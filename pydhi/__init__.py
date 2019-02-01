@@ -11,7 +11,7 @@ import ctypes
 from ctypes import string_at
 import sys
 
-
+sys.path.append(r"C:\Program Files (x86)\DHI\2019\bin\x64")
 clr.AddReference("DHI.Generic.MikeZero.DFS");
 clr.AddReference("DHI.Generic.MikeZero.EUM");
 clr.AddReference("System");
