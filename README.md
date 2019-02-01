@@ -9,7 +9,7 @@ Facilitate creating, reading and writing dfs0, dfs2, and dfs3 files
 
 # Examples
 
-## Reading dfs0 file into pandas dataframe
+## Reading dfs0 file into Pandas DataFrame
 	from pydhi import dfs0 as dfs0
 	dfs = dfs0.dfs0()
 	ts = dfs.read_to_pandas(dfs0file)
@@ -62,6 +62,13 @@ Facilitate creating, reading and writing dfs0, dfs2, and dfs3 files
 	dfsUtil.type_list()
 	dfsUtil.timestep_list()
 	
+## Read Res1D file Return Pandas DataFrame
+	import res1d as r1d
+	p1 = r1d.ExtractionPoint()
+	p1.BranchName  = 'branch1'
+	p1.Chainage = 10.11
+	p1.VariableType  = 'Discharge'
+	ts = r1d.read('res1dfile.res1d', [p1])
 	
 # Created by Marc-Etienne Ridler (mer@dhigroup.com)
 python setup.py sdist bdist_wheel
