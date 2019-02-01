@@ -1,5 +1,5 @@
 # pydhi
-Facilitate creating, reading and writing dfs0, dfs2, and dfs3 files
+Facilitate creating, reading and writing dfs0, dfs2, and dfs3 files. Reading Res1D data. 
 
 ## Install package from the dist directory:
     pip install py_dhi_dfs-0.0.1-py3-none-any.whl   
