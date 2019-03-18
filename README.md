@@ -2,7 +2,8 @@
 Facilitate creating, reading and writing dfs0, dfs2, and dfs3 files. Reading Res1D data. 
 
 ## Install package from the dist directory:
-    pip install py_dhi_dfs-0.0.1-py3-none-any.whl   
+	pythonnet - https://www.lfd.uci.edu/~gohlke/pythonlibs/#pythonnet
+    pip install py_dhi_xxx.whl   
 
 	% Assumes MIKE installed already on the computer. Add install directory to PYTHONPATH from windows command line:
 	% set PYTHONPATH=%PYTHONPATH%;"C:\Program Files (x86)\DHI\2019\bin\x64"

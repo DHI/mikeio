@@ -10,7 +10,7 @@ class dfs0:
 
         dfs = DfsFileFactory.DfsGenericOpen(dfs0file);
 
-        n_items = dfs.ItemInfo.Count
+        n_items = len(dfs.ItemInfo)
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         names = []
@@ -117,7 +117,7 @@ class dfs0:
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
-        n_items = dfs.ItemInfo.Count
+        n_items = len(dfs.ItemInfo)
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         if len(np.shape(data)) == 1:
@@ -151,7 +151,7 @@ class dfs0:
             #newTime = DfsExtensions.TimeInSeconds(itemData, dfs.FileInfo.TimeAxis)
             #tit = System.Double(newTime)
             tit = System.Double(t[it])
-            for ii in range(dfs.ItemInfo.Count):
+            for ii in range(len(dfs.ItemInfo)):
                 d = Array[System.Single](np.array([[data[it, ii]]]))
                 dfs.WriteItemTimeStepNext(tit, d)
 
