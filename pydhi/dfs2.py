@@ -1,6 +1,6 @@
 from pydhi import *
 
-class dfs2:
+class dfs2():
 
     def __calculate_index(self, nx, ny, x, y):
         """ Calculates the position in the dfs2 data array based on the
@@ -37,7 +37,7 @@ class dfs2:
         dfs = DfsFileFactory.DfsGenericOpen(dfs2file);
 
         # Determine the size of the grid
-        axis = dfs.ItemInfo.Items.get_Item(0).SpatialAxis
+        axis = dfs.ItemInfo[0].SpatialAxis
         yNum = axis.YCount
         xNum = axis.XCount
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -88,7 +88,7 @@ class dfs2:
         time = pd.DatetimeIndex(t)
         names = []
         for item in range(n_items):
-            name = dfs.ItemInfo.Items[item_numbers[item]].Name
+            name = dfs.ItemInfo[item].Name
             names.append(name)
 
         dfs.Close()
@@ -121,7 +121,7 @@ class dfs2:
         number_y = dfs.SpatialAxis.YCount
         number_x = dfs.SpatialAxis.XCount
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_items = dfs.ItemInfo.Count
+        n_items = len(dfs.ItemInfo)
 
         deletevalue = -1e-035
 

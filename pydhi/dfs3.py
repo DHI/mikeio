@@ -1,6 +1,6 @@
 from pydhi import *
 
-class dfs3:
+class dfs3():
 
 
     def __calculate_index(self, nx, ny, nz, x, y, z):
@@ -41,7 +41,7 @@ class dfs3:
         dfs = DfsFileFactory.DfsGenericOpen(dfs3file);
 
         # Determine the size of the grid
-        axis = dfs.ItemInfo.Items.get_Item(0).SpatialAxis
+        axis = dfs.ItemInfo[0].SpatialAxis
         dx = axis.Dx
         dy = axis.Dy
         x0 = axis.X0
@@ -93,7 +93,7 @@ class dfs3:
         dfs = DfsFileFactory.DfsGenericOpen(dfs3file);
 
         # Determine the size of the grid
-        axis = dfs.ItemInfo.Items.get_Item(item_numbers[0]).SpatialAxis
+        axis = dfs.ItemInfo[0].SpatialAxis
         dx = axis.Dx
         dy = axis.Dy
         x0 = axis.X0
@@ -154,7 +154,7 @@ class dfs3:
             [data,time,name] = read( filename, item_numbers, layers=None, coordinates=None)
 
         item_numbers
-            list of indices (base 0) to read from. If none, then all.
+            list of indices (base 0) to read from. If None then all the items.
         layers
             list of layer indices (base 0) to read
         coordinates
@@ -178,11 +178,10 @@ class dfs3:
             raise Warning("Not tested in 32 bit Python. It will by default use a MUCH SLOWER reader.")
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
+        dfs = DfsFileFactory.DfsGenericOpen(dfs3file);
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
-            
         zNum = axis.ZCount
         yNum = axis.YCount
         xNum = axis.XCount
@@ -191,7 +190,7 @@ class dfs3:
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         if item_numbers is None:
-            item_numbers = list(range(len(dfs.ItemInfo)))
+            item_numbers = list(range(len(dfs.Items)))
 
         n_items = len(item_numbers)
         data_list = []

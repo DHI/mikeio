@@ -1,6 +1,6 @@
 from pydhi import *
 
-class dfs0:
+class dfs0():
 
     def __read(self, dfs0file):
         """Read data from the dfs0 file

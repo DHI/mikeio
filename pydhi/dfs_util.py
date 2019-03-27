@@ -1,6 +1,6 @@
 from pydhi import *
 
-class dfs_util:
+class dfs_util():
 
     def type_list(self, search=None):
         """Produces a dictionary of the possible variables. For example 'Water Level', 'Head Elevation'. Returns a
