@@ -197,7 +197,7 @@ class dfs3():
 
         if coordinates is None:
             # if nt is 0, then the dfs is 'static' and must be handled differently
-            if nt is not 0:
+            if nt != 0:
                 for item in range(n_items):
                     if layers is None:
                         # Initialize an empty data block
@@ -310,7 +310,7 @@ class dfs3():
         names:
             array of names (ie. array of strings).
         title:
-            title of the dfs2 file (can be blank)
+            title of the dfs3 file (can be blank)
 
         """
 
@@ -336,14 +336,14 @@ class dfs3():
             raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
                      "Data is list of matices [y,x,time]")
 
-        if len(names) is not n_items:
+        if len(names) != n_items:
             raise Warning("names must be an array of strings with the same number as matrices in data list")
 
-        if len(variable_type) is not n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
+        if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
                           "elements as data columns")
 
-        if len(unit) is not n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
+        if len(unit) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
             raise Warning(
                 "unit if specified must be an array of integers (enuType) with the same number of "
                 "elements as data columns")
@@ -358,7 +358,7 @@ class dfs3():
         system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
                                             start_time.hour, start_time.minute, start_time.second)
 
-        # Create an empty dfs2 file object
+        # Create an empty dfs3 file object
         factory = DfsFactory();
         builder = Dfs3Builder.Create(title, 'Matlab DFS', 0);
 
@@ -409,7 +409,7 @@ class dfs3():
         Function: write to a pre-created dfs3 file. Only ONE item supported.
 
         NOTE:
-            The dfs2 file must be pre-created with corresponding y,x, z dimensions and number of time steps.
+            The dfs3 file must be pre-created with corresponding y,x, z dimensions and number of time steps.
 
         The Data Matrix
             size ( y, x, z, nt)
@@ -432,13 +432,13 @@ class dfs3():
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         deletevalue = dfs.FileInfo.DeleteValueFloat
 
-        if data.shape[0] is not yNum:
+        if data.shape[0] != yNum:
             sys.exit("ERROR Y dimension does not match")
-        elif data.shape[1] is not xNum:
+        elif data.shape[1] != xNum:
             sys.exit("ERROR X dimension does not match")
-        elif data.shape[2] is not zNum:
+        elif data.shape[2] != zNum:
             sys.exit("ERROR X dimension does not match")
-        elif data.shape[3] is not nt:
+        elif data.shape[3] != nt:
             sys.exit("ERROR Number of Time Steps dimension does not match")
 
         for it in range(nt):

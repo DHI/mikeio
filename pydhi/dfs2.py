@@ -207,14 +207,14 @@ class dfs2():
             raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
                      "Data is list of matices [y,x,time]")
 
-        if len(names) is not n_items:
+        if len(names) != n_items:
             raise Warning("names must be an array of strings with the same number as matrices in data list")
 
-        if len(variable_type) is not n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
+        if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
                           "elements as data columns")
 
-        if len(unit) is not n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
+        if len(unit) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
             raise Warning(
                 "unit if specified must be an array of integers (enuType) with the same number of "
                 "elements as data columns")

@@ -50,7 +50,7 @@ class test_dfs0(TestCase):
 
     def test_read_dfs0_to_pandas(self):
 
-        dfs0file = r'C:\test\randomNEQC.dfs0'
+        dfs0file = r'C:\test\randomEQC.dfs0'
 
         dfs = dfs0.dfs0()
         pd = dfs.read_to_pandas(dfs0file)

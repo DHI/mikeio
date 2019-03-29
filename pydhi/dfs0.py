@@ -194,14 +194,14 @@ class dfs0():
         n_items = np.shape(data)[1]
         n_time_steps = np.shape(data)[0]
 
-        if names is not None and len(names) is not n_items:
+        if names is not None and len(names) != n_items:
             raise Warning("names must be an array of strings with the same number of elements as data columns")
 
-        if len(variable_type) is not n_items :
+        if len(variable_type) != n_items :
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
                           "elements as data columns")
 
-        if len(unit) is not n_items:
+        if len(unit) != n_items:
             raise Warning(
                 "unit if specified must be an array of integers (enuType) with the same number of "
                 "elements as data columns")
@@ -283,10 +283,10 @@ class dfs0():
         n_items = np.shape(data)[1]
         n_time_steps = np.shape(data)[0]
 
-        if names is not None and len(names) is not n_items:
+        if names is not None and len(names) != n_items:
             raise Warning("names must be an array of strings with the same number of elements as data columns")
 
-        if len(variable_type) is not n_items or not all(isinstance(item, int) and 0 <= item < 1e15
+        if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15
                                                         for item in variable_type):
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
                           "elements as data columns")
@@ -295,7 +295,7 @@ class dfs0():
             raise Warning("The time_vector must be an array or list of datetime of same length as the number of "
                           "rows in the data")
 
-        if len(unit) is not n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
+        if len(unit) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
             raise Warning(
                 "unit if specified must be an array of integers (enuType) with the same number of "
                 "elements as data columns")
