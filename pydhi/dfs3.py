@@ -190,7 +190,7 @@ class dfs3():
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         if item_numbers is None:
-            item_numbers = list(range(len(dfs.Items)))
+            item_numbers = list(range(len(dfs.ItemInfo)))
 
         n_items = len(item_numbers)
         data_list = []
