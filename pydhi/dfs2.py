@@ -148,8 +148,12 @@ class dfs2():
 
         dfs.Close()
 
-    def create_equidistant_calendar(self, dfs2file, data, start_time, timeseries_unit, dt, variable_type, unit, coordinate,
-                                    x0, y0, length_x, length_y, names=None, title=None):
+    def create_equidistant_calendar(self, dfs2file, data,
+                                    start_time = None, dt = 3600,
+                                    length_x = 1, length_y = 1,
+                                    x0 = 0, y0 = 0,
+                                    coordinate = None, timeseries_unit=1400, variable_type=None, unit=None,
+                                    names=None, title=None):
         """
         Creates a dfs2 file
 
@@ -196,6 +200,21 @@ class dfs2():
         number_x = np.shape(data[0])[1]
         n_time_steps = np.shape(data[0])[2]
         n_items = len(data)
+
+        if start_time is None:
+            start_time = datetime.datetime.now()
+
+        if coordinate is None:
+            coordinate = ['LONG/LAT', 0, 0, 0]
+
+        if names is None:
+            names = [f"Item {i+1}" for i in range(n_items)]
+
+        if variable_type is None:
+            variable_type = [999] * n_items
+
+        if unit is None:
+            unit = [0] * n_items
 
         if not all( np.shape(d)[0] == number_y for d in data):
             raise Warning("ERROR data matrices in the Y dimension do not all match in the data list. "
