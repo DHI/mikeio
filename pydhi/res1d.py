@@ -1,5 +1,5 @@
 
-def read( res1DFile, extractionPoints):
+def read(res1DFile, extractionPoints):
     import clr
     import pandas as pd
     import datetime
@@ -12,15 +12,15 @@ def read( res1DFile, extractionPoints):
     clr.AddReference("DHI.Mike1D.Generic")
     from DHI.Mike1D.Generic import Connection
 
-    clr.AddReference("System");
+    clr.AddReference("System")
 
     if os.path.isfile(res1DFile) is False:
         print("ERROR, File Not Found: " + res1DFile)
 
     # Create a ResultData object and read the data file.
-    rd = ResultData();
-    rd.Connection = Connection.Create(res1DFile);
-    rd.Load();
+    rd = ResultData()
+    rd.Connection = Connection.Create(res1DFile)
+    rd.Load()
 
     reachNums = []
     dataItemTypes = []
@@ -74,7 +74,6 @@ def read( res1DFile, extractionPoints):
         print('ERROR. Chainage Not Found')
         quit()
 
-
         # Get the Data
     df = pd.DataFrame()
     for i in range(0, len(indices)):
@@ -100,7 +99,6 @@ def read( res1DFile, extractionPoints):
     rd.Dispose()
 
     return df
-
 
 
 class ExtractionPoint:
