@@ -196,7 +196,7 @@ class dfs2():
         """
 
         if title is None:
-            title = "dfs0 file"
+            title = ""
 
         number_y = np.shape(data[0])[0]
         number_x = np.shape(data[0])[1]
@@ -252,13 +252,12 @@ class dfs2():
                                             start_time.hour, start_time.minute, start_time.second)
 
         # Create an empty dfs2 file object
-        factory = DfsFactory()
-        builder = Dfs2Builder.Create(title, 'Matlab DFS', 0)
+        factory = DfsFactory();
+        builder = Dfs2Builder.Create(title, 'pydhi', 0);
 
         # Set up the header
-        builder.SetDataType(1)
-        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(
-            coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+        builder.SetDataType(0)
+        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
         builder.SetTemporalAxis(
             factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt))
         builder.SetSpatialAxis(factory.CreateAxisEqD2(
@@ -284,5 +283,128 @@ class dfs2():
                 d = np.flipud(d)
                 darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
                 dfs.WriteItemTimeStepNext(0, darray)
+
+        dfs.Close()
+
+    def create_non_equidistant_calendar(self, dfs2file, data,
+                                    datetimes,
+                                    length_x = 1, length_y = 1,
+                                    x0 = 0, y0 = 0,
+                                    coordinate = None, variable_type=None, unit=None,
+                                    names=None, title=None):
+        """
+        Creates a dfs2 file
+
+        dfs2file:
+            Location to write the dfs2 file
+        data:
+            list of matrices, one for each item. Matrix dimension: y, x, time
+        datetimes:
+            list of datetimes
+        variable_type:
+            Array integers corresponding to a variable types (ie. Water Level). Use dfsutil type_list
+            to figure out the integer corresponding to the variable.
+        unit:
+            Array integers corresponding to the unit corresponding to the variable types The unit (meters, seconds),
+            use dfsutil unit_list to figure out the corresponding unit for the variable.
+        coordinate:
+            ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
+        x0:
+            Lower right position
+        x0:
+            Lower right position
+        length_x:
+            length of each grid in the x direction (meters)
+        length_y:
+            length of each grid in the y direction (meters)
+        names:
+            array of names (ie. array of strings). (can be blank)
+        title:
+            title of the dfs2 file (can be blank)
+
+        """
+
+        if title is None:
+            title = ""
+
+        number_y = np.shape(data[0])[0]
+        number_x = np.shape(data[0])[1]
+        n_time_steps = np.shape(data[0])[2]
+        n_items = len(data)
+
+        if coordinate is None:
+            coordinate = ['LONG/LAT', 0, 0, 0]
+
+        if names is None:
+            names = [f"Item {i+1}" for i in range(n_items)]
+
+        if variable_type is None:
+            variable_type = [999] * n_items
+
+        if unit is None:
+            unit = [0] * n_items
+
+        if not all( np.shape(d)[0] == number_y for d in data):
+            raise Warning("ERROR data matrices in the Y dimension do not all match in the data list. "
+                     "Data is list of matices [y,x,time]")
+        if not all(np.shape(d)[1] == number_x for d in data):
+            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
+                     "Data is list of matices [y,x,time]")
+        if not all(np.shape(d)[2] == n_time_steps for d in data):
+            raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
+                     "Data is list of matices [y,x,time]")
+
+        if not len(datetimes) == n_time_steps:
+            raise Warning("Number of datetimes do not match number of time steps in time dimension")
+
+        if len(names) != n_items:
+            raise Warning("names must be an array of strings with the same number as matrices in data list")
+
+        if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
+            raise Warning("type if specified must be an array of integers (enuType) with the same number of "
+                          "elements as data columns")
+
+        if len(unit) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
+            raise Warning(
+                "unit if specified must be an array of integers (enuType) with the same number of "
+                "elements as data columns")
+
+
+        start_time = datetimes[0]
+        system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
+                                            start_time.hour, start_time.minute, start_time.second)
+
+        # Create an empty dfs2 file object
+        factory = DfsFactory();
+        builder = Dfs2Builder.Create(title, 'pydhi', 0)
+
+        # Set up the header
+        builder.SetDataType(0)
+        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+        builder.SetTemporalAxis(factory.CreateTemporalNonEqCalendarAxis(eumUnit.eumUsec, system_start_time))
+        builder.SetSpatialAxis(factory.CreateAxisEqD2(eumUnit.eumUmeter, number_x, x0, length_x, number_y, y0, length_y))
+
+
+        for i in range(n_items):
+            builder.AddDynamicItem(names[i], eumQuantity.Create(variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
+
+        try:
+            builder.CreateFile(dfs2file)
+        except IOError:
+            print('cannot create dfs2 file: ', dfs2file)
+
+        dfs = builder.GetFile();
+        deletevalue = dfs.FileInfo.DeleteValueFloat #-1.0000000031710769e-30
+
+        for i in range(n_time_steps):
+            for item in range(n_items):
+                d = data[item][:, :, i]
+                d[np.isnan(d)] = deletevalue
+                d = d.reshape(number_y, number_x)
+                d = np.flipud(d)
+                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                t = datetimes[i]
+                relt = (t-start_time).seconds
+                dfs.WriteItemTimeStepNext(relt, darray)
 
         dfs.Close()
