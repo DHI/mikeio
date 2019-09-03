@@ -1,5 +1,4 @@
 import clr
-from os import path
 import pandas as pd
 import numpy as np
 import array
@@ -12,16 +11,11 @@ from ctypes import string_at
 import sys
 
 sys.path.append(r"C:\Program Files (x86)\DHI\2019\bin\x64")
-clr.AddReference("DHI.Generic.MikeZero.DFS");
-clr.AddReference("DHI.Generic.MikeZero.EUM");
-clr.AddReference("System");
+clr.AddReference("DHI.Generic.MikeZero.DFS")
+clr.AddReference("DHI.Generic.MikeZero.EUM")
+clr.AddReference("System")
 clr.AddReference("System.Runtime.InteropServices")
 clr.AddReference("System.Runtime")
-from DHI.Generic.MikeZero import *
-from DHI.Generic.MikeZero.DFS import *
-from DHI.Generic.MikeZero.DFS.dfs0 import *
-from DHI.Generic.MikeZero.DFS.dfs123 import *
-from System.Runtime.InteropServices import GCHandle, GCHandleType
 
 import platform
 p=platform.architecture()

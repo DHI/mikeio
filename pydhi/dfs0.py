@@ -1,11 +1,20 @@
-from pydhi import *
+import os
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+import System
+from System import Array
+from DHI.Generic.MikeZero import eumUnit, eumQuantity
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType
+from System.Runtime.InteropServices import GCHandle, GCHandleType
+import ctypes
 
 class dfs0():
 
     def __read(self, dfs0file):
         """Read data from the dfs0 file
         """
-        if not path.exists(dfs0file):
+        if not os.path.exists(dfs0file):
             raise Warning("dfs0File - File does not Exist %s", dfs0file)
 
         dfs = DfsFileFactory.DfsGenericOpen(dfs0file);

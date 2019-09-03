@@ -1,4 +1,15 @@
-from pydhi import *
+#from pydhi import *
+import numpy as np
+import pandas as pd
+from datetime import datetime, timedelta
+import System
+from System import Array
+from DHI.Generic.MikeZero import eumUnit, eumQuantity
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
+from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
+from System.Runtime.InteropServices import GCHandle, GCHandleType
+import ctypes
+
 
 class dfs2():
 
@@ -61,22 +72,16 @@ class dfs2():
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
-                if x64:
-                    src = itemdata.Data
-                    src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
-                    try:
-                        src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
-                        bufType = ctypes.c_float * len(src)
-                        cbuf = bufType.from_address(src_ptr)
-                        d = np.frombuffer(cbuf, dtype=cbuf._type_)
-                    finally:
-                        if src_hndl.IsAllocated: src_hndl.Free()
 
-                else:
-                    raise Warning("Slow read if using 32 bit Python.")
-                    d = np.array(list(itemdata.Data))
-
-                #d = np.array(list(itemdata.Data))
+                src = itemdata.Data
+                src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
+                try:
+                    src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
+                    bufType = ctypes.c_float * len(src)
+                    cbuf = bufType.from_address(src_ptr)
+                    d = np.frombuffer(cbuf, dtype=cbuf._type_)
+                finally:
+                    if src_hndl.IsAllocated: src_hndl.Free()
 
                 d = d.reshape(yNum, xNum)
                 d = np.flipud(d)
@@ -202,7 +207,7 @@ class dfs2():
         n_items = len(data)
 
         if start_time is None:
-            start_time = datetime.datetime.now()
+            start_time = datetime.now()
 
         if coordinate is None:
             coordinate = ['LONG/LAT', 0, 0, 0]
@@ -238,7 +243,7 @@ class dfs2():
                 "unit if specified must be an array of integers (enuType) with the same number of "
                 "elements as data columns")
 
-        if not type(start_time) is datetime.datetime:
+        if not type(start_time) is datetime:
             raise Warning("start_time must be of type datetime ")
 
         if not isinstance(timeseries_unit, int):
