@@ -10,7 +10,7 @@ class dfs0():
 
         dfs = DfsFileFactory.DfsGenericOpen(dfs0file);
 
-        n_items = len(dfs.ItemInfo)
+        n_items = dfs.ItemInfo.Count
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         names = []
