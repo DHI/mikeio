@@ -400,8 +400,6 @@ class dfs2():
                 d = np.flipud(d)
                 darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
                 t = datetimes[i]
-                #sdt = (System.DateTime(t.year, t.month, t.day,
-                #                            t.hour, t.minute, t.second) - system_start_time).TotalSeconds
                 relt = (t-start_time).seconds
                 dfs.WriteItemTimeStepNext(relt, darray)
 
