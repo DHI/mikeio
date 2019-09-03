@@ -14,7 +14,7 @@ class test_dfs2(TestCase):
 
         start_time = datetime.datetime(2012, 1, 1)
 
-        #timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
+        # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
         timeseries_unit = 1402
         dt = 12
 
@@ -51,7 +51,7 @@ class test_dfs2(TestCase):
 
         dfs = dfs2.dfs2()
 
-        #print(help(dfs.create_equidistant_calendar))
+        # print(help(dfs.create_equidistant_calendar))
 
         dfs.create_equidistant_calendar(dfs2file=dfs2File, data=data, start_time=start_time,
                                         timeseries_unit=timeseries_unit, dt=dt, variable_type=variable_type,
@@ -62,7 +62,7 @@ class test_dfs2(TestCase):
 
         start_time = datetime.datetime(2012, 1, 1)
 
-        #timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
+        # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
         timeseries_unit = 1402
         dt = 12
 
@@ -87,7 +87,6 @@ class test_dfs2(TestCase):
         d = np.zeros([100, 100, 30]) + 3.0
         data.append(d)
 
-
         coordinate = ['UTM-33', 12.4387, 55.2257, 327]
         x0 = 0
         y0 = 0
@@ -99,13 +98,12 @@ class test_dfs2(TestCase):
 
         dfs = dfs2.dfs2()
 
-        #print(help(dfs.create_equidistant_calendar))
+        # print(help(dfs.create_equidistant_calendar))
 
         dfs.create_equidistant_calendar(dfs2file=dfs2File, data=data, start_time=start_time,
                                         timeseries_unit=timeseries_unit, dt=dt, variable_type=variable_type,
                                         unit=unit, coordinate=coordinate, x0=x0, y0=y0, length_x=length_x,
                                         length_y=length_y, names=names, title=title)
-
 
     def test_read(self):
 
@@ -117,7 +115,6 @@ class test_dfs2(TestCase):
         self.assertEqual(data[11, 0, 0], 0)
         self.assertEqual(np.isnan(data[10, 0, 0]), True)
         #self.assertEqual(data[12, 0, 0],  1e-10)
-
 
     def test_write(self):
         #dfs2File = r"C:\test\random.dfs2"

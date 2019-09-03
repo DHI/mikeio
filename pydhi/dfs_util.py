@@ -1,5 +1,6 @@
 from pydhi import *
 
+
 class dfs_util():
 
     def type_list(self, search=None):
@@ -20,7 +21,8 @@ class dfs_util():
                 check = False
 
         if search is not None:
-            items = dict([[key, value] for key, value in items.items() if search.lower() in value.lower() or search.lower() == value.lower()])
+            items = dict([[key, value] for key, value in items.items() if search.lower()
+                          in value.lower() or search.lower() == value.lower()])
 
         return items
 
@@ -50,24 +52,19 @@ class dfs_util():
         items = unit_list(key)
         return items
 
-
     def grid_centers_from_coordinates(self, X0, Y0, nx, ny, dx, dy):
         """Producses a grid of x, y values of the center of a grid, based on the
             provided X0, Y0, nx, ny, dx, dy 
         """
-        x = np.zeros(shape=(ny,nx))
-        y = np.zeros(shape=(ny,nx))
-        
-        
-        xvalues = np.arange( X0 + dx/2, X0  + dx/2 + nx*dx, step=dx )
-        yvalues = np.arange( Y0  - dy/2 + ny*dy, Y0 - dy/2, step=-dy )
-        
+        x = np.zeros(shape=(ny, nx))
+        y = np.zeros(shape=(ny, nx))
+
+        xvalues = np.arange(X0 + dx/2, X0 + dx/2 + nx*dx, step=dx)
+        yvalues = np.arange(Y0 - dy/2 + ny*dy, Y0 - dy/2, step=-dy)
+
         for i in range(ny):
-            x[i,:] = xvalues
+            x[i, :] = xvalues
         for i in range(nx):
-            y[:,i] = yvalues
-            
-        
+            y[:, i] = yvalues
+
         return x, y
-        
-        
