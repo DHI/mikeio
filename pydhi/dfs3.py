@@ -1,7 +1,7 @@
 from pydhi import *
 
-class dfs3():
 
+class dfs3():
 
     def __calculate_index(self, nx, ny, nz, x, y, z):
         """ Calculates the position in the dfs3 data array based on the
@@ -17,7 +17,6 @@ class dfs3():
             raise Warning('z coordinate is off the grid: ', z)
 
         return y*nx + x + z*nx*ny
-
 
     def grid_coordinates(self, dfs3file):
         """ Function: Returns the Grid information
@@ -38,7 +37,7 @@ class dfs3():
                 number of time steps
         """
 
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file);
+        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
@@ -54,7 +53,6 @@ class dfs3():
         dfs.Close()
 
         return x0, y0, dx, dy, xNum, yNum, zNum, nt
-
 
     def read_slice(self, dfs3file, item_numbers, lower_left_xy, upper_right_xy, layers=None, conservative=True):
         """ Function: Read data from a dfs3 file within the locations chosen
@@ -90,7 +88,7 @@ class dfs3():
 
         data = self.read(dfs3file, item_numbers, layers=layers)
 
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file);
+        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
@@ -141,11 +139,11 @@ class dfs3():
             raise Warning("upper_right_x_index > xNum - 1")
             upper_right_x_index = xNum - 1
 
-        for i in range( len(data[0])):
-            data[0][i] = data[0][i][ upper_right_y_index:lower_left_y_index,lower_left_x_index:upper_right_x_index,:,:]
+        for i in range(len(data[0])):
+            data[0][i] = data[0][i][upper_right_y_index:lower_left_y_index,
+                                    lower_left_x_index:upper_right_x_index, :, :]
 
         return data
-
 
     def read(self, dfs3file, item_numbers=None, layers=None, coordinates=None):
         """ Function: Read data from a dfs3 file
@@ -178,7 +176,7 @@ class dfs3():
             raise Warning("Not tested in 32 bit Python. It will by default use a MUCH SLOWER reader.")
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file);
+        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
@@ -201,10 +199,12 @@ class dfs3():
                 for item in range(n_items):
                     if layers is None:
                         # Initialize an empty data block
-                        data = np.ndarray(shape=(yNum, xNum, zNum, nt), dtype=float)  # .fill(deleteValue)
+                        data = np.ndarray(shape=(yNum, xNum, zNum, nt),
+                                          dtype=float)  # .fill(deleteValue)
                         data_list.append(data)
                     else:
-                        data = np.ndarray(shape=(yNum, xNum, len(layers), nt), dtype=float)  # .fill(deleteValue)
+                        data = np.ndarray(shape=(yNum, xNum, len(layers), nt),
+                                          dtype=float)  # .fill(deleteValue)
                         data_list.append(data)
 
             else:
@@ -217,9 +217,8 @@ class dfs3():
                 data = np.ndarray(shape=(ncoordinates, nt), dtype=float)
                 data_list.append(data)
 
-
         t = []
-        startTime = dfs.FileInfo.TimeAxis.StartDateTime;
+        startTime = dfs.FileInfo.TimeAxis.StartDateTime
 
         if coordinates is None:
             for it in range(nt):
@@ -235,7 +234,8 @@ class dfs3():
                             cbuf = bufType.from_address(src_ptr)
                             d = np.frombuffer(cbuf, dtype=cbuf._type_)
                         finally:
-                            if src_hndl.IsAllocated: src_hndl.Free()
+                            if src_hndl.IsAllocated:
+                                src_hndl.Free()
 
                     else:
                         d = np.array(list(itemdata.Data))
@@ -271,7 +271,6 @@ class dfs3():
         dfs.Close()
 
         return data_list, time, names
-
 
     def create_equidistant_calendar(self, dfs3file, data, start_time, timeseries_unit, dt, variable_type, unit, coordinate,
                                     x0, y0, length_x, length_y, names, title=None):
@@ -323,21 +322,22 @@ class dfs3():
         n_time_steps = np.shape(data[0])[3]
         n_items = len(data)
 
-        if not all( np.shape(d)[0] == number_y for d in data):
+        if not all(np.shape(d)[0] == number_y for d in data):
             raise Warning("ERROR data matrices in the Y dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not all(np.shape(d)[1] == number_x for d in data):
             raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not all(np.shape(d)[2] == number_z for d in data):
             raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not all(np.shape(d)[3] == n_time_steps for d in data):
             raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
 
         if len(names) != n_items:
-            raise Warning("names must be an array of strings with the same number as matrices in data list")
+            raise Warning(
+                "names must be an array of strings with the same number as matrices in data list")
 
         if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
@@ -359,12 +359,13 @@ class dfs3():
                                             start_time.hour, start_time.minute, start_time.second)
 
         # Create an empty dfs3 file object
-        factory = DfsFactory();
-        builder = Dfs3Builder.Create(title, 'Matlab DFS', 0);
+        factory = DfsFactory()
+        builder = Dfs3Builder.Create(title, 'Matlab DFS', 0)
 
         # Set up the header
-        builder.SetDataType(1);
-        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+        builder.SetDataType(1)
+        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(
+            coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
         builder.SetTemporalAxis(
             factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt))
         builder.SetSpatialAxis(
@@ -373,7 +374,8 @@ class dfs3():
         deletevalue = builder.DeleteValueFloat
 
         for i in range(n_items):
-            builder.AddDynamicItem(names[i], eumQuantity.Create(variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
+            builder.AddDynamicItem(names[i], eumQuantity.Create(
+                variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
 
         try:
             builder.CreateFile(dfs3file)
@@ -391,7 +393,6 @@ class dfs3():
                 #darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
                 #dfs.WriteItemTimeStepNext(0, darray)
 
-
                 # TESTED AND WORKDS if data already in the y,x,z,t format
                 d = data[item][:, :, :, i]
                 d = d.swapaxes(0, 1)
@@ -400,7 +401,6 @@ class dfs3():
                 d[np.isnan(d)] = deletevalue
                 darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
                 dfs.WriteItemTimeStepNext(0, darray)
-
 
         dfs.Close()
 
@@ -422,7 +422,7 @@ class dfs3():
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.Dfs3FileOpenEdit(dfs3file);
+        dfs = DfsFileFactory.Dfs3FileOpenEdit(dfs3file)
 
         # Determine the size of the grid
         yNum = dfs.SpatialAxis.YCount
@@ -445,7 +445,7 @@ class dfs3():
             d = data[:, :, :, it]
             d[np.isnan(d)] = deletevalue
             d = d.swapaxes(1, 2).swapaxes(1, 0)
-            d = d[:,::-1,:]
+            d = d[:, ::-1, :]
             darray = Array[System.Single](np.asarray(d).reshape(-1))
             dfs.WriteItemTimeStepNext(0, darray)
 

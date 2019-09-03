@@ -1,5 +1,6 @@
 from pydhi import *
 
+
 class dfs2():
 
     def __calculate_index(self, nx, ny, x, y):
@@ -34,7 +35,7 @@ class dfs2():
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(dfs2file);
+        dfs = DfsFileFactory.DfsGenericOpen(dfs2file)
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
@@ -55,7 +56,7 @@ class dfs2():
             data_list.append(data)
 
         t = []
-        startTime = dfs.FileInfo.TimeAxis.StartDateTime;
+        startTime = dfs.FileInfo.TimeAxis.StartDateTime
         for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
             for item in range(n_items):
 
@@ -70,7 +71,8 @@ class dfs2():
                         cbuf = bufType.from_address(src_ptr)
                         d = np.frombuffer(cbuf, dtype=cbuf._type_)
                     finally:
-                        if src_hndl.IsAllocated: src_hndl.Free()
+                        if src_hndl.IsAllocated:
+                            src_hndl.Free()
 
                 else:
                     raise Warning("Slow read if using 32 bit Python.")
@@ -93,7 +95,6 @@ class dfs2():
 
         dfs.Close()
         return (data_list, time, names)
-
 
     def write(self, dfs2file, data):
         """
@@ -125,17 +126,18 @@ class dfs2():
 
         deletevalue = -1e-035
 
-        if not all( np.shape(d)[0] == number_y for d in data):
+        if not all(np.shape(d)[0] == number_y for d in data):
             raise Warning("ERROR data matrices in the Y dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not all(np.shape(d)[1] == number_x for d in data):
             raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not all(np.shape(d)[2] == n_time_steps for d in data):
             raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not len(data) == n_items:
-            raise Warning("The number of matrices in data do not match the number of items in the dfs2 file.")
+            raise Warning(
+                "The number of matrices in data do not match the number of items in the dfs2 file.")
 
         for it in range(n_time_steps):
             for item in range(n_items):
@@ -216,18 +218,19 @@ class dfs2():
         if unit is None:
             unit = [0] * n_items
 
-        if not all( np.shape(d)[0] == number_y for d in data):
+        if not all(np.shape(d)[0] == number_y for d in data):
             raise Warning("ERROR data matrices in the Y dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not all(np.shape(d)[1] == number_x for d in data):
             raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
         if not all(np.shape(d)[2] == n_time_steps for d in data):
             raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                     "Data is list of matices [y,x,time]")
+                          "Data is list of matices [y,x,time]")
 
         if len(names) != n_items:
-            raise Warning("names must be an array of strings with the same number as matrices in data list")
+            raise Warning(
+                "names must be an array of strings with the same number as matrices in data list")
 
         if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
@@ -257,19 +260,20 @@ class dfs2():
         builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
         builder.SetTemporalAxis(
             factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt))
-        builder.SetSpatialAxis(factory.CreateAxisEqD2(eumUnit.eumUmeter, number_x, x0, length_x, number_y, y0, length_y))
-
+        builder.SetSpatialAxis(factory.CreateAxisEqD2(
+            eumUnit.eumUmeter, number_x, x0, length_x, number_y, y0, length_y))
 
         for i in range(n_items):
-            builder.AddDynamicItem(names[i], eumQuantity.Create(variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
+            builder.AddDynamicItem(names[i], eumQuantity.Create(
+                variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
 
         try:
             builder.CreateFile(dfs2file)
         except IOError:
             print('cannot create dfs2 file: ', dfs2file)
 
-        dfs = builder.GetFile();
-        deletevalue = dfs.FileInfo.DeleteValueFloat #-1.0000000031710769e-30
+        dfs = builder.GetFile()
+        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
         for i in range(n_time_steps):
             for item in range(n_items):

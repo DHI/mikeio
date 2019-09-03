@@ -1,5 +1,6 @@
 from pydhi import *
 
+
 class dfs0():
 
     def __read(self, dfs0file):
@@ -8,7 +9,7 @@ class dfs0():
         if not path.exists(dfs0file):
             raise Warning("dfs0File - File does not Exist %s", dfs0file)
 
-        dfs = DfsFileFactory.DfsGenericOpen(dfs0file);
+        dfs = DfsFileFactory.DfsGenericOpen(dfs0file)
 
         n_items = dfs.ItemInfo.Count
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -21,7 +22,7 @@ class dfs0():
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
 
         t = []
-        starttime = dfs.FileInfo.TimeAxis.StartDateTime;
+        starttime = dfs.FileInfo.TimeAxis.StartDateTime
 
         # EMPTY Data Block for copying the Results
         for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
@@ -39,8 +40,6 @@ class dfs0():
         dfs.Close()
 
         return data, t, names
-
-
 
     def read_to_pandas(self, dfs0file, indices=None):
         """Read data from the dfs0 file and return a Pandas DataFrame
@@ -73,7 +72,6 @@ class dfs0():
 
         return df
 
-
     def read(self, dfs0file, indices=None):
         """Read data from the dfs0 file and return data [data, time, itemNames]
 
@@ -100,7 +98,6 @@ class dfs0():
 
         return data, t, names
 
-
     def write(self, dfs0file, data):
         """Writes data to the pre-created dfs0 file.
         dfs0file --> file path to existing dfs0 file.
@@ -111,7 +108,7 @@ class dfs0():
             raise Warning("dfs0File - File does not Exist %s", dfs0file)
 
         try:
-            dfs = DfsFileFactory.DfsGenericOpenEdit(dfs0file);
+            dfs = DfsFileFactory.DfsGenericOpenEdit(dfs0file)
         except IOError:
             print('cannot open', dfs0file)
 
@@ -128,8 +125,7 @@ class dfs0():
             print("Inconsistent data size. nt (row count) must be size" + str(nt))
             # quit()
         if n_items != data.shape[1]:
-                print("Inconsistent data size. number of items (column count) must be size" + str(n_items))
-
+            print("Inconsistent data size. number of items (column count) must be size" + str(n_items))
 
         data[np.isnan(data)] = delete_value
 
@@ -156,7 +152,6 @@ class dfs0():
                 dfs.WriteItemTimeStepNext(tit, d)
 
         dfs.Close()
-
 
     def create_equidistant_calendar(self, dfs0file, data, start_time, timeseries_unit, dt, variable_type, unit, names=None,
                                     title=None, data_value_type=None):
@@ -195,9 +190,10 @@ class dfs0():
         n_time_steps = np.shape(data)[0]
 
         if names is not None and len(names) != n_items:
-            raise Warning("names must be an array of strings with the same number of elements as data columns")
+            raise Warning(
+                "names must be an array of strings with the same number of elements as data columns")
 
-        if len(variable_type) != n_items :
+        if len(variable_type) != n_items:
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
                           "elements as data columns")
 
@@ -216,27 +212,30 @@ class dfs0():
                                             start_time.hour, start_time.minute, start_time.second)
 
         factory = DfsFactory()
-        builder = DfsBuilder.Create(title, 'DFS', 0);
-        builder.SetDataType(1);
-        builder.SetGeographicalProjection(factory.CreateProjectionUndefined());
-        builder.SetTemporalAxis(factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt))
-        builder.SetItemStatisticsType(StatType.RegularStat);
+        builder = DfsBuilder.Create(title, 'DFS', 0)
+        builder.SetDataType(1)
+        builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
+        builder.SetTemporalAxis(factory.CreateTemporalEqCalendarAxis(
+            timeseries_unit, system_start_time, 0, dt))
+        builder.SetItemStatisticsType(StatType.RegularStat)
 
         for i in range(n_items):
 
             item = builder.CreateDynamicItemBuilder()
             if type is not None:
-                item.Set(names[i], eumQuantity.Create(variable_type[i], unit[i]), DfsSimpleType.Float)
+                item.Set(names[i], eumQuantity.Create(
+                    variable_type[i], unit[i]), DfsSimpleType.Float)
             else:
-                item.Set(str(i), eumQuantity.Create(eumItem.eumIItemUndefined, 0), DfsSimpleType.Float)
+                item.Set(str(i), eumQuantity.Create(
+                    eumItem.eumIItemUndefined, 0), DfsSimpleType.Float)
 
             if data_value_type is not None:
                 item.SetValueType(data_value_type[i])
             else:
                 item.SetValueType(DataValueType.Instantaneous)
 
-            item.SetAxis(factory.CreateAxisEqD0());
-            builder.AddDynamicItem(item.GetDynamicItemInfo());
+            item.SetAxis(factory.CreateAxisEqD0())
+            builder.AddDynamicItem(item.GetDynamicItemInfo())
 
         try:
             builder.CreateFile(dfs0file)
@@ -257,10 +256,8 @@ class dfs0():
 
         dfs.Close()
 
-
-
     def create_non_equidistant_calendar(self, dfs0file, data, time_vector, variable_type, unit, names=None,
-                                    title=None, data_value_type=None):
+                                        title=None, data_value_type=None):
         """Create_non_equidistant_calendar creates a dfs0 file with NOT-Equidistant Calendar.
 
         dfs0file: Full path and filename to dfs0 to be created.
@@ -284,10 +281,11 @@ class dfs0():
         n_time_steps = np.shape(data)[0]
 
         if names is not None and len(names) != n_items:
-            raise Warning("names must be an array of strings with the same number of elements as data columns")
+            raise Warning(
+                "names must be an array of strings with the same number of elements as data columns")
 
         if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15
-                                                        for item in variable_type):
+                                                    for item in variable_type):
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
                           "elements as data columns")
 
@@ -308,27 +306,30 @@ class dfs0():
         timeseries_unit = 1400
 
         factory = DfsFactory()
-        builder = DfsBuilder.Create(title, 'DFS', 0);
-        builder.SetDataType(1);
-        builder.SetGeographicalProjection(factory.CreateProjectionUndefined());
-        builder.SetTemporalAxis(factory.CreateTemporalNonEqCalendarAxis(timeseries_unit, system_start_time))
-        builder.SetItemStatisticsType(StatType.RegularStat);
+        builder = DfsBuilder.Create(title, 'DFS', 0)
+        builder.SetDataType(1)
+        builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
+        builder.SetTemporalAxis(factory.CreateTemporalNonEqCalendarAxis(
+            timeseries_unit, system_start_time))
+        builder.SetItemStatisticsType(StatType.RegularStat)
 
         for i in range(n_items):
 
             item = builder.CreateDynamicItemBuilder()
             if type is not None:
-                item.Set(names[i], eumQuantity.Create(variable_type[i], unit[i]), DfsSimpleType.Float)
+                item.Set(names[i], eumQuantity.Create(
+                    variable_type[i], unit[i]), DfsSimpleType.Float)
             else:
-                item.Set(str(i), eumQuantity.Create(eumItem.eumIItemUndefined, 0), DfsSimpleType.Float)
+                item.Set(str(i), eumQuantity.Create(
+                    eumItem.eumIItemUndefined, 0), DfsSimpleType.Float)
 
             if data_value_type is not None:
                 item.SetValueType(data_value_type[i])
             else:
                 item.SetValueType(DataValueType.Instantaneous)
 
-            item.SetAxis(factory.CreateAxisEqD0());
-            builder.AddDynamicItem(item.GetDynamicItemInfo());
+            item.SetAxis(factory.CreateAxisEqD0())
+            builder.AddDynamicItem(item.GetDynamicItemInfo())
 
         try:
             builder.CreateFile(dfs0file)
@@ -340,7 +341,6 @@ class dfs0():
 
         data[np.isnan(data)] = delete_value
 
-
         # COPY OVER THE DATA
         for it in range(n_time_steps):
             dt = (time_vector[it] - time_vector[0]).total_seconds()
@@ -349,4 +349,3 @@ class dfs0():
                 dfs.WriteItemTimeStepNext(dt, d)
 
         dfs.Close()
-
