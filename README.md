@@ -90,7 +90,7 @@ import pydhi
 
 dfs = pydhi.dfsu.dfsu()
 
-filename = r"C:\Users\JAN\OneDrive - DHI\seastatus\DA\TR\FunningsFjord2\FunningsFjord.m21fm - Result Files\area_HD.dfsu"
+filename = "HD.dfsu"
 (d,t,n)= dfs.read(filename,[0])
 
 idx = dfs.find_closest_element_index(x=608000, y=6907000)
