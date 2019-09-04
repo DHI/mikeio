@@ -97,7 +97,7 @@ idx = dfs.find_closest_element_index(x=608000, y=6907000)
 
 plt.plot(t,d[0][idx,:])
 ```
-![Timeseries](dfsu_ts.png)
+![Timeseries](images/dfsu_ts.png)
 
 # Created by Marc-Etienne Ridler (mer@dhigroup.com)
 python setup.py sdist bdist_wheel
