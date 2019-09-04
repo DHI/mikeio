@@ -1,4 +1,3 @@
-#from pydhi import *
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -73,24 +72,6 @@ class dfs2():
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
-<<<<<<< HEAD
-=======
-                if x64:
-                    src = itemdata.Data
-                    src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
-                    try:
-                        src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
-                        bufType = ctypes.c_float * len(src)
-                        cbuf = bufType.from_address(src_ptr)
-                        d = np.frombuffer(cbuf, dtype=cbuf._type_)
-                    finally:
-                        if src_hndl.IsAllocated:
-                            src_hndl.Free()
-
-                else:
-                    raise Warning("Slow read if using 32 bit Python.")
-                    d = np.array(list(itemdata.Data))
->>>>>>> f8d5151a11ade95e805e53d42b37d7b173fbe4c4
 
                 src = itemdata.Data
                 src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
