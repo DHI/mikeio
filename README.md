@@ -1,9 +1,9 @@
 # pydhi
-Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Reading Res1D data. 
+Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Reading Res1D data.
 
 ## Install package from the dist directory:
 	pythonnet - https://www.lfd.uci.edu/~gohlke/pythonlibs/#pythonnet
-        pip install py_dhi_xxx.whl   
+        pip install py_dhi_xxx.whl
 
 	% Assumes MIKE installed already on the computer. Add install directory to PYTHONPATH from windows command line:
 	% set PYTHONPATH=%PYTHONPATH%;"C:\Program Files (x86)\DHI\2019\bin\x64"
@@ -38,7 +38,7 @@ dfs.create_non_equidistant_calendar(dfs0file=dfs0file, data=data, time_vector=ti
 				    data_value_type=data_value_type)
 ```
 
-## Create equidistant dfs0											
+## Create equidistant dfs0
 ```python
 dfs0file = r'C:\test\randomEQC.dfs0'
 data = np.random.random([1000, 2])
@@ -82,6 +82,22 @@ p1.Chainage = 10.11
 p1.VariableType  = 'Discharge'
 ts = r1d.read('res1dfile.res1d', [p1])
 ```
+
+## Read dfsu files
+```python
+import matplotlib.pyplot as plt
+import pydhi
+
+dfs = pydhi.dfsu.dfsu()
+
+filename = r"C:\Users\JAN\OneDrive - DHI\seastatus\DA\TR\FunningsFjord2\FunningsFjord.m21fm - Result Files\area_HD.dfsu"
+(d,t,n)= dfs.read(filename,[0])
+
+idx = dfs.find_closest_element_index(x=608000, y=6907000)
+
+plt.plot(t,d[0][idx,:])
+```
+![Timeseries](dfsu_ts.png)
 
 # Created by Marc-Etienne Ridler (mer@dhigroup.com)
 python setup.py sdist bdist_wheel

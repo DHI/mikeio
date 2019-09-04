@@ -2,6 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
+import clr
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
