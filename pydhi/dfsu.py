@@ -6,8 +6,7 @@ from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType
-from System.Runtime.InteropServices import GCHandle, GCHandleType
-import ctypes
+from pydhi.dutil import to_numpy
 
 class dfsu():
 
@@ -44,6 +43,8 @@ class dfsu():
 
         if item_numbers is None:
             item_numbers = list(range(n_items))
+        else:
+            n_items = len(item_numbers)
 
 
         xNum = dfs.NumberOfElements
@@ -67,14 +68,8 @@ class dfsu():
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + item_offset, it)
 
                 src = itemdata.Data
-                src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
-                try:
-                    src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
-                    bufType = ctypes.c_float * len(src)
-                    cbuf = bufType.from_address(src_ptr)
-                    d = np.frombuffer(cbuf, dtype=cbuf._type_)
-                finally:
-                    if src_hndl.IsAllocated: src_hndl.Free()
+
+                d = to_numpy(src)
 
                 d[d == deleteValue] = np.nan
                 data_list[item][:, it] = d

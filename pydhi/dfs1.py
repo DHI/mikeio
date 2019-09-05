@@ -7,8 +7,7 @@ from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
-from System.Runtime.InteropServices import GCHandle, GCHandleType
-import ctypes
+from pydhi.dutil import to_numpy
 
 class dfs1():
 
@@ -65,14 +64,7 @@ class dfs1():
 
 
                 src = itemdata.Data
-                src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
-                try:
-                    src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
-                    bufType = ctypes.c_float * len(src)
-                    cbuf = bufType.from_address(src_ptr)
-                    d = np.frombuffer(cbuf, dtype=cbuf._type_)
-                finally:
-                    if src_hndl.IsAllocated: src_hndl.Free()
+                d = to_numpy(src)
 
                 d[d == deleteValue] = np.nan
                 data_list[item][:, it] = d

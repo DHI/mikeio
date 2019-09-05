@@ -27,5 +27,6 @@ if not x64:
 from pydhi import dfs_util as dfs_util
 from pydhi import dfs3 as dfs3
 from pydhi import dfs2 as dfs2
+from pydhi import dfs1 as dfs1
 from pydhi import dfs0 as dfs0
 from pydhi import dfsu as dfsu
