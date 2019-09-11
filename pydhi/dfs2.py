@@ -247,12 +247,18 @@ class dfs2():
                                             start_time.hour, start_time.minute, start_time.second)
 
         # Create an empty dfs2 file object
-        factory = DfsFactory();
-        builder = Dfs2Builder.Create(title, 'pydhi', 0);
+        factory = DfsFactory()
+        builder = Dfs2Builder.Create(title, 'pydhi', 0)
 
         # Set up the header
         builder.SetDataType(0)
-        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+
+        if coordinate[0] == 'LONG/LAT':
+            builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+        else:
+            builder.SetGeographicalProjection(factory.CreateProjectionProjOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+
+
         builder.SetTemporalAxis(
             factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt))
         builder.SetSpatialAxis(factory.CreateAxisEqD2(
@@ -370,12 +376,17 @@ class dfs2():
                                             start_time.hour, start_time.minute, start_time.second)
 
         # Create an empty dfs2 file object
-        factory = DfsFactory();
+        factory = DfsFactory()
         builder = Dfs2Builder.Create(title, 'pydhi', 0)
 
         # Set up the header
         builder.SetDataType(0)
-        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+
+        if coordinate[0] == 'LONG/LAT':
+            builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+        else:
+            builder.SetGeographicalProjection(factory.CreateProjectionProjOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+
         builder.SetTemporalAxis(factory.CreateTemporalNonEqCalendarAxis(eumUnit.eumUsec, system_start_time))
         builder.SetSpatialAxis(factory.CreateAxisEqD2(eumUnit.eumUmeter, number_x, x0, length_x, number_y, y0, length_y))
 
