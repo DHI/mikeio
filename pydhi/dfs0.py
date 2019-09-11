@@ -7,6 +7,7 @@ import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType
+from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
 
