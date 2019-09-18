@@ -1,5 +1,10 @@
-from pydhi import *
+import numpy as np
+import pandas as pd
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
+from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
+from pydhi.helpers import safe_length
+from pydhi.dutil import to_numpy
 
 class dfs3():
 
@@ -172,9 +177,6 @@ class dfs3():
             3) layer counts from the bottom
         """
 
-        if not x64:
-            raise Warning("Not tested in 32 bit Python. It will by default use a MUCH SLOWER reader.")
-
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
 
@@ -188,7 +190,8 @@ class dfs3():
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         if item_numbers is None:
-            item_numbers = list(range(len(dfs.ItemInfo)))
+            n_items = safe_length(dfs.ItemInfo)
+            item_numbers = list(range(n_items))
 
         n_items = len(item_numbers)
         data_list = []
@@ -225,20 +228,8 @@ class dfs3():
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
-                    if x64:
-                        src = itemdata.Data
-                        src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
-                        try:
-                            src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
-                            bufType = ctypes.c_float * len(src)
-                            cbuf = bufType.from_address(src_ptr)
-                            d = np.frombuffer(cbuf, dtype=cbuf._type_)
-                        finally:
-                            if src_hndl.IsAllocated:
-                                src_hndl.Free()
-
-                    else:
-                        d = np.array(list(itemdata.Data))
+                    src = itemdata.Data
+                    d = to_numpy(src)
 
                     # DO a direct copy instead of eleement by elment
                     d = d.reshape(zNum, yNum, xNum).swapaxes(0, 2).swapaxes(0, 1)
@@ -360,7 +351,7 @@ class dfs3():
 
         # Create an empty dfs3 file object
         factory = DfsFactory()
-        builder = Dfs3Builder.Create(title, 'Matlab DFS', 0)
+        builder = Dfs3Builder.Create(title, 'pydhi', 0)
 
         # Set up the header
         builder.SetDataType(1)

@@ -1,4 +1,4 @@
-from pydhi import *
+from DHI.Generic.MikeZero import EUMWrapper
 
 
 class dfs_util():
@@ -54,7 +54,7 @@ class dfs_util():
 
     def grid_centers_from_coordinates(self, X0, Y0, nx, ny, dx, dy):
         """Producses a grid of x, y values of the center of a grid, based on the
-            provided X0, Y0, nx, ny, dx, dy 
+            provided X0, Y0, nx, ny, dx, dy
         """
         x = np.zeros(shape=(ny, nx))
         y = np.zeros(shape=(ny, nx))
