@@ -66,7 +66,8 @@ data = dfs.read(dfs2File, [0])[0]
 data = data[0]
 ```
 
-For a complete example of conversion from netcdf to dfs2 see this [notebook](notebooks/Sea surface temperature - dfs2.ipynb)
+## Create dfs2
+For a complete example of conversion from netcdf to dfs2 see this [notebook](notebooks/Sea%20surface%20temperature%20-%20dfs2.ipynb)
 
 ## DFS Utilities to query variable type, time series types (useful when creating a new dfs file)
 ```python
