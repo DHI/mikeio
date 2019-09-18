@@ -11,6 +11,8 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
 
+from pydhi.helpers import safe_length
+
 
 class dfs0():
 
@@ -22,7 +24,7 @@ class dfs0():
 
         dfs = DfsFileFactory.DfsGenericOpen(dfs0file)
 
-        n_items = len(dfs.ItemInfo)
+        n_items = safe_length
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         names = []
