@@ -9,6 +9,8 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, 
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from pydhi.dutil import to_numpy
 
+from pydhi.helpers import safe_length
+
 
 class dfs2():
 
@@ -117,7 +119,7 @@ class dfs2():
         number_y = dfs.SpatialAxis.YCount
         number_x = dfs.SpatialAxis.XCount
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_items = len(dfs.ItemInfo)
+        n_items = safe_length(dfs.ItemInfo)
 
         deletevalue = -1e-035
 

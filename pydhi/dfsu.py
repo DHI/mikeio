@@ -8,6 +8,8 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, 
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType
 from pydhi.dutil import to_numpy
 
+from pydhi.helpers import safe_length
+
 class dfsu():
 
 
@@ -34,7 +36,7 @@ class dfsu():
 
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
         item_offset = 1
-        n_items = dfs.ItemInfo.Count
+        n_items = safe_length(dfs.ItemInfo)
 
         # Dynamic Z is the first item in 3d files
         if (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigma) or (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigmaZ):
@@ -109,7 +111,7 @@ class dfsu():
         dfs = DfsFileFactory.DfsGenericOpenEdit(dfsufile)
 
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_items = dfs.ItemInfo.Count
+        n_items = safe_length(dfs.ItemInfo)
 
         deletevalue = dfs.FileInfo.DeleteValueFloat
 
