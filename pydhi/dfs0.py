@@ -24,7 +24,7 @@ class dfs0():
 
         dfs = DfsFileFactory.DfsGenericOpen(dfs0file)
 
-        n_items = safe_length
+        n_items = safe_length(dfs.ItemInfo)
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         names = []
