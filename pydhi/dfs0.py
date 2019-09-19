@@ -6,7 +6,7 @@ import clr
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType, StatType
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
@@ -215,7 +215,7 @@ class dfs0():
                 "unit if specified must be an array of integers (enuType) with the same number of "
                 "elements as data columns")
 
-        if not type(start_time) is datetime.datetime:
+        if not type(start_time) is datetime:
             raise Warning("start_time must be of type datetime ")
 
         if not isinstance(timeseries_unit, int):
@@ -302,7 +302,7 @@ class dfs0():
             raise Warning("type if specified must be an array of integers (enuType) with the same number of "
                           "elements as data columns")
 
-        if not len(time_vector) == n_time_steps or not all(isinstance(t, datetime.datetime)for t in time_vector):
+        if not len(time_vector) == n_time_steps or not all(isinstance(t, datetime)for t in time_vector):
             raise Warning("The time_vector must be an array or list of datetime of same length as the number of "
                           "rows in the data")
 
