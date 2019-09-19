@@ -71,9 +71,12 @@ For a complete example of conversion from netcdf to dfs2 see this [notebook](not
 
 ## DFS Utilities to query variable type, time series types (useful when creating a new dfs file)
 ```python
-dfsUtil = dfs_util.dfs_util()
-dfsUtil.type_list()
-dfsUtil.timestep_list()
+>>> from pydhi.dfs_util import type_list, unit_list
+>>> type_list('Water level')
+{100000: 'Water Level', 100307: 'Water level change'}
+
+>>> unit_list(100307)
+{1000: 'meter', 1003: 'feet'}
 ```
 
 ## Read Res1D file Return Pandas DataFrame
