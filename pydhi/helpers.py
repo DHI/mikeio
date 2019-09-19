@@ -11,4 +11,10 @@ def safe_length(input_list):
         int
            Integer giving the length of the input list.
     """
-    return getattr(input_list, 'Count', len(input_list))
+
+    try:
+       n = input_list.Count
+    except:
+       n = len(input_list)
+
+    return n
