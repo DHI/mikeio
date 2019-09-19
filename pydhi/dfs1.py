@@ -59,7 +59,7 @@ class dfs1():
             data_list.append(data)
 
         t = []
-        startTime = dfs.FileInfo.TimeAxis.StartDateTime;
+        startTime = dfs.FileInfo.TimeAxis.StartDateTime
         for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
             for item in range(n_items):
 
