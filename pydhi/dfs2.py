@@ -27,7 +27,7 @@ class dfs2():
 
         return y * nx + x
 
-    def read(self, dfs2file, item_numbers):
+    def read(self, dfs2file, item_numbers = None):
         """ Function: Read a dfs2 file
 
         usage:
@@ -48,6 +48,10 @@ class dfs2():
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(dfs2file)
 
+        if item_numbers is None:
+            n_items = safe_length(dfs.ItemInfo)
+            item_numbers = list(range(n_items))
+            
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
         yNum = axis.YCount
