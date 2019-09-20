@@ -56,19 +56,17 @@ def test_create_non_equidistant_calendar():
 
 def test_read_dfs0_to_pandas():
 
-    dfs0file = r'testdata/random.dfs0'
+    dfs0file = r'tests/testdata/random.dfs0'
 
     dfs = dfs0.dfs0()
     pd = dfs.read_to_pandas(dfs0file)
 
-    #self.assertEqual(np.isnan(pd[pd.columns[0]][2]), True)
     assert np.isnan(pd[pd.columns[0]][2])
 
 def test_read_dfs0_to_matrix():
-    dfs0file = r'testdata/random.dfs0'
+    dfs0file = r'tests/testdata/random.dfs0'
 
     dfs = dfs0.dfs0()
     mat = dfs.read(dfs0file, indices=[0])[0]
 
-    #self.assertEqual(np.isnan(mat[2, 0]), True)
     assert np.isnan(mat[2, 0])
