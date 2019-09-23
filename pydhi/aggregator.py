@@ -55,9 +55,9 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
         raise Warning("Compressed files not supported")
 
     # custom blocks
-    cb = fileInfo.CustomBlocks #[0]
-    for j in range(safe_length(cb)):
-        builder.AddCustomBlocks(cb[j])
+    #cb = fileInfo.CustomBlocks #[0]
+    #for j in range(safe_length(cb)):
+    #    builder.AddCustomBlocks(cb[j])
 
     # static items
     while True:
