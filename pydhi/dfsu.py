@@ -24,23 +24,19 @@ class dfsu():
             1) the data contained in a dfsu file in a list of numpy matrices
             2) time index
             3) name of the items
-
-        NOTE
-            Returns data (x, nt)
         """
 
         # Open the dfs file for reading
         dfs = DfsuFile.Open(dfsufile)
         self._dfs = dfs
 
-
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-        item_offset = 1
+        item_offset = 0
         n_items = safe_length(dfs.ItemInfo)
 
         # Dynamic Z is the first item in 3d files
         if (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigma) or (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigmaZ):
-            item_offset = 2
+            item_offset = 1
             n_items = n_items -1
 
         if item_numbers is None:
@@ -48,12 +44,10 @@ class dfsu():
         else:
             n_items = len(item_numbers)
 
-
         xNum = dfs.NumberOfElements
         nt = dfs.NumberOfTimeSteps
 
         deleteValue = dfs.DeleteValueFloat
-
 
         data_list = []
 
@@ -67,7 +61,7 @@ class dfsu():
         for it in range(nt):
             for item in range(n_items):
 
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + item_offset, it)
+                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + item_offset + 1, it)
 
                 src = itemdata.Data
 
@@ -81,7 +75,7 @@ class dfsu():
         time = pd.DatetimeIndex(t)
         names = []
         for item in range(n_items):
-            name = dfs.ItemInfo[item].Name
+            name = dfs.ItemInfo[item_numbers[item] + item_offset].Name
             names.append(name)
 
         dfs.Close()
