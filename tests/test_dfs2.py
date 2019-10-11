@@ -5,6 +5,27 @@ import datetime
 from pydhi import dfs2 as dfs2
 
 
+def test_simple_create():
+
+    filename = r"simple.dfs2"
+
+    data = []
+
+    nt = 100
+    nx = 20
+    ny = 5
+    d = np.random.random([nt, ny, nx])
+
+    data.append(d)
+
+    dfs = dfs2.dfs2()
+
+    dfs.create(filename=filename, data=data)
+
+    assert True
+    os.remove(filename)
+
+
 def test_create_single_item():
 
     start_time = datetime.datetime(2012, 1, 1)
@@ -16,7 +37,7 @@ def test_create_single_item():
     variable_type = [100000]
     unit = [1000]
 
-    dfs2File = r"random.dfs2"
+    filename = r"random.dfs2"
 
     data = []
     d = np.random.random([100, 2, 3])
@@ -42,18 +63,18 @@ def test_create_single_item():
 
     dfs = dfs2.dfs2()
 
-    dfs.create_equidistant_calendar(dfs2file=dfs2File, data=data,
-                                    start_time=start_time,
-                                    timeseries_unit=timeseries_unit,
-                                    dt=dt, variable_type=variable_type,
-                                    unit=unit,
-                                    coordinate=coordinate,
-                                    length_x=length_x,
-                                    length_y=length_y,
-                                    names=names, title=title)
+    dfs.create(filename=filename, data=data,
+               start_time=start_time,
+              timeseries_unit=timeseries_unit,
+              dt=dt, variable_type=variable_type,
+              unit=unit,
+              coordinate=coordinate,
+              length_x=length_x,
+              length_y=length_y,
+              names=names, title=title)
 
     assert True
-    os.remove(dfs2File)
+    os.remove(filename)
 
 
 def test_create_multiple_item():
@@ -71,7 +92,7 @@ def test_create_multiple_item():
     # from result, we see meter is 1000 and milimeter is 1002, per second is 2605
     unit = [1000, 1002, 2605]
 
-    dfs2File = r"multiple.dfs2"
+    filename = r"multiple.dfs2"
 
     data = []
     d = np.zeros([100, 100, 30]) + 1.0
@@ -90,24 +111,58 @@ def test_create_multiple_item():
 
     dfs = dfs2.dfs2()
 
-    dfs.create_equidistant_calendar(dfs2file=dfs2File, data=data,
-                                    start_time=start_time,
-                                    timeseries_unit=timeseries_unit, dt=dt,
-                                    variable_type=variable_type,
-                                    unit=unit, coordinate=coordinate,
-                                    length_x=length_x, length_y=length_y,
-                                    names=names, title=title)
+    dfs.create(filename=filename, data=data,
+               start_time=start_time,
+               timeseries_unit=timeseries_unit, dt=dt,
+               variable_type=variable_type,
+               unit=unit, coordinate=coordinate,
+               length_x=length_x, length_y=length_y,
+               names=names, title=title)
 
     assert True
-    os.remove(dfs2File)
+    os.remove(filename)
+
+
+def test_non_equidistant_calendar():
+
+    filename = r"neq.dfs2"
+
+    data = []
+
+    datetimes = [datetime.datetime(2012, 1, 1),
+                 datetime.datetime(2012, 2, 1)]
+
+    nt = len(datetimes)
+    nx = 20
+    ny = 5
+    d = np.random.random([nt, ny, nx])
+
+    data.append(d)
+
+    dfs = dfs2.dfs2()
+
+    dfs.create(filename=filename, data=data, datetimes=datetimes)
+
+    assert True
+    os.remove(filename)
+
 
 
 def test_read():
 
-    dfs2File = r"tests/testdata/random.dfs2"
+    filename = r"tests/testdata/random.dfs2"
     dfs = dfs2.dfs2()
 
-    data = dfs.read(dfs2File, [0])[0]
+    data = dfs.read(filename, [0])[0]
     data = data[0]
-    assert data[11, 0, 0] == 0
-    assert np.isnan(data[10, 0, 0])
+    assert data[0, 11, 0] == 0
+    assert np.isnan(data[0, 10, 0])
+    assert data.shape == (3, 100, 2) # time, y, x
+
+
+def test_write():
+
+    pass
+
+
+

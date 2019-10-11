@@ -1,13 +1,6 @@
 # pydhi
 Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Reading Res1D data.
 
-## Install package from the dist directory:
-	pythonnet - https://www.lfd.uci.edu/~gohlke/pythonlibs/#pythonnet
-        pip install py_dhi_xxx.whl
-
-	% Assumes MIKE installed already on the computer. Add install directory to PYTHONPATH from windows command line:
-	% set PYTHONPATH=%PYTHONPATH%;"C:\Program Files (x86)\DHI\2019\bin\x64"
-
 # Examples
 
 ## Reading dfs0 file into Pandas DataFrame
@@ -17,32 +10,30 @@ dfs = dfs0.dfs0()
 ts = dfs.read_to_pandas(dfs0file)
 ```
 
-## Create non-equidistant dfs0
+## Create simple timeseries
 ```python
-dfs0file = r'C:\test\randomEQC.dfs0'
-data = np.random.random([1000, 2])
-data[2, :] = np.nan
+dfs0File = r"simple.dfs0"
+data = []
+nt = 100
+d = np.random.random([nt])
 start_time = datetime.datetime(2017, 1, 1)
-time_vector = []
-for i in range(1000):
-	time_vector.append( start_time + datetime.timedelta(hours=i*0.1) )
-title = 'Hello Test'
-names = ['VarFun01', 'NotFun']
-variable_type = [100000, 100000]
-unit = [1000, 1000]
-data_value_type = [0, 1]
-
+dt = 60
+data.append(d)
 dfs = dfs0.dfs0()
-dfs.create_non_equidistant_calendar(dfs0file=dfs0file, data=data, time_vector=time_vector,
-				    names=names, title=title, variable_type=variable_type, unit=unit,
-				    data_value_type=data_value_type)
+dfs.create(dfs0file=dfs0File, data=data,
+           start_time=start_time,dt=dt )
+
 ```
 
-## Create equidistant dfs0
+
+## Create non-equidistant dfs0
 ```python
-dfs0file = r'C:\test\randomEQC.dfs0'
-data = np.random.random([1000, 2])
-data[2, :] = np.nan
+dfs0file = r'random.dfs0'
+d1 = np.random.random([1000])
+d2 = np.random.random([1000])
+data = []
+data.append(d1)
+data.append(d2)
 start_time = datetime.datetime(2017, 1, 1)
 timeseries_unit = 1402
 title = 'Hello Test'
@@ -52,10 +43,39 @@ unit = [1000, 1000]
 data_value_type = [0, 1]
 dt = 5
 dfs = dfs0.dfs0()
-dfs.create_equidistant_calendar(dfs0file=dfs0file, data=data, start_time=start_time,
-				timeseries_unit=timeseries_unit, dt=dt, names=names,
-				title=title, variable_type=variable_type, unit=unit,
-				data_value_type=data_value_type)
+dfs.create(dfs0file=dfs0file, data=data,
+        	start_time=start_time,
+            timeseries_unit=timeseries_unit, dt=dt,
+            names=names, title=title,
+            variable_type=variable_type,
+            unit=unit, data_value_type=data_value_type)
+
+```
+
+## Create non equidistant dfs0
+```python
+dfs0file = r'neq.dfs0'
+d1 = np.random.random([1000])
+d2 = np.random.random([1000])
+data = []
+data.append(d1)
+data.append(d2)
+start_time = datetime.datetime(2017, 1, 1)
+time_vector = []
+for i in range(1000):
+	time_vector.append(start_time + datetime.timedelta(hours=i*0.1))
+title = 'Hello Test'
+names = ['VarFun01', 'NotFun']
+variable_type = [100000, 100000]
+unit = [1000, 1000]
+data_value_type = [0, 1]
+
+dfs = dfs0.dfs0()
+dfs.create(dfs0file=dfs0file, data=data,
+			datetimes=time_vector,
+			names=names, title=title,
+			variable_type=variable_type, unit=unit,
+			data_value_type=data_value_type)
 ```
 
 ## Read dfs2 data

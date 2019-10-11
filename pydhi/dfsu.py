@@ -13,7 +13,7 @@ from pydhi.helpers import safe_length
 class dfsu():
 
 
-    def read(self, dfsufile, item_numbers=None):
+    def read(self, filename, item_numbers=None):
         """ Function: Read a dfsu file
 
         usage:
@@ -24,79 +24,73 @@ class dfsu():
             1) the data contained in a dfsu file in a list of numpy matrices
             2) time index
             3) name of the items
-
-        NOTE
-            Returns data (x, nt)
         """
 
         # Open the dfs file for reading
-        dfs = DfsuFile.Open(dfsufile)
+        dfs = DfsuFile.Open(filename)
         self._dfs = dfs
 
-
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-        item_offset = 1
+        item_offset = 0
         n_items = safe_length(dfs.ItemInfo)
 
         # Dynamic Z is the first item in 3d files
-        if (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigma) or (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigmaZ):
-            item_offset = 2
-            n_items = n_items -1
+        if ((dfs.DfsuFileType == DfsuFileType.Dfsu3DSigma) or
+            (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigmaZ)):
+            item_offset = 1
+            n_items = n_items - 1
 
         if item_numbers is None:
             item_numbers = list(range(n_items))
         else:
             n_items = len(item_numbers)
 
-
         xNum = dfs.NumberOfElements
         nt = dfs.NumberOfTimeSteps
 
         deleteValue = dfs.DeleteValueFloat
 
-
         data_list = []
 
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=(xNum, nt), dtype=float)
+            data = np.ndarray(shape=(nt, xNum), dtype=float)
             data_list.append(data)
 
         t = []
-        startTime = dfs.StartDateTime;
+        startTime = dfs.StartDateTime
         for it in range(nt):
             for item in range(n_items):
 
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + item_offset, it)
+                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + item_offset + 1, it)
 
                 src = itemdata.Data
 
                 d = to_numpy(src)
 
                 d[d == deleteValue] = np.nan
-                data_list[item][:, it] = d
+                data_list[item][it, :] = d
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
         time = pd.DatetimeIndex(t)
         names = []
         for item in range(n_items):
-            name = dfs.ItemInfo[item].Name
+            name = dfs.ItemInfo[item_numbers[item] + item_offset].Name
             names.append(name)
 
         dfs.Close()
         return (data_list, time, names)
 
-
-    def write(self, dfsufile, data):
+    def write(self, filename, data):
         """
         Function: write to a pre-created dfsu file.
 
-        dfsufile:
-            full path and filename to existing dfs2 file
+        filename:
+            full path and filename to existing dfsu file
 
         data:
-            list of matrices. len(data) must equal the number of items in the dfs2.
+            list of matrices. len(data) must equal the number of items in the dfsu.
             Easch matrix must be of dimension y,x,time
 
         usage:
@@ -108,7 +102,7 @@ class dfsu():
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.DfsGenericOpenEdit(dfsufile)
+        dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
 
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         n_items = safe_length(dfs.ItemInfo)
@@ -151,7 +145,6 @@ class dfsu():
             ec[j,2] = zcoords.mean()
 
         return ec
-
 
     def find_closest_element_index(self, x, y, z=None):
 
