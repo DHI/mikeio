@@ -12,6 +12,9 @@ ts = dfs.read_to_pandas(dfs0file)
 
 ## Create simple timeseries
 ```python
+import datetime
+import numpy as np
+from pydhi import dfs0 as dfs0
 dfs0File = r"simple.dfs0"
 data = []
 nt = 100
@@ -20,7 +23,7 @@ start_time = datetime.datetime(2017, 1, 1)
 dt = 60
 data.append(d)
 dfs = dfs0.dfs0()
-dfs.create(dfs0file=dfs0File, data=data,
+dfs.create(filename=dfs0File, data=data,
            start_time=start_time,dt=dt )
 
 ```
@@ -43,7 +46,7 @@ unit = [1000, 1000]
 data_value_type = [0, 1]
 dt = 5
 dfs = dfs0.dfs0()
-dfs.create(dfs0file=dfs0file, data=data,
+dfs.create(filename=dfs0file, data=data,
         	start_time=start_time,
             timeseries_unit=timeseries_unit, dt=dt,
             names=names, title=title,
@@ -71,7 +74,7 @@ unit = [1000, 1000]
 data_value_type = [0, 1]
 
 dfs = dfs0.dfs0()
-dfs.create(dfs0file=dfs0file, data=data,
+dfs.create(filename=dfs0file, data=data,
 			datetimes=time_vector,
 			names=names, title=title,
 			variable_type=variable_type, unit=unit,
@@ -125,6 +128,4 @@ plt.plot(t,d[0][idx,:])
 ```
 ![Timeseries](images/dfsu_ts.png)
 
-# Created by Marc-Etienne Ridler (mer@dhigroup.com)
-python setup.py sdist bdist_wheel
 

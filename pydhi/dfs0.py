@@ -1,15 +1,11 @@
 import os
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
-import clr
+from datetime import datetime
 import System
 from System import Array
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
+from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType, StatType
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
-from System.Runtime.InteropServices import GCHandle, GCHandleType
-import ctypes
 
 from pydhi.helpers import safe_length
 
@@ -54,60 +50,64 @@ class dfs0():
 
         return data, t, names
 
-    def read_to_pandas(self, filename, indices=None):
+    def read_to_pandas(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return a Pandas DataFrame
         Usage:
-            read_to_pandas(filename, indices=None)
+            read_to_pandas(filename, item_numbers=None)
         filename
             full path and file name to the dfs0 file.
-        indices
-            read only the indices in the array specified (0 base)
+        item_numbers
+            read only the item_numbers in the array specified (0 base)
 
         Return:
             a Pandas DataFrame
         """
         import pandas as pd
-        from operator import itemgetter
 
-        if indices is not None:
-            if not all(isinstance(item, int) and 0 <= item < 1e15 for item in indices):
-                raise Warning("indices must be a list or array of values between 0 and 1e15")
+        if item_numbers is not None:
+            if not all(isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers):
+                raise Warning("item_numbers must be a list of integers")
 
         data, t, names = self.__read(filename=filename)
-
-        if indices is not None:
-            data = data[:, indices]
-            names = itemgetter(*indices)(names)
 
         df = pd.DataFrame(data, columns=names)
 
         df.index = pd.DatetimeIndex(t)
 
+        if item_numbers is not None:
+            df = df.iloc[:,item_numbers]
+
         return df
 
-    def read(self, filename, indices=None):
+    def read(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return data [data, time, itemNames]
 
         Usage:
-            read_to_pandas(filename, indices=None)
+            read_to_pandas(filename, item_numbers=None)
         filename
             full path and file name to the dfs0 file.
-        indices
-            read only the indices in the array specified (0 base)
+        item_numbers
+            read only the item_numbers in the array specified (0 base)
         Return:
             [data, time, itemNames]
         """
         from operator import itemgetter
 
-        if indices is not None:
-            if not all(isinstance(item, int) and 0 <= item < 1e15 for item in indices):
-                raise Warning("indices must be a list or array of values between 0 and 1e15")
+        if item_numbers is not None:
+            if not all(isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers):
+                raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
 
-        data, t, names = self.__read(filename)
+        d, t, names = self.__read(filename)
 
-        if indices is not None:
-            data = data[:, indices]
-            names = itemgetter(*indices)(names)
+        data = []
+
+        if item_numbers is not None:
+            names = itemgetter(*item_numbers)(names)
+            for item in item_numbers:
+                data.append(d[:,item])
+        else:
+            for item in range(d.shape[1]):
+                data.append(d[:,item])
 
         return data, t, names
 
@@ -287,6 +287,7 @@ class dfs0():
 
         for i in range(n_items):
             d = data[i]
+
             d[np.isnan(d)] = delete_value
 
         # COPY OVER THE DATA
