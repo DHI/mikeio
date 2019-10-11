@@ -35,9 +35,10 @@ class dfsu():
         n_items = safe_length(dfs.ItemInfo)
 
         # Dynamic Z is the first item in 3d files
-        if (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigma) or (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigmaZ):
+        if ((dfs.DfsuFileType == DfsuFileType.Dfsu3DSigma) or
+            (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigmaZ)):
             item_offset = 1
-            n_items = n_items -1
+            n_items = n_items - 1
 
         if item_numbers is None:
             item_numbers = list(range(n_items))
@@ -53,11 +54,11 @@ class dfsu():
 
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=(xNum, nt), dtype=float)
+            data = np.ndarray(shape=(nt, xNum), dtype=float)
             data_list.append(data)
 
         t = []
-        startTime = dfs.StartDateTime;
+        startTime = dfs.StartDateTime
         for it in range(nt):
             for item in range(n_items):
 
@@ -68,7 +69,7 @@ class dfsu():
                 d = to_numpy(src)
 
                 d[d == deleteValue] = np.nan
-                data_list[item][:, it] = d
+                data_list[item][it, :] = d
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
@@ -81,16 +82,15 @@ class dfsu():
         dfs.Close()
         return (data_list, time, names)
 
-
     def write(self, dfsufile, data):
         """
         Function: write to a pre-created dfsu file.
 
         dfsufile:
-            full path and filename to existing dfs2 file
+            full path and filename to existing dfsu file
 
         data:
-            list of matrices. len(data) must equal the number of items in the dfs2.
+            list of matrices. len(data) must equal the number of items in the dfsu.
             Easch matrix must be of dimension y,x,time
 
         usage:
@@ -145,7 +145,6 @@ class dfsu():
             ec[j,2] = zcoords.mean()
 
         return ec
-
 
     def find_closest_element_index(self, x, y, z=None):
 

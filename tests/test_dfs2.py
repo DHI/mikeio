@@ -5,6 +5,27 @@ import datetime
 from pydhi import dfs2 as dfs2
 
 
+def test_simple_create():
+
+    dfs2File = r"simple.dfs2"
+
+    data = []
+
+    nt = 100
+    nx = 20
+    ny = 5
+    d = np.random.random([nt, ny, nx])
+
+    data.append(d)
+
+    dfs = dfs2.dfs2()
+
+    dfs.create(dfs2file=dfs2File, data=data)
+
+    assert True
+    os.remove(dfs2File)
+
+
 def test_create_single_item():
 
     start_time = datetime.datetime(2012, 1, 1)
@@ -42,15 +63,15 @@ def test_create_single_item():
 
     dfs = dfs2.dfs2()
 
-    dfs.create_equidistant_calendar(dfs2file=dfs2File, data=data,
-                                    start_time=start_time,
-                                    timeseries_unit=timeseries_unit,
-                                    dt=dt, variable_type=variable_type,
-                                    unit=unit,
-                                    coordinate=coordinate,
-                                    length_x=length_x,
-                                    length_y=length_y,
-                                    names=names, title=title)
+    dfs.create(dfs2file=dfs2File, data=data,
+               start_time=start_time,
+              timeseries_unit=timeseries_unit,
+              dt=dt, variable_type=variable_type,
+              unit=unit,
+              coordinate=coordinate,
+              length_x=length_x,
+              length_y=length_y,
+              names=names, title=title)
 
     assert True
     os.remove(dfs2File)
@@ -90,16 +111,41 @@ def test_create_multiple_item():
 
     dfs = dfs2.dfs2()
 
-    dfs.create_equidistant_calendar(dfs2file=dfs2File, data=data,
-                                    start_time=start_time,
-                                    timeseries_unit=timeseries_unit, dt=dt,
-                                    variable_type=variable_type,
-                                    unit=unit, coordinate=coordinate,
-                                    length_x=length_x, length_y=length_y,
-                                    names=names, title=title)
+    dfs.create(dfs2file=dfs2File, data=data,
+               start_time=start_time,
+               timeseries_unit=timeseries_unit, dt=dt,
+               variable_type=variable_type,
+               unit=unit, coordinate=coordinate,
+               length_x=length_x, length_y=length_y,
+               names=names, title=title)
 
     assert True
     os.remove(dfs2File)
+
+
+def test_non_equidistant_calendar():
+
+    dfs2File = r"neq.dfs2"
+
+    data = []
+
+    datetimes = [datetime.datetime(2012, 1, 1),
+                 datetime.datetime(2012, 2, 1)]
+
+    nt = len(datetimes)
+    nx = 20
+    ny = 5
+    d = np.random.random([nt, ny, nx])
+
+    data.append(d)
+
+    dfs = dfs2.dfs2()
+
+    dfs.create(dfs2file=dfs2File, data=data, datetimes=datetimes)
+
+    assert True
+    os.remove(dfs2File)
+
 
 
 def test_read():
@@ -109,5 +155,14 @@ def test_read():
 
     data = dfs.read(dfs2File, [0])[0]
     data = data[0]
-    assert data[11, 0, 0] == 0
-    assert np.isnan(data[10, 0, 0])
+    assert data[0, 11, 0] == 0
+    assert np.isnan(data[0, 10, 0])
+    assert data.shape == (3, 100, 2) # time, y, x
+
+
+def test_write():
+
+    pass
+
+
+

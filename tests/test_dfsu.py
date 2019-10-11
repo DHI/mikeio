@@ -21,6 +21,15 @@ def test_read_single_item_returns_single_item():
     assert len(names) == 1
 
 
+def test_read_returns_array_time_dimension_first():
+    filename = r"tests/testdata/HD2D.dfsu"
+    dfs = dfsu()
+
+    (data, t, names) = dfs.read(filename, item_numbers=[3])
+
+    assert data[0].shape == (9, 884)
+
+
 def test_read_selected_item_returns_correct_items():
     filename = r"tests/testdata/HD2D.dfsu"
     dfs = dfsu()
