@@ -11,8 +11,8 @@ from pydhi.dutil import to_numpy
 
 from pydhi.helpers import safe_length
 
-class dfs1():
 
+class dfs1():
 
     def read(self, dfs1file, item_numbers=None):
         """ Function: Read a dfs1 file
@@ -27,7 +27,7 @@ class dfs1():
             3) name of the items
 
         NOTE
-            Returns data (x, nt)
+            Returns data (nt, x)
         """
 
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
@@ -55,7 +55,7 @@ class dfs1():
 
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=(xNum, nt), dtype=float)
+            data = np.ndarray(shape=(nt, xNum), dtype=float)
             data_list.append(data)
 
         t = []
@@ -65,12 +65,11 @@ class dfs1():
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
-
                 src = itemdata.Data
                 d = to_numpy(src)
 
                 d[d == deleteValue] = np.nan
-                data_list[item][:, it] = d
+                data_list[item][it, :] = d
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
@@ -83,7 +82,6 @@ class dfs1():
         dfs.Close()
         return (data_list, time, names)
 
-
     def write(self, dfs1file, data):
         """
         Function: write to a pre-created dfs1 file.
@@ -93,10 +91,10 @@ class dfs1():
 
         data:
             list of matrices. len(data) must equal the number of items in the dfs2.
-            Easch matrix must be of dimension x,time
+            Each matrix must be of dimension time, x
 
         usage:
-            write(filename, data) where  data(x, nt)
+            write(filename, data) where  data(nt, x)
 
         Returns:
             Nothing
@@ -113,12 +111,13 @@ class dfs1():
 
         deletevalue = -1e-035
 
-        if not all(np.shape(d)[0] == number_x for d in data):
-            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [x,time]")
-        if not all(np.shape(d)[1] == n_time_steps for d in data):
+        if not all(np.shape(d)[0] == n_time_steps for d in data):
             raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                     "Data is list of matices [x,time]")
+                     "Data is list of matices [t, x]")
+        if not all(np.shape(d)[1] == number_x for d in data):
+            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
+                     "Data is list of matices [t, x]")
+
         if not len(data) == n_items:
             raise Warning("The number of matrices in data do not match the number of items in the dfs1 file.")
 
@@ -132,12 +131,12 @@ class dfs1():
         dfs.Close()
 
 
-    def create_equidistant_calendar(self, dfs1file, data,
-                                    start_time = None, dt = 3600,
-                                    length_x = 1,
-                                    x0 = 0,
-                                    coordinate = None, timeseries_unit=1400, variable_type=None, unit=None,
-                                    names=None, title=None):
+    def create(self, dfs1file, data,
+               start_time = None, dt = 3600,
+               length_x = 1,
+               x0 = 0,
+               coordinate = None, timeseries_unit=1400, variable_type=None, unit=None,
+               names=None, title=None):
         """
         Creates a dfs1 file
 
@@ -176,8 +175,9 @@ class dfs1():
         if title is None:
             title = ""
 
-        number_x = np.shape(data[0])[0]
-        n_time_steps = np.shape(data[0])[1]
+
+        n_time_steps = np.shape(data[0])[0]
+        number_x = np.shape(data[0])[1]
         n_items = len(data)
 
         if start_time is None:
@@ -195,12 +195,13 @@ class dfs1():
         if unit is None:
             unit = [0] * n_items
 
-        if not all(np.shape(d)[0] == number_x for d in data):
-            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [x,time]")
-        if not all(np.shape(d)[1] == n_time_steps for d in data):
+
+        if not all(np.shape(d)[0] == n_time_steps for d in data):
             raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                     "Data is list of matices [x,time]")
+                     "Data is list of matices [t, x]")
+        if not all(np.shape(d)[1] == number_x for d in data):
+            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
+                     "Data is list of matices [t, x]")
 
         if len(names) != n_items:
             raise Warning("names must be an array of strings with the same number as matrices in data list")
@@ -249,7 +250,7 @@ class dfs1():
 
         for i in range(n_time_steps):
             for item in range(n_items):
-                d = data[item][:, i]
+                d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
                 darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
                 dfs.WriteItemTimeStepNext(0, darray)
