@@ -14,7 +14,7 @@ from pydhi.helpers import safe_length
 
 class dfs1():
 
-    def read(self, dfs1file, item_numbers=None):
+    def read(self, filename, item_numbers=None):
         """ Function: Read a dfs1 file
 
         usage:
@@ -33,7 +33,7 @@ class dfs1():
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(dfs1file)
+        dfs = DfsFileFactory.DfsGenericOpen(filename)
 
         if item_numbers is None:
             n_items = safe_length(dfs.ItemInfo)
@@ -82,11 +82,11 @@ class dfs1():
         dfs.Close()
         return (data_list, time, names)
 
-    def write(self, dfs1file, data):
+    def write(self, filename, data):
         """
         Function: write to a pre-created dfs1 file.
 
-        dfs1file:
+        filename:
             full path and filename to existing dfs1 file
 
         data:
@@ -102,7 +102,7 @@ class dfs1():
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.Dfs1FileOpenEdit(dfs1file)
+        dfs = DfsFileFactory.filenameOpenEdit(filename)
 
         # Determine the size of the grid
         number_x = dfs.SpatialAxis.XCount
@@ -131,7 +131,7 @@ class dfs1():
         dfs.Close()
 
 
-    def create(self, dfs1file, data,
+    def create(self, filename, data,
                start_time = None, dt = 3600,
                length_x = 1,
                x0 = 0,
@@ -140,7 +140,7 @@ class dfs1():
         """
         Creates a dfs1 file
 
-        dfs1file:
+        filename:
             Location to write the dfs1 file
         data:
             list of matrices, one for each item. Matrix dimension: x, time
@@ -241,9 +241,9 @@ class dfs1():
             builder.AddDynamicItem(names[i], eumQuantity.Create(variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
 
         try:
-            builder.CreateFile(dfs1file)
+            builder.CreateFile(filename)
         except IOError:
-            print('cannot create dfs2 file: ', dfs1file)
+            print('cannot create dfs2 file: ', filename)
 
         dfs = builder.GetFile()
         deletevalue = dfs.FileInfo.DeleteValueFloat #-1.0000000031710769e-30

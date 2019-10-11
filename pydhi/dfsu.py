@@ -13,7 +13,7 @@ from pydhi.helpers import safe_length
 class dfsu():
 
 
-    def read(self, dfsufile, item_numbers=None):
+    def read(self, filename, item_numbers=None):
         """ Function: Read a dfsu file
 
         usage:
@@ -27,7 +27,7 @@ class dfsu():
         """
 
         # Open the dfs file for reading
-        dfs = DfsuFile.Open(dfsufile)
+        dfs = DfsuFile.Open(filename)
         self._dfs = dfs
 
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
@@ -82,11 +82,11 @@ class dfsu():
         dfs.Close()
         return (data_list, time, names)
 
-    def write(self, dfsufile, data):
+    def write(self, filename, data):
         """
         Function: write to a pre-created dfsu file.
 
-        dfsufile:
+        filename:
             full path and filename to existing dfsu file
 
         data:
@@ -102,7 +102,7 @@ class dfsu():
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.DfsGenericOpenEdit(dfsufile)
+        dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
 
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         n_items = safe_length(dfs.ItemInfo)

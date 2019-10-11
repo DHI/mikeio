@@ -27,7 +27,7 @@ class dfs2():
 
         return y * nx + x
 
-    def read(self, dfs2file, item_numbers=None):
+    def read(self, filename, item_numbers=None):
         """ Function: Read a dfs2 file
 
         usage:
@@ -46,7 +46,7 @@ class dfs2():
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(dfs2file)
+        dfs = DfsFileFactory.DfsGenericOpen(filename)
 
         if item_numbers is None:
             n_items = safe_length(dfs.ItemInfo)
@@ -96,11 +96,11 @@ class dfs2():
         dfs.Close()
         return (data_list, time, names)
 
-    def write(self, dfs2file, data):
+    def write(self, filename, data):
         """
         Function: write to a pre-created dfs2 file.
 
-        dfs2file:
+        filename:
             full path and filename to existing dfs2 file
 
         data:
@@ -116,7 +116,7 @@ class dfs2():
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.Dfs2FileOpenEdit(dfs2file)
+        dfs = DfsFileFactory.filenameOpenEdit(filename)
 
         # Determine the size of the grid
         number_y = dfs.SpatialAxis.YCount
@@ -150,7 +150,7 @@ class dfs2():
 
         dfs.Close()
 
-    def create(self, dfs2file, data,
+    def create(self, filename, data,
                start_time=None, dt=3600,
                datetimes=None,
                length_x=1, length_y=1,
@@ -162,7 +162,7 @@ class dfs2():
         """
         Creates a dfs2 file
 
-        dfs2file:
+        filename:
             Location to write the dfs2 file
         data:
             list of matrices, one for each item. Matrix dimension: y, x, time
@@ -286,9 +286,9 @@ class dfs2():
                 variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
 
         try:
-            builder.CreateFile(dfs2file)
+            builder.CreateFile(filename)
         except IOError:
-            print('cannot create dfs2 file: ', dfs2file)
+            print('cannot create dfs2 file: ', filename)
 
         dfs = builder.GetFile()
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30

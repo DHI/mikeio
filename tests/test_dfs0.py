@@ -16,7 +16,7 @@ def test_simple_create():
 
     dfs = dfs0.dfs0()
 
-    dfs.create(dfs0file=dfs0File, data=data)
+    dfs.create(filename=dfs0File, data=data)
 
     assert True
     os.remove(dfs0File)
@@ -39,7 +39,7 @@ def test_create_equidistant_calendar():
     data_value_type = [0, 1]
     dt = 5
     dfs = dfs0.dfs0()
-    dfs.create(dfs0file=dfs0file, data=data,
+    dfs.create(filename=dfs0file, data=data,
                start_time=start_time,
                timeseries_unit=timeseries_unit, dt=dt,
                names=names, title=title,
@@ -68,7 +68,7 @@ def test_create_non_equidistant_calendar():
     data_value_type = [0, 1]
 
     dfs = dfs0.dfs0()
-    dfs.create(dfs0file=dfs0file, data=data,
+    dfs.create(filename=dfs0file, data=data,
                datetimes=time_vector,
                names=names, title=title,
                variable_type=variable_type, unit=unit,
@@ -90,6 +90,6 @@ def test_read_dfs0_to_matrix():
     dfs0file = r'tests/testdata/random.dfs0'
 
     dfs = dfs0.dfs0()
-    mat = dfs.read(dfs0file, indices=[0])[0]
+    mat = dfs.read(filename=dfs0file, indices=[0])[0]
 
     assert np.isnan(mat[2, 0])

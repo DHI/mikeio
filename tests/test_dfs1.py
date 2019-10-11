@@ -7,7 +7,7 @@ from pydhi import dfs1 as dfs1
 
 def test_simple_create():
 
-    dfs1File = r"simple.dfs1"
+    filename = r"simple.dfs1"
 
     data = []
 
@@ -19,10 +19,10 @@ def test_simple_create():
 
     dfs = dfs1.dfs1()
 
-    dfs.create(dfs1file=dfs1File, data=data)
+    dfs.create(filename=filename, data=data)
 
     assert True
-    os.remove(dfs1File)
+    os.remove(filename)
 
 
 def test_create_single_item():
@@ -36,7 +36,7 @@ def test_create_single_item():
     variable_type = [100000]
     unit = [1000]
 
-    dfs1File = r"random.dfs1"
+    filename = r"random.dfs1"
 
     data = []
     d = np.random.random([100, 3])
@@ -49,7 +49,7 @@ def test_create_single_item():
 
     dfs = dfs1.dfs1()
 
-    dfs.create(dfs1file=dfs1File, data=data,
+    dfs.create(filename=filename, data=data,
                start_time=start_time,
                dt=dt, variable_type=variable_type,
                unit=unit,
@@ -57,16 +57,16 @@ def test_create_single_item():
                names=names, title=title)
 
     assert True
-#    os.remove(dfs1File)
+#    os.remove(filename)
 
 
 
 def test_read():
 
-    dfs1File = r"tests/testdata/random.dfs1"
+    filename = r"tests/testdata/random.dfs1"
     dfs = dfs1.dfs1()
 
-    data = dfs.read(dfs1File, [0])[0]
+    data = dfs.read(filename, [0])[0]
     data = data[0]
     assert data.shape == (100, 3) # time, x
 

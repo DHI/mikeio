@@ -16,13 +16,13 @@ from pydhi.helpers import safe_length
 
 class dfs0():
 
-    def __read(self, dfs0file):
+    def __read(self, filename):
         """Read data from the dfs0 file
         """
-        if not os.path.exists(dfs0file):
-            raise Warning("dfs0File - File does not Exist %s", dfs0file)
+        if not os.path.exists(filename):
+            raise Warning("filename - File does not Exist %s", filename)
 
-        dfs = DfsFileFactory.DfsGenericOpen(dfs0file)
+        dfs = DfsFileFactory.DfsGenericOpen(filename)
 
         n_items = safe_length(dfs.ItemInfo)
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -54,11 +54,11 @@ class dfs0():
 
         return data, t, names
 
-    def read_to_pandas(self, dfs0file, indices=None):
+    def read_to_pandas(self, filename, indices=None):
         """Read data from the dfs0 file and return a Pandas DataFrame
         Usage:
-            read_to_pandas(dfs0file, indices=None)
-        dfs0file
+            read_to_pandas(filename, indices=None)
+        filename
             full path and file name to the dfs0 file.
         indices
             read only the indices in the array specified (0 base)
@@ -73,7 +73,7 @@ class dfs0():
             if not all(isinstance(item, int) and 0 <= item < 1e15 for item in indices):
                 raise Warning("indices must be a list or array of values between 0 and 1e15")
 
-        data, t, names = self.__read(dfs0file=dfs0file)
+        data, t, names = self.__read(filename=filename)
 
         if indices is not None:
             data = data[:, indices]
@@ -85,12 +85,12 @@ class dfs0():
 
         return df
 
-    def read(self, dfs0file, indices=None):
+    def read(self, filename, indices=None):
         """Read data from the dfs0 file and return data [data, time, itemNames]
 
         Usage:
-            read_to_pandas(dfs0file, indices=None)
-        dfs0file
+            read_to_pandas(filename, indices=None)
+        filename
             full path and file name to the dfs0 file.
         indices
             read only the indices in the array specified (0 base)
@@ -103,7 +103,7 @@ class dfs0():
             if not all(isinstance(item, int) and 0 <= item < 1e15 for item in indices):
                 raise Warning("indices must be a list or array of values between 0 and 1e15")
 
-        data, t, names = self.__read(dfs0file)
+        data, t, names = self.__read(filename)
 
         if indices is not None:
             data = data[:, indices]
@@ -111,19 +111,19 @@ class dfs0():
 
         return data, t, names
 
-    def write(self, dfs0file, data):
+    def write(self, filename, data):
         """Writes data to the pre-created dfs0 file.
-        dfs0file --> file path to existing dfs0 file.
+        filename --> file path to existing dfs0 file.
         data --> numpy matrix with data.
         """
 
-        if not path.exists(dfs0file):
-            raise Warning("dfs0File - File does not Exist %s", dfs0file)
+        if not path.exists(filename):
+            raise Warning("filename - File does not Exist %s", filename)
 
         try:
-            dfs = DfsFileFactory.DfsGenericOpenEdit(dfs0file)
+            dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
         except IOError:
-            print('cannot open', dfs0file)
+            print('cannot open', filename)
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
@@ -166,13 +166,13 @@ class dfs0():
 
         dfs.Close()
 
-    def create(self, dfs0file, data,
+    def create(self, filename, data,
                start_time=None, timeseries_unit=1400, dt=3600, datetimes=None,
                variable_type=None, unit=None, names=None,
                title=None, data_value_type=None):
         """create creates a dfs0 file.
 
-        dfs0file:
+        filename:
             Full path and filename to dfs0 to be created.
         data:
             a numpy matrix
@@ -277,10 +277,10 @@ class dfs0():
             builder.AddDynamicItem(item.GetDynamicItemInfo())
 
         try:
-            builder.CreateFile(dfs0file)
+            builder.CreateFile(filename)
 
         except IOError:
-            print('cannot create dfso file: ', dfs0file)
+            print('cannot create dfso file: ', filename)
 
         dfs = builder.GetFile()
         delete_value = dfs.FileInfo.DeleteValueFloat
