@@ -9,6 +9,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from pydhi.helpers import safe_length
 from pydhi.dutil import Dataset
+from pydhi.eum import TimeStep
 
 
 class dfs0():
@@ -100,6 +101,8 @@ class dfs0():
 
         d, t, names = self.__read(filename)
 
+        t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+
         data = []
 
         if item_numbers is not None:
@@ -108,7 +111,7 @@ class dfs0():
                 data.append(d[:,item])
         else:
             for item in range(d.shape[1]):
-                data.append(d[:,item])
+                data.append(d[:, item])
 
         return Dataset(data, t, names)
 
@@ -156,10 +159,6 @@ class dfs0():
 
         # COPY OVER THE DATA
         for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
-
-            #itemData = dfs.ReadItemTimeStep(1, it)
-            #newTime = DfsExtensions.TimeInSeconds(itemData, dfs.FileInfo.TimeAxis)
-            #tit = System.Double(newTime)
             tit = System.Double(t[it])
             for ii in range(len(dfs.ItemInfo)):
                 d = Array[System.Single](np.array([[data[it, ii]]]))
@@ -168,7 +167,8 @@ class dfs0():
         dfs.Close()
 
     def create(self, filename, data,
-               start_time=None, timeseries_unit=1400, dt=3600, datetimes=None,
+               start_time=None, timeseries_unit=TimeStep.SECOND,
+               dt=1, datetimes=None,
                variable_type=None, unit=None, names=None,
                title=None, data_value_type=None):
         """create creates a dfs0 file.
@@ -180,10 +180,10 @@ class dfs0():
         start_time:
             start date of type datetime.
         timeseries_unit:
-            second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404, default=1400
+            Timestep default Timestep.SECOND
         dt:
-            the time step (double based on the timeseries_unit). Therefore dt of 5.5 with timeseries_unit of minutes
-            means 5 mins and 30 seconds.
+            the time step. Therefore dt of 5.5 with timeseries_unit of minutes
+            means 5 mins and 30 seconds. default to 1
         variable_type:
             Array integers corresponding to a variable types (ie. Water Level). Use dfsutil type_list
             to figure out the integer corresponding to the variable.
@@ -195,8 +195,7 @@ class dfs0():
         title:
             title (string)
         data_value_type:
-            Instantaneous = 0 (default), Accumulated = 1, StepAccumulated = 3, MeanStepBackward = 3,
-            MeanStepForward = 4.
+            DataValueType default DataValueType.INSTANTANEOUS
 
         """
         if title is None:
@@ -239,8 +238,8 @@ class dfs0():
             start_time = datetimes[0]
             equidistant = False
 
-        if not isinstance(timeseries_unit, int):
-            raise Warning("timeseries_unit must be an integer. See dfsutil options for help ")
+        #if not isinstance(timeseries_unit, int):
+        #    raise Warning("timeseries_unit must be an integer. See dfsutil options for help ")
 
         system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
                                             start_time.hour, start_time.minute, start_time.second)

@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+from datetime import datetime
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
@@ -253,7 +253,8 @@ class dfs3():
 
                 t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
-        time = pd.DatetimeIndex(t)
+        # time = pd.DatetimeIndex(t)
+        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item_numbers[item]].Name

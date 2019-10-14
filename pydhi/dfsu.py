@@ -1,6 +1,5 @@
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
@@ -73,7 +72,8 @@ class dfsu():
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
-        time = pd.DatetimeIndex(t)
+        #time = pd.DatetimeIndex(t)
+        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item_numbers[item] + item_offset].Name

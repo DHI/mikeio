@@ -73,7 +73,8 @@ class dfs1():
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
-        time = pd.DatetimeIndex(t)
+        # time = pd.DatetimeIndex(t)
+        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item].Name

@@ -15,15 +15,15 @@ ts = dfs.read_to_pandas(dfs0file)
 import datetime
 import numpy as np
 from pydhi import dfs0 as dfs0
-dfs0File = r"simple.dfs0"
+
 data = []
 nt = 100
 d = np.random.random([nt])
 start_time = datetime.datetime(2017, 1, 1)
-dt = 60
+dt = 60 # using default timestep_unit of second
 data.append(d)
 dfs = dfs0.dfs0()
-dfs.create(filename=dfs0File, data=data,
+dfs.create(filename='simple.dfs0', data=data,
            start_time=start_time,dt=dt )
 
 ```
@@ -31,7 +31,6 @@ dfs.create(filename=dfs0File, data=data,
 
 ## Create non-equidistant dfs0
 ```python
-dfs0file = r'random.dfs0'
 d1 = np.random.random([1000])
 d2 = np.random.random([1000])
 data = []
@@ -46,7 +45,7 @@ unit = [1000, 1000]
 data_value_type = [0, 1]
 dt = 5
 dfs = dfs0.dfs0()
-dfs.create(filename=dfs0file, data=data,
+dfs.create(filename='random.dfs0', data=data,
         	start_time=start_time,
             timeseries_unit=timeseries_unit, dt=dt,
             names=names, title=title,
@@ -57,7 +56,6 @@ dfs.create(filename=dfs0file, data=data,
 
 ## Create non equidistant dfs0
 ```python
-dfs0file = r'neq.dfs0'
 d1 = np.random.random([1000])
 d2 = np.random.random([1000])
 data = []
@@ -74,7 +72,7 @@ unit = [1000, 1000]
 data_value_type = [0, 1]
 
 dfs = dfs0.dfs0()
-dfs.create(filename=dfs0file, data=data,
+dfs.create(filename='neq.dfs0', data=data,
 			datetimes=time_vector,
 			names=names, title=title,
 			variable_type=variable_type, unit=unit,
