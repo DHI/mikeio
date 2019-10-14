@@ -7,14 +7,15 @@ from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType, DfsBuilder
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
-from pydhi.dutil import to_numpy
 
-from pydhi.helpers import safe_length
+from .dutil import to_numpy
+from .helpers import safe_length
+
 
 def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
-    """ Function: take average (or other statistics) over axis in dfs2 and output to dfs1 
+    """ Function: take average (or other statistics) over axis in dfs2 and output to dfs1
 
-    Usage: 
+    Usage:
         dfs2todfs1(dfs2file, dfs1file)
         dfs2todfs1(dfs2file, dfs1file, axis)
         dfs2todfs1(dfs2file, dfs1file, axis, func=np.nanmean)
@@ -29,7 +30,7 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
     n_time_steps = fileInfo.TimeAxis.NumberOfTimeSteps
     if n_time_steps == 0:
         raise Warning("Static dfs2 files (with no time steps) are not supported.")
-        
+
     # Create an empty dfs1 file object
     factory = DfsFactory()
     builder = Dfs1Builder.Create(fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion)
@@ -66,7 +67,7 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
             break
         builder.AddStaticItem(static_item)
 
-    # dynamic items 
+    # dynamic items
     n_items = safe_length(dfs_in.ItemInfo)
     for item in range(n_items):
         ii = dfs_in.ItemInfo[item]
@@ -78,7 +79,7 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
         print('cannot create dfs1 file: ', dfs1file)
 
     dfs_out = builder.GetFile()
-    
+
     # read-write data
     deleteValue = fileInfo.DeleteValueFloat
     for it in range(n_time_steps):
@@ -103,7 +104,7 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
 def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
     """ Function: take average (or other statistics) over dfs and output dfs0
 
-    Usage: 
+    Usage:
         dfstodfs0(dfsfile, dfs0file)
         dfstodfs0(dfsfile, dfs0file, func=np.nanmean)
     """
@@ -112,11 +113,11 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
     dfs_in = DfsFileFactory.DfsGenericOpen(dfsfile)
     fileInfo = dfs_in.FileInfo
 
-    # Basic info from input file    
+    # Basic info from input file
     n_time_steps = fileInfo.TimeAxis.NumberOfTimeSteps
     if n_time_steps == 0:
         raise Warning("Static dfs files (with no time steps) are not supported.")
-        
+
     # Create an empty dfs1 file object
     factory = DfsFactory()
     builder = DfsBuilder.Create(fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion)
@@ -131,9 +132,9 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
     builder.DeleteValueInt = fileInfo.DeleteValueInt
     builder.DeleteValueUnsignedInt = fileInfo.DeleteValueUnsignedInt
 
-    # dynamic items 
+    # dynamic items
     n_items = safe_length(dfs_in.ItemInfo)
-    for item in range(n_items):    
+    for item in range(n_items):
         ii = dfs_in.ItemInfo[item]
         itemj = builder.CreateDynamicItemBuilder()
         itemj.Set(ii.Name, ii.Quantity, DfsSimpleType.Float)
@@ -148,7 +149,7 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
         print('cannot create dfs0 file: ', dfs0file)
 
     dfs_out = builder.GetFile()
-    
+
     # read-write data
     deleteValue = fileInfo.DeleteValueFloat
     for it in range(n_time_steps):
@@ -157,10 +158,10 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
 
             d = to_numpy(itemdata.Data)
             d[d == deleteValue] = np.nan
-            
+
             d0   = func(d)
             d    = np.zeros(1)
-            d[0] = d0 
+            d[0] = d0
             d[np.isnan(d)] = deleteValue
 
             darray = Array[System.Single](d)

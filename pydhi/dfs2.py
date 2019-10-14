@@ -1,14 +1,13 @@
 import numpy as np
-from datetime import datetime, timedelta
-import clr
+from datetime import datetime
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
-from pydhi.dutil import to_numpy, Dataset
 
-from pydhi.helpers import safe_length
+from .dutil import to_numpy, Dataset
+from .helpers import safe_length
 
 
 class dfs2():

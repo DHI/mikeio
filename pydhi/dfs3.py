@@ -3,8 +3,8 @@ from datetime import datetime
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
-from pydhi.helpers import safe_length
-from pydhi.dutil import to_numpy, Dataset
+from .helpers import safe_length
+from .dutil import to_numpy, Dataset
 
 class dfs3():
 

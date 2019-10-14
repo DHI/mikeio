@@ -7,9 +7,9 @@ from DHI.Generic.MikeZero import eumQuantity, eumItem
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType, StatType
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
-from pydhi.helpers import safe_length
-from pydhi.dutil import Dataset
-from pydhi.eum import TimeStep
+from .helpers import safe_length
+from .dutil import Dataset
+from .eum import TimeStep
 
 
 class dfs0():

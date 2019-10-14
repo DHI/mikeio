@@ -1,15 +1,13 @@
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
-import clr
+from datetime import datetime
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
-from pydhi.dutil import to_numpy, Dataset
 
-from pydhi.helpers import safe_length
+from .dutil import to_numpy, Dataset
+from .helpers import safe_length
 
 
 class dfs1():
@@ -73,7 +71,6 @@ class dfs1():
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
-        # time = pd.DatetimeIndex(t)
         time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
         names = []
         for item in range(n_items):
