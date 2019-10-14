@@ -7,6 +7,7 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, 
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
 from .dutil import to_numpy, Dataset
+from .eum import TimeStep
 from .helpers import safe_length
 
 
@@ -128,11 +129,14 @@ class dfs1():
 
         dfs.Close()
 
-    def create(self, filename, data,
-               start_time = None, dt = 3600,
-               length_x = 1,
-               x0 = 0,
-               coordinate = None, timeseries_unit=1400, variable_type=None, unit=None,
+    def create(self,
+               filename,
+               data,
+               start_time=None, dt=1,
+               length_x=1, x0=0,
+               coordinate=None,
+               timeseries_unit=TimeStep.SECOND,
+               variable_type=None, unit=None,
                names=None, title=None):
         """
         Creates a dfs1 file
@@ -144,7 +148,7 @@ class dfs1():
         start_time:
             start date of type datetime.
         timeseries_unit:
-            second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
+            TimeStep default TimeStep.SECOND
         dt:
             The time step (double based on the timeseries_unit). Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds.
@@ -215,9 +219,9 @@ class dfs1():
         if not type(start_time) is datetime:
             raise Warning("start_time must be of type datetime ")
 
-        if not isinstance(timeseries_unit, int):
-            raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
-                          "day=1403, month=1405, year= 1404See dfsutil options for help ")
+        #if not isinstance(timeseries_unit, int):
+        #    raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
+        #                  "day=1403, month=1405, year= 1404See dfsutil options for help ")
 
         system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
                                             start_time.hour, start_time.minute, start_time.second)

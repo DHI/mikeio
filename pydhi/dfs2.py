@@ -7,6 +7,7 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, 
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 
 from .dutil import to_numpy, Dataset
+from .eum import TimeStep
 from .helpers import safe_length
 
 
@@ -150,13 +151,12 @@ class dfs2():
         dfs.Close()
 
     def create(self, filename, data,
-               start_time=None, dt=3600,
+               start_time=None, dt=1,
                datetimes=None,
                length_x=1, length_y=1,
                x0=0, y0=0,
-               coordinate=None, timeseries_unit=1400,
-               variable_type=None,
-               unit=None,
+               coordinate=None, timeseries_unit=TimeStep.SECOND,
+               variable_type=None, unit=None,
                names=None, title=None):
         """
         Creates a dfs2 file
@@ -168,11 +168,11 @@ class dfs2():
         start_time:
             start date of type datetime.
         timeseries_unit:
-            second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
+            TimeStep default TimeStep.SECOND
         dt:
-            The time step (double based on the timeseries_unit). Therefore dt of 5.5 with timeseries_unit of minutes
-            means 5 mins and 30 seconds.
-        datetime:
+            The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
+            means 5 mins and 30 seconds. Default 1
+        datetimes:
             list of datetimes, creates a non-equidistant calendar axis
         variable_type:
             Array integers corresponding to a variable types (ie. Water Level). Use dfsutil type_list
@@ -187,13 +187,13 @@ class dfs2():
         x0:
             Lower right position
         length_x:
-            length of each grid in the x direction (meters)
+            length of each grid in the x direction (projection units)
         length_y:
-            length of each grid in the y direction (meters)
+            length of each grid in the y direction (projection units)
         names:
             array of names (ie. array of strings). (can be blank)
         title:
-            title of the dfs2 file (can be blank)
+            title of the dfs2 file. Default is blank.
         """
 
         if title is None:
@@ -252,9 +252,9 @@ class dfs2():
             equidistant = False
             start_time = datetimes[0]
 
-        if not isinstance(timeseries_unit, int):
-            raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
-                          "day=1403, month=1405, year= 1404See dfsutil options for help ")
+        #if not isinstance(timeseries_unit, int):
+        #    raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
+        #                  "day=1403, month=1405, year= 1404See dfsutil options for help ")
 
         system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
                                             start_time.hour, start_time.minute, start_time.second)
