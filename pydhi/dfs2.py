@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from datetime import datetime, timedelta
 import clr
 import System
@@ -7,7 +6,7 @@ from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
-from pydhi.dutil import to_numpy
+from pydhi.dutil import to_numpy, Dataset
 
 from pydhi.helpers import safe_length
 
@@ -87,14 +86,15 @@ class dfs2():
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
-        time = pd.DatetimeIndex(t)
+        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        # time = pd.DatetimeIndex(t)
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item].Name
             names.append(name)
 
         dfs.Close()
-        return (data_list, time, names)
+        return Dataset(data_list, time, names)
 
     def write(self, filename, data):
         """

@@ -2,6 +2,8 @@ import os
 import numpy as np
 import datetime
 from pydhi import dfs0 as dfs0
+from pydhi.eum import TimeStep
+from datetime import timedelta
 
 
 def test_simple_create():
@@ -19,6 +21,58 @@ def test_simple_create():
     dfs.create(filename=dfs0File, data=data)
 
     assert True
+    os.remove(dfs0File)
+
+
+def test_multiple_create():
+
+    dfs0File = r"zeros_ones.dfs0"
+
+    data = []
+
+    nt = 10
+    d1 = np.zeros(nt)
+    data.append(d1)
+    d2 = np.ones(nt)
+    data.append(d2)
+
+    names = ["Zeros", "Ones"]
+
+    dfs = dfs0.dfs0()
+
+    dfs.create(filename=dfs0File, data=data, names=names, title="Zeros and ones")
+
+    assert True
+    os.remove(dfs0File)
+
+
+def test_create_timestep_7days():
+
+    dfs0File = r"zeros_ones.dfs0"
+
+    data = []
+
+    nt = 10
+    d1 = np.zeros(nt)
+    data.append(d1)
+    d2 = np.ones(nt)
+    data.append(d2)
+
+    names = ["Zeros", "Ones"]
+
+    dfs = dfs0.dfs0()
+
+    dfs.create(filename=dfs0File, data=data, names=names, title="Zeros and ones",
+               timeseries_unit=TimeStep.DAY, dt=7)
+
+    assert True
+
+    res = dfs.read(dfs0File)
+
+    dt = res.time[1] - res.time[0]
+
+    assert dt == timedelta(days=7)
+
     os.remove(dfs0File)
 
 
@@ -77,6 +131,38 @@ def test_create_non_equidistant_calendar():
     assert True
     os.remove(dfs0file)
 
+
+def test_read_dfs0_to_pandas_single_item():
+
+    dfs0file = r'tests/testdata/random.dfs0'
+
+    dfs = dfs0.dfs0()
+    df = dfs.read_to_pandas(dfs0file, item_numbers=[1])
+
+    assert df.shape[1] == 1
+
+
+def test_read_dfs0_single_item():
+
+    dfs0file = r'tests/testdata/random.dfs0'
+
+    dfs = dfs0.dfs0()
+    (data, t, names) = dfs.read(dfs0file, item_numbers=[1])
+
+    assert len(data) == 1
+
+
+def test_read_dfs0_single_item_named_access():
+
+    dfs0file = r'tests/testdata/random.dfs0'
+
+    dfs = dfs0.dfs0()
+    res = dfs.read(dfs0file, item_numbers=[1])
+    data = res.data
+
+    assert len(data) == 1
+
+
 def test_read_dfs0_to_pandas():
 
     dfs0file = r'tests/testdata/random.dfs0'
@@ -86,10 +172,11 @@ def test_read_dfs0_to_pandas():
 
     assert np.isnan(pd[pd.columns[0]][2])
 
+
 def test_read_dfs0_to_matrix():
     dfs0file = r'tests/testdata/random.dfs0'
 
     dfs = dfs0.dfs0()
-    mat = dfs.read(filename=dfs0file, indices=[0])[0]
+    (data, t, names) = dfs.read(filename=dfs0file)
 
-    assert np.isnan(mat[2, 0])
+    assert len(data) == 2

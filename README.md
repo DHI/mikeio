@@ -5,85 +5,62 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Readin
 
 ## Reading dfs0 file into Pandas DataFrame
 ```python
-from pydhi import dfs0 as dfs0
-dfs = dfs0.dfs0()
-ts = dfs.read_to_pandas(dfs0file)
+from pydhi.dfs0 import dfs0
+dfs = dfs0()
+ts = dfs.read_to_pandas('simple.dfs0')
 ```
 
 ## Create simple timeseries
 ```python
-dfs0File = r"simple.dfs0"
+from datetime import datetime, timedelta
+import numpy as np
+from pydhi.dfs0 import dfs0
+
 data = []
 nt = 100
 d = np.random.random([nt])
-start_time = datetime.datetime(2017, 1, 1)
-dt = 60
+start_time = datetime(2017, 1, 1)
+dt = 60 # using default timestep_unit of second
 data.append(d)
-dfs = dfs0.dfs0()
-dfs.create(dfs0file=dfs0File, data=data,
+dfs = dfs0()
+dfs.create(filename='simple.dfs0', data=data,
            start_time=start_time,dt=dt )
 
 ```
 
 
-## Create non-equidistant dfs0
+## Create equidistant dfs0 with daily timestep
 ```python
-dfs0file = r'random.dfs0'
+from pydhi.eum import TimeStep
 d1 = np.random.random([1000])
 d2 = np.random.random([1000])
 data = []
 data.append(d1)
 data.append(d2)
-start_time = datetime.datetime(2017, 1, 1)
-timeseries_unit = 1402
+start_time = datetime(2017, 1, 1)
+timeseries_unit = TimeStep.DAY
 title = 'Hello Test'
 names = ['VarFun01', 'NotFun']
-variable_type = [100000, 100000]
-unit = [1000, 1000]
-data_value_type = [0, 1]
 dt = 5
 dfs = dfs0.dfs0()
-dfs.create(dfs0file=dfs0file, data=data,
-        	start_time=start_time,
+dfs.create(filename='random.dfs0', data=data,
+            start_time=start_time,
             timeseries_unit=timeseries_unit, dt=dt,
             names=names, title=title,
             variable_type=variable_type,
             unit=unit, data_value_type=data_value_type)
 
 ```
+For more examples see this [notebook](notebooks/01%20-%20Timeseries.ipynb)
 
-## Create non equidistant dfs0
-```python
-dfs0file = r'neq.dfs0'
-d1 = np.random.random([1000])
-d2 = np.random.random([1000])
-data = []
-data.append(d1)
-data.append(d2)
-start_time = datetime.datetime(2017, 1, 1)
-time_vector = []
-for i in range(1000):
-	time_vector.append(start_time + datetime.timedelta(hours=i*0.1))
-title = 'Hello Test'
-names = ['VarFun01', 'NotFun']
-variable_type = [100000, 100000]
-unit = [1000, 1000]
-data_value_type = [0, 1]
-
-dfs = dfs0.dfs0()
-dfs.create(dfs0file=dfs0file, data=data,
-			datetimes=time_vector,
-			names=names, title=title,
-			variable_type=variable_type, unit=unit,
-			data_value_type=data_value_type)
-```
 
 ## Read dfs2 data
 ```python
-dfs2File = r"C:\test\random.dfs2"
-dfs = dfs2.dfs2()
-data = dfs.read(dfs2File, [0])[0]
-data = data[0]
+from pydhi.dfs2 import dfs2
+dfs2File = r"20150101-DMI-L4UHfnd-NSEABALTIC-v01-fv01-DMI_OI.dfs2"
+dfs = dfs2()
+res = dfs.read(dfs2File)
+res.names
 ```
 
 ## Create dfs2
@@ -112,19 +89,18 @@ ts = r1d.read('res1dfile.res1d', [p1])
 ## Read dfsu files
 ```python
 import matplotlib.pyplot as plt
-import pydhi
+from pydhi.dfsu import dfsu
 
-dfs = pydhi.dfsu.dfsu()
+dfs = dfsu()
 
 filename = "HD.dfsu"
-(d,t,n)= dfs.read(filename,[0])
+res = dfs.read(filename)
 
 idx = dfs.find_closest_element_index(x=608000, y=6907000)
 
-plt.plot(t,d[0][idx,:])
+# data has two dimensions time, x
+plt.plot(res.time, res.data[0][:,idx])
 ```
 ![Timeseries](images/dfsu_ts.png)
 
-# Created by Marc-Etienne Ridler (mer@dhigroup.com)
-python setup.py sdist bdist_wheel
 

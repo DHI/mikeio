@@ -1,17 +1,16 @@
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType
-from pydhi.dutil import to_numpy
+from pydhi.dutil import to_numpy, Dataset
 
 from pydhi.helpers import safe_length
 
-class dfsu():
 
+class dfsu():
 
     def read(self, filename, item_numbers=None):
         """ Function: Read a dfsu file
@@ -73,14 +72,15 @@ class dfsu():
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
-        time = pd.DatetimeIndex(t)
+        #time = pd.DatetimeIndex(t)
+        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item_numbers[item] + item_offset].Name
             names.append(name)
 
         dfs.Close()
-        return (data_list, time, names)
+        return Dataset(data_list, time, names)
 
     def write(self, filename, data):
         """
