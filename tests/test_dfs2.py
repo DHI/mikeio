@@ -147,7 +147,6 @@ def test_non_equidistant_calendar():
     os.remove(filename)
 
 
-
 def test_read():
 
     filename = r"tests/testdata/random.dfs2"
@@ -158,6 +157,17 @@ def test_read():
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
     assert data.shape == (3, 100, 2) # time, y, x
+
+def test_read_named_access():
+
+    filename = r"tests/testdata/random.dfs2"
+    dfs = dfs2.dfs2()
+
+    res = dfs.read(filename, [0])
+
+    assert res.data is not None
+    assert res.time is not None
+    assert res.names is not None
 
 
 def test_write():

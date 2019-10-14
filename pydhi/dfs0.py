@@ -3,11 +3,12 @@ import numpy as np
 from datetime import datetime
 import System
 from System import Array
-from DHI.Generic.MikeZero import eumQuantity
+from DHI.Generic.MikeZero import eumQuantity, eumItem
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType, StatType
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from pydhi.helpers import safe_length
+from pydhi.dutil import Dataset
 
 
 class dfs0():
@@ -109,7 +110,7 @@ class dfs0():
             for item in range(d.shape[1]):
                 data.append(d[:,item])
 
-        return data, t, names
+        return Dataset(data, t, names)
 
     def write(self, filename, data):
         """Writes data to the pre-created dfs0 file.
@@ -221,12 +222,12 @@ class dfs0():
                 "names must be an array of strings with the same number of elements as data columns")
 
         if len(variable_type) != n_items:
-            raise Warning("type if specified must be an array of integers (enuType) with the same number of "
+            raise Warning("type if specified must be an array of integers (eumType) with the same number of "
                           "elements as data columns")
 
         if len(unit) != n_items:
             raise Warning(
-                "unit if specified must be an array of integers (enuType) with the same number of "
+                "unit if specified must be an array of integers (eumType) with the same number of "
                 "elements as data columns")
 
         if datetimes is None:

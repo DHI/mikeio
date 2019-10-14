@@ -7,7 +7,7 @@ from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
-from pydhi.dutil import to_numpy
+from pydhi.dutil import to_numpy, Dataset
 
 from pydhi.helpers import safe_length
 
@@ -94,7 +94,7 @@ class dfs2():
             names.append(name)
 
         dfs.Close()
-        return (data_list, time, names)
+        return Dataset(data_list, time, names)
 
     def write(self, filename, data):
         """

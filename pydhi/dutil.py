@@ -2,6 +2,9 @@ import numpy as np
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
 
+from collections import namedtuple
+
+
 def to_numpy(src):
 
     src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
@@ -14,3 +17,6 @@ def to_numpy(src):
         if src_hndl.IsAllocated: src_hndl.Free()
 
     return d
+
+
+Dataset = namedtuple("Dataset", ["data", "time", "names"])

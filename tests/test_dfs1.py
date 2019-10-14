@@ -57,8 +57,7 @@ def test_create_single_item():
                names=names, title=title)
 
     assert True
-#    os.remove(filename)
-
+    os.remove(filename)
 
 
 def test_read():
@@ -69,6 +68,18 @@ def test_read():
     data = dfs.read(filename, [0])[0]
     data = data[0]
     assert data.shape == (100, 3) # time, x
+
+def test_read_names_access():
+
+    filename = r"tests/testdata/random.dfs1"
+    dfs = dfs1.dfs1()
+
+    res = dfs.read(filename, [0])
+    data = res.data
+    item = data[0]
+    time = res.time
+    assert item.shape == (100, 3) # time, x
+    assert len(time) == 100
 
 
 def test_write():

@@ -4,7 +4,7 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, 
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from pydhi.helpers import safe_length
-from pydhi.dutil import to_numpy
+from pydhi.dutil import to_numpy, Dataset
 
 class dfs3():
 
@@ -261,7 +261,7 @@ class dfs3():
 
         dfs.Close()
 
-        return data_list, time, names
+        return Dataset(data_list, time, names)
 
     def create_equidistant_calendar(self, dfs3file, data, start_time, timeseries_unit, dt, variable_type, unit, coordinate,
                                     x0, y0, length_x, length_y, names, title=None):

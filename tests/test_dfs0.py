@@ -41,7 +41,7 @@ def test_multiple_create():
     dfs.create(filename=dfs0File, data=data, names=names, title="Zeros and ones")
 
     assert True
-    #os.remove(dfs0File)
+    os.remove(dfs0File)
 
 
 def test_create_equidistant_calendar():
@@ -109,12 +109,23 @@ def test_read_dfs0_to_pandas_single_item():
 
     assert df.shape[1] == 1
 
+
 def test_read_dfs0_single_item():
 
     dfs0file = r'tests/testdata/random.dfs0'
 
     dfs = dfs0.dfs0()
     (data, t, names) = dfs.read(dfs0file, item_numbers=[1])
+
+    assert len(data) == 1
+
+def test_read_dfs0_single_item_named_access():
+
+    dfs0file = r'tests/testdata/random.dfs0'
+
+    dfs = dfs0.dfs0()
+    res = dfs.read(dfs0file, item_numbers=[1])
+    data = res.data
 
     assert len(data) == 1
 
