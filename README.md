@@ -1,6 +1,15 @@
 # pydhi
 Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Reading Res1D data.
 
+# Requirements
+
+* Python x64 >=3.6
+* [Mike SDK](https://www.mikepoweredbydhi.com/download/mike-2019/mike-sdk)
+* Python packages:
+  * Pythonnet
+  * Numpy
+  * Pandas
+
 # Examples
 
 ## Reading dfs0 file into Pandas DataFrame
@@ -16,20 +25,23 @@ from datetime import datetime, timedelta
 import numpy as np
 from pydhi.dfs0 import dfs0
 
+# create a list containing data for each item
 data = []
-nt = 100
-d = np.random.random([nt])
-start_time = datetime(2017, 1, 1)
-dt = 60 # using default timestep_unit of second
+
+# Some random values for first (and only) item
+d = np.random.random([100])
 data.append(d)
+
 dfs = dfs0()
-dfs.create(filename='simple.dfs0', data=data,
-           start_time=start_time,dt=dt )
+dfs.create(filename='simple.dfs0',
+           data=data,
+           start_time=datetime(2017, 1, 1),
+           dt=60)
 
 ```
 
 
-## Create equidistant dfs0 with daily timestep
+## Create equidistant dfs0 with weekly timestep
 ```python
 from pydhi.eum import TimeStep
 d1 = np.random.random([1000])
@@ -37,18 +49,15 @@ d2 = np.random.random([1000])
 data = []
 data.append(d1)
 data.append(d2)
-start_time = datetime(2017, 1, 1)
-timeseries_unit = TimeStep.DAY
-title = 'Hello Test'
-names = ['VarFun01', 'NotFun']
-dt = 5
+
 dfs = dfs0.dfs0()
-dfs.create(filename='random.dfs0', data=data,
-            start_time=start_time,
-            timeseries_unit=timeseries_unit, dt=dt,
-            names=names, title=title,
-            variable_type=variable_type,
-            unit=unit, data_value_type=data_value_type)
+dfs.create(filename='random.dfs0',
+           data=data,
+           start_time=datetime(2017, 1, 1),
+           timeseries_unit=TimeStep.DAY,
+           dt=7,
+           names=['Random1', 'Random2'],
+           title='Hello Test')
 
 ```
 For more examples see this [notebook](notebooks/01%20-%20Timeseries.ipynb)
