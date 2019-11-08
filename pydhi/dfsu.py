@@ -62,7 +62,7 @@ class dfsu():
 
         t = []
         startTime = dfs.StartDateTime
-        #for it in range(nt):
+
         for i in range(len(time_steps)):
             it = time_steps[i]
             for item in range(n_items):
@@ -78,9 +78,8 @@ class dfsu():
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
-        #time = pd.DatetimeIndex(t)
         time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
-        print(time)
+
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item_numbers[item] + item_offset].Name
