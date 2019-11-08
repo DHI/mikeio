@@ -12,7 +12,7 @@ from .helpers import safe_length
 
 class dfsu():
 
-    def read(self, filename, item_numbers=None):
+    def read(self, filename, item_numbers=None, time_steps=None):
         """ Function: Read a dfsu file
 
         usage:
@@ -39,13 +39,17 @@ class dfsu():
             item_offset = 1
             n_items = n_items - 1
 
+        nt = dfs.NumberOfTimeSteps
+
         if item_numbers is None:
             item_numbers = list(range(n_items))
         else:
             n_items = len(item_numbers)
 
+        if time_steps is None:
+            time_steps = list(range(nt))
+
         xNum = dfs.NumberOfElements
-        nt = dfs.NumberOfTimeSteps
 
         deleteValue = dfs.DeleteValueFloat
 
@@ -53,12 +57,14 @@ class dfsu():
 
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=(nt, xNum), dtype=float)
+            data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
             data_list.append(data)
 
         t = []
         startTime = dfs.StartDateTime
-        for it in range(nt):
+        #for it in range(nt):
+        for i in range(len(time_steps)):
+            it = time_steps[i]
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + item_offset + 1, it)
@@ -68,12 +74,13 @@ class dfsu():
                 d = to_numpy(src)
 
                 d[d == deleteValue] = np.nan
-                data_list[item][it, :] = d
+                data_list[item][i, :] = d
 
             t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
 
         #time = pd.DatetimeIndex(t)
         time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        print(time)
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item_numbers[item] + item_offset].Name
