@@ -352,7 +352,7 @@ class dfs3():
 
         # Create an empty dfs3 file object
         factory = DfsFactory()
-        builder = Dfs3Builder.Create(title, 'pydhi', 0)
+        builder = Dfs3Builder.Create(title, 'mikeio', 0)
 
         # Set up the header
         builder.SetDataType(1)

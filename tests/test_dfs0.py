@@ -1,8 +1,8 @@
 import os
 import numpy as np
 import datetime
-from pydhi import dfs0 as dfs0
-from pydhi.eum import TimeStep
+from mikeio import dfs0 as dfs0
+from mikeio.eum import TimeStep
 from datetime import timedelta
 
 

@@ -1,5 +1,5 @@
 import pytest
-from pydhi.dfsu import dfsu
+from mikeio.dfsu import dfsu
 
 
 def test_read_all_items_returns_all_items_and_names():

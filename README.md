@@ -1,4 +1,4 @@
-# pydhi
+# mikeio
 Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Reading Res1D data.
 
 # Requirements
@@ -14,7 +14,7 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Readin
 
 ## Reading dfs0 file into Pandas DataFrame
 ```python
-from pydhi.dfs0 import dfs0
+from mikeio.dfs0 import dfs0
 dfs = dfs0()
 ts = dfs.read_to_pandas('simple.dfs0')
 ```
@@ -23,7 +23,7 @@ ts = dfs.read_to_pandas('simple.dfs0')
 ```python
 from datetime import datetime, timedelta
 import numpy as np
-from pydhi.dfs0 import dfs0
+from mikeio.dfs0 import dfs0
 
 # create a list containing data for each item
 data = []
@@ -43,7 +43,7 @@ dfs.create(filename='simple.dfs0',
 
 ## Create equidistant dfs0 with weekly timestep
 ```python
-from pydhi.eum import TimeStep
+from mikeio.eum import TimeStep
 d1 = np.random.random([1000])
 d2 = np.random.random([1000])
 data = []
@@ -65,7 +65,7 @@ For more examples see this [notebook](notebooks/01%20-%20Timeseries.ipynb)
 
 ## Read dfs2 data
 ```python
-from pydhi.dfs2 import dfs2
+from mikeio.dfs2 import dfs2
 dfs2File = r"20150101-DMI-L4UHfnd-NSEABALTIC-v01-fv01-DMI_OI.dfs2"
 dfs = dfs2()
 res = dfs.read(dfs2File)
@@ -77,7 +77,7 @@ For a complete example of conversion from netcdf to dfs2 see this [notebook](not
 
 ## DFS Utilities to query variable type, time series types (useful when creating a new dfs file)
 ```python
->>> from pydhi.dfs_util import type_list, unit_list
+>>> from mikeio.dfs_util import type_list, unit_list
 >>> type_list('Water level')
 {100000: 'Water Level', 100307: 'Water level change'}
 
@@ -98,7 +98,7 @@ ts = r1d.read('res1dfile.res1d', [p1])
 ## Read dfsu files
 ```python
 import matplotlib.pyplot as plt
-from pydhi.dfsu import dfsu
+from mikeio.dfsu import dfsu
 
 dfs = dfsu()
 

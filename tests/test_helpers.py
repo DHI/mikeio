@@ -1,4 +1,4 @@
-from pydhi.helpers import safe_length
+from mikeio.helpers import safe_length
 
 import clr
 
