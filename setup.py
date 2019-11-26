@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="py-dhi-dfs",
+    name="mikeio",
     version="0.1.0",
     install_requires=['pythonnet', 'numpy', 'datetime', 'pandas'],
     author="Marc-Etienne Ridler",

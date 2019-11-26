@@ -2,7 +2,7 @@ import os
 import numpy as np
 import datetime
 
-from pydhi import dfs2 as dfs2
+from mikeio import dfs2 as dfs2
 
 
 def test_simple_create():

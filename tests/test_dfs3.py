@@ -1,4 +1,4 @@
-from pydhi import dfs3
+from mikeio import dfs3
 
 
 # TODO Rewrite dfs3 to return data in (t, z, y, x) order

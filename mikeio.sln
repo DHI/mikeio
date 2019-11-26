@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "pydhi", "pydhi.pyproj", "{500C5C07-75BD-4D65-9AEA-FA902CE6BFB5}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "mikeio", "mikeio.pyproj", "{500C5C07-75BD-4D65-9AEA-FA902CE6BFB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

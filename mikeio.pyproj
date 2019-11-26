@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{500c5c07-75bd-4d65-9aea-fa902ce6bfb5}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>pydhi\__init__.py</StartupFile>
+    <StartupFile>mikeio\__init__.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -20,18 +20,18 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="pydhi\dfs0.py" />
-    <Compile Include="pydhi\dfs2.py" />
-    <Compile Include="pydhi\dfs3.py" />
-    <Compile Include="pydhi\dfs_util.py" />
-    <Compile Include="pydhi\res1d.py" />
-    <Compile Include="pydhi\__init__.py" />
-    <Compile Include="pydhi_test\test_dfs0.py" />
-    <Compile Include="pydhi_test\test_dfs2.py" />
+    <Compile Include="mikeio\dfs0.py" />
+    <Compile Include="mikeio\dfs2.py" />
+    <Compile Include="mikeio\dfs3.py" />
+    <Compile Include="mikeio\dfs_util.py" />
+    <Compile Include="mikeio\res1d.py" />
+    <Compile Include="mikeio\__init__.py" />
+    <Compile Include="mikeio_test\test_dfs0.py" />
+    <Compile Include="mikeio_test\test_dfs2.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="pydhi" />
-    <Folder Include="pydhi_test" />
+    <Folder Include="mikeio" />
+    <Folder Include="mikeio_test" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.7" />

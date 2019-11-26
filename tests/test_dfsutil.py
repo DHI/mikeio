@@ -1,4 +1,4 @@
-from pydhi.dfs_util import type_list, unit_list
+from mikeio.dfs_util import type_list, unit_list
 
 
 def test_type_list_finds_some_types():
