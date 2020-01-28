@@ -19,4 +19,16 @@ def to_numpy(src):
     return d
 
 
-Dataset = namedtuple("Dataset", ["data", "time", "names"])
+#Dataset = namedtuple("Dataset", ["data", "time", "names"])
+class Dataset(namedtuple("Dataset", ["data", "time", "names"])):
+
+    def __repr__(self):
+        n_items = len(self.names)
+
+        out = []
+        out.append("DataSet(data, time, names)")
+        out.append(f"Number of items: {n_items}")
+        out.append(f"Shape: {self.data[0].shape}")
+        out.append(f"{self.time[0]} - {self.time[-1]}")
+
+        return str.join("\n", out)
