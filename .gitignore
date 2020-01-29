@@ -5,3 +5,9 @@
 .ipynb_checkpoints
 .coverage
 .vscode
+
+# Python virtual environment folder
+\env
+
+# PyCharm project folder
+.idea/
