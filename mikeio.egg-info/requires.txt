@@ -1,0 +1,4 @@
+pythonnet
+numpy
+datetime
+pandas
