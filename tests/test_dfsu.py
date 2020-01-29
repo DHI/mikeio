@@ -76,6 +76,12 @@ def test_read_single_time_step_outside_bounds_fails():
         dfs.read(filename, item_numbers=[0, 3], time_steps=[100])
 
 
+def test_get_number_of_timesteps():
+    filename = os.path.join('tests', 'testdata', 'HD2D.dfsu')
+    dfs = dfsu()
+
+    (data, t, names) = dfs.read(filename)
+    assert dfs.get_number_of_time_steps() == 9
 
 
 
