@@ -1,7 +1,13 @@
 \__pycache__
-\py_dhi_dfs.egg-info
+\mikeio.egg-info
 \build
 
 .ipynb_checkpoints
 .coverage
 .vscode
+
+# Python virtual environment folder
+\env
+
+# PyCharm project folder
+.idea/
