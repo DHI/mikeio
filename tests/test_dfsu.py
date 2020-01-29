@@ -53,6 +53,7 @@ def test_read_all_time_steps():
     assert len(t) == 9
     assert data[0].shape[0] == 9
 
+
 def test_read_single_time_step():
 
     filename = r"tests/testdata/HD2D.dfsu"
@@ -71,7 +72,7 @@ def test_read_single_time_step_outside_bounds_fails():
 
     with pytest.raises(Exception):
 
-        (data, t, names) = dfs.read(filename, item_numbers=[0,3 ],
+        (data, t, names) = dfs.read(filename, item_numbers=[0, 3],
                                     time_steps=[100])
 
 
