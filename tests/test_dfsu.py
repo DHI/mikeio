@@ -72,8 +72,7 @@ def test_read_single_time_step_outside_bounds_fails():
 
     with pytest.raises(Exception):
 
-        (data, t, names) = dfs.read(filename, item_numbers=[0, 3],
-                                    time_steps=[100])
+        dfs.read(filename, item_numbers=[0, 3], time_steps=[100])
 
 
 
