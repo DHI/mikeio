@@ -80,8 +80,5 @@ def test_get_number_of_timesteps():
     filename = os.path.join('tests', 'testdata', 'HD2D.dfsu')
     dfs = dfsu()
 
-    (data, t, names) = dfs.read(filename)
+    dfs.read(filename)
     assert dfs.get_number_of_time_steps() == 9
-
-
-
