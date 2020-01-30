@@ -1,13 +1,18 @@
 import numpy as np
 from datetime import datetime
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
+from DHI.Generic.MikeZero.DFS import (
+    DfsFileFactory,
+    DfsFactory,
+    DfsSimpleType,
+    DataValueType,
+)
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
 from .dutil import to_numpy, Dataset
 
-class dfs3():
 
+class dfs3:
     def __calculate_index(self, nx, ny, nz, x, y, z):
         """ Calculates the position in the dfs3 data array based on the
         number of x,y,z layers (nx,ny,nz) at the specified x,y,z position.
@@ -15,13 +20,13 @@ class dfs3():
         Error checking is done here to see if the x,y,z coordinates are out of range.
         """
         if x >= nx:
-            raise Warning('x coordinate is off the grid: ', x)
+            raise Warning("x coordinate is off the grid: ", x)
         if y >= ny:
-            raise Warning('y coordinate is off the grid: ', y)
+            raise Warning("y coordinate is off the grid: ", y)
         if z >= nz:
-            raise Warning('z coordinate is off the grid: ', z)
+            raise Warning("z coordinate is off the grid: ", z)
 
-        return y*nx + x + z*nx*ny
+        return y * nx + x + z * nx * ny
 
     def grid_coordinates(self, dfs3file):
         """ Function: Returns the Grid information
@@ -59,7 +64,15 @@ class dfs3():
 
         return x0, y0, dx, dy, xNum, yNum, zNum, nt
 
-    def read_slice(self, dfs3file, item_numbers, lower_left_xy, upper_right_xy, layers=None, conservative=True):
+    def read_slice(
+        self,
+        dfs3file,
+        item_numbers,
+        lower_left_xy,
+        upper_right_xy,
+        layers=None,
+        conservative=True,
+    ):
         """ Function: Read data from a dfs3 file within the locations chosen
 
 
@@ -104,7 +117,7 @@ class dfs3():
         yNum = axis.YCount
         xNum = axis.XCount
 
-        top_left_y = y0 + (yNum + 1)*dy
+        top_left_y = y0 + (yNum + 1) * dy
 
         dfs.Close()
 
@@ -145,8 +158,12 @@ class dfs3():
             upper_right_x_index = xNum - 1
 
         for i in range(len(data[0])):
-            data[0][i] = data[0][i][upper_right_y_index:lower_left_y_index,
-                                    lower_left_x_index:upper_right_x_index, :, :]
+            data[0][i] = data[0][i][
+                upper_right_y_index:lower_left_y_index,
+                lower_left_x_index:upper_right_x_index,
+                :,
+                :,
+            ]
 
         return data
 
@@ -202,16 +219,20 @@ class dfs3():
                 for item in range(n_items):
                     if layers is None:
                         # Initialize an empty data block
-                        data = np.ndarray(shape=(yNum, xNum, zNum, nt),
-                                          dtype=float)  # .fill(deleteValue)
+                        data = np.ndarray(
+                            shape=(yNum, xNum, zNum, nt), dtype=float
+                        )  # .fill(deleteValue)
                         data_list.append(data)
                     else:
-                        data = np.ndarray(shape=(yNum, xNum, len(layers), nt),
-                                          dtype=float)  # .fill(deleteValue)
+                        data = np.ndarray(
+                            shape=(yNum, xNum, len(layers), nt), dtype=float
+                        )  # .fill(deleteValue)
                         data_list.append(data)
 
             else:
-                raise Warning("Static dfs3 files (with no time steps) are not supported.")
+                raise Warning(
+                    "Static dfs3 files (with no time steps) are not supported."
+                )
                 quit()
         else:
             ncoordinates = len(coordinates)
@@ -241,9 +262,14 @@ class dfs3():
                         for l in range(len(layers)):
                             data_list[item][:, :, l, it] = d[:, :, layers[l]]
 
-                t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
+                t.append(
+                    startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
+                )
         else:
-            indices = [self.__calculate_index(xNum, yNum, zNum, x, y, z) for x, y, z in coordinates]
+            indices = [
+                self.__calculate_index(xNum, yNum, zNum, x, y, z)
+                for x, y, z in coordinates
+            ]
             for it in range(nt):
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -251,7 +277,9 @@ class dfs3():
                     d[d == deleteValue] = np.nan
                     data_list[item][:, it] = d
 
-                t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
+                t.append(
+                    startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
+                )
 
         # time = pd.DatetimeIndex(t)
         time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
@@ -264,8 +292,23 @@ class dfs3():
 
         return Dataset(data_list, time, names)
 
-    def create_equidistant_calendar(self, dfs3file, data, start_time, timeseries_unit, dt, variable_type, unit, coordinate,
-                                    x0, y0, length_x, length_y, names, title=None):
+    def create_equidistant_calendar(
+        self,
+        dfs3file,
+        data,
+        start_time,
+        timeseries_unit,
+        dt,
+        variable_type,
+        unit,
+        coordinate,
+        x0,
+        y0,
+        length_x,
+        length_y,
+        names,
+        title=None,
+    ):
         """
         Creates a dfs3 file
 
@@ -315,75 +358,121 @@ class dfs3():
         n_items = len(data)
 
         if not all(np.shape(d)[0] == number_y for d in data):
-            raise Warning("ERROR data matrices in the Y dimension do not all match in the data list. "
-                          "Data is list of matices [y,x,time]")
+            raise Warning(
+                "ERROR data matrices in the Y dimension do not all match in the data list. "
+                "Data is list of matices [y,x,time]"
+            )
         if not all(np.shape(d)[1] == number_x for d in data):
-            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                          "Data is list of matices [y,x,time]")
+            raise Warning(
+                "ERROR data matrices in the X dimension do not all match in the data list. "
+                "Data is list of matices [y,x,time]"
+            )
         if not all(np.shape(d)[2] == number_z for d in data):
-            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                          "Data is list of matices [y,x,time]")
+            raise Warning(
+                "ERROR data matrices in the X dimension do not all match in the data list. "
+                "Data is list of matices [y,x,time]"
+            )
         if not all(np.shape(d)[3] == n_time_steps for d in data):
-            raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                          "Data is list of matices [y,x,time]")
+            raise Warning(
+                "ERROR data matrices in the time dimension do not all match in the data list. "
+                "Data is list of matices [y,x,time]"
+            )
 
         if len(names) != n_items:
             raise Warning(
-                "names must be an array of strings with the same number as matrices in data list")
+                "names must be an array of strings with the same number as matrices in data list"
+            )
 
-        if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
-            raise Warning("type if specified must be an array of integers (enuType) with the same number of "
-                          "elements as data columns")
+        if len(variable_type) != n_items or not all(
+            isinstance(item, int) and 0 <= item < 1e15 for item in variable_type
+        ):
+            raise Warning(
+                "type if specified must be an array of integers (enuType) with the same number of "
+                "elements as data columns"
+            )
 
-        if len(unit) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
+        if len(unit) != n_items or not all(
+            isinstance(item, int) and 0 <= item < 1e15 for item in unit
+        ):
             raise Warning(
                 "unit if specified must be an array of integers (enuType) with the same number of "
-                "elements as data columns")
+                "elements as data columns"
+            )
 
         if not type(start_time) is datetime.datetime:
             raise Warning("start_time must be of type datetime ")
 
         if not isinstance(timeseries_unit, int):
-            raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
-                          "day=1403, month=1405, year= 1404See dfsutil options for help ")
+            raise Warning(
+                "timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
+                "day=1403, month=1405, year= 1404See dfsutil options for help "
+            )
 
-        system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
-                                            start_time.hour, start_time.minute, start_time.second)
+        system_start_time = System.DateTime(
+            start_time.year,
+            start_time.month,
+            start_time.day,
+            start_time.hour,
+            start_time.minute,
+            start_time.second,
+        )
 
         # Create an empty dfs3 file object
         factory = DfsFactory()
-        builder = Dfs3Builder.Create(title, 'mikeio', 0)
+        builder = Dfs3Builder.Create(title, "mikeio", 0)
 
         # Set up the header
         builder.SetDataType(1)
-        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(
-            coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+        builder.SetGeographicalProjection(
+            factory.CreateProjectionGeoOrigin(
+                coordinate[0], coordinate[1], coordinate[2], coordinate[3]
+            )
+        )
         builder.SetTemporalAxis(
-            factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt))
+            factory.CreateTemporalEqCalendarAxis(
+                timeseries_unit, system_start_time, 0, dt
+            )
+        )
         builder.SetSpatialAxis(
-            factory.CreateAxisEqD3(eumUnit.eumUmeter, number_x, x0, length_x, number_y, y0, length_y, number_z, 0, 1))
+            factory.CreateAxisEqD3(
+                eumUnit.eumUmeter,
+                number_x,
+                x0,
+                length_x,
+                number_y,
+                y0,
+                length_y,
+                number_z,
+                0,
+                1,
+            )
+        )
 
         deletevalue = builder.DeleteValueFloat
 
         for i in range(n_items):
-            builder.AddDynamicItem(names[i], eumQuantity.Create(
-                variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
+            builder.AddDynamicItem(
+                names[i],
+                eumQuantity.Create(variable_type[i], unit[i]),
+                DfsSimpleType.Float,
+                DataValueType.Instantaneous,
+            )
 
         try:
             builder.CreateFile(dfs3file)
         except IOError:
-            print('cannot create dfs3 file: ', dfs3file)
+            print("cannot create dfs3 file: ", dfs3file)
 
         dfs = builder.GetFile()
 
         for i in range(n_time_steps):
             for item in range(n_items):
-                #d = data[item][:, :, :, i]
-                #d.reshape(number_z, number_y, number_x).swapaxes(0, 2).swapaxes(0, 1)
-                #d = np.flipud(d)
-                #d[np.isnan(d)] = deletevalue
-                #darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
-                #dfs.WriteItemTimeStepNext(0, darray)
+                # d = data[item][:, :, :, i]
+                # d.reshape(number_z, number_y, number_x).swapaxes(0, 2).swapaxes(0, 1)
+                # d = np.flipud(d)
+                # d[np.isnan(d)] = deletevalue
+                # darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                # dfs.WriteItemTimeStepNext(0, darray)
 
                 # TESTED AND WORKDS if data already in the y,x,z,t format
                 d = data[item][:, :, :, i]

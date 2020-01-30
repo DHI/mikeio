@@ -13,8 +13,8 @@ def safe_length(input_list):
     """
 
     try:
-       n = input_list.Count
+        n = input_list.Count
     except:
-       n = len(input_list)
+        n = len(input_list)
 
     return n

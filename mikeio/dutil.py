@@ -14,14 +14,13 @@ def to_numpy(src):
         cbuf = bufType.from_address(src_ptr)
         d = np.frombuffer(cbuf, dtype=cbuf._type_)
     finally:
-        if src_hndl.IsAllocated: src_hndl.Free()
+        if src_hndl.IsAllocated:
+            src_hndl.Free()
 
     return d
 
 
-#Dataset = namedtuple("Dataset", ["data", "time", "names"])
 class Dataset(namedtuple("Dataset", ["data", "time", "names"])):
-
     def __repr__(self):
         n_items = len(self.names)
 

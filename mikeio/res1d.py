@@ -1,4 +1,3 @@
-
 def read(res1DFile, extractionPoints):
     import clr
     import pandas as pd
@@ -34,29 +33,46 @@ def read(res1DFile, extractionPoints):
         reachNumber = -1
         idx = -1
         for i in range(0, rd.Reaches.Count):
-            if rd.Reaches.get_Item(i).Name.lower().strip() == ep.BranchName.lower().strip():
+            if (
+                rd.Reaches.get_Item(i).Name.lower().strip()
+                == ep.BranchName.lower().strip()
+            ):
 
                 reach = rd.Reaches.get_Item(i)
                 for j in range(0, reach.GridPoints.Count):
                     # print(str(j))
-                    if abs(float(reach.GridPoints.get_Item(j).Chainage) - ep.Chainage) < tol:
-                        if 'waterlevel' in ep.VariableType.lower().strip().replace(" ", ""):
+                    if (
+                        abs(float(reach.GridPoints.get_Item(j).Chainage) - ep.Chainage)
+                        < tol
+                    ):
+                        if "waterlevel" in ep.VariableType.lower().strip().replace(
+                            " ", ""
+                        ):
                             idx = int(j / 2)
-                        elif 'discharge' in ep.VariableType.lower().strip().replace(" ", ""):
+                        elif "discharge" in ep.VariableType.lower().strip().replace(
+                            " ", ""
+                        ):
 
                             idx = int((j - 1) / 2)
-                        elif 'pollutant' in ep.VariableType.lower().strip().replace(" ", ""):
+                        elif "pollutant" in ep.VariableType.lower().strip().replace(
+                            " ", ""
+                        ):
                             idx = int((j - 1) / 2)
                         else:
-                            print('ERROR. Variable Type must be either Water Level, Discharge, or Pollutant')
+                            print(
+                                "ERROR. Variable Type must be either Water Level, Discharge, or Pollutant"
+                            )
                         reachNumber = i
                         break
                         break
                         break
 
         for i in range(0, rd.get_Quantities().Count):
-            if ep.VariableType.lower().strip().replace(" ", "") == rd.get_Quantities().get_Item(
-                    i).Description.lower().strip().replace(" ", ""):
+            if ep.VariableType.lower().strip().replace(
+                " ", ""
+            ) == rd.get_Quantities().get_Item(i).Description.lower().strip().replace(
+                " ", ""
+            ):
                 item = i
                 break
 
@@ -65,22 +81,31 @@ def read(res1DFile, extractionPoints):
         dataItemTypes.append(item)
 
     if -1 in reachNums:
-        print('ERROR. Reach Not Found')
+        print("ERROR. Reach Not Found")
         quit()
     if -1 in dataItemTypes:
-        print('ERROR. Item Not Found')
+        print("ERROR. Item Not Found")
         quit()
     if -1 in indices:
-        print('ERROR. Chainage Not Found')
+        print("ERROR. Chainage Not Found")
         quit()
 
         # Get the Data
     df = pd.DataFrame()
     for i in range(0, len(indices)):
-        d = rd.Reaches.get_Item(reachNums[i]).get_DataItems().get_Item(dataItemTypes[i]).CreateTimeSeriesData(
-            indices[i])
-        name = extractionPoints[i].VariableType + ' ' + str(extractionPoints[i].BranchName) + ' ' + str(
-            extractionPoints[i].Chainage)
+        d = (
+            rd.Reaches.get_Item(reachNums[i])
+            .get_DataItems()
+            .get_Item(dataItemTypes[i])
+            .CreateTimeSeriesData(indices[i])
+        )
+        name = (
+            extractionPoints[i].VariableType
+            + " "
+            + str(extractionPoints[i].BranchName)
+            + " "
+            + str(extractionPoints[i].Chainage)
+        )
         d = pd.Series(list(d))
         d = d.rename(name)
         df[name] = d
@@ -90,8 +115,15 @@ def read(res1DFile, extractionPoints):
     for i in range(0, rd.TimesList.Count):
         it = rd.TimesList.get_Item(i)
         t = pd.Timestamp(
-            datetime.datetime(it.get_Year(), it.get_Month(), it.get_Day(), it.get_Hour(), it.get_Minute(),
-                              it.get_Second()))
+            datetime.datetime(
+                it.get_Year(),
+                it.get_Month(),
+                it.get_Day(),
+                it.get_Hour(),
+                it.get_Minute(),
+                it.get_Second(),
+            )
+        )
         times.append(t)
 
     df.index = pd.DatetimeIndex(times)

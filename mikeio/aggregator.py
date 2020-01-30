@@ -5,7 +5,13 @@ import clr
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType, DfsBuilder
+from DHI.Generic.MikeZero.DFS import (
+    DfsFileFactory,
+    DfsFactory,
+    DfsSimpleType,
+    DataValueType,
+    DfsBuilder,
+)
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
 from .dutil import to_numpy
@@ -33,7 +39,9 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
 
     # Create an empty dfs1 file object
     factory = DfsFactory()
-    builder = Dfs1Builder.Create(fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion)
+    builder = Dfs1Builder.Create(
+        fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion
+    )
 
     # Set up the header
     builder.SetDataType(fileInfo.DataType)
@@ -47,17 +55,21 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
 
     # use x-axis (default) else y-axis
     if ax == 0:
-        builder.SetSpatialAxis(factory.CreateAxisEqD1(axis.AxisUnit, axis.XCount, axis.X0, axis.Dx))
+        builder.SetSpatialAxis(
+            factory.CreateAxisEqD1(axis.AxisUnit, axis.XCount, axis.X0, axis.Dx)
+        )
     else:
-        builder.SetSpatialAxis(factory.CreateAxisEqD1(axis.AxisUnit, axis.YCount, axis.Y0, axis.Dy))
+        builder.SetSpatialAxis(
+            factory.CreateAxisEqD1(axis.AxisUnit, axis.YCount, axis.Y0, axis.Dy)
+        )
 
     # assume no compression keys
     if fileInfo.IsFileCompressed:
         raise Warning("Compressed files not supported")
 
     # custom blocks
-    #cb = fileInfo.CustomBlocks #[0]
-    #for j in range(safe_length(cb)):
+    # cb = fileInfo.CustomBlocks #[0]
+    # for j in range(safe_length(cb)):
     #    builder.AddCustomBlocks(cb[j])
 
     # static items
@@ -71,12 +83,14 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
     n_items = safe_length(dfs_in.ItemInfo)
     for item in range(n_items):
         ii = dfs_in.ItemInfo[item]
-        builder.AddDynamicItem(ii.Name, ii.Quantity, DfsSimpleType.Float, DataValueType.Instantaneous)
+        builder.AddDynamicItem(
+            ii.Name, ii.Quantity, DfsSimpleType.Float, DataValueType.Instantaneous
+        )
 
     try:
         builder.CreateFile(dfs1file)
     except IOError:
-        print('cannot create dfs1 file: ', dfs1file)
+        print("cannot create dfs1 file: ", dfs1file)
 
     dfs_out = builder.GetFile()
 
@@ -84,7 +98,7 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
     deleteValue = fileInfo.DeleteValueFloat
     for it in range(n_time_steps):
         for item in range(n_items):
-            itemdata = dfs_in.ReadItemTimeStep(item+1, it)
+            itemdata = dfs_in.ReadItemTimeStep(item + 1, it)
 
             d = to_numpy(itemdata.Data)
             d[d == deleteValue] = np.nan
@@ -120,7 +134,9 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
 
     # Create an empty dfs1 file object
     factory = DfsFactory()
-    builder = DfsBuilder.Create(fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion)
+    builder = DfsBuilder.Create(
+        fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion
+    )
 
     # Set up the header
     builder.SetDataType(fileInfo.DataType)
@@ -140,13 +156,13 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
         itemj.Set(ii.Name, ii.Quantity, DfsSimpleType.Float)
         itemj.SetValueType(DataValueType.Instantaneous)
         itemj.SetAxis(factory.CreateAxisEqD0())
-        #itemj.SetReferenceCoordinates(0, 0, 0)
+        # itemj.SetReferenceCoordinates(0, 0, 0)
         builder.AddDynamicItem(itemj.GetDynamicItemInfo())
 
     try:
         builder.CreateFile(dfs0file)
     except IOError:
-        print('cannot create dfs0 file: ', dfs0file)
+        print("cannot create dfs0 file: ", dfs0file)
 
     dfs_out = builder.GetFile()
 
@@ -154,13 +170,13 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
     deleteValue = fileInfo.DeleteValueFloat
     for it in range(n_time_steps):
         for item in range(n_items):
-            itemdata = dfs_in.ReadItemTimeStep(item+1, it)
+            itemdata = dfs_in.ReadItemTimeStep(item + 1, it)
 
             d = to_numpy(itemdata.Data)
             d[d == deleteValue] = np.nan
 
-            d0   = func(d)
-            d    = np.zeros(1)
+            d0 = func(d)
+            d = np.zeros(1)
             d[0] = d0
             d[np.isnan(d)] = deleteValue
 

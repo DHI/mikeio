@@ -4,7 +4,14 @@ from datetime import datetime
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumQuantity, eumItem
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsBuilder, DfsSimpleType, DataValueType, StatType
+from DHI.Generic.MikeZero.DFS import (
+    DfsFileFactory,
+    DfsFactory,
+    DfsBuilder,
+    DfsSimpleType,
+    DataValueType,
+    StatType,
+)
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
@@ -12,8 +19,7 @@ from .dutil import Dataset
 from .eum import TimeStep
 
 
-class dfs0():
-
+class dfs0:
     def __read(self, filename):
         """Read data from the dfs0 file
         """
@@ -37,7 +43,9 @@ class dfs0():
 
         # EMPTY Data Block for copying the Results
         for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
-            t.append(starttime.AddSeconds(dfsdata[it, 0]).ToString("yyyy-MM-dd HH:mm:ss"))
+            t.append(
+                starttime.AddSeconds(dfsdata[it, 0]).ToString("yyyy-MM-dd HH:mm:ss")
+            )
 
         # Copies the System Array to a numpy matrix
         # First column in the time (the rest is the data)
@@ -67,7 +75,9 @@ class dfs0():
         import pandas as pd
 
         if item_numbers is not None:
-            if not all(isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers):
+            if not all(
+                isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
+            ):
                 raise Warning("item_numbers must be a list of integers")
 
         data, t, names = self.__read(filename=filename)
@@ -77,7 +87,7 @@ class dfs0():
         df.index = pd.DatetimeIndex(t)
 
         if item_numbers is not None:
-            df = df.iloc[:,item_numbers]
+            df = df.iloc[:, item_numbers]
 
         return df
 
@@ -96,8 +106,12 @@ class dfs0():
         from operator import itemgetter
 
         if item_numbers is not None:
-            if not all(isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers):
-                raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
+            if not all(
+                isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
+            ):
+                raise Warning(
+                    "item_numbers must be a list or array of values between 0 and 1e15"
+                )
 
         d, t, names = self.__read(filename)
 
@@ -108,7 +122,7 @@ class dfs0():
         if item_numbers is not None:
             names = itemgetter(*item_numbers)(names)
             for item in item_numbers:
-                data.append(d[:,item])
+                data.append(d[:, item])
         else:
             for item in range(d.shape[1]):
                 data.append(d[:, item])
@@ -127,7 +141,7 @@ class dfs0():
         try:
             dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
         except IOError:
-            print('cannot open', filename)
+            print("cannot open", filename)
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
@@ -142,7 +156,10 @@ class dfs0():
             print("Inconsistent data size. nt (row count) must be size" + str(nt))
             # quit()
         if n_items != data.shape[1]:
-            print("Inconsistent data size. number of items (column count) must be size" + str(n_items))
+            print(
+                "Inconsistent data size. number of items (column count) must be size"
+                + str(n_items)
+            )
 
         data[np.isnan(data)] = delete_value
 
@@ -166,11 +183,20 @@ class dfs0():
 
         dfs.Close()
 
-    def create(self, filename, data,
-               start_time=None, timeseries_unit=TimeStep.SECOND,
-               dt=1, datetimes=None,
-               variable_type=None, unit=None, names=None,
-               title=None, data_value_type=None):
+    def create(
+        self,
+        filename,
+        data,
+        start_time=None,
+        timeseries_unit=TimeStep.SECOND,
+        dt=1,
+        datetimes=None,
+        variable_type=None,
+        unit=None,
+        names=None,
+        title=None,
+        data_value_type=None,
+    ):
         """create creates a dfs0 file.
 
         filename:
@@ -218,16 +244,20 @@ class dfs0():
 
         if names is not None and len(names) != n_items:
             raise Warning(
-                "names must be an array of strings with the same number of elements as data columns")
+                "names must be an array of strings with the same number of elements as data columns"
+            )
 
         if len(variable_type) != n_items:
-            raise Warning("type if specified must be an array of integers (eumType) with the same number of "
-                          "elements as data columns")
+            raise Warning(
+                "type if specified must be an array of integers (eumType) with the same number of "
+                "elements as data columns"
+            )
 
         if len(unit) != n_items:
             raise Warning(
                 "unit if specified must be an array of integers (eumType) with the same number of "
-                "elements as data columns")
+                "elements as data columns"
+            )
 
         if datetimes is None:
             equidistant = True
@@ -238,23 +268,35 @@ class dfs0():
             start_time = datetimes[0]
             equidistant = False
 
-        #if not isinstance(timeseries_unit, int):
+        # if not isinstance(timeseries_unit, int):
         #    raise Warning("timeseries_unit must be an integer. See dfsutil options for help ")
 
-        system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
-                                            start_time.hour, start_time.minute, start_time.second)
+        system_start_time = System.DateTime(
+            start_time.year,
+            start_time.month,
+            start_time.day,
+            start_time.hour,
+            start_time.minute,
+            start_time.second,
+        )
 
         factory = DfsFactory()
-        builder = DfsBuilder.Create(title, 'DFS', 0)
+        builder = DfsBuilder.Create(title, "DFS", 0)
         builder.SetDataType(1)
         builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
         if equidistant:
-            builder.SetTemporalAxis(factory.CreateTemporalEqCalendarAxis(
-                timeseries_unit, system_start_time, 0, dt))
+            builder.SetTemporalAxis(
+                factory.CreateTemporalEqCalendarAxis(
+                    timeseries_unit, system_start_time, 0, dt
+                )
+            )
         else:
-            builder.SetTemporalAxis(factory.CreateTemporalNonEqCalendarAxis(
-                timeseries_unit, system_start_time))
+            builder.SetTemporalAxis(
+                factory.CreateTemporalNonEqCalendarAxis(
+                    timeseries_unit, system_start_time
+                )
+            )
 
         builder.SetItemStatisticsType(StatType.RegularStat)
 
@@ -262,11 +304,17 @@ class dfs0():
 
             item = builder.CreateDynamicItemBuilder()
             if type is not None:
-                item.Set(names[i], eumQuantity.Create(
-                    variable_type[i], unit[i]), DfsSimpleType.Float)
+                item.Set(
+                    names[i],
+                    eumQuantity.Create(variable_type[i], unit[i]),
+                    DfsSimpleType.Float,
+                )
             else:
-                item.Set(str(i), eumQuantity.Create(
-                    eumItem.eumIItemUndefined, 0), DfsSimpleType.Float)
+                item.Set(
+                    str(i),
+                    eumQuantity.Create(eumItem.eumIItemUndefined, 0),
+                    DfsSimpleType.Float,
+                )
 
             if data_value_type is not None:
                 item.SetValueType(data_value_type[i])
@@ -280,7 +328,7 @@ class dfs0():
             builder.CreateFile(filename)
 
         except IOError:
-            print('cannot create dfso file: ', filename)
+            print("cannot create dfso file: ", filename)
 
         dfs = builder.GetFile()
         delete_value = dfs.FileInfo.DeleteValueFloat
@@ -294,7 +342,7 @@ class dfs0():
         for it in range(n_time_steps):
             for ii in range(n_items):
 
-                d = Array[System.Single](np.array(data[ii][it:it+1]))
+                d = Array[System.Single](np.array(data[ii][it : it + 1]))
                 if equidistant:
                     dfs.WriteItemTimeStepNext(it, d)
                 else:

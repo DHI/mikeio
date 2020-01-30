@@ -3,7 +3,12 @@ from datetime import datetime
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory, DfsSimpleType, DataValueType
+from DHI.Generic.MikeZero.DFS import (
+    DfsFileFactory,
+    DfsFactory,
+    DfsSimpleType,
+    DataValueType,
+)
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
 from .dutil import to_numpy, Dataset
@@ -11,8 +16,7 @@ from .eum import TimeStep
 from .helpers import safe_length
 
 
-class dfs1():
-
+class dfs1:
     def read(self, filename, item_numbers=None):
         """ Function: Read a dfs1 file
 
@@ -37,7 +41,6 @@ class dfs1():
         if item_numbers is None:
             n_items = safe_length(dfs.ItemInfo)
             item_numbers = list(range(n_items))
-
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
@@ -70,7 +73,9 @@ class dfs1():
                 d[d == deleteValue] = np.nan
                 data_list[item][it, :] = d
 
-            t.append(startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss"))
+            t.append(
+                startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
+            )
 
         time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
         names = []
@@ -111,14 +116,20 @@ class dfs1():
         deletevalue = -1e-035
 
         if not all(np.shape(d)[0] == n_time_steps for d in data):
-            raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                     "Data is list of matices [t, x]")
+            raise Warning(
+                "ERROR data matrices in the time dimension do not all match in the data list. "
+                "Data is list of matices [t, x]"
+            )
         if not all(np.shape(d)[1] == number_x for d in data):
-            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [t, x]")
+            raise Warning(
+                "ERROR data matrices in the X dimension do not all match in the data list. "
+                "Data is list of matices [t, x]"
+            )
 
         if not len(data) == n_items:
-            raise Warning("The number of matrices in data do not match the number of items in the dfs1 file.")
+            raise Warning(
+                "The number of matrices in data do not match the number of items in the dfs1 file."
+            )
 
         for i in range(n_time_steps):
             for item in range(n_items):
@@ -129,15 +140,21 @@ class dfs1():
 
         dfs.Close()
 
-    def create(self,
-               filename,
-               data,
-               start_time=None, dt=1,
-               length_x=1, x0=0,
-               coordinate=None,
-               timeseries_unit=TimeStep.SECOND,
-               variable_type=None, unit=None,
-               names=None, title=None):
+    def create(
+        self,
+        filename,
+        data,
+        start_time=None,
+        dt=1,
+        length_x=1,
+        x0=0,
+        coordinate=None,
+        timeseries_unit=TimeStep.SECOND,
+        variable_type=None,
+        unit=None,
+        names=None,
+        title=None,
+    ):
         """
         Creates a dfs1 file
 
@@ -176,7 +193,6 @@ class dfs1():
         if title is None:
             title = ""
 
-
         n_time_steps = np.shape(data[0])[0]
         number_x = np.shape(data[0])[1]
         n_items = len(data)
@@ -185,7 +201,7 @@ class dfs1():
             start_time = datetime.now()
 
         if coordinate is None:
-            coordinate = ['LONG/LAT', 0, 0, 0]
+            coordinate = ["LONG/LAT", 0, 0, 0]
 
         if names is None:
             names = [f"Item {i+1}" for i in range(n_items)]
@@ -196,58 +212,89 @@ class dfs1():
         if unit is None:
             unit = [0] * n_items
 
-
         if not all(np.shape(d)[0] == n_time_steps for d in data):
-            raise Warning("ERROR data matrices in the time dimension do not all match in the data list. "
-                     "Data is list of matices [t, x]")
+            raise Warning(
+                "ERROR data matrices in the time dimension do not all match in the data list. "
+                "Data is list of matices [t, x]"
+            )
         if not all(np.shape(d)[1] == number_x for d in data):
-            raise Warning("ERROR data matrices in the X dimension do not all match in the data list. "
-                     "Data is list of matices [t, x]")
+            raise Warning(
+                "ERROR data matrices in the X dimension do not all match in the data list. "
+                "Data is list of matices [t, x]"
+            )
 
         if len(names) != n_items:
-            raise Warning("names must be an array of strings with the same number as matrices in data list")
+            raise Warning(
+                "names must be an array of strings with the same number as matrices in data list"
+            )
 
-        if len(variable_type) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in variable_type):
-            raise Warning("type if specified must be an array of integers (enuType) with the same number of "
-                          "elements as data columns")
+        if len(variable_type) != n_items or not all(
+            isinstance(item, int) and 0 <= item < 1e15 for item in variable_type
+        ):
+            raise Warning(
+                "type if specified must be an array of integers (enuType) with the same number of "
+                "elements as data columns"
+            )
 
-        if len(unit) != n_items or not all(isinstance(item, int) and 0 <= item < 1e15 for item in unit):
+        if len(unit) != n_items or not all(
+            isinstance(item, int) and 0 <= item < 1e15 for item in unit
+        ):
             raise Warning(
                 "unit if specified must be an array of integers (enuType) with the same number of "
-                "elements as data columns")
+                "elements as data columns"
+            )
 
         if not type(start_time) is datetime:
             raise Warning("start_time must be of type datetime ")
 
-        #if not isinstance(timeseries_unit, int):
+        # if not isinstance(timeseries_unit, int):
         #    raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
         #                  "day=1403, month=1405, year= 1404See dfsutil options for help ")
 
-        system_start_time = System.DateTime(start_time.year, start_time.month, start_time.day,
-                                            start_time.hour, start_time.minute, start_time.second)
+        system_start_time = System.DateTime(
+            start_time.year,
+            start_time.month,
+            start_time.day,
+            start_time.hour,
+            start_time.minute,
+            start_time.second,
+        )
 
         # Create an empty dfs1 file object
         factory = DfsFactory()
-        builder = Dfs1Builder.Create(title, 'mikeio', 0)
+        builder = Dfs1Builder.Create(title, "mikeio", 0)
 
         # Set up the header
         builder.SetDataType(0)
-        builder.SetGeographicalProjection(factory.CreateProjectionGeoOrigin(coordinate[0], coordinate[1], coordinate[2], coordinate[3]))
+        builder.SetGeographicalProjection(
+            factory.CreateProjectionGeoOrigin(
+                coordinate[0], coordinate[1], coordinate[2], coordinate[3]
+            )
+        )
         builder.SetTemporalAxis(
-            factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt))
-        builder.SetSpatialAxis(factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, length_x))
-
+            factory.CreateTemporalEqCalendarAxis(
+                timeseries_unit, system_start_time, 0, dt
+            )
+        )
+        builder.SetSpatialAxis(
+            factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, length_x)
+        )
 
         for i in range(n_items):
-            builder.AddDynamicItem(names[i], eumQuantity.Create(variable_type[i], unit[i]), DfsSimpleType.Float, DataValueType.Instantaneous)
+            builder.AddDynamicItem(
+                names[i],
+                eumQuantity.Create(variable_type[i], unit[i]),
+                DfsSimpleType.Float,
+                DataValueType.Instantaneous,
+            )
 
         try:
             builder.CreateFile(filename)
         except IOError:
-            print('cannot create dfs2 file: ', filename)
+            print("cannot create dfs2 file: ", filename)
 
         dfs = builder.GetFile()
-        deletevalue = dfs.FileInfo.DeleteValueFloat #-1.0000000031710769e-30
+        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
         for i in range(n_time_steps):
             for item in range(n_items):

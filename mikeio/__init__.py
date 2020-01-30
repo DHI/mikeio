@@ -12,6 +12,7 @@ clr.AddReference("System.Runtime")
 
 p = platform.architecture()
 x64 = False
-x64 = '64' in p[0]
+x64 = "64" in p[0]
+
 if not x64:
-    print('This library has not been tested in a 32 bit system!!!!')
+    print("This library has not been tested in a 32 bit system!!!!")
