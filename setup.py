@@ -5,16 +5,16 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.1.0",
-    install_requires=['pythonnet', 'numpy', 'datetime', 'pandas'],
-    author="Marc-Etienne Ridler",
-    author_email="mer@dhigroup.com",
-    description="A package that works with the DHI dfs libraries to facilitate creating, writing and reading dfs0, dfs2, and dfs3 files.",
+    version="0.2.0",
+    install_requires=["pythonnet", "numpy", "datetime", "pandas"],
+    author="Henrik Andersson",
+    author_email="jan@dhigroup.com",
+    description="A package that works with the DHI dfs libraries to facilitate creating, writing and reading dfs0, dfs2, dfs3, dfsu and mesh files.",
     platform="windows_x64",
-    license='MIT',
+    license="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/DHI/py-dhi-dfs.git",
+    url="https://github.com/DHI/mikeio",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

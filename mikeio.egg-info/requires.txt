@@ -1,4 +1,0 @@
-pythonnet
-numpy
-datetime
-pandas
