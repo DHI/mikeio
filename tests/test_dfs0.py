@@ -62,8 +62,14 @@ def test_create_timestep_7days():
 
     dfs = dfs0.dfs0()
 
-    dfs.create(filename=dfs0File, data=data, names=names, title="Zeros and ones",
-               timeseries_unit=TimeStep.DAY, dt=7)
+    dfs.create(
+        filename=dfs0File,
+        data=data,
+        names=names,
+        title="Zeros and ones",
+        timeseries_unit=TimeStep.DAY,
+        dt=7,
+    )
 
     assert True
 
@@ -78,7 +84,7 @@ def test_create_timestep_7days():
 
 def test_create_equidistant_calendar():
 
-    dfs0file = r'random.dfs0'
+    dfs0file = r"random.dfs0"
     d1 = np.random.random([1000])
     d2 = np.random.random([1000])
     data = []
@@ -86,26 +92,32 @@ def test_create_equidistant_calendar():
     data.append(d2)
     start_time = datetime.datetime(2017, 1, 1)
     timeseries_unit = 1402
-    title = 'Hello Test'
-    names = ['VarFun01', 'NotFun']
+    title = "Hello Test"
+    names = ["VarFun01", "NotFun"]
     variable_type = [100000, 100000]
     unit = [1000, 1000]
     data_value_type = [0, 1]
     dt = 5
     dfs = dfs0.dfs0()
-    dfs.create(filename=dfs0file, data=data,
-               start_time=start_time,
-               timeseries_unit=timeseries_unit, dt=dt,
-               names=names, title=title,
-               variable_type=variable_type,
-               unit=unit, data_value_type=data_value_type)
+    dfs.create(
+        filename=dfs0file,
+        data=data,
+        start_time=start_time,
+        timeseries_unit=timeseries_unit,
+        dt=dt,
+        names=names,
+        title=title,
+        variable_type=variable_type,
+        unit=unit,
+        data_value_type=data_value_type,
+    )
 
     os.remove(dfs0file)
     assert True
 
 
 def test_create_non_equidistant_calendar():
-    dfs0file = r'neq.dfs0'
+    dfs0file = r"neq.dfs0"
     d1 = np.random.random([1000])
     d2 = np.random.random([1000])
     data = []
@@ -114,19 +126,24 @@ def test_create_non_equidistant_calendar():
     start_time = datetime.datetime(2017, 1, 1)
     time_vector = []
     for i in range(1000):
-        time_vector.append(start_time + datetime.timedelta(hours=i*0.1))
-    title = 'Hello Test'
-    names = ['VarFun01', 'NotFun']
+        time_vector.append(start_time + datetime.timedelta(hours=i * 0.1))
+    title = "Hello Test"
+    names = ["VarFun01", "NotFun"]
     variable_type = [100000, 100000]
     unit = [1000, 1000]
     data_value_type = [0, 1]
 
     dfs = dfs0.dfs0()
-    dfs.create(filename=dfs0file, data=data,
-               datetimes=time_vector,
-               names=names, title=title,
-               variable_type=variable_type, unit=unit,
-               data_value_type=data_value_type)
+    dfs.create(
+        filename=dfs0file,
+        data=data,
+        datetimes=time_vector,
+        names=names,
+        title=title,
+        variable_type=variable_type,
+        unit=unit,
+        data_value_type=data_value_type,
+    )
 
     assert True
     os.remove(dfs0file)
@@ -134,7 +151,7 @@ def test_create_non_equidistant_calendar():
 
 def test_read_dfs0_to_pandas_single_item():
 
-    dfs0file = r'tests/testdata/random.dfs0'
+    dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = dfs0.dfs0()
     df = dfs.read_to_pandas(dfs0file, item_numbers=[1])
@@ -144,7 +161,7 @@ def test_read_dfs0_to_pandas_single_item():
 
 def test_read_dfs0_single_item():
 
-    dfs0file = r'tests/testdata/random.dfs0'
+    dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = dfs0.dfs0()
     (data, t, names) = dfs.read(dfs0file, item_numbers=[1])
@@ -154,7 +171,7 @@ def test_read_dfs0_single_item():
 
 def test_read_dfs0_single_item_named_access():
 
-    dfs0file = r'tests/testdata/random.dfs0'
+    dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = dfs0.dfs0()
     res = dfs.read(dfs0file, item_numbers=[1])
@@ -163,9 +180,23 @@ def test_read_dfs0_single_item_named_access():
     assert len(data) == 1
 
 
+def test_read_dfs0_single_item_read_by_name():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = dfs0.dfs0()
+    res = dfs.read(
+        dfs0file, item_names=["NotFun", "VarFun01"]
+    )  # reversed order compare to original file
+    data = res.data
+
+    assert len(data) == 2
+    assert res.names[0] == "NotFun"
+
+
 def test_read_dfs0_to_pandas():
 
-    dfs0file = r'tests/testdata/random.dfs0'
+    dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = dfs0.dfs0()
     pd = dfs.read_to_pandas(dfs0file)
@@ -174,7 +205,7 @@ def test_read_dfs0_to_pandas():
 
 
 def test_read_dfs0_to_matrix():
-    dfs0file = r'tests/testdata/random.dfs0'
+    dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = dfs0.dfs0()
     (data, t, names) = dfs.read(filename=dfs0file)

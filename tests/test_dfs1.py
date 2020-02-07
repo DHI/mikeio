@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import datetime
+import pytest
 
 from mikeio import dfs1 as dfs1
 
@@ -44,17 +45,22 @@ def test_create_single_item():
     data.append(d)
     length_x = 100
 
-    names = ['testing water level']
-    title = 'test dfs1'
+    names = ["testing water level"]
+    title = "test dfs1"
 
     dfs = dfs1.dfs1()
 
-    dfs.create(filename=filename, data=data,
-               start_time=start_time,
-               dt=dt, variable_type=variable_type,
-               unit=unit,
-               length_x=length_x,
-               names=names, title=title)
+    dfs.create(
+        filename=filename,
+        data=data,
+        start_time=start_time,
+        dt=dt,
+        variable_type=variable_type,
+        unit=unit,
+        length_x=length_x,
+        names=names,
+        title=title,
+    )
 
     assert True
     os.remove(filename)
@@ -67,7 +73,27 @@ def test_read():
 
     data = dfs.read(filename, [0])[0]
     data = data[0]
-    assert data.shape == (100, 3) # time, x
+    assert data.shape == (100, 3)  # time, x
+
+
+def test_read_item_names():
+
+    filename = r"tests/testdata/random.dfs1"
+    dfs = dfs1.dfs1()
+
+    data = dfs.read(filename, item_names=["testing water level"])[0]
+    data = data[0]
+    assert data.shape == (100, 3)  # time, x
+
+
+def test_read_item_names_not_in_dataset_fails():
+
+    filename = r"tests/testdata/random.dfs1"
+    dfs = dfs1.dfs1()
+
+    with pytest.raises(Exception):
+        dfs.read(filename, item_names=["NOTAREALVARIABLE"])
+
 
 def test_read_names_access():
 
@@ -78,13 +104,11 @@ def test_read_names_access():
     data = res.data
     item = data[0]
     time = res.time
-    assert item.shape == (100, 3) # time, x
+    assert item.shape == (100, 3)  # time, x
     assert len(time) == 100
 
 
 def test_write():
 
     pass
-
-
 

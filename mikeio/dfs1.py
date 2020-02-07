@@ -11,32 +11,36 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dutil import to_numpy, Dataset
+from .dutil import to_numpy, Dataset, find_item
 from .eum import TimeStep
 from .helpers import safe_length
 
 
 class dfs1:
-    def read(self, filename, item_numbers=None):
-        """ Function: Read a dfs1 file
+    def read(self, filename, item_numbers=None, item_names=None):
+        """Read data from the dfs1 file
 
-        usage:
-            [data, time, name] = read(filename, item_numbers)
-            item_numbers is a list of indices (base 0) to read from
+        Usage:
+            read(filename, item_numbers=None, item_names=None)
+        filename
+            full path to the dfs1 file.
+        item_numbers
+            read only the item_numbers in the array specified (0 base)
+        item_names
+            read only the items in the array specified, (takes precedence over item_numbers)
 
-        Returns
-            1) the data contained in a dfs1 file in a list of numpy matrices
-            2) time index
-            3) name of the items
-
-        NOTE
-            Returns data (nt, x)
+        Return:
+            Dataset(data, time, names)
+            where data[nt,x]
         """
 
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
 
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(filename)
+
+        if item_names is not None:
+            item_numbers = find_item(dfs, item_names)
 
         if item_numbers is None:
             n_items = safe_length(dfs.ItemInfo)

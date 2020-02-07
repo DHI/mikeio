@@ -12,13 +12,13 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
-from .dutil import to_numpy, Dataset
+from .dutil import to_numpy, Dataset, find_item
 from .eum import TimeStep
 from .helpers import safe_length
 
 
 class dfsu:
-    def read(self, filename, item_numbers=None, time_steps=None):
+    def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
         """ Function: Read a dfsu file
 
         usage:
@@ -47,6 +47,9 @@ class dfsu:
             n_items = n_items - 1
 
         nt = dfs.NumberOfTimeSteps
+
+        if item_names is not None:
+            item_numbers = find_item(dfs, item_names)
 
         if item_numbers is None:
             item_numbers = list(range(n_items))

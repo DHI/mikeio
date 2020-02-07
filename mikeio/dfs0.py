@@ -1,5 +1,6 @@
 import os
 import numpy as np
+from operator import itemgetter
 from datetime import datetime
 import System
 from System import Array
@@ -15,7 +16,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
-from .dutil import Dataset
+from .dutil import Dataset, find_item
 from .eum import TimeStep
 
 
@@ -27,6 +28,7 @@ class dfs0:
             raise Warning("filename - File does not Exist %s", filename)
 
         dfs = DfsFileFactory.DfsGenericOpen(filename)
+        self._dfs = dfs
 
         n_items = safe_length(dfs.ItemInfo)
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -91,19 +93,26 @@ class dfs0:
 
         return df
 
-    def read(self, filename, item_numbers=None):
-        """Read data from the dfs0 file and return data [data, time, itemNames]
+    def read(self, filename, item_numbers=None, item_names=None):
+        """Read data from the dfs0 file
 
         Usage:
-            read_to_pandas(filename, item_numbers=None)
+            read(filename, item_numbers=None, item_names=None)
         filename
             full path and file name to the dfs0 file.
         item_numbers
             read only the item_numbers in the array specified (0 base)
+        item_names
+            read only the items in the array specified, (takes precedence over item_numbers)
+
         Return:
-            [data, time, itemNames]
+            Dataset(data, time, names)
         """
-        from operator import itemgetter
+
+        d, t, names = self.__read(filename)
+
+        if item_names is not None:
+            item_numbers = find_item(self._dfs, item_names)
 
         if item_numbers is not None:
             if not all(
@@ -112,8 +121,6 @@ class dfs0:
                 raise Warning(
                     "item_numbers must be a list or array of values between 0 and 1e15"
                 )
-
-        d, t, names = self.__read(filename)
 
         t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
 

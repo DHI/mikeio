@@ -54,24 +54,29 @@ def test_create_single_item():
     north = 6098907
     orientation = 0
 
-    coordinate = ['UTM-33', east, north, orientation]
+    coordinate = ["UTM-33", east, north, orientation]
     length_x = 100
     length_y = 100
 
-    names = ['testing water level']
-    title = 'test dfs2'
+    names = ["testing water level"]
+    title = "test dfs2"
 
     dfs = dfs2.dfs2()
 
-    dfs.create(filename=filename, data=data,
-               start_time=start_time,
-              timeseries_unit=timeseries_unit,
-              dt=dt, variable_type=variable_type,
-              unit=unit,
-              coordinate=coordinate,
-              length_x=length_x,
-              length_y=length_y,
-              names=names, title=title)
+    dfs.create(
+        filename=filename,
+        data=data,
+        start_time=start_time,
+        timeseries_unit=timeseries_unit,
+        dt=dt,
+        variable_type=variable_type,
+        unit=unit,
+        coordinate=coordinate,
+        length_x=length_x,
+        length_y=length_y,
+        names=names,
+        title=title,
+    )
 
     assert True
     os.remove(filename)
@@ -88,7 +93,7 @@ def test_create_multiple_item():
     # from result we see Water Level is 100000, Rainfall is 100004, drain time constant 100362
     variable_type = [100000, 100004, 100362]
 
-    #possible_units = util.unit_list(variable_type, search='meter')
+    # possible_units = util.unit_list(variable_type, search='meter')
     # from result, we see meter is 1000 and milimeter is 1002, per second is 2605
     unit = [1000, 1002, 2605]
 
@@ -102,22 +107,29 @@ def test_create_multiple_item():
     d = np.zeros([100, 100, 30]) + 3.0
     data.append(d)
 
-    coordinate = ['LONG/LAT', 12.4387, 55.2257, 0]
+    coordinate = ["LONG/LAT", 12.4387, 55.2257, 0]
     length_x = 0.1
     length_y = 0.1
 
-    names = ['testing water level', 'testing rainfall', 'testing drain time constant']
-    title = 'test dfs2'
+    names = ["testing water level", "testing rainfall", "testing drain time constant"]
+    title = "test dfs2"
 
     dfs = dfs2.dfs2()
 
-    dfs.create(filename=filename, data=data,
-               start_time=start_time,
-               timeseries_unit=timeseries_unit, dt=dt,
-               variable_type=variable_type,
-               unit=unit, coordinate=coordinate,
-               length_x=length_x, length_y=length_y,
-               names=names, title=title)
+    dfs.create(
+        filename=filename,
+        data=data,
+        start_time=start_time,
+        timeseries_unit=timeseries_unit,
+        dt=dt,
+        variable_type=variable_type,
+        unit=unit,
+        coordinate=coordinate,
+        length_x=length_x,
+        length_y=length_y,
+        names=names,
+        title=title,
+    )
 
     assert True
     os.remove(filename)
@@ -129,8 +141,7 @@ def test_non_equidistant_calendar():
 
     data = []
 
-    datetimes = [datetime.datetime(2012, 1, 1),
-                 datetime.datetime(2012, 2, 1)]
+    datetimes = [datetime.datetime(2012, 1, 1), datetime.datetime(2012, 2, 1)]
 
     nt = len(datetimes)
     nx = 20
@@ -152,11 +163,24 @@ def test_read():
     filename = r"tests/testdata/random.dfs2"
     dfs = dfs2.dfs2()
 
+    data = dfs.read(filename, item_names=["testing water level"])[0]
+    data = data[0]
+    assert data[0, 11, 0] == 0
+    assert np.isnan(data[0, 10, 0])
+    assert data.shape == (3, 100, 2)  # time, y, x
+
+
+def test_read_item_names():
+
+    filename = r"tests/testdata/random.dfs2"
+    dfs = dfs2.dfs2()
+
     data = dfs.read(filename, [0])[0]
     data = data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
-    assert data.shape == (3, 100, 2) # time, y, x
+    assert data.shape == (3, 100, 2)  # time, y, x
+
 
 def test_read_named_access():
 
@@ -173,6 +197,4 @@ def test_read_named_access():
 def test_write():
 
     pass
-
-
 

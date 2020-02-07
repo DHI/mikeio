@@ -20,7 +20,22 @@ def to_numpy(src):
     return d
 
 
-class Dataset(namedtuple("Dataset", ["data", "time", "names"])):
+def find_item(dfs, item_names):
+    names = [x.Name for x in dfs.ItemInfo]
+    item_lookup = {name: i for i, name in enumerate(names)}
+    try:
+        item_numbers = [item_lookup[x] for x in item_names]
+    except:
+        raise ValueError(f"Selected item name not found. Valid names are {names}")
+    return item_numbers
+
+
+class Dataset:
+    def __init__(self, data, time, names):
+        self.data = data
+        self.time = time
+        self.names = names
+
     def __repr__(self):
         n_items = len(self.names)
 
@@ -31,3 +46,26 @@ class Dataset(namedtuple("Dataset", ["data", "time", "names"])):
         out.append(f"{self.time[0]} - {self.time[-1]}")
 
         return str.join("\n", out)
+
+    def __len__(self):
+        return 2  # [data,time,names]
+
+    def __getitem__(self, x):
+
+        if isinstance(x, int):
+            if x == 0:
+                return self.data
+            if x == 1:
+                return self.time
+            if x == 2:
+                return self.names
+
+            if x > 2:
+                raise IndexError("")
+
+        if isinstance(x, str):
+            item_lookup = {name: i for i, name in enumerate(self.names)}
+            x = item_lookup[x]
+            return self.data[x]
+
+        raise Exception("Invalid operation")
