@@ -86,7 +86,9 @@ res.names
 ```
 
 ### Create dfs2
-For a complete example of conversion from netcdf to dfs2 see this [notebook](notebooks/Sea%20surface%20temperature%20-%20dfs2.ipynb)
+For a complete example of conversion from netcdf to dfs2 see this [notebook](notebooks/Sea%20surface%20temperature%20-%20dfs2.ipynb).
+
+Another [example](notebooks/Global%20Forecasting%20System%20-%20dfs2.ipynb) of downloading meteorlogical forecast from the Global Forecasting System and converting it to a dfs2 ready to be used by a MIKE 21 model.
 
 ## DFS Utilities to query variable type, time series types (useful when creating a new dfs file)
 ```python
