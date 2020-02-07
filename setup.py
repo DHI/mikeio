@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.2.0",
+    version="0.2.1",
     install_requires=["pythonnet", "numpy", "datetime", "pandas"],
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
