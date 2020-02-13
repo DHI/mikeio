@@ -1,4 +1,4 @@
-# mikeio: input/output of MIKE(https://www.mikepoweredbydhi.com/) files in python
+# mikeio: input/output of MIKE files in python
 
 Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
 
