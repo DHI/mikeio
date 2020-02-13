@@ -15,6 +15,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/DHI/mikeio",
+    download_url="https://github.com/DHI/mikeio/archive/0.2.1.zip",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
