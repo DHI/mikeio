@@ -11,3 +11,5 @@
 
 # PyCharm project folder
 .idea/
+
+dist/

@@ -19,6 +19,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Operating System :: Windows 10",
+        "Operating System :: Microsoft :: Windows :: Windows 10",
     ],
 )
