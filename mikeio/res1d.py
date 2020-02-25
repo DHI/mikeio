@@ -21,7 +21,7 @@ class res1d:
         """Read data from the res1d file
         """
         if not os.path.exists(file_path):
-            raise Warning("File does not exist %s", file_path)
+            raise("File does not exist %s", file_path)
 
         file = ResultData()
         file.Connection = Connection.Create(file_path)
@@ -73,6 +73,10 @@ class res1d:
         df.index = pd.DatetimeIndex(times)
         return df
 
+    @staticmethod
+    def format_string(s):
+        return s.lower().strip().replace(" ", "")
+
     def parse_query(self, query):
         return query.VariableType.lower().strip().replace(" ", "")
 
@@ -92,35 +96,28 @@ class res1d:
             reachNumber = -1
             idx = -1
             for i in range(0, file.Reaches.Count):
-                if (
-                        file.Reaches.get_Item(i).Name.lower().strip()
-                        == query.BranchName.lower().strip()
-                ):
+                if (file.Reaches.get_Item(i).Name.lower().strip()
+                        == query.BranchName.lower().strip()):
 
                     reach = file.Reaches.get_Item(i)
                     for j in range(0, reach.GridPoints.Count):
-                        if (abs(float(reach.GridPoints.get_Item(j).Chainage) - query.Chainage) < tol):
-                            if "waterlevel" in self.parse_query(query):
+                        isCorrectChainage = abs(float(reach.GridPoints.get_Item(j).Chainage) - query.Chainage) < tol
+                        if (isCorrectChainage):
+                            if "waterlevel" in self.format_string(query.VariableType):
                                 idx = int(j / 2)
-                            elif "discharge" in self.parse_query(query):
+                            elif "discharge" in self.format_string(query.VariableType):
                                 idx = int((j - 1) / 2)
-                            elif "pollutant" in self.parse_query(query):
+                            elif "pollutant" in self.format_string(query.VariableType):
                                 idx = int((j - 1) / 2)
                             else:
-                                print(
-                                    "ERROR. Variable Type must be either Water Level, Discharge, or Pollutant"
-                                )
+                                raise("VariableType must be either Water Level, Discharge, or Pollutant.")
                             reachNumber = i
                             break
                             break
                             break
 
             for i in range(0, file.get_Quantities().Count):
-                if query.VariableType.lower().strip().replace(
-                        " ", ""
-                ) == file.get_Quantities().get_Item(i).Description.lower().strip().replace(
-                    " ", ""
-                ):
+                if self.format_string(query.VariableType) == self.format_string(file.get_Quantities().get_Item(i).Description):
                     item = i
                     break
 
@@ -129,14 +126,11 @@ class res1d:
             dataItemTypes.append(item)
 
         if -1 in reachNums:
-            print("ERROR. Reach Not Found")
-            quit()
+            raise("Reach Not Found")
         if -1 in dataItemTypes:
-            print("ERROR. Item Not Found")
-            quit()
+            raise("Item Not Found")
         if -1 in indices:
-            print("ERROR. Chainage Not Found")
-            quit()
+            raise("Chainage Not Found")
 
         df = self.get_data(dataItemTypes, file, indices, queries, reachNums)
 
