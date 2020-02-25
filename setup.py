@@ -9,7 +9,7 @@ setuptools.setup(
     install_requires=["pythonnet", "numpy", "datetime", "pandas"],
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
-    description="A package that works with the DHI dfs libraries to facilitate creating, writing and reading dfs0, dfs2, dfs3, dfsu and mesh files.",
+    description="Create, write and read DHI files, e.g. dfs0, dfs2, dfs3, dfsu, res1d and mesh files.",
     platform="windows_x64",
     license="MIT",
     long_description=long_description,
