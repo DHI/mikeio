@@ -1,26 +1,21 @@
-# mikeio
-Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3 files. Reading Res1D data.
+# mikeio: input/output of MIKE files in python
+
+Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
 
 ## Requirements
 
 * Python x64 >=3.6
-* [Mike SDK](https://www.mikepoweredbydhi.com/download/mike-2019/mike-sdk)
-* Python packages:
-  * Pythonnet
-  * Numpy
-  * Pandas
+* [MIKE](https://www.mikepoweredbydhi.com/mike-2020) or [MIKE SDK](https://www.mikepoweredbydhi.com/download/mike-2020/mike-sdk)
 
 ## Installation
 
-`mikeio` is not yet on [PyPI](https://pypi.org/), and until then you can install the package either by 
+From PyPI:
 
-`pip install git+https://github.com/DHI/mikeio.git`
+`pip install mikeio`
 
-or
+Or development version:
 
-1. downloading the [zip file](https://github.com/DHI/mikeio/archive/master.zip).
-2. `pip install mikeio-master.zip`
-
+`pip install https://github.com/DHI/mikeio/archive/master.zip`
 
 
 ## Examples
