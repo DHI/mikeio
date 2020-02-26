@@ -4,6 +4,8 @@ import datetime
 from mikeio import dfs0 as dfs0
 from mikeio.eum import TimeStep
 from datetime import timedelta
+from shutil import copyfile
+import pytest
 
 
 def test_simple_create():
@@ -211,3 +213,52 @@ def test_read_dfs0_to_matrix():
     (data, t, names) = dfs.read(filename=dfs0file)
 
     assert len(data) == 2
+
+
+def test_write(tmpdir):
+    dfs0file = r"tests/testdata/random.dfs0"
+    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+
+    copyfile(dfs0file, tmpfile)
+    dfs = dfs0.dfs0()
+    res = dfs.read(tmpfile)
+    data = res.data
+
+    # Do something with the data
+    data[0] = np.zeros_like(data[0])
+    data[1] = np.ones_like(data[0])
+
+    # Overwrite the file
+    dfs.write(tmpfile, data)
+
+
+def test_write_wrong_n_items(tmpdir):
+    dfs0file = r"tests/testdata/random.dfs0"
+    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+
+    copyfile(dfs0file, tmpfile)
+    dfs = dfs0.dfs0()
+    res = dfs.read(tmpfile)
+    data = res.data
+
+    # One item too many...
+    data[0] = np.zeros_like(data[0])
+    data[1] = np.ones_like(data[0])
+    data.append(np.ones_like(data[0]))
+
+    # Overwrite the file
+    with pytest.raises(Exception):
+        dfs.write(tmpfile, data)
+
+
+def test_write_no_existing_file():
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = dfs0.dfs0()
+    res = dfs.read(dfs0file)
+    data = res.data
+
+    # Overwrite the file
+    with pytest.raises(Exception):
+        dfs.write("not_a_file", data)
+
