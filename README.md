@@ -20,6 +20,26 @@ Or development version:
 
 ## Examples
 
+### Reading data from dfs0, dfs1, dfs2, dfsu
+
+
+```python
+>>> import mikeio
+>>> ds = mikeio.read("random.dfs0")
+>>> ds
+DataSet(data, time, names)
+Number of items: 2
+Shape: (1000,)
+2017-01-01 00:00:00 - 2017-07-28 03:00:00
+
+>>> ds = mikeio.read("random.dfs1")
+>>> ds
+DataSet(data, time, names)
+Number of items: 1
+Shape: (100, 3)
+2012-01-01 00:00:00 - 2012-01-01 00:19:48
+```
+
 ### Reading dfs0 file into Pandas DataFrame
 ```python
 from mikeio.dfs0 import dfs0
@@ -68,7 +88,7 @@ dfs.create(filename='random.dfs0',
            title='Hello Test')
 
 ```
-For more examples see this [notebook](notebooks/01%20-%20Timeseries.ipynb)
+For more examples on timeseries data see this [notebook](notebooks/01%20-%20Timeseries.ipynb)
 
 
 ### Read dfs2 data
@@ -85,15 +105,6 @@ For a complete example of conversion from netcdf to dfs2 see this [notebook](not
 
 Another [example](notebooks/Global%20Forecasting%20System%20-%20dfs2.ipynb) of downloading meteorlogical forecast from the Global Forecasting System and converting it to a dfs2 ready to be used by a MIKE 21 model.
 
-## DFS Utilities to query variable type, time series types (useful when creating a new dfs file)
-```python
->>> from mikeio.dfs_util import type_list, unit_list
->>> type_list('Water level')
-{100000: 'Water Level', 100307: 'Water level change'}
-
->>> unit_list(100307)
-{1000: 'meter', 1003: 'feet'}
-```
 
 ### Read Res1D file Return Pandas DataFrame
 ```python
@@ -122,4 +133,13 @@ plt.plot(res.time, res.data[0][:,idx])
 ```
 ![Timeseries](images/dfsu_ts.png)
 
+## Misc utilities
+ to query variable type, time series types (useful when creating a new dfs file)
+```python
+>>> from mikeio.dfs_util import type_list, unit_list
+>>> type_list('Water level')
+{100000: 'Water Level', 100307: 'Water level change'}
 
+>>> unit_list(100307)
+{1000: 'meter', 1003: 'feet'}
+```
