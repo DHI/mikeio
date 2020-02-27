@@ -66,3 +66,37 @@ def test_linear_transform_dfsu(tmpdir):
     expected = orgvalue * 1.5 - 20.0
     scaledvalue = scaled.data[0][0]
     assert scaledvalue == pytest.approx(expected)
+
+
+def test_sum_dfsu(tmpdir):
+
+    infilename_a = "tests/testdata/HD2D.dfsu"
+    infilename_b = "tests/testdata/HD2D.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "sum.dfsu")
+    mikeio.generic.sum(infilename_a, infilename_b, outfilename)
+
+    org = mikeio.read(infilename_a)
+
+    summed = mikeio.read(outfilename)
+
+    orgvalue = org.data[0][0]
+    expected = orgvalue * 2
+    scaledvalue = summed.data[0][0]
+    assert scaledvalue == pytest.approx(expected)
+
+
+def test_diff_dfsu(tmpdir):
+
+    infilename_a = "tests/testdata/HD2D.dfsu"
+    infilename_b = "tests/testdata/HD2D.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "diff.dfsu")
+    mikeio.generic.diff(infilename_a, infilename_b, outfilename)
+
+    org = mikeio.read(infilename_a)
+
+    diffed = mikeio.read(outfilename)
+
+    orgvalue = org.data[0][0]
+    expected = 0.0
+    scaledvalue = diffed.data[0][0]
+    assert scaledvalue == pytest.approx(expected)
