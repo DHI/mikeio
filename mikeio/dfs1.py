@@ -16,7 +16,7 @@ from .eum import TimeStep
 from .helpers import safe_length
 
 
-class dfs1:
+class Dfs1:
     def read(self, filename, item_numbers=None, item_names=None):
         """Read data from the dfs1 file
 

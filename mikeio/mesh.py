@@ -2,7 +2,7 @@ import numpy as np
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
 
-class mesh:
+class Mesh:
     def read(self, filename):
         """ Function: Read a mesh file
 

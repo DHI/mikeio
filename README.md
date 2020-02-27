@@ -42,8 +42,8 @@ Shape: (100, 3)
 
 ### Reading dfs0 file into Pandas DataFrame
 ```python
-from mikeio.dfs0 import dfs0
-dfs = dfs0()
+from mikeio import Dfs0
+dfs = Dfs0()
 ts = dfs.read_to_pandas('simple.dfs0')
 ```
 
@@ -51,7 +51,7 @@ ts = dfs.read_to_pandas('simple.dfs0')
 ```python
 from datetime import datetime, timedelta
 import numpy as np
-from mikeio.dfs0 import dfs0
+from mikeio import Dfs0
 
 # create a list containing data for each item
 data = []
@@ -60,7 +60,7 @@ data = []
 d = np.random.random([100])
 data.append(d)
 
-dfs = dfs0()
+dfs = Dfs0()
 dfs.create(filename='simple.dfs0',
            data=data,
            start_time=datetime(2017, 1, 1),
@@ -71,6 +71,7 @@ dfs.create(filename='simple.dfs0',
 
 ### Create equidistant dfs0 with weekly timestep
 ```python
+from mikeio import Dfs0
 from mikeio.eum import TimeStep
 d1 = np.random.random([1000])
 d2 = np.random.random([1000])
@@ -78,7 +79,7 @@ data = []
 data.append(d1)
 data.append(d2)
 
-dfs = dfs0.dfs0()
+dfs = Dfs0()
 dfs.create(filename='random.dfs0',
            data=data,
            start_time=datetime(2017, 1, 1),
@@ -93,9 +94,9 @@ For more examples on timeseries data see this [notebook](notebooks/01%20-%20Time
 
 ### Read dfs2 data
 ```python
-from mikeio.dfs2 import dfs2
+from mikeio import Dfs2
 dfs2File = r"20150101-DMI-L4UHfnd-NSEABALTIC-v01-fv01-DMI_OI.dfs2"
-dfs = dfs2()
+dfs = Dfs2()
 res = dfs.read(dfs2File)
 res.names
 ```
@@ -119,9 +120,9 @@ ts = r1d.read('res1dfile.res1d', [p1])
 ### Read dfsu files
 ```python
 import matplotlib.pyplot as plt
-from mikeio.dfsu import dfsu
+from mikeio import Dfsu
 
-dfs = dfsu()
+dfs = Dfsu()
 
 filename = "HD.dfsu"
 res = dfs.read(filename)

@@ -3,6 +3,7 @@ import sys
 import os
 import platform
 
+
 sys.path.append(r"C:\Program Files (x86)\DHI\2019\bin\x64")
 sys.path.append(r"C:\Program Files (x86)\DHI\2020\bin\x64")
 clr.AddReference("DHI.Generic.MikeZero.DFS")
@@ -17,6 +18,14 @@ x64 = "64" in p[0]
 
 if not x64:
     print("This library has not been tested in a 32 bit system!!!!")
+
+
+from .dfs0 import Dfs0
+from .dfs1 import Dfs1
+from .dfs2 import Dfs2
+from .dfs3 import Dfs3
+from .dfsu import Dfsu
+from .mesh import Mesh
 
 
 def read(filename, item_numbers=None, item_names=None):
@@ -38,24 +47,20 @@ def read(filename, item_numbers=None, item_names=None):
     _, ext = os.path.splitext(filename)
 
     if ext == ".dfs0":
-        from .dfs0 import dfs0
 
-        dfs = dfs0()
+        dfs = Dfs0()
 
     elif ext == ".dfs1":
-        from .dfs1 import dfs1
 
-        dfs = dfs1()
+        dfs = Dfs1()
 
     elif ext == ".dfs2":
-        from .dfs2 import dfs2
 
-        dfs = dfs2()
+        dfs = Dfs2()
 
     elif ext == ".dfsu":
-        from .dfsu import dfsu
 
-        dfs = dfsu()
+        dfs = Dfsu()
     else:
         raise Exception(f"{ext} is an unsupported extension")
 

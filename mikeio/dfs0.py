@@ -20,7 +20,7 @@ from .dutil import Dataset, find_item
 from .eum import TimeStep
 
 
-class dfs0:
+class Dfs0:
     def __read(self, filename):
         """Read data from the dfs0 file
         """

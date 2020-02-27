@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.2.1",
+    version="0.3.0",
     install_requires=["pythonnet", "numpy", "datetime", "pandas"],
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
@@ -15,7 +15,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/DHI/mikeio",
-    download_url="https://github.com/DHI/mikeio/archive/0.2.1.zip",
+    download_url="https://github.com/DHI/mikeio/archive/0.3.0.zip",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
