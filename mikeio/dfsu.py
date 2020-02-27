@@ -17,7 +17,7 @@ from .eum import TimeStep
 from .helpers import safe_length
 
 
-class dfsu:
+class Dfsu:
     def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
         """ Function: Read a dfsu file
 

@@ -1,9 +1,12 @@
 import os
 import numpy as np
 import datetime
-from mikeio import dfs0 as dfs0
+import mikeio
+from mikeio.dfs0 import Dfs0
 from mikeio.eum import TimeStep
 from datetime import timedelta
+from shutil import copyfile
+import pytest
 
 
 def test_simple_create():
@@ -16,7 +19,7 @@ def test_simple_create():
     d = np.random.random([nt])
     data.append(d)
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
 
     dfs.create(filename=dfs0File, data=data)
 
@@ -38,7 +41,7 @@ def test_multiple_create():
 
     names = ["Zeros", "Ones"]
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
 
     dfs.create(filename=dfs0File, data=data, names=names, title="Zeros and ones")
 
@@ -60,7 +63,7 @@ def test_create_timestep_7days():
 
     names = ["Zeros", "Ones"]
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
 
     dfs.create(
         filename=dfs0File,
@@ -98,7 +101,7 @@ def test_create_equidistant_calendar():
     unit = [1000, 1000]
     data_value_type = [0, 1]
     dt = 5
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     dfs.create(
         filename=dfs0file,
         data=data,
@@ -133,7 +136,7 @@ def test_create_non_equidistant_calendar():
     unit = [1000, 1000]
     data_value_type = [0, 1]
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     dfs.create(
         filename=dfs0file,
         data=data,
@@ -153,7 +156,7 @@ def test_read_dfs0_to_pandas_single_item():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     df = dfs.read_to_pandas(dfs0file, item_numbers=[1])
 
     assert df.shape[1] == 1
@@ -163,7 +166,7 @@ def test_read_dfs0_single_item():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     (data, t, names) = dfs.read(dfs0file, item_numbers=[1])
 
     assert len(data) == 1
@@ -173,7 +176,7 @@ def test_read_dfs0_single_item_named_access():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     res = dfs.read(dfs0file, item_numbers=[1])
     data = res.data
 
@@ -184,7 +187,7 @@ def test_read_dfs0_single_item_read_by_name():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     res = dfs.read(
         dfs0file, item_names=["NotFun", "VarFun01"]
     )  # reversed order compare to original file
@@ -198,7 +201,7 @@ def test_read_dfs0_to_pandas():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     pd = dfs.read_to_pandas(dfs0file)
 
     assert np.isnan(pd[pd.columns[0]][2])
@@ -207,7 +210,66 @@ def test_read_dfs0_to_pandas():
 def test_read_dfs0_to_matrix():
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = dfs0.dfs0()
+    dfs = Dfs0()
     (data, t, names) = dfs.read(filename=dfs0file)
 
     assert len(data) == 2
+
+
+def test_write(tmpdir):
+    dfs0file = r"tests/testdata/random.dfs0"
+    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+
+    copyfile(dfs0file, tmpfile)
+    dfs = Dfs0()
+    res = dfs.read(tmpfile)
+    data = res.data
+
+    # Do something with the data
+    data[0] = np.zeros_like(data[0])
+    data[1] = np.ones_like(data[0])
+
+    # Overwrite the file
+    dfs.write(tmpfile, data)
+
+
+def test_write_wrong_n_items(tmpdir):
+    dfs0file = r"tests/testdata/random.dfs0"
+    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+
+    copyfile(dfs0file, tmpfile)
+    dfs = Dfs0()
+    res = dfs.read(tmpfile)
+    data = res.data
+
+    # One item too many...
+    data[0] = np.zeros_like(data[0])
+    data[1] = np.ones_like(data[0])
+    data.append(np.ones_like(data[0]))
+
+    # Overwrite the file
+    with pytest.raises(Exception):
+        dfs.write(tmpfile, data)
+
+
+def test_write_no_existing_file():
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = Dfs0()
+    res = dfs.read(dfs0file)
+    data = res.data
+
+    # Overwrite the file
+    with pytest.raises(Exception):
+        dfs.write("not_a_file", data)
+
+
+def test_read_dfs0_main_module():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = mikeio.Dfs0()
+    (data, t, names) = dfs.read(dfs0file, item_numbers=[1])
+
+    assert len(data) == 1
+

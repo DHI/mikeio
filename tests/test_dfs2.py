@@ -2,7 +2,7 @@ import os
 import numpy as np
 import datetime
 
-from mikeio import dfs2 as dfs2
+from mikeio.dfs2 import Dfs2
 
 
 def test_simple_create():
@@ -18,7 +18,7 @@ def test_simple_create():
 
     data.append(d)
 
-    dfs = dfs2.dfs2()
+    dfs = Dfs2()
 
     dfs.create(filename=filename, data=data)
 
@@ -61,7 +61,7 @@ def test_create_single_item():
     names = ["testing water level"]
     title = "test dfs2"
 
-    dfs = dfs2.dfs2()
+    dfs = Dfs2()
 
     dfs.create(
         filename=filename,
@@ -114,7 +114,7 @@ def test_create_multiple_item():
     names = ["testing water level", "testing rainfall", "testing drain time constant"]
     title = "test dfs2"
 
-    dfs = dfs2.dfs2()
+    dfs = Dfs2()
 
     dfs.create(
         filename=filename,
@@ -150,7 +150,7 @@ def test_non_equidistant_calendar():
 
     data.append(d)
 
-    dfs = dfs2.dfs2()
+    dfs = Dfs2()
 
     dfs.create(filename=filename, data=data, datetimes=datetimes)
 
@@ -161,7 +161,7 @@ def test_non_equidistant_calendar():
 def test_read():
 
     filename = r"tests/testdata/random.dfs2"
-    dfs = dfs2.dfs2()
+    dfs = Dfs2()
 
     data = dfs.read(filename, item_names=["testing water level"])[0]
     data = data[0]
@@ -173,7 +173,7 @@ def test_read():
 def test_read_item_names():
 
     filename = r"tests/testdata/random.dfs2"
-    dfs = dfs2.dfs2()
+    dfs = Dfs2()
 
     data = dfs.read(filename, [0])[0]
     data = data[0]
@@ -185,7 +185,7 @@ def test_read_item_names():
 def test_read_named_access():
 
     filename = r"tests/testdata/random.dfs2"
-    dfs = dfs2.dfs2()
+    dfs = Dfs2()
 
     res = dfs.read(filename, [0])
 

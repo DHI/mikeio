@@ -1,11 +1,11 @@
 import os
 import pytest
-from mikeio.mesh import mesh
+from mikeio.mesh import Mesh
 
 
 def test_get_number_of_elements():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = mesh()
+    m = Mesh()
 
     m.read(filename)
 
@@ -14,7 +14,7 @@ def test_get_number_of_elements():
 
 def test_get_element_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = mesh()
+    m = Mesh()
 
     m.read(filename)
 
@@ -27,7 +27,7 @@ def test_get_element_coordinates():
 
 def test_get_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = mesh()
+    m = Mesh()
 
     m.read(filename)
 
@@ -38,7 +38,7 @@ def test_get_node_coordinates():
 
 def test_get_land_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = mesh()
+    m = Mesh()
 
     m.read(filename)
 
@@ -49,7 +49,7 @@ def test_get_land_node_coordinates():
 
 def test_get_bad_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = mesh()
+    m = Mesh()
 
     m.read(filename)
 

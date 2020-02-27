@@ -20,7 +20,7 @@ from .dutil import Dataset, find_item
 from .eum import TimeStep
 
 
-class dfs0:
+class Dfs0:
     def __read(self, filename):
         """Read data from the dfs0 file
         """
@@ -137,12 +137,16 @@ class dfs0:
         return Dataset(data, t, names)
 
     def write(self, filename, data):
-        """Writes data to the pre-created dfs0 file.
-        filename --> file path to existing dfs0 file.
-        data --> numpy matrix with data.
+
+        """write overwrites an existing dfs0 file.
+
+        filename:
+            Full path and filename to dfs0 to be modified.
+        data:
+            a list of numpy array
         """
 
-        if not path.exists(filename):
+        if not os.path.exists(filename):
             raise Warning("filename - File does not Exist %s", filename)
 
         try:
@@ -153,40 +157,45 @@ class dfs0:
         delete_value = dfs.FileInfo.DeleteValueFloat
 
         n_items = len(dfs.ItemInfo)
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
-        if len(np.shape(data)) == 1:
-            data = data.reshape(len(data), 1)
+        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         # Makes sure the data to write to the file matches the dfs0 file
-        if nt != data.shape[0]:
-            print("Inconsistent data size. nt (row count) must be size" + str(nt))
-            # quit()
-        if n_items != data.shape[1]:
-            print(
-                "Inconsistent data size. number of items (column count) must be size"
-                + str(n_items)
+        if n_time_steps != data[0].shape[0]:
+            raise Exception(
+                f"Inconsistent data size. nt (row count) must be size {n_time_steps}"
             )
 
-        data[np.isnan(data)] = delete_value
+        if n_items != len(data):
+            raise Exception(f"Number of items must be size {n_items}")
+
+        for i in range(n_items):
+            d = data[i]
+
+            d[np.isnan(d)] = delete_value
 
         d = Array.CreateInstance(System.Single, 1)
 
         # Get the date times in seconds (from start)
+        dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
+
         t = []
-        for i in range(nt):
-            itemData = dfs.ReadItemTimeStep(1, i)
-            newTime = DfsExtensions.TimeInSeconds(itemData, dfs.FileInfo.TimeAxis)
-            t.append(newTime)
+        # starttime = dfs.FileInfo.TimeAxis.StartDateTime
+
+        for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
+            t.append(dfsdata[it, 0])
 
         dfs.Reset()
 
         # COPY OVER THE DATA
-        for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
-            tit = System.Double(t[it])
-            for ii in range(len(dfs.ItemInfo)):
-                d = Array[System.Single](np.array([[data[it, ii]]]))
-                dfs.WriteItemTimeStepNext(tit, d)
+        for it in range(n_time_steps):
+
+            for ii in range(n_items):
+
+                d = Array[System.Single](np.array(data[ii][it : it + 1]))
+
+                # dt = (t[it] - t[0]).total_seconds()
+                dt = t[it]
+                dfs.WriteItemTimeStepNext(dt, d)
 
         dfs.Close()
 
@@ -209,7 +218,7 @@ class dfs0:
         filename:
             Full path and filename to dfs0 to be created.
         data:
-            a numpy matrix
+            a list of numpy array
         start_time:
             start date of type datetime.
         timeseries_unit:
@@ -310,7 +319,7 @@ class dfs0:
         for i in range(n_items):
 
             item = builder.CreateDynamicItemBuilder()
-            if type is not None:
+            if variable_type is not None:
                 item.Set(
                     names[i],
                     eumQuantity.Create(variable_type[i], unit[i]),

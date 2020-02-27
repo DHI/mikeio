@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import pytest
 
-from mikeio import dfs1 as dfs1
+from mikeio.dfs1 import Dfs1
 
 
 def test_simple_create():
@@ -18,7 +18,7 @@ def test_simple_create():
 
     data.append(d)
 
-    dfs = dfs1.dfs1()
+    dfs = Dfs1()
 
     dfs.create(filename=filename, data=data)
 
@@ -48,7 +48,7 @@ def test_create_single_item():
     names = ["testing water level"]
     title = "test dfs1"
 
-    dfs = dfs1.dfs1()
+    dfs = Dfs1()
 
     dfs.create(
         filename=filename,
@@ -69,7 +69,7 @@ def test_create_single_item():
 def test_read():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = dfs1.dfs1()
+    dfs = Dfs1()
 
     data = dfs.read(filename, [0])[0]
     data = data[0]
@@ -79,7 +79,7 @@ def test_read():
 def test_read_item_names():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = dfs1.dfs1()
+    dfs = Dfs1()
 
     data = dfs.read(filename, item_names=["testing water level"])[0]
     data = data[0]
@@ -89,7 +89,7 @@ def test_read_item_names():
 def test_read_item_names_not_in_dataset_fails():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = dfs1.dfs1()
+    dfs = Dfs1()
 
     with pytest.raises(Exception):
         dfs.read(filename, item_names=["NOTAREALVARIABLE"])
@@ -98,7 +98,7 @@ def test_read_item_names_not_in_dataset_fails():
 def test_read_names_access():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = dfs1.dfs1()
+    dfs = Dfs1()
 
     res = dfs.read(filename, [0])
     data = res.data

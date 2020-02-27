@@ -12,7 +12,7 @@ from .helpers import safe_length
 from .dutil import to_numpy, Dataset
 
 
-class dfs3:
+class Dfs3:
     def __calculate_index(self, nx, ny, nz, x, y, z):
         """ Calculates the position in the dfs3 data array based on the
         number of x,y,z layers (nx,ny,nz) at the specified x,y,z position.

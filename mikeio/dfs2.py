@@ -16,7 +16,7 @@ from .eum import TimeStep
 from .helpers import safe_length
 
 
-class dfs2:
+class Dfs2:
     def __calculate_index(self, nx, ny, x, y):
         """ Calculates the position in the dfs2 data array based on the
         number of x,y  (nx,ny) at the specified x,y position.

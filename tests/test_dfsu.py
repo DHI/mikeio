@@ -1,11 +1,11 @@
 import os
 import pytest
-from mikeio.dfsu import dfsu
+from mikeio.dfsu import Dfsu
 
 
 def test_read_all_items_returns_all_items_and_names():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     (data, t, names) = dfs.read(filename)
 
@@ -15,7 +15,7 @@ def test_read_all_items_returns_all_items_and_names():
 
 def test_read_single_item_returns_single_item():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     (data, t, names) = dfs.read(filename, item_numbers=[3])
 
@@ -25,7 +25,7 @@ def test_read_single_item_returns_single_item():
 
 def test_read_returns_array_time_dimension_first():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     (data, t, names) = dfs.read(filename, item_numbers=[3])
 
@@ -34,7 +34,7 @@ def test_read_returns_array_time_dimension_first():
 
 def test_read_selected_item_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     (data, t, names) = dfs.read(filename, item_numbers=[0, 3])
 
@@ -46,7 +46,7 @@ def test_read_selected_item_returns_correct_items():
 
 def test_read_selected_item_names_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     (data, t, names) = dfs.read(
         filename, item_names=["Surface elevation", "Current speed"]
@@ -61,7 +61,7 @@ def test_read_selected_item_names_returns_correct_items():
 def test_read_all_time_steps():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     (data, t, names) = dfs.read(filename, item_numbers=[0, 3])
 
@@ -72,7 +72,7 @@ def test_read_all_time_steps():
 def test_read_single_time_step():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     (data, t, names) = dfs.read(filename, item_numbers=[0, 3], time_steps=[1])
 
@@ -83,7 +83,7 @@ def test_read_single_time_step():
 def test_read_single_time_step_outside_bounds_fails():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     with pytest.raises(Exception):
 
@@ -92,7 +92,7 @@ def test_read_single_time_step_outside_bounds_fails():
 
 def test_get_number_of_time_steps():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     dfs.read(filename)
     assert dfs.get_number_of_time_steps() == 9
@@ -100,7 +100,7 @@ def test_get_number_of_time_steps():
 
 def test_get_number_of_time_steps_with_input_arg():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = dfsu()
+    dfs = Dfsu()
 
     dfs.read(filename, time_steps=[4])
     assert dfs.get_number_of_time_steps() == 9
