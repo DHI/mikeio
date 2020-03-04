@@ -1,8 +1,6 @@
 import clr
-import pandas as pd
-import datetime
-import numpy as np
 import os.path
+import pandas as pd
 
 clr.AddReference("DHI.Mike1D.ResultDataAccess")
 from DHI.Mike1D.ResultDataAccess import ResultData
@@ -13,9 +11,10 @@ from DHI.Mike1D.Generic import Connection
 clr.AddReference("System")
 
 
-class res1d:
+class Res1D:
 
-    def __read(self, file_path):
+    @staticmethod
+    def __read(file_path):
         """
         Read the res1d file
         """
@@ -27,7 +26,8 @@ class res1d:
         file.Load()
         return file
 
-    def _get_time(self, file):
+    @staticmethod
+    def _get_time(file):
         for i in range(0, file.TimesList.Count):
             t = file.TimesList.get_Item(i)
             yield pd.Timestamp(year=t.get_Year(),
@@ -37,7 +37,8 @@ class res1d:
                                minute=t.get_Minute(),
                                second=t.get_Second())
 
-    def _get_values(self, dataItemTypes, file, indices, queries, reachNums):
+    @staticmethod
+    def _get_values(dataItemTypes, file, indices, queries, reachNums):
         df = pd.DataFrame()
         for i in range(0, len(indices)):
             d = (file.Reaches.get_Item(reachNums[i])
@@ -75,9 +76,9 @@ class res1d:
 
                     reach = file.Reaches.get_Item(i)
                     for j in range(0, reach.GridPoints.Count):
-                        isCorrectChainage = abs(
-                            float(reach.GridPoints.get_Item(j).Chainage) - query.Chainage) < chainage_tolerance
-                        if (isCorrectChainage):
+                        chainage_diff = float(reach.GridPoints.get_Item(j).Chainage) - query.Chainage
+                        is_correct_chainage = abs(chainage_diff) < chainage_tolerance
+                        if is_correct_chainage:
                             if "waterlevel" in self.format_string(query.VariableType):
                                 idx = int(j / 2)
                             elif "discharge" in self.format_string(query.VariableType):
@@ -85,10 +86,8 @@ class res1d:
                             elif "pollutant" in self.format_string(query.VariableType):
                                 idx = int((j - 1) / 2)
                             else:
-                                raise ("VariableType must be either Water Level, Discharge, or Pollutant.")
+                                raise Exception("VariableType must be either Water Level, Discharge, or Pollutant.")
                             reachNumber = i
-                            break
-                            break
                             break
 
             for i in range(0, file.get_Quantities().Count):
@@ -102,20 +101,18 @@ class res1d:
             dataItemTypes.append(item)
 
             if -1 in reachNums:
-                raise ("Reach Not Found")
+                raise Exception("Reach Not Found")
             if -1 in dataItemTypes:
-                raise ("Item Not Found")
+                raise Exception("Item Not Found")
             if -1 in indices:
-                raise ("Chainage Not Found")
+                raise Exception("Chainage Not Found")
 
         return dataItemTypes, indices, reachNums
 
     def read(self, file_path, queries):
 
         file = self.__read(file_path)
-
         dataItemTypes, indices, reachNums = self.find_items(file, queries)
-
         df = self._get_data(file, queries, dataItemTypes, indices, reachNums)
         file.Dispose()
         return df

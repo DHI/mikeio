@@ -11,6 +11,6 @@ def test_read_single_item():
     p1.BranchName = '104l1'
     p1.Chainage = 34.4131
     p1.VariableType = 'WaterLevel'
-    ts = r1d.res1d().read(file, [p1])
+    ts = r1d.Res1D().read(file, [p1])
 
     assert len(ts) == 110
