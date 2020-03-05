@@ -4,15 +4,15 @@ from mikeio.res1d import Res1D, ExtractionPoint
 
 def get_test_query():
     query = ExtractionPoint()
-    query.BranchName = '104l1'
+    query.BranchName = "104l1"
     query.Chainage = 34.4131
-    query.VariableType = 'WaterLevel'
+    query.VariableType = "WaterLevel"
 
     return query
 
 
 def test_file_does_not_exist():
-    file = r"testdata/not_a_file.res1d"
+    file = "tests/testdata/not_a_file.res1d"
 
     query = get_test_query()
 
@@ -21,7 +21,7 @@ def test_file_does_not_exist():
 
 
 def test_read_single_item():
-    file = r"testdata/Exam6Base.res1d"
+    file = "tests/testdata/Exam6Base.res1d"
     query = get_test_query()
     ts = Res1D().read(file, [query])
 
