@@ -1,136 +1,121 @@
-def read(res1DFile, extractionPoints):
-    import clr
-    import pandas as pd
-    import datetime
-    import numpy as np
-    import os.path
+import clr
+import os.path
+import pandas as pd
 
-    clr.AddReference("DHI.Mike1D.ResultDataAccess")
-    from DHI.Mike1D.ResultDataAccess import ResultData
+clr.AddReference("DHI.Mike1D.ResultDataAccess")
+from DHI.Mike1D.ResultDataAccess import ResultData
 
-    clr.AddReference("DHI.Mike1D.Generic")
-    from DHI.Mike1D.Generic import Connection
+clr.AddReference("DHI.Mike1D.Generic")
+from DHI.Mike1D.Generic import Connection
 
-    clr.AddReference("System")
+clr.AddReference("System")
 
-    if os.path.isfile(res1DFile) is False:
-        print("ERROR, File Not Found: " + res1DFile)
 
-    # Create a ResultData object and read the data file.
-    rd = ResultData()
-    rd.Connection = Connection.Create(res1DFile)
-    rd.Load()
+class Res1D:
 
-    reachNums = []
-    dataItemTypes = []
-    indices = []
+    @staticmethod
+    def __read(file_path):
+        """
+        Read the res1d file
+        """
+        if not os.path.exists(file_path):
+            raise FileExistsError(f"File does not exist {file_path}")
 
-    tol = 0.1
+        file = ResultData()
+        file.Connection = Connection.Create(file_path)
+        file.Load()
+        return file
 
-    # Find the Item
-    for ep in extractionPoints:
-        item = -1
-        reachNumber = -1
-        idx = -1
-        for i in range(0, rd.Reaches.Count):
-            if (
-                rd.Reaches.get_Item(i).Name.lower().strip()
-                == ep.BranchName.lower().strip()
-            ):
+    @staticmethod
+    def _get_time(file):
+        for i in range(0, file.TimesList.Count):
+            t = file.TimesList.get_Item(i)
+            yield pd.Timestamp(year=t.get_Year(),
+                               month=t.get_Month(),
+                               day=t.get_Day(),
+                               hour=t.get_Hour(),
+                               minute=t.get_Minute(),
+                               second=t.get_Second())
 
-                reach = rd.Reaches.get_Item(i)
-                for j in range(0, reach.GridPoints.Count):
-                    # print(str(j))
-                    if (
-                        abs(float(reach.GridPoints.get_Item(j).Chainage) - ep.Chainage)
-                        < tol
-                    ):
-                        if "waterlevel" in ep.VariableType.lower().strip().replace(
-                            " ", ""
-                        ):
-                            idx = int(j / 2)
-                        elif "discharge" in ep.VariableType.lower().strip().replace(
-                            " ", ""
-                        ):
+    @staticmethod
+    def _get_values(dataItemTypes, file, indices, queries, reachNums):
+        df = pd.DataFrame()
+        for i in range(0, len(indices)):
+            d = (file.Reaches.get_Item(reachNums[i])
+                 .get_DataItems()
+                 .get_Item(dataItemTypes[i])
+                 .CreateTimeSeriesData(indices[i]))
+            name = str(queries[i])
+            d = pd.Series(list(d), name=name)
+            df[name] = d
+        return df
 
-                            idx = int((j - 1) / 2)
-                        elif "pollutant" in ep.VariableType.lower().strip().replace(
-                            " ", ""
-                        ):
-                            idx = int((j - 1) / 2)
-                        else:
-                            print(
-                                "ERROR. Variable Type must be either Water Level, Discharge, or Pollutant"
-                            )
-                        reachNumber = i
-                        break
-                        break
-                        break
+    def _get_data(self, file, queries, dataItemTypes, indices, reachNums):
+        data = self._get_values(dataItemTypes, file, indices, queries, reachNums)
+        time = self._get_time(file)
+        data.index = pd.DatetimeIndex(time)
+        return data
 
-        for i in range(0, rd.get_Quantities().Count):
-            if ep.VariableType.lower().strip().replace(
-                " ", ""
-            ) == rd.get_Quantities().get_Item(i).Description.lower().strip().replace(
-                " ", ""
-            ):
-                item = i
-                break
+    @staticmethod
+    def format_string(s):
+        return s.lower().strip().replace(" ", "")
 
-        indices.append(idx)
-        reachNums.append(reachNumber)
-        dataItemTypes.append(item)
+    def find_items(self, file, queries, chainage_tolerance=0.1):
+        reachNums = []
+        dataItemTypes = []
+        indices = []
 
-    if -1 in reachNums:
-        print("ERROR. Reach Not Found")
-        quit()
-    if -1 in dataItemTypes:
-        print("ERROR. Item Not Found")
-        quit()
-    if -1 in indices:
-        print("ERROR. Chainage Not Found")
-        quit()
+        # Find the Item
+        for query in queries:
+            item = -1
+            reachNumber = -1
+            idx = -1
+            for i in range(0, file.Reaches.Count):
+                if (file.Reaches.get_Item(i).Name.lower().strip()
+                        == query.BranchName.lower().strip()):
 
-        # Get the Data
-    df = pd.DataFrame()
-    for i in range(0, len(indices)):
-        d = (
-            rd.Reaches.get_Item(reachNums[i])
-            .get_DataItems()
-            .get_Item(dataItemTypes[i])
-            .CreateTimeSeriesData(indices[i])
-        )
-        name = (
-            extractionPoints[i].VariableType
-            + " "
-            + str(extractionPoints[i].BranchName)
-            + " "
-            + str(extractionPoints[i].Chainage)
-        )
-        d = pd.Series(list(d))
-        d = d.rename(name)
-        df[name] = d
+                    reach = file.Reaches.get_Item(i)
+                    for j in range(0, reach.GridPoints.Count):
+                        chainage_diff = float(reach.GridPoints.get_Item(j).Chainage) - query.Chainage
+                        is_correct_chainage = abs(chainage_diff) < chainage_tolerance
+                        if is_correct_chainage:
+                            if "waterlevel" in self.format_string(query.VariableType):
+                                idx = int(j / 2)
+                            elif "discharge" in self.format_string(query.VariableType):
+                                idx = int((j - 1) / 2)
+                            elif "pollutant" in self.format_string(query.VariableType):
+                                idx = int((j - 1) / 2)
+                            else:
+                                raise Exception("VariableType must be either Water Level, Discharge, or Pollutant.")
+                            reachNumber = i
+                            break
 
-    # Get the Times
-    times = []
-    for i in range(0, rd.TimesList.Count):
-        it = rd.TimesList.get_Item(i)
-        t = pd.Timestamp(
-            datetime.datetime(
-                it.get_Year(),
-                it.get_Month(),
-                it.get_Day(),
-                it.get_Hour(),
-                it.get_Minute(),
-                it.get_Second(),
-            )
-        )
-        times.append(t)
+            for i in range(0, file.get_Quantities().Count):
+                if self.format_string(query.VariableType) == self.format_string(
+                        file.get_Quantities().get_Item(i).Description):
+                    item = i
+                    break
 
-    df.index = pd.DatetimeIndex(times)
+            indices.append(idx)
+            reachNums.append(reachNumber)
+            dataItemTypes.append(item)
 
-    rd.Dispose()
+            if -1 in reachNums:
+                raise Exception("Reach Not Found")
+            if -1 in dataItemTypes:
+                raise Exception("Item Not Found")
+            if -1 in indices:
+                raise Exception("Chainage Not Found")
 
-    return df
+        return dataItemTypes, indices, reachNums
+
+    def read(self, file_path, queries):
+
+        file = self.__read(file_path)
+        dataItemTypes, indices, reachNums = self.find_items(file, queries)
+        df = self._get_data(file, queries, dataItemTypes, indices, reachNums)
+        file.Dispose()
+        return df
 
 
 class ExtractionPoint:
@@ -151,3 +136,6 @@ class ExtractionPoint:
             Chainage number along branch
         """
         return Chainage
+
+    def __str__(self):
+        return f"{self.VariableType} {self.BranchName} {self.Chainage}"
