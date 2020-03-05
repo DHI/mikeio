@@ -19,7 +19,7 @@ class Res1D:
         Read the res1d file
         """
         if not os.path.exists(file_path):
-            raise ("File does not exist %s", file_path)
+            raise FileExistsError(f"File does not exist {file_path}")
 
         file = ResultData()
         file.Connection = Connection.Create(file_path)
