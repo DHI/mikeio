@@ -96,7 +96,39 @@ def test_diff_dfsu(tmpdir):
 
     diffed = mikeio.read(outfilename)
 
-    orgvalue = org.data[0][0]
     expected = 0.0
     scaledvalue = diffed.data[0][0]
     assert scaledvalue == pytest.approx(expected)
+
+
+def test_concat_overlapping(tmpdir):
+    infilename_a = "tests/testdata/tide1.dfs1"
+    infilename_b = "tests/testdata/tide2.dfs1"
+    outfilename = os.path.join(tmpdir.dirname, "concat.dfs1")
+
+    mikeio.generic.concat([infilename_a, infilename_b], outfilename)
+
+    ds = mikeio.read(outfilename)
+    assert len(ds.time) == 145
+
+
+def test_concat_files_gap_fail(tmpdir):
+    infilename_a = "tests/testdata/tide1.dfs1"
+    infilename_b = "tests/testdata/tide4.dfs1"
+    outfilename = os.path.join(tmpdir.dirname, "concat.dfs1")
+    with pytest.raises(Exception):
+        mikeio.generic.concat([infilename_a, infilename_b], outfilename)
+
+
+def test_concat_three_files(tmpdir):
+    infiles = [
+        "tests/testdata/tide1.dfs1",
+        "tests/testdata/tide2.dfs1",
+        "tests/testdata/tide4.dfs1",
+    ]
+    outfilename = os.path.join(tmpdir.dirname, "concat.dfs1")
+
+    mikeio.generic.concat(infiles, outfilename)
+
+    ds = mikeio.read(outfilename)
+    assert len(ds.time) == (5 * 48 + 1)

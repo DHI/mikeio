@@ -1,0 +1,39 @@
+// Created     : 2020-03-11 15:24:53
+// DLL         : C:\Program Files (x86)\DHI\2020\bin\x64\pfs2004.dll
+// Version     : 18.1.0.14067
+
+[txconc]
+   CLSID = 'TxConc.dll'
+   TypeName = 'txconc'
+   CREATEDTIME = '2020-03-11T15:24:45'
+   MODIFIEDTIME = '2020-03-11T15:24:45'
+   NOTES = ''
+   [Setup]
+      Name = 'Setup Name'
+      NumberFiles = 2
+      NumberDimensions = 1
+      NumberItems = 1
+      InsertDelIfGabs = 0
+      UseTimeRange = 1
+      TimeRange = 0, 145, 1
+      FirstFileTimeDef = 0
+      OverwriteWithLatest = 1
+      [File_1]
+         InputFile = |.\tide1.dfs1|
+         Items = 1
+      EndSect  // File_1
+
+      [File_2]
+         InputFile = |.\tide2.dfs1|
+         Items = 1
+      EndSect  // File_2
+
+      [File_Out]
+         OutputFile = |.\txconc.dfs1|
+         OutputFileTitle = ''
+      EndSect  // File_Out
+
+   EndSect  // Setup
+
+EndSect  // txconc
+

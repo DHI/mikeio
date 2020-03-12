@@ -1,9 +1,53 @@
+from datetime import datetime, timedelta
 import System
 from System import Array
-from DHI.Generic.MikeZero.DFS import DfsFileFactory
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
 from .dutil import to_numpy
 from .helpers import safe_length
 from shutil import copyfile
+
+
+def _clone(infilename, outfilename):
+    source = DfsFileFactory.DfsGenericOpen(infilename)
+    fileInfo = source.FileInfo
+
+    builder = DfsBuilder.Create(
+        fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion
+    )
+
+    # Set up the header
+    builder.SetDataType(fileInfo.DataType)
+    builder.SetGeographicalProjection(fileInfo.Projection)
+    builder.SetTemporalAxis(fileInfo.TimeAxis)
+    builder.SetItemStatisticsType(fileInfo.StatsType)
+    builder.DeleteValueByte = fileInfo.DeleteValueByte
+    builder.DeleteValueDouble = fileInfo.DeleteValueDouble
+    builder.DeleteValueFloat = fileInfo.DeleteValueFloat
+    builder.DeleteValueInt = fileInfo.DeleteValueInt
+    builder.DeleteValueUnsignedInt = fileInfo.DeleteValueUnsignedInt
+
+    # Copy custom blocks - if any
+    for customBlock in fileInfo.CustomBlocks:
+        builder.AddCustomBlock(customBlock)
+
+    # Copy dynamic items
+    for itemInfo in source.ItemInfo:
+        builder.AddDynamicItem(itemInfo)
+
+    # Create file
+    builder.CreateFile(outfilename)
+
+    # Copy static items
+    while True:
+        static_item = source.ReadStaticItemNext()
+        if static_item is None:
+            break
+        builder.AddStaticItem(static_item)
+
+    # Get the file
+    file = builder.GetFile()
+
+    return file
 
 
 def scale(infilename, outfilename, offset=0.0, factor=1.0):
@@ -131,4 +175,53 @@ def diff(infilename_a, infilename_b, outfilename):
 
     dfs_i_a.Close()
     dfs_i_b.Close()
+    dfs_o.Close()
+
+
+def concat(infilenames, outfilename):
+
+    dfs_i_a = DfsFileFactory.DfsGenericOpen(infilenames[0])
+
+    dfs_o = _clone(infilenames[0], outfilename)
+
+    n_items = safe_length(dfs_i_a.ItemInfo)
+
+    for i, infilename in enumerate(infilenames):
+
+        dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+        n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+        dt = dfs_i.FileInfo.TimeAxis.TimeStep
+        s = dfs_i.FileInfo.TimeAxis.StartDateTime
+        start_time = datetime(s.Year, s.Month, s.Day, s.Hour, s.Minute, s.Second)
+
+        if i > 0 and start_time > current_time + timedelta(seconds=dt):
+            dfs_o.Close()
+            os.remove(outfilename)
+            raise Exception("Gap in time axis detected - not supported")
+
+        current_time = start_time
+
+        if i < (len(infilenames) - 1):
+            dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
+            nf = dfs_n.FileInfo.TimeAxis.StartDateTime
+            next_start_time = datetime(
+                nf.Year, nf.Month, nf.Day, nf.Hour, nf.Minute, nf.Second
+            )
+
+        for timestep in range(n_time_steps):
+
+            current_time = start_time + timedelta(seconds=timestep * dt)
+            if i < (len(infilenames) - 1):
+                if current_time >= next_start_time:
+                    break
+
+            for item in range(n_items):
+
+                itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
+                d = to_numpy(itemdata.Data)
+
+                darray = Array[System.Single](d)
+
+                dfs_o.WriteItemTimeStepNext(0, darray)
+
     dfs_o.Close()
