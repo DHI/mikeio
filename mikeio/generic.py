@@ -8,6 +8,20 @@ from shutil import copyfile
 
 
 def _clone(infilename, outfilename):
+    """Clone a dfs file
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+
+    Returns
+    -------
+    DfsFile
+        MIKE generic dfs file object
+    """
     source = DfsFileFactory.DfsGenericOpen(infilename)
     fileInfo = source.FileInfo
 
@@ -53,19 +67,17 @@ def _clone(infilename, outfilename):
 def scale(infilename, outfilename, offset=0.0, factor=1.0):
     """Apply scaling to any dfs file
 
-        Usage:
-            scale(infilename, outfilename, offset=0.0, factor=1.0):
-        infilename
-            full path to the input file
-        outfilename
-            full path to the output file
-        offset
-            value to add to all items, default 0.0
-        factor
-            value to multiply to all items, default 1.0
+        Parameters
+        ----------
 
-        Return:
-            Nothing
+        infilename: str
+            full path to the input file
+        outfilename: str
+            full path to the output file
+        offset: float, optional
+            value to add to all items, default 0.0
+        factor: float, optional
+            value to multiply to all items, default 1.0
         """
 
     copyfile(infilename, outfilename)
@@ -89,19 +101,16 @@ def scale(infilename, outfilename, offset=0.0, factor=1.0):
 
 
 def sum(infilename_a, infilename_b, outfilename):
-    """Sum two dfs files
+    """Sum two dfs files (a+b)
 
-    Usage:
-        sum(infilename_a, infilename_b, outfilename):
-    infilename_a
+    Parameters
+    ----------
+    infilename_a: str
         full path to the first input file
-    infilename_b
+    infilename_b: str
         full path to the second input file
-    outfilename
+    outfilename: str
         full path to the output file
-    
-    Return:
-        Nothing
     """
     copyfile(infilename_a, outfilename)
 
@@ -134,20 +143,18 @@ def sum(infilename_a, infilename_b, outfilename):
 
 
 def diff(infilename_a, infilename_b, outfilename):
-    """Caluclate difference between two dfs files
+    """Calculate difference between two dfs files (a-b)
 
-    Usage:
-        diff(infilename_a, infilename_b, outfilename):
-    infilename_a
+    Parameters
+    ----------
+    infilename_a : str
         full path to the first input file
-    infilename_b
+    infilename_b : str
         full path to the second input file
-    outfilename
+    outfilename : str
         full path to the output file
-    
-    Return:
-        Nothing
     """
+
     copyfile(infilename_a, outfilename)
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
@@ -179,6 +186,23 @@ def diff(infilename_a, infilename_b, outfilename):
 
 
 def concat(infilenames, outfilename):
+    """Concatenates files along the time axis
+
+    If files are overlapping, the last one will be used.
+
+    Parameters
+    ----------
+    infilenames: list of str
+        filenames to concatenate
+
+    outfilename: str
+        filename
+
+    Notes
+    ------
+
+    The list of input files have to be sorted, i.e. in chronological order
+    """
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(infilenames[0])
 
