@@ -149,7 +149,7 @@ class Dfs2:
         if not all(np.shape(d)[2] == number_x for d in data):
             raise Warning(
                 "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
+                "Data is list of matices [time, y, x]"
             )
         if not len(data) == n_items:
             raise Warning(
@@ -191,7 +191,7 @@ class Dfs2:
         filename:
             Location to write the dfs2 file
         data:
-            list of matrices, one for each item. Matrix dimension: y, x, time
+            list of matrices, one for each item. Matrix dimension: time, y, x
         start_time:
             start date of type datetime.
         timeseries_unit:
