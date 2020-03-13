@@ -110,7 +110,7 @@ class Dfs1:
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.filenameOpenEdit(filename)
+        dfs = DfsFileFactory.Dfs1FileOpenEdit(filename)
 
         # Determine the size of the grid
         number_x = dfs.SpatialAxis.XCount
@@ -137,7 +137,7 @@ class Dfs1:
 
         for i in range(n_time_steps):
             for item in range(n_items):
-                d = data[item][:, i]
+                d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
                 darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
                 dfs.WriteItemTimeStepNext(0, darray)

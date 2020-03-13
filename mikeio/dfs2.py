@@ -126,7 +126,7 @@ class Dfs2:
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.filenameOpenEdit(filename)
+        dfs = DfsFileFactory.Dfs2FileOpenEdit(filename)
 
         # Determine the size of the grid
         number_y = dfs.SpatialAxis.YCount
@@ -136,20 +136,20 @@ class Dfs2:
 
         deletevalue = -1e-035
 
-        if not all(np.shape(d)[0] == number_y for d in data):
-            raise Warning(
-                "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [y,x,time]"
-            )
-        if not all(np.shape(d)[1] == number_x for d in data):
-            raise Warning(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [y,x,time]"
-            )
-        if not all(np.shape(d)[2] == n_time_steps for d in data):
+        if not all(np.shape(d)[0] == n_time_steps for d in data):
             raise Warning(
                 "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [y,x,time]"
+                "Data is list of matices [time,y,x]"
+            )
+        if not all(np.shape(d)[1] == number_y for d in data):
+            raise Warning(
+                "ERROR data matrices in the Y dimension do not all match in the data list. "
+                "Data is list of matices [time,y,x]"
+            )
+        if not all(np.shape(d)[2] == number_x for d in data):
+            raise Warning(
+                "ERROR data matrices in the X dimension do not all match in the data list. "
+                "Data is list of matices [time,y,x]"
             )
         if not len(data) == n_items:
             raise Warning(
