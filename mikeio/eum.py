@@ -1,4 +1,5 @@
 from enum import IntEnum
+from mikeio.dfs_util import unit_list
 
 
 class TimeStep(IntEnum):
@@ -586,3 +587,10 @@ class Item(IntEnum):
     Molal_Concentration = 110300
     Suspended_sediment_load_per_area = 110301
     Bollard_Force = 110302
+
+    def __init__(self, code):
+        self.code = code
+
+    @property
+    def units(self):
+        return unit_list(self.code)
