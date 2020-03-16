@@ -134,13 +134,14 @@ plt.plot(res.time, res.data[0][:,idx])
 ```
 ![Timeseries](images/dfsu_ts.png)
 
-## Misc utilities
- to query variable type, time series types (useful when creating a new dfs file)
+## Items, units
+ Useful when creating a new dfs file
 ```python
->>> from mikeio.dfs_util import type_list, unit_list
->>> type_list('Water level')
-{100000: 'Water Level', 100307: 'Water level change'}
-
->>> unit_list(100307)
-{1000: 'meter', 1003: 'feet'}
+>>> from mikeio.eum import Item
+>>> Item.Temperature
+<Item.Temperature: 100006>
+>>> Item.Temperature.units
+{'degree Celsius': 2800, 'degree Fahrenheit': 2801, 'degree Kelvin': 2802}
+>>> Item.Temperature.units['degree Kelvin']
+2802
 ```
