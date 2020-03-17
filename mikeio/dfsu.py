@@ -19,16 +19,22 @@ from .helpers import safe_length
 
 class Dfsu:
     def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
-        """ Function: Read a dfsu file
+        """Read a dfsu file
 
-        usage:
-            [data, time, name] = read(filename, item_numbers)
-            item_numbers is a list of indices (base 0) to read from
+        Paramters
+        ---------
+        filename: str
+        item_numbers: list[int], optional
+            Read only selected items, by number (0-based)
+        item_names: list[str], optional
+            Read only selected items, by name, takes precedence over item_numbers
+        time_steps: list[int], optional
+            Read only selected time_steps
 
         Returns
-            1) the data contained in a dfsu file in a list of numpy matrices
-            2) time index
-            3) name of the items
+        -------
+        Dataset
+            A dataset with data dimensions [t,elements]
         """
 
         # Open the dfs file for reading
@@ -103,22 +109,15 @@ class Dfsu:
         return Dataset(data_list, time, names)
 
     def write(self, filename, data):
-        """
-        Function: write to a pre-created dfsu file.
+        """Overwrite a pre-created dfsu file.
 
-        filename:
+        Parameters
+        ----------
+        filename: str
             full path and filename to existing dfsu file
-
-        data:
+        data: list[np.array]
             list of matrices. len(data) must equal the number of items in the dfsu.
             Each matrix must be of dimension time,elements
-
-        usage:
-            write(filename, data) where  data(nt,elements)
-
-        Returns:
-            Nothing
-
         """
 
         # Open the dfs file for writing
@@ -151,6 +150,32 @@ class Dfsu:
         names=None,
         title=None,
     ):
+        """Create a dfsu file
+
+        Parameters
+        -----------
+        meshfilename: str,
+            full path to a valid mesh file
+        filename: str
+            full path to the new dfsu file
+        data: list[np.array]
+            list of matrices, one for each item. Matrix dimension: time, y, x
+        start_time: datetime, optional
+            start datetime, default is datetime.now()
+        dt: float
+            The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
+            means 5 mins and 30 seconds. Default 1
+        timeseries_unit: TimeStep, optional
+             default TimeStep.SECOND
+        variable_type: list[int], optional
+            EUM type, default is undefined
+        unit: list[int], optional
+            EUM unit, default is undefined
+        names: list[str]
+            names of items
+        title: str
+            title of the dfsu file. Default is blank.
+        """
 
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
@@ -220,8 +245,19 @@ class Dfsu:
         dfs.Close()
 
     def get_node_coords(self, code=None):
-        """
-        Function: get node coordinates, optionally filtered by code, land==1
+        """Get the coordinates of each node.
+
+
+        Parameters
+        ----------
+
+        code: int
+            Get only nodes with specific code, e.g. land == 1
+
+        Returns
+        -------
+            np.array
+                x,y,z of each node
         """
         # Node coordinates
         xn = np.array(list(self._dfs.X))
@@ -244,14 +280,12 @@ class Dfsu:
         return nc
 
     def get_element_coords(self):
-        """
-        Function: Calculates the coordinates of the center of each element.
+        """Calculates the coordinates of the center of each element.
 
-        usage:
-            dfs.get_element_coords() where dfs = dfs.read(dfsufile)
-
-        Returns:
-            nd-array of x,y,z of each element
+        Returns
+        -------
+            np.array
+                x,y,z of each element
         """
         n_elements = self._dfs.NumberOfElements
 
@@ -281,6 +315,18 @@ class Dfsu:
         return ec
 
     def find_closest_element_index(self, x, y, z=None):
+        """Find index of closest element
+
+        Parameters
+        ----------
+
+        x: float
+            X coordinate(easting or longitude)
+        y: float
+            Y coordinate(northing or latitude)
+        z: float, optional
+          Z coordinate(depth, positive upwards)
+        """
 
         ec = self.get_element_coords()
 
@@ -302,29 +348,22 @@ class Dfsu:
 
     @property
     def is_geo(self):
-        """
-        Function: Determines if dfsu file is defined on geographical LONG/LAT mesh.
-
-        usage:
-            dfs.is_geo() where dfs = dfs.read(dfsufile)
+        """Determines if dfsu file is defined on geographical LONG/LAT mesh.
 
         Returns:
-            True if LONG/LAT, FALSE otherwise
+            bool
+                True if LONG/LAT, FALSE otherwise
         """
         return self._dfs.Projection.WKTString == "LONG/LAT"
 
     def get_element_area(self):
-        """
-        Function: Calculates the horizontal area of each element.
-
-        usage:
-            dfs.get_element_area() where dfs = dfs.read(dfsufile)
+        """Calculate the horizontal area of each element.
 
         Returns:
-            array of areas in m2
+            np.array
+                areas in m2
         """
         n_elements = self._dfs.NumberOfElements
-        # element_ids  = self._dfs.ElementIds
 
         # Node coordinates
         xn = np.array(list(self._dfs.X))
