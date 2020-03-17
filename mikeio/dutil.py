@@ -135,3 +135,6 @@ class Dataset:
             return self.data[x]
 
         raise Exception("Invalid operation")
+
+    def _ipython_key_completions_(self):
+        return self.names
