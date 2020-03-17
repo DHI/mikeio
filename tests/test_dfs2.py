@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import datetime
+from shutil import copyfile
 
 from mikeio.dfs2 import Dfs2
 
@@ -196,5 +197,26 @@ def test_read_named_access():
 
 def test_write():
 
-    pass
+    filename1 = r"tests/testdata/random.dfs2"
+    filename2 = r"tests/testdata/random_for_write.dfs2"
+    copyfile(filename1, filename2)
+    
+    # read contents of original file
+    dfs = Dfs2()
+    res1 = dfs.read(filename1, [0])
+
+    # overwrite 
+    res1.data[0] = -2*res1.data[0] 
+    dfs.write(filename2, res1.data)
+
+    # read contents of manipulated file
+    res1 = dfs.read(filename1, [0])
+    res2 = dfs.read(filename2, [0])
+
+    data1 = res1.data[0]
+    data2 = res2.data[0]
+    assert data2[0, 11, 0] == -2*data1[0, 11, 0]
+
+    # clean 
+    os.remove(filename2)
 
