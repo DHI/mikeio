@@ -219,17 +219,50 @@ class Dfsu:
 
         dfs.Close()
 
+    def get_node_coords(self, code=None):
+        """
+        Function: get node coordinates, optionally filtered by code, land==1
+        """
+        # Node coordinates
+        xn = np.array(list(self._dfs.X))
+        yn = np.array(list(self._dfs.Y))
+        zn = np.array(list(self._dfs.Z))
+
+        nc = np.column_stack([xn, yn, zn])
+
+        if code is not None:
+
+            c = np.array(list(self._dfs.Code))
+            valid_codes = set(c)
+
+            if code not in valid_codes:
+
+                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
+                raise Exception
+            return nc[c == code]
+
+        return nc
+
     def get_element_coords(self):
-        ne = self._dfs.NumberOfElements
+        """
+        Function: Calculates the coordinates of the center of each element.
+
+        usage:
+            dfs.get_element_coords() where dfs = dfs.read(dfsufile)
+
+        Returns:
+            nd-array of x,y,z of each element
+        """
+        n_elements = self._dfs.NumberOfElements
 
         # Node coordinates
         xn = np.array(list(self._dfs.X))
         yn = np.array(list(self._dfs.Y))
         zn = np.array(list(self._dfs.Z))
 
-        ec = np.empty([ne, 3])
+        ec = np.empty([n_elements, 3])
 
-        for j in range(ne):
+        for j in range(n_elements):
             nodes = self._dfs.ElementTable[j]
 
             xcoords = np.empty(nodes.Length)
@@ -267,3 +300,83 @@ class Dfsu:
     def get_number_of_time_steps(self):
         return self._dfs.get_NumberOfTimeSteps()
 
+    def is_geo(self):
+        """
+        Function: Determines if dfsu file is defined on geographical LONG/LAT mesh.
+
+        usage:
+            dfs.is_geo() where dfs = dfs.read(dfsufile)
+
+        Returns:
+            True if LONG/LAT, FALSE otherwise
+        """
+        return self._dfs.Projection.WKTString == 'LONG/LAT' 
+
+    def get_element_area(self):
+        """
+        Function: Calculates the horizontal area of each element.
+
+        usage:
+            dfs.get_element_area() where dfs = dfs.read(dfsufile)
+
+        Returns:
+            array of areas in m2
+        """
+        n_elements = self._dfs.NumberOfElements
+        #element_ids  = self._dfs.ElementIds
+        
+        # Node coordinates
+        xn = np.array(list(self._dfs.X))
+        yn = np.array(list(self._dfs.Y))
+        
+        area = np.empty(n_elements)
+        xcoords = np.empty(4)
+        ycoords = np.empty(4)
+
+        for j in range(n_elements):
+            nodes = self._dfs.ElementTable[j]
+
+            for i in range(nodes.Length):
+                nidx = nodes[i] - 1
+                xcoords[i] = xn[nidx]
+                ycoords[i] = yn[nidx]
+
+            # ab : edge vector corner a to b
+            abx = xcoords[1] - xcoords[0]
+            aby = ycoords[1] - ycoords[0]
+
+            # ac : edge vector corner a to c
+            acx = xcoords[2] - xcoords[0]
+            acy = ycoords[2] - ycoords[0]
+
+            isquad = False
+            if nodes.Length > 3:
+                isquad = True
+                # ad : edge vector corner a to d
+                adx = xcoords[3] - xcoords[0]  
+                ady = ycoords[3] - ycoords[0]
+                
+            # if geographical coords, convert all length to meters
+            if (self.is_geo()):
+                earth_radius = 6366707.0
+                deg_to_rad   = np.pi/180.0
+                earth_radius_deg_to_rad = earth_radius * deg_to_rad
+                
+                # Y on element centers
+                Ye    = np.sum(ycoords[:nodes.Length])/nodes.Length
+                cosYe = np.cos(np.deg2rad(Ye))
+                
+                abx = earth_radius_deg_to_rad * abx*cosYe
+                aby = earth_radius_deg_to_rad * aby
+                acx = earth_radius_deg_to_rad * acx*cosYe
+                acy = earth_radius_deg_to_rad * acy
+                if isquad:
+                    adx = earth_radius_deg_to_rad * adx*cosYe
+                    ady = earth_radius_deg_to_rad * ady
+            
+            # calculate area in m2
+            area[j] = 0.5*(abx*acy - aby*acx)
+            if isquad:
+                area[j] = area[j] + 0.5*(acx*ady - acy*adx)
+
+        return np.abs(area)
