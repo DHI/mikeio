@@ -9,7 +9,8 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
 
 ## Installation
 
-From PyPI:
+From PyPI: [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+
 
 `pip install mikeio`
 
