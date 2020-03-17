@@ -112,7 +112,7 @@ def test_get_node_coords():
     dfs.read(filename)
 
     nc = dfs.get_node_coords()
-    assert nc[0,0] == 607031.4886285994
+    assert nc[0, 0] == 607031.4886285994
 
 
 def test_get_element_coords():
@@ -121,7 +121,7 @@ def test_get_element_coords():
     dfs.read(filename)
 
     ec = dfs.get_element_coords()
-    assert ec[1,1] == 6906790.5928664245
+    assert ec[1, 1] == 6906790.5928664245
 
 
 def test_find_closest_element_index():
@@ -138,7 +138,7 @@ def test_is_geo_UTM():
     dfs = Dfsu()
     dfs.read(filename)
 
-    assert dfs.is_geo() == False
+    assert dfs.is_geo is False
 
 
 def test_is_geo_LONGLAT():
@@ -146,7 +146,7 @@ def test_is_geo_LONGLAT():
     dfs = Dfsu()
     dfs.read(filename)
 
-    assert dfs.is_geo()
+    assert dfs.is_geo is True
 
 
 def test_get_element_area_UTM():
@@ -165,4 +165,4 @@ def test_get_element_area_LONGLAT():
 
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
-    
+

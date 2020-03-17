@@ -300,6 +300,7 @@ class Dfsu:
     def get_number_of_time_steps(self):
         return self._dfs.get_NumberOfTimeSteps()
 
+    @property
     def is_geo(self):
         """
         Function: Determines if dfsu file is defined on geographical LONG/LAT mesh.
@@ -310,7 +311,7 @@ class Dfsu:
         Returns:
             True if LONG/LAT, FALSE otherwise
         """
-        return self._dfs.Projection.WKTString == 'LONG/LAT' 
+        return self._dfs.Projection.WKTString == "LONG/LAT"
 
     def get_element_area(self):
         """
@@ -323,12 +324,12 @@ class Dfsu:
             array of areas in m2
         """
         n_elements = self._dfs.NumberOfElements
-        #element_ids  = self._dfs.ElementIds
-        
+        # element_ids  = self._dfs.ElementIds
+
         # Node coordinates
         xn = np.array(list(self._dfs.X))
         yn = np.array(list(self._dfs.Y))
-        
+
         area = np.empty(n_elements)
         xcoords = np.empty(4)
         ycoords = np.empty(4)
@@ -353,30 +354,30 @@ class Dfsu:
             if nodes.Length > 3:
                 isquad = True
                 # ad : edge vector corner a to d
-                adx = xcoords[3] - xcoords[0]  
+                adx = xcoords[3] - xcoords[0]
                 ady = ycoords[3] - ycoords[0]
-                
+
             # if geographical coords, convert all length to meters
-            if (self.is_geo()):
+            if self.is_geo:
                 earth_radius = 6366707.0
-                deg_to_rad   = np.pi/180.0
+                deg_to_rad = np.pi / 180.0
                 earth_radius_deg_to_rad = earth_radius * deg_to_rad
-                
+
                 # Y on element centers
-                Ye    = np.sum(ycoords[:nodes.Length])/nodes.Length
+                Ye = np.sum(ycoords[: nodes.Length]) / nodes.Length
                 cosYe = np.cos(np.deg2rad(Ye))
-                
-                abx = earth_radius_deg_to_rad * abx*cosYe
+
+                abx = earth_radius_deg_to_rad * abx * cosYe
                 aby = earth_radius_deg_to_rad * aby
-                acx = earth_radius_deg_to_rad * acx*cosYe
+                acx = earth_radius_deg_to_rad * acx * cosYe
                 acy = earth_radius_deg_to_rad * acy
                 if isquad:
-                    adx = earth_radius_deg_to_rad * adx*cosYe
+                    adx = earth_radius_deg_to_rad * adx * cosYe
                     ady = earth_radius_deg_to_rad * ady
-            
+
             # calculate area in m2
-            area[j] = 0.5*(abx*acy - aby*acx)
+            area[j] = 0.5 * (abx * acy - aby * acx)
             if isquad:
-                area[j] = area[j] + 0.5*(acx*ady - acy*adx)
+                area[j] = area[j] + 0.5 * (acx * ady - acy * adx)
 
         return np.abs(area)
