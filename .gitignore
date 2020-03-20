@@ -13,3 +13,6 @@
 .idea/
 
 dist/
+
+\.pytest_cache
+.vs

@@ -5,8 +5,9 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.3.0",
+    version="0.3.1",
     install_requires=["pythonnet", "numpy", "pandas"],
+    extras_require={"dev": ["pytest", "black"]},
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
     description="A package that works with the DHI dfs libraries to facilitate creating, writing and reading dfs, res1d and mesh files.",

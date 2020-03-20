@@ -104,3 +104,65 @@ def test_get_number_of_time_steps_with_input_arg():
 
     dfs.read(filename, time_steps=[4])
     assert dfs.get_number_of_time_steps() == 9
+
+
+def test_get_node_coords():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu()
+    dfs.read(filename)
+
+    nc = dfs.get_node_coords()
+    assert nc[0, 0] == 607031.4886285994
+
+
+def test_get_element_coords():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu()
+    dfs.read(filename)
+
+    ec = dfs.get_element_coords()
+    assert ec[1, 1] == 6906790.5928664245
+
+
+def test_find_closest_element_index():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu()
+    dfs.read(filename)
+
+    idx = dfs.find_closest_element_index(606200, 6905480)
+    assert idx == 317
+
+
+def test_is_geo_UTM():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu()
+    dfs.read(filename)
+
+    assert dfs.is_geo is False
+
+
+def test_is_geo_LONGLAT():
+    filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
+    dfs = Dfsu()
+    dfs.read(filename)
+
+    assert dfs.is_geo is True
+
+
+def test_get_element_area_UTM():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu()
+    dfs.read(filename)
+
+    areas = dfs.get_element_area()
+    assert areas[0] == 4949.102548750438
+
+
+def test_get_element_area_LONGLAT():
+    filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
+    dfs = Dfsu()
+    dfs.read(filename)
+
+    areas = dfs.get_element_area()
+    assert areas[0] == 139524218.81411952
+
