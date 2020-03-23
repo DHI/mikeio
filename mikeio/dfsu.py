@@ -142,9 +142,7 @@ class Dfsu:
         start_time=None,
         dt=1,
         timeseries_unit=TimeStep.SECOND,
-        variable_type=None,
-        unit=None,
-        names=None,
+        items=None,
         title=None,
     ):
         """Create a dfsu file
@@ -164,12 +162,8 @@ class Dfsu:
             means 5 mins and 30 seconds. Default 1
         timeseries_unit: TimeStep, optional
              default TimeStep.SECOND
-        variable_type: list[int], optional
-            EUM type, default is undefined
-        unit: list[int], optional
-            EUM unit, default is undefined
-        names: list[str]
-            names of items
+        unit: list[ItemInfo], optional
+            Name, item, unit, default is undefined
         title: str
             title of the dfsu file. Default is blank.
         """
@@ -180,14 +174,8 @@ class Dfsu:
         if start_time is None:
             start_time = datetime.now()
 
-        if names is None:
-            names = [f"Item {i+1}" for i in range(n_items)]
-
-        if variable_type is None:
-            variable_type = [999] * n_items
-
-        if unit is None:
-            unit = [0] * n_items
+        if items is None:
+            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
 
         if title is None:
             title = ""
@@ -219,10 +207,8 @@ class Dfsu:
         builder.SetTimeInfo(system_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
 
-        for i in range(n_items):
-            builder.AddDynamicItem(
-                names[i], eumQuantity.Create(variable_type[i], unit[i])
-            )
+        for item in items:
+            builder.AddDynamicItem(item.name, eumQuantity.Create(item.item, item.unit))
 
         try:
             dfs = builder.CreateFile(filename)

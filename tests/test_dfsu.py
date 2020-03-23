@@ -1,6 +1,9 @@
 import os
+import numpy as np
 import pytest
-from mikeio.dfsu import Dfsu
+
+from mikeio import Dfsu, Mesh
+from mikeio.dutil import ItemInfo
 
 
 def test_read_all_items_returns_all_items_and_names():
@@ -165,3 +168,24 @@ def test_get_element_area_LONGLAT():
 
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
+
+
+def test_create(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple.dfs1")
+    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
+
+    msh = Mesh()
+    msh.read(meshfilename)
+    n_elements = msh.number_of_elements
+    d = np.zeros((1, n_elements))
+    data = []
+    data.append(d)
+
+    items = [ItemInfo("Zeros")]
+
+    dfs = Dfsu()
+
+    dfs.create(meshfilename, filename, data, items=items)
+
+    assert True
