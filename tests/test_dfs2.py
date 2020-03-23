@@ -185,14 +185,14 @@ def test_read_item_names():
 
 def test_read_named_access():
 
-    filename = r"tests/testdata/random.dfs2"
+    filename = r"tests/testdata/random_two_item.dfs2"
     dfs = Dfs2()
 
-    res = dfs.read(filename, [0])
+    res = dfs.read(filename, [1])
 
-    assert res.data is not None
+    assert np.isnan(res.data[0][0, 0, 0])
     assert res.time is not None
-    assert res.names is not None
+    assert res.items[0].name == "Untitled"
 
 
 def test_write():
@@ -200,13 +200,13 @@ def test_write():
     filename1 = r"tests/testdata/random.dfs2"
     filename2 = r"tests/testdata/random_for_write.dfs2"
     copyfile(filename1, filename2)
-    
+
     # read contents of original file
     dfs = Dfs2()
     res1 = dfs.read(filename1, [0])
 
-    # overwrite 
-    res1.data[0] = -2*res1.data[0] 
+    # overwrite
+    res1.data[0] = -2 * res1.data[0]
     dfs.write(filename2, res1.data)
 
     # read contents of manipulated file
@@ -215,8 +215,7 @@ def test_write():
 
     data1 = res1.data[0]
     data2 = res2.data[0]
-    assert data2[0, 11, 0] == -2*data1[0, 11, 0]
+    assert data2[0, 11, 0] == -2 * data1[0, 11, 0]
 
-    # clean 
+    # clean
     os.remove(filename2)
-

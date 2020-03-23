@@ -5,6 +5,7 @@ import pytest
 from shutil import copyfile
 
 from mikeio.dfs1 import Dfs1
+from mikeio.eum import Item
 
 
 def test_simple_create():
@@ -31,12 +32,10 @@ def test_create_single_item():
 
     start_time = datetime.datetime(2012, 1, 1)
 
-    # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
-    timeseries_unit = 1402
     dt = 12
 
-    variable_type = [100000]
-    unit = [1000]
+    variable_type = [Item.Water_Level]  # [100000]
+    unit = [Item.Water_Level.units["meter"]]  # [1000]
 
     filename = r"random.dfs1"
 
@@ -107,6 +106,9 @@ def test_read_names_access():
     time = res.time
     assert item.shape == (100, 3)  # time, x
     assert len(time) == 100
+    assert res.items[0].name == "testing water level"
+    assert res.items[0].item == Item.Water_Level
+    assert res.items[0].unit == Item.Water_Level.units["meter"]
 
 
 def test_write():
@@ -114,13 +116,13 @@ def test_write():
     filename1 = r"tests/testdata/random.dfs1"
     filename2 = r"tests/testdata/random_for_write.dfs1"
     copyfile(filename1, filename2)
-    
+
     # read contents of original file
     dfs = Dfs1()
     res1 = dfs.read(filename1, [0])
 
-    # overwrite 
-    res1.data[0] = -2*res1.data[0] 
+    # overwrite
+    res1.data[0] = -2 * res1.data[0]
     dfs.write(filename2, res1.data)
 
     # read contents of manipulated file
@@ -129,8 +131,7 @@ def test_write():
 
     data1 = res1.data[0]
     data2 = res2.data[0]
-    assert data2[2, 1] == -2*data1[2, 1]
+    assert data2[2, 1] == -2 * data1[2, 1]
 
-    # clean 
+    # clean
     os.remove(filename2)
-

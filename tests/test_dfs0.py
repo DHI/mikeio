@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
-from mikeio.eum import TimeStep
+from mikeio.eum import TimeStep, Item
 from datetime import timedelta
 from shutil import copyfile
 import pytest
@@ -167,7 +167,7 @@ def test_read_dfs0_single_item():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0()
-    (data, t, names) = dfs.read(dfs0file, item_numbers=[1])
+    (data, t, items) = dfs.read(dfs0file, item_numbers=[1])
 
     assert len(data) == 1
 
@@ -194,7 +194,11 @@ def test_read_dfs0_single_item_read_by_name():
     data = res.data
 
     assert len(data) == 2
-    assert res.names[0] == "NotFun"
+    assert res.items[0].name == "NotFun"
+    assert res.items[0].item == Item.Water_Level
+    assert (
+        res.items[0].unit == Item.Water_Level.units["meter"]
+    )  # Not sure this is the most readable way to specify unit
 
 
 def test_read_dfs0_to_pandas():
@@ -211,7 +215,7 @@ def test_read_dfs0_to_matrix():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0()
-    (data, t, names) = dfs.read(filename=dfs0file)
+    (data, t, items) = dfs.read(filename=dfs0file)
 
     assert len(data) == 2
 
@@ -269,7 +273,6 @@ def test_read_dfs0_main_module():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = mikeio.Dfs0()
-    (data, t, names) = dfs.read(dfs0file, item_numbers=[1])
+    (data, t, items) = dfs.read(dfs0file, item_numbers=[1])
 
     assert len(data) == 1
-

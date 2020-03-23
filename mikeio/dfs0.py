@@ -16,8 +16,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
-from .dutil import Dataset, find_item
-from .eum import TimeStep
+from .dutil import Dataset, find_item, ItemInfo
+from .eum import TimeStep, Item
 
 
 class Dfs0:
@@ -33,9 +33,14 @@ class Dfs0:
         n_items = safe_length(dfs.ItemInfo)
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        names = []
+        items = []
         for i in range(n_items):
-            names.append(dfs.ItemInfo[i].Name)
+            eumItem = dfs.ItemInfo[i].Quantity.Item
+            eumUnit = dfs.ItemInfo[i].Quantity.Unit
+            name = dfs.ItemInfo[i].Name
+            variable = Item(eumItem)
+            item = ItemInfo(name, variable, eumUnit)
+            items.append(item)
 
         # BULK READ THE DFS0
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
@@ -60,7 +65,7 @@ class Dfs0:
 
         dfs.Close()
 
-        return data, t, names
+        return data, t, items
 
     def read_to_pandas(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return a Pandas DataFrame
@@ -106,10 +111,10 @@ class Dfs0:
             read only the items in the array specified, (takes precedence over item_numbers)
 
         Return:
-            Dataset(data, time, names)
+            Dataset(data, time, items)
         """
 
-        d, t, names = self.__read(filename)
+        d, t, items = self.__read(filename)
 
         if item_names is not None:
             item_numbers = find_item(self._dfs, item_names)
@@ -127,14 +132,16 @@ class Dfs0:
         data = []
 
         if item_numbers is not None:
-            names = itemgetter(*item_numbers)(names)
+            sel_items = []
             for item in item_numbers:
                 data.append(d[:, item])
+                sel_items.append(items[item])
+            items = sel_items
         else:
             for item in range(d.shape[1]):
                 data.append(d[:, item])
 
-        return Dataset(data, t, names)
+        return Dataset(data, t, items)
 
     def write(self, filename, data):
 

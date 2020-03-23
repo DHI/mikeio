@@ -1,7 +1,8 @@
 from datetime import datetime
 import numpy as np
 import pytest
-from mikeio.dutil import Dataset
+from mikeio.dutil import Dataset, ItemInfo
+from mikeio.eum import Item
 
 
 def test_get_names():
@@ -10,10 +11,11 @@ def test_get_names():
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
     time = [datetime.now()]
-    names = ["Foo"]
-    ds = Dataset(data, time, names)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
 
-    assert ds.names[0] == "Foo"
+    assert ds.items[0].name == "Foo"
+    assert ds.items[0].item == Item.Undefined
 
 
 def test_get_data():
@@ -22,8 +24,8 @@ def test_get_data():
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
     time = [datetime.now()]
-    names = ["Foo"]
-    ds = Dataset(data, time, names)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
 
     assert ds.data[0].shape == (100, 100, 30)
 
@@ -34,8 +36,8 @@ def test_get_data_2():
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
     time = [datetime.now()]
-    names = ["Foo"]
-    (data, time, names) = Dataset(data, time, names)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
 
     assert data[0].shape == (100, 100, 30)
 
@@ -46,8 +48,8 @@ def test_get_data_name():
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
     time = [datetime.now()]
-    names = ["Foo"]
-    ds = Dataset(data, time, names)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
 
     assert ds["Foo"].shape == (100, 100, 30)
 
@@ -58,8 +60,8 @@ def test_get_bad_name():
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
     time = [datetime.now()]
-    names = ["Foo"]
-    ds = Dataset(data, time, names)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
 
     with pytest.raises(Exception):
         ds["BAR"]
@@ -71,8 +73,8 @@ def test_get_data_mulitple_name_fails():
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
     time = [datetime.now()]
-    names = ["Foo"]
-    ds = Dataset(data, time, names)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
 
     with pytest.raises(Exception):
         ds[["Foo", "Foo"]]
@@ -83,5 +85,5 @@ if __name__ == "__main__":
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
     time = [datetime.now()]
-    names = ["Foo"]
-    (data, time, names) = Dataset(data, time, names)
+    items = [ItemInfo("Foo")]
+    (data, time, names) = Dataset(data, time, items)

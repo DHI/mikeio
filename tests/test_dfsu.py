@@ -7,27 +7,27 @@ def test_read_all_items_returns_all_items_and_names():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, names) = dfs.read(filename)
+    (data, t, items) = dfs.read(filename)
 
     assert len(data) == 4
-    assert len(names) == 4
+    assert len(items) == 4
 
 
 def test_read_single_item_returns_single_item():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, names) = dfs.read(filename, item_numbers=[3])
+    (data, t, items) = dfs.read(filename, item_numbers=[3])
 
     assert len(data) == 1
-    assert len(names) == 1
+    assert len(items) == 1
 
 
 def test_read_returns_array_time_dimension_first():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, names) = dfs.read(filename, item_numbers=[3])
+    (data, t, items) = dfs.read(filename, item_numbers=[3])
 
     assert data[0].shape == (9, 884)
 
@@ -36,26 +36,26 @@ def test_read_selected_item_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, names) = dfs.read(filename, item_numbers=[0, 3])
+    (data, t, items) = dfs.read(filename, item_numbers=[0, 3])
 
     assert len(data) == 2
-    assert len(names) == 2
-    assert names[0] == "Surface elevation"
-    assert names[1] == "Current speed"
+    assert len(items) == 2
+    assert items[0].name == "Surface elevation"
+    assert items[1].name == "Current speed"
 
 
 def test_read_selected_item_names_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, names) = dfs.read(
+    (data, t, items) = dfs.read(
         filename, item_names=["Surface elevation", "Current speed"]
     )
 
     assert len(data) == 2
-    assert len(names) == 2
-    assert names[0] == "Surface elevation"
-    assert names[1] == "Current speed"
+    assert len(items) == 2
+    assert items[0].name == "Surface elevation"
+    assert items[1].name == "Current speed"
 
 
 def test_read_all_time_steps():
@@ -63,10 +63,10 @@ def test_read_all_time_steps():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, names) = dfs.read(filename, item_numbers=[0, 3])
+    ds = dfs.read(filename, item_numbers=[0, 3])
 
-    assert len(t) == 9
-    assert data[0].shape[0] == 9
+    assert len(ds.time) == 9
+    assert ds.data[0].shape[0] == 9
 
 
 def test_read_single_time_step():
@@ -74,10 +74,10 @@ def test_read_single_time_step():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, names) = dfs.read(filename, item_numbers=[0, 3], time_steps=[1])
+    ds = dfs.read(filename, item_numbers=[0, 3], time_steps=[1])
 
-    assert len(t) == 1
-    assert data[0].shape[0] == 1
+    assert len(ds.time) == 1
+    assert ds.data[0].shape[0] == 1
 
 
 def test_read_single_time_step_outside_bounds_fails():
@@ -165,4 +165,3 @@ def test_get_element_area_LONGLAT():
 
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
-

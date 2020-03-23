@@ -11,7 +11,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 
-from .dutil import to_numpy, Dataset, find_item
+from .dutil import to_numpy, Dataset, ItemInfo, find_item, get_item_info
 from .eum import TimeStep
 from .helpers import safe_length
 
@@ -43,7 +43,7 @@ class Dfs2:
             read only the items in the array specified, (takes precedence over item_numbers)
 
         Return:
-            Dataset(data, time, names)
+            Dataset(data, time, items)
             where data[nt,y,x]
         """
 
@@ -97,14 +97,11 @@ class Dfs2:
             )
 
         time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
-        # time = pd.DatetimeIndex(t)
-        names = []
-        for item in range(n_items):
-            name = dfs.ItemInfo[item].Name
-            names.append(name)
+
+        items = get_item_info(dfs, item_numbers)
 
         dfs.Close()
-        return Dataset(data_list, time, names)
+        return Dataset(data_list, time, items)
 
     def write(self, filename, data):
         """

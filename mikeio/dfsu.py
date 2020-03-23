@@ -12,7 +12,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
-from .dutil import to_numpy, Dataset, find_item
+from .dutil import to_numpy, Dataset, ItemInfo, find_item, get_item_info
 from .eum import TimeStep
 from .helpers import safe_length
 
@@ -100,13 +100,10 @@ class Dfsu:
 
         time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
 
-        names = []
-        for item in range(n_items):
-            name = dfs.ItemInfo[item_numbers[item] + item_offset].Name
-            names.append(name)
+        items = get_item_info(dfs, item_numbers)
 
         dfs.Close()
-        return Dataset(data_list, time, names)
+        return Dataset(data_list, time, items)
 
     def write(self, filename, data):
         """Overwrite a pre-created dfsu file.
