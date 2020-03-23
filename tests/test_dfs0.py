@@ -4,6 +4,7 @@ import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
 from mikeio.eum import TimeStep, Item
+from mikeio.dutil import ItemInfo
 from datetime import timedelta
 from shutil import copyfile
 import pytest
@@ -39,11 +40,11 @@ def test_multiple_create():
     d2 = np.ones(nt)
     data.append(d2)
 
-    names = ["Zeros", "Ones"]
+    items = [ItemInfo("Zeros"), ItemInfo("Ones")]
 
     dfs = Dfs0()
 
-    dfs.create(filename=dfs0File, data=data, names=names, title="Zeros and ones")
+    dfs.create(filename=dfs0File, data=data, items=items, title="Zeros and ones")
 
     assert True
     os.remove(dfs0File)
@@ -61,14 +62,14 @@ def test_create_timestep_7days():
     d2 = np.ones(nt)
     data.append(d2)
 
-    names = ["Zeros", "Ones"]
+    items = [ItemInfo("Zeros"), ItemInfo("Ones")]
 
     dfs = Dfs0()
 
     dfs.create(
         filename=dfs0File,
         data=data,
-        names=names,
+        items=items,
         title="Zeros and ones",
         timeseries_unit=TimeStep.DAY,
         dt=7,
@@ -96,10 +97,9 @@ def test_create_equidistant_calendar():
     start_time = datetime.datetime(2017, 1, 1)
     timeseries_unit = 1402
     title = "Hello Test"
-    names = ["VarFun01", "NotFun"]
-    variable_type = [100000, 100000]
-    unit = [1000, 1000]
-    data_value_type = [0, 1]
+    items = [ItemInfo("VarFun01", 100000, 1000), ItemInfo("NotFun", 100000, 1000)]
+
+    data_value_type = [0, 1]  # TODO add data_value_type to ItemInfo
     dt = 5
     dfs = Dfs0()
     dfs.create(
@@ -108,10 +108,8 @@ def test_create_equidistant_calendar():
         start_time=start_time,
         timeseries_unit=timeseries_unit,
         dt=dt,
-        names=names,
+        items=items,
         title=title,
-        variable_type=variable_type,
-        unit=unit,
         data_value_type=data_value_type,
     )
 
@@ -131,9 +129,7 @@ def test_create_non_equidistant_calendar():
     for i in range(1000):
         time_vector.append(start_time + datetime.timedelta(hours=i * 0.1))
     title = "Hello Test"
-    names = ["VarFun01", "NotFun"]
-    variable_type = [100000, 100000]
-    unit = [1000, 1000]
+    items = [ItemInfo("VarFun01", 100000, 1000), ItemInfo("NotFun", 100000, 1000)]
     data_value_type = [0, 1]
 
     dfs = Dfs0()
@@ -141,10 +137,8 @@ def test_create_non_equidistant_calendar():
         filename=dfs0file,
         data=data,
         datetimes=time_vector,
-        names=names,
+        items=items,
         title=title,
-        variable_type=variable_type,
-        unit=unit,
         data_value_type=data_value_type,
     )
 

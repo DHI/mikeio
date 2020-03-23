@@ -214,36 +214,30 @@ class Dfs0:
         timeseries_unit=TimeStep.SECOND,
         dt=1,
         datetimes=None,
-        variable_type=None,
-        unit=None,
-        names=None,
+        items=None,
         title=None,
         data_value_type=None,
     ):
-        """create creates a dfs0 file.
+        """Create a dfs0 file.
 
-        filename:
+        Parameters
+        ----------
+        filename: str
             Full path and filename to dfs0 to be created.
-        data:
-            a list of numpy array
-        start_time:
+        data: list[np.array]
+            values
+        start_time: datetime.dateime, , optional
             start date of type datetime.
-        timeseries_unit:
-            Timestep default Timestep.SECOND
-        dt:
+        timeseries_unit: Timestep, optional
+            Timestep  unitdefault Timestep.SECOND
+        dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds. default to 1
-        variable_type:
-            Array integers corresponding to a variable types (ie. Water Level). Use dfsutil type_list
-            to figure out the integer corresponding to the variable.
-        unit:
-            Array integers corresponding to the unit corresponding to the variable types The unit (meters, seconds),
-            use dfsutil unit_list to figure out the corresponding unit for the variable.
-        names:
-            array of names (ie. array of strings)
-        title:
-            title (string)
-        data_value_type:
+        items: list[ItemInfo], optional
+            List of ItemInfo corresponding to a variable types (ie. Water Level).
+        title: str, optional
+            title
+        data_value_type: list[DataValueType], optional
             DataValueType default DataValueType.INSTANTANEOUS
 
         """
@@ -256,30 +250,12 @@ class Dfs0:
         if start_time is None:
             start_time = datetime.now()
 
-        if names is None:
-            names = [f"Item {i+1}" for i in range(n_items)]
+        if items is None:
+            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
 
-        if variable_type is None:
-            variable_type = [999] * n_items
-
-        if unit is None:
-            unit = [0] * n_items
-
-        if names is not None and len(names) != n_items:
+        if len(items) != n_items:
             raise Warning(
                 "names must be an array of strings with the same number of elements as data columns"
-            )
-
-        if len(variable_type) != n_items:
-            raise Warning(
-                "type if specified must be an array of integers (eumType) with the same number of "
-                "elements as data columns"
-            )
-
-        if len(unit) != n_items:
-            raise Warning(
-                "unit if specified must be an array of integers (eumType) with the same number of "
-                "elements as data columns"
             )
 
         if datetimes is None:
@@ -326,18 +302,12 @@ class Dfs0:
         for i in range(n_items):
 
             item = builder.CreateDynamicItemBuilder()
-            if variable_type is not None:
-                item.Set(
-                    names[i],
-                    eumQuantity.Create(variable_type[i], unit[i]),
-                    DfsSimpleType.Float,
-                )
-            else:
-                item.Set(
-                    str(i),
-                    eumQuantity.Create(eumItem.eumIItemUndefined, 0),
-                    DfsSimpleType.Float,
-                )
+
+            item.Set(
+                items[i].name,
+                eumQuantity.Create(items[i].item, items[i].unit),
+                DfsSimpleType.Float,
+            )
 
             if data_value_type is not None:
                 item.SetValueType(data_value_type[i])
