@@ -17,6 +17,14 @@ class Mesh:
     def get_number_of_elements(self):
         return self._mesh.NumberOfElements
 
+    @property
+    def number_of_elements(self):
+        return self._mesh.NumberOfElements
+
+    @property
+    def number_of_nodes(self):
+        return self._mesh.NumberOfNodes
+
     def get_number_of_nodes(self):
         return self._mesh.NumberOfNodes
 
