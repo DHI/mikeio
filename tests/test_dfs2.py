@@ -4,6 +4,10 @@ import datetime
 from shutil import copyfile
 
 from mikeio.dfs2 import Dfs2
+from mikeio.dutil import (
+    ItemInfo,
+)  # TODO should ItemInfo be in the main module or in eum
+from mikeio.eum import Item
 
 
 def test_simple_create():
@@ -35,8 +39,11 @@ def test_create_single_item():
     timeseries_unit = 1402
     dt = 12
 
-    variable_type = [100000]
-    unit = [1000]
+    items = [
+        ItemInfo(
+            "testing water level", Item.Water_Level, Item.Water_Level.units["meter"]
+        )
+    ]
 
     filename = r"random.dfs2"
 
@@ -59,7 +66,6 @@ def test_create_single_item():
     length_x = 100
     length_y = 100
 
-    names = ["testing water level"]
     title = "test dfs2"
 
     dfs = Dfs2()
@@ -70,12 +76,10 @@ def test_create_single_item():
         start_time=start_time,
         timeseries_unit=timeseries_unit,
         dt=dt,
-        variable_type=variable_type,
-        unit=unit,
+        items=items,
         coordinate=coordinate,
         length_x=length_x,
         length_y=length_y,
-        names=names,
         title=title,
     )
 
@@ -91,12 +95,12 @@ def test_create_multiple_item():
     timeseries_unit = 1402
     dt = 12
 
-    # from result we see Water Level is 100000, Rainfall is 100004, drain time constant 100362
-    variable_type = [100000, 100004, 100362]
-
-    # possible_units = util.unit_list(variable_type, search='meter')
-    # from result, we see meter is 1000 and milimeter is 1002, per second is 2605
-    unit = [1000, 1002, 2605]
+    # TODO change int to enum
+    items = [
+        ItemInfo("testing water level", 100000, 1000),
+        ItemInfo("testing rainfall", 100004, 1002),
+        ItemInfo("testing drain time constant", 100362, 2605),
+    ]
 
     filename = r"multiple.dfs2"
 
@@ -112,7 +116,6 @@ def test_create_multiple_item():
     length_x = 0.1
     length_y = 0.1
 
-    names = ["testing water level", "testing rainfall", "testing drain time constant"]
     title = "test dfs2"
 
     dfs = Dfs2()
@@ -123,12 +126,10 @@ def test_create_multiple_item():
         start_time=start_time,
         timeseries_unit=timeseries_unit,
         dt=dt,
-        variable_type=variable_type,
-        unit=unit,
+        items=items,
         coordinate=coordinate,
         length_x=length_x,
         length_y=length_y,
-        names=names,
         title=title,
     )
 
