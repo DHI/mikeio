@@ -6,11 +6,12 @@ from shutil import copyfile
 
 from mikeio.dfs1 import Dfs1
 from mikeio.eum import Item
+from mikeio.dutil import ItemInfo
 
 
-def test_simple_create():
+def test_simple_create(tmpdir):
 
-    filename = r"simple.dfs1"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs1")
 
     data = []
 
@@ -22,30 +23,27 @@ def test_simple_create():
 
     dfs = Dfs1()
 
+    # create a file, without specifying dates, names, units etc.
+    # Proably not so useful
     dfs.create(filename=filename, data=data)
 
     assert True
-    os.remove(filename)
 
 
-def test_create_single_item():
+def test_create_single_item(tmpdir):
 
-    start_time = datetime.datetime(2012, 1, 1)
-
-    dt = 12
-
-    variable_type = [Item.Water_Level]  # [100000]
-    unit = [Item.Water_Level.units["meter"]]  # [1000]
-
-    filename = r"random.dfs1"
+    filename = os.path.join(tmpdir.dirname, "random.dfs1")
 
     data = []
     d = np.random.random([100, 3])
 
     data.append(d)
-    length_x = 100
 
-    names = ["testing water level"]
+    items = [
+        ItemInfo(
+            "testing water level", Item.Water_Level, Item.Water_Level.units["meter"]
+        )
+    ]
     title = "test dfs1"
 
     dfs = Dfs1()
@@ -53,17 +51,14 @@ def test_create_single_item():
     dfs.create(
         filename=filename,
         data=data,
-        start_time=start_time,
-        dt=dt,
-        variable_type=variable_type,
-        unit=unit,
-        length_x=length_x,
-        names=names,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        length_x=100,
+        items=items,
         title=title,
     )
 
     assert True
-    os.remove(filename)
 
 
 def test_read():

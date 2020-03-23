@@ -148,35 +148,31 @@ class Dfs1:
         data,
         start_time=None,
         dt=1,
+        items=None,
         length_x=1,
         x0=0,
         coordinate=None,
         timeseries_unit=TimeStep.SECOND,
-        variable_type=None,
-        unit=None,
-        names=None,
         title=None,
     ):
         """
-        Creates a dfs1 file
+        Create a dfs1 file
 
-        filename:
+        Parameters
+        ----------
+        filename: str
             Location to write the dfs1 file
-        data:
+        data: list[np.array]
             list of matrices, one for each item. Matrix dimension: x, time
-        start_time:
-            start date of type datetime.
-        timeseries_unit:
-            TimeStep default TimeStep.SECOND
-        dt:
+        start_time: datetime, optional
+            start datetime
+        timeseries_unit: Timestep, optional
+            TimeStep unit default TimeStep.SECOND
+        dt: float
             The time step (double based on the timeseries_unit). Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds.
-        variable_type:
-            Array integers corresponding to a variable types (ie. Water Level). Use dfsutil type_list
-            to figure out the integer corresponding to the variable.
-        unit:
-            Array integers corresponding to the unit corresponding to the variable types The unit (meters, seconds),
-            use dfsutil unit_list to figure out the corresponding unit for the variable.
+        items: list[ItemInfo], optional
+            List of ItemInfo corresponding to a variable types (ie. Water Level).
         coordinate:
             ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
             OR
@@ -185,8 +181,6 @@ class Dfs1:
             Lower right position
         length_x:
             length of each grid in the x direction (meters)
-        names:
-            array of names (ie. array of strings). (can be blank)
         title:
             title of the dfs2 file (can be blank)
 
@@ -205,14 +199,8 @@ class Dfs1:
         if coordinate is None:
             coordinate = ["LONG/LAT", 0, 0, 0]
 
-        if names is None:
-            names = [f"Item {i+1}" for i in range(n_items)]
-
-        if variable_type is None:
-            variable_type = [999] * n_items
-
-        if unit is None:
-            unit = [0] * n_items
+        if items is None:
+            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
 
         if not all(np.shape(d)[0] == n_time_steps for d in data):
             raise Warning(
@@ -225,33 +213,13 @@ class Dfs1:
                 "Data is list of matices [t, x]"
             )
 
-        if len(names) != n_items:
+        if len(items) != n_items:
             raise Warning(
                 "names must be an array of strings with the same number as matrices in data list"
             )
 
-        if len(variable_type) != n_items or not all(
-            isinstance(item, int) and 0 <= item < 1e15 for item in variable_type
-        ):
-            raise Warning(
-                "type if specified must be an array of integers (enuType) with the same number of "
-                "elements as data columns"
-            )
-
-        if len(unit) != n_items or not all(
-            isinstance(item, int) and 0 <= item < 1e15 for item in unit
-        ):
-            raise Warning(
-                "unit if specified must be an array of integers (enuType) with the same number of "
-                "elements as data columns"
-            )
-
         if not type(start_time) is datetime:
             raise Warning("start_time must be of type datetime ")
-
-        # if not isinstance(timeseries_unit, int):
-        #    raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
-        #                  "day=1403, month=1405, year= 1404See dfsutil options for help ")
 
         system_start_time = System.DateTime(
             start_time.year,
@@ -284,8 +252,8 @@ class Dfs1:
 
         for i in range(n_items):
             builder.AddDynamicItem(
-                names[i],
-                eumQuantity.Create(variable_type[i], unit[i]),
+                items[i].name,
+                eumQuantity.Create(items[i].item, items[i].unit),
                 DfsSimpleType.Float,
                 DataValueType.Instantaneous,
             )
