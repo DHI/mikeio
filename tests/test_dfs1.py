@@ -5,8 +5,7 @@ import pytest
 from shutil import copyfile
 
 from mikeio.dfs1 import Dfs1
-from mikeio.eum import Item
-from mikeio.dutil import ItemInfo
+from mikeio.eum import Item, ItemInfo, Unit
 
 
 def test_simple_create(tmpdir):
@@ -39,11 +38,7 @@ def test_create_single_item(tmpdir):
 
     data.append(d)
 
-    items = [
-        ItemInfo(
-            "testing water level", Item.Water_Level, Item.Water_Level.units["meter"]
-        )
-    ]
+    items = [ItemInfo("testing water level", Item.Water_Level, Unit.meter)]
     title = "test dfs1"
 
     dfs = Dfs1()
@@ -103,7 +98,7 @@ def test_read_names_access():
     assert len(time) == 100
     assert res.items[0].name == "testing water level"
     assert res.items[0].item == Item.Water_Level
-    assert res.items[0].unit == Item.Water_Level.units["meter"]
+    assert res.items[0].unit == Unit.meter
 
 
 def test_write():

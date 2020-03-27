@@ -1,8 +1,8 @@
 from datetime import datetime
 import numpy as np
 import pytest
-from mikeio.dutil import Dataset, ItemInfo
-from mikeio.eum import Item
+from mikeio.dutil import Dataset
+from mikeio.eum import Item, ItemInfo
 
 
 def test_get_names():
@@ -16,6 +16,7 @@ def test_get_names():
 
     assert ds.items[0].name == "Foo"
     assert ds.items[0].item == Item.Undefined
+    assert repr(ds.items[0].unit) == "undefined"
 
 
 def test_get_data():

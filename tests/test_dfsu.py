@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 from mikeio import Dfsu, Mesh
-from mikeio.dutil import ItemInfo
+from mikeio.eum import ItemInfo
 
 
 def test_read_all_items_returns_all_items_and_names():

@@ -1,10 +1,10 @@
 import os
 import numpy as np
-from operator import itemgetter
 from datetime import datetime
 import System
 from System import Array
-from DHI.Generic.MikeZero import eumQuantity, eumItem
+
+from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
@@ -16,8 +16,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
-from .dutil import Dataset, find_item, ItemInfo
-from .eum import TimeStep, Item
+from .dutil import Dataset, find_item
+from .eum import TimeStep, Item, Unit, ItemInfo
 
 
 class Dfs0:
@@ -39,7 +39,8 @@ class Dfs0:
             eumUnit = dfs.ItemInfo[i].Quantity.Unit
             name = dfs.ItemInfo[i].Name
             variable = Item(eumItem)
-            item = ItemInfo(name, variable, eumUnit)
+            unit = Unit(eumUnit)
+            item = ItemInfo(name, variable, unit)
             items.append(item)
 
         # BULK READ THE DFS0

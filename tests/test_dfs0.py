@@ -3,16 +3,15 @@ import numpy as np
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
-from mikeio.eum import TimeStep, Item
-from mikeio.dutil import ItemInfo
+from mikeio.eum import TimeStep, Item, Unit, ItemInfo
 from datetime import timedelta
 from shutil import copyfile
 import pytest
 
 
-def test_simple_create():
+def test_simple_create(tmpdir):
 
-    dfs0File = r"simple.dfs0"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs0")
 
     data = []
 
@@ -22,10 +21,29 @@ def test_simple_create():
 
     dfs = Dfs0()
 
-    dfs.create(filename=dfs0File, data=data)
+    dfs.create(filename=filename, data=data)
 
     assert True
-    os.remove(dfs0File)
+
+
+def test_read_units_create_new(tmpdir):
+
+    dfs0file = r"tests/testdata/random.dfs0"
+    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+
+    copyfile(dfs0file, tmpfile)
+    dfs = Dfs0()
+    res = dfs.read(tmpfile)
+    data = res.data
+
+    # Create new file
+    dfs.create(tmpfile, data=data, items=res.items)
+
+    # Verify that new file has same variables/units as original
+    ds = dfs.read(tmpfile)
+
+    assert res.items[0].item == ds.items[0].item
+    assert res.items[0].unit == ds.items[0].unit
 
 
 def test_multiple_create():
@@ -190,9 +208,8 @@ def test_read_dfs0_single_item_read_by_name():
     assert len(data) == 2
     assert res.items[0].name == "NotFun"
     assert res.items[0].item == Item.Water_Level
-    assert (
-        res.items[0].unit == Item.Water_Level.units["meter"]
-    )  # Not sure this is the most readable way to specify unit
+    assert res.items[0].unit == Unit.meter
+    assert repr(res.items[0].unit) == "meter"
 
 
 def test_read_dfs0_to_pandas():

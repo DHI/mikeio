@@ -3,17 +3,12 @@ from datetime import datetime
 import System
 from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-    DfsSimpleType,
-    DataValueType,
-)
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
-from .dutil import to_numpy, Dataset, ItemInfo, find_item, get_item_info
-from .eum import TimeStep
+from .dutil import to_numpy, Dataset, find_item, get_item_info
+from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
 

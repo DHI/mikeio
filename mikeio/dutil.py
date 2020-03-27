@@ -2,7 +2,7 @@ import numpy as np
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
 
-from mikeio.eum import Item
+from mikeio.eum import Item, Unit, ItemInfo
 
 
 def to_numpy(src):
@@ -69,8 +69,8 @@ def get_item_info(dfs, item_numbers):
         eumItem = dfs.ItemInfo[item].Quantity.Item
         eumUnit = dfs.ItemInfo[item].Quantity.Unit
         variable = Item(eumItem)
-        # TODO add lookup for Units
-        item = ItemInfo(name, variable, eumUnit)
+        unit = Unit(eumUnit)
+        item = ItemInfo(name, variable, unit)
         items.append(item)
     return items
 
@@ -153,14 +153,3 @@ class Dataset:
 
     def _ipython_key_completions_(self):
         return self.names
-
-
-class ItemInfo:
-    def __init__(self, name, item=Item.Undefined, unit=0):
-        self.name = name
-        self.item = item
-        self.unit = unit
-
-    def __repr__(self):
-
-        return f"{self.name} <{self.item}> ({self.unit})"
