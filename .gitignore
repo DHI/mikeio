@@ -14,5 +14,6 @@
 
 dist/
 
+\.spyproject
 \.pytest_cache
 .vs
