@@ -2,7 +2,7 @@ from datetime import datetime
 import numpy as np
 import pytest
 from mikeio.dutil import Dataset
-from mikeio.eum import Item, ItemInfo, Unit
+from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
 def test_get_names():
@@ -15,7 +15,7 @@ def test_get_names():
     ds = Dataset(data, time, items)
 
     assert ds.items[0].name == "Foo"
-    assert ds.items[0].item == Item.Undefined
+    assert ds.items[0].type == EUMType.Undefined
     assert repr(ds.items[0].unit) == "undefined"
 
 
@@ -84,42 +84,42 @@ def test_get_data_mulitple_name_fails():
 def test_default_type():
 
     item = ItemInfo("Foo")
-    assert item.item == Item.Undefined
+    assert item.type == EUMType.Undefined
     assert repr(item.unit) == "undefined"
 
 
 def test_int_is_valid_type_info():
 
     item = ItemInfo("Foo", 100123)
-    assert item.item == Item.Viscosity
+    assert item.type == EUMType.Viscosity
 
     item = ItemInfo("U", 100002)
-    assert item.item == Item.Wind_Velocity
+    assert item.type == EUMType.Wind_Velocity
 
 
 def test_int_is_valid_unit_info():
 
     item = ItemInfo("U", 100002, 2000)
-    assert item.item == Item.Wind_Velocity
-    assert item.unit == Unit.meter_per_sec
+    assert item.type == EUMType.Wind_Velocity
+    assert item.unit == EUMUnit.meter_per_sec
     assert repr(item.unit) == "meter per sec"  # TODO replace _per_ with /
 
 
 def test_default_unit_from_type():
 
-    item = ItemInfo("Foo", Item.Water_Level)
-    assert item.item == Item.Water_Level
-    assert item.unit == Unit.meter
+    item = ItemInfo("Foo", EUMType.Water_Level)
+    assert item.type == EUMType.Water_Level
+    assert item.unit == EUMUnit.meter
     assert repr(item.unit) == "meter"
 
-    item = ItemInfo("Tp", Item.Wave_period)
-    assert item.item == Item.Wave_period
-    assert item.unit == Unit.second
+    item = ItemInfo("Tp", EUMType.Wave_period)
+    assert item.type == EUMType.Wave_period
+    assert item.unit == EUMUnit.second
     assert repr(item.unit) == "second"
 
-    item = ItemInfo("Temperature", Item.Temperature)
-    assert item.item == Item.Temperature
-    assert item.unit == Unit.degree_Celsius
+    item = ItemInfo("Temperature", EUMType.Temperature)
+    assert item.type == EUMType.Temperature
+    assert item.unit == EUMUnit.degree_Celsius
     assert repr(item.unit) == "degree Celsius"
 
 

@@ -130,11 +130,11 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 ## Items, units
  Useful when creating a new dfs file
 ```python
->>> from mikeio.eum import Item
->>> Item.Temperature
-<Item.Temperature: 100006>
->>> Item.Temperature.units
+>>> from mikeio.eum import EUMType
+>>> EUMType.Temperature
+<EUMType.Temperature: 100006>
+>>> EUMType.Temperature.units
 {'degree Celsius': 2800, 'degree Fahrenheit': 2801, 'degree Kelvin': 2802}
->>> Item.Temperature.units['degree Kelvin']
+>>> EUMType.Temperature.units['degree Kelvin']
 2802
 ```

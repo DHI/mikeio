@@ -49,7 +49,7 @@ def unit_list(type_enum, search=None):
     Parameters
     ----------
     type_enum: int
-        EUM variable type, e.g. 100006 or Item.Temperature
+        EUM variable type, e.g. 100006 or EUMType.Temperature
 
     Returns
     -------

@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
 from .dutil import Dataset, find_item
-from .eum import TimeStep, Item, Unit, ItemInfo
+from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
 
 
 class Dfs0:
@@ -38,9 +38,9 @@ class Dfs0:
             eumItem = dfs.ItemInfo[i].Quantity.Item
             eumUnit = dfs.ItemInfo[i].Quantity.Unit
             name = dfs.ItemInfo[i].Name
-            variable = Item(eumItem)
-            unit = Unit(eumUnit)
-            item = ItemInfo(name, variable, unit)
+            itemtype = EUMType(eumItem)
+            unit = EUMUnit(eumUnit)
+            item = ItemInfo(name, itemtype, unit)
             items.append(item)
 
         # BULK READ THE DFS0
@@ -306,7 +306,7 @@ class Dfs0:
 
             item.Set(
                 items[i].name,
-                eumQuantity.Create(items[i].item, items[i].unit),
+                eumQuantity.Create(items[i].type, items[i].unit),
                 DfsSimpleType.Float,
             )
 

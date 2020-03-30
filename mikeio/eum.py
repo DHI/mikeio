@@ -12,7 +12,7 @@ class TimeStep(IntEnum):
     YEAR = 1404
 
 
-class Item(IntEnum):
+class EUMType(IntEnum):
 
     Water_Level = 100000
     Discharge = 100001
@@ -604,10 +604,10 @@ class Item(IntEnum):
     @property
     def units(self):
         temp = unit_list(self.code).items()
-        return [Unit(value) for key, value in temp]
+        return [EUMUnit(value) for key, value in temp]
 
 
-class Unit(IntEnum):
+class EUMUnit(IntEnum):
     meter = 1000
     kilometer = 1001
     centimeter = 1007
@@ -1185,52 +1185,52 @@ class ItemInfo:
     Parameters
     ----------
     name: str
-    item: Item or int, optional
-        Default Item.Undefined
-    unit: Unit or int, optional
-        Default unit mathcing Item
+    type: EUMType or int, optional
+        Default EUMType.Undefined
+    unit: EUMUnit or int, optional
+        Default unit matching EUMType
 
     Examples
     --------
-    >>> item = ItemInfo("Viken", Item.Water_Level)
+    >>> item = ItemInfo("Viken", EUMType.Water_Level)
     >>> item
     Viken <Water Level> (meter)
     """
 
-    def __init__(self, name, item=None, unit=None):
+    def __init__(self, name, itemtype=None, unit=None):
         if not isinstance(name, str):
             raise ValueError("Invalid name, name should be a string")
         self.name = name
 
-        if item is not None:
-            if isinstance(item, int):
-                item = Item(item)
+        if itemtype is not None:
+            if isinstance(itemtype, int):
+                itemtype = EUMType(itemtype)
 
-            if not isinstance(item, Item):
+            if not isinstance(itemtype, EUMType):
                 raise ValueError(
-                    "Invalid type. Type should be supplied as Item, e.g. ItemInfo('WL',Item.Water_Level, Unit.meter)"
+                    "Invalid type. Type should be supplied as EUMType, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
                 )
-            self.item = item
+            self.type = itemtype
         else:
 
-            self.item = Item.Undefined
+            self.type = EUMType.Undefined
 
         if unit is not None:
 
             if isinstance(unit, int):
-                unit = Unit(unit)
+                unit = EUMUnit(unit)
 
-            if not isinstance(unit, Unit):
+            if not isinstance(unit, EUMUnit):
                 raise ValueError(
-                    "Invalid unit. Unit should be supplied as Unit, e.g. ItemInfo('WL',Item.Water_Level, Unit.meter)"
+                    "Invalid unit. Unit should be supplied as EUMUnit, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
                 )
             self.unit = unit
         else:
-            if self.item == Item.Undefined:
-                self.unit = Unit.undefined
+            if self.type == EUMType.Undefined:
+                self.unit = EUMUnit.undefined
             else:
-                self.unit = self.item.units[0]
+                self.unit = self.type.units[0]
 
     def __repr__(self):
 
-        return f"{self.name} <{self.item.display_name}> ({self.unit.display_name})"
+        return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"

@@ -253,7 +253,7 @@ class Dfs1:
         for i in range(n_items):
             builder.AddDynamicItem(
                 items[i].name,
-                eumQuantity.Create(items[i].item, items[i].unit),
+                eumQuantity.Create(items[i].type, items[i].unit),
                 DfsSimpleType.Float,
                 DataValueType.Instantaneous,
             )

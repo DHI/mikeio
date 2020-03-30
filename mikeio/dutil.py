@@ -2,7 +2,7 @@ import numpy as np
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
 
-from mikeio.eum import Item, Unit, ItemInfo
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 
 def to_numpy(src):
@@ -68,9 +68,9 @@ def get_item_info(dfs, item_numbers):
         name = dfs.ItemInfo[item].Name
         eumItem = dfs.ItemInfo[item].Quantity.Item
         eumUnit = dfs.ItemInfo[item].Quantity.Unit
-        variable = Item(eumItem)
-        unit = Unit(eumUnit)
-        item = ItemInfo(name, variable, unit)
+        itemtype = EUMType(eumItem)
+        unit = EUMUnit(eumUnit)
+        item = ItemInfo(name, itemtype, unit)
         items.append(item)
     return items
 

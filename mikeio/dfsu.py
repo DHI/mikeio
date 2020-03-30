@@ -203,7 +203,7 @@ class Dfsu:
         builder.SetZUnit(eumUnit.eumUmeter)
 
         for item in items:
-            builder.AddDynamicItem(item.name, eumQuantity.Create(item.item, item.unit))
+            builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
 
         try:
             dfs = builder.CreateFile(filename)

@@ -3,7 +3,7 @@ import numpy as np
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
-from mikeio.eum import TimeStep, Item, Unit, ItemInfo
+from mikeio.eum import TimeStep, EUMType, EUMUnit, ItemInfo
 from datetime import timedelta
 from shutil import copyfile
 import pytest
@@ -42,7 +42,7 @@ def test_read_units_create_new(tmpdir):
     # Verify that new file has same variables/units as original
     ds = dfs.read(tmpfile)
 
-    assert res.items[0].item == ds.items[0].item
+    assert res.items[0].type == ds.items[0].type
     assert res.items[0].unit == ds.items[0].unit
 
 
@@ -207,8 +207,8 @@ def test_read_dfs0_single_item_read_by_name():
 
     assert len(data) == 2
     assert res.items[0].name == "NotFun"
-    assert res.items[0].item == Item.Water_Level
-    assert res.items[0].unit == Unit.meter
+    assert res.items[0].type == EUMType.Water_Level
+    assert res.items[0].unit == EUMUnit.meter
     assert repr(res.items[0].unit) == "meter"
 
 

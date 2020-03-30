@@ -4,7 +4,7 @@ import datetime
 from shutil import copyfile
 
 from mikeio.dfs2 import Dfs2
-from mikeio.eum import Item, ItemInfo, Unit
+from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
 def test_simple_create():
@@ -36,7 +36,7 @@ def test_create_single_item():
     timeseries_unit = 1402
     dt = 12
 
-    items = [ItemInfo("testing water level", Item.Water_Level, Unit.meter)]
+    items = [ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)]
 
     filename = r"random.dfs2"
 
