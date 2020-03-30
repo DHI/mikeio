@@ -740,6 +740,8 @@ class Unit(IntEnum):
     ton_US = 1208
     kg_per_meter = 4401
     meter_pow_3_per_sec_per_meter = 4700
+    meter_pow_2_per_sec = 4702
+    feet_pow_2_per_sec = 4704
     cm_pow_3_per_sec_per_cm = 4721
     mm_pow_3_per_sec_per_mm = 4722
     feet_pow_3_per_sec_per_feet = 4718
@@ -770,8 +772,8 @@ class Unit(IntEnum):
     feet_pow_2_per_rad = 5215
     meter_pow_2_sec = 5202
     feet_pow_2_sec = 5217
-    meter_pow_2_per_sec = 9400
-    feet_pow_2_per_sec = 9401
+    square_meter_per_sec = 9400
+    square_feet_per_sec = 9401
     Integer = 99013
     hectare = 3204
     km_pow_2 = 3205
@@ -1178,15 +1180,50 @@ class Unit(IntEnum):
 
 
 class ItemInfo:
+    """ItemInfo
+
+    Parameters
+    ----------
+    name: str
+    item: Item or int, optional
+        Default Item.Undefined
+    unit: Unit or int, optional
+        Default unit mathcing Item
+
+    Examples
+    --------
+    >>> item = ItemInfo("Viken", Item.Water_Level)
+    >>> item
+    Viken <Water Level> (meter)
+    """
+
     def __init__(self, name, item=None, unit=None):
+        if not isinstance(name, str):
+            raise ValueError("Invalid name, name should be a string")
         self.name = name
 
         if item is not None:
+            if isinstance(item, int):
+                item = Item(item)
+
+            if not isinstance(item, Item):
+                raise ValueError(
+                    "Invalid type. Type should be supplied as Item, e.g. ItemInfo('WL',Item.Water_Level, Unit.meter)"
+                )
             self.item = item
         else:
+
             self.item = Item.Undefined
 
         if unit is not None:
+
+            if isinstance(unit, int):
+                unit = Unit(unit)
+
+            if not isinstance(unit, Unit):
+                raise ValueError(
+                    "Invalid unit. Unit should be supplied as Unit, e.g. ItemInfo('WL',Item.Water_Level, Unit.meter)"
+                )
             self.unit = unit
         else:
             if self.item == Item.Undefined:

@@ -88,6 +88,23 @@ def test_default_type():
     assert repr(item.unit) == "undefined"
 
 
+def test_int_is_valid_type_info():
+
+    item = ItemInfo("Foo", 100123)
+    assert item.item == Item.Viscosity
+
+    item = ItemInfo("U", 100002)
+    assert item.item == Item.Wind_Velocity
+
+
+def test_int_is_valid_unit_info():
+
+    item = ItemInfo("U", 100002, 2000)
+    assert item.item == Item.Wind_Velocity
+    assert item.unit == Unit.meter_per_sec
+    assert repr(item.unit) == "meter per sec"  # TODO replace _per_ with /
+
+
 def test_default_unit_from_type():
 
     item = ItemInfo("Foo", Item.Water_Level)
@@ -104,6 +121,13 @@ def test_default_unit_from_type():
     assert item.item == Item.Temperature
     assert item.unit == Unit.degree_Celsius
     assert repr(item.unit) == "degree Celsius"
+
+
+def test_iteminfo_string_type_should_fail_with_helpful_message():
+
+    with pytest.raises(ValueError):
+
+        item = ItemInfo("Water level", "Water level")
 
 
 if __name__ == "__main__":
