@@ -66,37 +66,20 @@ Shape: (100, 3)
 ```
 
 
-### Create equidistant dfs0 with weekly timestep
-```python
->>>  from mikeio import Dfs0
->>>  from mikeio.eum import TimeStep
->>>  d1 = np.random.random([1000])
->>>  d2 = np.random.random([1000])
->>>  data = []
->>>  data.append(d1)
->>>  data.append(d2)
-
->>>  dfs = Dfs0()
->>>  dfs.create(filename='random.dfs0',
->>>             data=data,
->>>             start_time=datetime(2017, 1, 1),
->>>             timeseries_unit=TimeStep.DAY,
->>>             dt=7,
->>>             names=['Random1', 'Random2'],
->>>             title='Hello Test')
-
-```
 For more examples on timeseries data see this [notebook](notebooks/Dfs0%20-%20Timeseries.ipynb)
 
 
 ### Read dfs2 data
 ```python
 >>>  from mikeio import Dfs2
->>>  dfs2File = r"20150101-DMI-L4UHfnd-NSEABALTIC-v01-fv01-DMI_OI.dfs2"
->>>  dfs = Dfs2()
->>>  res = dfs.read(dfs2File)
->>>  res.names
-['Temperature]
+>>> ds = dfs.read("tests/testdata/random.dfs2")
+>>> ds
+DataSet(data, time, items)
+Number of items: 1
+Shape: (3, 100, 2)
+2012-01-01 00:00:00 - 2012-01-01 00:00:24
+>>> ds.items
+[testing water level <Water Level> (meter)]
 ```
 
 ### Create dfs2
@@ -130,11 +113,11 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 ## Items, units
  Useful when creating a new dfs file
 ```python
->>> from mikeio.eum import EUMType
+>>> from mikeio.eum import EUMType, EUMUnit
 >>> EUMType.Temperature
 <EUMType.Temperature: 100006>
 >>> EUMType.Temperature.units
-{'degree Celsius': 2800, 'degree Fahrenheit': 2801, 'degree Kelvin': 2802}
->>> EUMType.Temperature.units['degree Kelvin']
-2802
+[degree Celsius, degree Fahrenheit, degree Kelvin]
+>>> EUMUnit.degree_Kelvin
+degree Kelvin
 ```
