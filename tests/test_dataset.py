@@ -2,7 +2,7 @@ from datetime import datetime
 import numpy as np
 import pytest
 from mikeio.dutil import Dataset
-from mikeio.eum import Item, ItemInfo
+from mikeio.eum import Item, ItemInfo, Unit
 
 
 def test_get_names():
@@ -79,6 +79,31 @@ def test_get_data_mulitple_name_fails():
 
     with pytest.raises(Exception):
         ds[["Foo", "Foo"]]
+
+
+def test_default_type():
+
+    item = ItemInfo("Foo")
+    assert item.item == Item.Undefined
+    assert repr(item.unit) == "undefined"
+
+
+def test_default_unit_from_type():
+
+    item = ItemInfo("Foo", Item.Water_Level)
+    assert item.item == Item.Water_Level
+    assert item.unit == Unit.meter
+    assert repr(item.unit) == "meter"
+
+    item = ItemInfo("Tp", Item.Wave_period)
+    assert item.item == Item.Wave_period
+    assert item.unit == Unit.second
+    assert repr(item.unit) == "second"
+
+    item = ItemInfo("Temperature", Item.Temperature)
+    assert item.item == Item.Temperature
+    assert item.unit == Unit.degree_Celsius
+    assert repr(item.unit) == "degree Celsius"
 
 
 if __name__ == "__main__":

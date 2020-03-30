@@ -642,10 +642,10 @@ class Unit(IntEnum):
     km_per_hour = 2021
     knot = 2019
     degree = 2401
-    degree_Celsius_ = 2800
-    degree_Celsius = 2900
-    degree_Fahrenheit_ = 2801
-    degree_Fahrenheit = 2901
+    degree_Celsius = 2800
+    delta_degree_Celsius = 2900
+    degree_Fahrenheit = 2801
+    delta_degree_Fahrenheit = 2901
     degree_Kelvin = 2802
     mu_g_per_meter_pow_3 = 2201
     mg_per_meter_pow_3 = 2202
@@ -724,6 +724,7 @@ class Unit(IntEnum):
     feet_per_day = 2009
     inch_per_min = 2014
     mu_m_per_sec = 2031
+    millimeter_per_day = 4801
     inch_per_day = 4802
     liter_per_sec_per_ha = 2030
     mm_per_year = 2040
@@ -821,6 +822,7 @@ class Unit(IntEnum):
     meter_pow_2_per_sec_pow_3 = 6401
     feet_pow_2_per_sec_pow_3 = 6402
     PSU_meter_pow_3_per_sec = 6300
+    non_dim_meter_pow_3_per_sec = 6302
     PSU_feet_pow_3_per_sec = 6303
     C_meter_pow_3_per_sec = 6301
     F_feet_pow_3_per_sec = 6304
@@ -1101,6 +1103,8 @@ class Unit(IntEnum):
     per_acre = 9301
     per_hectare = 9302
     per_km_pow_2 = 9303
+    currency_per_meter_pow_3 = 9351
+    currency_per_feet_pow_3 = 9352
     per_watt = 9600
     newton_meter = 9700
     kilonewton_meter = 9701
@@ -1174,10 +1178,21 @@ class Unit(IntEnum):
 
 
 class ItemInfo:
-    def __init__(self, name, item=Item.Undefined, unit=Unit.undefined):
+    def __init__(self, name, item=None, unit=None):
         self.name = name
-        self.item = item
-        self.unit = unit
+
+        if item is not None:
+            self.item = item
+        else:
+            self.item = Item.Undefined
+
+        if unit is not None:
+            self.unit = unit
+        else:
+            if self.item == Item.Undefined:
+                self.unit = Unit.undefined
+            else:
+                self.unit = self.item.units[0]
 
     def __repr__(self):
 
