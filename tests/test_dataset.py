@@ -130,6 +130,14 @@ def test_iteminfo_string_type_should_fail_with_helpful_message():
         item = ItemInfo("Water level", "Water level")
 
 
+def test_item_search():
+
+    res = EUMType.search("level")
+
+    assert len(res) > 0
+    assert isinstance(res[0], EUMType)
+
+
 if __name__ == "__main__":
     data = []
     d = np.zeros([100, 100, 30]) + 1.0

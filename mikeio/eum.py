@@ -1,5 +1,5 @@
 from enum import IntEnum
-from mikeio.dfs_util import unit_list
+from mikeio.dfs_util import unit_list, type_list
 
 
 class TimeStep(IntEnum):
@@ -605,6 +605,11 @@ class EUMType(IntEnum):
     def units(self):
         temp = unit_list(self.code).items()
         return [EUMUnit(value) for key, value in temp]
+
+    @staticmethod
+    def search(pattern):
+        temp = type_list(pattern).items()
+        return [EUMType(key) for key, value in temp]
 
 
 class EUMUnit(IntEnum):
