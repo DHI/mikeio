@@ -1,10 +1,10 @@
 import os
 import numpy as np
-from operator import itemgetter
 from datetime import datetime
 import System
 from System import Array
-from DHI.Generic.MikeZero import eumQuantity, eumItem
+
+from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
 from .dutil import Dataset, find_item
-from .eum import TimeStep
+from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
 
 
 class Dfs0:
@@ -33,9 +33,15 @@ class Dfs0:
         n_items = safe_length(dfs.ItemInfo)
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        names = []
+        items = []
         for i in range(n_items):
-            names.append(dfs.ItemInfo[i].Name)
+            eumItem = dfs.ItemInfo[i].Quantity.Item
+            eumUnit = dfs.ItemInfo[i].Quantity.Unit
+            name = dfs.ItemInfo[i].Name
+            itemtype = EUMType(eumItem)
+            unit = EUMUnit(eumUnit)
+            item = ItemInfo(name, itemtype, unit)
+            items.append(item)
 
         # BULK READ THE DFS0
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
@@ -60,7 +66,7 @@ class Dfs0:
 
         dfs.Close()
 
-        return data, t, names
+        return data, t, items
 
     def read_to_pandas(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return a Pandas DataFrame
@@ -106,10 +112,10 @@ class Dfs0:
             read only the items in the array specified, (takes precedence over item_numbers)
 
         Return:
-            Dataset(data, time, names)
+            Dataset(data, time, items)
         """
 
-        d, t, names = self.__read(filename)
+        d, t, items = self.__read(filename)
 
         if item_names is not None:
             item_numbers = find_item(self._dfs, item_names)
@@ -127,14 +133,16 @@ class Dfs0:
         data = []
 
         if item_numbers is not None:
-            names = itemgetter(*item_numbers)(names)
+            sel_items = []
             for item in item_numbers:
                 data.append(d[:, item])
+                sel_items.append(items[item])
+            items = sel_items
         else:
             for item in range(d.shape[1]):
                 data.append(d[:, item])
 
-        return Dataset(data, t, names)
+        return Dataset(data, t, items)
 
     def write(self, filename, data):
 
@@ -207,36 +215,30 @@ class Dfs0:
         timeseries_unit=TimeStep.SECOND,
         dt=1,
         datetimes=None,
-        variable_type=None,
-        unit=None,
-        names=None,
+        items=None,
         title=None,
         data_value_type=None,
     ):
-        """create creates a dfs0 file.
+        """Create a dfs0 file.
 
-        filename:
+        Parameters
+        ----------
+        filename: str
             Full path and filename to dfs0 to be created.
-        data:
-            a list of numpy array
-        start_time:
+        data: list[np.array]
+            values
+        start_time: datetime.dateime, , optional
             start date of type datetime.
-        timeseries_unit:
-            Timestep default Timestep.SECOND
-        dt:
+        timeseries_unit: Timestep, optional
+            Timestep  unitdefault Timestep.SECOND
+        dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds. default to 1
-        variable_type:
-            Array integers corresponding to a variable types (ie. Water Level). Use dfsutil type_list
-            to figure out the integer corresponding to the variable.
-        unit:
-            Array integers corresponding to the unit corresponding to the variable types The unit (meters, seconds),
-            use dfsutil unit_list to figure out the corresponding unit for the variable.
-        names:
-            array of names (ie. array of strings)
-        title:
-            title (string)
-        data_value_type:
+        items: list[ItemInfo], optional
+            List of ItemInfo corresponding to a variable types (ie. Water Level).
+        title: str, optional
+            title
+        data_value_type: list[DataValueType], optional
             DataValueType default DataValueType.INSTANTANEOUS
 
         """
@@ -249,30 +251,12 @@ class Dfs0:
         if start_time is None:
             start_time = datetime.now()
 
-        if names is None:
-            names = [f"Item {i+1}" for i in range(n_items)]
+        if items is None:
+            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
 
-        if variable_type is None:
-            variable_type = [999] * n_items
-
-        if unit is None:
-            unit = [0] * n_items
-
-        if names is not None and len(names) != n_items:
+        if len(items) != n_items:
             raise Warning(
                 "names must be an array of strings with the same number of elements as data columns"
-            )
-
-        if len(variable_type) != n_items:
-            raise Warning(
-                "type if specified must be an array of integers (eumType) with the same number of "
-                "elements as data columns"
-            )
-
-        if len(unit) != n_items:
-            raise Warning(
-                "unit if specified must be an array of integers (eumType) with the same number of "
-                "elements as data columns"
             )
 
         if datetimes is None:
@@ -319,18 +303,12 @@ class Dfs0:
         for i in range(n_items):
 
             item = builder.CreateDynamicItemBuilder()
-            if variable_type is not None:
-                item.Set(
-                    names[i],
-                    eumQuantity.Create(variable_type[i], unit[i]),
-                    DfsSimpleType.Float,
-                )
-            else:
-                item.Set(
-                    str(i),
-                    eumQuantity.Create(eumItem.eumIItemUndefined, 0),
-                    DfsSimpleType.Float,
-                )
+
+            item.Set(
+                items[i].name,
+                eumQuantity.Create(items[i].type, items[i].unit),
+                DfsSimpleType.Float,
+            )
 
             if data_value_type is not None:
                 item.SetValueType(data_value_type[i])

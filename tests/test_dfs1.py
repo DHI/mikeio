@@ -5,11 +5,12 @@ import pytest
 from shutil import copyfile
 
 from mikeio.dfs1 import Dfs1
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 
-def test_simple_create():
+def test_simple_create(tmpdir):
 
-    filename = r"simple.dfs1"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs1")
 
     data = []
 
@@ -21,32 +22,23 @@ def test_simple_create():
 
     dfs = Dfs1()
 
+    # create a file, without specifying dates, names, units etc.
+    # Proably not so useful
     dfs.create(filename=filename, data=data)
 
     assert True
-    os.remove(filename)
 
 
-def test_create_single_item():
+def test_create_single_item(tmpdir):
 
-    start_time = datetime.datetime(2012, 1, 1)
-
-    # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
-    timeseries_unit = 1402
-    dt = 12
-
-    variable_type = [100000]
-    unit = [1000]
-
-    filename = r"random.dfs1"
+    filename = os.path.join(tmpdir.dirname, "random.dfs1")
 
     data = []
     d = np.random.random([100, 3])
 
     data.append(d)
-    length_x = 100
 
-    names = ["testing water level"]
+    items = [ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)]
     title = "test dfs1"
 
     dfs = Dfs1()
@@ -54,17 +46,14 @@ def test_create_single_item():
     dfs.create(
         filename=filename,
         data=data,
-        start_time=start_time,
-        dt=dt,
-        variable_type=variable_type,
-        unit=unit,
-        length_x=length_x,
-        names=names,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        length_x=100,
+        items=items,
         title=title,
     )
 
     assert True
-    os.remove(filename)
 
 
 def test_read():
@@ -107,6 +96,9 @@ def test_read_names_access():
     time = res.time
     assert item.shape == (100, 3)  # time, x
     assert len(time) == 100
+    assert res.items[0].name == "testing water level"
+    assert res.items[0].type == EUMType.Water_Level
+    assert res.items[0].unit == EUMUnit.meter
 
 
 def test_write():
@@ -114,13 +106,13 @@ def test_write():
     filename1 = r"tests/testdata/random.dfs1"
     filename2 = r"tests/testdata/random_for_write.dfs1"
     copyfile(filename1, filename2)
-    
+
     # read contents of original file
     dfs = Dfs1()
     res1 = dfs.read(filename1, [0])
 
-    # overwrite 
-    res1.data[0] = -2*res1.data[0] 
+    # overwrite
+    res1.data[0] = -2 * res1.data[0]
     dfs.write(filename2, res1.data)
 
     # read contents of manipulated file
@@ -129,8 +121,7 @@ def test_write():
 
     data1 = res1.data[0]
     data2 = res2.data[0]
-    assert data2[2, 1] == -2*data1[2, 1]
+    assert data2[2, 1] == -2 * data1[2, 1]
 
-    # clean 
+    # clean
     os.remove(filename2)
-

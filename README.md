@@ -127,13 +127,14 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 ```
 ![Timeseries](images/dfsu_ts.png)
 
-## Misc utilities
- to query variable type, time series types (useful when creating a new dfs file)
+## Items, units
+ Useful when creating a new dfs file
 ```python
->>> from mikeio.dfs_util import type_list, unit_list
->>> type_list('Water level')
-{100000: 'Water Level', 100307: 'Water level change'}
-
->>> unit_list(100307)
-{1000: 'meter', 1003: 'feet'}
+>>> from mikeio.eum import EUMType
+>>> EUMType.Temperature
+<EUMType.Temperature: 100006>
+>>> EUMType.Temperature.units
+{'degree Celsius': 2800, 'degree Fahrenheit': 2801, 'degree Kelvin': 2802}
+>>> EUMType.Temperature.units['degree Kelvin']
+2802
 ```

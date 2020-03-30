@@ -2,6 +2,8 @@ import numpy as np
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
 
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
 
 def to_numpy(src):
     """
@@ -60,6 +62,19 @@ def find_item(dfs, item_names):
     return item_numbers
 
 
+def get_item_info(dfs, item_numbers):
+    items = []
+    for item in item_numbers:
+        name = dfs.ItemInfo[item].Name
+        eumItem = dfs.ItemInfo[item].Quantity.Item
+        eumUnit = dfs.ItemInfo[item].Quantity.Unit
+        itemtype = EUMType(eumItem)
+        unit = EUMUnit(eumUnit)
+        item = ItemInfo(name, itemtype, unit)
+        items.append(item)
+    return items
+
+
 class Dataset:
     """Dataset
 
@@ -83,30 +98,30 @@ class Dataset:
     --------
     >>> ds = mikeio.read("tests/testdata/random.dfs0")
     >>> ds
-    DataSet(data, time, names)
+    DataSet(data, time, items)
     Number of items: 2
     Shape: (1000,)
     2017-01-01 00:00:00 - 2017-07-28 03:00:00
-    >>> ds.names
+    >>> ds.items
     ['VarFun01', 'NotFun']
     >>> ds['NotFun'][0:5]
     array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
 
-    >> data,time,names = ds
-    >> names
+    >> data,time,items = ds
+    >> items
     ['VarFun01', 'NotFun']
     """
 
-    def __init__(self, data, time, names):
+    def __init__(self, data, time, items):
         self.data = data
         self.time = time
-        self.names = names
+        self.items = items
 
     def __repr__(self):
-        n_items = len(self.names)
+        n_items = len(self.items)
 
         out = []
-        out.append("DataSet(data, time, names)")
+        out.append("DataSet(data, time, items)")
         out.append(f"Number of items: {n_items}")
         out.append(f"Shape: {self.data[0].shape}")
         out.append(f"{self.time[0]} - {self.time[-1]}")
@@ -114,7 +129,7 @@ class Dataset:
         return str.join("\n", out)
 
     def __len__(self):
-        return 3  # [data,time,names]
+        return 3  # [data,time,items]
 
     def __getitem__(self, x):
 
@@ -124,13 +139,13 @@ class Dataset:
             if x == 1:
                 return self.time
             if x == 2:
-                return self.names
+                return self.items
 
             if x > 2:
                 raise IndexError("")
 
         if isinstance(x, str):
-            item_lookup = {name: i for i, name in enumerate(self.names)}
+            item_lookup = {item.name: i for i, item in enumerate(self.items)}
             x = item_lookup[x]
             return self.data[x]
 

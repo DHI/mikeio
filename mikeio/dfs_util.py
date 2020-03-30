@@ -3,10 +3,21 @@ import numpy as np
 
 
 def type_list(search=None):
-    """Produces a dictionary of the possible variables. For example 'Water Level', 'Head Elevation'. Returns a
-    dictionary with the eumType and variable description.
+    """Get a dictionary of the EUM items
 
-    Options: one can provide a search string (caseinsensitive) to filter out results.
+    Notes
+    -----
+    An alternative to `type_list` is to use `mikeio.eum.Item`
+
+    Parameters
+    ----------
+    search: str, optional
+        a search string (caseinsensitive) to filter out results
+
+    Returns
+    -------
+    dict
+        names and codes for EUM items
     """
     items = {}
     check = True
@@ -33,23 +44,30 @@ def type_list(search=None):
 
 
 def unit_list(type_enum, search=None):
-    """Produces a dictionary of the possible variables Units. For example 'Water Level' can have units of 'meters',
-    'inches',...
+    """Get a dictionary of valid units
 
-    Options: one can provide a search string (caseinsensitive) to filter out results.
+    Parameters
+    ----------
+    type_enum: int
+        EUM variable type, e.g. 100006 or EUMType.Temperature
+
+    Returns
+    -------
+    dict
+        names and codes for valid units
     """
     items = {}
     for i in range(EUMWrapper.eumGetItemUnitCount(type_enum)):
         d = EUMWrapper.eumGetItemUnitSeq(type_enum, i + 1, 1, "")
         if d[0] is True:
-            items[d[1]] = d[2]
+            items[d[2]] = d[1]
 
     if search is not None:
         items = dict(
             [
                 [key, value]
                 for key, value in items.items()
-                if search.lower() in value.lower() or search.lower() == value.lower()
+                if search.lower() in key.lower() or search.lower() == key.lower()
             ]
         )
 
