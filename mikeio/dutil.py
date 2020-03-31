@@ -84,8 +84,8 @@ class Dataset:
         Data, potentially multivariate and multiple spatial dimensions
     time: list[datetime]
         Datetime of each timestep
-    names: list[str]
-        Names of each item in the data list
+    items: list[ItemInfo]
+        Names, type and unit of each item in the data list
 
     Notes
     -----
@@ -103,13 +103,13 @@ class Dataset:
     Shape: (1000,)
     2017-01-01 00:00:00 - 2017-07-28 03:00:00
     >>> ds.items
-    ['VarFun01', 'NotFun']
+    [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
     >>> ds['NotFun'][0:5]
     array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
 
     >> data,time,items = ds
     >> items
-    ['VarFun01', 'NotFun']
+    [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
     """
 
     def __init__(self, data, time, items):

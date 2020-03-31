@@ -29,14 +29,14 @@ Generic `read` method to read values, if you need additional features such as co
 >>> import mikeio
 >>> ds = mikeio.read("random.dfs0")
 >>> ds
-DataSet(data, time, names)
+DataSet(data, time, items)
 Number of items: 2
 Shape: (1000,)
 2017-01-01 00:00:00 - 2017-07-28 03:00:00
 
 >>> ds = mikeio.read("random.dfs1")
 >>> ds
-DataSet(data, time, names)
+DataSet(data, time, items)
 Number of items: 1
 Shape: (100, 3)
 2012-01-01 00:00:00 - 2012-01-01 00:19:48
