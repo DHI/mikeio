@@ -165,14 +165,24 @@ def test_create_non_equidistant_calendar():
     os.remove(dfs0file)
 
 
-def test_read_dfs0_to_pandas_single_item():
+def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0()
-    df = dfs.read_to_pandas(dfs0file, item_numbers=[1])
+    df = dfs.to_dataframe(dfs0file)
 
-    assert df.shape[1] == 1
+    assert df.index.freq is not None
+
+
+def test_read_nonequidistant_dfs0_to_dataframe_no_freq():
+
+    dfs0file = r"tests/testdata/da_diagnostic.dfs0"
+
+    dfs = Dfs0()
+    df = dfs.to_dataframe(dfs0file)
+
+    assert df.index.freq is None
 
 
 def test_read_dfs0_delete_value_conversion():
@@ -296,12 +306,12 @@ def test_read_dfs0_single_item_read_by_name():
     assert repr(res.items[0].unit) == "meter"
 
 
-def test_read_dfs0_to_pandas():
+def test_read_dfs0_to_dataframe():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0()
-    pd = dfs.read_to_pandas(dfs0file)
+    pd = dfs.to_dataframe(dfs0file)
 
     assert np.isnan(pd[pd.columns[0]][2])
 

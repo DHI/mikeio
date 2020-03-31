@@ -46,7 +46,7 @@ Shape: (100, 3)
 ```python
 >>>  from mikeio import Dfs0
 >>>  dfs = Dfs0()
->>>  ts = dfs.read_to_pandas('simple.dfs0')
+>>>  ts = dfs.to_dataframe('simple.dfs0')
 ```
 
 ### Create simple timeseries

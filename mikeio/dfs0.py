@@ -1,4 +1,5 @@
 import os
+import warnings
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -85,6 +86,10 @@ class Dfs0:
         -------
             pd.Dataframe
         """
+
+        warnings.warn(
+            "read_to_pandas is deprecated. Use to_dataframe instead.", FutureWarning
+        )
         if item_numbers is not None:
             if not all(
                 isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
@@ -371,7 +376,7 @@ class Dfs0:
 
         df = pd.DataFrame(data, columns=names)
 
-        df.index = pd.DatetimeIndex(t)
+        df.index = pd.DatetimeIndex(t, freq="infer")
 
         return df
 
@@ -394,29 +399,7 @@ class Dfs0:
         items: list[ItemInfo]
             Different types, units for each items, similar to `create`
         """
-
-        if not isinstance(df.index, pd.DatetimeIndex):
-            raise ValueError(
-                "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
-            )
-
-        dfs = Dfs0()
-
-        data = []
-        for i in range(df.values.shape[1]):
-            data.append(df.values[:, i])
-
-        if items is None:
-
-            if itemtype is None:
-                items = [ItemInfo(name) for name in df.columns]
-            else:
-                if unit is None:
-                    items = [ItemInfo(name, itemtype) for name in df.columns]
-                else:
-                    items = [ItemInfo(name, itemtype, unit) for name in df.columns]
-
-        dfs.create(filename=filename, data=data, datetimes=df.index, items=items)
+        return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
 
 def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None):
@@ -456,7 +439,14 @@ def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None):
             else:
                 items = [ItemInfo(name, itemtype, unit) for name in self.columns]
 
-    dfs.create(filename=filename, data=data, datetimes=self.index, items=items)
+    if self.index.freq is None:  # non-equidistant
+        dfs.create(filename=filename, data=data, datetimes=self.index, items=items)
+    else:  # equidistant
+        dt = self.index.freq.delta.total_seconds()
+        start_time = self.index[0].to_pydatetime()
+        dfs.create(
+            filename=filename, data=data, start_time=start_time, dt=dt, items=items
+        )
 
 
 pd.DataFrame.to_dfs0 = dataframe_to_dfs0
