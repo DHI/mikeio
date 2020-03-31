@@ -194,6 +194,33 @@ def test_read_dfs0_delete_value_conversion():
 
     assert np.isnan(ds.data[3][1])
 
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = Dfs0()
+    ds = dfs.read(dfs0file)
+
+    assert np.isnan(ds.data[0][2])
+
+
+def test_read_dfs0_small_value_not_delete_value(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "small.dfs0")
+
+    data = []
+
+    d = np.array([0.0, 0.0000001, -0.0001])
+
+    assert np.isclose(d, -1e-35, atol=1e-33).any()
+    data.append(d)
+
+    dfs = Dfs0()
+
+    dfs.create(filename=filename, data=data)
+
+    ds = dfs.read(filename)
+
+    assert not np.isnan(ds.data[0]).any()
+
 
 def test_create_from_data_frame(tmpdir):
 

@@ -61,12 +61,12 @@ class Dfs0:
         # First column in the time (the rest is the data)
         data = np.fromiter(dfsdata, np.float64).reshape(nt, n_items + 1)[:, 1::]
 
-        mask = np.isclose(data, dfs.FileInfo.DeleteValueFloat, atol=1e-34)
+        mask = np.isclose(data, dfs.FileInfo.DeleteValueFloat, atol=1e-36)
         data[mask] = np.nan
-        mask = np.isclose(
-            data, dfs.FileInfo.DeleteValueDouble, atol=1e-34
-        )  # TODO needs to be verified
-        data[mask] = np.nan
+        # mask = np.isclose(
+        #    data, dfs.FileInfo.DeleteValueDouble, atol=1e-34
+        # )  # TODO needs to be verified
+        # data[mask] = np.nan
 
         dfs.Close()
 
