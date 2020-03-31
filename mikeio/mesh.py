@@ -1,17 +1,15 @@
 import numpy as np
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
+from matplotlib.collections import PatchCollection
+import numpy as np
+
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
 
 class Mesh:
-    def read(self, filename):
-        """ Function: Read a mesh file
-
-        usage:
-            read(filename)
-
-        Returns
-            Nothing
-        """
+    def __init__(self, filename):
         self._mesh = MeshFile.ReadMesh(filename)
 
     def get_number_of_elements(self):
@@ -30,7 +28,16 @@ class Mesh:
 
     def get_node_coords(self, code=None):
         """
-        Function: get node coordinates, optionally filtered by code, land==1
+        Get node coordinates
+        
+        Parameters
+        ----------
+        code: int, optional
+            filter results by code, land==1
+
+        Returns
+        -------
+        np.ndarray
         """
         # Node coordinates
         xn = np.array(list(self._mesh.X))
@@ -53,7 +60,7 @@ class Mesh:
         return nc
 
     def get_element_coords(self):
-        """ Function: Calculate element center coordinates
+        """ Calculate element center coordinates
 
             Returns
                 np.array((number_of_elements, 3)
@@ -84,3 +91,49 @@ class Mesh:
             ec[j, 2] = zcoords.mean()
 
         return ec
+
+    def plot(self, cmap=None, z=None, label=None):
+        """
+        Plot mesh elements
+
+        Parameters
+        ----------
+        cmap: matplotlib.cm.cmap, optional
+            default viridis
+        z: np.array
+            value for each element to plot, default bathymetry
+        label: str, optional
+            colorbar label
+        """
+        if cmap is None:
+            cmap = cm.viridis
+
+        nc = self.get_node_coords()
+        ec = self.get_element_coords()
+        ne = ec.shape[0]
+
+        if z is None:
+            z = ec[:, 2]
+            if label is None:
+                label = "Bathymetry (m)"
+
+        patches = []
+
+        for j in range(ne):
+            nodes = self._mesh.ElementTable[j]
+            pcoords = np.empty([nodes.Length, 2])
+            for i in range(nodes.Length):
+                nidx = nodes[i] - 1
+                pcoords[i, :] = nc[nidx, 0:2]
+
+            polygon = Polygon(pcoords, True)
+            patches.append(polygon)
+
+        fig, ax = plt.subplots()
+        p = PatchCollection(patches, cmap=cmap, edgecolor="black")
+
+        p.set_array(z)
+        ax.add_collection(p)
+        fig.colorbar(p, ax=ax, label=label)
+        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
+        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())

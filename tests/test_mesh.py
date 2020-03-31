@@ -5,18 +5,14 @@ from mikeio.mesh import Mesh
 
 def test_get_number_of_elements():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = Mesh()
-
-    m.read(filename)
+    m = Mesh(filename)
 
     assert m.get_number_of_elements() == 654
 
 
 def test_get_element_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = Mesh()
-
-    m.read(filename)
+    m = Mesh(filename)
 
     ec = m.get_element_coords()
 
@@ -27,9 +23,7 @@ def test_get_element_coordinates():
 
 def test_get_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = Mesh()
-
-    m.read(filename)
+    m = Mesh(filename)
 
     nc = m.get_node_coords()
 
@@ -38,9 +32,7 @@ def test_get_node_coordinates():
 
 def test_get_land_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = Mesh()
-
-    m.read(filename)
+    m = Mesh(filename)
 
     nc = m.get_node_coords(code=1)
 
@@ -49,10 +41,16 @@ def test_get_land_node_coordinates():
 
 def test_get_bad_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    m = Mesh()
-
-    m.read(filename)
+    m = Mesh(filename)
 
     with pytest.raises(Exception):
         nc = m.get_node_coords(code="foo")
 
+
+def test_plot_mesh():
+    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
+    m = Mesh(filename)
+
+    m.plot()
+
+    assert True

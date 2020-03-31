@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="mikeio",
     version="0.4.0.alpha",
-    install_requires=["pythonnet", "numpy", "pandas"],
+    install_requires=["pythonnet", "numpy", "pandas", "matplotlib"],
     extras_require={"dev": ["pytest", "black"]},
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
