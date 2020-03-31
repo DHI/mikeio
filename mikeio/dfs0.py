@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 from datetime import datetime
 import System
 from System import Array
@@ -70,18 +71,18 @@ class Dfs0:
 
     def read_to_pandas(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return a Pandas DataFrame
-        Usage:
-            read_to_pandas(filename, item_numbers=None)
-        filename
+        
+        Parameters
+        ----------
+        filename: str
             full path and file name to the dfs0 file.
-        item_numbers
+        item_numbers: list[int], optional
             read only the item_numbers in the array specified (0 base)
 
-        Return:
-            a Pandas DataFrame
+        Returns
+        -------
+            pd.Dataframe
         """
-        import pandas as pd
-
         if item_numbers is not None:
             if not all(
                 isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
@@ -344,3 +345,115 @@ class Dfs0:
                     dfs.WriteItemTimeStepNext(dt, d)
 
         dfs.Close()
+
+    @staticmethod
+    def to_dataframe(self, filename):
+        """Read data from the dfs0 file and return a Pandas DataFrame
+        
+        Parameters
+        ----------
+        filename: str
+            full path and file name to the dfs0 file.
+        
+        Returns
+        -------
+        pd.DataFrame
+        """
+        import pandas as pd
+
+        data, t, names = self.__read(filename=filename)
+
+        df = pd.DataFrame(data, columns=names)
+
+        df.index = pd.DatetimeIndex(t)
+
+        if item_numbers is not None:
+            df = df.iloc[:, item_numbers]
+
+        return df
+
+    @staticmethod
+    def from_dataframe(df, filename, itemtype=None, unit=None, items=None):
+        """
+        Create a dfs0 from a pandas Dataframe
+
+        Parameters
+        ----------
+
+        df: pd.DataFrame
+            Dataframe with data
+        filename: str
+            filename to write output
+        itemtype: EUMType, optional
+            Same type for all items
+        unit: EUMUnit, optional
+            Same unit for all items
+        items: list[ItemInfo]
+            Different types, units for each items, similar to `create`
+        """
+
+        if not isinstance(df.index, pd.DatetimeIndex):
+            raise ValueError(
+                "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
+            )
+
+        dfs = Dfs0()
+
+        data = []
+        for i in range(df.values.shape[1]):
+            data.append(df.values[:, i])
+
+        if items is None:
+
+            if itemtype is None:
+                items = [ItemInfo(name) for name in df.columns]
+            else:
+                if unit is None:
+                    items = [ItemInfo(name, itemtype) for name in df.columns]
+                else:
+                    items = [ItemInfo(name, itemtype, unit) for name in df.columns]
+
+        dfs.create(filename=filename, data=data, datetimes=df.index, items=items)
+
+
+def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None):
+    """
+    Create a dfs0
+
+    Parameters
+    ----------
+    filename: str
+        filename to write output
+    itemtype: EUMType, optional
+        Same type for all items
+    unit: EUMUnit, optional
+        Same unit for all items
+    items: list[ItemInfo]
+        Different types, units for each items, similar to `create`
+    """
+
+    if not isinstance(self.index, pd.DatetimeIndex):
+        raise ValueError(
+            "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
+        )
+
+    dfs = Dfs0()
+
+    data = []
+    for i in range(self.values.shape[1]):
+        data.append(self.values[:, i])
+
+    if items is None:
+
+        if itemtype is None:
+            items = [ItemInfo(name) for name in self.columns]
+        else:
+            if unit is None:
+                items = [ItemInfo(name, itemtype) for name in self.columns]
+            else:
+                items = [ItemInfo(name, itemtype, unit) for name in self.columns]
+
+    dfs.create(filename=filename, data=data, datetimes=self.index, items=items)
+
+
+pd.DataFrame.to_dfs0 = dataframe_to_dfs0

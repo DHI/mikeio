@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
@@ -172,6 +173,79 @@ def test_read_dfs0_to_pandas_single_item():
     df = dfs.read_to_pandas(dfs0file, item_numbers=[1])
 
     assert df.shape[1] == 1
+
+
+def test_create_from_data_frame(tmpdir):
+
+    df = pd.read_csv(
+        "tests/testdata/co2-mm-mlo.csv",
+        parse_dates=True,
+        index_col="Date",
+        na_values=-99.99,
+    )
+
+    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+    Dfs0.from_dataframe(
+        df, filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
+    )  # Could not find better type
+
+    ds = mikeio.read(filename)
+
+    assert len(ds.items) == 5
+    assert ds.items[0].type == EUMType.Concentration
+    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
+
+
+def test_create_from_data_frame_monkey_patched(tmpdir):
+
+    df = pd.read_csv(
+        "tests/testdata/co2-mm-mlo.csv",
+        parse_dates=True,
+        index_col="Date",
+        na_values=-99.99,
+    )
+
+    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+
+    df.to_dfs0(
+        filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
+    )
+
+    ds = mikeio.read(filename)
+
+    assert len(ds.items) == 5
+    assert ds.items[0].type == EUMType.Concentration
+    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
+
+
+def test_create_from_data_frame_different_types(tmpdir):
+
+    df = pd.read_csv(
+        "tests/testdata/co2-mm-mlo.csv",
+        parse_dates=True,
+        index_col="Date",
+        na_values=-99.99,
+    )
+
+    df = df[["Average", "Trend"]]
+
+    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+
+    items = [
+        ItemInfo("Average", EUMType.Concentration, EUMUnit.gram_per_meter_pow_3),
+        ItemInfo("Trend", EUMType.Undefined),
+    ]
+
+    Dfs0.from_dataframe(df, filename, items=items)
+
+    ds = mikeio.read(filename)
+
+    assert len(ds.items) == 2
+    assert ds.items[0].type == EUMType.Concentration
+    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
+
+    assert ds.items[1].type == EUMType.Undefined
+    assert ds.items[1].unit == EUMUnit.undefined
 
 
 def test_read_dfs0_single_item():

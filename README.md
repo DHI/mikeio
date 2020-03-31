@@ -64,7 +64,18 @@ Shape: (100, 3)
 >>>            dt=60)
 
 ```
-
+### Create timeseries from dataframe
+```python
+import pandas as pd
+import mikeio
+>>> df = pd.read_csv(
+...         "tests/testdata/co2-mm-mlo.csv",
+...         parse_dates=True,
+...         index_col="Date",
+...         na_values=-99.99,
+...     )
+>>> df.to_dfs0("mauna_loa.dfs0")
+```
 
 For more examples on timeseries data see this [notebook](notebooks/Dfs0%20-%20Timeseries.ipynb)
 
