@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.3.1",
+    version="0.4.0.alpha",
     install_requires=["pythonnet", "numpy", "pandas"],
     extras_require={"dev": ["pytest", "black"]},
     author="Henrik Andersson",
@@ -16,7 +16,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/DHI/mikeio",
-    download_url="https://github.com/DHI/mikeio/archive/0.3.0.zip",
+    download_url="https://github.com/DHI/mikeio/archive/v0.4.0-alpha.zip",
     packages=setuptools.find_packages(),
     classifiers=[
         "License :: OSI Approved :: BSD License",
