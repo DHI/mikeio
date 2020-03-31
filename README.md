@@ -5,7 +5,7 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
 ## Requirements
 
 * Python x64 >=3.6
-* [MIKE](https://www.mikepoweredbydhi.com/mike-2020) or [MIKE SDK](https://www.mikepoweredbydhi.com/download/mike-2020/mike-sdk)
+* [MIKE](https://www.mikepoweredbydhi.com/mike-2020) or [MIKE SDK](https://www.mikepoweredbydhi.com/download/mike-2020/mike-sdk) >= 2019
 
 ## Installation
 
