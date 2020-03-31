@@ -175,6 +175,16 @@ def test_read_dfs0_to_pandas_single_item():
     assert df.shape[1] == 1
 
 
+def test_read_dfs0_delete_value_conversion():
+
+    dfs0file = r"tests/testdata/da_diagnostic.dfs0"
+
+    dfs = Dfs0()
+    ds = dfs.read(dfs0file)
+
+    assert np.isnan(ds.data[3][1])
+
+
 def test_create_from_data_frame(tmpdir):
 
     df = pd.read_csv(

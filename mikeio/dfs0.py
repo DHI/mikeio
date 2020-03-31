@@ -60,10 +60,12 @@ class Dfs0:
         # First column in the time (the rest is the data)
         data = np.fromiter(dfsdata, np.float64).reshape(nt, n_items + 1)[:, 1::]
 
-        data[data == -1.0000000180025095e-35] = np.nan
-        data[data == -1.0000000031710769e-30] = np.nan
-        data[data == dfs.FileInfo.DeleteValueFloat] = np.nan
-        data[data == dfs.FileInfo.DeleteValueDouble] = np.nan
+        mask = np.isclose(data, dfs.FileInfo.DeleteValueFloat, atol=1e-34)
+        data[mask] = np.nan
+        mask = np.isclose(
+            data, dfs.FileInfo.DeleteValueDouble, atol=1e-34
+        )  # TODO needs to be verified
+        data[mask] = np.nan
 
         dfs.Close()
 
@@ -89,7 +91,9 @@ class Dfs0:
             ):
                 raise Warning("item_numbers must be a list of integers")
 
-        data, t, names = self.__read(filename=filename)
+        data, t, items = self.__read(filename=filename)
+
+        names = [item.name for item in items]
 
         df = pd.DataFrame(data, columns=names)
 
@@ -346,8 +350,7 @@ class Dfs0:
 
         dfs.Close()
 
-    @staticmethod
-    def to_dataframe(self, filename):
+    def to_dataframe(self, filename, unit_in_name=False):
         """Read data from the dfs0 file and return a Pandas DataFrame
         
         Parameters
@@ -359,16 +362,16 @@ class Dfs0:
         -------
         pd.DataFrame
         """
-        import pandas as pd
+        data, t, items = self.__read(filename=filename)
 
-        data, t, names = self.__read(filename=filename)
+        if unit_in_name:
+            names = [f"{item.name} ({item.unit.name})" for item in items]
+        else:
+            names = [item.name for item in items]
 
         df = pd.DataFrame(data, columns=names)
 
         df.index = pd.DatetimeIndex(t)
-
-        if item_numbers is not None:
-            df = df.iloc[:, item_numbers]
 
         return df
 
