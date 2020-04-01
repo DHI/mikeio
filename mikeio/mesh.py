@@ -92,6 +92,26 @@ class Mesh:
 
         return ec
 
+    def to_shapely(self):
+        from shapely.geometry import Polygon, MultiPolygon
+
+        nc = self.get_node_coords()
+
+        ne = self.get_number_of_elements()
+
+        polys = []
+        for j in range(ne):
+            nodes = self._mesh.ElementTable[j]
+            pcoords = np.empty([nodes.Length, 2])
+            for i in range(nodes.Length):
+                nidx = nodes[i] - 1
+                pcoords[i, :] = nc[nidx, 0:2]
+            polygon = Polygon(pcoords)
+            polys.append(polygon)
+        mp = MultiPolygon(polys)
+
+        return mp
+
     def plot(self, cmap=None, z=None, label=None):
         """
         Plot mesh elements
