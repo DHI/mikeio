@@ -28,7 +28,17 @@ Mesh
 .. autoclass:: mikeio.Mesh
 	:members:
 
-Dataset
+Misc
 -------
 .. autoclass:: mikeio.dutil.Dataset
+	:members:
+
+.. autoclass:: mikeio.dutil.ItemInfo 
+	:members:
+
+
+
+Generic
+-------
+.. automodule:: mikeio.generic
 	:members:

@@ -161,6 +161,19 @@
 <blockquote>
 <div><p>pip install mikeio</p>
 </div></blockquote>
+</div>
+<div class="section" id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs0</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+<span class="go">                     VarFun01    NotFun</span>
+<span class="go">2017-01-01 00:00:00  0.843547  0.640486</span>
+<span class="go">2017-01-01 05:00:00  0.093729  0.653257</span>
+<span class="go">2017-01-01 10:00:00       NaN       NaN</span>
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -170,7 +183,8 @@
 <li class="toctree-l2"><a class="reference internal" href="api.html#dfs2">Dfs2</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html#dfsu">Dfsu</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html#mesh">Mesh</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#dataset">Dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#misc">Misc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#module-mikeio.generic">Generic</a></li>
 </ul>
 </li>
 </ul>

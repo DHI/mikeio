@@ -14,11 +14,13 @@ from .helpers import safe_length
 
 class Dfsu:
     def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
-        """Read a dfsu file
+        """
+        Read a dfsu file
 
         Paramters
         ---------
         filename: str
+            dfsu filename
         item_numbers: list[int], optional
             Read only selected items, by number (0-based)
         item_names: list[str], optional

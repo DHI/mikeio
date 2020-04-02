@@ -73,7 +73,8 @@ class Dfs0:
         return data, t, items
 
     def read_to_pandas(self, filename, item_numbers=None):
-        """Read data from the dfs0 file and return a Pandas DataFrame
+        """Read data from the dfs0 file and return a Pandas DataFrame (deprecated)
+           `read_to_pandas` is deprecated. Use to_dataframe instead.
         
         Parameters
         ----------
@@ -112,16 +113,17 @@ class Dfs0:
     def read(self, filename, item_numbers=None, item_names=None):
         """Read data from the dfs0 file
 
-        Usage:
-            read(filename, item_numbers=None, item_names=None)
-        filename
+        Parameters
+        ----------
+        filename: str
             full path and file name to the dfs0 file.
-        item_numbers
+        item_numbers: list[int], optional
             read only the item_numbers in the array specified (0 base)
-        item_names
+        item_names: list[str], optional
             read only the items in the array specified, (takes precedence over item_numbers)
 
-        Return:
+        Returns
+        -------
             Dataset(data, time, items)
         """
 
@@ -158,10 +160,12 @@ class Dfs0:
 
         """write overwrites an existing dfs0 file.
 
-        filename:
+        Parameters
+        ----------
+        filename: str
             Full path and filename to dfs0 to be modified.
-        data:
-            a list of numpy array
+        data: list[np.array]
+            data to overwrite
         """
 
         if not os.path.exists(filename):

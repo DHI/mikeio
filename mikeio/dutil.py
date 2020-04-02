@@ -107,9 +107,8 @@ class Dataset:
     [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
     >>> ds['NotFun'][0:5]
     array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
-
-    >> data,time,items = ds
-    >> items
+    >>> data,time,items = ds
+    >>> items
     [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
     """
 

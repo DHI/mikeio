@@ -19,6 +19,18 @@ Installation
 
     pip install mikeio
 
+Getting started
+---------------
+    
+    >>>  from mikeio import Dfs0
+    >>>  dfs = Dfs0()
+    >>>  df = dfs.to_dataframe('simple.dfs0')
+    >>> df.head()
+                         VarFun01    NotFun
+    2017-01-01 00:00:00  0.843547  0.640486
+    2017-01-01 05:00:00  0.093729  0.653257
+    2017-01-01 10:00:00       NaN       NaN
+    
 
 .. toctree::
    api
