@@ -179,6 +179,10 @@ class Dataset:
         Dataset
             dataset with subset
         """
+
+        if axis == 0:
+            raise ValueError("Subsetting along time axis not supported")
+
         res = []
         for item in self.items:
             x = np.take(self[item.name], idx, axis=axis)
