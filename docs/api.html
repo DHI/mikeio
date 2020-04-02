@@ -1,0 +1,773 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>API Documentation &mdash; mikeio  documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="mikeio: input/output of MIKE files in Python" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mikeio
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dfs0">Dfs0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfs1">Dfs1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfs2">Dfs2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfsu">Dfsu</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mesh">Mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataset">Dataset</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mikeio</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>API Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-documentation">
+<span id="api"></span><h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dfs0">
+<h2>Dfs0<a class="headerlink" href="#dfs0" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mikeio.Dfs0">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs0</code><a class="headerlink" href="#mikeio.Dfs0" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mikeio.Dfs0.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">data_value_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dfs0 file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Full path and filename to dfs0 to be created.</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – values</p></li>
+<li><p><strong>start_time</strong> (<em>datetime.dateime</em><em>, </em><em>, </em><em>optional</em>) – start date of type datetime.</p></li>
+<li><p><strong>timeseries_unit</strong> (<em>Timestep</em><em>, </em><em>optional</em>) – Timestep  unitdefault Timestep.SECOND</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – the time step. Therefore dt of 5.5 with timeseries_unit of minutes
+means 5 mins and 30 seconds. default to 1</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><em>ItemInfo</em><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title</p></li>
+<li><p><strong>data_value_type</strong> (<em>list</em><em>[</em><em>DataValueType</em><em>]</em><em>, </em><em>optional</em>) – DataValueType default DataValueType.INSTANTANEOUS</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs0.from_dataframe">
+<em class="property">static </em><code class="sig-name descname">from_dataframe</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">filename</em>, <em class="sig-param">itemtype=None</em>, <em class="sig-param">unit=None</em>, <em class="sig-param">items=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.from_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dfs0 from a pandas Dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe with data</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – filename to write output</p></li>
+<li><p><strong>itemtype</strong> (<em>EUMType</em><em>, </em><em>optional</em>) – Same type for all items</p></li>
+<li><p><strong>unit</strong> (<em>EUMUnit</em><em>, </em><em>optional</em>) – Same unit for all items</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><em>ItemInfo</em><em>]</em>) – Different types, units for each items, similar to <cite>create</cite></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs0.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the dfs0 file</p>
+<dl class="simple">
+<dt>Usage:</dt><dd><p>read(filename, item_numbers=None, item_names=None)</p>
+</dd>
+<dt>filename</dt><dd><p>full path and file name to the dfs0 file.</p>
+</dd>
+<dt>item_numbers</dt><dd><p>read only the item_numbers in the array specified (0 base)</p>
+</dd>
+<dt>item_names</dt><dd><p>read only the items in the array specified, (takes precedence over item_numbers)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dataset(data, time, items)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs0.read_to_pandas">
+<code class="sig-name descname">read_to_pandas</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.read_to_pandas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the dfs0 file and return a Pandas DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – full path and file name to the dfs0 file.</p></li>
+<li><p><strong>item_numbers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – read only the item_numbers in the array specified (0 base)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.Dataframe</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs0.to_dataframe">
+<code class="sig-name descname">to_dataframe</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">unit_in_name=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.to_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the dfs0 file and return a Pandas DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – full path and file name to the dfs0 file.</p></li>
+<li><p><strong>unit_in_name</strong> (<em>bool</em><em>, </em><em>optional</em>) – include unit in column name, default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs0.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>write overwrites an existing dfs0 file.</p>
+<dl class="simple">
+<dt>filename:</dt><dd><p>Full path and filename to dfs0 to be modified.</p>
+</dd>
+<dt>data:</dt><dd><p>a list of numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="dfs1">
+<h2>Dfs1<a class="headerlink" href="#dfs1" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mikeio.Dfs1">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs1</code><a class="headerlink" href="#mikeio.Dfs1" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mikeio.Dfs1.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">items=None</em>, <em class="sig-param">length_x=1</em>, <em class="sig-param">x0=0</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">title=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dfs1 file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Location to write the dfs1 file</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices, one for each item. Matrix dimension: x, time</p></li>
+<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime</p></li>
+<li><p><strong>timeseries_unit</strong> (<em>Timestep</em><em>, </em><em>optional</em>) – TimeStep unit default TimeStep.SECOND</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – The time step (double based on the timeseries_unit). Therefore dt of 5.5 with timeseries_unit of minutes
+means 5 mins and 30 seconds.</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><em>ItemInfo</em><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
+<li><p><strong>coordinate</strong> – [‘UTM-33’, 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
+OR
+[TODO: Support not Local Coordinates …]</p></li>
+<li><p><strong>x0</strong> – Lower right position</p></li>
+<li><p><strong>length_x</strong> – length of each grid in the x direction (meters)</p></li>
+<li><p><strong>title</strong> – title of the dfs2 file (can be blank)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs1.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the dfs1 file</p>
+<dl class="simple">
+<dt>Usage:</dt><dd><p>read(filename, item_numbers=None, item_names=None)</p>
+</dd>
+<dt>filename</dt><dd><p>full path to the dfs1 file.</p>
+</dd>
+<dt>item_numbers</dt><dd><p>read only the item_numbers in the array specified (0 base)</p>
+</dd>
+<dt>item_names</dt><dd><p>read only the items in the array specified, (takes precedence over item_numbers)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dataset(data, time, items)
+where data[nt,x]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs1.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function: write to a pre-created dfs1 file.</p>
+<dl class="simple">
+<dt>filename:</dt><dd><p>full path and filename to existing dfs1 file</p>
+</dd>
+<dt>data:</dt><dd><p>list of matrices. len(data) must equal the number of items in the dfs2.
+Each matrix must be of dimension time, x</p>
+</dd>
+<dt>usage:</dt><dd><p>write(filename, data) where  data(nt, x)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="dfs2">
+<h2>Dfs2<a class="headerlink" href="#dfs2" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mikeio.Dfs2">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs2</code><a class="headerlink" href="#mikeio.Dfs2" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mikeio.Dfs2.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">length_x=1</em>, <em class="sig-param">length_y=1</em>, <em class="sig-param">x0=0</em>, <em class="sig-param">y0=0</em>, <em class="sig-param">coordinate=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">title=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dfs2 file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Location to write the dfs2 file</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
+<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start date of type datetime.</p></li>
+<li><p><strong>timeseries_unit</strong> (<em>Timestep</em><em>, </em><em>optional</em>) – TimeStep default TimeStep.SECOND</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
+means 5 mins and 30 seconds. Default 1</p></li>
+<li><p><strong>datetimes</strong> (<em>list</em><em>[</em><em>datetime</em><em>]</em><em>, </em><em>optional</em>) – datetimes, creates a non-equidistant calendar axis</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><em>ItemInfo</em><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
+<li><p><strong>coordinate</strong> – [‘UTM-33’, 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees</p></li>
+<li><p><strong>x0</strong> (<em>float</em><em>, </em><em>optional</em>) – Lower right position</p></li>
+<li><p><strong>x0</strong> – Lower right position</p></li>
+<li><p><strong>length_x</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the x direction (projection units)</p></li>
+<li><p><strong>length_y</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the y direction (projection units)</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title of the dfs2 file. Default is blank.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs2.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the dfs1 file</p>
+<dl class="simple">
+<dt>Usage:</dt><dd><p>read(filename, item_numbers=None, item_names=None)</p>
+</dd>
+<dt>filename</dt><dd><p>full path to the dfs1 file.</p>
+</dd>
+<dt>item_numbers</dt><dd><p>read only the item_numbers in the array specified (0 base)</p>
+</dd>
+<dt>item_names</dt><dd><p>read only the items in the array specified, (takes precedence over item_numbers)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Dataset(data, time, items)
+where data[nt,y,x]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs2.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function: write to a pre-created dfs2 file.</p>
+<dl class="simple">
+<dt>filename:</dt><dd><p>full path and filename to existing dfs2 file</p>
+</dd>
+<dt>data:</dt><dd><p>list of matrices. len(data) must equal the number of items in the dfs2.
+Easch matrix must be of dimension y,x,time</p>
+</dd>
+<dt>usage:</dt><dd><p>write( filename, data) where  data( y, x, nt)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="dfsu">
+<h2>Dfsu<a class="headerlink" href="#dfsu" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mikeio.Dfsu">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfsu</code><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mikeio.Dfsu.create">
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">meshfilename</em>, <em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a dfsu file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>meshfilename</strong> (<em>str</em><em>,</em>) – full path to a valid mesh file</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
+<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime, default is datetime.now()</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
+means 5 mins and 30 seconds. Default 1</p></li>
+<li><p><strong>timeseries_unit</strong> (<em>TimeStep</em><em>, </em><em>optional</em>) – default TimeStep.SECOND</p></li>
+<li><p><strong>unit</strong> (<em>list</em><em>[</em><em>ItemInfo</em><em>]</em><em>, </em><em>optional</em>) – Name, item, unit, default is undefined</p></li>
+<li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.find_closest_element_index">
+<code class="sig-name descname">find_closest_element_index</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">z=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.find_closest_element_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find index of closest element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X coordinate(easting or longitude)</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y coordinate(northing or latitude)</p></li>
+<li><p><strong>z</strong> (<em>float</em><em>, </em><em>optional</em>) – Z coordinate(depth, positive upwards)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.get_element_area">
+<code class="sig-name descname">get_element_area</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_element_area" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the horizontal area of each element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>np.array</dt><dd><p>areas in m2</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.get_element_coords">
+<code class="sig-name descname">get_element_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_element_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the coordinates of the center of each element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>x,y,z of each element</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.get_node_coords">
+<code class="sig-name descname">get_node_coords</code><span class="sig-paren">(</span><em class="sig-param">code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_node_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the coordinates of each node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>code</strong> (<em>int</em>) – Get only nodes with specific code, e.g. land == 1</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>x,y,z of each node</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.is_geo">
+<em class="property">property </em><code class="sig-name descname">is_geo</code><a class="headerlink" href="#mikeio.Dfsu.is_geo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if dfsu file is defined on geographical LONG/LAT mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>bool</dt><dd><p>True if LONG/LAT, FALSE otherwise</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em>, <em class="sig-param">time_steps=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a dfsu file</p>
+<dl class="simple">
+<dt>filename: str</dt><dd><p>dfsu filename</p>
+</dd>
+<dt>item_numbers: list[int], optional</dt><dd><p>Read only selected items, by number (0-based)</p>
+</dd>
+<dt>item_names: list[str], optional</dt><dd><p>Read only selected items, by name, takes precedence over item_numbers</p>
+</dd>
+<dt>time_steps: list[int], optional</dt><dd><p>Read only selected time_steps</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dataset with data dimensions [t,elements]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#mikeio.dutil.Dataset" title="mikeio.dutil.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwrite a pre-created dfsu file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – full path and filename to existing dfsu file</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices. len(data) must equal the number of items in the dfsu.
+Each matrix must be of dimension time,elements</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mesh">
+<h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mikeio.Mesh">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="mikeio.Mesh.get_element_coords">
+<code class="sig-name descname">get_element_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_element_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate element center coordinates</p>
+<dl class="simple">
+<dt>Returns</dt><dd><p>np.array((number_of_elements, 3)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Mesh.get_node_coords">
+<code class="sig-name descname">get_node_coords</code><span class="sig-paren">(</span><em class="sig-param">code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_node_coords" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get node coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>code</strong> (<em>int</em><em>, </em><em>optional</em>) – filter results by code, land==1</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Mesh.plot">
+<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">cmap=None</em>, <em class="sig-param">z=None</em>, <em class="sig-param">label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot mesh elements</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – default viridis</p></li>
+<li><p><strong>z</strong> (<em>np.array</em>) – value for each element to plot, default bathymetry</p></li>
+<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="dataset">
+<h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="mikeio.dutil.Dataset">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.dutil.</code><code class="sig-name descname">Dataset</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">time</em>, <em class="sig-param">items</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dutil.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="mikeio.dutil.Dataset.data">
+<code class="sig-name descname">data</code><a class="headerlink" href="#mikeio.dutil.Dataset.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data, potentially multivariate and multiple spatial dimensions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list[np.array]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mikeio.dutil.Dataset.time">
+<code class="sig-name descname">time</code><a class="headerlink" href="#mikeio.dutil.Dataset.time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Datetime of each timestep</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list[datetime]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="mikeio.dutil.Dataset.items">
+<code class="sig-name descname">items</code><a class="headerlink" href="#mikeio.dutil.Dataset.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Names, type and unit of each item in the data list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list[ItemInfo]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Notes</p>
+<p>Data from a specific item can be accessed using the name of the item
+similar to a dictionary.</p>
+<p>Attributes data, time, names can also be unpacked like a tuple</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/random.dfs0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
+<span class="go">DataSet(data, time, items)</span>
+<span class="go">Number of items: 2</span>
+<span class="go">Shape: (1000,)</span>
+<span class="go">2017-01-01 00:00:00 - 2017-07-28 03:00:00</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">items</span>
+<span class="go">[VarFun01 &lt;Water Level&gt; (meter), NotFun &lt;Water Level&gt; (meter)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;NotFun&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+<span class="go">array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])</span>
+</pre></div>
+</div>
+<p>&gt;&gt; data,time,items = ds
+&gt;&gt; items
+[VarFun01 &lt;Water Level&gt; (meter), NotFun &lt;Water Level&gt; (meter)]</p>
+<dl class="method">
+<dt id="mikeio.dutil.Dataset.isel">
+<code class="sig-name descname">isel</code><span class="sig-paren">(</span><em class="sig-param">idx</em>, <em class="sig-param">axis=1</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dutil.Dataset.isel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select subset along an axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em><em>, </em><em>scalar</em><em> or </em><em>array_like</em>) – </p></li>
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataset with subset</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.dutil.Dataset" title="mikeio.dutil.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.dutil.Dataset.to_dataframe">
+<code class="sig-name descname">to_dataframe</code><span class="sig-paren">(</span><em class="sig-param">unit_in_name=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dutil.Dataset.to_dataframe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Dataset to a Pandas DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – full path and file name to the dfs0 file.</p></li>
+<li><p><strong>unit_in_name</strong> (<em>bool</em><em>, </em><em>optional</em>) – include unit in column name, default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="mikeio: input/output of MIKE files in Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
