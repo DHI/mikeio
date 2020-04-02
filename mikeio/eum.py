@@ -1,3 +1,17 @@
+"""Functionality related to the DHI EUM scientific type system.
+
+
+Examples
+--------
+>>> from mikeio.eum import EUMType, EUMUnit
+>>> EUMType.Temperature
+<EUMType.Temperature: 100006>
+>>> EUMType.Temperature.units
+[degree Celsius, degree Fahrenheit, degree Kelvin]
+>>> EUMUnit.degree_Kelvin
+degree Kelvin
+
+"""
 from enum import IntEnum
 from mikeio.dfs_util import unit_list, type_list
 
@@ -1189,7 +1203,7 @@ class ItemInfo:
 
     Parameters
     ----------
-    name: str
+    name: str or EUMType, optional
     type: EUMType or int, optional
         Default EUMType.Undefined
     unit: EUMUnit or int, optional
@@ -1200,12 +1214,15 @@ class ItemInfo:
     >>> item = ItemInfo("Viken", EUMType.Water_Level)
     >>> item
     Viken <Water Level> (meter)
+    >>> ItemInfo(EUMType.Wind_speed)
+    Wind speed <Wind speed> (meter per sec)
     """
 
-    def __init__(self, name, itemtype=None, unit=None):
-        if not isinstance(name, str):
-            raise ValueError("Invalid name, name should be a string")
-        self.name = name
+    def __init__(self, name=None, itemtype=None, unit=None):
+
+        if isinstance(name, EUMType):
+            itemtype = name
+            name = name.display_name
 
         if itemtype is not None:
             if isinstance(itemtype, int):
@@ -1216,6 +1233,9 @@ class ItemInfo:
                     "Invalid type. Type should be supplied as EUMType, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
                 )
             self.type = itemtype
+
+            if name is None:
+                name = itemtype.display_name
         else:
 
             self.type = EUMType.Undefined
@@ -1235,6 +1255,10 @@ class ItemInfo:
                 self.unit = EUMUnit.undefined
             else:
                 self.unit = self.type.units[0]
+
+        if not isinstance(name, str):
+            raise ValueError("Invalid name, name should be a string")
+        self.name = name
 
     def __repr__(self):
 

@@ -1,4 +1,4 @@
-from mikeio.eum import EUMType
+from mikeio.eum import EUMType, ItemInfo
 
 
 def test_item_is_equivalent_to_int():
@@ -24,3 +24,25 @@ def test_get_item_name():
 def test_get_item_repr():
 
     assert repr(EUMType.Water_Level) == "Water Level"
+
+
+def test_create_info_with_name():
+
+    item = ItemInfo("Foo")
+
+    assert item.name == "Foo"
+
+
+def test_create_info_with_type_only():
+
+    item = ItemInfo(itemtype=EUMType.Water_Level)
+
+    assert item.name == "Water Level"
+
+
+def test_create_info_with_type_only_positional():
+
+    item = ItemInfo(EUMType.Water_Level)
+
+    assert item.name == "Water Level"
+    assert item.type == EUMType.Water_Level
