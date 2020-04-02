@@ -187,7 +187,7 @@ class Dfs3:
             3) name of the items
 
         NOTE
-            Returns data ( y, x, z, nt)
+            Returns Dataset with data (t, z, y, x)
 
             1) If coordinates is selected, then only return data at those coordinates
             2) coordinates specified overules layers.
@@ -219,26 +219,24 @@ class Dfs3:
                 for item in range(n_items):
                     if layers is None:
                         # Initialize an empty data block
-                        data = np.ndarray(
-                            shape=(yNum, xNum, zNum, nt), dtype=float
-                        )  # .fill(deleteValue)
+                        data = np.ndarray(shape=(nt, zNum, yNum, xNum), dtype=float)
                         data_list.append(data)
                     else:
                         data = np.ndarray(
-                            shape=(yNum, xNum, len(layers), nt), dtype=float
-                        )  # .fill(deleteValue)
+                            shape=(nt, len(layers), yNum, xNum), dtype=float
+                        )
                         data_list.append(data)
 
             else:
-                raise Warning(
+                raise ValueError(
                     "Static dfs3 files (with no time steps) are not supported."
                 )
-                quit()
+
         else:
             ncoordinates = len(coordinates)
             for item in range(n_items):
                 # Initialize an empty data block
-                data = np.ndarray(shape=(ncoordinates, nt), dtype=float)
+                data = np.ndarray(shape=(nt, ncoordinates), dtype=float)
                 data_list.append(data)
 
         t = []
@@ -253,14 +251,14 @@ class Dfs3:
                     d = to_numpy(src)
 
                     # DO a direct copy instead of eleement by elment
-                    d = d.reshape(zNum, yNum, xNum).swapaxes(0, 2).swapaxes(0, 1)
+                    d = d.reshape(zNum, yNum, xNum)  # .swapaxes(0, 2).swapaxes(0, 1)
                     d = np.flipud(d)
                     d[d == deleteValue] = np.nan
                     if layers is None:
-                        data_list[item][:, :, :, it] = d
+                        data_list[item][it, :, :, :] = d
                     else:
                         for l in range(len(layers)):
-                            data_list[item][:, :, l, it] = d[:, :, layers[l]]
+                            data_list[item][it, l, :, :] = d[layers[l], :, :]
 
                 t.append(
                     startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
@@ -275,7 +273,7 @@ class Dfs3:
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
                     d = np.array([itemdata.Data[i] for i in indices])
                     d[d == deleteValue] = np.nan
-                    data_list[item][:, it] = d
+                    data_list[item][it, :] = d
 
                 t.append(
                     startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
