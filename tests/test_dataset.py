@@ -49,6 +49,25 @@ def test_select_subset_isel():
     assert selds["Bar"][0, 0] == 3.0
 
 
+def test_select_subset_isel_multiple_idxs():
+
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    selds = ds.isel([10, 15], axis=1)
+
+    assert len(selds.items) == 2
+    assert len(selds.data) == 2
+    assert selds["Foo"].shape == (100, 2, 30)
+
+
 def test_to_dataframe():
 
     nt = 100
