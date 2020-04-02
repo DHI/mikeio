@@ -362,7 +362,8 @@ class Dfs0:
         ----------
         filename: str
             full path and file name to the dfs0 file.
-        
+        unit_in_name: bool, optional
+            include unit in column name, default False
         Returns
         -------
         pd.DataFrame

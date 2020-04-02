@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from System.Runtime.InteropServices import GCHandle, GCHandleType
 import ctypes
 
@@ -113,6 +114,18 @@ class Dataset:
     """
 
     def __init__(self, data, time, items):
+
+        n_items = len(data)
+        n_timesteps = data[0].shape[0]
+
+        if len(time) != n_timesteps:
+            raise ValueError(
+                f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
+            )
+        if len(items) != n_items:
+            raise ValueError(
+                f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
+            )
         self.data = data
         self.time = time
         self.items = items
@@ -150,6 +163,61 @@ class Dataset:
             return self.data[x]
 
         raise Exception("Invalid operation")
+
+    def isel(self, idx, axis=1):
+        """
+        Select subset along an axis.
+
+        Parameters
+        ----------
+        idx: int, scalar or array_like
+        axis: int, optional
+            default 1
+
+        Returns
+        -------
+        Dataset
+            dataset with subset
+        """
+        res = []
+        for item in self.items:
+            x = np.take(self[item.name], idx, axis=axis)
+            res.append(x)
+
+        ds = Dataset(res, self.time, self.items)
+        return ds
+
+    def to_dataframe(self, unit_in_name=False):
+        """Convert Dataset to a Pandas DataFrame
+        
+        Parameters
+        ----------
+        filename: str
+            full path and file name to the dfs0 file.
+        unit_in_name: bool, optional
+            include unit in column name, default False
+        
+        Returns
+        -------
+        pd.DataFrame
+        """
+
+        if len(self.data[0].shape) != 1:
+            raise ValueError(
+                "Only data with a single dimension can be converted to a dataframe. Hint: use `isel` to create a subset."
+            )
+
+        if unit_in_name:
+            names = [f"{item.name} ({item.unit.name})" for item in self.items]
+        else:
+            names = [item.name for item in self.items]
+
+        data = np.asarray(self.data).T
+        df = pd.DataFrame(data, columns=names)
+
+        df.index = pd.DatetimeIndex(self.time, freq="infer")
+
+        return df
 
     def _ipython_key_completions_(self):
         return self.names

@@ -1,16 +1,23 @@
 from datetime import datetime
+from dateutil.rrule import rrule, SECONDLY
 import numpy as np
+import pandas as pd
 import pytest
 from mikeio.dutil import Dataset
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
+def _get_time(nt):
+    return list(rrule(freq=SECONDLY, count=nt, dtstart=datetime(2000, 1, 1)))
+
+
 def test_get_names():
 
     data = []
-    d = np.zeros([100, 100, 30]) + 1.0
+    nt = 100
+    d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = [datetime.now()]
+    time = _get_time(nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -19,12 +26,53 @@ def test_get_names():
     assert repr(ds.items[0].unit) == "undefined"
 
 
+def test_select_subset_isel():
+
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+
+    d1[0, 10, :] = 2.0
+    d2[0, 10, :] = 3.0
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    selds = ds.isel(10, axis=1)
+
+    assert len(selds.items) == 2
+    assert len(selds.data) == 2
+    assert selds["Foo"].shape == (100, 30)
+    assert selds["Foo"][0, 0] == 2.0
+    assert selds["Bar"][0, 0] == 3.0
+
+
+def test_to_dataframe():
+
+    nt = 100
+    d1 = np.zeros([nt])
+    d2 = np.zeros([nt])
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+    df = ds.to_dataframe()
+
+    assert list(df.columns) == ["Foo", "Bar"]
+    assert isinstance(df.index, pd.DatetimeIndex)
+
+
 def test_get_data():
 
     data = []
-    d = np.zeros([100, 100, 30]) + 1.0
+    nt = 100
+    d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = [datetime.now()]
+    time = _get_time(nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -33,10 +81,11 @@ def test_get_data():
 
 def test_get_data_2():
 
+    nt = 100
     data = []
-    d = np.zeros([100, 100, 30]) + 1.0
+    d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = [datetime.now()]
+    time = _get_time(nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -45,10 +94,11 @@ def test_get_data_2():
 
 def test_get_data_name():
 
+    nt = 100
     data = []
-    d = np.zeros([100, 100, 30]) + 1.0
+    d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = [datetime.now()]
+    time = _get_time(nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -56,11 +106,11 @@ def test_get_data_name():
 
 
 def test_get_bad_name():
-
+    nt = 100
     data = []
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
-    time = [datetime.now()]
+    time = _get_time(nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -70,10 +120,11 @@ def test_get_bad_name():
 
 def test_get_data_mulitple_name_fails():
 
+    nt = 100
     data = []
-    d = np.zeros([100, 100, 30]) + 1.0
+    d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = [datetime.now()]
+    time = _get_time(nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -136,12 +187,3 @@ def test_item_search():
 
     assert len(res) > 0
     assert isinstance(res[0], EUMType)
-
-
-if __name__ == "__main__":
-    data = []
-    d = np.zeros([100, 100, 30]) + 1.0
-    data.append(d)
-    time = [datetime.now()]
-    items = [ItemInfo("Foo")]
-    (data, time, names) = Dataset(data, time, items)

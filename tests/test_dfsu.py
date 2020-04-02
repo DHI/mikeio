@@ -136,6 +136,22 @@ def test_find_closest_element_index():
     assert idx == 317
 
 
+def test_read_and_select_single_element():
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu()
+
+    ds = dfs.read(filename)
+
+    assert ds.data[0].shape == (9, 884)
+
+    idx = dfs.find_closest_element_index(606200, 6905480)
+
+    selds = ds.isel(idx=idx, axis=1)
+
+    assert selds.data[0].shape == (9,)
+
+
 def test_is_geo_UTM():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
@@ -175,8 +191,8 @@ def test_create(tmpdir):
     filename = os.path.join(tmpdir.dirname, "simple.dfs1")
     meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
 
-    msh = Mesh()
-    msh.read(meshfilename)
+    msh = Mesh(meshfilename)
+    # msh.read(meshfilename)
     n_elements = msh.number_of_elements
     d = np.zeros((1, n_elements))
     data = []
