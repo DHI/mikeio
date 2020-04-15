@@ -1,37 +1,6 @@
 import numpy as np
 import pandas as pd
-from System.Runtime.InteropServices import GCHandle, GCHandleType
-import ctypes
-
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
-
-
-def to_numpy(src):
-    """
-    Convert .NET array to numpy array
-
-    Parameters
-    ----------
-    src : System.Array
-        
-    Returns
-    -------
-    np.ndarray
-        
-    """
-
-    src_hndl = GCHandle.Alloc(src, GCHandleType.Pinned)
-    try:
-        src_ptr = src_hndl.AddrOfPinnedObject().ToInt64()
-        bufType = ctypes.c_float * len(src)
-        cbuf = bufType.from_address(src_ptr)
-        d = np.frombuffer(cbuf, dtype=cbuf._type_)
-    finally:
-        if src_hndl.IsAllocated:
-            src_hndl.Free()
-
-    return d
-
 
 def find_item(dfs, item_names):
     """Utility function to find item numbers

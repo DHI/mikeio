@@ -2,7 +2,7 @@ import os
 import warnings
 import numpy as np
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import System
 from System import Array
 
@@ -19,6 +19,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
 from .dutil import Dataset, find_item
+from .dotnet import asNetArray
 from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
 
 
@@ -227,7 +228,7 @@ class Dfs0:
         data,
         start_time=None,
         timeseries_unit=TimeStep.SECOND,
-        dt=1,
+        dt=1.0,
         datetimes=None,
         items=None,
         title=None,
@@ -247,7 +248,7 @@ class Dfs0:
             Timestep  unitdefault Timestep.SECOND
         dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
-            means 5 mins and 30 seconds. default to 1
+            means 5 mins and 30 seconds. default to 1.0
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         title: str, optional
@@ -277,7 +278,11 @@ class Dfs0:
             equidistant = True
 
             if not type(start_time) is datetime:
-                raise Warning("start_time must be of type datetime ")
+                raise Warning("start_time must be of type datetime ")            
+            
+            dt = np.float(dt)
+            datetimes = np.array([start_time + timedelta(seconds=(step*dt)) for step in np.arange(n_time_steps)])
+
         else:
             start_time = datetimes[0]
             equidistant = False
@@ -343,21 +348,14 @@ class Dfs0:
 
         for i in range(n_items):
             d = data[i]
-
             d[np.isnan(d)] = delete_value
 
-        # COPY OVER THE DATA
-        for it in range(n_time_steps):
-            for ii in range(n_items):
-
-                d = Array[System.Single](np.array(data[ii][it : it + 1]))
-                if equidistant:
-                    dfs.WriteItemTimeStepNext(it, d)
-                else:
-                    dt = (datetimes[it] - datetimes[0]).total_seconds()
-                    dfs.WriteItemTimeStepNext(dt, d)
+        data1 = np.stack(data, axis=1)
+        t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
+        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, asNetArray(data1))
 
         dfs.Close()
+
 
     def to_dataframe(self, filename, unit_in_name=False):
         """Read data from the dfs0 file and return a Pandas DataFrame

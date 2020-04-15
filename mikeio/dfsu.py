@@ -7,7 +7,8 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
-from .dutil import to_numpy, Dataset, find_item, get_item_info
+from .dutil import Dataset, find_item, get_item_info
+from .dotnet import to_numpy
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 

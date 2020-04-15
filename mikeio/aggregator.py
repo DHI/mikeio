@@ -14,7 +14,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dutil import to_numpy
+from .dotnet import to_numpy
 from .helpers import safe_length
 
 

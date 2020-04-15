@@ -9,8 +9,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
-from .dutil import to_numpy, Dataset
-
+from .dutil import Dataset
+from .dotnet import to_numpy
 
 class Dfs3:
     def __calculate_index(self, nx, ny, nz, x, y, z):

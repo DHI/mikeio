@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import System
 from System import Array
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
-from .dutil import to_numpy
+from .dotnet import to_numpy
 from .helpers import safe_length
 from shutil import copyfile
 
