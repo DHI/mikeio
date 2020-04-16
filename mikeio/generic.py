@@ -1,9 +1,8 @@
 import os
 from datetime import datetime, timedelta
-import System
-from System import Array
+
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
-from .dotnet import to_numpy
+from .dotnet import to_numpy, to_dotnet_float_array
 from .helpers import safe_length
 from shutil import copyfile
 
@@ -96,7 +95,8 @@ def scale(infilename, outfilename, offset=0.0, factor=1.0):
             time = itemdata.Time
 
             outdata = d * factor + offset
-            darray = Array[System.Single](outdata)
+            # darray = Array[System.Single](outdata)
+            darray = to_dotnet_float_array(outdata)
 
             dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
 
@@ -134,7 +134,8 @@ def sum(infilename_a, infilename_b, outfilename):
             time = itemdata_a.Time
 
             outdata = d_a + d_b
-            darray = Array[System.Single](outdata)
+            # darray = Array[System.Single](outdata)
+            darray = to_dotnet_float_array(outdata)
 
             dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
 
@@ -177,7 +178,8 @@ def diff(infilename_a, infilename_b, outfilename):
             time = itemdata_a.Time
 
             outdata = d_a - d_b
-            darray = Array[System.Single](outdata)
+            # darray = Array[System.Single](outdata)
+            darray = to_dotnet_float_array(outdata)
 
             dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
 
@@ -245,7 +247,8 @@ def concat(infilenames, outfilename):
                 itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
                 d = to_numpy(itemdata.Data)
 
-                darray = Array[System.Single](d)
+                # darray = Array[System.Single](d)
+                darray = to_dotnet_float_array(d)
 
                 dfs_o.WriteItemTimeStepNext(0, darray)
 

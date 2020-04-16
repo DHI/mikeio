@@ -1,7 +1,6 @@
 import numpy as np
 from datetime import datetime
-import System
-from System import Array
+
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
@@ -12,7 +11,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
 from .dutil import Dataset, find_item, get_item_info
-from .dotnet import to_numpy
+from .dotnet import to_numpy, to_dotnet_float_array, to_dotnet_datetime
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
@@ -138,7 +137,7 @@ class Dfs1:
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
-                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                darray = to_dotnet_float_array(d)
                 dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
@@ -222,14 +221,7 @@ class Dfs1:
         if not type(start_time) is datetime:
             raise Warning("start_time must be of type datetime ")
 
-        system_start_time = System.DateTime(
-            start_time.year,
-            start_time.month,
-            start_time.day,
-            start_time.hour,
-            start_time.minute,
-            start_time.second,
-        )
+        system_start_time = to_dotnet_datetime(start_time)
 
         # Create an empty dfs1 file object
         factory = DfsFactory()
@@ -271,7 +263,8 @@ class Dfs1:
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
-                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                # darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                darray = to_dotnet_float_array(d)
                 dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()

@@ -1,14 +1,12 @@
 import numpy as np
 from datetime import datetime
-import System
-from System import Array
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
 from .dutil import Dataset, find_item, get_item_info
-from .dotnet import to_numpy
+from .dotnet import to_numpy, to_dotnet_float_array, to_dotnet_datetime
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
@@ -18,7 +16,7 @@ class Dfsu:
         """
         Read a dfsu file
 
-        Paramters
+        Parameters
         ---------
         filename: str
             dfsu filename
@@ -127,7 +125,7 @@ class Dfsu:
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
-                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                darray = to_dotnet_float_array(d)
                 dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
@@ -178,14 +176,7 @@ class Dfsu:
         if title is None:
             title = ""
 
-        system_start_time = System.DateTime(
-            start_time.year,
-            start_time.month,
-            start_time.day,
-            start_time.hour,
-            start_time.minute,
-            start_time.second,
-        )
+        system_start_time = to_dotnet_datetime(start_time)
 
         mesh = MeshFile.ReadMesh(meshfilename)
 
@@ -195,7 +186,8 @@ class Dfsu:
         # Setup header and geometry, copy from source file
 
         # zn have to be Single precision??
-        zn = Array[System.Single](list(mesh.Z))
+        # zn = Array[System.Single](list(mesh.Z))
+        zn = to_dotnet_float_array(np.array(list(mesh.Z)))
         builder.SetNodes(mesh.X, mesh.Y, zn, mesh.Code)
 
         builder.SetElements(mesh.ElementTable)
@@ -220,7 +212,7 @@ class Dfsu:
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
-                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                darray = to_dotnet_float_array(d)
                 dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
