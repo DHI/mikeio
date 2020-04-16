@@ -202,6 +202,10 @@ class EUMType(IntEnum):
     Vegetation_height = 100182
     Geographical_coordinate = 100183
     Angle = 100184
+    ItemGeometry0D = 100185
+    ItemGeometry1D = 100186
+    ItemGeometry2D = 100187
+    ItemGeometry3D = 100188
     Temperature_lapse_rate = 100189
     Correction_of_precipitation = 100190
     Temperature_correction = 100191
