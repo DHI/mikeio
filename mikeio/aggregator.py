@@ -14,25 +14,34 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dotnet import to_numpy
+from .dutil import to_numpy
 from .helpers import safe_length
 
 
-def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
-    """ Function: take average (or other statistics) over axis in dfs2 and output to dfs1
-
-    Usage:
-        dfs2todfs1(dfs2file, dfs1file)
-        dfs2todfs1(dfs2file, dfs1file, axis)
-        dfs2todfs1(dfs2file, dfs1file, axis, func=np.nanmean)
+def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
+    """Aggregate file over an axis
+    
+    Parameters
+    ----------
+    dfs2file : str
+        input file
+    dfs1file : str
+        output file
+    axis : int, optional
+        spatial axis to aggregate over, 1=y, 2=x default 1
+    func : function, optional
+        aggregation function, by default np.nanmean
     """
+
+    if axis not in [1, 2]:
+        raise ValueError("Axis must be 1=y or 2=x")
 
     # Read dfs2
     dfs_in = DfsFileFactory.DfsGenericOpen(dfs2file)
     fileInfo = dfs_in.FileInfo
 
     # Basic info from input file
-    axis = dfs_in.ItemInfo[0].SpatialAxis
+    ax = dfs_in.ItemInfo[0].SpatialAxis
     n_time_steps = fileInfo.TimeAxis.NumberOfTimeSteps
     if n_time_steps == 0:
         raise Warning("Static dfs2 files (with no time steps) are not supported.")
@@ -53,14 +62,13 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
     builder.DeleteValueInt = fileInfo.DeleteValueInt
     builder.DeleteValueUnsignedInt = fileInfo.DeleteValueUnsignedInt
 
-    # use x-axis (default) else y-axis
-    if ax == 0:
+    if axis == 1:
         builder.SetSpatialAxis(
-            factory.CreateAxisEqD1(axis.AxisUnit, axis.XCount, axis.X0, axis.Dx)
+            factory.CreateAxisEqD1(ax.AxisUnit, ax.XCount, ax.X0, ax.Dx)
         )
     else:
         builder.SetSpatialAxis(
-            factory.CreateAxisEqD1(axis.AxisUnit, axis.YCount, axis.Y0, axis.Dy)
+            factory.CreateAxisEqD1(ax.AxisUnit, ax.YCount, ax.Y0, ax.Dy)
         )
 
     # assume no compression keys
@@ -102,10 +110,10 @@ def dfs2todfs1(dfs2file, dfs1file, ax=0, func=np.nanmean):
 
             d = to_numpy(itemdata.Data)
             d[d == deleteValue] = np.nan
-            d2 = d.reshape(axis.YCount, axis.XCount)
+            d2 = d.reshape(ax.YCount, ax.XCount)
             d2 = np.flipud(d2)
 
-            d1 = func(d2, axis=ax)
+            d1 = func(d2, axis=axis - 1)
             d1[np.isnan(d1)] = deleteValue
 
             darray = Array[System.Single](d1)
