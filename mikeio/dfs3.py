@@ -1,5 +1,5 @@
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
@@ -10,7 +10,7 @@ from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
 from .dutil import Dataset
-from .dotnet import to_numpy
+from .dotnet import to_numpy, to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 
 class Dfs3:
     def __calculate_index(self, nx, ny, nz, x, y, z):
@@ -239,7 +239,7 @@ class Dfs3:
                 data = np.ndarray(shape=(nt, ncoordinates), dtype=float)
                 data_list.append(data)
 
-        t = []
+        t_seconds = np.zeros(nt, dtype=float)
         startTime = dfs.FileInfo.TimeAxis.StartDateTime
 
         if coordinates is None:
@@ -260,9 +260,7 @@ class Dfs3:
                         for l in range(len(layers)):
                             data_list[item][it, l, :, :] = d[layers[l], :, :]
 
-                t.append(
-                    startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
-                )
+                t_seconds[it] = itemdata.Time
         else:
             indices = [
                 self.__calculate_index(xNum, yNum, zNum, x, y, z)
@@ -275,12 +273,10 @@ class Dfs3:
                     d[d == deleteValue] = np.nan
                     data_list[item][it, :] = d
 
-                t.append(
-                    startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
-                )
+                t_seconds[it] = itemdata.Time
 
-        # time = pd.DatetimeIndex(t)
-        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
         names = []
         for item in range(n_items):
             name = dfs.ItemInfo[item_numbers[item]].Name
@@ -406,14 +402,7 @@ class Dfs3:
                 "day=1403, month=1405, year= 1404See dfsutil options for help "
             )
 
-        system_start_time = System.DateTime(
-            start_time.year,
-            start_time.month,
-            start_time.day,
-            start_time.hour,
-            start_time.minute,
-            start_time.second,
-        )
+        system_start_time = to_dotnet_datetime(start_time)
 
         # Create an empty dfs3 file object
         factory = DfsFactory()
@@ -525,7 +514,7 @@ class Dfs3:
             d[np.isnan(d)] = deletevalue
             d = d.swapaxes(1, 2).swapaxes(1, 0)
             d = d[:, ::-1, :]
-            darray = Array[System.Single](np.asarray(d).reshape(-1))
+            darray = to_dotnet_array(np.asarray(d).reshape(-1))
             dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()

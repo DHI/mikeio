@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timedelta
 
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
-from .dotnet import to_numpy, to_dotnet_float_array
+from .dotnet import to_numpy, to_dotnet_float_array, from_dotnet_datetime
 from .helpers import safe_length
 from shutil import copyfile
 
@@ -217,9 +217,8 @@ def concat(infilenames, outfilename):
 
         dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
         n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-        dt = dfs_i.FileInfo.TimeAxis.TimeStep
-        s = dfs_i.FileInfo.TimeAxis.StartDateTime
-        start_time = datetime(s.Year, s.Month, s.Day, s.Hour, s.Minute, s.Second)
+        dt = dfs_i.FileInfo.TimeAxis.TimeStep        
+        start_time = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
 
         if i > 0 and start_time > current_time + timedelta(seconds=dt):
             dfs_o.Close()

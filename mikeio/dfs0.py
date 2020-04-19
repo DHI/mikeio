@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
 from .dutil import Dataset, find_item
-from .dotnet import to_dotnet_array, to_dotnet_datetime
+from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
 
 
@@ -46,19 +46,12 @@ class Dfs0:
 
         # BULK READ THE DFS0
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
+        # First column is the time (the rest is the data)
+        t_seconds = [dfsdata[i,0] for i in range(nt)]
 
-        t = []
-        starttime = dfs.FileInfo.TimeAxis.StartDateTime
-
-        # EMPTY Data Block for copying the Results
-        for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
-            t.append(
-                starttime.AddSeconds(dfsdata[it, 0]).ToString("yyyy-MM-dd HH:mm:ss")
-            )
-
-        # Copies the System Array to a numpy matrix
-        # First column in the time (the rest is the data)
-
+        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        
         # TODO use to_numpy ?
         data = np.fromiter(dfsdata, np.float64).reshape(nt, n_items + 1)[:, 1::]
 
@@ -71,7 +64,7 @@ class Dfs0:
 
         dfs.Close()
 
-        return data, t, items
+        return data, time, items
 
     def read_to_pandas(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return a Pandas DataFrame (deprecated)
@@ -141,7 +134,7 @@ class Dfs0:
                     "item_numbers must be a list or array of values between 0 and 1e15"
                 )
 
-        t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        #t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
 
         data = []
 
@@ -198,16 +191,12 @@ class Dfs0:
 
         # Get the date times in seconds (from start)
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
-
-        t = []
-
-        for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
-            t.append(dfsdata[it, 0])
+        t_seconds = [dfsdata[i,0] for i in range(n_time_steps)]
 
         dfs.Reset()
 
         data1 = np.stack(data, axis=1)
-        Dfs0Util.WriteDfs0DataDouble(dfs, t, to_dotnet_array(data1))
+        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, to_dotnet_array(data1))
 
         dfs.Close()
 
@@ -231,7 +220,7 @@ class Dfs0:
             Full path and filename to dfs0 to be created.
         data: list[np.array]
             values
-        start_time: datetime.dateime, , optional
+        start_time: datetime.datetime, , optional
             start date of type datetime.
         timeseries_unit: Timestep, optional
             Timestep  unitdefault Timestep.SECOND

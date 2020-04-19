@@ -1,3 +1,4 @@
+import datetime
 import numpy as np
 import ctypes
 import clr
@@ -33,8 +34,13 @@ _MAP_NET_NP = {
 
 
 def to_dotnet_datetime(x):
-
+    """Convert from python datetime to .NET System.DateTime """
     return System.DateTime(x.year, x.month, x.day, x.hour, x.minute, x.second,)
+
+
+def from_dotnet_datetime(x):
+    """Convert from .NET System.DateTime to python datetime"""
+    return datetime.datetime(x.Year, x.Month, x.Day, x.Hour, x.Minute, x.Second)
 
 
 def asNumpyArray(x):
@@ -67,7 +73,7 @@ def asNumpyArray(x):
         )
 
     try:  # Memmove
-        sourceHandle = GCHandle.Alloc(netArray, GCHandleType.Pinned)
+        sourceHandle = GCHandle.Alloc(x, GCHandleType.Pinned)
         sourcePtr = sourceHandle.AddrOfPinnedObject().ToInt64()
         destPtr = npArray.__array_interface__["data"][0]
         ctypes.memmove(destPtr, sourcePtr, npArray.nbytes)

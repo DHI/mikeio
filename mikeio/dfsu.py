@@ -1,12 +1,12 @@
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
 from .dutil import Dataset, find_item, get_item_info
-from .dotnet import to_numpy, to_dotnet_float_array, to_dotnet_datetime
+from .dotnet import to_numpy, to_dotnet_float_array, to_dotnet_datetime, from_dotnet_datetime
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
@@ -72,8 +72,7 @@ class Dfsu:
             data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
             data_list.append(data)
 
-        t = []
-        startTime = dfs.StartDateTime
+        t_seconds = np.zeros(len(time_steps), dtype=float)
 
         for i in range(len(time_steps)):
             it = time_steps[i]
@@ -90,11 +89,10 @@ class Dfsu:
                 d[d == deleteValue] = np.nan
                 data_list[item][i, :] = d
 
-            t.append(
-                startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
-            )
+            t_seconds[i] = itemdata.Time
 
-        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        start_time = from_dotnet_datetime(dfs.StartDateTime)
+        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
         items = get_item_info(dfs, item_numbers)
 
