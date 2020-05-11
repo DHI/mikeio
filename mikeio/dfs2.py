@@ -111,7 +111,7 @@ class Dfs2:
                 d[d == deleteValue] = np.nan
                 data_list[item][i, :, :] = d
 
-            t_seconds[it] = itemdata.Time
+            t_seconds[i] = itemdata.Time
 
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
