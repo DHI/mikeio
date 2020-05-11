@@ -11,7 +11,12 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
 from .dutil import Dataset, find_item, get_item_info
-from .dotnet import to_numpy, to_dotnet_float_array, to_dotnet_datetime, from_dotnet_datetime
+from .dotnet import (
+    to_numpy,
+    to_dotnet_float_array,
+    to_dotnet_datetime,
+    from_dotnet_datetime,
+)
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
@@ -65,7 +70,7 @@ class Dfs1:
             data_list.append(data)
 
         t_seconds = np.zeros(nt, dtype=float)
-        
+
         for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
             for item in range(n_items):
 
@@ -81,7 +86,7 @@ class Dfs1:
 
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
-        
+
         items = get_item_info(dfs, item_numbers)
 
         dfs.Close()
@@ -262,7 +267,7 @@ class Dfs1:
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
-                # darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+
                 darray = to_dotnet_float_array(d)
                 dfs.WriteItemTimeStepNext(0, darray)
 

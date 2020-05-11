@@ -95,7 +95,6 @@ def scale(infilename, outfilename, offset=0.0, factor=1.0):
             time = itemdata.Time
 
             outdata = d * factor + offset
-            # darray = Array[System.Single](outdata)
             darray = to_dotnet_float_array(outdata)
 
             dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
@@ -134,7 +133,7 @@ def sum(infilename_a, infilename_b, outfilename):
             time = itemdata_a.Time
 
             outdata = d_a + d_b
-            # darray = Array[System.Single](outdata)
+
             darray = to_dotnet_float_array(outdata)
 
             dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
@@ -178,7 +177,7 @@ def diff(infilename_a, infilename_b, outfilename):
             time = itemdata_a.Time
 
             outdata = d_a - d_b
-            # darray = Array[System.Single](outdata)
+
             darray = to_dotnet_float_array(outdata)
 
             dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
@@ -217,7 +216,7 @@ def concat(infilenames, outfilename):
 
         dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
         n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-        dt = dfs_i.FileInfo.TimeAxis.TimeStep        
+        dt = dfs_i.FileInfo.TimeAxis.TimeStep
         start_time = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
 
         if i > 0 and start_time > current_time + timedelta(seconds=dt):
@@ -246,7 +245,6 @@ def concat(infilenames, outfilename):
                 itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
                 d = to_numpy(itemdata.Data)
 
-                # darray = Array[System.Single](d)
                 darray = to_dotnet_float_array(d)
 
                 dfs_o.WriteItemTimeStepNext(0, darray)
