@@ -11,7 +11,12 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 
 from .dutil import Dataset, find_item, get_item_info
-from .dotnet import to_numpy, to_dotnet_float_array, to_dotnet_datetime, from_dotnet_datetime
+from .dotnet import (
+    to_numpy,
+    to_dotnet_float_array,
+    to_dotnet_datetime,
+    from_dotnet_datetime,
+)
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
@@ -30,21 +35,23 @@ class Dfs2:
 
         return y * nx + x
 
-    def read(self, filename, item_numbers=None, item_names=None):
-        """Read data from the dfs1 file
+    def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
+        """
+        Parameters
+        ---------
+        filename: str
+            dfs2 filename
+        item_numbers: list[int], optional
+            Read only selected items, by number (0-based)
+        item_names: list[str], optional
+            Read only selected items, by name, takes precedence over item_numbers
+        time_steps: list[int], optional
+            Read only selected time_steps
 
-        Usage:
-            read(filename, item_numbers=None, item_names=None)
-        filename
-            full path to the dfs1 file.
-        item_numbers
-            read only the item_numbers in the array specified (0 base)
-        item_names
-            read only the items in the array specified, (takes precedence over item_numbers)
-
-        Return:
-            Dataset(data, time, items)
-            where data[nt,y,x]
+        Returns
+        -------
+        Dataset
+            A dataset with data dimensions [t,y,x]
         """
 
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
@@ -59,14 +66,24 @@ class Dfs2:
             n_items = safe_length(dfs.ItemInfo)
             item_numbers = list(range(n_items))
 
+        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
+        if time_steps is None:
+            time_steps = list(range(nt))
+
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
         yNum = axis.YCount
         xNum = axis.XCount
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
         if nt == 0:
             raise Warning("Static files (with no dynamic items) are not supported.")
             nt = 1
+
+        for t in time_steps:
+            if t > (nt - 1):
+                raise ValueError(f"Trying to read timestep {t}: max timestep is {nt-1}")
+
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         n_items = len(item_numbers)
@@ -74,11 +91,14 @@ class Dfs2:
 
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=(nt, yNum, xNum), dtype=float)
+            data = np.ndarray(shape=(len(time_steps), yNum, xNum), dtype=float)
             data_list.append(data)
 
-        t_seconds = np.zeros(nt, dtype=float)
-        for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
+        t_seconds = np.zeros(len(time_steps), dtype=float)
+
+        startTime = dfs.FileInfo.TimeAxis.StartDateTime
+        for i in range(len(time_steps)):
+            it = time_steps[i]
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -89,7 +109,7 @@ class Dfs2:
                 d = d.reshape(yNum, xNum)
                 d = np.flipud(d)
                 d[d == deleteValue] = np.nan
-                data_list[item][it, :, :] = d
+                data_list[item][i, :, :] = d
 
             t_seconds[it] = itemdata.Time
 

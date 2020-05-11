@@ -380,7 +380,7 @@ class Dfs0:
         return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
 
-def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None):
+def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None, title=None):
     """
     Create a dfs0
 
@@ -394,6 +394,8 @@ def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None):
         Same unit for all items
     items: list[ItemInfo]
         Different types, units for each items, similar to `create`
+    title: str, optional
+        Title of dfs0 file
     """
 
     if not isinstance(self.index, pd.DatetimeIndex):
@@ -418,12 +420,19 @@ def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None):
                 items = [ItemInfo(name, itemtype, unit) for name in self.columns]
 
     if self.index.freq is None:  # non-equidistant
-        dfs.create(filename=filename, data=data, datetimes=self.index, items=items)
+        dfs.create(
+            filename=filename, data=data, datetimes=self.index, items=items, title=title
+        )
     else:  # equidistant
         dt = self.index.freq.delta.total_seconds()
         start_time = self.index[0].to_pydatetime()
         dfs.create(
-            filename=filename, data=data, start_time=start_time, dt=dt, items=items
+            filename=filename,
+            data=data,
+            start_time=start_time,
+            dt=dt,
+            items=items,
+            title=title,
         )
 
 

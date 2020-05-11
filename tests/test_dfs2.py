@@ -157,7 +157,7 @@ def test_read():
 
     filename = r"tests/testdata/random.dfs2"
     dfs = Dfs2()
-
+    data = dfs.read(filename, [0])[0]
     data = dfs.read(filename, item_names=["testing water level"])[0]
     data = data[0]
     assert data[0, 11, 0] == 0
@@ -170,23 +170,34 @@ def test_read_item_names():
     filename = r"tests/testdata/random.dfs2"
     dfs = Dfs2()
 
-    data = dfs.read(filename, [0])[0]
+    data = dfs.read(filename, item_names=["testing water level"])[0]
     data = data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
-def test_read_named_access():
+def test_read_numbered_access():
 
     filename = r"tests/testdata/random_two_item.dfs2"
     dfs = Dfs2()
 
-    res = dfs.read(filename, [1])
+    res = dfs.read(filename, item_numbers=[1])
 
     assert np.isnan(res.data[0][0, 0, 0])
     assert res.time is not None
     assert res.items[0].name == "Untitled"
+
+
+def test_read_some_time_step():
+
+    filename = r"tests/testdata/random_two_item.dfs2"
+    dfs = Dfs2()
+
+    res = dfs.read(filename, time_steps=[1, 2])
+
+    assert res.data[0].shape[0] == 2
+    assert len(res.time) == 2
 
 
 def test_write():
