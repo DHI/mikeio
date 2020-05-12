@@ -1,7 +1,6 @@
 import numpy as np
-from datetime import datetime
-import System
-from System import Array
+from datetime import datetime, timedelta
+
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
@@ -11,7 +10,13 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 
-from .dutil import to_numpy, Dataset, find_item, get_item_info
+from .dutil import Dataset, find_item, get_item_info
+from .dotnet import (
+    to_numpy,
+    to_dotnet_float_array,
+    to_dotnet_datetime,
+    from_dotnet_datetime,
+)
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
@@ -89,7 +94,8 @@ class Dfs2:
             data = np.ndarray(shape=(len(time_steps), yNum, xNum), dtype=float)
             data_list.append(data)
 
-        t = []
+        t_seconds = np.zeros(len(time_steps), dtype=float)
+
         startTime = dfs.FileInfo.TimeAxis.StartDateTime
         for i in range(len(time_steps)):
             it = time_steps[i]
@@ -105,11 +111,10 @@ class Dfs2:
                 d[d == deleteValue] = np.nan
                 data_list[item][i, :, :] = d
 
-            t.append(
-                startTime.AddSeconds(itemdata.Time).ToString("yyyy-MM-dd HH:mm:ss")
-            )
+            t_seconds[i] = itemdata.Time
 
-        time = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
         items = get_item_info(dfs, item_numbers)
 
@@ -172,7 +177,7 @@ class Dfs2:
                 d[np.isnan(d)] = deletevalue
                 d = d.reshape(number_y, number_x)
                 d = np.flipud(d)
-                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
                 dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
@@ -277,18 +282,7 @@ class Dfs2:
             equidistant = False
             start_time = datetimes[0]
 
-        # if not isinstance(timeseries_unit, int):
-        #    raise Warning("timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
-        #                  "day=1403, month=1405, year= 1404See dfsutil options for help ")
-
-        system_start_time = System.DateTime(
-            start_time.year,
-            start_time.month,
-            start_time.day,
-            start_time.hour,
-            start_time.minute,
-            start_time.second,
-        )
+        system_start_time = to_dotnet_datetime(start_time)
 
         # Create an empty dfs2 file object
         factory = DfsFactory()
@@ -351,7 +345,7 @@ class Dfs2:
                 d[np.isnan(d)] = deletevalue
                 d = d.reshape(number_y, number_x)
                 d = np.flipud(d)
-                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
 
                 if equidistant:
                     dfs.WriteItemTimeStepNext(0, darray)

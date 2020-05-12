@@ -2,9 +2,7 @@ import os
 import warnings
 import numpy as np
 import pandas as pd
-from datetime import datetime
-import System
-from System import Array
+from datetime import datetime, timedelta
 
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
@@ -19,6 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .helpers import safe_length
 from .dutil import Dataset, find_item
+from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
 
 
@@ -47,18 +46,13 @@ class Dfs0:
 
         # BULK READ THE DFS0
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
+        # First column is the time (the rest is the data)
+        t_seconds = [dfsdata[i,0] for i in range(nt)]
 
-        t = []
-        starttime = dfs.FileInfo.TimeAxis.StartDateTime
-
-        # EMPTY Data Block for copying the Results
-        for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
-            t.append(
-                starttime.AddSeconds(dfsdata[it, 0]).ToString("yyyy-MM-dd HH:mm:ss")
-            )
-
-        # Copies the System Array to a numpy matrix
-        # First column in the time (the rest is the data)
+        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        
+        # TODO use to_numpy ?
         data = np.fromiter(dfsdata, np.float64).reshape(nt, n_items + 1)[:, 1::]
 
         mask = np.isclose(data, dfs.FileInfo.DeleteValueFloat, atol=1e-36)
@@ -70,7 +64,7 @@ class Dfs0:
 
         dfs.Close()
 
-        return data, t, items
+        return data, time, items
 
     def read_to_pandas(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return a Pandas DataFrame (deprecated)
@@ -140,7 +134,7 @@ class Dfs0:
                     "item_numbers must be a list or array of values between 0 and 1e15"
                 )
 
-        t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        #t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
 
         data = []
 
@@ -195,29 +189,14 @@ class Dfs0:
 
             d[np.isnan(d)] = delete_value
 
-        d = Array.CreateInstance(System.Single, 1)
-
         # Get the date times in seconds (from start)
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
-
-        t = []
-        # starttime = dfs.FileInfo.TimeAxis.StartDateTime
-
-        for it in range(dfs.FileInfo.TimeAxis.NumberOfTimeSteps):
-            t.append(dfsdata[it, 0])
+        t_seconds = [dfsdata[i,0] for i in range(n_time_steps)]
 
         dfs.Reset()
 
-        # COPY OVER THE DATA
-        for it in range(n_time_steps):
-
-            for ii in range(n_items):
-
-                d = Array[System.Single](np.array(data[ii][it : it + 1]))
-
-                # dt = (t[it] - t[0]).total_seconds()
-                dt = t[it]
-                dfs.WriteItemTimeStepNext(dt, d)
+        data1 = np.stack(data, axis=1)
+        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, to_dotnet_array(data1))
 
         dfs.Close()
 
@@ -227,7 +206,7 @@ class Dfs0:
         data,
         start_time=None,
         timeseries_unit=TimeStep.SECOND,
-        dt=1,
+        dt=1.0,
         datetimes=None,
         items=None,
         title=None,
@@ -241,13 +220,13 @@ class Dfs0:
             Full path and filename to dfs0 to be created.
         data: list[np.array]
             values
-        start_time: datetime.dateime, , optional
+        start_time: datetime.datetime, , optional
             start date of type datetime.
         timeseries_unit: Timestep, optional
             Timestep  unitdefault Timestep.SECOND
         dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
-            means 5 mins and 30 seconds. default to 1
+            means 5 mins and 30 seconds. default to 1.0
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         title: str, optional
@@ -278,6 +257,15 @@ class Dfs0:
 
             if not type(start_time) is datetime:
                 raise Warning("start_time must be of type datetime ")
+
+            dt = np.float(dt)
+            datetimes = np.array(
+                [
+                    start_time + timedelta(seconds=(step * dt))
+                    for step in np.arange(n_time_steps)
+                ]
+            )
+
         else:
             start_time = datetimes[0]
             equidistant = False
@@ -285,14 +273,7 @@ class Dfs0:
         # if not isinstance(timeseries_unit, int):
         #    raise Warning("timeseries_unit must be an integer. See dfsutil options for help ")
 
-        system_start_time = System.DateTime(
-            start_time.year,
-            start_time.month,
-            start_time.day,
-            start_time.hour,
-            start_time.minute,
-            start_time.second,
-        )
+        system_start_time = to_dotnet_datetime(start_time)
 
         factory = DfsFactory()
         builder = DfsBuilder.Create(title, "DFS", 0)
@@ -343,19 +324,11 @@ class Dfs0:
 
         for i in range(n_items):
             d = data[i]
-
             d[np.isnan(d)] = delete_value
 
-        # COPY OVER THE DATA
-        for it in range(n_time_steps):
-            for ii in range(n_items):
-
-                d = Array[System.Single](np.array(data[ii][it : it + 1]))
-                if equidistant:
-                    dfs.WriteItemTimeStepNext(it, d)
-                else:
-                    dt = (datetimes[it] - datetimes[0]).total_seconds()
-                    dfs.WriteItemTimeStepNext(dt, d)
+        data1 = np.stack(data, axis=1)
+        t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
+        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, to_dotnet_array(data1))
 
         dfs.Close()
 

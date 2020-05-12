@@ -2,8 +2,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 import clr
-import System
-from System import Array
+
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
@@ -14,7 +13,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dutil import to_numpy
+from .dotnet import to_numpy, to_dotnet_float_array
 from .helpers import safe_length
 
 
@@ -116,7 +115,7 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
             d1 = func(d2, axis=axis - 1)
             d1[np.isnan(d1)] = deleteValue
 
-            darray = Array[System.Single](d1)
+            darray = to_dotnet_float_array(d1)
             dfs_out.WriteItemTimeStepNext(itemdata.Time, darray)
 
     dfs_in.Close()
@@ -188,7 +187,7 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
             d[0] = d0
             d[np.isnan(d)] = deleteValue
 
-            darray = Array[System.Single](d)
+            darray = to_dotnet_float_array(d)
             dfs_out.WriteItemTimeStepNext(itemdata.Time, darray)
 
     dfs_in.Close()
