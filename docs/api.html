@@ -164,17 +164,17 @@
 <em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs0</code><a class="headerlink" href="#mikeio.Dfs0" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="mikeio.Dfs0.create">
-<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">data_value_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.create" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">dt=1.0</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">data_value_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – Full path and filename to dfs0 to be created.</p></li>
 <li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – values</p></li>
-<li><p><strong>start_time</strong> (<em>datetime.dateime</em><em>, </em><em>, </em><em>optional</em>) – start date of type datetime.</p></li>
+<li><p><strong>start_time</strong> (<em>datetime.datetime</em><em>, </em><em>, </em><em>optional</em>) – start date of type datetime.</p></li>
 <li><p><strong>timeseries_unit</strong> (<em>Timestep</em><em>, </em><em>optional</em>) – Timestep  unitdefault Timestep.SECOND</p></li>
 <li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – the time step. Therefore dt of 5.5 with timeseries_unit of minutes
-means 5 mins and 30 seconds. default to 1</p></li>
+means 5 mins and 30 seconds. default to 1.0</p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.dutil.ItemInfo" title="mikeio.dutil.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title</p></li>
 <li><p><strong>data_value_type</strong> (<em>list</em><em>[</em><em>DataValueType</em><em>]</em><em>, </em><em>optional</em>) – DataValueType default DataValueType.INSTANTANEOUS</p></li>
@@ -389,22 +389,21 @@ means 5 mins and 30 seconds. Default 1</p></li>
 
 <dl class="method">
 <dt id="mikeio.Dfs2.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read data from the dfs1 file</p>
-<dl class="simple">
-<dt>Usage:</dt><dd><p>read(filename, item_numbers=None, item_names=None)</p>
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em>, <em class="sig-param">time_steps=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.read" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – dfs2 filename</p></li>
+<li><p><strong>item_numbers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based)</p></li>
+<li><p><strong>item_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by name, takes precedence over item_numbers</p></li>
+<li><p><strong>time_steps</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected time_steps</p></li>
+</ul>
 </dd>
-<dt>filename</dt><dd><p>full path to the dfs1 file.</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dataset with data dimensions [t,y,x]</p>
 </dd>
-<dt>item_numbers</dt><dd><p>read only the item_numbers in the array specified (0 base)</p>
-</dd>
-<dt>item_names</dt><dd><p>read only the items in the array specified, (takes precedence over item_numbers)</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Dataset(data, time, items)
-where data[nt,y,x]</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.dutil.Dataset" title="mikeio.dutil.Dataset">Dataset</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -538,22 +537,20 @@ means 5 mins and 30 seconds. Default 1</p></li>
 <dt id="mikeio.Dfsu.read">
 <code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em>, <em class="sig-param">time_steps=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a dfsu file</p>
-<dl class="simple">
-<dt>filename: str</dt><dd><p>dfsu filename</p>
-</dd>
-<dt>item_numbers: list[int], optional</dt><dd><p>Read only selected items, by number (0-based)</p>
-</dd>
-<dt>item_names: list[str], optional</dt><dd><p>Read only selected items, by name, takes precedence over item_numbers</p>
-</dd>
-<dt>time_steps: list[int], optional</dt><dd><p>Read only selected time_steps</p>
-</dd>
-</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A dataset with data dimensions [t,elements]</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – dfsu filename</p></li>
+<li><p><strong>item_numbers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based)</p></li>
+<li><p><strong>item_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by name, takes precedence over item_numbers</p></li>
+<li><p><strong>time_steps</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected time_steps</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#mikeio.dutil.Dataset" title="mikeio.dutil.Dataset">Dataset</a></p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dataset with data dimensions [t,elements]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.dutil.Dataset" title="mikeio.dutil.Dataset">Dataset</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -728,11 +725,11 @@ similar to a dictionary.</p>
 
 <dl class="class">
 <dt id="mikeio.dutil.ItemInfo">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.dutil.</code><code class="sig-name descname">ItemInfo</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">itemtype=None</em>, <em class="sig-param">unit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dutil.ItemInfo" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.dutil.</code><code class="sig-name descname">ItemInfo</code><span class="sig-paren">(</span><em class="sig-param">name=None</em>, <em class="sig-param">itemtype=None</em>, <em class="sig-param">unit=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dutil.ItemInfo" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>str</em>) – </p></li>
+<li><p><strong>name</strong> (<em>str</em><em> or </em><em>EUMType</em><em>, </em><em>optional</em>) – </p></li>
 <li><p><strong>type</strong> (<em>EUMType</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Default EUMType.Undefined</p></li>
 <li><p><strong>unit</strong> (<em>EUMUnit</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Default unit matching EUMType</p></li>
 </ul>
@@ -742,6 +739,8 @@ similar to a dictionary.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Viken&quot;</span><span class="p">,</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Water_Level</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">item</span>
 <span class="go">Viken &lt;Water Level&gt; (meter)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ItemInfo</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Wind_speed</span><span class="p">)</span>
+<span class="go">Wind speed &lt;Wind speed&gt; (meter per sec)</span>
 </pre></div>
 </div>
 </dd></dl>
