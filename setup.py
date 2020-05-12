@@ -16,7 +16,6 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/DHI/mikeio",
-    download_url="https://github.com/DHI/mikeio/archive/v0.4.0-alpha.zip",
     packages=setuptools.find_packages(),
     classifiers=[
         "License :: OSI Approved :: BSD License",
