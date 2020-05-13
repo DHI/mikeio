@@ -1,4 +1,5 @@
 import os
+from shutil import copyfile
 import numpy as np
 import pytest
 
@@ -14,6 +15,22 @@ def test_read_all_items_returns_all_items_and_names():
 
     assert len(data) == 4
     assert len(items) == 4
+
+
+def test_write(tmpdir):
+
+    infilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "adjusted.dfsu")
+
+    copyfile(infilename, outfilename)
+    dfs = Dfsu()
+
+    (data, t, items) = dfs.read(infilename)
+
+    # Do arbitrary calculation
+    data[0] = data[0] * 2.0
+
+    dfs.write(outfilename, data)
 
 
 def test_read_single_item_returns_single_item():
@@ -188,7 +205,7 @@ def test_get_element_area_LONGLAT():
 
 def test_create(tmpdir):
 
-    filename = os.path.join(tmpdir.dirname, "simple.dfs1")
+    filename = os.path.join(tmpdir.dirname, "simple.dfsu")
     meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
 
     msh = Mesh(meshfilename)
@@ -205,3 +222,58 @@ def test_create(tmpdir):
     dfs.create(meshfilename, filename, data, items=items)
 
     assert True
+
+
+def test_create_invalid_data_closes_and_deletes_file(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
+
+    msh = Mesh(meshfilename)
+
+    n_elements = msh.number_of_elements
+    d = np.zeros((1, n_elements - 1))
+
+    assert d.shape[1] != n_elements
+    data = []
+    data.append(d)
+
+    items = [ItemInfo("Bad data")]
+
+    dfs = Dfsu()
+
+    dfs.create(meshfilename, filename, data, items=items)
+
+    assert not os.path.exists(filename)
+
+
+def test_write_invalid_data_closes_file(tmpdir):
+
+    infilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "adjusted.dfsu")
+
+    copyfile(infilename, outfilename)
+    dfs = Dfsu()
+
+    (data, t, items) = dfs.read(infilename)
+
+    # Do some mistake, such as only trying to writing one item
+
+    baddata = [data[0]]
+    try:
+        dfs.write(outfilename, baddata)
+    except:
+        print("Failed as expected")
+
+    # Ok, it failed, try again, to write to the same file
+
+    # Do arbitrary calculation
+    newdata = data.copy()
+    newdata[0] = newdata[0] * 2.0
+
+    dfs.write(outfilename, newdata)
+
+    (addata, t, items) = dfs.read(outfilename)
+
+    assert addata[0][0, 0] == 2 * data[0][0, 0]
+    assert addata[1][0, 0] == data[1][0, 0]

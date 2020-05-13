@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from datetime import datetime, timedelta
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
@@ -122,6 +123,18 @@ class Dfsu:
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         n_items = safe_length(dfs.ItemInfo)
 
+        if len(data) != n_items:
+            dfs.Close()
+            raise ValueError(
+                "Number of items in data must equal number of items in the file"
+            )
+
+        if data[0].shape[0] != n_time_steps:
+            dfs.Close()
+            raise ValueError(
+                "Number of timesteps in data must equal number of timesteps in the file"
+            )
+
         deletevalue = dfs.FileInfo.DeleteValueFloat
 
         for i in range(n_time_steps):
@@ -209,15 +222,20 @@ class Dfsu:
 
         deletevalue = dfs.DeleteValueFloat
 
-        # Add data for all item-timesteps, copying from source
-        for i in range(n_time_steps):
-            for item in range(n_items):
-                d = data[item][i, :]
-                d[np.isnan(d)] = deletevalue
-                darray = to_dotnet_float_array(d)
-                dfs.WriteItemTimeStepNext(0, darray)
+        try:
+            # Add data for all item-timesteps, copying from source
+            for i in range(n_time_steps):
+                for item in range(n_items):
+                    d = data[item][i, :]
+                    d[np.isnan(d)] = deletevalue
+                    darray = to_dotnet_float_array(d)
+                    dfs.WriteItemTimeStepNext(0, darray)
+            dfs.Close()
 
-        dfs.Close()
+        except Exception as e:
+            print(e)
+            dfs.Close()
+            os.remove(filename)
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
