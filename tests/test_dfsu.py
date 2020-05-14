@@ -224,6 +224,25 @@ def test_create(tmpdir):
     assert True
 
 
+def test_create_from_dfsu(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu()
+
+    ds = dfs.read(sourcefilename)
+
+    data = ds.data[0:1]
+
+    items = ds.items[0:1]
+
+    dfs.create(
+        sourcefilename, outfilename, data, items=items, start_time=ds.time[0], dt=3600
+    )
+
+    assert True
+
+
 def test_create_invalid_data_closes_and_deletes_file(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfsu")

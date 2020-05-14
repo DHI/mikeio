@@ -162,7 +162,7 @@ class Dfsu:
         Parameters
         -----------
         meshfilename: str,
-            full path to a valid mesh file
+            full path to a mesh or dfsu file
         filename: str
             full path to the new dfsu file
         data: list[np.array]
@@ -194,20 +194,35 @@ class Dfsu:
 
         system_start_time = to_dotnet_datetime(start_time)
 
-        mesh = MeshFile.ReadMesh(meshfilename)
+        _, ext = os.path.splitext(meshfilename)
+
+        if ext == ".mesh":
+
+            source = MeshFile.ReadMesh(meshfilename)
+            projstr = source.ProjectionString
+
+        elif ext == ".dfsu":
+
+            source = DfsuFile.Open(meshfilename)
+            projstr = source.Projection.WKTString
+
+        xn = source.X
+        yn = source.Y
+
+        # zn have to be Single precision??
+        zn = to_dotnet_float_array(np.array(list(source.Z)))
+
+        nodecodes = source.Code
+        elementtable = source.ElementTable
 
         # TODO support all types of Dfsu
         builder = DfsuBuilder.Create(DfsuFileType.Dfsu2D)
 
-        # Setup header and geometry, copy from source file
+        builder.SetNodes(xn, yn, zn, nodecodes)
 
-        # zn have to be Single precision??
-        zn = to_dotnet_float_array(np.array(list(mesh.Z)))
-        builder.SetNodes(mesh.X, mesh.Y, zn, mesh.Code)
-
-        builder.SetElements(mesh.ElementTable)
+        builder.SetElements(elementtable)
         factory = DfsFactory()
-        proj = factory.CreateProjection(mesh.ProjectionString)
+        proj = factory.CreateProjection(projstr)
         builder.SetProjection(proj)
         builder.SetTimeInfo(system_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
