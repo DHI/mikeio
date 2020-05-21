@@ -1,120 +1,206 @@
+from collections import defaultdict, namedtuple
+from contextlib import contextmanager 
+
 import clr
 import os.path
 import pandas as pd
 
 clr.AddReference("DHI.Mike1D.ResultDataAccess")
-from DHI.Mike1D.ResultDataAccess import ResultData
+from DHI.Mike1D.ResultDataAccess import ResultData  # noqa
 
 clr.AddReference("DHI.Mike1D.Generic")
-from DHI.Mike1D.Generic import Connection
+from DHI.Mike1D.Generic import Connection  # noqa
 
 clr.AddReference("System")
 
 
-class Res1D:
+class DataNotFoundInFile(Exception):
+    """Data not found in file."""
 
-    @staticmethod
-    def __read(file_path):
-        """
-        Read the res1d file
-        """
-        if not os.path.exists(file_path):
-            raise FileExistsError(f"File does not exist {file_path}")
+
+def read(file_path, queries):
+    """Read the requested data from the res1d file and
+    return a Pandas DataFrame.
+    
+    Parameters
+    ----------
+    filename: str
+        full path and file name to the res1d file.
+    queries: list
+        `QueryData` objects that define the requested data.
+    Returns
+    -------
+    pd.DataFrame
+    """
+    res1d = Res1D(file_path)
+    df = res1d.read(queries)
+    return df
+
+
+def _comp_strings(s1, s2, format=None):
+    if not format:
+        return s1 == s2
+    return format(s1) == format(s2)
+
+
+class Res1D:
+    def __init__(self, file_path=None):
+        self.file_path = file_path
+        self.file = None
+        self._time_index = None
+        self._data_types = None
+        self._reaches = None
+
+    def _load_file(self):
+        """Read the res1d file."""
+        if not os.path.exists(self.file_path):
+            raise FileExistsError(f"File {self.file_path} does not exist.")
 
         file = ResultData()
-        file.Connection = Connection.Create(file_path)
+        file.Connection = Connection.Create(self.file_path)
         file.Load()
         return file
 
-    @staticmethod
-    def _get_time(file):
-        for i in range(0, file.TimesList.Count):
-            t = file.TimesList.get_Item(i)
-            yield pd.Timestamp(year=t.get_Year(),
-                               month=t.get_Month(),
-                               day=t.get_Day(),
-                               hour=t.get_Hour(),
-                               minute=t.get_Minute(),
-                               second=t.get_Second())
+    def _close(self):
+        self.file.Dispose()
+
+    @contextmanager
+    def open(self):
+        yield self._load_file()
+        self._close()
+
+    @property
+    def data_types(self):
+        if self._data_types:
+            return self._data_types
+        quantities = self.file.get_Quantities()
+        return [quantities.get_Item(i).Id for i in range(0, quantities.Count)]
+
+    @property
+    def reaches(self):
+        if self._reaches:
+            return self._reaches
+        reaches = self.file.Reaches
+        return [reaches.get_Item(i) for i in range(0, reaches.Count)]
 
     @staticmethod
-    def _get_values(dataItemTypes, file, indices, queries, reachNums):
+    def _chainages(reach):
+        for i in range(0, reach.GridPoints.Count):
+            yield float(reach.GridPoints.get_Item(i).Chainage)
+
+    @property
+    def time_index(self):
+        if self._time_index:
+            return self._time_index
+        time_stamps = []
+        for i in range(0, self.file.TimesList.Count):
+            t = self.file.TimesList.get_Item(i)
+            time_stamps.append(
+                pd.Timestamp(
+                    year=t.get_Year(),
+                    month=t.get_Month(),
+                    day=t.get_Day(),
+                    hour=t.get_Hour(),
+                    minute=t.get_Minute(),
+                    second=t.get_Second()
+                )
+            )
+        self._time_index = pd.DatetimeIndex(time_stamps)
+        return self._time_index
+
+    def _get_values(self, points):
         df = pd.DataFrame()
-        for i in range(0, len(indices)):
-            d = (file.Reaches.get_Item(reachNums[i])
+        p = zip(points["variable"], points["reach"], points["chainage"])
+        for variable_type, reach, chainage in p:
+            d = (self.file.Reaches.get_Item(reach.index)
                  .get_DataItems()
-                 .get_Item(dataItemTypes[i])
-                 .CreateTimeSeriesData(indices[i]))
-            name = str(queries[i])
+                 .get_Item(variable_type.index)
+                 .CreateTimeSeriesData(chainage.index))
+            name  = f"{variable_type.value} {reach.value} {chainage.value}"
             d = pd.Series(list(d), name=name)
             df[name] = d
         return df
 
-    def _get_data(self, file, queries, dataItemTypes, indices, reachNums):
-        data = self._get_values(dataItemTypes, file, indices, queries, reachNums)
-        time = self._get_time(file)
-        data.index = pd.DatetimeIndex(time)
-        return data
+    def _get_data(self, points):
+        df = self._get_values(points)
+        df.index = self.time_index
+        return df
 
-    @staticmethod
-    def format_string(s):
-        return s.lower().strip().replace(" ", "")
+    def _find_points(self, queries, chainage_tolerance=0.1):
+        """From a list of queries returns a dictionnary with the required
+        information for each requested point to extract its time series
+        later on."""
 
-    def find_items(self, file, queries, chainage_tolerance=0.1):
-        reachNums = []
-        dataItemTypes = []
-        indices = []
+        PointInfo = namedtuple('PointInfo', ['index', 'value'])
 
-        # Find the Item
-        for query in queries:
-            item = -1
-            reachNumber = -1
-            idx = -1
-            for i in range(0, file.Reaches.Count):
-                if (file.Reaches.get_Item(i).Name.lower().strip()
-                        == query.BranchName.lower().strip()):
+        found_points = defaultdict(list)
+        # Find the point
+        for q_variable_type, q_reach_name, q_chain  in queries:
 
-                    reach = file.Reaches.get_Item(i)
-                    for j in range(0, reach.GridPoints.Count):
-                        chainage_diff = float(reach.GridPoints.get_Item(j).Chainage) - query.Chainage
-                        is_correct_chainage = abs(chainage_diff) < chainage_tolerance
-                        if is_correct_chainage:
-                            if "waterlevel" in self.format_string(query.VariableType):
-                                idx = int(j / 2)
-                            elif "discharge" in self.format_string(query.VariableType):
-                                idx = int((j - 1) / 2)
-                            elif "pollutant" in self.format_string(query.VariableType):
-                                idx = int((j - 1) / 2)
-                            else:
-                                raise Exception("VariableType must be either Water Level, Discharge, or Pollutant.")
-                            reachNumber = i
-                            break
+            found_data_type = found_reach = found_chainage = False
 
-            for i in range(0, file.get_Quantities().Count):
-                if self.format_string(query.VariableType) == self.format_string(
-                        file.get_Quantities().get_Item(i).Description):
-                    item = i
+            for data_type_idx, data_type in enumerate(self.data_types):
+                if q_variable_type.lower() == data_type.lower():
+                    found_data_type = True
                     break
+            if not found_data_type:
+                raise DataNotFoundInFile(
+                    f"Data type '{q_variable_type}' was not found.")
+            data_type_info = PointInfo(data_type_idx, q_variable_type)
+            if q_reach_name and q_chain:
+                found_points["variable"].append(data_type_info)
 
-            indices.append(idx)
-            reachNums.append(reachNumber)
-            dataItemTypes.append(item)
+            for reach_idx, curr_reach in enumerate(self.reaches):
+                # Look for the targeted chainage if set
+                if q_reach_name:
+                    if not q_reach_name == curr_reach.Name:
+                        continue
 
-            if -1 in reachNums:
-                raise Exception("Reach Not Found")
-            if -1 in dataItemTypes:
-                raise Exception("Item Not Found")
-            if -1 in indices:
-                raise Exception("Chainage Not Found")
+                found_reach = True
+                reach_val = q_reach_name if q_reach_name else curr_reach
+                reach = PointInfo(reach_idx, reach_val)
+                if q_reach_name and q_chain:
+                    found_points["reach"].append(reach)
+                for j, curr_chain in enumerate(self._chainages(curr_reach)):
+                    # Look for the targeted chainage if set.
+                    if q_chain:
+                        chainage_diff = curr_chain - q_chain
+                        is_chainage = abs(chainage_diff) < chainage_tolerance
+                        if not is_chainage:
+                            continue
 
-        return dataItemTypes, indices, reachNums
+                    if q_variable_type == "WaterLevel" and j % 2 == 0:
+                        chainage_idx = int(j / 2)
+                    elif q_variable_type == "Discharge" and j % 2 != 0:
+                        chainage_idx = int((j - 1) / 2)
+                    elif q_variable_type == "Pollutant" and j % 2 != 0:
+                        chainage_idx = int((j - 1) / 2)
+                    else:
+                        continue  # q_chainage is None in that case.
+                    
+                    found_chainage = True
+                    chainage_val = q_chain if q_chain else round(curr_chain, 3)
+                    chainage = PointInfo(chainage_idx, chainage_val)
+                    found_points["chainage"].append(chainage)
+                    if not q_chain:
+                        found_points["variable"].append(data_type_info)
+                        found_points["reach"].append(reach)
+                    else:
+                        break  # Break at the first chainage found.
 
-    def read(self, file_path, queries):
+            if not found_reach:
+                raise DataNotFoundInFile(
+                    f"Reach '{q_reach_name}' was not found.")
+            if not found_chainage:
+                raise DataNotFoundInFile(
+                    f"Chainage {q_chain} was not found.")
 
-        file = self.__read(file_path)
-        dataItemTypes, indices, reachNums = self.find_items(file, queries)
-        df = self._get_data(file, queries, dataItemTypes, indices, reachNums)
-        file.Dispose()
+        return dict(found_points)
+
+    def read(self, queries):
+        with self.open() as self.file:
+            found_points = self._find_points(queries)
+            df = self._get_data(found_points)
         return df
 
 
