@@ -43,27 +43,62 @@ def test_query_iter():
     assert bn == "104l1"
     assert c == 34.4131
 
-def get_test_query():
-    query = ExtractionPoint()
-    query.BranchName = "104l1"
-    query.Chainage = 34.4131
-    query.VariableType = "WaterLevel"
 
-    return query
+@pytest.fixture
+def file():
+    return "tests/testdata/Exam6Base.res1d"
 
 
 def test_file_does_not_exist():
     file = "tests/testdata/not_a_file.res1d"
 
-    query = get_test_query()
+    query = QueryData("WaterLevel")
 
     with pytest.raises(FileExistsError):
-        assert Res1D().read(file, [query])
+        assert read(file, [query])
 
 
-def test_read_single_item():
-    file = "tests/testdata/Exam6Base.res1d"
-    query = get_test_query()
-    ts = Res1D().read(file, [query])
-
+@pytest.mark.parametrize("query,expected_max", [
+    (QueryData("WaterLevel", "104l1", 34.4131), 197.046),
+    (QueryData("WaterLevel", "9l1", 10), 195.165),
+    (QueryData("Discharge", "100l1", 23.8414), 0.1),
+    (QueryData("Discharge", "9l1", 5), 0.761)
+])
+def test_read_single_query(file, query, expected_max):
+    ts = read(file, [query])
     assert len(ts) == 110
+    assert pytest.approx(round(ts.max()[0], 3)) == expected_max
+
+
+def test_read_multiple_queries(file):
+    q1 = QueryData("WaterLevel", "104l1", 34.4131)
+    q2 = QueryData("Discharge", "9l1", 5)
+    ts = read(file, [q1, q2])
+    assert ts.shape == (110, 2)
+    max = ts.max()
+    assert pytest.approx(round(max[0], 3)) == 197.046
+    assert pytest.approx(round(max[1], 3)) == 0.761
+
+def test_read_reach(file):
+    q_reach = QueryData("WaterLevel", "118l1")
+    ts = read(file, [q_reach])
+    assert ts.shape == (110, 3)
+    assert list(ts.columns) == ['WaterLevel 118l1 0.0', 'WaterLevel 118l1 49.443',
+       'WaterLevel 118l1 98.887']
+
+def test_read_multiple_reaches(file):
+    q_reach1 = QueryData("WaterLevel", "118l1")
+    q_reach2 = QueryData("Discharge", "113l1")
+    ts = read(file, [q_reach1, q_reach2])
+    assert ts.shape == (110, 5)
+
+def test_read_all_reaches(file):
+    q_waterlevel = QueryData("WaterLevel")
+    ts = read(file, [q_waterlevel])
+    # TODO: Should it be (110, 243)? As +4 water level structure points
+    assert ts.shape == (110, 247)
+
+    q_discharge = QueryData("Discharge")
+    ts = read(file, [q_discharge])
+    # TODO: Should it be (110, 127)? As +2 discharge structure points
+    assert ts.shape == (110, 129)
