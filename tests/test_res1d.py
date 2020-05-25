@@ -76,9 +76,9 @@ def test_read_multiple_queries(file):
     q2 = QueryData("Discharge", "9l1", 5)
     ts = read(file, [q1, q2])
     assert ts.shape == (110, 2)
-    max = ts.max()
-    assert pytest.approx(round(max[0], 3)) == 197.046
-    assert pytest.approx(round(max[1], 3)) == 0.761
+    ts_max = ts.max()
+    assert pytest.approx(round(ts_max[0], 3)) == 197.046
+    assert pytest.approx(round(ts_max[1], 3)) == 0.761
 
 
 def test_read_reach(file):
