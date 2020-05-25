@@ -19,11 +19,11 @@ def test_query_validate():
 
     # Bad branch type
     with pytest.raises(TypeError):
-        QueryData("WaterLevel", BranchName=666)
+        QueryData("WaterLevel", branch_name=666)
 
     # Bad chainage type
     with pytest.raises(TypeError):
-        QueryData("WaterLevel", "branch", Chainage="BadChainage")
+        QueryData("WaterLevel", "branch", chainage="BadChainage")
 
     # Cannot set a chainage with no branch
     with pytest.raises(ValueError):
@@ -32,8 +32,8 @@ def test_query_validate():
 
 def test_query_repr():
     query = QueryData("WaterLevel", "104l1", 34.4131)
-    expected = ("QueryData(VariableType='WaterLevel', BranchName='104l1', "
-                "Chainage=34.4131)")
+    expected = ("QueryData(variable_type='WaterLevel', branch_name='104l1', "
+                "chainage=34.4131)")
     assert repr(query) == expected
 
 
