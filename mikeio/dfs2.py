@@ -9,6 +9,7 @@ from DHI.Generic.MikeZero.DFS import (
     DataValueType,
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
+from DHI.Projections import Cartography
 
 from .dutil import Dataset, find_item, get_item_info
 from .dotnet import (
@@ -35,6 +36,44 @@ class Dfs2:
 
         return y * nx + x
 
+    def find_closest_element_index(
+        self, lon, lat,
+    ):
+        """Find index of closest element
+
+        Parameters
+        ----------
+
+        lon: float
+            longitude
+        lat: float
+            latitude
+
+        Returns
+        -------
+
+        (int,int): indexes in y, x 
+        """
+        projection = self._dfs.FileInfo.Projection
+        axis = self._dfs.SpatialAxis
+        cart = Cartography(
+            projection.WKTString,
+            projection.Longitude,
+            projection.Latitude,
+            projection.Orientation,
+        )
+
+        # C# out parameters must be handled in special way
+        (_, xx, yy) = cart.Geo2Xy(lon, lat, 0.0, 0.0)
+
+        j = int(xx / axis.Dx + 0.5)
+        k = axis.YCount - int(yy / axis.Dy + 0.5) - 1
+
+        j = min(max(0, j), axis.XCount - 1)
+        k = min(max(0, k), axis.YCount - 1)
+
+        return k, j
+
     def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
         """
         Parameters
@@ -57,7 +96,8 @@ class Dfs2:
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(filename)
+        dfs = DfsFileFactory.Dfs2FileOpen(filename)
+        self._dfs = dfs
 
         if item_names is not None:
             item_numbers = find_item(dfs, item_names)
@@ -72,7 +112,8 @@ class Dfs2:
             time_steps = list(range(nt))
 
         # Determine the size of the grid
-        axis = dfs.ItemInfo[0].SpatialAxis
+        # axis = dfs.ItemInfo[0].SpatialAxis
+        axis = dfs.SpatialAxis
         yNum = axis.YCount
         xNum = axis.XCount
 
