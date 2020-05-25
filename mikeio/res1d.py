@@ -24,7 +24,7 @@ def read(file_path, queries):
     
     Parameters
     ----------
-    filename: str
+    file_path: str
         full path and file name to the res1d file.
     queries: list
         `QueryData` objects that define the requested data.
