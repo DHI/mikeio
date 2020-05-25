@@ -351,7 +351,7 @@ class Dfs2:
                     dfs.WriteItemTimeStepNext(0, darray)
                 else:
                     t = datetimes[i]
-                    relt = (t - start_time).seconds
+                    relt = (t - start_time).total_seconds()
                     dfs.WriteItemTimeStepNext(relt, darray)
 
         dfs.Close()
