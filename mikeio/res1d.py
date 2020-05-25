@@ -210,12 +210,12 @@ class QueryData:
     
     Parameters
     ----------
-    VariableType: str
+    variable_type: str
         Either 'WaterLevel', 'Discharge' or 'Pollutant'
-    BranchName: str, optional
+    branch_name: str, optional
         Branch name, consider all the branches if None
-    Chainage: float, optional
-        Chainage, considers all the chainages if None
+    chainage: float, optional
+        chainage, considers all the chainages if None
     
     Examples
     --------
@@ -225,50 +225,50 @@ class QueryData:
     `QueryData('Discharge')` requests all the Discharge points of the model.
     """
 
-    def __init__(self, VariableType, BranchName=None, Chainage=None):
-        self._VariableType = VariableType
-        self._BranchName = BranchName
-        self._Chainage = Chainage
+    def __init__(self, variable_type, branch_name=None, chainage=None):
+        self._variable_type = variable_type
+        self._branch_name = branch_name
+        self._chainage = chainage
         self._validate()
 
     def _validate(self):
-        vt = self.VariableType
-        bn = self.BranchName
-        c = self.Chainage
+        vt = self.variable_type
+        bn = self.branch_name
+        c = self.chainage
         if not isinstance(vt, str):
-            raise TypeError("VariableType must be a string.")
+            raise TypeError("variable_type must be a string.")
         if not vt in ["WaterLevel", "Discharge", "Pollutant"]:
             raise ValueError(
-                f"Bad VariableType {vt} entered. "
+                f"Bad variable_type {vt} entered. "
                 "It must be either 'WaterLevel', 'Discharge' or 'Pollutant'."
             )
         if bn is not None and not isinstance(bn, str):
-            raise TypeError("BranchName must be either None or a string.")
+            raise TypeError("branch_name must be either None or a string.")
         if c is not None and not isinstance(c, (int, float)):
-            raise TypeError("Chainage must be either None or a number.")
+            raise TypeError("chainage must be either None or a number.")
         if bn is None and c is not None:
-            raise ValueError("Chainage cannot be set if BranchName is None.")
+            raise ValueError("chainage cannot be set if branch_name is None.")
 
     @property
-    def VariableType(self):
-        return self._VariableType
+    def variable_type(self):
+        return self._variable_type
 
     @property
-    def BranchName(self):
-        return self._BranchName
+    def branch_name(self):
+        return self._branch_name
 
     @property
-    def Chainage(self):
-        return self._Chainage
+    def chainage(self):
+        return self._chainage
 
     def __repr__(self):
         return (
-            f"QueryData(VariableType='{self.VariableType}', "
-            f"BranchName='{self.BranchName}', "
-            f"Chainage={self.Chainage})"
+            f"QueryData(variable_type='{self.variable_type}', "
+            f"branch_name='{self.branch_name}', "
+            f"chainage={self.chainage})"
         )
 
     def __iter__(self):
-        yield self.VariableType
-        yield self.BranchName
-        yield self.Chainage
+        yield self.variable_type
+        yield self.branch_name
+        yield self.chainage
