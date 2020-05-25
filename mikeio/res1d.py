@@ -1,5 +1,5 @@
 from collections import defaultdict, namedtuple
-from contextlib import contextmanager 
+from contextlib import contextmanager
 
 import clr
 import os.path
@@ -24,7 +24,7 @@ def read(file_path, queries):
     
     Parameters
     ----------
-    filename: str
+    file_path: str
         full path and file name to the res1d file.
     queries: list
         `QueryData` objects that define the requested data.
@@ -116,7 +116,7 @@ class Res1D:
                  .get_DataItems()
                  .get_Item(variable_type.index)
                  .CreateTimeSeriesData(chainage.index))
-            name  = f"{variable_type.value} {reach.value} {chainage.value}"
+            name = f"{variable_type.value} {reach.value} {chainage.value}"
             d = pd.Series(list(d), name=name)
             df[name] = d
         return df
@@ -127,7 +127,7 @@ class Res1D:
         return df
 
     def _find_points(self, queries, chainage_tolerance=0.1):
-        """From a list of queries returns a dictionnary with the required
+        """From a list of queries returns a dictionary with the required
         information for each requested point to extract its time series
         later on."""
 
@@ -135,7 +135,7 @@ class Res1D:
 
         found_points = defaultdict(list)
         # Find the point
-        for q_variable_type, q_reach_name, q_chain  in queries:
+        for q_variable_type, q_reach_name, q_chain in queries:
 
             found_data_type = found_reach = found_chainage = False
 
@@ -177,7 +177,7 @@ class Res1D:
                         chainage_idx = int((j - 1) / 2)
                     else:
                         continue  # q_chainage is None in that case.
-                    
+
                     found_chainage = True
                     chainage_val = q_chain if q_chain else round(curr_chain, 3)
                     chainage = PointInfo(chainage_idx, chainage_val)
@@ -241,14 +241,14 @@ class QueryData:
             raise ValueError(
                 f"Bad VariableType {vt} entered. "
                 "It must be either 'WaterLevel', 'Discharge' or 'Pollutant'."
-                )
+            )
         if bn is not None and not isinstance(bn, str):
             raise TypeError("BranchName must be either None or a string.")
         if c is not None and not isinstance(c, (int, float)):
             raise TypeError("Chainage must be either None or a number.")
         if bn is None and c is not None:
             raise ValueError("Chainage cannot be set if BranchName is None.")
-    
+
     @property
     def VariableType(self):
         return self._VariableType

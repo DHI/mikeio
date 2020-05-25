@@ -1,5 +1,6 @@
 import pytest
-from mikeio.res1d import read, Res1D, QueryData
+
+from mikeio.res1d import read, QueryData
 
 
 def test_query_validate():
@@ -11,19 +12,19 @@ def test_query_validate():
     # Bad variable type
     with pytest.raises(TypeError):
         QueryData(666)
-    
+
     # Bad string variable type
     with pytest.raises(ValueError):
         QueryData("BadVariableType")
-    
+
     # Bad branch type
     with pytest.raises(TypeError):
         QueryData("WaterLevel", BranchName=666)
-    
+
     # Bad chainage type
     with pytest.raises(TypeError):
         QueryData("WaterLevel", "branch", Chainage="BadChainage")
-    
+
     # Cannot set a chainage with no branch
     with pytest.raises(ValueError):
         QueryData("WaterLevel", None, 10)
@@ -75,22 +76,25 @@ def test_read_multiple_queries(file):
     q2 = QueryData("Discharge", "9l1", 5)
     ts = read(file, [q1, q2])
     assert ts.shape == (110, 2)
-    max = ts.max()
-    assert pytest.approx(round(max[0], 3)) == 197.046
-    assert pytest.approx(round(max[1], 3)) == 0.761
+    ts_max = ts.max()
+    assert pytest.approx(round(ts_max[0], 3)) == 197.046
+    assert pytest.approx(round(ts_max[1], 3)) == 0.761
+
 
 def test_read_reach(file):
     q_reach = QueryData("WaterLevel", "118l1")
     ts = read(file, [q_reach])
     assert ts.shape == (110, 3)
     assert list(ts.columns) == ['WaterLevel 118l1 0.0', 'WaterLevel 118l1 49.443',
-       'WaterLevel 118l1 98.887']
+                                'WaterLevel 118l1 98.887']
+
 
 def test_read_multiple_reaches(file):
     q_reach1 = QueryData("WaterLevel", "118l1")
     q_reach2 = QueryData("Discharge", "113l1")
     ts = read(file, [q_reach1, q_reach2])
     assert ts.shape == (110, 5)
+
 
 def test_read_all_reaches(file):
     q_waterlevel = QueryData("WaterLevel")
