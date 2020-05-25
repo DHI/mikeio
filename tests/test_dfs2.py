@@ -149,6 +149,10 @@ def test_non_equidistant_calendar():
 
     dfs.create(filename=filename, data=data, datetimes=datetimes)
 
+    ds = dfs.read(filename)
+
+    assert ds.time[1] == datetimes[1]
+
     assert True
     os.remove(filename)
 
