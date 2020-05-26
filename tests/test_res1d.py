@@ -65,8 +65,20 @@ def test_file_does_not_exist():
     (QueryData("Discharge", "100l1", 23.8414), 0.1),
     (QueryData("Discharge", "9l1", 5), 0.761)
 ])
-def test_read_single_query(file, query, expected_max):
+def test_read_single_query_as_list(file, query, expected_max):
     ts = read(file, [query])
+    assert len(ts) == 110
+    assert pytest.approx(round(ts.max()[0], 3)) == expected_max
+
+
+@pytest.mark.parametrize("query,expected_max", [
+    (QueryData("WaterLevel", "104l1", 34.4131), 197.046),
+    (QueryData("WaterLevel", "9l1", 10), 195.165),
+    (QueryData("Discharge", "100l1", 23.8414), 0.1),
+    (QueryData("Discharge", "9l1", 5), 0.761)
+])
+def test_read_single_query(file, query, expected_max):
+    ts = read(file, query)
     assert len(ts) == 110
     assert pytest.approx(round(ts.max()[0], 3)) == expected_max
 

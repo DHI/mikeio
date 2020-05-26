@@ -26,15 +26,18 @@ def read(file_path, queries):
     ----------
     file_path: str
         full path and file name to the res1d file.
-    queries: list
+    queries: a single query or a list of queries
         `QueryData` objects that define the requested data.
     Returns
     -------
     pd.DataFrame
     """
     res1d = Res1D(file_path)
-    df = res1d.read(queries)
-    return df
+
+    if isinstance(queries, list):
+        return res1d.read(queries)
+
+    return res1d.read([queries])
 
 
 def _comp_strings(s1, s2, format=None):
