@@ -40,12 +40,6 @@ def read(file_path, queries):
     return res1d.read([queries])
 
 
-def _comp_strings(s1, s2, format=None):
-    if not format:
-        return s1 == s2
-    return format(s1) == format(s2)
-
-
 class Res1D:
     def __init__(self, file_path=None):
         self.file_path = file_path
