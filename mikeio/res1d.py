@@ -158,6 +158,34 @@ class Res1D:
         df.index = self.time_index
         return df
 
+    def _validate_queries(self, queries, chainage_tolerance=0.1):
+        """Check whether the queries point to existing data in the file."""
+        for query in queries:
+            if query._variable_type not in self.data_types:
+                raise DataNotFoundInFile(
+                    f"Data type '{query._variable_type}' was not found.")
+            if query.branch_name is not None:
+                if query.branch_name not in self.reach_names:
+                    raise DataNotFoundInFile(
+                        f"Branch '{query.branch_name}' was not found.")
+            if query.chainage is not None:
+                found_chainage = False
+                for reach in self._reaches:
+                    if found_chainage:
+                        break
+                    # Look for the targeted reach
+                    if query.branch_name != reach.Name:
+                        continue
+                    for chainage in self._chainages(reach):
+                        # Look for the targeted chainage
+                        chainage_diff = chainage - query.chainage
+                        if abs(chainage_diff) < chainage_tolerance:
+                            found_chainage = True
+                            break
+                if not found_chainage:
+                    raise DataNotFoundInFile(
+                        f"Chainage {query.chainage} was not found.")
+
     def _build_queries(self, queries):
         """"
         A query can be in an undefined state if branch_name and/or chainage
@@ -209,20 +237,14 @@ class Res1D:
         found_points = defaultdict(list)
         # Find the point given its variable type, reach, and chainage
         for q_variable_type, q_reach_name, q_chain in queries:
-            found_data_type = found_reach = found_chainage = False
             for data_type_idx, data_type in enumerate(self.data_types):
                 if q_variable_type.lower() == data_type.lower():
-                    found_data_type = True
                     break
-            if not found_data_type:
-                raise DataNotFoundInFile(
-                    f"Data type '{q_variable_type}' was not found.")
             data_type_info = PointInfo(data_type_idx, q_variable_type)
             for reach_idx, curr_reach in enumerate(self._reaches):
                 # Look for the targeted reach
                 if not q_reach_name == curr_reach.Name:
                     continue
-                found_reach = True
                 reach = PointInfo(reach_idx, q_reach_name)
                 for j, curr_chain in enumerate(self._chainages(curr_reach)):
                     # Look for the targeted chainage
@@ -236,19 +258,11 @@ class Res1D:
                         chainage_idx = int((j - 1) / 2)
                     elif q_variable_type == "Pollutant":
                         chainage_idx = int((j - 1) / 2)
-                    found_chainage = True
                     chainage = PointInfo(chainage_idx, q_chain)
                     found_points["chainage"].append(chainage)
                     found_points["variable"].append(data_type_info)
                     found_points["reach"].append(reach)
                     break  # Break at the first chainage found.
-
-            if not found_reach:
-                raise DataNotFoundInFile(
-                    f"Reach '{q_reach_name}' was not found.")
-            if not found_chainage:
-                raise DataNotFoundInFile(
-                    f"Chainage {q_chain} was not found.")
 
         return dict(found_points)
 
@@ -265,6 +279,7 @@ class Res1D:
         pd.DataFrame
         """
         with self.open() as self.file:
+            self._validate_queries(queries)
             built_queries = self._build_queries(queries)
             found_points = self._find_points(built_queries)
             df = self._get_data(found_points)

@@ -1,6 +1,8 @@
 import pytest
 
-from mikeio.res1d import read, QueryData, Res1D, FileNotOpenedError
+from mikeio.res1d import (
+    read, QueryData, Res1D, FileNotOpenedError, DataNotFoundInFile
+)
 
 
 def test_query_validate():
@@ -98,6 +100,25 @@ def test_read_single_query(file, query, expected_max):
     ts = read(file, query)
     assert len(ts) == 110
     assert pytest.approx(round(ts.max()[0], 3)) == expected_max
+
+
+def test_read_bad_queries(file):
+    """Querying data not available in the file must return an error"""
+
+    # Bad variable type
+    with pytest.raises(DataNotFoundInFile) as excinfo:
+        read(file, [QueryData("Pollutant")])
+    assert "Pollutant" in str(excinfo.value)
+ 
+    # Bad branch name
+    with pytest.raises(DataNotFoundInFile) as excinfo:
+        read(file, [QueryData("WaterLevel", "bad_branch_name")])
+    assert "bad_branch_name" in str(excinfo.value)
+
+    # Bad chainage
+    with pytest.raises(DataNotFoundInFile) as excinfo:
+        read(file, [QueryData("WaterLevel", "104l1", 666)])
+    assert "666" in str(excinfo.value)
 
 
 def test_read_multiple_queries(file):
