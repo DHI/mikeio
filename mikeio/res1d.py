@@ -46,7 +46,8 @@ class Res1D:
         self.file = None
         self._time_index = None
         self._data_types = None
-        self._reaches = None
+        self._reach_names = None
+        self.__reaches = None
 
     def _load_file(self):
         """Read the res1d file."""
@@ -74,11 +75,18 @@ class Res1D:
         return [quantities.get_Item(i).Id for i in range(0, quantities.Count)]
 
     @property
-    def reaches(self):
-        if self._reaches:
-            return self._reaches
+    def _reaches(self):
+        if self.__reaches:
+            return self.__reaches
         reaches = self.file.Reaches
         return [reaches.get_Item(i) for i in range(0, reaches.Count)]
+
+    @property
+    def reach_names(self):
+        """A list of the reach names"""
+        if self._reach_names:
+            return self._reach_names
+        return [reach.Name for reach in self._reaches]
 
     @staticmethod
     def _chainages(reach):
@@ -144,11 +152,11 @@ class Res1D:
             # e.g QueryData("WaterLevel", "branch1") or QueryData("WaterLevel")
             q_variable_type = query.variable_type
             q_reach_name = query.branch_name
-            for curr_reach in self.reaches:
+            for reach, reach_name in zip(self._reaches, self.reach_names):
                 if q_reach_name is not None:  # When branch_name is set.
-                    if curr_reach.Name != q_reach_name:
+                    if reach_name != q_reach_name:
                         continue
-                for j, curr_chain in enumerate(self._chainages(curr_reach)):
+                for j, curr_chain in enumerate(self._chainages(reach)):
                     if q_variable_type == "WaterLevel" and j % 2 == 0:
                         chainage = curr_chain
                     elif q_variable_type == "Discharge" and j % 2 != 0:
@@ -159,7 +167,7 @@ class Res1D:
                         continue
 
                     q = QueryData(
-                        q_variable_type, curr_reach.Name, round(chainage, 3)
+                        q_variable_type, reach_name, round(chainage, 3)
                     )
                     built_queries.append(q)
         return built_queries
@@ -183,7 +191,7 @@ class Res1D:
                 raise DataNotFoundInFile(
                     f"Data type '{q_variable_type}' was not found.")
             data_type_info = PointInfo(data_type_idx, q_variable_type)
-            for reach_idx, curr_reach in enumerate(self.reaches):
+            for reach_idx, curr_reach in enumerate(self._reaches):
                 # Look for the targeted reach
                 if not q_reach_name == curr_reach.Name:
                     continue
