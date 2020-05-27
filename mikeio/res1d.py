@@ -123,6 +123,47 @@ class Res1D:
         df.index = self.time_index
         return df
 
+    def _build_queries(self, queries):
+        """"
+        A query can be in an undefined state if branch_name and/or chainage
+        isn't set. This function takes care of building lists of queries
+        for these cases. Chainages are rounded to three decimal places.
+
+        >>> self._build_queries([QueryData("WaterLevel", "branch1")])
+        [
+            QueryData("WaterLevel", "branch1", 0),
+            QueryData("WaterLevel", "branch1", 10)
+        ]
+        """
+        built_queries = []
+        for query in queries:
+            # e.g. QueryData("WaterLevel", "branch1", 1)
+            if query.branch_name and query.chainage:
+                built_queries.append(query)
+                continue
+            # e.g QueryData("WaterLevel", "branch1") or QueryData("WaterLevel")
+            q_variable_type = query.variable_type
+            q_reach_name = query.branch_name
+            for curr_reach in self.reaches:
+                if q_reach_name is not None:  # When branch_name is set.
+                    if curr_reach.Name != q_reach_name:
+                        continue
+                for j, curr_chain in enumerate(self._chainages(curr_reach)):
+                    if q_variable_type == "WaterLevel" and j % 2 == 0:
+                        chainage = curr_chain
+                    elif q_variable_type == "Discharge" and j % 2 != 0:
+                        chainage = curr_chain
+                    elif q_variable_type == "Pollutant" and j % 2 != 0:
+                        chainage = curr_chain
+                    else:
+                        continue
+
+                    q = QueryData(
+                        q_variable_type, curr_reach.Name, round(chainage, 3)
+                    )
+                    built_queries.append(q)
+        return built_queries
+
     def _find_points(self, queries, chainage_tolerance=0.1):
         """From a list of queries returns a dictionary with the required
         information for each requested point to extract its time series
@@ -131,11 +172,9 @@ class Res1D:
         PointInfo = namedtuple('PointInfo', ['index', 'value'])
 
         found_points = defaultdict(list)
-        # Find the point
+        # Find the point given its variable type, reach, and chainage
         for q_variable_type, q_reach_name, q_chain in queries:
-
             found_data_type = found_reach = found_chainage = False
-
             for data_type_idx, data_type in enumerate(self.data_types):
                 if q_variable_type.lower() == data_type.lower():
                     found_data_type = True
@@ -144,46 +183,30 @@ class Res1D:
                 raise DataNotFoundInFile(
                     f"Data type '{q_variable_type}' was not found.")
             data_type_info = PointInfo(data_type_idx, q_variable_type)
-            if q_reach_name and q_chain:
-                found_points["variable"].append(data_type_info)
-
             for reach_idx, curr_reach in enumerate(self.reaches):
-                # Look for the targeted chainage if set
-                if q_reach_name:
-                    if not q_reach_name == curr_reach.Name:
-                        continue
-
+                # Look for the targeted reach
+                if not q_reach_name == curr_reach.Name:
+                    continue
                 found_reach = True
-                reach_val = q_reach_name if q_reach_name else curr_reach
-                reach = PointInfo(reach_idx, reach_val)
-                if q_reach_name and q_chain:
-                    found_points["reach"].append(reach)
+                reach = PointInfo(reach_idx, q_reach_name)
                 for j, curr_chain in enumerate(self._chainages(curr_reach)):
-                    # Look for the targeted chainage if set.
-                    if q_chain:
-                        chainage_diff = curr_chain - q_chain
-                        is_chainage = abs(chainage_diff) < chainage_tolerance
-                        if not is_chainage:
-                            continue
-
-                    if q_variable_type == "WaterLevel" and j % 2 == 0:
+                    # Look for the targeted chainage
+                    chainage_diff = curr_chain - q_chain
+                    is_chainage = abs(chainage_diff) < chainage_tolerance
+                    if not is_chainage:
+                        continue
+                    if q_variable_type == "WaterLevel":
                         chainage_idx = int(j / 2)
-                    elif q_variable_type == "Discharge" and j % 2 != 0:
+                    elif q_variable_type == "Discharge":
                         chainage_idx = int((j - 1) / 2)
-                    elif q_variable_type == "Pollutant" and j % 2 != 0:
+                    elif q_variable_type == "Pollutant":
                         chainage_idx = int((j - 1) / 2)
-                    else:
-                        continue  # q_chainage is None in that case.
-
                     found_chainage = True
-                    chainage_val = q_chain if q_chain else round(curr_chain, 3)
-                    chainage = PointInfo(chainage_idx, chainage_val)
+                    chainage = PointInfo(chainage_idx, q_chain)
                     found_points["chainage"].append(chainage)
-                    if not q_chain:
-                        found_points["variable"].append(data_type_info)
-                        found_points["reach"].append(reach)
-                    else:
-                        break  # Break at the first chainage found.
+                    found_points["variable"].append(data_type_info)
+                    found_points["reach"].append(reach)
+                    break  # Break at the first chainage found.
 
             if not found_reach:
                 raise DataNotFoundInFile(
@@ -195,8 +218,20 @@ class Res1D:
         return dict(found_points)
 
     def read(self, queries):
+        """Read the requested data from the res1d file and
+        return a Pandas DataFrame.
+
+        Parameters
+        ----------
+        queries: a single query or a list of queries
+            `QueryData` objects that define the requested data.
+        Returns
+        -------
+        pd.DataFrame
+        """
         with self.open() as self.file:
-            found_points = self._find_points(queries)
+            built_queries = self._build_queries(queries)
+            found_points = self._find_points(built_queries)
             df = self._get_data(found_points)
         return df
 
