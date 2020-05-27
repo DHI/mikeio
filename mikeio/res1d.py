@@ -1,5 +1,6 @@
 from collections import defaultdict, namedtuple
 from contextlib import contextmanager
+import functools
 
 import clr
 import os.path
@@ -14,7 +15,15 @@ from DHI.Mike1D.Generic import Connection  # noqa
 clr.AddReference("System")
 
 
-class DataNotFoundInFile(Exception):
+class BaseRes1DError(Exception):
+    """Base class for Red1D errors."""
+
+
+class DataNotFoundInFile(BaseRes1DError):
+    """Data not found in file."""
+
+
+class FileNotOpenedError(BaseRes1DError):
     """Data not found in file."""
 
 
@@ -40,10 +49,23 @@ def read(file_path, queries):
     return res1d.read([queries])
 
 
+def _not_closed(prop):
+    @functools.wraps(prop)
+    def wrapper(self, *args, **kwargs):
+        if self._closed:
+            raise FileNotOpenedError(
+                "The res1d file should be opened first to access to its "
+                f"{prop.__name__} property."
+            )
+        return prop(self, *args, **kwargs)
+    return wrapper
+
+
 class Res1D:
     def __init__(self, file_path=None):
         self.file_path = file_path
         self.file = None
+        self._closed = True
         self._time_index = None
         self._data_types = None
         self._reach_names = None
@@ -57,10 +79,12 @@ class Res1D:
         file = ResultData()
         file.Connection = Connection.Create(self.file_path)
         file.Load()
+        self._closed = False
         return file
 
     def _close(self):
         self.file.Dispose()
+        self._closed = True
 
     @contextmanager
     def open(self):
@@ -68,6 +92,7 @@ class Res1D:
         self._close()
 
     @property
+    @_not_closed
     def data_types(self):
         if self._data_types:
             return self._data_types
@@ -82,6 +107,7 @@ class Res1D:
         return [reaches.get_Item(i) for i in range(0, reaches.Count)]
 
     @property
+    @_not_closed
     def reach_names(self):
         """A list of the reach names"""
         if self._reach_names:
@@ -94,6 +120,7 @@ class Res1D:
             yield float(reach.GridPoints.get_Item(i).Chainage)
 
     @property
+    @_not_closed
     def time_index(self):
         if self._time_index:
             return self._time_index

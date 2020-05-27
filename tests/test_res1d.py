@@ -1,6 +1,6 @@
 import pytest
 
-from mikeio.res1d import read, QueryData
+from mikeio.res1d import read, QueryData, Res1D, FileNotOpenedError
 
 
 def test_query_validate():
@@ -57,6 +57,23 @@ def test_file_does_not_exist():
 
     with pytest.raises(FileExistsError):
         assert read(file, [query])
+
+
+def test_get_properties_if_not_opened(file):
+    """Public properties cannot be accessed if the file is not opened"""
+    r = Res1D(file)
+
+    with pytest.raises(FileNotOpenedError) as excinfo:
+        r.data_types
+    assert "data_types" in str(excinfo.value)
+
+    with pytest.raises(FileNotOpenedError) as excinfo:
+        r.reach_names
+    assert "reach_names" in str(excinfo.value)
+    
+    with pytest.raises(FileNotOpenedError) as excinfo:
+        r.time_index
+    assert "time_index" in str(excinfo.value)
 
 
 @pytest.mark.parametrize("query,expected_max", [
