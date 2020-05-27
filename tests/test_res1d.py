@@ -149,10 +149,10 @@ def test_read_multiple_reaches(file):
 def test_read_all_reaches(file):
     q_waterlevel = QueryData("WaterLevel")
     ts = read(file, [q_waterlevel])
-    # TODO: Should it be (110, 243)? As +4 water level structure points
+    # Note that it includes 4 water level structure points
     assert ts.shape == (110, 247)
 
     q_discharge = QueryData("Discharge")
     ts = read(file, [q_discharge])
-    # TODO: Should it be (110, 127)? As +2 discharge structure points
+    # Note that it includes 2 discharge structure points
     assert ts.shape == (110, 129)

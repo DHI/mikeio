@@ -88,12 +88,14 @@ class Res1D:
 
     @contextmanager
     def open(self):
+        """Returns a handle on the file"""
         yield self._load_file()
         self._close()
 
     @property
     @_not_closed
     def data_types(self):
+        """List of the data types"""
         if self._data_types:
             return self._data_types
         quantities = self.file.get_Quantities()
@@ -122,6 +124,7 @@ class Res1D:
     @property
     @_not_closed
     def time_index(self):
+        """panda.DatetimeIndex of the time index"""
         if self._time_index:
             return self._time_index
         time_stamps = []
@@ -304,7 +307,7 @@ class QueryData:
     `QueryData('WaterLevel', 'branch1', 10)` is a valid query.
     `QueryData('WaterLevel', 'branch1')` requests all the WaterLevel points
     of `branch1`.
-    `QueryData('Discharge')` requests all the Discharge points of the model.
+    `QueryData('Discharge')` requests all the Discharge points of the file.
     """
 
     def __init__(self, variable_type, branch_name=None, chainage=None):
