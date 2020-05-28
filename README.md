@@ -11,6 +11,8 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
 * Python x64 >=3.6
 * [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
 
+[More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
+
 ## Installation
 
 From PyPI: [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
