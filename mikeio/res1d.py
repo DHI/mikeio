@@ -41,12 +41,32 @@ def read(file_path, queries):
     -------
     pd.DataFrame
     """
-    res1d = Res1D(file_path)
-
-    if isinstance(queries, list):
+    queries = queries if isinstance(queries, list) else [queries]
+    with open(file_path) as res1d:
         return res1d.read(queries)
 
-    return res1d.read([queries])
+
+def open(file_path):
+    """Open a res1d file as a Res1D object that has convenient methods
+    to extract specific data from the file. It is recommended to use it
+    as a context manager.
+
+    Parameters
+    ----------
+    file_path: str
+        full path and file name to the res1d file.
+    
+    Returns
+    -------
+    Res1D
+    
+    Examples
+    --------
+    >>> with open("file.res1d") as r1d:
+    >>>     print(r1d.data_types)
+    ['WaterLevel', 'Discharge']
+    """
+    return Res1D(file_path)
 
 
 def _not_closed(prop):
@@ -70,27 +90,28 @@ class Res1D:
         self._data_types = None
         self._reach_names = None
         self.__reaches = None
+        # Load the file on initialization
+        self._load_file()
 
     def _load_file(self):
-        """Read the res1d file."""
+        """Load the file."""
         if not os.path.exists(self.file_path):
             raise FileExistsError(f"File {self.file_path} does not exist.")
-
-        file = ResultData()
-        file.Connection = Connection.Create(self.file_path)
-        file.Load()
+        self.file = ResultData()
+        self.file.Connection = Connection.Create(self.file_path)
+        self.file.Load()
         self._closed = False
-        return file
 
-    def _close(self):
+    def close(self):
+        """Close the file handle."""
         self.file.Dispose()
         self._closed = True
 
-    @contextmanager
-    def open(self):
-        """Returns a handle on the file"""
-        yield self._load_file()
-        self._close()
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *excinfo):
+        self.close()
 
     @property
     @_not_closed
@@ -275,17 +296,16 @@ class Res1D:
 
         Parameters
         ----------
-        queries: a single query or a list of queries
+        queries: list
             `QueryData` objects that define the requested data.
         Returns
         -------
         pd.DataFrame
         """
-        with self.open() as self.file:
-            self._validate_queries(queries)
-            built_queries = self._build_queries(queries)
-            found_points = self._find_points(built_queries)
-            df = self._get_data(found_points)
+        self._validate_queries(queries)
+        built_queries = self._build_queries(queries)
+        found_points = self._find_points(built_queries)
+        df = self._get_data(found_points)
         return df
 
 

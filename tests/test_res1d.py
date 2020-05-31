@@ -64,6 +64,7 @@ def test_file_does_not_exist():
 def test_get_properties_if_not_opened(file):
     """Public properties cannot be accessed if the file is not opened"""
     r = Res1D(file)
+    r.close()
 
     with pytest.raises(FileNotOpenedError) as excinfo:
         r.data_types
