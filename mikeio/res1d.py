@@ -290,6 +290,7 @@ class Res1D:
 
         return dict(found_points)
 
+    @_not_closed
     def read(self, queries):
         """Read the requested data from the res1d file and
         return a Pandas DataFrame.
