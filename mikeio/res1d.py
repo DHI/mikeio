@@ -260,29 +260,29 @@ class Res1D:
 
         found_points = defaultdict(list)
         # Find the point given its variable type, reach, and chainage
-        for q_variable_type, q_reach_name, q_chain in queries:
+        for q in queries:
             for data_type_idx, data_type in enumerate(self.data_types):
-                if q_variable_type.lower() == data_type.lower():
+                if q.variable_type.lower() == data_type.lower():
                     break
-            data_type_info = PointInfo(data_type_idx, q_variable_type)
+            data_type_info = PointInfo(data_type_idx, q.variable_type)
             for reach_idx, curr_reach in enumerate(self._reaches):
                 # Look for the targeted reach
-                if not q_reach_name == curr_reach.Name:
+                if not q.branch_name == curr_reach.Name:
                     continue
-                reach = PointInfo(reach_idx, q_reach_name)
+                reach = PointInfo(reach_idx, q.branch_name)
                 for j, curr_chain in enumerate(self._chainages(curr_reach)):
                     # Look for the targeted chainage
-                    chainage_diff = curr_chain - q_chain
+                    chainage_diff = curr_chain - q.chainage
                     is_chainage = abs(chainage_diff) < chainage_tolerance
                     if not is_chainage:
                         continue
-                    if q_variable_type == "WaterLevel":
+                    if q.variable_type == "WaterLevel":
                         chainage_idx = int(j / 2)
-                    elif q_variable_type == "Discharge":
+                    elif q.variable_type == "Discharge":
                         chainage_idx = int((j - 1) / 2)
-                    elif q_variable_type == "Pollutant":
+                    elif q.variable_type == "Pollutant":
                         chainage_idx = int((j - 1) / 2)
-                    chainage = PointInfo(chainage_idx, q_chain)
+                    chainage = PointInfo(chainage_idx, q.chainage)
                     found_points["chainage"].append(chainage)
                     found_points["variable"].append(data_type_info)
                     found_points["reach"].append(reach)
@@ -372,8 +372,3 @@ class QueryData:
             f"branch_name='{self.branch_name}', "
             f"chainage={self.chainage})"
         )
-
-    def __iter__(self):
-        yield self.variable_type
-        yield self.branch_name
-        yield self.chainage

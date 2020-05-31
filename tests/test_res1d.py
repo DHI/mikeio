@@ -39,14 +39,6 @@ def test_query_repr():
     assert repr(query) == expected
 
 
-def test_query_iter():
-    query = QueryData("WaterLevel", "104l1", 34.4131)
-    vt, bn, c = query
-    assert vt == "WaterLevel"
-    assert bn == "104l1"
-    assert c == 34.4131
-
-
 @pytest.fixture
 def file():
     return "tests/testdata/Exam6Base.res1d"
