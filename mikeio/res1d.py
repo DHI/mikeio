@@ -24,7 +24,7 @@ class DataNotFoundInFile(BaseRes1DError):
 
 
 class FileNotOpenedError(BaseRes1DError):
-    """Data not found in file."""
+    """Accessing data from a file that is not opened."""
 
 
 def read(file_path, queries):
@@ -119,15 +119,13 @@ class Res1D:
         """List of the data types"""
         if self._data_types:
             return self._data_types
-        quantities = self.file.get_Quantities()
-        return [quantities.get_Item(i).Id for i in range(0, quantities.Count)]
+        return [q.Id for q in self.file.get_Quantities()]
 
     @property
     def _reaches(self):
         if self.__reaches:
             return self.__reaches
-        reaches = self.file.Reaches
-        return [reaches.get_Item(i) for i in range(0, reaches.Count)]
+        return list(self.file.Reaches)
 
     @property
     @_not_closed
@@ -139,8 +137,8 @@ class Res1D:
 
     @staticmethod
     def _chainages(reach):
-        for i in range(0, reach.GridPoints.Count):
-            yield float(reach.GridPoints.get_Item(i).Chainage)
+        for gp in reach.GridPoints:
+            yield float(gp.Chainage)
 
     @property
     @_not_closed
@@ -149,8 +147,7 @@ class Res1D:
         if self._time_index:
             return self._time_index
         time_stamps = []
-        for i in range(0, self.file.TimesList.Count):
-            t = self.file.TimesList.get_Item(i)
+        for t in self.file.TimesList:
             time_stamps.append(
                 pd.Timestamp(
                     year=t.get_Year(),
@@ -185,9 +182,9 @@ class Res1D:
     def _validate_queries(self, queries, chainage_tolerance=0.1):
         """Check whether the queries point to existing data in the file."""
         for query in queries:
-            if query._variable_type not in self.data_types:
+            if query.variable_type not in self.data_types:
                 raise DataNotFoundInFile(
-                    f"Data type '{query._variable_type}' was not found.")
+                    f"Data type '{query.variable_type}' was not found.")
             if query.branch_name is not None:
                 if query.branch_name not in self.reach_names:
                     raise DataNotFoundInFile(
