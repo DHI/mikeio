@@ -283,15 +283,15 @@ class Res1D:
         found_points = defaultdict(list)
         # Find the point given its variable type, reach, and chainage
         for q in queries:
-            for data_type_idx, data_type in enumerate(self.data_types):
-                if q.variable_type.lower() == data_type.lower():
-                    break
-            data_type_info = PointInfo(data_type_idx, q.variable_type)
             for reach_idx, curr_reach in enumerate(self._reaches):
                 # Look for the targeted reach
                 if q.reach_name != curr_reach.Name:
                     continue
                 reach = PointInfo(reach_idx, q.reach_name)
+                for data_type_idx, data_type in enumerate(self.data_types):
+                    if q.variable_type.lower() == data_type.lower():
+                        break
+                data_type_info = PointInfo(data_type_idx, q.variable_type)
                 for idx, curr_chain in enumerate(self._chainages(curr_reach, data_type_idx)):
                     # Look for the targeted chainage
                     chainage_diff = curr_chain - q.chainage
