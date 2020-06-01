@@ -19,22 +19,22 @@ def test_query_validate():
     with pytest.raises(ValueError):
         QueryData("BadVariableType")
 
-    # Bad branch type
+    # Bad reach type
     with pytest.raises(TypeError):
-        QueryData("WaterLevel", branch_name=666)
+        QueryData("WaterLevel", reach_name=666)
 
     # Bad chainage type
     with pytest.raises(TypeError):
-        QueryData("WaterLevel", "branch", chainage="BadChainage")
+        QueryData("WaterLevel", "reach", chainage="BadChainage")
 
-    # Cannot set a chainage with no branch
+    # Cannot set a chainage with no reach
     with pytest.raises(ValueError):
         QueryData("WaterLevel", None, 10)
 
 
 def test_query_repr():
     query = QueryData("WaterLevel", "104l1", 34.4131)
-    expected = ("QueryData(variable_type='WaterLevel', branch_name='104l1', "
+    expected = ("QueryData(variable_type='WaterLevel', reach_name='104l1', "
                 "chainage=34.4131)")
     assert repr(query) == expected
 
@@ -103,10 +103,10 @@ def test_read_bad_queries(file):
         read(file, [QueryData("Pollutant")])
     assert "Pollutant" in str(excinfo.value)
  
-    # Bad branch name
+    # Bad reach name
     with pytest.raises(DataNotFoundInFile) as excinfo:
-        read(file, [QueryData("WaterLevel", "bad_branch_name")])
-    assert "bad_branch_name" in str(excinfo.value)
+        read(file, [QueryData("WaterLevel", "bad_reach_name")])
+    assert "bad_reach_name" in str(excinfo.value)
 
     # Bad chainage
     with pytest.raises(DataNotFoundInFile) as excinfo:

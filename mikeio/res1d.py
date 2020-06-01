@@ -204,17 +204,17 @@ class Res1D:
             if q.variable_type not in self.data_types:
                 raise DataNotFoundInFile(
                     f"Data type '{q.variable_type}' was not found.")
-            if q.branch_name is not None:
-                if q.branch_name not in self.reach_names:
+            if q.reach_name is not None:
+                if q.reach_name not in self.reach_names:
                     raise DataNotFoundInFile(
-                        f"Branch '{q.branch_name}' was not found.")
+                        f"Reach '{q.reach_name}' was not found.")
             if q.chainage is not None:
                 found_chainage = False
                 for reach in self._reaches:
                     if found_chainage:
                         break
                     # Look for the targeted reach
-                    if q.branch_name != reach.Name:
+                    if q.reach_name != reach.Name:
                         continue
                     # Raise an error if the data type isn't found in this reach
                     data_types_in_reach = self._data_types_reach(reach)
@@ -234,27 +234,27 @@ class Res1D:
 
     def _build_queries(self, queries):
         """"
-        A query can be in an undefined state if branch_name and/or chainage
+        A query can be in an undefined state if reach_name and/or chainage
         isn't set. This function takes care of building lists of queries
         for these cases. Chainages are rounded to three decimal places.
 
-        >>> self._build_queries([QueryData("WaterLevel", "branch1")])
+        >>> self._build_queries([QueryData("WaterLevel", "reach1")])
         [
-            QueryData("WaterLevel", "branch1", 0),
-            QueryData("WaterLevel", "branch1", 10)
+            QueryData("WaterLevel", "reach1", 0),
+            QueryData("WaterLevel", "reach1", 10)
         ]
         """
         built_queries = []
         for q in queries:
-            # e.g. QueryData("WaterLevel", "branch1", 1)
-            if q.branch_name and q.chainage:
+            # e.g. QueryData("WaterLevel", "reach1", 1)
+            if q.reach_name and q.chainage:
                 built_queries.append(q)
                 continue
-            # e.g QueryData("WaterLevel", "branch1") or QueryData("WaterLevel")
+            # e.g QueryData("WaterLevel", "reach1") or QueryData("WaterLevel")
             q_variable_type = q.variable_type
-            q_reach_name = q.branch_name
+            q_reach_name = q.reach_name
             for reach, reach_name in zip(self._reaches, self.reach_names):
-                if q_reach_name is not None:  # When branch_name is set.
+                if q_reach_name is not None:  # When reach_name is set.
                     if reach_name != q_reach_name:
                         continue
                 data_types_in_reach = self._data_types_reach(reach)
@@ -289,9 +289,9 @@ class Res1D:
             data_type_info = PointInfo(data_type_idx, q.variable_type)
             for reach_idx, curr_reach in enumerate(self._reaches):
                 # Look for the targeted reach
-                if q.branch_name != curr_reach.Name:
+                if q.reach_name != curr_reach.Name:
                     continue
-                reach = PointInfo(reach_idx, q.branch_name)
+                reach = PointInfo(reach_idx, q.reach_name)
                 for idx, curr_chain in enumerate(self._chainages(curr_reach, data_type_idx)):
                     # Look for the targeted chainage
                     chainage_diff = curr_chain - q.chainage
@@ -337,30 +337,30 @@ class QueryData:
     variable_type: str
         Either 'WaterLevel', 'Discharge', 'Pollutant', 'LeftLatLinkOutflow',
         'RightLatLinkOutflow'
-    branch_name: str, optional
-        Branch name, consider all the branches if None
+    reach_name: str, optional
+        Reach name, consider all the reaches if None
     chainage: float, optional
         chainage, considers all the chainages if None
     
     Examples
     --------
-    `QueryData('WaterLevel', 'branch1', 10)` is a valid query.
-    `QueryData('WaterLevel', 'branch1')` requests all the WaterLevel points
-    of `branch1`.
+    `QueryData('WaterLevel', 'reach1', 10)` is a valid query.
+    `QueryData('WaterLevel', 'reach1')` requests all the WaterLevel points
+    of `reach1`.
     `QueryData('Discharge')` requests all the Discharge points of the file.
     """
 
     allowed_data_types = DATA_TYPES_HANDLED_IN_QUERIES
 
-    def __init__(self, variable_type, branch_name=None, chainage=None):
+    def __init__(self, variable_type, reach_name=None, chainage=None):
         self._variable_type = variable_type
-        self._branch_name = branch_name
+        self._reach_name = reach_name
         self._chainage = chainage
         self._validate()
 
     def _validate(self):
         vt = self.variable_type
-        bn = self.branch_name
+        rn = self.reach_name
         c = self.chainage
         if not isinstance(vt, str):
             raise TypeError("variable_type must be a string.")
@@ -369,20 +369,20 @@ class QueryData:
                 f"Undefined variable_type {vt}. Allowed types are: "
                 f"{', '.join(self.allowed_data_types)}."
             )
-        if bn is not None and not isinstance(bn, str):
-            raise TypeError("branch_name must be either None or a string.")
+        if rn is not None and not isinstance(rn, str):
+            raise TypeError("reach_name must be either None or a string.")
         if c is not None and not isinstance(c, (int, float)):
             raise TypeError("chainage must be either None or a number.")
-        if bn is None and c is not None:
-            raise ValueError("chainage cannot be set if branch_name is None.")
+        if rn is None and c is not None:
+            raise ValueError("chainage cannot be set if reach_name is None.")
 
     @property
     def variable_type(self):
         return self._variable_type
 
     @property
-    def branch_name(self):
-        return self._branch_name
+    def reach_name(self):
+        return self._reach_name
 
     @property
     def chainage(self):
@@ -391,6 +391,6 @@ class QueryData:
     def __repr__(self):
         return (
             f"QueryData(variable_type='{self.variable_type}', "
-            f"branch_name='{self.branch_name}', "
+            f"reach_name='{self.reach_name}', "
             f"chainage={self.chainage})"
         )
