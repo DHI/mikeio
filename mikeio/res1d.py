@@ -14,6 +14,14 @@ from DHI.Mike1D.Generic import Connection  # noqa
 
 clr.AddReference("System")
 
+# Data types handled by the read function.
+DATA_TYPES_HANDLED_IN_QUERIES = [
+    "WaterLevel",
+    "Discharge",
+    "Pollutant",
+    "LeftLatLinkOutflow",
+    "RightLatLinkOutflow",
+]
 
 class BaseRes1DError(Exception):
     """Base class for Red1D errors."""
@@ -136,9 +144,19 @@ class Res1D:
         return [reach.Name for reach in self._reaches]
 
     @staticmethod
-    def _chainages(reach):
-        for gp in reach.GridPoints:
+    def _chainages(reach, data_type_idx):
+        """Generates chainages given a reach object and a data_type_idx"""
+        data_item = list(reach.DataItems)[data_type_idx]
+        index_list = list(data_item.IndexList)
+        gridpoints = list(reach.GridPoints)
+        gridpoints_filtered = [gridpoints[i] for i in index_list]
+        for gp in gridpoints_filtered:
             yield float(gp.Chainage)
+
+    @staticmethod
+    def _data_types_reach(reach):
+        """A list of the data types IDs contained in a reach."""
+        return [di.get_Quantity().Id for di in list(reach.get_DataItems())]
 
     @property
     @_not_closed
@@ -181,31 +199,38 @@ class Res1D:
 
     def _validate_queries(self, queries, chainage_tolerance=0.1):
         """Check whether the queries point to existing data in the file."""
-        for query in queries:
-            if query.variable_type not in self.data_types:
+        for q in queries:
+            # Raise an error if the data type is not found globally
+            if q.variable_type not in self.data_types:
                 raise DataNotFoundInFile(
-                    f"Data type '{query.variable_type}' was not found.")
-            if query.branch_name is not None:
-                if query.branch_name not in self.reach_names:
+                    f"Data type '{q.variable_type}' was not found.")
+            if q.branch_name is not None:
+                if q.branch_name not in self.reach_names:
                     raise DataNotFoundInFile(
-                        f"Branch '{query.branch_name}' was not found.")
-            if query.chainage is not None:
+                        f"Branch '{q.branch_name}' was not found.")
+            if q.chainage is not None:
                 found_chainage = False
                 for reach in self._reaches:
                     if found_chainage:
                         break
                     # Look for the targeted reach
-                    if query.branch_name != reach.Name:
+                    if q.branch_name != reach.Name:
                         continue
-                    for chainage in self._chainages(reach):
+                    # Raise an error if the data type isn't found in this reach
+                    data_types_in_reach = self._data_types_reach(reach)
+                    if q.variable_type not in data_types_in_reach:
+                        raise DataNotFoundInFile(
+                            f"Data type '{q.variable_type}' was not found.")
+                    data_type_idx = data_types_in_reach.index(q.variable_type)
+                    for chainage in self._chainages(reach, data_type_idx):
                         # Look for the targeted chainage
-                        chainage_diff = chainage - query.chainage
+                        chainage_diff = chainage - q.chainage
                         if abs(chainage_diff) < chainage_tolerance:
                             found_chainage = True
                             break
                 if not found_chainage:
                     raise DataNotFoundInFile(
-                        f"Chainage {query.chainage} was not found.")
+                        f"Chainage {q.chainage} was not found.")
 
     def _build_queries(self, queries):
         """"
@@ -220,24 +245,24 @@ class Res1D:
         ]
         """
         built_queries = []
-        for query in queries:
+        for q in queries:
             # e.g. QueryData("WaterLevel", "branch1", 1)
-            if query.branch_name and query.chainage:
-                built_queries.append(query)
+            if q.branch_name and q.chainage:
+                built_queries.append(q)
                 continue
             # e.g QueryData("WaterLevel", "branch1") or QueryData("WaterLevel")
-            q_variable_type = query.variable_type
-            q_reach_name = query.branch_name
+            q_variable_type = q.variable_type
+            q_reach_name = q.branch_name
             for reach, reach_name in zip(self._reaches, self.reach_names):
                 if q_reach_name is not None:  # When branch_name is set.
                     if reach_name != q_reach_name:
                         continue
-                for j, curr_chain in enumerate(self._chainages(reach)):
-                    if q_variable_type == "WaterLevel" and j % 2 == 0:
-                        chainage = curr_chain
-                    elif q_variable_type == "Discharge" and j % 2 != 0:
-                        chainage = curr_chain
-                    elif q_variable_type == "Pollutant" and j % 2 != 0:
+                data_types_in_reach = self._data_types_reach(reach)
+                if q.variable_type not in data_types_in_reach:
+                    continue
+                data_type_idx = data_types_in_reach.index(q.variable_type)
+                for curr_chain in self._chainages(reach, data_type_idx):
+                    if q_variable_type in DATA_TYPES_HANDLED_IN_QUERIES:
                         chainage = curr_chain
                     else:
                         continue
@@ -264,22 +289,18 @@ class Res1D:
             data_type_info = PointInfo(data_type_idx, q.variable_type)
             for reach_idx, curr_reach in enumerate(self._reaches):
                 # Look for the targeted reach
-                if not q.branch_name == curr_reach.Name:
+                if q.branch_name != curr_reach.Name:
                     continue
                 reach = PointInfo(reach_idx, q.branch_name)
-                for j, curr_chain in enumerate(self._chainages(curr_reach)):
+                for idx, curr_chain in enumerate(self._chainages(curr_reach, data_type_idx)):
                     # Look for the targeted chainage
                     chainage_diff = curr_chain - q.chainage
                     is_chainage = abs(chainage_diff) < chainage_tolerance
                     if not is_chainage:
                         continue
-                    if q.variable_type == "WaterLevel":
-                        chainage_idx = int(j / 2)
-                    elif q.variable_type == "Discharge":
-                        chainage_idx = int((j - 1) / 2)
-                    elif q.variable_type == "Pollutant":
-                        chainage_idx = int((j - 1) / 2)
-                    chainage = PointInfo(chainage_idx, q.chainage)
+                    # idx is the index in the item data, not in the
+                    # gridpoints data.
+                    chainage = PointInfo(idx, q.chainage)
                     found_points["chainage"].append(chainage)
                     found_points["variable"].append(data_type_info)
                     found_points["reach"].append(reach)
@@ -314,7 +335,8 @@ class QueryData:
     Parameters
     ----------
     variable_type: str
-        Either 'WaterLevel', 'Discharge' or 'Pollutant'
+        Either 'WaterLevel', 'Discharge', 'Pollutant', 'LeftLatLinkOutflow',
+        'RightLatLinkOutflow'
     branch_name: str, optional
         Branch name, consider all the branches if None
     chainage: float, optional
@@ -328,6 +350,8 @@ class QueryData:
     `QueryData('Discharge')` requests all the Discharge points of the file.
     """
 
+    allowed_data_types = DATA_TYPES_HANDLED_IN_QUERIES
+
     def __init__(self, variable_type, branch_name=None, chainage=None):
         self._variable_type = variable_type
         self._branch_name = branch_name
@@ -340,10 +364,10 @@ class QueryData:
         c = self.chainage
         if not isinstance(vt, str):
             raise TypeError("variable_type must be a string.")
-        if not vt in ["WaterLevel", "Discharge", "Pollutant"]:
+        if not vt in self.allowed_data_types:
             raise ValueError(
-                f"Bad variable_type {vt} entered. "
-                "It must be either 'WaterLevel', 'Discharge' or 'Pollutant'."
+                f"Undefined variable_type {vt}. Allowed types are: "
+                f"{', '.join(self.allowed_data_types)}."
             )
         if bn is not None and not isinstance(bn, str):
             raise TypeError("branch_name must be either None or a string.")
