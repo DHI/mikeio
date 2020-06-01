@@ -187,7 +187,7 @@ class Res1D:
                  .get_DataItems()
                  .get_Item(variable_type.index)
                  .CreateTimeSeriesData(chainage.index))
-            name = f"{variable_type.value} {reach.value} {chainage.value}"
+            name = f"{variable_type.value} {reach.value} {chainage.value:.3f}"
             d = pd.Series(list(d), name=name)
             df[name] = d
         return df

@@ -128,8 +128,11 @@ def test_read_reach(file):
     q_reach = QueryData("WaterLevel", "118l1")
     ts = read(file, [q_reach])
     assert ts.shape == (110, 3)
-    assert list(ts.columns) == ['WaterLevel 118l1 0.0', 'WaterLevel 118l1 49.443',
-                                'WaterLevel 118l1 98.887']
+    assert list(ts.columns) == [
+        'WaterLevel 118l1 0.000',
+        'WaterLevel 118l1 49.443',
+        'WaterLevel 118l1 98.887'
+    ]
 
 
 def test_read_multiple_reaches(file):
