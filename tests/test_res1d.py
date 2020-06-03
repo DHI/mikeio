@@ -1,6 +1,8 @@
 import pytest
 
-from mikeio.res1d import read, QueryData
+from mikeio.res1d import (
+    read, QueryData, Res1D, FileNotOpenedError, DataNotFoundInFile
+)
 
 
 def test_query_validate():
@@ -17,32 +19,24 @@ def test_query_validate():
     with pytest.raises(ValueError):
         QueryData("BadVariableType")
 
-    # Bad branch type
+    # Bad reach type
     with pytest.raises(TypeError):
-        QueryData("WaterLevel", branch_name=666)
+        QueryData("WaterLevel", reach_name=666)
 
     # Bad chainage type
     with pytest.raises(TypeError):
-        QueryData("WaterLevel", "branch", chainage="BadChainage")
+        QueryData("WaterLevel", "reach", chainage="BadChainage")
 
-    # Cannot set a chainage with no branch
+    # Cannot set a chainage with no reach
     with pytest.raises(ValueError):
         QueryData("WaterLevel", None, 10)
 
 
 def test_query_repr():
     query = QueryData("WaterLevel", "104l1", 34.4131)
-    expected = ("QueryData(variable_type='WaterLevel', branch_name='104l1', "
+    expected = ("QueryData(variable_type='WaterLevel', reach_name='104l1', "
                 "chainage=34.4131)")
     assert repr(query) == expected
-
-
-def test_query_iter():
-    query = QueryData("WaterLevel", "104l1", 34.4131)
-    vt, bn, c = query
-    assert vt == "WaterLevel"
-    assert bn == "104l1"
-    assert c == 34.4131
 
 
 @pytest.fixture
@@ -57,6 +51,24 @@ def test_file_does_not_exist():
 
     with pytest.raises(FileExistsError):
         assert read(file, [query])
+
+
+def test_get_properties_if_not_opened(file):
+    """Public properties cannot be accessed if the file is not opened"""
+    r = Res1D(file)
+    r.close()
+
+    with pytest.raises(FileNotOpenedError) as excinfo:
+        r.data_types
+    assert "data_types" in str(excinfo.value)
+
+    with pytest.raises(FileNotOpenedError) as excinfo:
+        r.reach_names
+    assert "reach_names" in str(excinfo.value)
+    
+    with pytest.raises(FileNotOpenedError) as excinfo:
+        r.time_index
+    assert "time_index" in str(excinfo.value)
 
 
 @pytest.mark.parametrize("query,expected_max", [
@@ -83,6 +95,25 @@ def test_read_single_query(file, query, expected_max):
     assert pytest.approx(round(ts.max()[0], 3)) == expected_max
 
 
+def test_read_bad_queries(file):
+    """Querying data not available in the file must return an error"""
+
+    # Bad variable type
+    with pytest.raises(DataNotFoundInFile) as excinfo:
+        read(file, [QueryData("Pollutant")])
+    assert "Pollutant" in str(excinfo.value)
+ 
+    # Bad reach name
+    with pytest.raises(DataNotFoundInFile) as excinfo:
+        read(file, [QueryData("WaterLevel", "bad_reach_name")])
+    assert "bad_reach_name" in str(excinfo.value)
+
+    # Bad chainage
+    with pytest.raises(DataNotFoundInFile) as excinfo:
+        read(file, [QueryData("WaterLevel", "104l1", 666)])
+    assert "666" in str(excinfo.value)
+
+
 def test_read_multiple_queries(file):
     q1 = QueryData("WaterLevel", "104l1", 34.4131)
     q2 = QueryData("Discharge", "9l1", 5)
@@ -97,8 +128,11 @@ def test_read_reach(file):
     q_reach = QueryData("WaterLevel", "118l1")
     ts = read(file, [q_reach])
     assert ts.shape == (110, 3)
-    assert list(ts.columns) == ['WaterLevel 118l1 0.0', 'WaterLevel 118l1 49.443',
-                                'WaterLevel 118l1 98.887']
+    assert list(ts.columns) == [
+        'WaterLevel 118l1 0.000',
+        'WaterLevel 118l1 49.443',
+        'WaterLevel 118l1 98.887'
+    ]
 
 
 def test_read_multiple_reaches(file):
@@ -111,10 +145,10 @@ def test_read_multiple_reaches(file):
 def test_read_all_reaches(file):
     q_waterlevel = QueryData("WaterLevel")
     ts = read(file, [q_waterlevel])
-    # TODO: Should it be (110, 243)? As +4 water level structure points
+    # Note that it includes 4 water level structure points
     assert ts.shape == (110, 247)
 
     q_discharge = QueryData("Discharge")
     ts = read(file, [q_discharge])
-    # TODO: Should it be (110, 127)? As +2 discharge structure points
+    # Note that it includes 2 discharge structure points
     assert ts.shape == (110, 129)
