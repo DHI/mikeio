@@ -1,0 +1,1540 @@
+[MAP_PROJECTION_DEFINITION]
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alabama East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -85, 50
+    Scale_Reduction     = 25000
+    Origin_Latitude_dms = 30, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alabama West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -87, 30
+    Scale_Reduction     = 15000
+    Origin_Latitude_dms = 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [HOTINE_OBLIQUE_MERCATOR_PROJECTION]
+    Projection_Name      = 'Alaska 1, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Scale_Reduction      = 10000
+    Center_Longitude_dms = -133, 40
+    Center_Latitude_dms  = 57
+    Azimuth              = -36.8698976458333
+    Feast                = 5000000
+    Fnorth               = -5000000
+  EndSect  // HOTINE_OBLIQUE_MERCATOR_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 2, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -142
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 3, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -146
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 4, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -150
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 5, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -154
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 6, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -158
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 7, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -162
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 700000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 8, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -166
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Alaska 9, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -170
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 54
+    Feast_ft_us         = 600000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Alaska 10, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 51, 50
+    Parallel_2_dms       = 53, 50
+    Origin_Longitude_dms = -176
+    Origin_Latitude_dms  = 51
+    Feast_ft_us          = 3000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Arizona East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -110, 10
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 31
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Arizona Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -111, 55
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 31
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Arizona West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -113, 45
+    Scale_Reduction     = 15000
+    Origin_Latitude_dms = 31
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Arkansas North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 34, 56
+    Parallel_2_dms       = 36, 14
+    Origin_Longitude_dms = -92
+    Origin_Latitude_dms  = 34, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Arkansas South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 33, 18
+    Parallel_2_dms       = 34, 46
+    Origin_Longitude_dms = -92
+    Origin_Latitude_dms  = 32, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+  
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'California I, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 40
+    Parallel_2_dms       = 41, 40
+    Origin_Longitude_dms = -122
+    Origin_Latitude_dms  = 39, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'California II, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 38, 20
+    Parallel_2_dms       = 39, 50
+    Origin_Longitude_dms = -122
+    Origin_Latitude_dms  = 37, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'California III, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 37, 04
+    Parallel_2_dms       = 38, 26
+    Origin_Longitude_dms = -120, 30
+    Origin_Latitude_dms  = 36, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'California IV, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 36
+    Parallel_2_dms       = 37, 15
+    Origin_Longitude_dms = -119
+    Origin_Latitude_dms  = 35, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'California V, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 34, 02
+    Parallel_2_dms       = 35, 28
+    Origin_Longitude_dms = -118
+    Origin_Latitude_dms  = 33, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'California VI, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 32, 47
+    Parallel_2_dms       = 33, 53
+    Origin_Longitude_dms = -116, 15
+    Origin_Latitude_dms  = 32, 10
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'California VII, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 33, 52
+    Parallel_2_dms       = 34, 25
+    Origin_Longitude_dms = -118, 20
+    Origin_Latitude_dms  = 34, 08
+    Feast_ft_us          = 4186692.58
+    Fnorth_ft_us         = 4160926.74
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Colorado North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 39, 43
+    Parallel_2_dms       = 40, 47
+    Origin_Longitude_dms = -105, 30
+    Origin_Latitude_dms  = 39, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Colorado Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 38, 27
+    Parallel_2_dms       = 39, 45
+    Origin_Longitude_dms = -105, 30
+    Origin_Latitude_dms  = 37, 50
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Colorado South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 37, 14
+    Parallel_2_dms       = 38, 26
+    Origin_Longitude_dms = -105, 30
+    Origin_Latitude_dms  = 36, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Connecticut, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 41, 12
+    Parallel_2_dms       = 41, 52
+    Origin_Longitude_dms = -72, 45
+    Origin_Latitude_dms  = 40, 50
+    Feast_ft_us          = 600000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Delaware, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -75, 25
+    Scale_Reduction     = 200000
+    Origin_Latitude_dms = 38
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Florida North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 29, 35
+    Parallel_2_dms       = 30, 45
+    Origin_Longitude_dms = -84, 30
+    Origin_Latitude_dms  = 29
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Florida East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -81
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 24, 20
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Florida West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -82
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 24, 20
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Georgia East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -82, 10
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Georgia West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -84, 10
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Hawaii 1, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -155, 30
+    Scale_Reduction     = 30000
+    Origin_Latitude_dms = 18, 50
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Hawaii 2, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -156, 40
+    Scale_Reduction     = 30000
+    Origin_Latitude_dms = 20, 20
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Hawaii 3, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -158
+    Scale_Reduction     = 100000
+    Origin_Latitude_dms = 21, 10
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Hawaii 4, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -159, 30
+    Scale_Reduction     = 100000
+    Origin_Latitude_dms = 21, 50
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Hawaii 5, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -160, 10
+    Scale               = 1
+    Origin_Latitude_dms = 21, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Idaho East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -112, 10
+    Scale_Reduction     = 19000
+    Origin_Latitude_dms = 41, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Idaho Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -114
+    Scale_Reduction     = 19000
+    Origin_Latitude_dms = 41, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Idaho West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -115, 45
+    Scale_Reduction     = 15000
+    Origin_Latitude_dms = 41, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Illinois East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -88, 20
+    Scale_Reduction     = 40000
+    Origin_Latitude_dms = 36, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Illinois West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -90, 10
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 36, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Indiana East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -85, 40
+    Scale_Reduction     = 30000
+    Origin_Latitude_dms = 37, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Indiana West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -87, 05
+    Scale_Reduction     = 30000
+    Origin_Latitude_dms = 37, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Iowa North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 42, 04
+    Parallel_2_dms       = 43, 16
+    Origin_Longitude_dms = -93, 30
+    Origin_Latitude_dms  = 41, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Iowa South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 40, 37
+    Parallel_2_dms       = 41, 47
+    Origin_Longitude_dms = -93, 30
+    Origin_Latitude_dms  = 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Kansas North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 38, 43
+    Parallel_2_dms       = 39, 47
+    Origin_Longitude_dms = -98
+    Origin_Latitude_dms  = 38, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Kansas South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 37, 16
+    Parallel_2_dms       = 38, 34
+    Origin_Longitude_dms = -98, 30
+    Origin_Latitude_dms  = 36, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Kentucky North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 37, 58
+    Parallel_2_dms       = 38, 58
+    Origin_Longitude_dms = -84, 15
+    Origin_Latitude_dms  = 37, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Kentucky South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 36, 44
+    Parallel_2_dms       = 37, 56
+    Origin_Longitude_dms = -85, 45
+    Origin_Latitude_dms  = 36, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Louisiana North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 31, 10
+    Parallel_2_dms       = 32, 40
+    Origin_Longitude_dms = -92, 30
+    Origin_Latitude_dms  = 30, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Louisiana South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 29, 18
+    Parallel_2_dms       = 30, 42
+    Origin_Longitude_dms = -91, 20
+    Origin_Latitude_dms  = 28, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Louisiana Offshore, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 26, 10
+    Parallel_2_dms       = 27, 50
+    Origin_Longitude_dms = -91, 20
+    Origin_Latitude_dms  = 25, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Maine East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -68, 30
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 43, 50
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Maine West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -70, 10
+    Scale_Reduction     = 30000
+    Origin_Latitude_dms = 42, 50
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Maryland, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 38, 18
+    Parallel_2_dms       = 39, 27
+    Origin_Longitude_dms = -77
+    Origin_Latitude_dms  = 37, 50
+    Feast_ft_us          = 800000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Massachusetts Mainland, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 41, 43
+    Parallel_2_dms       = 42, 41
+    Origin_Longitude_dms = -71, 30
+    Origin_Latitude_dms  = 41
+    Feast_ft_us          = 600000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Massachusetts Island, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 41, 17
+    Parallel_2_dms       = 41, 29
+    Origin_Longitude_dms = -70, 30
+    Origin_Latitude_dms  = 41
+    Feast_ft_us          = 200000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Michigan East (old), NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -83, 40
+    Scale_Reduction     = 17500
+    Origin_Latitude_dms = 41, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Michigan Central (old), NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -85, 45
+    Scale_Reduction     = 11000
+    Origin_Latitude_dms = 41, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Michigan West (old), NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -88, 45
+    Scale_Reduction     = 11000
+    Origin_Latitude_dms = 41, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Michigan North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 45, 29
+    Parallel_2_dms       = 47, 05
+    Origin_Longitude_dms = -87
+    Origin_Latitude_dms  = 44, 47
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Michigan Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 44, 11
+    Parallel_2_dms       = 45, 42
+    Origin_Longitude_dms = -84, 20
+    Origin_Latitude_dms  = 43, 19
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Michigan South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 42, 06
+    Parallel_2_dms       = 43, 40
+    Origin_Longitude_dms = -84, 20
+    Origin_Latitude_dms  = 41, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Minnesota North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 47, 02
+    Parallel_2_dms       = 48, 38
+    Origin_Longitude_dms = -93, 06
+    Origin_Latitude_dms  = 46, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Minnesota Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 45, 37
+    Parallel_2_dms       = 47, 03
+    Origin_Longitude_dms = -94, 15
+    Origin_Latitude_dms  = 45
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Minnesota South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 43, 47
+    Parallel_2_dms       = 45, 13
+    Origin_Longitude_dms = -94
+    Origin_Latitude_dms  = 43
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Mississippi East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -88, 50
+    Scale_Reduction     = 25000
+    Origin_Latitude_dms = 29, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Mississippi West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -90, 20
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 30, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Missouri East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -90, 30
+    Scale_Reduction     = 15000
+    Origin_Latitude_dms = 35, 50
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Missouri Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -92, 30
+    Scale_Reduction     = 15000
+    Origin_Latitude_dms = 35, 50
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Missouri West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -94, 30
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 36, 10
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Montana North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 47, 51
+    Parallel_2_dms       = 48, 43
+    Origin_Longitude_dms = -109, 30
+    Origin_Latitude_dms  = 47
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Montana Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 46, 27
+    Parallel_2_dms       = 47, 53
+    Origin_Longitude_dms = -109, 30
+    Origin_Latitude_dms  = 45, 50
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Montana South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 44, 52
+    Parallel_2_dms       = 46, 24
+    Origin_Longitude_dms = -109, 30
+    Origin_Latitude_dms  = 44
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Nebraska North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 41, 51
+    Parallel_2_dms       = 42, 49
+    Origin_Longitude_dms = -100
+    Origin_Latitude_dms  = 41, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Nebraska South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 40, 17
+    Parallel_2_dms       = 41, 43
+    Origin_Longitude_dms = -99, 30
+    Origin_Latitude_dms  = 39, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Nevada East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -115, 35
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 34, 45
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Nevada Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -116, 40
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 34, 45
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Nevada West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -118, 35
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 34, 45
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New Hampshire, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -71, 40
+    Scale_Reduction     = 30000
+    Origin_Latitude_dms = 42, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New Jersey, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -74, 40
+    Scale_Reduction     = 40000
+    Origin_Latitude_dms = 38, 50
+    Feast_ft_us         = 2000000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New Mexico East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -104, 20
+    Scale_Reduction     = 11000
+    Origin_Latitude_dms = 31
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New Mexico Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -106, 15
+    Scale_Reduction     = 10000
+    Origin_Latitude_dms = 31
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New Mexico West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -107, 50
+    Scale_Reduction     = 12000
+    Origin_Latitude_dms = 31
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New York East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -74, 20
+    Scale_Reduction     = 30000
+    Origin_Latitude_dms = 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New York Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -76, 35
+    Scale_Reduction     = 16000
+    Origin_Latitude_dms = 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'New York West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -78, 35
+    Scale_Reduction     = 16000
+    Origin_Latitude_dms = 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'New York Long Island, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 40, 40
+    Parallel_2_dms       = 41, 02
+    Origin_Longitude_dms = -74
+    Origin_Latitude_dms  = 40, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 100000
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'North Carolina, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 34, 20
+    Parallel_2_dms       = 36, 10
+    Origin_Longitude_dms = -79
+    Origin_Latitude_dms  = 33, 45
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'North Dakota North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 47, 26
+    Parallel_2_dms       = 48, 44
+    Origin_Longitude_dms = -100, 30
+    Origin_Latitude_dms  = 47
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'North Dakota South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 46, 11
+    Parallel_2_dms       = 47, 29
+    Origin_Longitude_dms = -100, 30
+    Origin_Latitude_dms  = 45, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Ohio North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 40, 26
+    Parallel_2_dms       = 41, 42
+    Origin_Longitude_dms = -82, 30
+    Origin_Latitude_dms  = 39, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Ohio South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 38, 44
+    Parallel_2_dms       = 40, 02
+    Origin_Longitude_dms = -82, 30
+    Origin_Latitude_dms  = 38
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Oklahoma North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 35, 34
+    Parallel_2_dms       = 36, 46
+    Origin_Longitude_dms = -98
+    Origin_Latitude_dms  = 35
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Oklahoma South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 33, 56
+    Parallel_2_dms       = 35, 14
+    Origin_Longitude_dms = -98
+    Origin_Latitude_dms  = 33, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Oregon North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 44, 20
+    Parallel_2_dms       = 46
+    Origin_Longitude_dms = -120, 30
+    Origin_Latitude_dms  = 43, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Oregon South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 42, 20
+    Parallel_2_dms       = 44
+    Origin_Longitude_dms = -120, 30
+    Origin_Latitude_dms  = 41, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Pennsylvania North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 40, 53
+    Parallel_2_dms       = 41, 57
+    Origin_Longitude_dms = -77, 45
+    Origin_Latitude_dms  = 40, 10
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Pennsylvania South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 39, 56
+    Parallel_2_dms       = 40, 58
+    Origin_Longitude_dms = -77, 45
+    Origin_Latitude_dms  = 39, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Puerto Rico and Virgin Islands, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 18, 02
+    Parallel_2_dms       = 18, 26
+    Origin_Longitude_dms = -66, 26
+    Origin_Latitude_dms  = 17, 50
+    Feast_ft_us          = 500000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Puerto Rico (St. Croix), NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 18, 02
+    Parallel_2_dms       = 18, 26
+    Origin_Longitude_dms = -66, 26
+    Origin_Latitude_dms  = 17, 50
+    Feast_ft_us          = 500000
+    Fnorth_ft_us         = 100000
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Rhode Island, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -71, 30
+    Scale_Reduction     = 160000
+    Origin_Latitude_dms = 41, 05
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_1SP_PROJECTION]
+    Projection_Name      = 'Samoa, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Scale                = 1
+    Origin_Longitude_dms = -170
+    Origin_Latitude_dms  = -14, 16
+    Feast_ft_us          = 500000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'South Carolina North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 33, 46
+    Parallel_2_dms       = 34, 58
+    Origin_Longitude_dms = -81
+    Origin_Latitude_dms  = 33
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'South Carolina South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 32, 20
+    Parallel_2_dms       = 33, 40
+    Origin_Longitude_dms = -81
+    Origin_Latitude_dms  = 31, 50
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'South Dakota North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 44, 25
+    Parallel_2_dms       = 45, 41
+    Origin_Longitude_dms = -100
+    Origin_Latitude_dms  = 43, 50
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'South Dakota South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 42, 50
+    Parallel_2_dms       = 44, 24
+    Origin_Longitude_dms = -100, 20
+    Origin_Latitude_dms  = 42, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Tennessee, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 35, 15
+    Parallel_2_dms       = 36, 25
+    Origin_Longitude_dms = -86
+    Origin_Latitude_dms  = 34, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 100000
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Texas North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 34, 39
+    Parallel_2_dms       = 36, 11
+    Origin_Longitude_dms = -101, 30
+    Origin_Latitude_dms  = 34
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Texas North Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 32, 08
+    Parallel_2_dms       = 33, 58
+    Origin_Longitude_dms = -97, 30
+    Origin_Latitude_dms  = 31, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Texas Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 30, 07
+    Parallel_2_dms       = 31, 53
+    Origin_Longitude_dms = -100, 20
+    Origin_Latitude_dms  = 29, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Texas South Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 28, 23
+    Parallel_2_dms       = 30, 17
+    Origin_Longitude_dms = -99
+    Origin_Latitude_dms  = 27, 50
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Texas South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 26, 10
+    Parallel_2_dms       = 27, 50
+    Origin_Longitude_dms = -98, 30
+    Origin_Latitude_dms  = 25, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Utah North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 40, 43
+    Parallel_2_dms       = 41, 47
+    Origin_Longitude_dms = -111, 30
+    Origin_Latitude_dms  = 40, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Utah Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 39, 01
+    Parallel_2_dms       = 40, 39
+    Origin_Longitude_dms = -111, 30
+    Origin_Latitude_dms  = 38, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Utah South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 37, 13
+    Parallel_2_dms       = 38, 21
+    Origin_Longitude_dms = -111, 30
+    Origin_Latitude_dms  = 36, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Vermont, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -72, 30
+    Scale_Reduction     = 28000
+    Origin_Latitude_dms = 42, 30
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Virginia North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 38, 02
+    Parallel_2_dms       = 39, 12
+    Origin_Longitude_dms = -78, 30
+    Origin_Latitude_dms  = 37, 40
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Virginia South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 36, 46
+    Parallel_2_dms       = 37, 58
+    Origin_Longitude_dms = -78, 30
+    Origin_Latitude_dms  = 36, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Washington North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 47, 30
+    Parallel_2_dms       = 48, 44
+    Origin_Longitude_dms = -120, 50
+    Origin_Latitude_dms  = 47
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Washington South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 45, 50
+    Parallel_2_dms       = 47, 20
+    Origin_Longitude_dms = -120, 30
+    Origin_Latitude_dms  = 45, 20
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'West Virginia North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 39
+    Parallel_2_dms       = 40, 15
+    Origin_Longitude_dms = -79, 30
+    Origin_Latitude_dms  = 38, 30
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'West Virginia South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 37, 29
+    Parallel_2_dms       = 38, 53
+    Origin_Longitude_dms = -81
+    Origin_Latitude_dms  = 37
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Wisconsin North, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 45, 34
+    Parallel_2_dms       = 46, 46
+    Origin_Longitude_dms = -90
+    Origin_Latitude_dms  = 45, 10
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Wisconsin Central, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 44, 15
+    Parallel_2_dms       = 45, 30
+    Origin_Longitude_dms = -90
+    Origin_Latitude_dms  = 43, 50
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [LAMBERT_CONIC_2SP_PROJECTION]
+    Projection_Name      = 'Wisconsin South, NAD 27'
+    Branch_Name          = 'North American Datum 1927'
+    Ellipsoid            = 'CC'
+    Parallel_1_dms       = 42, 44
+    Parallel_2_dms       = 44, 04
+    Origin_Longitude_dms = -90
+    Origin_Latitude_dms  = 42
+    Feast_ft_us          = 2000000
+    Fnorth_ft_us         = 0
+  EndSect  // LAMBERT_CONIC_2SP_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Wyoming East, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -105, 10
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 40, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Wyoming East Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -107, 20
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 40, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Wyoming West Central, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -108, 45
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 40, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name     = 'Wyoming West, NAD 27'
+    Branch_Name         = 'North American Datum 1927'
+    Ellipsoid           = 'CC'
+    Centre_dms          = -110, 05
+    Scale_Reduction     = 17000
+    Origin_Latitude_dms = 40, 40
+    Feast_ft_us         = 500000
+    Fnorth_ft_us        = 0
+  EndSect  // UTM_PROJECTION
+
+EndSect  // MAP_PROJECTION_DEFINITION

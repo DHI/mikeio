@@ -9,9 +9,9 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
 ## Requirements
 
 * Python x64 >=3.6
-* [MIKE](https://www.mikepoweredbydhi.com/mike-2020) >= 2019 or [MIKE SDK](https://www.mikepoweredbydhi.com/download/mike-2020/mike-sdk) >= 2017 
+* [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
 
-In a future version of `mikeio` we will try to include MIKE SDK to avoid having to install this separately.
+[More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
 
 ## Installation
 
