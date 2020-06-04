@@ -164,7 +164,7 @@
 <em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs0</code><a class="headerlink" href="#mikeio.Dfs0" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
 <dt id="mikeio.Dfs0.create">
-<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">dt=1.0</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">data_value_type=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.create" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">dt=1.0</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">data_value_type=None</em>, <em class="sig-param">dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -178,6 +178,7 @@ means 5 mins and 30 seconds. default to 1.0</p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.dutil.ItemInfo" title="mikeio.dutil.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title</p></li>
 <li><p><strong>data_value_type</strong> (<em>list</em><em>[</em><em>DataValueType</em><em>]</em><em>, </em><em>optional</em>) – DataValueType default DataValueType.INSTANTANEOUS</p></li>
+<li><p><strong>dtype</strong> (<em>np.dtype</em><em>, </em><em>optional</em>) – default np.float32</p></li>
 </ul>
 </dd>
 </dl>
@@ -378,11 +379,31 @@ means 5 mins and 30 seconds. Default 1</p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.dutil.ItemInfo" title="mikeio.dutil.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
 <li><p><strong>coordinate</strong> – [‘UTM-33’, 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees</p></li>
 <li><p><strong>x0</strong> (<em>float</em><em>, </em><em>optional</em>) – Lower right position</p></li>
-<li><p><strong>x0</strong> – Lower right position</p></li>
+<li><p><strong>y0</strong> (<em>float</em><em>, </em><em>optional</em>) – Lower right position</p></li>
 <li><p><strong>length_x</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the x direction (projection units)</p></li>
 <li><p><strong>length_y</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the y direction (projection units)</p></li>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title of the dfs2 file. Default is blank.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfs2.find_closest_element_index">
+<code class="sig-name descname">find_closest_element_index</code><span class="sig-paren">(</span><em class="sig-param">lon</em>, <em class="sig-param">lat</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.find_closest_element_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find index of closest element</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>lon</strong> (<em>float</em>) – longitude</p></li>
+<li><p><strong>lat</strong> (<em>float</em>) – latitude</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>(int,int)</strong></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>indexes in y, x</p>
 </dd>
 </dl>
 </dd></dl>
@@ -443,7 +464,7 @@ Easch matrix must be of dimension y,x,time</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>meshfilename</strong> (<em>str</em><em>,</em>) – full path to a valid mesh file</p></li>
+<li><p><strong>meshfilename</strong> (<em>str</em><em>,</em>) – full path to a mesh or dfsu file</p></li>
 <li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
 <li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
 <li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime, default is datetime.now()</p></li>
