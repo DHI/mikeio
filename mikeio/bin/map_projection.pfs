@@ -1,0 +1,393 @@
+[MAP_PROJECTION_DEFINITION]
+  [UTM_PROJECTION]
+    Projection_Name = 'SBF'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'IN'
+    Centre          = 10.96667
+    Scale           = 0.999999
+    Feast           = 500000
+    Fnorth          = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'DKS'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'IN'
+    Centre          = 12.8
+    Scale           = 0.999999
+    Feast           = 119000 
+    Fnorth          = -5895000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'OSGB'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'AA'
+    Centre          = -2.0
+    Scale           = 0.9996012717
+    Origin_Latitude = 49
+    Feast           = 400000
+    Fnorth          = -100000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'BTM'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'EA'
+    Centre          = 90.0
+    Scale           = 0.9996
+    Feast           = 500000.0
+    Fnorth          = -2000000.0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'HKG'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'IN'
+    Centre          = 114.1785556
+    Scale           = 1.0
+    Feast           = 836694.05
+    Fnorth          = -1649325.988
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'GAUSS-BOAGA'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'IN'
+    Centre          = 15
+    Scale           = 0.9996
+    Feast           = 2520000
+    Fnorth          = 0.0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-49'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 111
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-50'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 117
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-51'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 123
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-52'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 129
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-53'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 135
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-54'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 141
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-55'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 147
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-56'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 153
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'AMG-57'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'AN'
+    Centre          = 159
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-48'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 105
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-49'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 111
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-50'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 117
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-51'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 123
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-52'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 129
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-53'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 135
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-54'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 141
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-55'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 147
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-56'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 153
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-57'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 159
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MGA-58'
+    Branch_Name     = 'Australian Datum'
+    Ellipsoid       = 'RF'
+    Centre          = 165
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 10000000
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'GAUSS-KRUGER'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'BR'
+    Centre          = 9.0
+    Scale           = 1.0
+    Feast           = 500000.0
+    Fnorth          = 0.0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'T.S.CASSINI'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'EA'
+    Centre          = 102.8833
+    Scale           = 0.99984
+    Feast           = 0
+    Fnorth          = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'Clarke-1880'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'CD'
+    Centre          = 57.0
+    Scale           = 1.0000
+    Feast           = 500000
+    Fnorth          = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'Clarke-1880-1'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'CD'
+    Centre          = 57.0
+    Scale           = 0.9996
+    Feast           = 500000
+    Fnorth          = 0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MPA'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'EE'
+    Centre          = 103.853
+    Scale           = 1.0
+    Feast           = 30000.0
+    Fnorth          = -113083.0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MPA1'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'WE'
+    Centre          = 103.8333333
+    Scale           = 1.0
+    Feast           = 28001.64
+    Fnorth          = -112375.0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'SDS2'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'EE'
+    Centre          = 103.85300
+    Scale           = 1.0
+    Feast           = 30186.9
+    Fnorth          = -112362.4
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'SDS1'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'EE'
+    Centre          = 103.85300
+    Scale           = 1.0
+    Feast           = 30000.0
+    Fnorth          = -112335.0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MRSO-K'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'EE'
+    Centre          = 105.2364429
+    Scale           = 0.99984
+    Feast           = 804798.
+    Fnorth          = -205.
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'MRSO-W'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'EE'
+    Centre          = 105.2364429
+    Scale           = 0.99984
+    Feast           = 804920.
+    Fnorth          = -209.
+  EndSect  // UTM_PROJECTION
+
+  [NEW_ZEALAND_MAP_GRID_PROJECTION]
+    Projection_Name  = 'NZMG'
+    Branch_Name      = 'UTM Projections'
+    Ellipsoid        = 'IN'
+    Origin_Longitude = 173.000
+    Origin_Latitude  = -41
+    Feast            = 2510000.0
+    Fnorth           = 6023150.0
+  EndSect  // NEW_ZEALAND_MAP_GRID_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'NZTM'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'WE'
+    Centre          = 173.000
+    Scale           = 0.9996
+    Feast           = 1600000.0
+    Fnorth          = 10000000.0
+  EndSect  // UTM_PROJECTION
+
+  [UTM_PROJECTION]
+    Projection_Name = 'NVSPW27'
+    Branch_Name     = 'UTM Projections'
+    Ellipsoid       = 'CC'
+    Centre          = -118.5833333 
+    Scale           = 0.9999
+    Feast           = 152400.23
+    Fnorth          = -3846276.83
+  EndSect  // UTM_PROJECTION
+
+EndSect  // MAP_PROJECTION_DEFINITION
