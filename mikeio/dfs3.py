@@ -1,5 +1,6 @@
 import numpy as np
 from datetime import datetime, timedelta
+from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
@@ -9,8 +10,16 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
-from .dutil import Dataset
-from .dotnet import to_numpy, to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
+from .dutil import Dataset, get_item_info
+from .dotnet import (
+    to_numpy,
+    to_dotnet_array,
+    to_dotnet_float_array,
+    to_dotnet_datetime,
+    from_dotnet_datetime,
+)
+from .eum import TimeStep
+
 
 class Dfs3:
     def __calculate_index(self, nx, ny, nz, x, y, z):
@@ -277,130 +286,74 @@ class Dfs3:
 
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
-        names = []
-        for item in range(n_items):
-            name = dfs.ItemInfo[item_numbers[item]].Name
-            names.append(name)
+
+        items = get_item_info(dfs, item_numbers)
 
         dfs.Close()
 
-        return Dataset(data_list, time, names)
+        return Dataset(data_list, time, items)
 
-    def create_equidistant_calendar(
+    def create(
         self,
-        dfs3file,
+        filename,
         data,
-        start_time,
-        timeseries_unit,
-        dt,
-        variable_type,
-        unit,
-        coordinate,
-        x0,
-        y0,
-        length_x,
-        length_y,
-        names,
+        start_time=None,
+        dt=1,
+        items=None,
+        length_x=1.0,
+        length_y=1.0,
+        length_z=1.0,
+        x0=0,
+        y0=0,
+        coordinate=None,
+        timeseries_unit=TimeStep.SECOND,
         title=None,
     ):
         """
-        Creates a dfs3 file
+        Create a dfs3 file
 
-        dfs3file:
+        Parameters
+        ----------
+
+        filename: str
             Location to write the dfs3 file
-        data:
-            list of matrices, one for each item. Matrix dimension: y, x, z, time
-        start_time:
+        data: list[np.array]
+            list of matrices, one for each item. Matrix dimension: time, z, y, x
+        start_time: datetime, optional
             start date of type datetime.
-        timeseries_unit:
-            second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
-        dt:
-            The time step (double based on the timeseries_unit). Therefore dt of 5.5 with timeseries_unit of minutes
-            means 5 mins and 30 seconds.
-        variable_type:
-            Array integers corresponding to a variable types (ie. Water Level). Use dfsutil type_list
-            to figure out the integer corresponding to the variable.
-        unit:
-            Array integers corresponding to the unit corresponding to the variable types The unit (meters, seconds),
-            use dfsutil unit_list to figure out the corresponding unit for the variable.
+        timeseries_unit: Timestep, optional
+            TimeStep default TimeStep.SECOND
+        dt: float, optional
+            The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
+            means 5 mins and 30 seconds. Default 1
+        items: list[ItemInfo], optional
+            List of ItemInfo corresponding to a variable types (ie. Water Level).
         coordinate:
             ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
-            OR
-            [TODO: Support not Local Coordinates ...]
-        x0:
+        x0: float, optional
             Lower right position
-        y0:
+        y0: float, optional
             Lower right position
-        length_x:
-            length of each grid in the x direction (meters)
-        length_y:
-            length of each grid in the y direction (meters)
-        names:
-            array of names (ie. array of strings).
-        title:
-            title of the dfs3 file (can be blank)
-
+        length_x: float, optional
+            length of each grid in the x direction (projection units)
+        length_y: float, optional
+            length of each grid in the y direction (projection units)
+        length_z: float, optional
+            length of each grid in the z direction (projection units)
+        
+        title: str, optional
+            title of the dfs2 file. Default is blank.
         """
 
         if title is None:
-            title = "dfs0 file"
+            title = "dfs3 file"
 
-        number_y = np.shape(data[0])[0]
-        number_x = np.shape(data[0])[1]
-        number_z = np.shape(data[0])[2]
-        n_time_steps = np.shape(data[0])[3]
+        n_time_steps = np.shape(data[0])[0]
+        number_z = np.shape(data[0])[1]
+        number_y = np.shape(data[0])[2]
+        number_x = np.shape(data[0])[3]
+
         n_items = len(data)
-
-        if not all(np.shape(d)[0] == number_y for d in data):
-            raise Warning(
-                "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [y,x,time]"
-            )
-        if not all(np.shape(d)[1] == number_x for d in data):
-            raise Warning(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [y,x,time]"
-            )
-        if not all(np.shape(d)[2] == number_z for d in data):
-            raise Warning(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [y,x,time]"
-            )
-        if not all(np.shape(d)[3] == n_time_steps for d in data):
-            raise Warning(
-                "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [y,x,time]"
-            )
-
-        if len(names) != n_items:
-            raise Warning(
-                "names must be an array of strings with the same number as matrices in data list"
-            )
-
-        if len(variable_type) != n_items or not all(
-            isinstance(item, int) and 0 <= item < 1e15 for item in variable_type
-        ):
-            raise Warning(
-                "type if specified must be an array of integers (enuType) with the same number of "
-                "elements as data columns"
-            )
-
-        if len(unit) != n_items or not all(
-            isinstance(item, int) and 0 <= item < 1e15 for item in unit
-        ):
-            raise Warning(
-                "unit if specified must be an array of integers (enuType) with the same number of "
-                "elements as data columns"
-            )
-
-        if not type(start_time) is datetime.datetime:
-            raise Warning("start_time must be of type datetime ")
-
-        if not isinstance(timeseries_unit, int):
-            raise Warning(
-                "timeseries_unit must be an integer. timeseries_unit: second=1400, minute=1401, hour=1402, "
-                "day=1403, month=1405, year= 1404See dfsutil options for help "
-            )
 
         system_start_time = to_dotnet_datetime(start_time)
 
@@ -431,90 +384,93 @@ class Dfs3:
                 length_y,
                 number_z,
                 0,
-                1,
+                length_z,
             )
         )
 
-        deletevalue = builder.DeleteValueFloat
-
         for i in range(n_items):
             builder.AddDynamicItem(
-                names[i],
-                eumQuantity.Create(variable_type[i], unit[i]),
+                items[i].name,
+                eumQuantity.Create(items[i].type, items[i].unit),
                 DfsSimpleType.Float,
                 DataValueType.Instantaneous,
             )
 
         try:
-            builder.CreateFile(dfs3file)
+            builder.CreateFile(filename)
         except IOError:
-            print("cannot create dfs3 file: ", dfs3file)
+            print("cannot create dfs3 file: ", filename)
 
         dfs = builder.GetFile()
+        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
         for i in range(n_time_steps):
             for item in range(n_items):
-                # d = data[item][:, :, :, i]
-                # d.reshape(number_z, number_y, number_x).swapaxes(0, 2).swapaxes(0, 1)
-                # d = np.flipud(d)
-                # d[np.isnan(d)] = deletevalue
-                # darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
-                # dfs.WriteItemTimeStepNext(0, darray)
-
-                # TESTED AND WORKDS if data already in the y,x,z,t format
-                d = data[item][:, :, :, i]
-                d = d.swapaxes(0, 1)
-                d = d.swapaxes(0, 2)
-                d = np.fliplr(d)
+                d = data[item][i]
                 d[np.isnan(d)] = deletevalue
-                darray = Array[System.Single](np.array(d.reshape(d.size, 1)[:, 0]))
+                d = np.flipud(d)
+                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+
                 dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
 
-    def write(self, dfs3file, data):
+    def write(self, filename, data):
         """
-        Function: write to a pre-created dfs3 file. Only ONE item supported.
+        Function: write to a pre-created dfs3 file.
 
-        NOTE:
-            The dfs3 file must be pre-created with corresponding y,x, z dimensions and number of time steps.
+        filename:
+            full path and filename to existing dfs3 file
 
-        The Data Matrix
-            size ( y, x, z, nt)
-
-        usage:
-            write( filename, data) where  data( y, x, z, nt)
-
-        Returns:
-            Nothing
+        data:
+            list of arrays. len(data) must equal the number of items in the dfs3.
+            Each array must be of dimension t,z,y,x
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.Dfs3FileOpenEdit(dfs3file)
+        dfs = DfsFileFactory.Dfs3FileOpenEdit(filename)
 
         # Determine the size of the grid
-        yNum = dfs.SpatialAxis.YCount
-        xNum = dfs.SpatialAxis.XCount
-        zNum = dfs.SpatialAxis.ZCount
+        number_y = dfs.SpatialAxis.YCount
+        number_x = dfs.SpatialAxis.XCount
+        number_z = dfs.SpatialAxis.ZCount
+        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        n_items = safe_length(dfs.ItemInfo)
 
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         deletevalue = dfs.FileInfo.DeleteValueFloat
 
-        if data.shape[0] != yNum:
-            sys.exit("ERROR Y dimension does not match")
-        elif data.shape[1] != xNum:
-            sys.exit("ERROR X dimension does not match")
-        elif data.shape[2] != zNum:
-            sys.exit("ERROR X dimension does not match")
-        elif data.shape[3] != nt:
-            sys.exit("ERROR Number of Time Steps dimension does not match")
+        if not all(np.shape(d)[0] == n_time_steps for d in data):
+            raise Warning(
+                "ERROR data matrices in the time dimension do not all match in the data list. "
+                "Data is list of matices [time,y,x]"
+            )
+        if not all(np.shape(d)[1] == number_z for d in data):
+            raise Warning(
+                "ERROR data matrices in the Y dimension do not all match in the data list. "
+                "Data is list of matices [time,y,x]"
+            )
+        if not all(np.shape(d)[2] == number_y for d in data):
+            raise Warning(
+                "ERROR data matrices in the Y dimension do not all match in the data list. "
+                "Data is list of matices [time,y,x]"
+            )
+        if not all(np.shape(d)[3] == number_x for d in data):
+            raise Warning(
+                "ERROR data matrices in the X dimension do not all match in the data list. "
+                "Data is list of matices [time, y, x]"
+            )
+        if not len(data) == n_items:
+            raise Warning(
+                "The number of matrices in data do not match the number of items in the dfs3 file."
+            )
 
-        for it in range(nt):
-            d = data[:, :, :, it]
-            d[np.isnan(d)] = deletevalue
-            d = d.swapaxes(1, 2).swapaxes(1, 0)
-            d = d[:, ::-1, :]
-            darray = to_dotnet_array(np.asarray(d).reshape(-1))
-            dfs.WriteItemTimeStepNext(0, darray)
+        for i in range(n_time_steps):
+            for item in range(n_items):
+                d = data[item][i]
+                d[np.isnan(d)] = deletevalue
+                d = np.flipud(d)
+                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+
+                dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
