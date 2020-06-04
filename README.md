@@ -107,12 +107,17 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 
 ### Read Res1D file Return Pandas DataFrame
 ```python
->>>  import res1d as r1d
->>>  p1 = r1d.ExtractionPoint()
->>>  p1.BranchName  = 'branch1'
->>>  p1.Chainage = 10.11
->>>  p1.VariableType  = 'Discharge'
->>>  ts = r1d.read('res1dfile.res1d', [p1])
+>>>  from mikeio import res1d
+>>>  # Query the discharge time series at chainage 10.1 of branch1
+>>>  q1 = res1d.QueryData('Discharge', 'branch1', 10.1)
+>>>  # Query all the discharge time series of branch2
+>>>  q2 = res1d.QueryData('Discharge', 'branch2')
+>>>  # Query all the water level time series in the file
+>>>  q3 = res1d.QueryData('WaterLevel')
+>>>  # Combine the queries in a list
+>>>  queries = [q1, q2, q3]
+>>>  # The returned ts object is a pandas DataFrame
+>>>  ts = r1d.read('res1dfile.res1d', queries)
 ```
 
 ### Read dfsu files
