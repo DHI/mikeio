@@ -47,11 +47,11 @@ class Dfs0:
         # BULK READ THE DFS0
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
         # First column is the time (the rest is the data)
-        t_seconds = [dfsdata[i,0] for i in range(nt)]
+        t_seconds = [dfsdata[i, 0] for i in range(nt)]
 
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
-        
+
         # TODO use to_numpy ?
         data = np.fromiter(dfsdata, np.float64).reshape(nt, n_items + 1)[:, 1::]
 
@@ -134,7 +134,7 @@ class Dfs0:
                     "item_numbers must be a list or array of values between 0 and 1e15"
                 )
 
-        #t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
+        # t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
 
         data = []
 
@@ -191,7 +191,7 @@ class Dfs0:
 
         # Get the date times in seconds (from start)
         dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
-        t_seconds = [dfsdata[i,0] for i in range(n_time_steps)]
+        t_seconds = [dfsdata[i, 0] for i in range(n_time_steps)]
 
         dfs.Reset()
 
@@ -211,6 +211,7 @@ class Dfs0:
         items=None,
         title=None,
         data_value_type=None,
+        dtype=None,
     ):
         """Create a dfs0 file.
 
@@ -233,6 +234,8 @@ class Dfs0:
             title
         data_value_type: list[DataValueType], optional
             DataValueType default DataValueType.INSTANTANEOUS
+        dtype : np.dtype, optional
+            default np.float32
 
         """
         if title is None:
@@ -270,6 +273,17 @@ class Dfs0:
             start_time = datetimes[0]
             equidistant = False
 
+        if dtype in (np.float64, DfsSimpleType.Double, "double"):
+            dtype = DfsSimpleType.Double
+        elif dtype in (np.float32, DfsSimpleType.Float, "float", "single"):
+            dtype = DfsSimpleType.Float
+        elif dtype is None:
+            dtype = DfsSimpleType.Float
+        else:
+            raise ValueError(
+                "Invalid data type, choose between np.float32 or np.float64"
+            )
+
         # if not isinstance(timeseries_unit, int):
         #    raise Warning("timeseries_unit must be an integer. See dfsutil options for help ")
 
@@ -300,9 +314,7 @@ class Dfs0:
             item = builder.CreateDynamicItemBuilder()
 
             item.Set(
-                items[i].name,
-                eumQuantity.Create(items[i].type, items[i].unit),
-                DfsSimpleType.Float,
+                items[i].name, eumQuantity.Create(items[i].type, items[i].unit), dtype,
             )
 
             if data_value_type is not None:
@@ -380,7 +392,16 @@ class Dfs0:
         return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
 
-def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None, title=None):
+def dataframe_to_dfs0(
+    self,
+    filename,
+    itemtype=None,
+    unit=None,
+    items=None,
+    title=None,
+    data_value_type=None,
+    dtype=None,
+):
     """
     Create a dfs0
 
@@ -396,6 +417,10 @@ def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None, titl
         Different types, units for each items, similar to `create`
     title: str, optional
         Title of dfs0 file
+    data_value_type: list[DataValueType], optional
+            DataValueType default DataValueType.INSTANTANEOUS
+    dtype : np.dtype, optional
+            default np.float32
     """
 
     if not isinstance(self.index, pd.DatetimeIndex):
@@ -421,7 +446,13 @@ def dataframe_to_dfs0(self, filename, itemtype=None, unit=None, items=None, titl
 
     if self.index.freq is None:  # non-equidistant
         dfs.create(
-            filename=filename, data=data, datetimes=self.index, items=items, title=title
+            filename=filename,
+            data=data,
+            datetimes=self.index,
+            items=items,
+            title=title,
+            data_value_type=data_value_type,
+            dtype=dtype,
         )
     else:  # equidistant
         dt = self.index.freq.delta.total_seconds()

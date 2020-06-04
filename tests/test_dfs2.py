@@ -149,6 +149,10 @@ def test_non_equidistant_calendar():
 
     dfs.create(filename=filename, data=data, datetimes=datetimes)
 
+    ds = dfs.read(filename)
+
+    assert ds.time[1] == datetimes[1]
+
     assert True
     os.remove(filename)
 
@@ -224,3 +228,30 @@ def test_write():
 
     # clean
     os.remove(filename2)
+
+
+def test_find_index_from_coordinate():
+
+    filename = "tests/testdata/gebco_sound.dfs2"
+
+    dfs = Dfs2()
+
+    ds = dfs.read(filename)
+
+    i, j = dfs.find_closest_element_index(lon=12.74792, lat=55.865)
+
+    assert i == 104
+    assert j == 131
+
+    assert ds.data[0][0, i, j] == -43.0
+
+    # try some outside the domain
+    i, j = dfs.find_closest_element_index(lon=11.0, lat=57.0)
+
+    assert i == 0
+    assert j == 0
+
+    i, j = dfs.find_closest_element_index(lon=15.0, lat=50.0)
+
+    assert i == 263
+    assert j == 215
