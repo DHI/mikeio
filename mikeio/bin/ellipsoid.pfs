@@ -1,0 +1,170 @@
+[ELLIPSOID_DEFINITION]
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Airy 1830'
+    ID_Code             = 'AA'
+    Semi_Major_Axis     = 6377563.396
+    Inverse_Flatness    = 299.3249646
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Modified Airy'
+    ID_Code             = 'AM'
+    Semi_Major_Axis     = 6377340.189
+    Inverse_Flatness    = 299.3249646
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Australian National'
+    ID_Code             = 'AN'
+    Semi_Major_Axis     = 6378160.0
+    Inverse_Flatness    = 298.25
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Bessel 1841'
+    ID_Code             = 'BR'
+    Semi_Major_Axis     = 6377397.155
+    Inverse_Flatness    = 299.1528128
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Bessel 1841 (Namibia)'
+    ID_Code             = 'BN'
+    Semi_Major_Axis     = 6377483.865
+    Inverse_Flatness    = 299.1528128
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Clarke 1866'
+    ID_Code             = 'CC'
+    Semi_Major_Axis     = 6378206.4
+    Inverse_Flatness    = 294.9786982
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Clarke 1880'
+    ID_Code             = 'CD'
+    Semi_Major_Axis     = 6378249.145
+    Inverse_Flatness    = 293.465
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Everest (India 1830)'
+    ID_Code             = 'EA'
+    Semi_Major_Axis     = 6377276.345
+    Inverse_Flatness    = 300.8017
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Everest (Brunei & E, Malaysia)'
+    ID_Code             = 'EB'
+    Semi_Major_Axis     = 6377298.556
+    Inverse_Flatness    = 300.8017
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Everest (India 1956)'
+    ID_Code             = 'EC'
+    Semi_Major_Axis     = 6377301.243
+    Inverse_Flatness    = 300.8017
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Everest (W. Malaysia 1969)'
+    ID_Code             = 'ED'
+    Semi_Major_Axis     = 6377295.664
+    Inverse_Flatness    = 300.8017
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Everest (W. Malaysia & Singapore 1948)'
+    ID_Code             = 'EE'
+    Semi_Major_Axis     = 6377304.063
+    Inverse_Flatness    = 300.8017
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Modified Fischer'
+    ID_Code             = 'FA'
+    Semi_Major_Axis     = 6378155
+    Inverse_Flatness    = 298.3
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Helmert 1906'
+    ID_Code             = 'HE'
+    Semi_Major_Axis     = 6378200
+    Inverse_Flatness    = 298.3
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Hough 1960'
+    ID_Code             = 'HO'
+    Semi_Major_Axis     = 6378270
+    Inverse_Flatness    = 297
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Indonesian 1974'
+    ID_Code             = 'ID'
+    Semi_Major_Axis     = 6378160
+    Inverse_Flatness    = 298.247
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'International 1924 (Hayford)'
+    ID_Code             = 'IN'
+    Semi_Major_Axis     = 6378388
+    Inverse_Flatness    = 297
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Krassovsky 1940'
+    ID_Code             = 'KA'
+    Semi_Major_Axis     = 6378245
+    Inverse_Flatness    = 298.3
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Geodetic Reference System 1980'
+    ID_Code             = 'RF'
+    Semi_Major_Axis     = 6378137
+    Inverse_Flatness    = 298.257222101
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'South American 1969'
+    ID_Code             = 'SA'
+    Semi_Major_Axis     = 6378160
+    Inverse_Flatness    = 298.25
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'WGS 1972'
+    ID_Code             = 'WD'
+    Semi_Major_Axis     = 6378135
+    Inverse_Flatness    = 298.26
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'WGS 1984'
+    ID_Code             = 'WE'
+    Semi_Major_Axis     = 6378137
+    Inverse_Flatness    = 298.257223563
+  EndSect  // REF_ELLIPSOID
+
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Sphere (Radius = 6371000)'
+    ID_Code             = 'XX'
+    Semi_Major_Axis     = 6371000
+    Inverse_Flatness    = 0
+  EndSect  // REF_ELLIPSOID
+  
+  [REF_ELLIPSOID]
+    Ellipsoid_Name      = 'Sphere (Radius = 6367470)'
+    ID_Code             = 'XY'
+    Semi_Major_Axis     = 6367470
+    Inverse_Flatness    = 0
+  EndSect  // REF_ELLIPSOID
+
+EndSect  // ELLIPSOID_DEFINITION
