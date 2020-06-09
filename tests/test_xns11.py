@@ -1,8 +1,7 @@
 from mikeio.xns11 import Xns11, ExtractionPoint
 
+
 def test_read():
-
-
     xns11 = Xns11()
 
     query = ExtractionPoint()
