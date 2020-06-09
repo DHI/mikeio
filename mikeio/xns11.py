@@ -8,6 +8,7 @@ from DHI.Mike1D.CrossSectionModule import CrossSectionDataFactory
 clr.AddReference("DHI.Mike1D.Generic")
 from DHI.Mike1D.Generic import Connection, Diagnostics, Location
 
+
 # clr.AddReference("System")
 
 
@@ -63,10 +64,10 @@ class Xns11:
             reach_topoid = -999
             chainage = -999
             for reach in reaches:
-                if reach.ReachId.strip() == query.BranchName.strip():
-                    if reach.TopoId.strip() == query.TopoId.strip():
+                if reach.ReachId.strip() == query.reach_name.strip():
+                    if reach.TopoId.strip() == query.topo_id.strip():
                         for cross_section in reach.GetChainageSortedCrossSections():
-                            chainage_diff = float(cross_section.Key) - query.Chainage
+                            chainage_diff = float(cross_section.Key) - query.chainage
                             is_correct_chainage = abs(chainage_diff) < chainage_tolerance
                             if is_correct_chainage:
                                 chainage = float(cross_section.Key)
@@ -79,14 +80,14 @@ class Xns11:
             chainages.append(chainage)
 
             if -999 in reaches_name:
-                raise Exception("Reach Not Found: {}".format(query.BranchName.strip()))
+                raise Exception("Reach Not Found: {}".format(query.reach_name.strip()))
             if -999 in reaches_topoid:
                 raise Exception(
-                    "Topo-ID Not Found {} in Reach: {}".format(query.TopoId.strip(), query.BranchName.strip()))
+                    "Topo-ID Not Found {} in Reach: {}".format(query.topo_id.strip(), query.reach_name.strip()))
             if -999 in chainages:
                 raise Exception(
-                    "Chainage {} Not Found in Reach/Topo-ID: {}/{}".format(query.Chainage, query.BranchName.strip(),
-                                                                           query.TopoId.strip()))
+                    "Chainage {} Not Found in Reach/Topo-ID: {}/{}".format(query.chainage, query.reach_name.strip(),
+                                                                           query.topo_id.strip()))
 
         return reaches_name, reaches_topoid, chainages
 
@@ -99,25 +100,28 @@ class Xns11:
         return df
 
 
-class ExtractionPoint:
+class QueryData:
 
-    def BranchName(BranchName):
-        """
-            Name of the Branch
-        """
-        return BranchName
+    def __init__(self, topo_id, reach_name=None, chainage=None):
+        self._topo_id = topo_id
+        self._reach_name = reach_name
+        self._chainage = chainage
 
-    def TopoId(TopoId):
-        """
-            Name of the TopoId
-        """
-        return TopoId
+    @property
+    def topo_id(self):
+        return self._topo_id
 
-    def Chainage(Chainage):
-        """
-            Chainage number along branch
-        """
-        return Chainage
+    @property
+    def reach_name(self):
+        return self._reach_name
 
-    def __str__(self):
-        return f"{self.BranchName} {self.TopoId} {self.Chainage}"
+    @property
+    def chainage(self):
+        return self._chainage
+
+    def __repr__(self):
+        return (
+            f"QueryData(topo_id='{self.topo_id}', "
+            f"reach_name='{self.reach_name}', "
+            f"chainage={self.chainage})"
+        )
