@@ -25,35 +25,23 @@ class Dfs0:
     def __read(self, filename):
         """Read data from the dfs0 file
         """
-        if not os.path.exists(filename):
-            raise Warning("filename - File does not Exist %s", filename)
+        if not os.path.exists(self.file_path):
+            raise FileExistsError(f"File {self.file_path} does not exist.")
 
         dfs = DfsFileFactory.DfsGenericOpen(filename)
         self._dfs = dfs
-
-        n_items = safe_length(dfs.ItemInfo)
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
-        items = []
-        for i in range(n_items):
-            eumItem = dfs.ItemInfo[i].Quantity.Item
-            eumUnit = dfs.ItemInfo[i].Quantity.Unit
-            name = dfs.ItemInfo[i].Name
-            itemtype = EUMType(eumItem)
-            unit = EUMUnit(eumUnit)
-            item = ItemInfo(name, itemtype, unit)
-            items.append(item)
-
-        # BULK READ THE DFS0
-        dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
-        # First column is the time (the rest is the data)
-        t_seconds = [dfsdata[i, 0] for i in range(nt)]
-
+        self._n_items = safe_length(dfs.ItemInfo)
+        n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+
+        # Bulk read the file
+        data = Dfs0Util.ReadDfs0DataDouble(dfs)
+
+        # First column is time (the rest is data)
+        t_seconds = [data[i, 0] for i in range(n_timesteps)]
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
-        # TODO use to_numpy ?
-        data = np.fromiter(dfsdata, np.float64).reshape(nt, n_items + 1)[:, 1::]
+        data = np.fromiter(data, np.float64).reshape(n_timesteps, self._n_items + 1)[:, 1::]  # TODO use to_numpy ?
 
         mask = np.isclose(data, dfs.FileInfo.DeleteValueFloat, atol=1e-36)
         data[mask] = np.nan
@@ -64,7 +52,14 @@ class Dfs0:
 
         dfs.Close()
 
-        return data, time, items
+        return data, time, list(self._get_items())
+
+    def _get_items(self):
+        for i in range(self._n_items):
+            name = self._dfs.ItemInfo[i].Name
+            item_type = EUMType(self._dfs.ItemInfo[i].Quantity.Item)
+            unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
+            yield ItemInfo(name, item_type, unit)
 
     def read_to_pandas(self, filename, item_numbers=None):
         """Read data from the dfs0 file and return a Pandas DataFrame (deprecated)
@@ -87,7 +82,7 @@ class Dfs0:
         )
         if item_numbers is not None:
             if not all(
-                isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
+                    isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
             ):
                 raise Warning("item_numbers must be a list of integers")
 
@@ -128,7 +123,7 @@ class Dfs0:
 
         if item_numbers is not None:
             if not all(
-                isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
+                    isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
             ):
                 raise Warning(
                     "item_numbers must be a list or array of values between 0 and 1e15"
@@ -201,17 +196,17 @@ class Dfs0:
         dfs.Close()
 
     def create(
-        self,
-        filename,
-        data,
-        start_time=None,
-        timeseries_unit=TimeStep.SECOND,
-        dt=1.0,
-        datetimes=None,
-        items=None,
-        title=None,
-        data_value_type=None,
-        dtype=None,
+            self,
+            filename,
+            data,
+            start_time=None,
+            timeseries_unit=TimeStep.SECOND,
+            dt=1.0,
+            datetimes=None,
+            items=None,
+            title=None,
+            data_value_type=None,
+            dtype=None,
     ):
         """Create a dfs0 file.
 
@@ -248,7 +243,7 @@ class Dfs0:
             start_time = datetime.now()
 
         if items is None:
-            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
+            items = [ItemInfo(f"temItem {i + 1}") for i in range(n_items)]
 
         if len(items) != n_items:
             raise Warning(
@@ -393,14 +388,14 @@ class Dfs0:
 
 
 def dataframe_to_dfs0(
-    self,
-    filename,
-    itemtype=None,
-    unit=None,
-    items=None,
-    title=None,
-    data_value_type=None,
-    dtype=None,
+        self,
+        filename,
+        itemtype=None,
+        unit=None,
+        items=None,
+        title=None,
+        data_value_type=None,
+        dtype=None,
 ):
     """
     Create a dfs0
