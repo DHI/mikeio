@@ -64,44 +64,6 @@ class Dfs0:
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
             yield ItemInfo(name, item_type, unit)
 
-    def read_to_pandas(self, filename, item_numbers=None):
-        """Read data from the dfs0 file and return a Pandas DataFrame (deprecated)
-           `read_to_pandas` is deprecated. Use to_dataframe instead.
-        
-        Parameters
-        ----------
-        filename: str
-            full path and file name to the dfs0 file.
-        item_numbers: list[int], optional
-            read only the item_numbers in the array specified (0 base)
-
-        Returns
-        -------
-            pd.Dataframe
-        """
-
-        warnings.warn(
-            "read_to_pandas is deprecated. Use to_dataframe instead.", FutureWarning
-        )
-        if item_numbers is not None:
-            if not all(
-                    isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
-            ):
-                raise Warning("item_numbers must be a list of integers")
-
-        data, t, items = self.__read(filename=filename)
-
-        names = [item.name for item in items]
-
-        df = pd.DataFrame(data, columns=names)
-
-        df.index = pd.DatetimeIndex(t)
-
-        if item_numbers is not None:
-            df = df.iloc[:, item_numbers]
-
-        return df
-
     def read(self, filename, item_numbers=None, item_names=None):
         """Read data from the dfs0 file
 
@@ -126,8 +88,7 @@ class Dfs0:
 
         selected_item_numbers = range(data.shape[1]) if item_numbers is None else item_numbers
 
-        if not all(isinstance(item_number, int) and 0 <= item_number < 1e15 for item_number in selected_item_numbers):
-            raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
+        self._validate_item_numbers(selected_item_numbers)
 
         selected_data = []
         selected_items = []
@@ -136,6 +97,10 @@ class Dfs0:
             selected_items.append(items[item_number])
 
         return Dataset(selected_data, time, selected_items)
+
+    def _validate_item_numbers(self, item_numbers):
+        if not all(isinstance(item_number, int) and 0 <= item_number < 1e15 for item_number in item_numbers):
+            raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
 
     def write(self, filename, data):
 
