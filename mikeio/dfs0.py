@@ -119,32 +119,23 @@ class Dfs0:
             Dataset(data, time, items)
         """
 
-        d, t, items = self.__read(filename)
+        data, time, items = self.__read(filename)
 
         if item_names is not None:
             item_numbers = find_item(self._dfs, item_names)
 
-        if item_numbers is not None:
-            if not all(
-                    isinstance(item, int) and 0 <= item < 1e15 for item in item_numbers
-            ):
-                raise Warning(
-                    "item_numbers must be a list or array of values between 0 and 1e15"
-                )
+        selected_item_numbers = range(data.shape[1]) if item_numbers is None else item_numbers
 
-        data = []
+        if not all(isinstance(item_number, int) and 0 <= item_number < 1e15 for item_number in selected_item_numbers):
+            raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
 
-        if item_numbers is not None:
-            sel_items = []
-            for item in item_numbers:
-                data.append(d[:, item])
-                sel_items.append(items[item])
-            items = sel_items
-        else:
-            for item in range(d.shape[1]):
-                data.append(d[:, item])
+        selected_data = []
+        selected_items = []
+        for item_number in selected_item_numbers:
+            selected_data.append(data[:, item_number])
+            selected_items.append(items[item_number])
 
-        return Dataset(data, t, items)
+        return Dataset(selected_data, time, selected_items)
 
     def write(self, filename, data):
 
