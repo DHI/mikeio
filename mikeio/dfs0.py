@@ -132,8 +132,6 @@ class Dfs0:
                     "item_numbers must be a list or array of values between 0 and 1e15"
                 )
 
-        # t = [datetime.strptime(x, "%Y-%m-%d %H:%M:%S") for x in t]
-
         data = []
 
         if item_numbers is not None:
