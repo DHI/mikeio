@@ -22,39 +22,42 @@ from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
 
 
 class Dfs0:
-    def __read(self, filename):
-        """Read data from the dfs0 file
+    def __read(self, file_path):
         """
-        if not os.path.exists(self.file_path):
-            raise FileExistsError(f"File {self.file_path} does not exist.")
+        Read data from the dfs0 file
+        """
+        if not os.path.exists(file_path):
+            raise FileExistsError(f"File {file_path} does not exist.")
 
-        dfs = DfsFileFactory.DfsGenericOpen(filename)
-        self._dfs = dfs
-        self._n_items = safe_length(dfs.ItemInfo)
-        n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        self._dfs = DfsFileFactory.DfsGenericOpen(file_path)
+        self._n_items = safe_length(self._dfs.ItemInfo)
+        self._n_timesteps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        self._time_column_index = 0  # First column is time (the rest is data)
 
-        # Bulk read the file
-        data = Dfs0Util.ReadDfs0DataDouble(dfs)
+        raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
 
-        # First column is time (the rest is data)
-        t_seconds = [data[i, 0] for i in range(n_timesteps)]
-        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        data = self.__to_numpy_with_nans(raw_data)
+        time = list(self.__get_time(raw_data))
+        items = list(self.__get_items())
 
-        data = np.fromiter(data, np.float64).reshape(n_timesteps, self._n_items + 1)[:, 1::]  # TODO use to_numpy ?
+        self._dfs.Close()
 
-        mask = np.isclose(data, dfs.FileInfo.DeleteValueFloat, atol=1e-36)
-        data[mask] = np.nan
-        # mask = np.isclose(
-        #    data, dfs.FileInfo.DeleteValueDouble, atol=1e-34
-        # )  # TODO needs to be verified
-        # data[mask] = np.nan
+        return data, time, items
 
-        dfs.Close()
+    def __to_numpy_with_nans(self, raw_data):
+        data = np.fromiter(raw_data, np.float64).reshape(self._n_timesteps, self._n_items + 1)[:, 1::]
+        nan_indices = np.isclose(data, self._dfs.FileInfo.DeleteValueFloat, atol=1e-36)
+        data[nan_indices] = np.nan
+        return data
 
-        return data, time, list(self._get_items())
+    def __get_time(self, raw_data):
+        start_time = from_dotnet_datetime(self._dfs.FileInfo.TimeAxis.StartDateTime)
 
-    def _get_items(self):
+        for t in range(self._n_timesteps):
+            t_sec = raw_data[t, self._time_column_index]
+            yield start_time + timedelta(seconds=t_sec)
+
+    def __get_items(self):
         for i in range(self._n_items):
             name = self._dfs.ItemInfo[i].Name
             item_type = EUMType(self._dfs.ItemInfo[i].Quantity.Item)
@@ -352,7 +355,7 @@ class Dfs0:
         -------
         pd.DataFrame
         """
-        data, t, items = self.__read(filename=filename)
+        data, t, items = self.__read(filename)
 
         if unit_in_name:
             names = [f"{item.name} ({item.unit.name})" for item in items]
