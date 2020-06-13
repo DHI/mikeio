@@ -101,11 +101,45 @@ class Xns11:
 
 
 class QueryData:
+    """A query object that declares what data should be
+    extracted from a .xns11 file.
+    
+    Parameters
+    ----------
+    topo_id: str
+        Topo ID, must be passed
+    reach_name: str, optional
+        Reach name, consider all the reaches if None
+    chainage: float, optional
+        chainage, considers all the chainages if None
+    
+    Examples
+    --------
+    `QueryData('topoid1', 'reach1', 10)` is a valid query.
+    `QueryData('topoid1', 'reach1')` requests all the points
+    for `topoid1` of `reach1`.
+    `QueryData('topoid1')` requests all the points for `topid1` 
+    of the file.
+    """
 
     def __init__(self, topo_id, reach_name=None, chainage=None):
         self._topo_id = topo_id
         self._reach_name = reach_name
         self._chainage = chainage
+        self._validate()
+
+    def _validate(self):
+        tp = self.topo_id
+        rn = self.reach_name
+        c = self.chainage
+        if not isinstance(tp, str):
+            raise TypeError("topo_id must be a string.")
+        if rn is not None and not isinstance(rn, str):
+            raise TypeError("reach_name must be either None or a string.")
+        if c is not None and not isinstance(c, (int, float)):
+            raise TypeError("chainage must be either None or a number.")
+        if rn is None and c is not None:
+            raise ValueError("chainage cannot be set if reach_name is None.")
 
     @property
     def topo_id(self):
