@@ -8,7 +8,7 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
 
 ## Requirements
 * Windows operating system
-* Python x64 3.6 or 3.7 (3.8 is not yet supprted by pythonnet)
+* Python x64 3.6 or 3.7 (3.8 is not yet supprted by pythonnet) ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
 * [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
 
 [More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
