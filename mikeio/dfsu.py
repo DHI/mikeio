@@ -47,13 +47,6 @@ class Dfsu:
         item_offset = 0
         n_items = safe_length(dfs.ItemInfo)
 
-        # Dynamic Z is the first item in 3d files
-        if (dfs.DfsuFileType == DfsuFileType.Dfsu3DSigma) or (
-            dfs.DfsuFileType == DfsuFileType.Dfsu3DSigmaZ
-        ):
-            item_offset = 1
-            n_items = n_items - 1
-
         nt = dfs.NumberOfTimeSteps
 
         if item_names is not None:
@@ -73,9 +66,14 @@ class Dfsu:
 
         data_list = []
 
+        items = get_item_info(dfs, item_numbers)
+
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
+            if items[item].name == "Z coordinate":
+                data = np.ndarray(shape=(len(time_steps), dfs.NumberOfNodes), dtype=float)
+            else:
+                data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
             data_list.append(data)
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
@@ -100,7 +98,7 @@ class Dfsu:
         start_time = from_dotnet_datetime(dfs.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
-        items = get_item_info(dfs, item_numbers)
+        
 
         dfs.Close()
         return Dataset(data_list, time, items)

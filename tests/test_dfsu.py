@@ -16,6 +16,19 @@ def test_read_all_items_returns_all_items_and_names():
     assert len(data) == 4
     assert len(items) == 4
 
+def test_read_simple_3d():
+    filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    dfs = Dfsu()
+
+    ds = dfs.read(filename)
+
+    assert len(ds.data) == 4
+    assert len(ds.items) == 4
+
+    assert ds.items[0].name == "Z coordinate"
+    assert ds.items[3].name == "W velocity"
+
+
 
 def test_write(tmpdir):
 
