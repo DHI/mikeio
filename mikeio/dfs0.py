@@ -21,14 +21,14 @@ from .helpers import safe_length
 
 
 class Dfs0:
-    def __read(self, file_path):
+    def __read(self, filename):
         """
-        Read data from the dfs0 file
+        Read data from a dfs0 file.
         """
-        if not os.path.exists(file_path):
-            raise FileExistsError(f"File {file_path} does not exist.")
+        if not os.path.exists(filename):
+            raise FileNotFoundError(f"File {filename} not found.")
 
-        self._dfs = DfsFileFactory.DfsGenericOpen(file_path)
+        self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         self._n_items = safe_length(self._dfs.ItemInfo)
         self._n_timesteps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._time_column_index = 0  # First column is time (the rest is data)
@@ -64,16 +64,17 @@ class Dfs0:
             yield ItemInfo(name, item_type, unit)
 
     def read(self, filename, item_numbers=None, item_names=None):
-        """Read data from the dfs0 file
+        """
+        Read data from a dfs0 file.
 
         Parameters
         ----------
         filename: str
-            full path and file name to the dfs0 file.
+            File name including full path to the dfs0 file.
         item_numbers: list[int], optional
-            read only the item_numbers in the array specified (0 base)
+            Rread only the item_numbers in the array specified (0 base)
         item_names: list[str], optional
-            read only the items in the array specified, (takes precedence over item_numbers)
+            Read only the items in the array specified, (takes precedence over item_numbers)
 
         Returns
         -------
@@ -103,18 +104,19 @@ class Dfs0:
 
     def write(self, filename, data):
 
-        """write overwrites an existing dfs0 file.
+        """
+        Overwrites an existing dfs0 file.
 
         Parameters
         ----------
         filename: str
             Full path and filename to dfs0 to be modified.
         data: list[np.array]
-            data to overwrite
+            Data to overwrite.
         """
 
         if not os.path.exists(filename):
-            raise Warning("filename - File does not Exist %s", filename)
+            raise Warning(f"File {filename} not found.")
 
         try:
             dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
@@ -164,7 +166,8 @@ class Dfs0:
             data_value_type=None,
             dtype=None,
     ):
-        """Create a dfs0 file.
+        """
+        Create a dfs0 file.
 
         Parameters
         ----------
@@ -296,7 +299,8 @@ class Dfs0:
         dfs.Close()
 
     def to_dataframe(self, filename, unit_in_name=False):
-        """Read data from the dfs0 file and return a Pandas DataFrame
+        """
+        Read data from the dfs0 file and return a Pandas DataFrame.
         
         Parameters
         ----------
