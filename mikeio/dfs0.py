@@ -182,6 +182,7 @@ class Dfs0:
         dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds. default to 1.0
+        datetimes: list[datetime]
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         title: str, optional
