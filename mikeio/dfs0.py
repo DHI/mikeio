@@ -116,7 +116,7 @@ class Dfs0:
         """
 
         if not os.path.exists(filename):
-            raise Warning(f"File {filename} not found.")
+            raise FileNotFoundError(f"File {filename} not found.")
 
         try:
             dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
