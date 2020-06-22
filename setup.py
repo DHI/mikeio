@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.4.1",
+    version="0.4.2",
     install_requires=["pythonnet==2.4.0", "numpy", "pandas", "matplotlib"],
     extras_require={"dev": ["pytest", "black", "sphinx", "sphinx", "sphinx-rtd-theme"]},
     author="Henrik Andersson",
