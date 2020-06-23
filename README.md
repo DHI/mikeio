@@ -1,3 +1,4 @@
+![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg)
 # mikeio: input/output of MIKE files in python
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
