@@ -70,7 +70,7 @@ class Dfsu:
 
         for item in range(n_items):
             # Initialize an empty data block
-            if items[item].name == "Z coordinate":
+            if item == 0 and items[item].name == "Z coordinate":
                 data = np.ndarray(shape=(len(time_steps), dfs.NumberOfNodes), dtype=float)
             else:
                 data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
