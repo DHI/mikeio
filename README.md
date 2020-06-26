@@ -120,6 +120,27 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 >>>  ts = r1d.read('res1dfile.res1d', queries)
 ```
 
+### Read Xns11 file Return Pandas DataFrame
+```python
+>>>  import matplotlib.pyplot as plt
+>>>  from mikeio import xns11
+>>>  # Query the geometry of chainage 58.68 of topoid1 at reach1
+>>>  q1 = xns11.QueryData('topoid1', 'reach1', 58.68)
+>>>  # Query the geometry of all chainages of topoid1 at reach2
+>>>  q2 = xns11.QueryData('topoid1', 'reach2')
+>>>  # Query the geometry of all chainages of topoid2
+>>>  q3 = xns11.QueryData('topoid2')
+>>>  # Combine the queries in a list
+>>>  queries = [q1, q2, q3]
+>>>  # The returned geometry object is a pandas DataFrame
+>>>  geometry = xns11.read('xsections.xns11', queries)
+>>>  # Plot geometry of chainage 58.68 of topoid1 at reach1
+>>>  plt.plot(geometry['x topoid1 reach1 58.68'],geometry['z topoid1 reach1 58.68'])
+>>>  plt.xlabel('Horizontal [meter]')
+>>>  plt.ylabel('Elevation [meter]')
+```
+![Geometry](images/xns11_geometry.png)
+
 ### Read dfsu files
 ```python
 >>>  import matplotlib.pyplot as plt
