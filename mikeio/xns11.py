@@ -168,8 +168,8 @@ class Xns11:
             for i in range(geometry.Count):
                 x.append(geometry.LstPoints[i].X)
                 z.append(geometry.LstPoints[i].Z)
-            x_name = f"x {topoid.value} {reach.value} {str(chainage.value)}"
-            z_name = f"z {topoid.value} {reach.value} {str(chainage.value)}"
+            x_name = f"x {topoid.value} {reach.value} {chainage.value}"
+            z_name = f"z {topoid.value} {reach.value} {chainage.value}"
             geometry_x = pd.Series(x, name=x_name)
             geometry_z = pd.Series(z, name=z_name)
             df = pd.concat([df, geometry_x, geometry_z], axis=1)
