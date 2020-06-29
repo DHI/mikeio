@@ -96,8 +96,7 @@ class Xns11:
         """Load the file."""
         if not os.path.exists(self.file_path):
             raise FileExistsError(f"File {self.file_path} does not exist.")
-        self.file = CrossSectionDataFactory()
-        self.file = self.file.Open(
+        self.file = CrossSectionDataFactory().Open(
             Connection.Create(self.file_path), Diagnostics("Error loading file.")
         )
         self._closed = False
