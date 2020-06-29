@@ -89,6 +89,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#mesh">Mesh</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#misc">Misc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-mikeio.generic">Generic</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mikeio.res1d">Mike 1D</a></li>
 </ul>
 </li>
 </ul>
@@ -175,6 +176,7 @@
 <li><p><strong>timeseries_unit</strong> (<em>Timestep</em><em>, </em><em>optional</em>) – Timestep  unitdefault Timestep.SECOND</p></li>
 <li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – the time step. Therefore dt of 5.5 with timeseries_unit of minutes
 means 5 mins and 30 seconds. default to 1.0</p></li>
+<li><p><strong>datetimes</strong> (<em>list</em><em>[</em><em>datetime</em><em>]</em>) – </p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.dutil.ItemInfo" title="mikeio.dutil.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title</p></li>
 <li><p><strong>data_value_type</strong> (<em>list</em><em>[</em><em>DataValueType</em><em>]</em><em>, </em><em>optional</em>) – DataValueType default DataValueType.INSTANTANEOUS</p></li>
@@ -204,13 +206,13 @@ means 5 mins and 30 seconds. default to 1.0</p></li>
 <dl class="method">
 <dt id="mikeio.Dfs0.read">
 <code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read data from the dfs0 file</p>
+<dd><p>Read data from a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path and file name to the dfs0 file.</p></li>
-<li><p><strong>item_numbers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – read only the item_numbers in the array specified (0 base)</p></li>
-<li><p><strong>item_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – read only the items in the array specified, (takes precedence over item_numbers)</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – File name including full path to the dfs0 file.</p></li>
+<li><p><strong>item_numbers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Rread only the item_numbers in the array specified (0 base)</p></li>
+<li><p><strong>item_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only the items in the array specified, (takes precedence over item_numbers)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -223,32 +225,9 @@ means 5 mins and 30 seconds. default to 1.0</p></li>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Dfs0.read_to_pandas">
-<code class="sig-name descname">read_to_pandas</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.read_to_pandas" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Read data from the dfs0 file and return a Pandas DataFrame (deprecated)</dt><dd><p><cite>read_to_pandas</cite> is deprecated. Use to_dataframe instead.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path and file name to the dfs0 file.</p></li>
-<li><p><strong>item_numbers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – read only the item_numbers in the array specified (0 base)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.Dataframe</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
 <dt id="mikeio.Dfs0.to_dataframe">
 <code class="sig-name descname">to_dataframe</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">unit_in_name=False</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.to_dataframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read data from the dfs0 file and return a Pandas DataFrame</p>
+<dd><p>Read data from the dfs0 file and return a Pandas DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -268,12 +247,12 @@ means 5 mins and 30 seconds. default to 1.0</p></li>
 <dl class="method">
 <dt id="mikeio.Dfs0.write">
 <code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>write overwrites an existing dfs0 file.</p>
+<dd><p>Overwrites an existing dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – Full path and filename to dfs0 to be modified.</p></li>
-<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – data to overwrite</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – Data to overwrite.</p></li>
 </ul>
 </dd>
 </dl>
@@ -828,6 +807,181 @@ similar to a dictionary.</p>
 <li><p><strong>infilename_b</strong> (<em>str</em>) – full path to the second input file</p></li>
 <li><p><strong>outfilename</strong> (<em>str</em>) – full path to the output file</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-mikeio.res1d">
+<span id="mike-1d"></span><h2>Mike 1D<a class="headerlink" href="#module-mikeio.res1d" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="mikeio.res1d.BaseRes1DError">
+<em class="property">exception </em><code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">BaseRes1DError</code><a class="headerlink" href="#mikeio.res1d.BaseRes1DError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for Red1D errors.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mikeio.res1d.DataNotFoundInFile">
+<em class="property">exception </em><code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">DataNotFoundInFile</code><a class="headerlink" href="#mikeio.res1d.DataNotFoundInFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data not found in file.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mikeio.res1d.FileNotOpenedError">
+<em class="property">exception </em><code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">FileNotOpenedError</code><a class="headerlink" href="#mikeio.res1d.FileNotOpenedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accessing data from a file that is not opened.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mikeio.res1d.QueryData">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">QueryData</code><span class="sig-paren">(</span><em class="sig-param">variable_type</em>, <em class="sig-param">reach_name=None</em>, <em class="sig-param">chainage=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.QueryData" title="Permalink to this definition">¶</a></dt>
+<dd><p>A query object that declares what data should be
+extracted from a .res1d file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>variable_type</strong> (<em>str</em>) – Either ‘WaterLevel’, ‘Discharge’, ‘Pollutant’, ‘LeftLatLinkOutflow’,
+‘RightLatLinkOutflow’</p></li>
+<li><p><strong>reach_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Reach name, consider all the reaches if None</p></li>
+<li><p><strong>chainage</strong> (<em>float</em><em>, </em><em>optional</em>) – chainage, considers all the chainages if None</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p><cite>QueryData(‘WaterLevel’, ‘reach1’, 10)</cite> is a valid query.
+<cite>QueryData(‘WaterLevel’, ‘reach1’)</cite> requests all the WaterLevel points
+of <cite>reach1</cite>.
+<cite>QueryData(‘Discharge’)</cite> requests all the Discharge points of the file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mikeio.res1d.open">
+<code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">open</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a res1d file as a Res1D object that has convenient methods
+to extract specific data from the file. It is recommended to use it
+as a context manager.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – full path and file name to the res1d file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Res1D</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;file.res1d&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">r1d</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="n">r1d</span><span class="o">.</span><span class="n">data_types</span><span class="p">)</span>
+<span class="go">[&#39;WaterLevel&#39;, &#39;Discharge&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="mikeio.res1d.read">
+<code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">file_path</em>, <em class="sig-param">queries</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the requested data from the res1d file and
+return a Pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – full path and file name to the res1d file.</p></li>
+<li><p><strong>queries</strong> (<em>a single query</em><em> or </em><em>a list of queries</em>) – <cite>QueryData</cite> objects that define the requested data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-mikeio.xns11"></span><dl class="exception">
+<dt id="mikeio.xns11.BaseXns11Error">
+<em class="property">exception </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">BaseXns11Error</code><a class="headerlink" href="#mikeio.xns11.BaseXns11Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for Xns11 errors.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mikeio.xns11.DataNotFoundInFile">
+<em class="property">exception </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">DataNotFoundInFile</code><a class="headerlink" href="#mikeio.xns11.DataNotFoundInFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data not found in file.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="mikeio.xns11.FileNotOpenedError">
+<em class="property">exception </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">FileNotOpenedError</code><a class="headerlink" href="#mikeio.xns11.FileNotOpenedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accessing data from a file that is not opened.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="mikeio.xns11.QueryData">
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">QueryData</code><span class="sig-paren">(</span><em class="sig-param">topoid_name</em>, <em class="sig-param">reach_name=None</em>, <em class="sig-param">chainage=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.xns11.QueryData" title="Permalink to this definition">¶</a></dt>
+<dd><p>A query object that declares what data should be
+extracted from a .xns11 file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>topoid_name</strong> (<em>str</em>) – Topo ID, must be passed</p></li>
+<li><p><strong>reach_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Reach name, consider all the reaches if None</p></li>
+<li><p><strong>chainage</strong> (<em>float</em><em>, </em><em>optional</em>) – chainage, considers all the chainages if None</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p><cite>QueryData(‘topoid1’, ‘reach1’, 10)</cite> is a valid query.
+<cite>QueryData(‘topoid1’, ‘reach1’)</cite> requests all the points
+for <cite>topoid1</cite> of <cite>reach1</cite>.
+<cite>QueryData(‘topoid1’)</cite> requests all the points for <cite>topid1</cite>
+of the file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mikeio.xns11.open">
+<code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">open</code><span class="sig-paren">(</span><em class="sig-param">file_path</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.xns11.open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a xns11 file as a Xns11 object that has convenient methods
+to extract specific data from the file. It is recommended to use it
+as a context manager.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – full path and file name to the xns11 file.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Xns11</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;file.xns11&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">x11</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="n">x11</span><span class="o">.</span><span class="n">topoid_names</span><span class="p">)</span>
+<span class="go">[&#39;topoid1&#39;, &#39;topoid2&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="mikeio.xns11.read">
+<code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">file_path</em>, <em class="sig-param">queries</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.xns11.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the requested data from the xns11 file and
+return a Pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>str</em>) – full path and file name to the xns11 file.</p></li>
+<li><p><strong>queries</strong> (<em>a single query</em><em> or </em><em>a list of queries</em>) – <cite>QueryData</cite> objects that define the requested data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
