@@ -118,7 +118,7 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 >>>  # Combine the queries in a list
 >>>  queries = [q1, q2, q3]
 >>>  # The returned ts object is a pandas DataFrame
->>>  ts = r1d.read('res1dfile.res1d', queries)
+>>>  ts = res1d.read('res1dfile.res1d', queries)
 ```
 
 ### Read Xns11 file Return Pandas DataFrame
