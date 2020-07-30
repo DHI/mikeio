@@ -23,25 +23,25 @@ def _clone(infilename, outfilename):
         MIKE generic dfs file object
     """
     source = DfsFileFactory.DfsGenericOpen(infilename)
-    fileInfo = source.FileInfo
+    fi = source.FileInfo
 
     builder = DfsBuilder.Create(
-        fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion
+        fi.FileTitle, fi.ApplicationTitle, fi.ApplicationVersion
     )
 
     # Set up the header
-    builder.SetDataType(fileInfo.DataType)
-    builder.SetGeographicalProjection(fileInfo.Projection)
-    builder.SetTemporalAxis(fileInfo.TimeAxis)
-    builder.SetItemStatisticsType(fileInfo.StatsType)
-    builder.DeleteValueByte = fileInfo.DeleteValueByte
-    builder.DeleteValueDouble = fileInfo.DeleteValueDouble
-    builder.DeleteValueFloat = fileInfo.DeleteValueFloat
-    builder.DeleteValueInt = fileInfo.DeleteValueInt
-    builder.DeleteValueUnsignedInt = fileInfo.DeleteValueUnsignedInt
+    builder.SetDataType(fi.DataType)
+    builder.SetGeographicalProjection(fi.Projection)
+    builder.SetTemporalAxis(fi.TimeAxis)
+    builder.SetItemStatisticsType(fi.StatsType)
+    builder.DeleteValueByte = fi.DeleteValueByte
+    builder.DeleteValueDouble = fi.DeleteValueDouble
+    builder.DeleteValueFloat = fi.DeleteValueFloat
+    builder.DeleteValueInt = fi.DeleteValueInt
+    builder.DeleteValueUnsignedInt = fi.DeleteValueUnsignedInt
 
     # Copy custom blocks - if any
-    for customBlock in fileInfo.CustomBlocks:
+    for customBlock in fi.CustomBlocks:
         builder.AddCustomBlock(customBlock)
 
     # Copy dynamic items
@@ -212,12 +212,15 @@ def concat(infilenames, outfilename):
 
     n_items = safe_length(dfs_i_a.ItemInfo)
 
+    current_time = datetime(1,1,1) # beginning of time...
+
     for i, infilename in enumerate(infilenames):
 
         dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
-        n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-        dt = dfs_i.FileInfo.TimeAxis.TimeStep
-        start_time = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
+        t_axis = dfs_i.FileInfo.TimeAxis
+        n_time_steps = t_axis.NumberOfTimeSteps
+        dt = t_axis.TimeStep
+        start_time = from_dotnet_datetime(t_axis.StartDateTime)
 
         if i > 0 and start_time > current_time + timedelta(seconds=dt):
             dfs_o.Close()
