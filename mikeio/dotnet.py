@@ -103,16 +103,13 @@ def to_dotnet_array(x):
     dims = x.shape
     dtype = x.dtype
 
-    netDims = System.Array.CreateInstance(System.Int32, x.ndim)
-    for I in range(x.ndim):
-        netDims[I] = System.Int32(dims[I])
 
     if not x.flags.c_contiguous:
         x = x.copy(order="C")
     assert x.flags.c_contiguous
 
     try:
-        netArray = System.Array.CreateInstance(_MAP_NP_NET[dtype], netDims)
+        netArray = System.Array.CreateInstance(_MAP_NP_NET[dtype], dims)
     except KeyError:
         raise NotImplementedError(
             "asNetArray does not yet support dtype {}".format(dtype)

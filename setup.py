@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="mikeio",
     version="0.4.2",
-    install_requires=["pythonnet==2.4.0", "numpy", "pandas", "matplotlib"],
+    install_requires=["pythonnet", "numpy", "pandas", "matplotlib"],
     extras_require={"dev": ["pytest", "black", "sphinx", "sphinx", "sphinx-rtd-theme"]},
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
@@ -26,6 +26,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Operating System :: Microsoft :: Windows",
         "Topic :: Scientific/Engineering",
     ],
