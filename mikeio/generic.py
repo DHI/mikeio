@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
 from .dotnet import to_numpy, to_dotnet_float_array, from_dotnet_datetime
 from .helpers import safe_length
+from .dutil import find_item
 from shutil import copyfile
 
 
@@ -64,7 +65,9 @@ def _clone(infilename, outfilename):
     return file
 
 
-def scale(infilename, outfilename, offset=0.0, factor=1.0):
+def scale(
+    infilename, outfilename, offset=0.0, factor=1.0, item_numbers=None, item_names=None
+):
     """Apply scaling to any dfs file
 
         Parameters
@@ -78,19 +81,28 @@ def scale(infilename, outfilename, offset=0.0, factor=1.0):
             value to add to all items, default 0.0
         factor: float, optional
             value to multiply to all items, default 1.0
+        item_numbers: list[int], optional
+            Process only selected items, by number (0-based)
+        item_names: list[str], optional
+            Process only selected items, by name, takes precedence over item_numbers
         """
-
     copyfile(infilename, outfilename)
-
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
+    if item_names is not None:
+        item_numbers = find_item(dfs, item_names)
+
+    if item_numbers is None:
+        n_items = safe_length(dfs.ItemInfo)
+        item_numbers = list(range(n_items))
+
     n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-    n_items = safe_length(dfs.ItemInfo)
+    n_items = len(item_numbers)
 
     for timestep in range(n_time_steps):
         for item in range(n_items):
 
-            itemdata = dfs.ReadItemTimeStep(item + 1, timestep)
+            itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             d = to_numpy(itemdata.Data)
             time = itemdata.Time
 

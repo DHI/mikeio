@@ -35,6 +35,46 @@ def test_multiply_constant(tmpdir):
     scaledvalue = scaled.data[0][0]
     assert scaledvalue == pytest.approx(expected)
 
+def test_multiply_constant_single_item_number(tmpdir):
+
+    infilename = "tests/testdata/wind_north_sea.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "mult.dfsu")
+    scale(infilename, outfilename, factor=1.5, item_numbers=[0])
+
+    org = mikeio.read(infilename)
+
+    scaled = mikeio.read(outfilename)
+
+    orgvalue_speed = org.data[0][0][0]
+    expected_speed = orgvalue_speed * 1.5
+    scaledvalue_speed = scaled.data[0][0][0]
+    assert scaledvalue_speed == pytest.approx(expected_speed)
+
+    orgvalue_dir = org.data[1][0][0]
+    expected_dir = orgvalue_dir
+    scaledvalue_dir = scaled.data[1][0][0]
+    assert scaledvalue_dir == pytest.approx(expected_dir)
+
+def test_multiply_constant_single_item_name(tmpdir):
+
+    infilename = "tests/testdata/wind_north_sea.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "multname.dfsu")
+    scale(infilename, outfilename, factor=1.5, item_names=["Wind speed"])
+
+    org = mikeio.read(infilename)
+
+    scaled = mikeio.read(outfilename)
+
+    orgvalue_speed = org["Wind speed"][0,0]
+    expected_speed = orgvalue_speed * 1.5
+    scaledvalue_speed = scaled["Wind speed"][0,0]
+    assert scaledvalue_speed == pytest.approx(expected_speed)
+
+    orgvalue_dir = org["Wind direction"][0,0]
+    expected_dir = orgvalue_dir
+    scaledvalue_dir = scaled["Wind direction"][0,0]
+    assert scaledvalue_dir == pytest.approx(expected_dir)
+
 
 def test_linear_transform(tmpdir):
 
