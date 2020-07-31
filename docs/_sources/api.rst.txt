@@ -36,9 +36,15 @@ Misc
 .. autoclass:: mikeio.dutil.ItemInfo 
 	:members:
 
-
-
 Generic
 -------
 .. automodule:: mikeio.generic
+	:members:
+
+Mike 1D
+-------
+.. automodule:: mikeio.res1d
+	:members:
+
+.. automodule:: mikeio.xns11
 	:members:

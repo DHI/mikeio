@@ -1,3 +1,4 @@
+![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg)
 # mikeio: input/output of MIKE files in python
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
@@ -8,8 +9,8 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
 
 ## Requirements
 * Windows operating system
-* Python x64 3.6 or 3.7 (3.8 is not yet supprted by pythonnet)
-* [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads)
+* Python x64 3.6, 3.7 or 3.8 ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
+* [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 [More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
 
@@ -117,8 +118,29 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 >>>  # Combine the queries in a list
 >>>  queries = [q1, q2, q3]
 >>>  # The returned ts object is a pandas DataFrame
->>>  ts = r1d.read('res1dfile.res1d', queries)
+>>>  ts = res1d.read('res1dfile.res1d', queries)
 ```
+
+### Read Xns11 file Return Pandas DataFrame
+```python
+>>>  import matplotlib.pyplot as plt
+>>>  from mikeio import xns11
+>>>  # Query the geometry of chainage 58.68 of topoid1 at reach1
+>>>  q1 = xns11.QueryData('topoid1', 'reach1', 58.68)
+>>>  # Query the geometry of all chainages of topoid1 at reach2
+>>>  q2 = xns11.QueryData('topoid1', 'reach2')
+>>>  # Query the geometry of all chainages of topoid2
+>>>  q3 = xns11.QueryData('topoid2')
+>>>  # Combine the queries in a list
+>>>  queries = [q1, q2, q3]
+>>>  # The returned geometry object is a pandas DataFrame
+>>>  geometry = xns11.read('xsections.xns11', queries)
+>>>  # Plot geometry of chainage 58.68 of topoid1 at reach1
+>>>  plt.plot(geometry['x topoid1 reach1 58.68'],geometry['z topoid1 reach1 58.68'])
+>>>  plt.xlabel('Horizontal [meter]')
+>>>  plt.ylabel('Elevation [meter]')
+```
+![Geometry](images/xns11_geometry.png)
 
 ### Read dfsu files
 ```python

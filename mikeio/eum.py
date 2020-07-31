@@ -1065,6 +1065,7 @@ class EUMUnit(IntEnum):
     yard_pow_3_per_year_per_yard = 4728
     yard_US_pow_3_per_year_per_yard_US = 4729
     per_inch_US = 5006
+    meter_pow_3_per_sec_2 = 5100
     meter_pow_2_per_deg = 5203
     meter_pow_2_sec_pow_2_per_rad = 5204
     meter_pow_2_per_sec_per_rad = 5205
