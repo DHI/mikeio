@@ -55,10 +55,10 @@ class Dfs0:
             selected_items.append(items[item_number])
 
         return Dataset(selected_data, time, selected_items)
-    
+
     def __read(self, filename):
         """
-        Read data from a dfs0 file.
+        Read all data from a dfs0 file.
         """
         if not os.path.exists(filename):
             raise FileNotFoundError(f"File {filename} not found.")
@@ -98,14 +98,11 @@ class Dfs0:
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
             yield ItemInfo(name, item_type, unit)
 
-
-
     def _validate_item_numbers(self, item_numbers):
         if not all(isinstance(item_number, int) and 0 <= item_number < 1e15 for item_number in item_numbers):
             raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
 
     def write(self, filename, data):
-
         """
         Overwrites an existing dfs0 file.
 
@@ -123,7 +120,7 @@ class Dfs0:
         try:
             dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
         except IOError:
-            print("cannot open", filename)
+            raise IOError(f"Cannot open {filename}.")
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
