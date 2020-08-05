@@ -133,15 +133,15 @@ class Dfs0:
         if n_items != len(data):
             raise Exception(f"Number of items must be size {n_items}")
 
+        # TODO handle deletevalues?
+
         # Get time in seconds from start
         existing_data = Dfs0Util.ReadDfs0DataDouble(dfs)
         time = [existing_data[i, 0] for i in range(n_time_steps)]
 
         dfs.Reset()
-
         new_data = to_dotnet_array(np.stack(data, axis=1))
         Dfs0Util.WriteDfs0DataDouble(dfs, time, new_data)
-
         dfs.Close()
 
     def create(
@@ -184,9 +184,6 @@ class Dfs0:
             default np.float32
 
         """
-        if title is None:
-            title = "dfs0 file"
-
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
 
@@ -235,24 +232,20 @@ class Dfs0:
 
         system_start_time = to_dotnet_datetime(start_time)
 
+        if title is None:
+            title = "dfs0 file"
+
         factory = DfsFactory()
         builder = DfsBuilder.Create(title, "DFS", 0)
         builder.SetDataType(1)
         builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
         if equidistant:
-            builder.SetTemporalAxis(
-                factory.CreateTemporalEqCalendarAxis(
-                    timeseries_unit, system_start_time, 0, dt
-                )
-            )
+            temporal_axis = factory.CreateTemporalEqCalendarAxis(timeseries_unit, system_start_time, 0, dt)
         else:
-            builder.SetTemporalAxis(
-                factory.CreateTemporalNonEqCalendarAxis(
-                    timeseries_unit, system_start_time
-                )
-            )
+            temporal_axis = factory.CreateTemporalNonEqCalendarAxis(timeseries_unit, system_start_time)
 
+        builder.SetTemporalAxis(temporal_axis)
         builder.SetItemStatisticsType(StatType.RegularStat)
 
         for i in range(n_items):
