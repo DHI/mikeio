@@ -148,6 +148,21 @@ class Dfs0:
         Dfs0Util.WriteDfs0DataDouble(dfs, time, new_data)
         dfs.Close()
 
+    @staticmethod
+    def _to_dfs_datatype(dtype):
+        if dtype is None:
+            return DfsSimpleType.Float
+
+        if dtype in (np.float64, DfsSimpleType.Double, "double"):
+            return DfsSimpleType.Double
+
+        if dtype in (np.float32, DfsSimpleType.Float, "float", "single"):
+            return DfsSimpleType.Float
+
+        raise ValueError(
+            "Invalid data type, choose between np.float32 or np.float64"
+        )
+
     def create(
             self,
             filename,
@@ -220,20 +235,6 @@ class Dfs0:
             start_time = datetimes[0]
             equidistant = False
 
-        if dtype in (np.float64, DfsSimpleType.Double, "double"):
-            dtype = DfsSimpleType.Double
-        elif dtype in (np.float32, DfsSimpleType.Float, "float", "single"):
-            dtype = DfsSimpleType.Float
-        elif dtype is None:
-            dtype = DfsSimpleType.Float
-        else:
-            raise ValueError(
-                "Invalid data type, choose between np.float32 or np.float64"
-            )
-
-        # if not isinstance(timeseries_unit, int):
-        #    raise Warning("timeseries_unit must be an integer. See dfsutil options for help ")
-
         system_start_time = to_dotnet_datetime(start_time)
 
         if title is None:
@@ -252,10 +253,12 @@ class Dfs0:
         builder.SetTemporalAxis(temporal_axis)
         builder.SetItemStatisticsType(StatType.RegularStat)
 
+        dtype_dfs = self._to_dfs_datatype(dtype)
+
         for i in range(n_items):
             item = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(items[i].type, items[i].unit)
-            item.Set(items[i].name, quantity, dtype,)
+            item.Set(items[i].name, quantity, dtype_dfs, )
 
             if data_value_type is not None:
                 item.SetValueType(data_value_type[i])
@@ -267,20 +270,16 @@ class Dfs0:
 
         try:
             builder.CreateFile(filename)
-
         except IOError:
-            print("cannot create dfso file: ", filename)
+            raise IOError(f"Cannot create dfs0 file: {filename}")
 
         dfs = builder.GetFile()
-        delete_value = dfs.FileInfo.DeleteValueFloat
 
-        for i in range(n_items):
-            d = data[i]
-            d[np.isnan(d)] = delete_value
+        # dfs.FileInfo.DeleteValueFloat
 
-        data1 = np.stack(data, axis=1)
+        data_to_write = to_dotnet_array(np.stack(data, axis=1))
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
-        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, to_dotnet_array(data1))
+        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
 
         dfs.Close()
 
