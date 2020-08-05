@@ -1,8 +1,8 @@
 import os
-from datetime import datetime, timedelta
-
 import numpy as np
 import pandas as pd
+from datetime import datetime, timedelta
+
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
@@ -21,6 +21,41 @@ from .helpers import safe_length
 
 
 class Dfs0:
+    def read(self, filename, item_numbers=None, item_names=None):
+        """
+        Read data from a dfs0 file.
+
+        Parameters
+        ----------
+        filename: str
+            File name including full path to the dfs0 file.
+        item_numbers: list[int], optional
+            Read only the item_numbers in the array specified (0 base)
+        item_names: list[str], optional
+            Read only the items in the array specified, (takes precedence over item_numbers)
+
+        Returns
+        -------
+            Dataset(data, time, items)
+        """
+
+        data, time, items = self.__read(filename)
+
+        if item_names is not None:
+            item_numbers = find_item(self._dfs, item_names)
+
+        selected_item_numbers = range(data.shape[1]) if item_numbers is None else item_numbers
+
+        self._validate_item_numbers(selected_item_numbers)
+
+        selected_data = []
+        selected_items = []
+        for item_number in selected_item_numbers:
+            selected_data.append(data[:, item_number])
+            selected_items.append(items[item_number])
+
+        return Dataset(selected_data, time, selected_items)
+    
     def __read(self, filename):
         """
         Read data from a dfs0 file.
@@ -63,40 +98,7 @@ class Dfs0:
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
             yield ItemInfo(name, item_type, unit)
 
-    def read(self, filename, item_numbers=None, item_names=None):
-        """
-        Read data from a dfs0 file.
 
-        Parameters
-        ----------
-        filename: str
-            File name including full path to the dfs0 file.
-        item_numbers: list[int], optional
-            Rread only the item_numbers in the array specified (0 base)
-        item_names: list[str], optional
-            Read only the items in the array specified, (takes precedence over item_numbers)
-
-        Returns
-        -------
-            Dataset(data, time, items)
-        """
-
-        data, time, items = self.__read(filename)
-
-        if item_names is not None:
-            item_numbers = find_item(self._dfs, item_names)
-
-        selected_item_numbers = range(data.shape[1]) if item_numbers is None else item_numbers
-
-        self._validate_item_numbers(selected_item_numbers)
-
-        selected_data = []
-        selected_items = []
-        for item_number in selected_item_numbers:
-            selected_data.append(data[:, item_number])
-            selected_items.append(items[item_number])
-
-        return Dataset(selected_data, time, selected_items)
 
     def _validate_item_numbers(self, item_numbers):
         if not all(isinstance(item_number, int) and 0 <= item_number < 1e15 for item_number in item_numbers):
