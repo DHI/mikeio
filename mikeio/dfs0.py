@@ -98,11 +98,13 @@ class Dfs0:
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
             yield ItemInfo(name, item_type, unit)
 
-    def _validate_item_numbers(self, item_numbers):
+    @staticmethod
+    def _validate_item_numbers(item_numbers):
         if not all(isinstance(item_number, int) and 0 <= item_number < 1e15 for item_number in item_numbers):
             raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
 
-    def _validate_and_open_dfs(self, filename, data):
+    @staticmethod
+    def _validate_and_open_dfs(filename, data):
         if not os.path.exists(filename):
             raise FileNotFoundError(f"File {filename} not found.")
 
@@ -144,8 +146,9 @@ class Dfs0:
 
         # Overwrite with new data
         dfs.Reset()
-        new_data = to_dotnet_array(np.stack(data, axis=1))
-        Dfs0Util.WriteDfs0DataDouble(dfs, time, new_data)
+        new_data = np.nan_to_num(data, nan=dfs.FileInfo.DeleteValueFloat)
+        new_data_dotnet = to_dotnet_array(np.stack(new_data, axis=1))
+        Dfs0Util.WriteDfs0DataDouble(dfs, time, new_data_dotnet)
         dfs.Close()
 
     @staticmethod
@@ -159,9 +162,7 @@ class Dfs0:
         if dtype in (np.float32, DfsSimpleType.Float, "float", "single"):
             return DfsSimpleType.Float
 
-        raise ValueError(
-            "Invalid data type, choose between np.float32 or np.float64"
-        )
+        raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
     def create(
             self,
