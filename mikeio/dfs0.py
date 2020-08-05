@@ -104,16 +104,15 @@ class Dfs0:
 
     def write(self, filename, data):
         """
-        Overwrites an existing dfs0 file.
+        Overwrite data in an existing dfs0 file.
 
         Parameters
         ----------
         filename: str
             Full path and filename to dfs0 to be modified.
         data: list[np.array]
-            Data to overwrite.
+            New data to write.
         """
-
         if not os.path.exists(filename):
             raise FileNotFoundError(f"File {filename} not found.")
 
@@ -121,8 +120,6 @@ class Dfs0:
             dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
         except IOError:
             raise IOError(f"Cannot open {filename}.")
-
-        delete_value = dfs.FileInfo.DeleteValueFloat
 
         n_items = len(dfs.ItemInfo)
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -140,15 +137,15 @@ class Dfs0:
             d = data[i]
 
             d[np.isnan(d)] = delete_value
-
-        # Get the date times in seconds (from start)
-        dfsdata = Dfs0Util.ReadDfs0DataDouble(dfs)
-        t_seconds = [dfsdata[i, 0] for i in range(n_time_steps)]
+            
+        # Get time in seconds from start
+        existing_data = Dfs0Util.ReadDfs0DataDouble(dfs)
+        time = [existing_data[i, 0] for i in range(n_time_steps)]
 
         dfs.Reset()
 
-        data1 = np.stack(data, axis=1)
-        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, to_dotnet_array(data1))
+        new_data = to_dotnet_array(np.stack(data, axis=1))
+        Dfs0Util.WriteDfs0DataDouble(dfs, time, new_data)
 
         dfs.Close()
 
