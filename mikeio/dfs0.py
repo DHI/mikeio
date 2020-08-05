@@ -102,17 +102,7 @@ class Dfs0:
         if not all(isinstance(item_number, int) and 0 <= item_number < 1e15 for item_number in item_numbers):
             raise Warning("item_numbers must be a list or array of values between 0 and 1e15")
 
-    def write(self, filename, data):
-        """
-        Overwrite data in an existing dfs0 file.
-
-        Parameters
-        ----------
-        filename: str
-            Full path and filename to dfs0 to be modified.
-        data: list[np.array]
-            New data to write.
-        """
+    def _validate_and_open_dfs(self, filename, data):
         if not os.path.exists(filename):
             raise FileNotFoundError(f"File {filename} not found.")
 
@@ -124,21 +114,35 @@ class Dfs0:
         n_items = len(dfs.ItemInfo)
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        # Makes sure the data to write to the file matches the dfs0 file
+        # Match the data to write to the existing dfs0 file
         if n_time_steps != data[0].shape[0]:
             raise Exception(
-                f"Inconsistent data size. nt (row count) must be size {n_time_steps}"
+                f"Inconsistent data size. Number of time steps (row count) is {data[0].shape[0]}. Expected {n_time_steps}."
             )
 
         if n_items != len(data):
-            raise Exception(f"Number of items must be size {n_items}")
+            raise Exception(f"The number of items is {len(data)}. Expected {n_items}.")
 
-        # TODO handle deletevalues?
+        return dfs, n_items, n_time_steps
+
+    def write(self, filename, data):
+        """
+        Overwrite data in an existing dfs0 file.
+
+        Parameters
+        ----------
+        filename: str
+            Full path and filename to dfs0 to be modified.
+        data: list[np.array]
+            New data to write.
+        """
+        dfs, n_items, n_time_steps = self._validate_and_open_dfs(filename, data)
 
         # Get time in seconds from start
         existing_data = Dfs0Util.ReadDfs0DataDouble(dfs)
         time = [existing_data[i, 0] for i in range(n_time_steps)]
 
+        # Overwrite with new data
         dfs.Reset()
         new_data = to_dotnet_array(np.stack(data, axis=1))
         Dfs0Util.WriteDfs0DataDouble(dfs, time, new_data)
@@ -191,7 +195,7 @@ class Dfs0:
             start_time = datetime.now()
 
         if items is None:
-            items = [ItemInfo(f"temItem {i + 1}") for i in range(n_items)]
+            items = [ItemInfo(f"Item {i + 1}") for i in range(n_items)]
 
         if len(items) != n_items:
             raise Warning(
@@ -202,7 +206,7 @@ class Dfs0:
             equidistant = True
 
             if not type(start_time) is datetime:
-                raise Warning("start_time must be of type datetime ")
+                raise Warning("start_time must be of type datetime.")
 
             dt = np.float(dt)
             datetimes = np.array(
@@ -249,12 +253,9 @@ class Dfs0:
         builder.SetItemStatisticsType(StatType.RegularStat)
 
         for i in range(n_items):
-
             item = builder.CreateDynamicItemBuilder()
-
-            item.Set(
-                items[i].name, eumQuantity.Create(items[i].type, items[i].unit), dtype,
-            )
+            quantity = eumQuantity.Create(items[i].type, items[i].unit)
+            item.Set(items[i].name, quantity, dtype,)
 
             if data_value_type is not None:
                 item.SetValueType(data_value_type[i])
