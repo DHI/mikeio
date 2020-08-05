@@ -133,11 +133,6 @@ class Dfs0:
         if n_items != len(data):
             raise Exception(f"Number of items must be size {n_items}")
 
-        for i in range(n_items):
-            d = data[i]
-
-            d[np.isnan(d)] = delete_value
-            
         # Get time in seconds from start
         existing_data = Dfs0Util.ReadDfs0DataDouble(dfs)
         time = [existing_data[i, 0] for i in range(n_time_steps)]
