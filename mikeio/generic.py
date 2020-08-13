@@ -115,7 +115,7 @@ def scale(
             outdata[np.isnan(outdata)] = deletevalue
             darray = to_dotnet_float_array(outdata)
 
-            dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
+            dfs.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
 
     dfs.Close()
 
