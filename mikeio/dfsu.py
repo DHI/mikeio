@@ -192,6 +192,9 @@ class Dfsu:
 
         system_start_time = to_dotnet_datetime(start_time)
 
+        # Default filetype; TODO support all types of Dfsu
+        filetype = DfsuFileType.Dfsu2D
+        
         _, ext = os.path.splitext(meshfilename)
 
         if ext == ".mesh":
@@ -203,6 +206,7 @@ class Dfsu:
 
             source = DfsuFile.Open(meshfilename)
             projstr = source.Projection.WKTString
+            filetype = source.DfsuFileType
 
         xn = source.X
         yn = source.Y
@@ -213,20 +217,25 @@ class Dfsu:
         nodecodes = source.Code
         elementtable = source.ElementTable
 
-        # TODO support all types of Dfsu
-        builder = DfsuBuilder.Create(DfsuFileType.Dfsu2D)
+        builder = DfsuBuilder.Create(filetype)
 
         builder.SetNodes(xn, yn, zn, nodecodes)
-
         builder.SetElements(elementtable)
+        #builder.SetNodeIds(source.NodeIds)
+        #builder.SetElementIds(source.ElementIds)
+
         factory = DfsFactory()
         proj = factory.CreateProjection(projstr)
         builder.SetProjection(proj)
         builder.SetTimeInfo(system_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
 
+        if filetype != DfsuFileType.Dfsu2D:
+            builder.SetNumberOfSigmaLayers(source.NumberOfSigmaLayers)
+           
         for item in items:
-            builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
+            if item.name != "Z coordinate":
+                builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
 
         try:
             dfs = builder.CreateFile(filename)

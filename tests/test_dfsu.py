@@ -268,6 +268,23 @@ def test_create_from_dfsu(tmpdir):
 
     assert True
 
+def test_create_from_dfsu3D(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple3D.dfsu")
+    dfs = Dfsu()
+
+    ds = dfs.read(sourcefilename)
+
+    data = ds.data[0:2]
+
+    items = ds.items[0:2]
+
+    dfs.create(
+        sourcefilename, outfilename, data, items=items, start_time=ds.time[0], dt=3600
+    )
+
+    assert os.path.exists(outfilename)
 
 def test_create_invalid_data_closes_and_deletes_file(tmpdir):
 
