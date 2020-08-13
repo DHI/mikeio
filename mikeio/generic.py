@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from datetime import datetime, timedelta
 
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
@@ -99,17 +100,24 @@ def scale(
     n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = len(item_numbers)
 
+    deletevalue = dfs.FileInfo.DeleteValueFloat
+
     for timestep in range(n_time_steps):
         for item in range(n_items):
 
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
-            d = to_numpy(itemdata.Data)
             time = itemdata.Time
+            d = to_numpy(itemdata.Data)
+            d[d == deletevalue] = np.nan
 
             outdata = d * factor + offset
+
+            outdata[np.isnan(outdata)] = deletevalue
             darray = to_dotnet_float_array(outdata)
 
             dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
+
+    dfs.Close()
 
 
 def sum(infilename_a, infilename_b, outfilename):
@@ -224,7 +232,7 @@ def concat(infilenames, outfilename):
 
     n_items = safe_length(dfs_i_a.ItemInfo)
 
-    current_time = datetime(1,1,1) # beginning of time...
+    current_time = datetime(1, 1, 1)  # beginning of time...
 
     for i, infilename in enumerate(infilenames):
 
