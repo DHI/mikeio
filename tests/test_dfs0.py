@@ -368,6 +368,7 @@ def test_write(tmpdir):
     # Overwrite the file
     dfs.write(tmpfile, data)
 
+
 def test_write_data_with_missing_values(tmpdir):
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")

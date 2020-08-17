@@ -314,7 +314,6 @@ class Dfs0:
             df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
         else:
             df.index = pd.DatetimeIndex(t, freq="infer")
-            
 
         return df
 
