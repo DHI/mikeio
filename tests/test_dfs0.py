@@ -368,6 +368,29 @@ def test_write(tmpdir):
     # Overwrite the file
     dfs.write(tmpfile, data)
 
+def test_write_data_with_missing_values(tmpdir):
+    dfs0file = r"tests/testdata/random.dfs0"
+    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+
+    copyfile(dfs0file, tmpfile)
+    dfs = Dfs0()
+    res = dfs.read(tmpfile)
+    data = res.data
+
+    # Do something with the data
+    data[0] = np.zeros_like(data[0])
+    data[1] = np.ones_like(data[0])
+
+    # Add some NaNs
+    data[1][0:10] = np.nan
+
+    # Overwrite the file
+    dfs.write(tmpfile, data)
+
+    modified = dfs.read(tmpfile)
+    assert(np.isnan(modified.data[1][5]))
+
+
 
 def test_write_wrong_n_items(tmpdir):
     dfs0file = r"tests/testdata/random.dfs0"

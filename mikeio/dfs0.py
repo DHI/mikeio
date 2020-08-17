@@ -299,7 +299,7 @@ class Dfs0:
 
         dfs.Close()
 
-    def to_dataframe(self, filename, unit_in_name=False):
+    def to_dataframe(self, filename, unit_in_name=False, round_time='s'):
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
         
@@ -309,6 +309,8 @@ class Dfs0:
             full path and file name to the dfs0 file.
         unit_in_name: bool, optional
             include unit in column name, default False
+        round_time: string, bool, optional
+            round time to avoid problem with floating point inaccurcy, set to False to avoid rounding
         Returns
         -------
         pd.DataFrame
@@ -322,7 +324,12 @@ class Dfs0:
 
         df = pd.DataFrame(data, columns=names)
 
-        df.index = pd.DatetimeIndex(t, freq="infer")
+        if round_time:
+            rounded_idx = pd.DatetimeIndex(t).round(round_time)
+            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
+        else:
+            df.index = pd.DatetimeIndex(t, freq="infer")
+            
 
         return df
 
