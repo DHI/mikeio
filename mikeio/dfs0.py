@@ -136,9 +136,9 @@ class Dfs0:
 
         if n_items != len(data):
             raise Exception(f"Number of items must be size {n_items}")
-
+        
         for i in range(n_items):
-            d = data[i]
+            d = data[i].copy()
 
             d[np.isnan(d)] = delete_value
 
@@ -290,7 +290,7 @@ class Dfs0:
         delete_value = dfs.FileInfo.DeleteValueFloat
 
         for i in range(n_items):
-            d = data[i]
+            d = data[i].copy()
             d[np.isnan(d)] = delete_value
 
         data1 = np.stack(data, axis=1)

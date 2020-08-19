@@ -387,6 +387,9 @@ def test_write_data_with_missing_values(tmpdir):
     # Overwrite the file
     dfs.write(tmpfile, data)
 
+    # Write operation does not modify the data
+    assert(np.isnan(data[1][1]))
+
     modified = dfs.read(tmpfile)
     assert(np.isnan(modified.data[1][5]))
 
