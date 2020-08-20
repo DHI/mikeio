@@ -126,6 +126,7 @@ class Dfs0:
             raise Exception(f"The number of items is {len(data)}. Expected {n_items}.")
 
         return dfs, n_items, n_time_steps
+      
 
     def write(self, filename, data):
         """
@@ -276,7 +277,9 @@ class Dfs0:
 
         dfs = builder.GetFile()
 
-        # dfs.FileInfo.DeleteValueFloat
+        for i in range(n_items):
+            d = data[i].copy()
+            d[np.isnan(d)] = delete_value
 
         data_to_write = to_dotnet_array(np.stack(data, axis=1))
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
