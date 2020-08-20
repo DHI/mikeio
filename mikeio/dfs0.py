@@ -277,6 +277,8 @@ class Dfs0:
 
         dfs = builder.GetFile()
 
+        delete_value = dfs.FileInfo.DeleteValueFloat
+
         for i in range(n_items):
             d = data[i].copy()
             d[np.isnan(d)] = delete_value
