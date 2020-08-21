@@ -315,15 +315,15 @@ class Dfsu:
         # pre-allocate for speed
         maxnodes = 8
         idx = np.zeros(maxnodes, dtype=np.int)
-        xcoords = np.empty([maxnodes, n_elements])
-        ycoords = np.empty([maxnodes, n_elements])
-        zcoords = np.empty([maxnodes, n_elements])
-        allnnodes = np.zeros(n_elements)
+        xcoords = np.zeros([maxnodes, n_elements])
+        ycoords = np.zeros([maxnodes, n_elements])
+        zcoords = np.zeros([maxnodes, n_elements])
+        nnodes_per_elem = np.zeros(n_elements)
 
         for j in range(n_elements):
             nodes = self._dfs.ElementTable[j]
             nnodes = len(nodes)
-            allnnodes[j] = nnodes
+            nnodes_per_elem[j] = nnodes
             for i in range(nnodes):
                 idx[i] = nodes[i] - 1
 
@@ -331,9 +331,9 @@ class Dfsu:
             ycoords[:nnodes,j] = yn[idx[:nnodes]]
             zcoords[:nnodes,j] = zn[idx[:nnodes]]
         
-        ec[:, 0] = np.sum(xcoords, axis=0)/allnnodes
-        ec[:, 1] = np.sum(ycoords, axis=0)/allnnodes
-        ec[:, 2] = np.sum(zcoords, axis=0)/allnnodes
+        ec[:, 0] = np.sum(xcoords, axis=0)/nnodes_per_elem
+        ec[:, 1] = np.sum(ycoords, axis=0)/nnodes_per_elem
+        ec[:, 2] = np.sum(zcoords, axis=0)/nnodes_per_elem
 
         self._ec = ec
         return ec
