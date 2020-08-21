@@ -3,7 +3,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
-from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder
+from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
 from .dutil import Dataset, find_item, get_item_info
@@ -12,17 +12,152 @@ from .dotnet import (
     to_dotnet_float_array,
     to_dotnet_datetime,
     from_dotnet_datetime,
+    asNumpyArray,
+    to_dotnet_array
 )
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
+class _Unstructured:
+    _filename = None
+    _source = None
+    _filetype = None
+    _projstr = None
+    _nc = None
+    _ec = None
+    _valid_codes = None
+    _start_time = None
+    _items = None
 
-class Dfsu:
-    _ec = None     # element coordinates
+    def __init__(self, filename):       
+        self._filename = filename
+        self._read_header(filename)
 
-    def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
+    def _read_header(self, filename):
+        _, ext = os.path.splitext(filename)
+
+        if ext == ".mesh":
+            self._read_mesh_header(filename)            
+        
+        elif ext == ".dfsu":
+            self._read_dfsu_header(filename)
+            self._source.Close()
+
+    def _read_mesh_header(self, filename):
+        msh = MeshFile.ReadMesh(filename)
+        self._source = msh
+        self._projstr = msh.ProjectionString
+        self._filetype = -1        
+
+    def _read_dfsu_header(self, filename):
+        
+        dfs = DfsuFile.Open(filename)
+        self._source = dfs
+        self._projstr = dfs.Projection.WKTString
+        self._filetype = dfs.DfsuFileType    
+        self._deleteValue = dfs.DeleteValueFloat
+
+        # items 
+        self._n_items = safe_length(dfs.ItemInfo)
+        self._items = get_item_info(dfs, list(range(self._n_items)))
+
+        # time
+        self._start_time = from_dotnet_datetime(dfs.StartDateTime)
+        self._n_timesteps = dfs.NumberOfTimeSteps
+        self._timestep_in_seconds = dfs.TimeStepInSeconds
+
+        #dfs.Close()
+
+    @property
+    def node_coordinates(self):  
+        if self._nc is None:
+            #xn = np.array(list())
+            xn = asNumpyArray(self._source.X)
+            yn = asNumpyArray(self._source.Y)
+            zn = asNumpyArray(self._source.Z)
+            #yn = np.array(list(self._source.Y))
+            #zn = np.array(list(self._source.Z))
+            self._nc = np.column_stack([xn, yn, zn])      
+        return self._nc
+
+    @property
+    def n_elements(self):
+        return self._source.NumberOfElements
+
+    @property
+    def projection_string(self):
+        return self._projstr
+
+    @property
+    def is_geo(self):
+        return self._projstr == "LONG/LAT"
+    
+    @property
+    def is_local_coordinates(self):
+        return self._projstr == "NON-UTM"
+
+    @property
+    def valid_codes(self):
+        if self._valid_codes is None:
+            codes = np.array(list(self._source.Code))
+            #codes = to_numpy(self._source.Code).astype(int)            
+            self._valid_codes = list(set(codes))
+        return self._valid_codes
+
+    @property
+    def boundary_codes(self):
+        """provides a unique list of boundary codes
+        """        
+        return [code for code in self.valid_codes if code > 0]
+
+    @property
+    def element_coordinates(self):
+        if self._ec is None:
+            xc = np.zeros(self.n_elements)
+            yc = np.zeros(self.n_elements)
+            zc = np.zeros(self.n_elements)
+            _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc))
+            self._ec = nc = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
+        return self._ec
+
+
+class Dfsu(_Unstructured):
+    
+    def __init__(self, filename):
+        super().__init__(filename)  # super(Dfsu, self)
+
+    @property 
+    def deletevalue(self):
+        return self._deletevalue
+
+    @property 
+    def n_items(self):
+        return self._n_items
+
+    @property 
+    def items(self):
+        return self._items
+
+    @property
+    def start_time(self):
+        return self._start_time
+
+    @property
+    def n_timesteps(self):
+        return self._n_timesteps
+
+    @property
+    def timestep(self):
+        return self._timestep_in_seconds
+
+    @property
+    def end_time(self):
+        return self.start_time + timedelta(self.n_timesteps * self.timestep)
+
+
+    def read(self, item_numbers=None, item_names=None, time_steps=None):
         """
-        Read a dfsu file
+        Read data from a dfsu file
 
         Parameters
         ---------
@@ -42,13 +177,13 @@ class Dfsu:
         """
 
         # Open the dfs file for reading
-        dfs = DfsuFile.Open(filename)
-        self._dfs = dfs
-        self._ec = None
-
+        #dfs = DfsuFile.Open(self._filename)
+        self._read_dfsu_header(self._filename)
+        dfs = self._source
+        
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
         item_offset = 0
-        n_items = safe_length(dfs.ItemInfo)
+        n_items = self.n_items #safe_length(dfs.ItemInfo)
 
         nt = dfs.NumberOfTimeSteps
 
@@ -104,7 +239,7 @@ class Dfsu:
         dfs.Close()
         return Dataset(data_list, time, items)
 
-    def write(self, filename, data):
+    def write(self, data):
         """Overwrite a pre-created dfsu file.
 
         Parameters
@@ -117,7 +252,7 @@ class Dfsu:
         """
 
         # Open the dfs file for writing
-        dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
+        dfs = DfsFileFactory.DfsGenericOpenEdit(self._filename)
 
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         n_items = safe_length(dfs.ItemInfo)
@@ -152,11 +287,10 @@ class Dfsu:
         data,
         start_time=None,
         dt=1,
-        timeseries_unit=TimeStep.SECOND,
         items=None,
         title=None,
     ):
-        """Create a dfsu file
+        """Create a new dfsu file
 
         Parameters
         -----------
@@ -169,12 +303,8 @@ class Dfsu:
         start_time: datetime, optional
             start datetime, default is datetime.now()
         dt: float
-            The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
-            means 5 mins and 30 seconds. Default 1
-        timeseries_unit: TimeStep, optional
-             default TimeStep.SECOND
-        unit: list[ItemInfo], optional
-            Name, item, unit, default is undefined
+            The time step (in seconds). Default 1        
+        items: TODO
         title: str
             title of the dfsu file. Default is blank.
         """
@@ -186,7 +316,7 @@ class Dfsu:
             start_time = datetime.now()
 
         if items is None:
-            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
+            items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
 
         if title is None:
             title = ""
@@ -276,18 +406,20 @@ class Dfsu:
                 x,y,z of each node
         """
         # Node coordinates
-        xn = np.array(list(self._dfs.X))
-        yn = np.array(list(self._dfs.Y))
-        zn = np.array(list(self._dfs.Z))
+        #xn = np.array(list(self._dfs.X))
+        #yn = np.array(list(self._dfs.Y))
+        #zn = np.array(list(self._dfs.Z))
 
-        nc = np.column_stack([xn, yn, zn])
+        nc = self.node_coordinates #np.column_stack([xn, yn, zn])
 
         if code is not None:
 
-            c = np.array(list(self._dfs.Code))
-            valid_codes = set(c)
+            #c = np.array(list(self._dfs.Code))
+            #valid_codes = set(c)
 
-            if code not in valid_codes:
+            # TODO: support list of codes
+
+            if code not in self.valid_codes:
 
                 print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
                 raise Exception
@@ -296,47 +428,9 @@ class Dfsu:
         return nc
 
     def get_element_coords(self):
-        """Calculates the coordinates of the center of each element.
-
-        Returns
-        -------
-            np.array
-                x,y,z of each element
+        """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
         """
-        n_elements = self._dfs.NumberOfElements
-
-        # Node coordinates
-        xn = np.array(list(self._dfs.X))
-        yn = np.array(list(self._dfs.Y))
-        zn = np.array(list(self._dfs.Z))
-
-        ec = np.empty([n_elements, 3])
-
-        # pre-allocate for speed
-        maxnodes = 8
-        idx = np.zeros(maxnodes, dtype=np.int)
-        xcoords = np.zeros([maxnodes, n_elements])
-        ycoords = np.zeros([maxnodes, n_elements])
-        zcoords = np.zeros([maxnodes, n_elements])
-        nnodes_per_elem = np.zeros(n_elements)
-
-        for j in range(n_elements):
-            nodes = self._dfs.ElementTable[j]
-            nnodes = len(nodes)
-            nnodes_per_elem[j] = nnodes
-            for i in range(nnodes):
-                idx[i] = nodes[i] - 1
-
-            xcoords[:nnodes,j] = xn[idx[:nnodes]]
-            ycoords[:nnodes,j] = yn[idx[:nnodes]]
-            zcoords[:nnodes,j] = zn[idx[:nnodes]]
-        
-        ec[:, 0] = np.sum(xcoords, axis=0)/nnodes_per_elem
-        ec[:, 1] = np.sum(ycoords, axis=0)/nnodes_per_elem
-        ec[:, 2] = np.sum(zcoords, axis=0)/nnodes_per_elem
-
-        self._ec = ec
-        return ec
+        return self.element_coordinates
 
     def find_closest_element_index(self, x, y, z=None):
         """Find index of closest element
@@ -351,10 +445,7 @@ class Dfsu:
         z: float, optional
           Z coordinate(depth, positive upwards)
         """
-        if self._ec is None:
-            self._ec = self.get_element_coords()
-        
-        ec = self._ec
+        ec = self.element_coordinates
 
         if z is None:
             poi = np.array([x, y])
@@ -370,17 +461,9 @@ class Dfsu:
         return idx
 
     def get_number_of_time_steps(self):
-        return self._dfs.get_NumberOfTimeSteps()
-
-    @property
-    def is_geo(self):
-        """Determines if dfsu file is defined on geographical LONG/LAT mesh.
-
-        Returns:
-            bool
-                True if LONG/LAT, FALSE otherwise
+        """FOR BACKWARD COMPATIBILITY ONLY. Use n_timesteps instead.
         """
-        return self._dfs.Projection.WKTString == "LONG/LAT"
+        return self.n_timesteps
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.
@@ -389,18 +472,18 @@ class Dfsu:
             np.array
                 areas in m2
         """
-        n_elements = self._dfs.NumberOfElements
+        n_elements = self._source.NumberOfElements
 
         # Node coordinates
-        xn = np.array(list(self._dfs.X))
-        yn = np.array(list(self._dfs.Y))
+        xn = np.array(list(self._source.X))
+        yn = np.array(list(self._source.Y))
 
         area = np.empty(n_elements)
         xcoords = np.empty(4)
         ycoords = np.empty(4)
 
         for j in range(n_elements):
-            nodes = self._dfs.ElementTable[j]
+            nodes = self._source.ElementTable[j]
 
             for i in range(nodes.Length):
                 nidx = nodes[i] - 1
