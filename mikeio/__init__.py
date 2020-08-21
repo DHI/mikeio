@@ -64,7 +64,8 @@ def read(filename, item_numbers=None, item_names=None):
 
     elif ext == ".dfsu":
 
-        dfs = Dfsu()
+        dfs = Dfsu(filename)
+        return dfs.read(item_numbers, item_names)
     else:
         raise Exception(f"{ext} is an unsupported extension")
 
