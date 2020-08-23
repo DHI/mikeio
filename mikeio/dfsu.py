@@ -117,7 +117,7 @@ class _Unstructured:
             yc = np.zeros(self.n_elements)
             zc = np.zeros(self.n_elements)
             _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc))
-            self._ec = nc = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
+            self._ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return self._ec
 
 
@@ -150,10 +150,127 @@ class Dfsu(_Unstructured):
     def timestep(self):
         return self._timestep_in_seconds
 
+    @timestep.setter
+    def timestep(self, value):
+        if value <= 0:
+            print(f'timestep must be positive scalar!')
+        else:
+            self._timestep_in_seconds = value
+
     @property
     def end_time(self):
         return self.start_time + timedelta(self.n_timesteps * self.timestep)
 
+
+    # 3D dfsu stuff
+
+    @property
+    def n_layers(self):
+        return self._source.NumberOfLayers
+
+    @property
+    def n_sigma_layers(self):
+        return self._source.NumberOfSigmaLayers
+
+    _top_elems = None
+
+    @property 
+    def top_element_ids(self):
+        if self._top_elems is None:
+            self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
+        return self._top_elems
+    
+    _n_layers_column = None
+
+    @property 
+    def num_layers_per_column(self):
+        if self._n_layers_column is None:                    
+            top_elems = self.top_element_ids
+            n = len(top_elems)
+            tmp = top_elems.copy()
+            tmp[0] = -1
+            tmp[1:n] = top_elems[0:(n-1)]
+            self._n_layers_column = top_elems - tmp
+        return self._n_layers_column
+
+    _bot_elems = None
+
+    @property 
+    def bottom_element_ids(self):
+        if self._bot_elems is None:
+            self._bot_elems = self.top_element_ids - self.num_layers_per_column
+        return self._bot_elems
+
+    def get_element_ids_layer_n(self, n):
+        """3D element ids for a specific layer
+
+        Parameters
+        ----------
+        n : int
+            layer between 1 (bottom) and n_layers (top) 
+            (can also be negative with 0 as top layer )
+
+        Returns
+        -------
+        np.array(int)
+            element ids
+        """
+        n_lay = self.n_layers
+        n_sigma = self.n_sigma_layers
+        n_z = n_lay - n_sigma
+        if n > n_z:
+            n = n - n_lay
+
+        if n < (-n_lay) or n > n_lay:
+            print(f'Layer {n} not allowed must be between -{n_lay} and {n_lay}')
+            raise Exception         
+        if n <= 0:
+            # sigma layers, counting from the top
+            if n < -n_sigma:
+                raise Exception(f'Negative layers only possible for sigma layers')
+            return self.top_element_ids + n 
+        else:
+            # then it must be a z layer 
+            return self.bottom_element_ids[self.num_layers_per_column >= n] + n 
+
+    def get_nodes_for_elements(self, element_ids, node_layers = 'all'): 
+        """list of unique node ids for a list of elements
+
+        Parameters
+        ----------
+        element_ids : np.array(int)
+            array of element ids
+        node_layers : str, optional
+            for 3D files 'all', 'bottom' or 'top' nodes of each element, by default 'all'
+
+        Returns
+        -------
+        np.array(int)
+            array of node ids (unique)
+        """
+        nodes = []        
+        if (node_layers is None) or (node_layers == 'all') or self._filetype <= 0:
+            for j in element_ids:
+                elem_nodes = list(self._source.ElementTable[j])
+                for node in elem_nodes:
+                    nodes.append(node)
+        else: 
+            # 3D file    
+            if (node_layers != 'bottom') and (node_layers != 'top'):
+                raise Exception('node_layers must be either all, bottom or top')
+            for j in element_ids:
+                elem_nodes = list(self._source.ElementTable[j])
+                nn = len(elem_nodes)
+                halfn = int(nn/2)
+                if (node_layers == 'bottom'):
+                    elem_nodes = elem_nodes[:halfn]
+                if (node_layers == 'top'):
+                    elem_nodes = elem_nodes[halfn:]
+                for node in elem_nodes:
+                    nodes.append(node)    
+
+        return np.unique(nodes)
+        
 
     def read(self, item_numbers=None, item_names=None, time_steps=None):
         """
@@ -405,24 +522,13 @@ class Dfsu(_Unstructured):
             np.array
                 x,y,z of each node
         """
-        # Node coordinates
-        #xn = np.array(list(self._dfs.X))
-        #yn = np.array(list(self._dfs.Y))
-        #zn = np.array(list(self._dfs.Z))
-
-        nc = self.node_coordinates #np.column_stack([xn, yn, zn])
+        nc = self.node_coordinates
 
         if code is not None:
-
-            #c = np.array(list(self._dfs.Code))
-            #valid_codes = set(c)
-
-            # TODO: support list of codes
-
             if code not in self.valid_codes:
-
                 print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
                 raise Exception
+            c = np.array(list(self._source.Code))
             return nc[c == code]
 
         return nc
@@ -431,6 +537,28 @@ class Dfsu(_Unstructured):
         """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
         """
         return self.element_coordinates
+
+    def get_number_of_time_steps(self):
+        """FOR BACKWARD COMPATIBILITY ONLY. Use n_timesteps instead.
+        """
+        return self.n_timesteps
+
+    def find_n_closest_element_index(self, x, y, z=None, n=1):
+        ec = self.element_coordinates
+
+        if z is None:
+            poi = np.array([x, y])
+
+            d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
+            idx = d.argsort()[0:n]
+        else:
+            poi = np.array([x, y, z])
+
+            d = ((ec - poi) ** 2).sum(axis=1)
+            idx = d.argsort()[0:n]
+        if n == 1:
+            idx = idx[0]
+        return idx
 
     def find_closest_element_index(self, x, y, z=None):
         """Find index of closest element
@@ -445,25 +573,25 @@ class Dfsu(_Unstructured):
         z: float, optional
           Z coordinate(depth, positive upwards)
         """
-        ec = self.element_coordinates
-
-        if z is None:
-            poi = np.array([x, y])
-
-            d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
-            idx = d.argsort()[0]
+        if np.isscalar(x):
+            return self.find_n_closest_element_index(x, y, z, n=1)
         else:
-            poi = np.array([x, y, z])
-
-            d = ((ec - poi) ** 2).sum(axis=1)
-            idx = d.argsort()[0]
-
+            nx = len(x)
+            ny = len(y)
+            if nx != ny:
+                print(f"x and y must have same length")
+                raise Exception
+            idx = np.zeros(nx, dtype=int)
+            if z is None:
+                for j in range(nx):
+                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z=None, n=1)
+            else: 
+                nz = len(z)
+                if nx != nz:
+                    print(f"z must have same length as x and y")
+                for j in range(nx):
+                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z[j], n=1)
         return idx
-
-    def get_number_of_time_steps(self):
-        """FOR BACKWARD COMPATIBILITY ONLY. Use n_timesteps instead.
-        """
-        return self.n_timesteps
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.
