@@ -54,3 +54,13 @@ def test_plot_mesh():
     m.plot()
 
     assert True
+
+def test_create(tmpdir):
+    outfilename = os.path.join(tmpdir.dirname, "simple.mesh")
+    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
+
+    msh = Mesh(meshfilename)
+
+    msh.create(outfilename)
+
+    assert os.path.exists(outfilename)

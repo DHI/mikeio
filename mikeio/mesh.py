@@ -5,7 +5,7 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import numpy as np
 
-from DHI.Generic.MikeZero.DFS.mesh import MeshFile
+from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
 
 class Mesh:
@@ -157,3 +157,25 @@ class Mesh:
         fig.colorbar(p, ax=ax, label=label)
         ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+
+    def create(self, outfilename):
+        projection = self._mesh.ProjectionString
+        eumQuantity = self._mesh.EumQuantity
+
+        builder = MeshBuilder()
+
+        nc = self.get_node_coords()
+
+        x = self._mesh.X
+        y = self._mesh.Y
+        z = self._mesh.Z
+        c = self._mesh.Code
+
+        builder.SetNodes(x,y,z,c)
+        builder.SetElements(self._mesh.ElementTable)
+        builder.SetProjection(projection)
+        builder.SetEumQuantity(eumQuantity)
+        newMesh = builder.CreateMesh()
+        newMesh.Write(outfilename)
+
+
