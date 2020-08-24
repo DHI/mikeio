@@ -1,10 +1,12 @@
 import os
 from shutil import copyfile
 import numpy as np
+from datetime import datetime
 import pytest
 
 from mikeio import Dfsu, Mesh
 from mikeio.eum import ItemInfo
+from mikeio.dutil import Dataset
 
 
 def test_read_all_items_returns_all_items_and_names():
@@ -223,23 +225,23 @@ def test_get_element_area_LONGLAT():
 
 def test_create(tmpdir):
 
-    filename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
     meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
 
     msh = Mesh(meshfilename)
-    # msh.read(meshfilename)
+    
     n_elements = msh.number_of_elements
     d = np.zeros((1, n_elements))
     data = []
     data.append(d)
 
-    items = [ItemInfo("Zeros")]
+    ds = Dataset(data, time=[datetime(2000,1,1)],items= [ItemInfo("Zeros")])
 
     dfs = Dfsu(meshfilename)
 
-    dfs.create(meshfilename, filename, data, items=items)
+    dfs.create(outfilename, ds)
 
-    assert True
+    assert os.path.exists(outfilename)
 
 
 def test_create_from_dfsu(tmpdir):
@@ -248,17 +250,11 @@ def test_create_from_dfsu(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
     dfs = Dfsu(sourcefilename)
 
-    ds = dfs.read()
+    ds = dfs.read([0,1])
 
-    data = ds.data[0:1]
+    dfs.create(outfilename, ds)
 
-    items = ds.items[0:1]
-
-    dfs.create(
-        sourcefilename, outfilename, data, items=items, start_time=ds.time[0], dt=3600
-    )
-
-    assert True
+    assert os.path.exists(outfilename)
 
 def test_create_from_dfsu3D(tmpdir):
 
@@ -266,15 +262,9 @@ def test_create_from_dfsu3D(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple3D.dfsu")
     dfs = Dfsu(sourcefilename)
 
-    ds = dfs.read()
+    ds = dfs.read([0,1,2])
 
-    data = ds.data[0:2]
-
-    items = ds.items[0:2]
-
-    dfs.create(
-        sourcefilename, outfilename, data, items=items, start_time=ds.time[0], dt=3600
-    )
+    dfs.create(outfilename, ds)
 
     assert os.path.exists(outfilename)
 
@@ -296,7 +286,7 @@ def test_create_invalid_data_closes_and_deletes_file(tmpdir):
 
     dfs = Dfsu(meshfilename)
 
-    dfs.create(meshfilename, filename, data, items=items)
+    dfs.create(filename, data, items=items)
 
     assert not os.path.exists(filename)
 

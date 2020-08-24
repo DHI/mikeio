@@ -397,11 +397,10 @@ class Dfsu(_Unstructured):
 
     def create(
         self,
-        meshfilename,
         filename,
         data,
         start_time=None,
-        dt=1,
+        dt=None,
         items=None,
         title=None,
     ):
@@ -409,23 +408,31 @@ class Dfsu(_Unstructured):
 
         Parameters
         -----------
-        meshfilename: str,
-            full path to a mesh or dfsu file
         filename: str
             full path to the new dfsu file
-        data: list[np.array]
+        data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, y, x
         start_time: datetime, optional
             start datetime, default is datetime.now()
-        dt: float
-            The time step (in seconds). Default 1        
-        items: TODO
+        dt: float, optional
+            The time step (in seconds)
+        items: list[ItemInfo], optional
         title: str
             title of the dfsu file. Default is blank.
         """
 
+        if isinstance(data,Dataset):
+            items = data.items
+            start_time = data.time[0]
+            if dt is None and len(data.time) > 1:
+                dt = (data.time[1] - data.time[0]).total_seconds()
+            data = data.data
+
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
+
+        if dt is None:
+            dt = 1 # Arbitrary if there is only a single timestep
 
         if start_time is None:
             start_time = datetime.now()
@@ -441,16 +448,16 @@ class Dfsu(_Unstructured):
         # Default filetype;
         filetype = DfsuFileType.Dfsu2D
         
-        _, ext = os.path.splitext(meshfilename)
+        _, ext = os.path.splitext(self._filename)
 
         if ext == ".mesh":
 
-            source = MeshFile.ReadMesh(meshfilename)
+            source = MeshFile.ReadMesh(self._filename)
             projstr = source.ProjectionString
 
         elif ext == ".dfsu":
 
-            source = DfsuFile.Open(meshfilename)
+            source = DfsuFile.Open(self._filename)
             projstr = source.Projection.WKTString
             filetype = source.DfsuFileType
 
