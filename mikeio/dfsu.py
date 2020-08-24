@@ -272,7 +272,7 @@ class Dfsu(_Unstructured):
         return np.unique(nodes)
         
 
-    def read(self, item_numbers=None, item_names=None, time_steps=None):
+    def read(self, items=None, time_steps=None):
         """
         Read data from a dfsu file
 
@@ -280,10 +280,8 @@ class Dfsu(_Unstructured):
         ---------
         filename: str
             dfsu filename
-        item_numbers: list[int], optional
-            Read only selected items, by number (0-based)
-        item_names: list[str], optional
-            Read only selected items, by name, takes precedence over item_numbers
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
         time_steps: list[int], optional
             Read only selected time_steps
 
@@ -299,17 +297,17 @@ class Dfsu(_Unstructured):
         dfs = self._source
         
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-        item_offset = 0
         n_items = self.n_items #safe_length(dfs.ItemInfo)
 
         nt = dfs.NumberOfTimeSteps
 
-        if item_names is not None:
-            item_numbers = find_item(dfs, item_names)
+        if items is not None and isinstance(items[0],str):
+            items = find_item(dfs, items)
 
-        if item_numbers is None:
+        if items is None:
             item_numbers = list(range(n_items))
         else:
+            item_numbers = items
             n_items = len(item_numbers)
 
         if time_steps is None:
@@ -338,7 +336,7 @@ class Dfsu(_Unstructured):
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(
-                    item_numbers[item] + item_offset + 1, it
+                    item_numbers[item] + 1, it
                 )
 
                 src = itemdata.Data

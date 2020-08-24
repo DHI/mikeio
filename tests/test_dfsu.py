@@ -63,7 +63,7 @@ def test_read_single_item_returns_single_item():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read(item_numbers=[3])
+    (data, t, items) = dfs.read(items=[3])
 
     assert len(data) == 1
     assert len(items) == 1
@@ -73,7 +73,7 @@ def test_read_returns_array_time_dimension_first():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read(item_numbers=[3])
+    (data, t, items) = dfs.read(items=[3])
 
     assert data[0].shape == (9, 884)
 
@@ -82,7 +82,7 @@ def test_read_selected_item_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read(item_numbers=[0, 3])
+    (data, t, items) = dfs.read([0, 3])
 
     assert len(data) == 2
     assert len(items) == 2
@@ -94,9 +94,7 @@ def test_read_selected_item_names_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read(
-        item_names=["Surface elevation", "Current speed"]
-    )
+    (data, t, items) = dfs.read(["Surface elevation", "Current speed"])
 
     assert len(data) == 2
     assert len(items) == 2
@@ -109,7 +107,7 @@ def test_read_all_time_steps():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    ds = dfs.read(item_numbers=[0, 3])
+    ds = dfs.read(items=[0, 3])
 
     assert len(ds.time) == 9
     assert ds.data[0].shape[0] == 9
@@ -120,7 +118,7 @@ def test_read_single_time_step():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    ds = dfs.read(item_numbers=[0, 3], time_steps=[1])
+    ds = dfs.read(items=[0, 3], time_steps=[1])
 
     assert len(ds.time) == 1
     assert ds.data[0].shape[0] == 1
@@ -133,7 +131,7 @@ def test_read_single_time_step_outside_bounds_fails():
 
     with pytest.raises(Exception):
 
-        dfs.read(item_numbers=[0, 3], time_steps=[100])
+        dfs.read(items=[0, 3], time_steps=[100])
 
 
 def test_get_number_of_time_steps():
