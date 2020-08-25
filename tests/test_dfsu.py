@@ -51,14 +51,14 @@ def test_write(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "adjusted.dfsu")
 
     copyfile(infilename, outfilename)
-    dfs = Dfsu(outfilename)
+    dfs = Dfsu(infilename)
 
-    (data, t, items) = dfs.read()
+    ds = dfs.read()
 
     # Do arbitrary calculation
-    data[0] = data[0] * 2.0
+    ds.data[0] = ds.data[0] * 2.0
 
-    dfs.write(data)
+    dfs.write(outfilename,data)
 
 
 def test_read_single_item_returns_single_item():
@@ -223,7 +223,7 @@ def test_get_element_area_LONGLAT():
     assert areas[0] == 139524218.81411952
 
 
-def test_create(tmpdir):
+def test_write(tmpdir):
 
     outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
     meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
@@ -239,12 +239,12 @@ def test_create(tmpdir):
 
     dfs = Dfsu(meshfilename)
 
-    dfs.create(outfilename, ds)
+    dfs.write(outfilename, ds)
 
     assert os.path.exists(outfilename)
 
 
-def test_create_from_dfsu(tmpdir):
+def test_write_from_dfsu(tmpdir):
 
     sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
     outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
@@ -252,11 +252,11 @@ def test_create_from_dfsu(tmpdir):
 
     ds = dfs.read([0,1])
 
-    dfs.create(outfilename, ds)
+    dfs.write(outfilename, ds)
 
     assert os.path.exists(outfilename)
 
-def test_create_from_dfsu3D(tmpdir):
+def test_write_from_dfsu3D(tmpdir):
 
     sourcefilename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     outfilename = os.path.join(tmpdir.dirname, "simple3D.dfsu")
@@ -264,11 +264,11 @@ def test_create_from_dfsu3D(tmpdir):
 
     ds = dfs.read([0,1,2])
 
-    dfs.create(outfilename, ds)
+    dfs.write(outfilename, ds)
 
     assert os.path.exists(outfilename)
 
-def test_create_invalid_data_closes_and_deletes_file(tmpdir):
+def test_write_invalid_data_closes_and_deletes_file(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfsu")
     meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
@@ -286,38 +286,6 @@ def test_create_invalid_data_closes_and_deletes_file(tmpdir):
 
     dfs = Dfsu(meshfilename)
 
-    dfs.create(filename, data, items=items)
+    dfs.write(filename, data, items=items)
 
     assert not os.path.exists(filename)
-
-
-def test_write_invalid_data_closes_file(tmpdir):
-
-    infilename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    outfilename = os.path.join(tmpdir.dirname, "adjusted.dfsu")
-
-    copyfile(infilename, outfilename)
-    dfs = Dfsu(outfilename)
-
-    (data, t, items) = dfs.read()
-
-    # Do some mistake, such as only trying to writing one item
-
-    baddata = [data[0]]
-    try:
-        dfs.write(baddata)
-    except:
-        print("Failed as expected")
-
-    # Ok, it failed, try again, to write to the same file
-
-    # Do arbitrary calculation
-    newdata = data.copy()
-    newdata[0] = newdata[0] * 2.0
-
-    dfs.write(newdata)
-
-    (addata, t, items) = dfs.read()
-
-    assert addata[0][0, 0] == 2 * data[0][0, 0]
-    assert addata[1][0, 0] == data[1][0, 0]

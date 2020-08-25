@@ -354,48 +354,8 @@ class Dfsu(_Unstructured):
         dfs.Close()
         return Dataset(data_list, time, items)
 
-    def write(self, data):
-        """Overwrite a pre-created dfsu file.
-
-        Parameters
-        ----------
-        filename: str
-            full path and filename to existing dfsu file
-        data: list[np.array]
-            list of matrices. len(data) must equal the number of items in the dfsu.
-            Each matrix must be of dimension time,elements
-        """
-
-        # Open the dfs file for writing
-        dfs = DfsFileFactory.DfsGenericOpenEdit(self._filename)
-
-        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_items = safe_length(dfs.ItemInfo)
-
-        if len(data) != n_items:
-            dfs.Close()
-            raise ValueError(
-                "Number of items in data must equal number of items in the file"
-            )
-
-        if data[0].shape[0] != n_time_steps:
-            dfs.Close()
-            raise ValueError(
-                "Number of timesteps in data must equal number of timesteps in the file"
-            )
-
-        deletevalue = dfs.FileInfo.DeleteValueFloat
-
-        for i in range(n_time_steps):
-            for item in range(n_items):
-                d = data[item][i, :]
-                d[np.isnan(d)] = deletevalue
-                darray = to_dotnet_float_array(d)
-                dfs.WriteItemTimeStepNext(0, darray)
-
-        dfs.Close()
-
-    def create(
+    
+    def write(
         self,
         filename,
         data,
@@ -411,7 +371,7 @@ class Dfsu(_Unstructured):
         filename: str
             full path to the new dfsu file
         data: list[np.array] or Dataset
-            list of matrices, one for each item. Matrix dimension: time, y, x
+            list of matrices, one for each item. Matrix dimension: time, x
         start_time: datetime, optional
             start datetime, default is datetime.now()
         dt: float, optional

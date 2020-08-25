@@ -158,7 +158,7 @@ class Mesh:
         ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
-    def create(self, outfilename):
+    def write(self, outfilename):
         projection = self._mesh.ProjectionString
         eumQuantity = self._mesh.EumQuantity
 
