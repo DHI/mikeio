@@ -5,8 +5,12 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import numpy as np
 
+from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
+from .dfsu import _UnstructuredGeometry
+from .eum import EUMType, EUMUnit
+from .dotnet import asnetarray_v2
 
 class Mesh:
     def __init__(self, filename):
@@ -178,4 +182,27 @@ class Mesh:
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
+    @staticmethod
+    def geometry_to_mesh(outfilename, geometry):
+        projection = geometry.projection_string        
+        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
 
+        builder = MeshBuilder()
+
+        nc = geometry.node_coordinates
+
+        x = nc[:,0]
+        y = nc[:,1]
+        z = nc[:,2]
+        c = geometry.codes
+
+        elem_table = asnetarray_v2(geometry.element_table)
+
+        builder.SetNodes(x,y,z,c)
+        builder.SetNodeIds(geometry.node_ids)
+        builder.SetElementIds(geometry.element_ids)
+        builder.SetElements(elem_table)
+        builder.SetProjection(projection)
+        builder.SetEumQuantity(quantity)
+        newMesh = builder.CreateMesh()
+        newMesh.Write(outfilename)

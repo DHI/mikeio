@@ -125,6 +125,14 @@ def to_dotnet_array(x):
             destHandle.Free()
     return netArray
 
+def asnetarray_v2(x):
+    if any([type(xi) is list for xi in x]):
+        # Array of array
+        return asnetarray_v2([asnetarray_v2(xi) for xi in x])
+    else:
+        # Array
+        return System.Array[type(x[1])](x)
+
 
 def to_dotnet_float_array(x):
 

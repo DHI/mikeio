@@ -1,6 +1,8 @@
 import os
 import numpy as np
 from datetime import datetime, timedelta
+from matplotlib.patches import Polygon
+
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
@@ -25,7 +27,8 @@ class _UnstructuredGeometry:
     _n_elements = None     
     _nc = None
     _ec = None
-    _codes = None    
+    _codes = None
+    _valid_codes = None
     _element_ids = None
     _node_ids = None
     _element_table = None
@@ -48,7 +51,11 @@ class _UnstructuredGeometry:
     @property
     def n_elements(self):        
         return self._n_elements
-    
+
+    @property
+    def node_coordinates(self):      
+        return self._nc
+
     @property
     def node_ids(self):        
         return self._node_ids
@@ -125,7 +132,19 @@ class _UnstructuredGeometry:
         self._type = geometry_type
 
     def reindex(self):
-        return False
+        new_node_ids = range(1,self.n_nodes+1)
+        new_element_ids = range(1,self.n_elements+1)
+        node_dict = dict(zip(self.node_ids, new_node_ids))
+
+        for j in range(self.n_elements):
+            elem_nodes = self._element_table[j]
+            new_elem_nodes = []
+            for ids in elem_nodes:
+                new_elem_nodes.append(node_dict[ids+1])
+            self._element_table[j] = new_elem_nodes
+            
+        self._node_ids = list(new_node_ids)
+        self._element_ids = list(new_element_ids)
 
     def get_element_table_for_elements(self, element_ids):
         elem_tbl = []        
@@ -137,13 +156,13 @@ class _UnstructuredGeometry:
     def elements_to_geometry(self, elements):
         geom = _UnstructuredGeometry()
         nodes = self.get_nodes_for_elements(elements)
-        node_ids = self._node_ids[nodes]
+        node_ids = self.node_ids[nodes]
         node_coords = self.node_coordinates[nodes]
         codes = self.codes[nodes]
         elem_tbl = self.get_element_table_for_elements(elements)
 
         geom.set_nodes(node_coords, codes=codes, node_ids=node_ids, projection_string=self.projection_string)
-        geom.set_elements(elem_tbl, self._element_ids)
+        geom.set_elements(elem_tbl, self.element_ids[elements])
         
         return geom
 
@@ -234,12 +253,24 @@ class _UnstructuredGeometry:
         self._ec = ec
         return ec
 
+    def to_polygons(self):
+        polygons = []
+
+        for j in range(self.n_elements):
+            nodes = self.element_table[j]
+            pcoords = np.empty([len(nodes), 2])
+            for i in range(len(nodes)):
+                nidx = nodes[i] - 1
+                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
+
+            polygon = Polygon(pcoords, True)
+            polygons.append(polygon)   
+        return polygons
 
 
 class _Unstructured(_UnstructuredGeometry):
     _filename = None
     _source = None
-    _filetype = None
     _start_time = None
     _items = None
 
@@ -252,7 +283,8 @@ class _Unstructured(_UnstructuredGeometry):
         #out.append(f"{self.time[0]} - {self.time[-1]}")
         return str.join("\n", out)
 
-    #def __init__(self):       
+    def __init__(self):       
+        super().__init__()
         #self._filename = filename
         #self._read_header(filename)
 
@@ -270,21 +302,30 @@ class _Unstructured(_UnstructuredGeometry):
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
         self._projstr = msh.ProjectionString
-        self._filetype = -1
-        self._set_nodes(asNumpyArray(self._source.X), 
-            asNumpyArray(self._source.Y),
-            asNumpyArray(self._source.Z),
-            np.array(list(self._source.Code))
-            )
-        self._n_elements = self._source.NumberOfElements
+        self._type = -1
+
+        # geometry
+        self._set_nodes_from_source(msh)
+        self._set_elements_from_source(msh)
+
+        # self._set_nodes(asNumpyArray(self._source.X), 
+        #     asNumpyArray(self._source.Y),
+        #     asNumpyArray(self._source.Z),
+        #     np.array(list(self._source.Code))
+        #     )
+        # self._n_elements = self._source.NumberOfElements
 
     def _read_dfsu_header(self, filename):
         
         dfs = DfsuFile.Open(filename)
         self._source = dfs
         self._projstr = dfs.Projection.WKTString
-        self._filetype = dfs.DfsuFileType    
+        self._type = dfs.DfsuFileType    
         self._deleteValue = dfs.DeleteValueFloat
+
+        # geometry
+        self._set_nodes_from_source(dfs)
+        self._set_elements_from_source(dfs)
 
         # items 
         self._n_items = safe_length(dfs.ItemInfo)
@@ -304,11 +345,17 @@ class _Unstructured(_UnstructuredGeometry):
         self._nc = np.column_stack([xn, yn, zn])   
         self._codes = np.array(list(source.Code))
         self._n_nodes = source.NumberOfNodes
+        self._node_ids = np.array(list(source.NodeIds))
 
-    def _set_nodes(self, xn, yn, zn, codes):
-        self._nc = np.column_stack([xn, yn, zn]) 
-        self._codes = codes
-
+    def _set_elements_from_source(self, source):        
+        elem_tbl = []        
+        for j in range(self.n_elements):
+            elem_nodes = list(source.ElementTable[j])
+            elem_tbl.append(elem_nodes)
+        self._element_table = elem_tbl
+        self._n_elements = len(elem_tbl)
+        self._element_ids = np.array(list(source.ElementIds))
+        
     @property
     def node_coordinates(self):  
         if self._nc is None:
@@ -372,6 +419,7 @@ class _Unstructured(_UnstructuredGeometry):
 class Dfsu(_Unstructured):
     
     def __init__(self, filename):
+        super().__init__()
         #super().__init__(filename) 
         self._filename = filename
         self._read_header(filename)
