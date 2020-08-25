@@ -21,8 +21,8 @@ from .helpers import safe_length
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
     _projstr = None
-    _n_nodes = 0
-    _n_elements = 0     
+    _n_nodes = None
+    _n_elements = None     
     _nc = None
     _ec = None
     _codes = None    
@@ -34,9 +34,11 @@ class _UnstructuredGeometry:
     def __repr__(self):
         out = []
         out.append("Unstructured Geometry")
-        out.append(f"Number of nodes: {self.n_nodes}")
-        out.append(f"Number of elements: {self.n_elements}")
-        out.append(f"Projection: {self.data[0].shape}")
+        if self.n_nodes:
+            out.append(f"Number of nodes: {self.n_nodes}")
+        if self.n_elements:
+            out.append(f"Number of elements: {self.n_elements}")
+        out.append(f"Projection: {self.projection_string}")
         return str.join("\n", out)
     
     @property
