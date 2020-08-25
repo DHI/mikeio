@@ -18,20 +18,241 @@ from .dotnet import (
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
 
-class _Unstructured:
+class _UnstructuredGeometry:
+    # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
+    _projstr = None
+    _n_nodes = 0
+    _n_elements = 0     
+    _nc = None
+    _ec = None
+    _codes = None    
+    _element_ids = None
+    _node_ids = None
+    _element_table = None
+    _type = None    # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
+
+    def __repr__(self):
+        out = []
+        out.append("Unstructured Geometry")
+        out.append(f"Number of nodes: {self.n_nodes}")
+        out.append(f"Number of elements: {self.n_elements}")
+        out.append(f"Projection: {self.data[0].shape}")
+        return str.join("\n", out)
+    
+    @property
+    def n_nodes(self):        
+        return self._n_nodes
+
+    @property
+    def n_elements(self):        
+        return self._n_elements
+    
+    @property
+    def node_ids(self):        
+        return self._node_ids
+
+    @property
+    def element_ids(self):        
+        return self._element_ids
+
+    @property
+    def codes(self):
+        return self._codes
+
+    @property
+    def valid_codes(self):
+        if self._valid_codes is None:         
+            self._valid_codes = list(set(self.codes))
+        return self._valid_codes
+
+    @property
+    def projection_string(self):
+        return self._projstr
+
+    @property
+    def is_geo(self):
+        return self._projstr == "LONG/LAT"
+    
+    @property
+    def is_local_coordinates(self):
+        return self._projstr == "NON-UTM"
+
+    @property
+    def element_table(self):
+        return self._element_table
+
+    @property 
+    def max_nodes_per_element(self):
+        maxnodes = 0
+        for local_nodes in self.element_table:
+            n = len(local_nodes)
+            if n > maxnodes:
+                maxnodes = n
+        return maxnodes
+
+    @property 
+    def is_2d(self):
+        return _type <= 0
+
+    def set_nodes(self, node_coordinates, codes=None, node_ids=None, projection_string=None):
+        self._nc = np.asarray(node_coordinates)
+        if codes is None:
+            codes = np.zeros(len(node_coordinates), dtype=int)
+        self._codes = np.asarray(codes)
+        self._n_nodes = len(codes)
+        if node_ids is None:
+            node_ids = list(range(1,self._n_nodes+1))
+        self._node_ids = np.asarray(node_ids)
+        if projection_string is None:
+            projection_string = "LONG/LAT"
+        self._projstr = projection_string
+
+    def set_elements(self, element_table, element_ids=None, geometry_type=None):
+        self._element_table = element_table
+        self._n_elements = len(element_table)
+        if element_ids is None:
+            element_ids = list(range(1,self.n_elements+1))
+        self._element_ids = np.asarray(element_ids)
+        
+        if geometry_type is None:
+            # guess type
+            if self.max_nodes_per_element < 5:
+                geometry_type = 0
+            else:
+                geometry_type = 4
+        self._type = geometry_type
+
+    def reindex(self):
+        return False
+
+    def get_element_table_for_elements(self, element_ids):
+        elem_tbl = []        
+        for j in element_ids:
+            elem_nodes = self.element_table[j]
+            elem_tbl.append(elem_nodes)  
+        return elem_tbl
+
+    def elements_to_geometry(self, elements):
+        geom = _UnstructuredGeometry()
+        nodes = self.get_nodes_for_elements(elements)
+        node_ids = self._node_ids[nodes]
+        node_coords = self.node_coordinates[nodes]
+        codes = self.codes[nodes]
+        elem_tbl = self.get_element_table_for_elements(elements)
+
+        geom.set_nodes(node_coords, codes=codes, node_ids=node_ids, projection_string=self.projection_string)
+        geom.set_elements(elem_tbl, self._element_ids)
+        
+        return geom
+
+    def get_nodes_for_elements(self, element_ids, node_layers = 'all'): 
+        """list of unique node ids for a list of elements
+
+        Parameters
+        ----------
+        element_ids : np.array(int)
+            array of element ids
+        node_layers : str, optional
+            for 3D files 'all', 'bottom' or 'top' nodes of each element, by default 'all'
+
+        Returns
+        -------
+        np.array(int)
+            array of node ids (unique)
+        """
+        nodes = []        
+        if (node_layers is None) or (node_layers == 'all') or self._type <= 0:
+            for j in element_ids:
+                elem_nodes = self.element_table[j] 
+                for node in elem_nodes:
+                    nodes.append(node)
+        else: 
+            # 3D file    
+            if (node_layers != 'bottom') and (node_layers != 'top'):
+                raise Exception('node_layers must be either all, bottom or top')
+            for j in element_ids:
+                elem_nodes = self.element_table[j] 
+                nn = len(elem_nodes)
+                halfn = int(nn/2)
+                if (node_layers == 'bottom'):
+                    elem_nodes = elem_nodes[:halfn]
+                if (node_layers == 'top'):
+                    elem_nodes = elem_nodes[halfn:]
+                for node in elem_nodes:
+                    nodes.append(node)    
+
+        return np.unique(nodes)
+
+
+    def validate(self):
+        """ validate consistency of this mesh geometry
+        """
+        return False
+    
+    @property 
+    def element_coordinates(self):
+        if self._ec is None:
+            self._ec = self.get_element_coords()
+        return self._ec
+
+    def get_element_coords(self):
+        """Calculates the coordinates of the center of each element.
+        Returns
+        -------
+            np.array
+                x,y,z of each element
+        """
+        n_elements = self._n_elements
+
+        ec = np.empty([n_elements, 3])
+
+        # pre-allocate for speed
+        maxnodes = self.max_nodes_per_element#8
+        idx = np.zeros(maxnodes, dtype=np.int)
+        xcoords = np.zeros([maxnodes, n_elements])
+        ycoords = np.zeros([maxnodes, n_elements])
+        zcoords = np.zeros([maxnodes, n_elements])
+        nnodes_per_elem = np.zeros(n_elements)
+
+        for j in range(n_elements):
+            nodes = self._element_table[j]
+            nnodes = len(nodes)
+            nnodes_per_elem[j] = nnodes
+            for i in range(nnodes):
+                idx[i] = nodes[i] - 1
+
+            xcoords[:nnodes,j] = self._nc[idx[:nnodes],0]
+            ycoords[:nnodes,j] = self._nc[idx[:nnodes],1]
+            zcoords[:nnodes,j] = self._nc[idx[:nnodes],2]
+        
+        ec[:, 0] = np.sum(xcoords, axis=0)/nnodes_per_elem
+        ec[:, 1] = np.sum(ycoords, axis=0)/nnodes_per_elem
+        ec[:, 2] = np.sum(zcoords, axis=0)/nnodes_per_elem
+
+        self._ec = ec
+        return ec
+
+
+
+class _Unstructured(_UnstructuredGeometry):
     _filename = None
     _source = None
     _filetype = None
-    _projstr = None
-    _nc = None
-    _ec = None
-    _valid_codes = None
     _start_time = None
     _items = None
 
-    def __init__(self, filename):       
-        self._filename = filename
-        self._read_header(filename)
+    def __repr__(self):
+        out = []
+        out.append("Dfsu/Mesh")
+        out.append(f"Number of nodes: {self.n_nodes}")
+        out.append(f"Number of elements: {self.n_elements}")
+        #out.append(f"Shape: {self.data[0].shape}")
+        #out.append(f"{self.time[0]} - {self.time[-1]}")
+        return str.join("\n", out)
+
+    #def __init__(self):       
+        #self._filename = filename
+        #self._read_header(filename)
 
     def _read_header(self, filename):
         _, ext = os.path.splitext(filename)
@@ -47,7 +268,13 @@ class _Unstructured:
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
         self._projstr = msh.ProjectionString
-        self._filetype = -1        
+        self._filetype = -1
+        self._set_nodes(asNumpyArray(self._source.X), 
+            asNumpyArray(self._source.Y),
+            asNumpyArray(self._source.Z),
+            np.array(list(self._source.Code))
+            )
+        self._n_elements = self._source.NumberOfElements
 
     def _read_dfsu_header(self, filename):
         
@@ -68,40 +295,49 @@ class _Unstructured:
 
         #dfs.Close()
 
+    def _set_nodes_from_source(self, source):
+        xn = asNumpyArray(source.X)
+        yn = asNumpyArray(source.Y)
+        zn = asNumpyArray(source.Z)
+        self._nc = np.column_stack([xn, yn, zn])   
+        self._codes = np.array(list(source.Code))
+        self._n_nodes = source.NumberOfNodes
+
+    def _set_nodes(self, xn, yn, zn, codes):
+        self._nc = np.column_stack([xn, yn, zn]) 
+        self._codes = codes
+
     @property
     def node_coordinates(self):  
         if self._nc is None:
-            #xn = np.array(list())
             xn = asNumpyArray(self._source.X)
             yn = asNumpyArray(self._source.Y)
             zn = asNumpyArray(self._source.Z)
-            #yn = np.array(list(self._source.Y))
-            #zn = np.array(list(self._source.Z))
             self._nc = np.column_stack([xn, yn, zn])      
         return self._nc
 
     @property
+    def n_nodes(self):
+        if self._n_nodes is None:
+            self._n_nodes = self._source.NumberOfNodes
+        return self._n_nodes
+
+    @property
     def n_elements(self):
-        return self._source.NumberOfElements
+        if self._n_elements is None:
+            self._n_elements = self._source.NumberOfElements
+        return self._n_elements
 
     @property
-    def projection_string(self):
-        return self._projstr
-
-    @property
-    def is_geo(self):
-        return self._projstr == "LONG/LAT"
-    
-    @property
-    def is_local_coordinates(self):
-        return self._projstr == "NON-UTM"
+    def codes(self):
+        if self._codes is None:
+            self._codes = np.array(list(self._source.Code))
+        return self._codes
 
     @property
     def valid_codes(self):
-        if self._valid_codes is None:
-            codes = np.array(list(self._source.Code))
-            #codes = to_numpy(self._source.Code).astype(int)            
-            self._valid_codes = list(set(codes))
+        if self._valid_codes is None:         
+            self._valid_codes = list(set(self.codes))
         return self._valid_codes
 
     @property
@@ -120,11 +356,23 @@ class _Unstructured:
             self._ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return self._ec
 
+    @property
+    def element_table(self):
+        if self._element_table is None:
+            elem_tbl = []        
+            for j in range(self.n_elements):
+                elem_nodes = list(self._source.ElementTable[j])
+                elem_tbl.append(elem_nodes)
+            self._element_table = elem_tbl
+        return self._element_table
+
 
 class Dfsu(_Unstructured):
     
     def __init__(self, filename):
-        super().__init__(filename)  # super(Dfsu, self)
+        #super().__init__(filename) 
+        self._filename = filename
+        self._read_header(filename)
 
     @property 
     def deletevalue(self):
@@ -233,46 +481,7 @@ class Dfsu(_Unstructured):
             # then it must be a z layer 
             return self.bottom_element_ids[self.num_layers_per_column >= n] + n 
 
-    def get_nodes_for_elements(self, element_ids, node_layers = 'all'): 
-        """list of unique node ids for a list of elements
-
-        Parameters
-        ----------
-        element_ids : np.array(int)
-            array of element ids
-        node_layers : str, optional
-            for 3D files 'all', 'bottom' or 'top' nodes of each element, by default 'all'
-
-        Returns
-        -------
-        np.array(int)
-            array of node ids (unique)
-        """
-        nodes = []        
-        if (node_layers is None) or (node_layers == 'all') or self._filetype <= 0:
-            for j in element_ids:
-                elem_nodes = list(self._source.ElementTable[j])
-                for node in elem_nodes:
-                    nodes.append(node)
-        else: 
-            # 3D file    
-            if (node_layers != 'bottom') and (node_layers != 'top'):
-                raise Exception('node_layers must be either all, bottom or top')
-            for j in element_ids:
-                elem_nodes = list(self._source.ElementTable[j])
-                nn = len(elem_nodes)
-                halfn = int(nn/2)
-                if (node_layers == 'bottom'):
-                    elem_nodes = elem_nodes[:halfn]
-                if (node_layers == 'top'):
-                    elem_nodes = elem_nodes[halfn:]
-                for node in elem_nodes:
-                    nodes.append(node)    
-
-        return np.unique(nodes)
-        
-
-    def read(self, items=None, time_steps=None):
+    def read(self, items=None, time_steps=None, element_ids=None):
         """
         Read data from a dfsu file
 
@@ -284,6 +493,8 @@ class Dfsu(_Unstructured):
             Read only selected items, by number (0-based), or by name
         time_steps: list[int], optional
             Read only selected time_steps
+        element_ids: list[int], optional
+            Read only selected element ids   
 
         Returns
         -------
@@ -313,7 +524,13 @@ class Dfsu(_Unstructured):
         if time_steps is None:
             time_steps = list(range(nt))
 
-        xNum = dfs.NumberOfElements
+        if element_ids is None:
+            n_elems = self.n_elements
+            n_nodes = self.n_nodes
+        else:
+            node_ids = self.get_nodes_for_elements(element_ids)
+            n_elems = len(element_ids)
+            n_nodes = len(node_ids)
 
         deleteValue = dfs.DeleteValueFloat
 
@@ -321,12 +538,14 @@ class Dfsu(_Unstructured):
 
         items = get_item_info(dfs, item_numbers)
 
+        item0_is_node_based = False
         for item in range(n_items):
             # Initialize an empty data block
             if item == 0 and items[item].name == "Z coordinate":
-                data = np.ndarray(shape=(len(time_steps), dfs.NumberOfNodes), dtype=float)
+                item0_is_node_based = True
+                data = np.ndarray(shape=(len(time_steps), n_nodes), dtype=float)
             else:
-                data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
+                data = np.ndarray(shape=(len(time_steps), n_elems), dtype=float)
             data_list.append(data)
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
@@ -344,6 +563,13 @@ class Dfsu(_Unstructured):
                 d = to_numpy(src)
 
                 d[d == deleteValue] = np.nan
+
+                if element_ids:
+                    if item==0 and item0_is_node_based:
+                        d = d[node_ids]
+                    else:
+                        d = d[element_ids]
+
                 data_list[item][i, :] = d
 
             t_seconds[i] = itemdata.Time
