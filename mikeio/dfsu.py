@@ -41,7 +41,8 @@ class _UnstructuredGeometry:
             out.append(f"Number of nodes: {self.n_nodes}")
         if self.n_elements:
             out.append(f"Number of elements: {self.n_elements}")
-        out.append(f"Projection: {self.projection_string}")
+        if self._projstr:
+            out.append(f"Projection: {self.projection_string}")
         return str.join("\n", out)
     
     @property
@@ -75,6 +76,37 @@ class _UnstructuredGeometry:
         return self._valid_codes
 
     @property
+    def boundary_codes(self):
+        """provides a unique list of boundary codes
+        """        
+        return [code for code in self.valid_codes if code > 0]
+
+    def get_node_coords(self, code=None):
+        """Get the coordinates of each node.
+
+
+        Parameters
+        ----------
+
+        code: int
+            Get only nodes with specific code, e.g. land == 1
+
+        Returns
+        -------
+            np.array
+                x,y,z of each node
+        """
+        nc = self.node_coordinates
+
+        if code is not None:
+            if code not in self.valid_codes:
+                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
+                raise Exception            
+            return nc[self.codes == code]
+
+        return nc
+
+    @property
     def projection_string(self):
         return self._projstr
 
@@ -102,6 +134,32 @@ class _UnstructuredGeometry:
     @property 
     def is_2d(self):
         return _type <= 0
+
+    @property 
+    def type_as_string(self):        
+        """
+        0: Dfsu2D: 2D area series
+        1: DfsuVerticalColumn: 1D vertical column
+        2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
+        3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
+        4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
+        5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
+        """
+        if self._type == -1:
+            return 'Mesh'
+        if self._type == 0:
+            return 'Dfsu2D'
+        if self._type == 1:
+            return 'DfsuVerticalColumn'
+        if self._type == 2:
+            return 'DfsuVerticalProfileSigma'
+        if self._type == 3:
+            return 'DfsuVerticalProfileSigmaZ'
+        if self._type == 4:
+            return 'Dfsu3DSigma'
+        if self._type == 5:
+            return 'Dfsu3DSigmaZ'
+        return None
 
     def set_nodes(self, node_coordinates, codes=None, node_ids=None, projection_string=None):
         self._nc = np.asarray(node_coordinates)
@@ -223,12 +281,12 @@ class _UnstructuredGeometry:
             np.array
                 x,y,z of each element
         """
-        n_elements = self._n_elements
+        n_elements = self.n_elements
 
         ec = np.empty([n_elements, 3])
 
         # pre-allocate for speed
-        maxnodes = self.max_nodes_per_element#8
+        maxnodes = self.max_nodes_per_element
         idx = np.zeros(maxnodes, dtype=np.int)
         xcoords = np.zeros([maxnodes, n_elements])
         ycoords = np.zeros([maxnodes, n_elements])
@@ -268,7 +326,7 @@ class _UnstructuredGeometry:
         return polygons
 
 
-class _Unstructured(_UnstructuredGeometry):
+class _UnstructuredFile(_UnstructuredGeometry):
     _filename = None
     _source = None
     _start_time = None
@@ -279,8 +337,6 @@ class _Unstructured(_UnstructuredGeometry):
         out.append("Dfsu/Mesh")
         out.append(f"Number of nodes: {self.n_nodes}")
         out.append(f"Number of elements: {self.n_elements}")
-        #out.append(f"Shape: {self.data[0].shape}")
-        #out.append(f"{self.time[0]} - {self.time[-1]}")
         return str.join("\n", out)
 
     def __init__(self):       
@@ -307,13 +363,6 @@ class _Unstructured(_UnstructuredGeometry):
         # geometry
         self._set_nodes_from_source(msh)
         self._set_elements_from_source(msh)
-
-        # self._set_nodes(asNumpyArray(self._source.X), 
-        #     asNumpyArray(self._source.Y),
-        #     asNumpyArray(self._source.Z),
-        #     np.array(list(self._source.Code))
-        #     )
-        # self._n_elements = self._source.NumberOfElements
 
     def _read_dfsu_header(self, filename):
         
@@ -348,52 +397,60 @@ class _Unstructured(_UnstructuredGeometry):
         self._node_ids = np.array(list(source.NodeIds))
 
     def _set_elements_from_source(self, source):        
-        elem_tbl = []        
+        elem_tbl = []
+        self._n_elements = source.NumberOfElements
         for j in range(self.n_elements):
             elem_nodes = list(source.ElementTable[j])
             elem_tbl.append(elem_nodes)
         self._element_table = elem_tbl
-        self._n_elements = len(elem_tbl)
         self._element_ids = np.array(list(source.ElementIds))
         
-    @property
-    def node_coordinates(self):  
-        if self._nc is None:
-            xn = asNumpyArray(self._source.X)
-            yn = asNumpyArray(self._source.Y)
-            zn = asNumpyArray(self._source.Z)
-            self._nc = np.column_stack([xn, yn, zn])      
-        return self._nc
+    # @property
+    # def node_coordinates(self):  
+    #     if self._nc is None:
+    #         xn = asNumpyArray(self._source.X)
+    #         yn = asNumpyArray(self._source.Y)
+    #         zn = asNumpyArray(self._source.Z)
+    #         self._nc = np.column_stack([xn, yn, zn])      
+    #     return self._nc
 
-    @property
-    def n_nodes(self):
-        if self._n_nodes is None:
-            self._n_nodes = self._source.NumberOfNodes
-        return self._n_nodes
+    # @property
+    # def n_nodes(self):
+    #     if self._n_nodes is None:
+    #         self._n_nodes = self._source.NumberOfNodes
+    #     return self._n_nodes
 
-    @property
-    def n_elements(self):
-        if self._n_elements is None:
-            self._n_elements = self._source.NumberOfElements
-        return self._n_elements
+    # @property
+    # def n_elements(self):
+    #     if self._n_elements is None:
+    #         self._n_elements = self._source.NumberOfElements
+    #     return self._n_elements
 
-    @property
-    def codes(self):
-        if self._codes is None:
-            self._codes = np.array(list(self._source.Code))
-        return self._codes
+    # @property
+    # def codes(self):
+    #     if self._codes is None:
+    #         self._codes = np.array(list(self._source.Code))
+    #     return self._codes
 
-    @property
-    def valid_codes(self):
-        if self._valid_codes is None:         
-            self._valid_codes = list(set(self.codes))
-        return self._valid_codes
+    # @property
+    # def element_table(self):
+    #     if self._element_table is None:
+    #         elem_tbl = []        
+    #         for j in range(self.n_elements):
+    #             elem_nodes = list(self._source.ElementTable[j])
+    #             elem_tbl.append(elem_nodes)
+    #         self._element_table = elem_tbl
+    #     return self._element_table
 
-    @property
-    def boundary_codes(self):
-        """provides a unique list of boundary codes
-        """        
-        return [code for code in self.valid_codes if code > 0]
+
+class Dfsu(_UnstructuredFile):
+    
+    def __init__(self, filename):
+        super().__init__()
+        #super().__init__(filename) 
+        self._filename = filename
+        self._read_header(filename)
+
 
     @property
     def element_coordinates(self):
@@ -404,25 +461,6 @@ class _Unstructured(_UnstructuredGeometry):
             _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc))
             self._ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return self._ec
-
-    @property
-    def element_table(self):
-        if self._element_table is None:
-            elem_tbl = []        
-            for j in range(self.n_elements):
-                elem_nodes = list(self._source.ElementTable[j])
-                elem_tbl.append(elem_nodes)
-            self._element_table = elem_tbl
-        return self._element_table
-
-
-class Dfsu(_Unstructured):
-    
-    def __init__(self, filename):
-        super().__init__()
-        #super().__init__(filename) 
-        self._filename = filename
-        self._read_header(filename)
 
     @property 
     def deletevalue(self):
@@ -747,32 +785,6 @@ class Dfsu(_Unstructured):
             print(e)
             dfs.Close()
             os.remove(filename)
-
-    def get_node_coords(self, code=None):
-        """Get the coordinates of each node.
-
-
-        Parameters
-        ----------
-
-        code: int
-            Get only nodes with specific code, e.g. land == 1
-
-        Returns
-        -------
-            np.array
-                x,y,z of each node
-        """
-        nc = self.node_coordinates
-
-        if code is not None:
-            if code not in self.valid_codes:
-                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
-                raise Exception
-            c = np.array(list(self._source.Code))
-            return nc[c == code]
-
-        return nc
 
     def get_element_coords(self):
         """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
