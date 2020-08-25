@@ -48,6 +48,41 @@ def test_select_subset_isel():
     assert selds["Foo"][0, 0] == 2.0
     assert selds["Bar"][0, 0] == 3.0
 
+def test_select_item_by_name():
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+
+    d1[0, 10, :] = 2.0
+    d2[0, 10, :] = 3.0
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    foo_data = ds["Foo"]
+    assert foo_data[0, 10, 0] == 2.0
+
+def test_select_item_by_iteminfo():
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+
+    d1[0, 10, :] = 2.0
+    d2[0, 10, :] = 3.0
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    foo_item = items[0]
+
+    foo_data = ds[foo_item]
+    assert foo_data[0, 10, 0] == 2.0
+
+
 
 def test_select_subset_isel_multiple_idxs():
 

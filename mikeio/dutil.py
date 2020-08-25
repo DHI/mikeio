@@ -130,6 +130,11 @@ class Dataset:
             x = item_lookup[x]
             return self.data[x]
 
+        if isinstance(x, ItemInfo):
+            return self.__getitem__(x.name)
+        
+        
+
         raise Exception("Invalid operation")
 
     def isel(self, idx, axis=1):
