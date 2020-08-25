@@ -1,7 +1,6 @@
 import os
 import numpy as np
 from datetime import datetime, timedelta
-from matplotlib.patches import Polygon
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -312,6 +311,7 @@ class _UnstructuredGeometry:
         return ec
 
     def to_polygons(self):
+        from matplotlib.patches import Polygon
         polygons = []
 
         for j in range(self.n_elements):
@@ -324,6 +324,137 @@ class _UnstructuredGeometry:
             polygon = Polygon(pcoords, True)
             polygons.append(polygon)   
         return polygons
+    
+    def to_shapely(self):
+        from shapely.geometry import Polygon, MultiPolygon
+
+        polygons = []
+        for j in range(self.n_elements):
+            nodes = self.element_table[j]
+            pcoords = np.empty([len(nodes), 2])
+            for i in range(len(nodes)):
+                nidx = nodes[i] - 1
+                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
+            polygon = Polygon(pcoords)
+            polygons.append(polygon)
+        mp = MultiPolygon(polygons)
+
+        return mp
+
+    def find_n_closest_element_index(self, x, y, z=None, n=1):
+        ec = self.element_coordinates
+
+        if z is None:
+            poi = np.array([x, y])
+
+            d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
+            idx = d.argsort()[0:n]
+        else:
+            poi = np.array([x, y, z])
+
+            d = ((ec - poi) ** 2).sum(axis=1)
+            idx = d.argsort()[0:n]
+        if n == 1:
+            idx = idx[0]
+        return idx
+
+    def find_closest_element_index(self, x, y, z=None):
+        """Find index of closest element
+
+        Parameters
+        ----------
+
+        x: float
+            X coordinate(easting or longitude)
+        y: float
+            Y coordinate(northing or latitude)
+        z: float, optional
+          Z coordinate(depth, positive upwards)
+        """
+        if np.isscalar(x):
+            return self.find_n_closest_element_index(x, y, z, n=1)
+        else:
+            nx = len(x)
+            ny = len(y)
+            if nx != ny:
+                print(f"x and y must have same length")
+                raise Exception
+            idx = np.zeros(nx, dtype=int)
+            if z is None:
+                for j in range(nx):
+                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z=None, n=1)
+            else: 
+                nz = len(z)
+                if nx != nz:
+                    print(f"z must have same length as x and y")
+                for j in range(nx):
+                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z[j], n=1)
+        return idx
+
+    def get_element_area(self):
+        """Calculate the horizontal area of each element.
+
+        Returns:
+            np.array
+                areas in m2
+        """
+        n_elements = self._source.NumberOfElements
+
+        # Node coordinates
+        xn = np.array(list(self._source.X))
+        yn = np.array(list(self._source.Y))
+
+        area = np.empty(n_elements)
+        xcoords = np.empty(4)
+        ycoords = np.empty(4)
+
+        for j in range(n_elements):
+            nodes = self._source.ElementTable[j]
+
+            for i in range(nodes.Length):
+                nidx = nodes[i] - 1
+                xcoords[i] = xn[nidx]
+                ycoords[i] = yn[nidx]
+
+            # ab : edge vector corner a to b
+            abx = xcoords[1] - xcoords[0]
+            aby = ycoords[1] - ycoords[0]
+
+            # ac : edge vector corner a to c
+            acx = xcoords[2] - xcoords[0]
+            acy = ycoords[2] - ycoords[0]
+
+            isquad = False
+            if nodes.Length > 3:
+                isquad = True
+                # ad : edge vector corner a to d
+                adx = xcoords[3] - xcoords[0]
+                ady = ycoords[3] - ycoords[0]
+
+            # if geographical coords, convert all length to meters
+            if self.is_geo:
+                earth_radius = 6366707.0
+                deg_to_rad = np.pi / 180.0
+                earth_radius_deg_to_rad = earth_radius * deg_to_rad
+
+                # Y on element centers
+                Ye = np.sum(ycoords[: nodes.Length]) / nodes.Length
+                cosYe = np.cos(np.deg2rad(Ye))
+
+                abx = earth_radius_deg_to_rad * abx * cosYe
+                aby = earth_radius_deg_to_rad * aby
+                acx = earth_radius_deg_to_rad * acx * cosYe
+                acy = earth_radius_deg_to_rad * acy
+                if isquad:
+                    adx = earth_radius_deg_to_rad * adx * cosYe
+                    ady = earth_radius_deg_to_rad * ady
+
+            # calculate area in m2
+            area[j] = 0.5 * (abx * acy - aby * acx)
+            if isquad:
+                area[j] = area[j] + 0.5 * (acx * ady - acy * adx)
+
+        return np.abs(area)
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
@@ -450,7 +581,6 @@ class Dfsu(_UnstructuredFile):
         #super().__init__(filename) 
         self._filename = filename
         self._read_header(filename)
-
 
     @property
     def element_coordinates(self):
@@ -795,118 +925,3 @@ class Dfsu(_UnstructuredFile):
         """FOR BACKWARD COMPATIBILITY ONLY. Use n_timesteps instead.
         """
         return self.n_timesteps
-
-    def find_n_closest_element_index(self, x, y, z=None, n=1):
-        ec = self.element_coordinates
-
-        if z is None:
-            poi = np.array([x, y])
-
-            d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
-            idx = d.argsort()[0:n]
-        else:
-            poi = np.array([x, y, z])
-
-            d = ((ec - poi) ** 2).sum(axis=1)
-            idx = d.argsort()[0:n]
-        if n == 1:
-            idx = idx[0]
-        return idx
-
-    def find_closest_element_index(self, x, y, z=None):
-        """Find index of closest element
-
-        Parameters
-        ----------
-
-        x: float
-            X coordinate(easting or longitude)
-        y: float
-            Y coordinate(northing or latitude)
-        z: float, optional
-          Z coordinate(depth, positive upwards)
-        """
-        if np.isscalar(x):
-            return self.find_n_closest_element_index(x, y, z, n=1)
-        else:
-            nx = len(x)
-            ny = len(y)
-            if nx != ny:
-                print(f"x and y must have same length")
-                raise Exception
-            idx = np.zeros(nx, dtype=int)
-            if z is None:
-                for j in range(nx):
-                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z=None, n=1)
-            else: 
-                nz = len(z)
-                if nx != nz:
-                    print(f"z must have same length as x and y")
-                for j in range(nx):
-                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z[j], n=1)
-        return idx
-
-    def get_element_area(self):
-        """Calculate the horizontal area of each element.
-
-        Returns:
-            np.array
-                areas in m2
-        """
-        n_elements = self._source.NumberOfElements
-
-        # Node coordinates
-        xn = np.array(list(self._source.X))
-        yn = np.array(list(self._source.Y))
-
-        area = np.empty(n_elements)
-        xcoords = np.empty(4)
-        ycoords = np.empty(4)
-
-        for j in range(n_elements):
-            nodes = self._source.ElementTable[j]
-
-            for i in range(nodes.Length):
-                nidx = nodes[i] - 1
-                xcoords[i] = xn[nidx]
-                ycoords[i] = yn[nidx]
-
-            # ab : edge vector corner a to b
-            abx = xcoords[1] - xcoords[0]
-            aby = ycoords[1] - ycoords[0]
-
-            # ac : edge vector corner a to c
-            acx = xcoords[2] - xcoords[0]
-            acy = ycoords[2] - ycoords[0]
-
-            isquad = False
-            if nodes.Length > 3:
-                isquad = True
-                # ad : edge vector corner a to d
-                adx = xcoords[3] - xcoords[0]
-                ady = ycoords[3] - ycoords[0]
-
-            # if geographical coords, convert all length to meters
-            if self.is_geo:
-                earth_radius = 6366707.0
-                deg_to_rad = np.pi / 180.0
-                earth_radius_deg_to_rad = earth_radius * deg_to_rad
-
-                # Y on element centers
-                Ye = np.sum(ycoords[: nodes.Length]) / nodes.Length
-                cosYe = np.cos(np.deg2rad(Ye))
-
-                abx = earth_radius_deg_to_rad * abx * cosYe
-                aby = earth_radius_deg_to_rad * aby
-                acx = earth_radius_deg_to_rad * acx * cosYe
-                acy = earth_radius_deg_to_rad * acy
-                if isquad:
-                    adx = earth_radius_deg_to_rad * adx * cosYe
-                    ady = earth_radius_deg_to_rad * ady
-
-            # calculate area in m2
-            area[j] = 0.5 * (abx * acy - aby * acx)
-            if isquad:
-                area[j] = area[j] + 0.5 * (acx * ady - acy * adx)
-
-        return np.abs(area)
