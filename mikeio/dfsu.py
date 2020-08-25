@@ -14,7 +14,8 @@ from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
     asNumpyArray,
-    to_dotnet_array
+    to_dotnet_array,
+    asnetarray_v2
 )
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
@@ -192,12 +193,13 @@ class _UnstructuredGeometry:
         new_node_ids = range(1,self.n_nodes+1)
         new_element_ids = range(1,self.n_elements+1)
         node_dict = dict(zip(self.node_ids, new_node_ids))
-
+        #print(node_dict)
         for j in range(self.n_elements):
             elem_nodes = self._element_table[j]
+            #print(elem_nodes)
             new_elem_nodes = []
-            for ids in elem_nodes:
-                new_elem_nodes.append(node_dict[ids+1])
+            for idx in elem_nodes:
+                new_elem_nodes.append(node_dict[idx])
             self._element_table[j] = new_elem_nodes
             
         self._node_ids = list(new_node_ids)
@@ -206,24 +208,28 @@ class _UnstructuredGeometry:
     def get_element_table_for_elements(self, element_ids):
         elem_tbl = []        
         for j in element_ids:
-            elem_nodes = self.element_table[j]
+            elem_nodes = self.element_table[j-1]
             elem_tbl.append(elem_nodes)  
         return elem_tbl
 
     def elements_to_geometry(self, elements):
         geom = _UnstructuredGeometry()
-        nodes = self.get_nodes_for_elements(elements)
-        node_ids = self.node_ids[nodes]
-        node_coords = self.node_coordinates[nodes]
-        codes = self.codes[nodes]
+        node_ids = self.get_node_ids_for_elements(elements)
+        node_idx = node_ids-1  # index is zero based
+        #node_ids = self.node_ids[nodes]
+        #print(node_ids)
+        node_coords = self.node_coordinates[node_idx]
+        codes = self.codes[node_idx]
         elem_tbl = self.get_element_table_for_elements(elements)
-
+        #print(elem_tbl)
         geom.set_nodes(node_coords, codes=codes, node_ids=node_ids, projection_string=self.projection_string)
         geom.set_elements(elem_tbl, self.element_ids[elements])
         
+        geom.reindex()
+        #print(geomnode_ids)
         return geom
 
-    def get_nodes_for_elements(self, element_ids, node_layers = 'all'): 
+    def get_node_ids_for_elements(self, element_ids, node_layers = 'all'): 
         """list of unique node ids for a list of elements
 
         Parameters
@@ -241,7 +247,7 @@ class _UnstructuredGeometry:
         nodes = []        
         if (node_layers is None) or (node_layers == 'all') or self._type <= 0:
             for j in element_ids:
-                elem_nodes = self.element_table[j] 
+                elem_nodes = self.element_table[j-1] 
                 for node in elem_nodes:
                     nodes.append(node)
         else: 
@@ -249,7 +255,7 @@ class _UnstructuredGeometry:
             if (node_layers != 'bottom') and (node_layers != 'top'):
                 raise Exception('node_layers must be either all, bottom or top')
             for j in element_ids:
-                elem_nodes = self.element_table[j] 
+                elem_nodes = self.element_table[j-1] 
                 nn = len(elem_nodes)
                 halfn = int(nn/2)
                 if (node_layers == 'bottom'):
@@ -461,6 +467,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
     _filename = None
     _source = None
     _start_time = None
+    _timestep_in_seconds = None
     _items = None
 
     def __repr__(self):
@@ -746,7 +753,7 @@ class Dfsu(_UnstructuredFile):
             n_elems = self.n_elements
             n_nodes = self.n_nodes
         else:
-            node_ids = self.get_nodes_for_elements(element_ids)
+            node_ids = self.get_node_ids_for_elements(element_ids)
             n_elems = len(element_ids)
             n_nodes = len(node_ids)
 
@@ -782,7 +789,7 @@ class Dfsu(_UnstructuredFile):
 
                 d[d == deleteValue] = np.nan
 
-                if element_ids:
+                if element_ids is not None:
                     if item==0 and item0_is_node_based:
                         d = d[node_ids]
                     else:
@@ -806,6 +813,7 @@ class Dfsu(_UnstructuredFile):
         start_time=None,
         dt=None,
         items=None,
+        element_ids=None,
         title=None,
     ):
         """Create a new dfsu file
@@ -836,10 +844,16 @@ class Dfsu(_UnstructuredFile):
         n_time_steps = np.shape(data[0])[0]
 
         if dt is None:
-            dt = 1 # Arbitrary if there is only a single timestep
+            if self.timestep is None:
+                dt = 1
+            else:
+                dt = self.timestep #1 # Arbitrary if there is only a single timestep
 
         if start_time is None:
-            start_time = datetime.now()
+            if self.start_time is None:
+                start_time = datetime.now()
+            else:
+                start_time = self.start_time 
 
         if items is None:
             items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
@@ -847,48 +861,51 @@ class Dfsu(_UnstructuredFile):
         if title is None:
             title = ""
 
-        system_start_time = to_dotnet_datetime(start_time)
+        file_start_time = to_dotnet_datetime(start_time)
 
         # Default filetype;
-        filetype = DfsuFileType.Dfsu2D
+        if self._type == -1:
+            # create dfs2d from mesh
+            filetype = DfsuFileType.Dfsu2D
+        else:
+            # same as source
+            # TODO: if subset is 2d or slice... 
+            filetype = self._type
         
-        _, ext = os.path.splitext(self._filename)
+        if filetype != DfsuFileType.Dfsu2D:
+            if items[0].name != "Z coordinate":
+                raise Exception("First item must be z coordinates of the nodes!")  
 
-        if ext == ".mesh":
+        # spatial subset 
+        if element_ids is None:
+            geometry = self
+        else:
+            geometry = self.elements_to_geometry(element_ids)
 
-            source = MeshFile.ReadMesh(self._filename)
-            projstr = source.ProjectionString
-
-        elif ext == ".dfsu":
-
-            source = DfsuFile.Open(self._filename)
-            projstr = source.Projection.WKTString
-            filetype = source.DfsuFileType
-
-        xn = source.X
-        yn = source.Y
+        xn = geometry.node_coordinates[:,0]
+        yn = geometry.node_coordinates[:,1]
 
         # zn have to be Single precision??
-        zn = to_dotnet_float_array(np.array(list(source.Z)))
+        zn = to_dotnet_float_array(geometry.node_coordinates[:,2])
 
-        nodecodes = source.Code
-        elementtable = source.ElementTable
+        elementtable = asnetarray_v2(geometry.element_table)
 
         builder = DfsuBuilder.Create(filetype)
 
-        builder.SetNodes(xn, yn, zn, nodecodes)
+        builder.SetNodes(xn, yn, zn, geometry.codes)
         builder.SetElements(elementtable)
-        builder.SetNodeIds(source.NodeIds)
-        builder.SetElementIds(source.ElementIds)
+        builder.SetNodeIds(geometry.node_ids)
+        builder.SetElementIds(geometry.element_ids)
 
         factory = DfsFactory()
-        proj = factory.CreateProjection(projstr)
+        proj = factory.CreateProjection(geometry.projection_string)
         builder.SetProjection(proj)
-        builder.SetTimeInfo(system_start_time, dt)
+        builder.SetTimeInfo(file_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
 
         if filetype != DfsuFileType.Dfsu2D:
-            builder.SetNumberOfSigmaLayers(source.NumberOfSigmaLayers)
+            # TODO: take this from geometry
+            builder.SetNumberOfSigmaLayers(self._source.NumberOfSigmaLayers)
            
         for item in items:
             if item.name != "Z coordinate":
