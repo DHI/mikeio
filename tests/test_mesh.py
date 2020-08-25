@@ -7,14 +7,14 @@ def test_get_number_of_elements():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     m = Mesh(filename)
 
-    assert m.get_number_of_elements() == 654
+    assert m.n_elements == 654
 
 
 def test_get_element_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     m = Mesh(filename)
 
-    ec = m.get_element_coords()
+    ec = m.element_coordinates
 
     assert ec.shape == (654, 3)
     assert ec[0, 0] > 212000.0
@@ -25,7 +25,7 @@ def test_get_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     m = Mesh(filename)
 
-    nc = m.get_node_coords()
+    nc = m.node_coordinates
 
     assert nc.shape == (399, 3)
 

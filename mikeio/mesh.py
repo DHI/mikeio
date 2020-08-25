@@ -8,101 +8,102 @@ import numpy as np
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
-from .dfsu import _UnstructuredGeometry
+from .dfsu import _UnstructuredGeometry, _UnstructuredFile
 from .eum import EUMType, EUMUnit
 from .dotnet import asnetarray_v2
 
-class Mesh:
+class Mesh(_UnstructuredFile):
     def __init__(self, filename):
-        self._mesh = MeshFile.ReadMesh(filename)
+        #self._mesh = MeshFile.ReadMesh(filename)
+        super().__init__()
+        self._filename = filename
+        self._read_mesh_header(filename)
 
-    def get_number_of_elements(self):
-        return self._mesh.NumberOfElements
+    # def get_number_of_elements(self):
+    #     return self.n_elements #_mesh.NumberOfElements
 
-    @property
-    def number_of_elements(self):
-        return self._mesh.NumberOfElements
+    # @property
+    # def number_of_elements(self):
+    #     return self._mesh.NumberOfElements
 
-    @property
-    def number_of_nodes(self):
-        return self._mesh.NumberOfNodes
+    # @property
+    # def number_of_nodes(self):
+    #     return self._mesh.NumberOfNodes
 
-    def get_number_of_nodes(self):
-        return self._mesh.NumberOfNodes
+    # def get_number_of_nodes(self):
+    #     return self._mesh.NumberOfNodes
 
-    def get_node_coords(self, code=None):
-        """
-        Get node coordinates
+    # def get_node_coords(self, code=None):
+    #     """
+    #     Get node coordinates
         
-        Parameters
-        ----------
-        code: int, optional
-            filter results by code, land==1
+    #     Parameters
+    #     ----------
+    #     code: int, optional
+    #         filter results by code, land==1
 
-        Returns
-        -------
-        np.ndarray
-        """
-        # Node coordinates
-        xn = np.array(list(self._mesh.X))
-        yn = np.array(list(self._mesh.Y))
-        zn = np.array(list(self._mesh.Z))
+    #     Returns
+    #     -------
+    #     np.ndarray
+    #     """
+    #     # Node coordinates
+    #     xn = np.array(list(self._mesh.X))
+    #     yn = np.array(list(self._mesh.Y))
+    #     zn = np.array(list(self._mesh.Z))
 
-        nc = np.column_stack([xn, yn, zn])
+    #     nc = np.column_stack([xn, yn, zn])
 
-        if code is not None:
+    #     if code is not None:
 
-            c = np.array(list(self._mesh.Code))
-            valid_codes = set(c)
+    #         c = np.array(list(self._mesh.Code))
+    #         valid_codes = set(c)
 
-            if code not in valid_codes:
+    #         if code not in valid_codes:
 
-                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
-                raise Exception
-            return nc[c == code]
+    #             print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
+    #             raise Exception
+    #         return nc[c == code]
 
-        return nc
+    #     return nc
 
-    def get_element_coords(self):
-        """ Calculate element center coordinates
+    # def get_element_coords(self):
+    #     """ Calculate element center coordinates
 
-            Returns
-                np.array((number_of_elements, 3)
-        """
-        ne = self._mesh.NumberOfElements
+    #         Returns
+    #             np.array((number_of_elements, 3)
+    #     """
+    #     ne = self._mesh.NumberOfElements
 
-        # Node coordinates
-        xn = np.array(list(self._mesh.X))
-        yn = np.array(list(self._mesh.Y))
-        zn = np.array(list(self._mesh.Z))
+    #     # Node coordinates
+    #     xn = np.array(list(self._mesh.X))
+    #     yn = np.array(list(self._mesh.Y))
+    #     zn = np.array(list(self._mesh.Z))
 
-        ec = np.empty([ne, 3])
+    #     ec = np.empty([ne, 3])
 
-        for j in range(ne):
-            nodes = self._mesh.ElementTable[j]
+    #     for j in range(ne):
+    #         nodes = self._mesh.ElementTable[j]
 
-            xcoords = np.empty(nodes.Length)
-            ycoords = np.empty(nodes.Length)
-            zcoords = np.empty(nodes.Length)
-            for i in range(nodes.Length):
-                nidx = nodes[i] - 1
-                xcoords[i] = xn[nidx]
-                ycoords[i] = yn[nidx]
-                zcoords[i] = zn[nidx]
+    #         xcoords = np.empty(nodes.Length)
+    #         ycoords = np.empty(nodes.Length)
+    #         zcoords = np.empty(nodes.Length)
+    #         for i in range(nodes.Length):
+    #             nidx = nodes[i] - 1
+    #             xcoords[i] = xn[nidx]
+    #             ycoords[i] = yn[nidx]
+    #             zcoords[i] = zn[nidx]
 
-            ec[j, 0] = xcoords.mean()
-            ec[j, 1] = ycoords.mean()
-            ec[j, 2] = zcoords.mean()
+    #         ec[j, 0] = xcoords.mean()
+    #         ec[j, 1] = ycoords.mean()
+    #         ec[j, 2] = zcoords.mean()
 
-        return ec
+    #     return ec
 
     def to_shapely(self):
         from shapely.geometry import Polygon, MultiPolygon
 
-        nc = self.get_node_coords()
-
-        ne = self.get_number_of_elements()
-
+        nc = self.node_coordinates
+        ne = self.n_elements
         polys = []
         for j in range(ne):
             nodes = self._mesh.ElementTable[j]
@@ -112,6 +113,7 @@ class Mesh:
                 pcoords[i, :] = nc[nidx, 0:2]
             polygon = Polygon(pcoords)
             polys.append(polygon)
+        #polygons = self.to_polygons()
         mp = MultiPolygon(polys)
 
         return mp
@@ -132,8 +134,8 @@ class Mesh:
         if cmap is None:
             cmap = cm.viridis
 
-        nc = self.get_node_coords()
-        ec = self.get_element_coords()
+        nc = self.node_coordinates
+        ec = self.element_coordinates
         ne = ec.shape[0]
 
         if z is None:
@@ -141,19 +143,19 @@ class Mesh:
             if label is None:
                 label = "Bathymetry (m)"
 
-        patches = []
+        # patches = []
+        # for j in range(ne):
+        #     nodes = self._mesh.ElementTable[j]
+        #     pcoords = np.empty([nodes.Length, 2])
+        #     for i in range(nodes.Length):
+        #         nidx = nodes[i] - 1
+        #         pcoords[i, :] = nc[nidx, 0:2]
 
-        for j in range(ne):
-            nodes = self._mesh.ElementTable[j]
-            pcoords = np.empty([nodes.Length, 2])
-            for i in range(nodes.Length):
-                nidx = nodes[i] - 1
-                pcoords[i, :] = nc[nidx, 0:2]
-
-            polygon = Polygon(pcoords, True)
-            patches.append(polygon)
+        #     polygon = Polygon(pcoords, True)
+        #     patches.append(polygon)
 
         fig, ax = plt.subplots()
+        patches = self.to_polygons()
         p = PatchCollection(patches, cmap=cmap, edgecolor="black")
 
         p.set_array(z)
@@ -163,20 +165,20 @@ class Mesh:
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
     def write(self, outfilename):
-        projection = self._mesh.ProjectionString
-        eumQuantity = self._mesh.EumQuantity
+        projection = self._source.ProjectionString
+        eumQuantity = self._source.EumQuantity
 
         builder = MeshBuilder()
 
-        nc = self.get_node_coords()
+        nc = self.node_coordinates
 
-        x = self._mesh.X
-        y = self._mesh.Y
-        z = self._mesh.Z
-        c = self._mesh.Code
+        x = self._source.X
+        y = self._source.Y
+        z = self._source.Z
+        c = self._source.Code
 
         builder.SetNodes(x,y,z,c)
-        builder.SetElements(self._mesh.ElementTable)
+        builder.SetElements(self._source.ElementTable)
         builder.SetProjection(projection)
         builder.SetEumQuantity(eumQuantity)
         newMesh = builder.CreateMesh()

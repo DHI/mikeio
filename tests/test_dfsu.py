@@ -230,7 +230,7 @@ def test_write(tmpdir):
 
     msh = Mesh(meshfilename)
     
-    n_elements = msh.number_of_elements
+    n_elements = msh.n_elements
     d = np.zeros((1, n_elements))
     data = []
     data.append(d)
@@ -275,7 +275,7 @@ def test_write_invalid_data_closes_and_deletes_file(tmpdir):
 
     msh = Mesh(meshfilename)
 
-    n_elements = msh.number_of_elements
+    n_elements = msh.n_elements
     d = np.zeros((1, n_elements - 1))
 
     assert d.shape[1] != n_elements
