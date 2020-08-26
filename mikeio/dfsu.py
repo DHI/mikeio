@@ -412,8 +412,8 @@ class _UnstructuredGeometry:
         yn = np.array(list(self._source.Y))
 
         area = np.empty(n_elements)
-        xcoords = np.empty(4)
-        ycoords = np.empty(4)
+        xcoords = np.empty(8)
+        ycoords = np.empty(8)
 
         for j in range(n_elements):
             nodes = self._source.ElementTable[j]

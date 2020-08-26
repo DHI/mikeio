@@ -221,6 +221,12 @@ def test_get_element_area_UTM():
     areas = dfs.get_element_area()
     assert areas[0] == 4949.102548750438
 
+def test_get_element_area_3D():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    areas = dfs.get_element_area()
+    assert areas[0] == 350186.43530453625
+
 
 def test_get_element_area_LONGLAT():
     filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
