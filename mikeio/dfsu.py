@@ -19,7 +19,7 @@ from .dotnet import (
     asnetarray_v2
 )
 from .eum import TimeStep, ItemInfo
-from .helpers import safe_length
+from .helpers import safe_length, dist_in_meters
 
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
@@ -470,6 +470,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
     _start_time = None
     _timestep_in_seconds = None
     _items = None
+    _deletevalue = None
 
     def __repr__(self):
         out = []
@@ -494,6 +495,9 @@ class _UnstructuredFile(_UnstructuredGeometry):
         super().__init__()
   
     def _read_header(self, filename):
+        if not os.path.isfile(filename):
+            raise Exception(f'file {filename} does not exist!')
+
         _, ext = os.path.splitext(filename)
 
         if ext == ".mesh":
@@ -501,7 +505,9 @@ class _UnstructuredFile(_UnstructuredGeometry):
         
         elif ext == ".dfsu":
             self._read_dfsu_header(filename)
-            self._source.Close()
+            #self._source.Close()
+        else: 
+            raise Exception(f'Filetype {ext} not supported (mesh,dfsu)')
 
     def _read_mesh_header(self, filename):
         msh = MeshFile.ReadMesh(filename)
@@ -519,7 +525,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._source = dfs
         self._projstr = dfs.Projection.WKTString
         self._type = dfs.DfsuFileType    
-        self._deleteValue = dfs.DeleteValueFloat
+        self._deletevalue = dfs.DeleteValueFloat
 
         # geometry
         self._set_nodes_from_source(dfs)
@@ -534,7 +540,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._n_timesteps = dfs.NumberOfTimeSteps
         self._timestep_in_seconds = dfs.TimeStepInSeconds
 
-        #dfs.Close()
+        dfs.Close()
 
     def _set_nodes_from_source(self, source):
         xn = asNumpyArray(source.X)
@@ -558,7 +564,6 @@ class Dfsu(_UnstructuredFile):
     
     def __init__(self, filename):
         super().__init__()
-        #super().__init__(filename) 
         self._filename = filename
         self._read_header(filename)
 
@@ -700,15 +705,19 @@ class Dfsu(_UnstructuredFile):
             A dataset with data dimensions [t,elements]
         """
 
-        # Open the dfs file for reading
-        #dfs = DfsuFile.Open(self._filename)
-        self._read_dfsu_header(self._filename)
-        dfs = self._source
+        # Open the dfs file for reading        
+        #self._read_dfsu_header(self._filename)
+        dfs = DfsuFile.Open(self._filename)        
+        # time may have changes since we read the header 
+        # (if engine is continuously writing to this file)        
+        self._n_timesteps = dfs.NumberOfTimeSteps
+        # TODO: add more checks that this is actually still the same file 
+        # (could have been replaced in the meantime)
         
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
         #n_items = self.n_items #safe_length(dfs.ItemInfo)
 
-        nt = dfs.NumberOfTimeSteps
+        nt = self.n_timesteps #.NumberOfTimeSteps
 
         items, item_numbers, time_steps = get_valid_items_and_timesteps(self, items, time_steps)
 
@@ -722,7 +731,7 @@ class Dfsu(_UnstructuredFile):
             n_elems = len(element_ids)
             n_nodes = len(node_ids)
 
-        deleteValue = dfs.DeleteValueFloat
+        deletevalue = self.deletevalue # dfs.DeleteValueFloat
 
         data_list = []
 
@@ -752,7 +761,7 @@ class Dfsu(_UnstructuredFile):
 
                 d = to_numpy(src)
 
-                d[d == deleteValue] = np.nan
+                d[d == deletevalue] = np.nan
 
                 if element_ids is not None:
                     if item==0 and item0_is_node_based:
@@ -764,8 +773,8 @@ class Dfsu(_UnstructuredFile):
 
             t_seconds[i] = itemdata.Time
 
-        start_time = from_dotnet_datetime(dfs.StartDateTime)
-        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        #start_time = from_dotnet_datetime(dfs.StartDateTime)
+        time = [self.start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
         dfs.Close()
         return Dataset(data_list, time, items)
