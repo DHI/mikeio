@@ -15,8 +15,8 @@ def test_read_all_items_returns_all_items_and_names():
 
     ds = dfs.read()
 
-    assert len(ds.data) == 4
-    assert len(ds.items) == 4
+    assert len(ds) == 4
+    
 
 def test_read_simple_3d():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
@@ -44,23 +44,6 @@ def test_read_simple_2dv():
     assert ds.items[3].name == "W velocity"
 
 
-
-def test_write(tmpdir):
-
-    infilename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    outfilename = os.path.join(tmpdir.dirname, "adjusted.dfsu")
-
-    copyfile(infilename, outfilename)
-    dfs = Dfsu(infilename)
-
-    ds = dfs.read()
-
-    # Do arbitrary calculation
-    ds.data[0] = ds.data[0] * 2.0
-
-    dfs.write(outfilename,data)
-
-
 def test_read_single_item_returns_single_item():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -73,18 +56,18 @@ def test_read_single_item_scalar_index():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    ds = dfs.read(items=3)
+    ds = dfs.read([3])
 
-    assert len(ds.items) == 1
+    assert len(ds) == 1
 
 
 def test_read_returns_array_time_dimension_first():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read(items=[3])
+    ds = dfs.read([3])
 
-    assert data[0].shape == (9, 884)
+    assert ds.data[0].shape == (9, 884)
 
 
 def test_read_selected_item_returns_correct_items():
@@ -93,8 +76,7 @@ def test_read_selected_item_returns_correct_items():
 
     ds = dfs.read([0, 3])
 
-    assert len(ds.data) == 2
-    assert len(ds.items) == 2
+    assert len(ds) == 2
     assert ds.items[0].name == "Surface elevation"
     assert ds.items[1].name == "Current speed"
 
@@ -105,8 +87,7 @@ def test_read_selected_item_names_returns_correct_items():
 
     ds = dfs.read(["Surface elevation", "Current speed"])
 
-    assert len(ds.data) == 2
-    assert len(ds.items) == 2
+    assert len(ds) == 2
     assert ds.items[0].name == "Surface elevation"
     assert ds.items[1].name == "Current speed"
 
@@ -163,8 +144,7 @@ def test_get_number_of_time_steps():
 def test_get_node_coords():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    #dfs.read()
-
+    
     nc = dfs.node_coordinates
     assert nc[0, 0] == 607031.4886285994
 
@@ -172,8 +152,7 @@ def test_get_node_coords():
 def test_get_element_coords():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    #dfs.read()
-
+    
     ec = dfs.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
@@ -181,8 +160,7 @@ def test_get_element_coords():
 def test_find_closest_element_index():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    #dfs.read()
-
+    
     idx = dfs.find_closest_element_index(606200, 6905480)
     assert idx == 317
 
@@ -201,6 +179,17 @@ def test_read_and_select_single_element():
     selds = ds.isel(idx=idx, axis=1)
 
     assert selds.data[0].shape == (9,)
+
+def test_read_and_select_single_element_dfsu_3d():
+
+    filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    dfs = Dfsu(filename)
+
+    ds = dfs.read()
+
+    selds = ds.isel(idx=1739, axis=1)
+
+    assert selds.data[0].shape == (3,)
 
 
 def test_is_geo_UTM():
