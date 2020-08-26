@@ -193,3 +193,7 @@ class Dataset:
 
     def _ipython_key_completions_(self):
         return self.names
+
+    @property
+    def is_equidistant(self):
+        return pd.DatetimeIndex(self.time, freq="infer").freq is not None

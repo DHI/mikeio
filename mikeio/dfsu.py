@@ -1,4 +1,5 @@
 import os
+import warnings
 import numpy as np
 from datetime import datetime, timedelta
 
@@ -837,6 +838,8 @@ class Dfsu(_UnstructuredFile):
             items = data.items
             start_time = data.time[0]
             if dt is None and len(data.time) > 1:
+                if not data.is_equidistant:
+                    raise Exception("Data is not equidistant in time. Dfsu requires equidistant temporal axis!")
                 dt = (data.time[1] - data.time[0]).total_seconds()
             data = data.data
 
@@ -852,8 +855,10 @@ class Dfsu(_UnstructuredFile):
         if start_time is None:
             if self.start_time is None:
                 start_time = datetime.now()
+                warnings.warn(f"No start time supplied. Using current time: {start_time} as start time.")
             else:
                 start_time = self.start_time 
+                warnings.warn(f"No start time supplied. Using start time from source: {start_time} as start time.")
 
         if items is None:
             items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
