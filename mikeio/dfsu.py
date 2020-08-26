@@ -169,7 +169,7 @@ class _UnstructuredGeometry:
         self._codes = np.asarray(codes)
         self._n_nodes = len(codes)
         if node_ids is None:
-            node_ids = list(range(1,self._n_nodes+1))
+            node_ids = list(range(self._n_nodes)) #list(range(1,self._n_nodes+1))
         self._node_ids = np.asarray(node_ids)
         if projection_string is None:
             projection_string = "LONG/LAT"
@@ -179,7 +179,7 @@ class _UnstructuredGeometry:
         self._element_table = element_table
         self._n_elements = len(element_table)
         if element_ids is None:
-            element_ids = list(range(1,self.n_elements+1))
+            element_ids = list(range(self.n_elements)) #list(range(1,self.n_elements+1))
         self._element_ids = np.asarray(element_ids)
         
         if geometry_type is None:
@@ -191,8 +191,8 @@ class _UnstructuredGeometry:
         self._type = geometry_type
 
     def reindex(self):
-        new_node_ids = range(1,self.n_nodes+1)
-        new_element_ids = range(1,self.n_elements+1)
+        new_node_ids = range(self.n_nodes) #range(1,self.n_nodes+1)
+        new_element_ids = range(self.n_elements) #range(1,self.n_elements+1)
         node_dict = dict(zip(self.node_ids, new_node_ids))
         #print(node_dict)
         for j in range(self.n_elements):
@@ -209,19 +209,19 @@ class _UnstructuredGeometry:
     def get_element_table_for_elements(self, element_ids):
         elem_tbl = []        
         for j in element_ids:
-            elem_nodes = self.element_table[j-1]
+            elem_nodes = self.element_table[j]
             elem_tbl.append(elem_nodes)  
         return elem_tbl
 
-    def elements_to_geometry(self, elements):
+    def elements_to_geometry(self, elements, node_layers='all'):
         geom = _UnstructuredGeometry()
-        node_ids = self.get_node_ids_for_elements(elements)
-        node_idx = node_ids-1  # index is zero based
+        node_ids, elem_tbl = self.get_nodes_and_table_for_elements(elements, node_layers=node_layers)
+        node_idx = node_ids #-1  # index is zero based
         #node_ids = self.node_ids[nodes]
         #print(node_ids)
         node_coords = self.node_coordinates[node_idx]
         codes = self.codes[node_idx]
-        elem_tbl = self.get_element_table_for_elements(elements)
+        #elem_tbl = self.get_element_table_for_elements(elements)
         #print(elem_tbl)
         geom.set_nodes(node_coords, codes=codes, node_ids=node_ids, projection_string=self.projection_string)
         geom.set_elements(elem_tbl, self.element_ids[elements])
@@ -248,7 +248,7 @@ class _UnstructuredGeometry:
         nodes = []        
         if (node_layers is None) or (node_layers == 'all') or self._type <= 0:
             for j in element_ids:
-                elem_nodes = self.element_table[j-1] 
+                elem_nodes = self.element_table[j] #[j-1] 
                 for node in elem_nodes:
                     nodes.append(node)
         else: 
@@ -256,7 +256,7 @@ class _UnstructuredGeometry:
             if (node_layers != 'bottom') and (node_layers != 'top'):
                 raise Exception('node_layers must be either all, bottom or top')
             for j in element_ids:
-                elem_nodes = self.element_table[j-1] 
+                elem_nodes = self.element_table[j] #[j-1] 
                 nn = len(elem_nodes)
                 halfn = int(nn/2)
                 if (node_layers == 'bottom'):
@@ -268,6 +268,46 @@ class _UnstructuredGeometry:
 
         return np.unique(nodes)
 
+    def get_nodes_and_table_for_elements(self, element_ids, node_layers = 'all'): 
+        """list of unique node ids for a list of elements
+
+        Parameters
+        ----------
+        element_ids : np.array(int)
+            array of element ids
+        node_layers : str, optional
+            for 3D files 'all', 'bottom' or 'top' nodes of each element, by default 'all'
+
+        Returns
+        -------
+        np.array(int)
+            array of node ids (unique)
+        """
+        nodes = []        
+        elem_tbl = []
+        if (node_layers is None) or (node_layers == 'all') or self._type <= 0:
+            for j in element_ids:
+                elem_nodes = self.element_table[j] #[j-1] 
+                elem_tbl.append(elem_nodes)
+                for node in elem_nodes:
+                    nodes.append(node)
+        else: 
+            # 3D file    
+            if (node_layers != 'bottom') and (node_layers != 'top'):
+                raise Exception('node_layers must be either all, bottom or top')
+            for j in element_ids:
+                elem_nodes = self.element_table[j] #[j-1] 
+                nn = len(elem_nodes)
+                halfn = int(nn/2)
+                if (node_layers == 'bottom'):
+                    elem_nodes = elem_nodes[:halfn]
+                if (node_layers == 'top'):
+                    elem_nodes = elem_nodes[halfn:]
+                elem_tbl.append(elem_nodes)
+                for node in elem_nodes:
+                    nodes.append(node)    
+
+        return np.unique(nodes), elem_tbl
 
     def validate(self):
         """ validate consistency of this mesh geometry
@@ -304,7 +344,7 @@ class _UnstructuredGeometry:
             nnodes = len(nodes)
             nnodes_per_elem[j] = nnodes
             for i in range(nnodes):
-                idx[i] = nodes[i] - 1
+                idx[i] = nodes[i] #- 1
 
             xcoords[:nnodes,j] = self._nc[idx[:nnodes],0]
             ycoords[:nnodes,j] = self._nc[idx[:nnodes],1]
@@ -549,16 +589,17 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._nc = np.column_stack([xn, yn, zn])   
         self._codes = np.array(list(source.Code))
         self._n_nodes = source.NumberOfNodes
-        self._node_ids = np.array(list(source.NodeIds))
+        self._node_ids = np.array(list(source.NodeIds)) - 1
 
     def _set_elements_from_source(self, source):        
         elem_tbl = []
         self._n_elements = source.NumberOfElements
         for j in range(self.n_elements):
             elem_nodes = list(source.ElementTable[j])
+            elem_nodes = [nd-1 for nd in elem_nodes]  
             elem_tbl.append(elem_nodes)
         self._element_table = elem_tbl
-        self._element_ids = np.array(list(source.ElementIds))
+        self._element_ids = np.array(list(source.ElementIds)) - 1
        
 class Dfsu(_UnstructuredFile):
     
@@ -649,7 +690,7 @@ class Dfsu(_UnstructuredFile):
     @property 
     def bottom_element_ids(self):
         if self._bot_elems is None:
-            self._bot_elems = self.top_element_ids - self.num_layers_per_column
+            self._bot_elems = self.top_element_ids - self.num_layers_per_column + 1
         return self._bot_elems
 
     def get_element_ids_layer_n(self, n):
@@ -866,14 +907,19 @@ class Dfsu(_UnstructuredFile):
         # zn have to be Single precision??
         zn = to_dotnet_float_array(geometry.node_coordinates[:,2])
 
-        elementtable = asnetarray_v2(geometry.element_table)
+        elem_table = []
+        for j in range(geometry.n_elements):
+            elem_nodes = geometry.element_table[j]
+            elem_nodes = [nd+1 for nd in elem_nodes]  
+            elem_table.append(elem_nodes)
+        elem_table = asnetarray_v2(elem_table)
 
         builder = DfsuBuilder.Create(filetype)
 
         builder.SetNodes(xn, yn, zn, geometry.codes)
-        builder.SetElements(elementtable)
-        builder.SetNodeIds(geometry.node_ids)
-        builder.SetElementIds(geometry.element_ids)
+        builder.SetElements(elem_table)
+        #builder.SetNodeIds(geometry.node_ids+1)
+        #builder.SetElementIds(geometry.element_ids+1)
 
         factory = DfsFactory()
         proj = factory.CreateProjection(geometry.projection_string)
