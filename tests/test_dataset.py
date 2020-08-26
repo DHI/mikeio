@@ -64,6 +64,25 @@ def test_select_item_by_name():
     foo_data = ds["Foo"]
     assert foo_data[0, 10, 0] == 2.0
 
+def test_select_multiple_items_by_name():
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+    d3 = np.zeros([nt, 100, 30]) + 3.0
+
+    data = [d1, d2, d3]
+
+    time = _get_time(nt)
+    #items = [ItemInfo("Foo"), ItemInfo("Bar"), ItemInfo("Baz")]
+    items = [ItemInfo(x) for x in ["Foo","Bar","Baz"]]
+    ds = Dataset(data, time, items)
+
+    newds = ds[["Baz","Foo"]]
+    assert newds.items[0].name == "Baz"
+    assert newds.items[1].name == "Foo"
+    assert newds["Foo"][0, 10, 0] == 1.5
+
+
 def test_select_item_by_iteminfo():
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
@@ -170,20 +189,6 @@ def test_get_bad_name():
 
     with pytest.raises(Exception):
         ds["BAR"]
-
-
-def test_get_data_mulitple_name_fails():
-
-    nt = 100
-    data = []
-    d = np.zeros([nt, 100, 30]) + 1.0
-    data.append(d)
-    time = _get_time(nt)
-    items = [ItemInfo("Foo")]
-    ds = Dataset(data, time, items)
-
-    with pytest.raises(Exception):
-        ds[["Foo", "Foo"]]
 
 
 def test_default_type():

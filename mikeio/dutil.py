@@ -132,6 +132,21 @@ class Dataset:
 
         if isinstance(x, ItemInfo):
             return self.__getitem__(x.name)
+
+        if isinstance(x, list):
+            data = []
+            items = []
+
+            item_lookup = {item.name: i for i, item in enumerate(self.items)}
+
+            for v in x:
+                data_item =  self.__getitem__(v)
+                i = item_lookup[v]
+                item = self.items[i]
+                items.append(item)
+                data.append(data_item)
+
+            return Dataset(data, self.time, items)
         
         
 
