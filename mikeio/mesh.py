@@ -57,7 +57,8 @@ class Mesh(_UnstructuredFile):
 
         fig, ax = plt.subplots()
         patches = self.to_polygons()
-        p = PatchCollection(patches, cmap=cmap, edgecolor="black")
+        #p = PatchCollection(patches, cmap=cmap, edgecolor="black")
+        p = PatchCollection(patches, cmap=cmap, edgecolor="lightgray", alpha=0.2)
 
         p.set_array(z)
         ax.add_collection(p)
@@ -100,11 +101,16 @@ class Mesh(_UnstructuredFile):
         z = nc[:,2]
         c = geometry.codes
 
-        elem_table = asnetarray_v2(geometry.element_table)
+        elem_table = []
+        for j in range(geometry.n_elements):
+            elem_nodes = geometry.element_table[j]
+            elem_nodes = [nd+1 for nd in elem_nodes]  
+            elem_table.append(elem_nodes)
+        elem_table = asnetarray_v2(elem_table)
 
         builder.SetNodes(x,y,z,c)
-        builder.SetNodeIds(geometry.node_ids)
-        builder.SetElementIds(geometry.element_ids)
+        #builder.SetNodeIds(geometry.node_ids)
+        #builder.SetElementIds(geometry.element_ids)
         builder.SetElements(elem_table)
         builder.SetProjection(projection)
         builder.SetEumQuantity(quantity)
