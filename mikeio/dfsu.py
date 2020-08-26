@@ -134,7 +134,7 @@ class _UnstructuredGeometry:
 
     @property 
     def is_2d(self):
-        return _type <= 0
+        return self._type <= 0
 
     @property 
     def type_as_string(self):        
@@ -473,16 +473,26 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
     def __repr__(self):
         out = []
-        out.append("Dfsu/Mesh")
-        out.append(f"Number of nodes: {self.n_nodes}")
+        if self._type is not None:
+            out.append(self.type_as_string)        
         out.append(f"Number of elements: {self.n_elements}")
+        out.append(f"Number of nodes: {self.n_nodes}")
+        if self._type > 0:
+            out.append(f"Number of sigma layers: {self.n_sigma_layers}")
+        if self._type == 3 or self._type == 5:
+            out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
+        if self._n_items is not None:
+            out.append(f"Number of items: {self._n_items}")
+        if self._n_timesteps is not None:
+            if self._n_timesteps == 1:
+                out.append(f"Time: time-invariant file (1 step) at {self._start_time}")
+            else:
+                out.append(f"Time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s and start {self._start_time}")
         return str.join("\n", out)
 
     def __init__(self):       
         super().__init__()
-        #self._filename = filename
-        #self._read_header(filename)
-
+  
     def _read_header(self, filename):
         _, ext = os.path.splitext(filename)
 
@@ -543,45 +553,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
             elem_tbl.append(elem_nodes)
         self._element_table = elem_tbl
         self._element_ids = np.array(list(source.ElementIds))
-        
-    # @property
-    # def node_coordinates(self):  
-    #     if self._nc is None:
-    #         xn = asNumpyArray(self._source.X)
-    #         yn = asNumpyArray(self._source.Y)
-    #         zn = asNumpyArray(self._source.Z)
-    #         self._nc = np.column_stack([xn, yn, zn])      
-    #     return self._nc
-
-    # @property
-    # def n_nodes(self):
-    #     if self._n_nodes is None:
-    #         self._n_nodes = self._source.NumberOfNodes
-    #     return self._n_nodes
-
-    # @property
-    # def n_elements(self):
-    #     if self._n_elements is None:
-    #         self._n_elements = self._source.NumberOfElements
-    #     return self._n_elements
-
-    # @property
-    # def codes(self):
-    #     if self._codes is None:
-    #         self._codes = np.array(list(self._source.Code))
-    #     return self._codes
-
-    # @property
-    # def element_table(self):
-    #     if self._element_table is None:
-    #         elem_tbl = []        
-    #         for j in range(self.n_elements):
-    #             elem_nodes = list(self._source.ElementTable[j])
-    #             elem_tbl.append(elem_nodes)
-    #         self._element_table = elem_tbl
-    #     return self._element_table
-
-
+       
 class Dfsu(_UnstructuredFile):
     
     def __init__(self, filename):
