@@ -13,10 +13,10 @@ def test_read_all_items_returns_all_items_and_names():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read()
+    ds = dfs.read()
 
-    assert len(data) == 4
-    assert len(items) == 4
+    assert len(ds.data) == 4
+    assert len(ds.items) == 4
 
 def test_read_simple_3d():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
@@ -65,10 +65,17 @@ def test_read_single_item_returns_single_item():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read(items=[3])
+    ds = dfs.read(items=[3])
 
-    assert len(data) == 1
-    assert len(items) == 1
+    assert len(ds.items) == 1
+
+def test_read_single_item_scalar_index():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(items=3)
+
+    assert len(ds.items) == 1
 
 
 def test_read_returns_array_time_dimension_first():
@@ -84,24 +91,24 @@ def test_read_selected_item_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read([0, 3])
+    ds = dfs.read([0, 3])
 
-    assert len(data) == 2
-    assert len(items) == 2
-    assert items[0].name == "Surface elevation"
-    assert items[1].name == "Current speed"
+    assert len(ds.data) == 2
+    assert len(ds.items) == 2
+    assert ds.items[0].name == "Surface elevation"
+    assert ds.items[1].name == "Current speed"
 
 
 def test_read_selected_item_names_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    (data, t, items) = dfs.read(["Surface elevation", "Current speed"])
+    ds = dfs.read(["Surface elevation", "Current speed"])
 
-    assert len(data) == 2
-    assert len(items) == 2
-    assert items[0].name == "Surface elevation"
-    assert items[1].name == "Current speed"
+    assert len(ds.data) == 2
+    assert len(ds.items) == 2
+    assert ds.items[0].name == "Surface elevation"
+    assert ds.items[1].name == "Current speed"
 
 
 def test_read_all_time_steps():
@@ -125,6 +132,16 @@ def test_read_single_time_step():
     assert len(ds.time) == 1
     assert ds.data[0].shape[0] == 1
 
+def test_read_single_time_step_scalar():
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(items=[0, 3], time_steps=1)
+
+    assert len(ds.time) == 1
+    assert ds.data[0].shape[0] == 1
+
 
 def test_read_single_time_step_outside_bounds_fails():
 
@@ -140,16 +157,7 @@ def test_get_number_of_time_steps():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    dfs.read()
-    assert dfs.get_number_of_time_steps() == 9
-
-
-def test_get_number_of_time_steps_with_input_arg():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
-
-    dfs.read(time_steps=[4])
-    assert dfs.get_number_of_time_steps() == 9
+    assert dfs.n_timesteps == 9
 
 
 def test_get_node_coords():
@@ -302,3 +310,17 @@ def test_write_non_equidistant_is_not_possible(tmpdir):
         dfs.write(outfilename, ds)
 
     assert not os.path.exists(outfilename)
+
+def test_temporal_resample_by_reading_selected_timesteps(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read()
+    dfs.write(outfilename, ds)
+
+    assert os.path.exists(outfilename)
+
