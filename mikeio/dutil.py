@@ -95,7 +95,7 @@ class Dataset:
                 f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
             )
         self.data = data
-        self.time = time
+        self.time = pd.DatetimeIndex(time, freq='infer')
         self.items = items
 
     def __repr__(self):
@@ -110,7 +110,7 @@ class Dataset:
         return str.join("\n", out)
 
     def __len__(self):
-        return 3  # [data,time,items]
+        return len(self.items)
 
     def __getitem__(self, x):
 
@@ -168,15 +168,16 @@ class Dataset:
             dataset with subset
         """
 
+        time = self.time
         if axis == 0:
-            raise ValueError("Subsetting along time axis not supported")
+            time = time[idx]
 
         res = []
         for item in self.items:
             x = np.take(self[item.name], idx, axis=axis)
             res.append(x)
 
-        ds = Dataset(res, self.time, self.items)
+        ds = Dataset(res, time, self.items)
         return ds
 
     def to_dataframe(self, unit_in_name=False):
