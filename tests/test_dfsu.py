@@ -289,3 +289,16 @@ def test_write_invalid_data_closes_and_deletes_file(tmpdir):
     dfs.write(filename, data, items=items)
 
     assert not os.path.exists(filename)
+
+def test_write_non_equidistant_is_not_possible(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    ds = dfs.read(time_steps=[0,1,3])
+
+    with pytest.raises(Exception):
+        dfs.write(outfilename, ds)
+
+    assert not os.path.exists(outfilename)

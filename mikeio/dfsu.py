@@ -838,6 +838,8 @@ class Dfsu(_UnstructuredFile):
             items = data.items
             start_time = data.time[0]
             if dt is None and len(data.time) > 1:
+                if not data.is_equidistant:
+                    raise Exception("Data is not equidistant in time. Dfsu requires equidistant temporal axis!")
                 dt = (data.time[1] - data.time[0]).total_seconds()
             data = data.data
 
