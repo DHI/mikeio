@@ -194,6 +194,17 @@ def test_read_and_select_single_element():
 
     assert selds.data[0].shape == (9,)
 
+def test_read_and_select_single_element_dfsu_3d():
+
+    filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    dfs = Dfsu()
+
+    ds = dfs.read(filename)
+
+    selds = ds.isel(idx=1739, axis=1)
+
+    assert selds.data[0].shape == (3,)
+
 
 def test_is_geo_UTM():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")

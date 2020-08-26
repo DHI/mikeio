@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
 
 def find_item(dfs, item_names):
     """Utility function to find item numbers
@@ -208,16 +210,22 @@ class Dataset:
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
 
+        items = self.items
+
+        if axis==1 and items[0].name == "Z coordinate":
+            items = deepcopy(items)
+            items.pop(0)
+
         time = self.time
         if axis == 0:
             time = time[idx]
 
         res = []
-        for item in self.items:
+        for item in items:
             x = np.take(self[item.name], idx, axis=axis)
             res.append(x)
 
-        ds = Dataset(res, time, self.items)
+        ds = Dataset(res, time, items)
         return ds
 
     def to_dataframe(self, unit_in_name=False):
