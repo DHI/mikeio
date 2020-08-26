@@ -11,10 +11,10 @@ def test_read_all_items_returns_all_items_and_names():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, items) = dfs.read(filename)
+    ds = dfs.read(filename)
 
-    assert len(data) == 4
-    assert len(items) == 4
+    assert len(ds) == 4
+    
 
 def test_read_simple_3d():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
@@ -42,66 +42,44 @@ def test_read_simple_2dv():
     assert ds.items[3].name == "W velocity"
 
 
-
-def test_write(tmpdir):
-
-    infilename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    outfilename = os.path.join(tmpdir.dirname, "adjusted.dfsu")
-
-    copyfile(infilename, outfilename)
-    dfs = Dfsu()
-
-    (data, t, items) = dfs.read(infilename)
-
-    # Do arbitrary calculation
-    data[0] = data[0] * 2.0
-
-    dfs.write(outfilename, data)
-
-
 def test_read_single_item_returns_single_item():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, items) = dfs.read(filename, item_numbers=[3])
+    ds = dfs.read(filename, item_numbers=[3])
 
-    assert len(data) == 1
-    assert len(items) == 1
+    assert len(ds) == 1
 
 
 def test_read_returns_array_time_dimension_first():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, items) = dfs.read(filename, item_numbers=[3])
+    ds = dfs.read(filename, item_numbers=[3])
 
-    assert data[0].shape == (9, 884)
+    assert ds.data[0].shape == (9, 884)
 
 
 def test_read_selected_item_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, items) = dfs.read(filename, item_numbers=[0, 3])
+    ds = dfs.read(filename, item_numbers=[0, 3])
 
-    assert len(data) == 2
-    assert len(items) == 2
-    assert items[0].name == "Surface elevation"
-    assert items[1].name == "Current speed"
+    assert len(ds) == 2
+    assert ds.items[0].name == "Surface elevation"
+    assert ds.items[1].name == "Current speed"
 
 
 def test_read_selected_item_names_returns_correct_items():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu()
 
-    (data, t, items) = dfs.read(
-        filename, item_names=["Surface elevation", "Current speed"]
-    )
+    ds = dfs.read(filename, item_names=["Surface elevation", "Current speed"])
 
-    assert len(data) == 2
-    assert len(items) == 2
-    assert items[0].name == "Surface elevation"
-    assert items[1].name == "Current speed"
+    assert len(ds) == 2
+    assert ds.items[0].name == "Surface elevation"
+    assert ds.items[1].name == "Current speed"
 
 
 def test_read_all_time_steps():
@@ -193,6 +171,17 @@ def test_read_and_select_single_element():
     selds = ds.isel(idx=idx, axis=1)
 
     assert selds.data[0].shape == (9,)
+
+def test_read_and_select_single_element_dfsu_3d():
+
+    filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    dfs = Dfsu()
+
+    ds = dfs.read(filename)
+
+    selds = ds.isel(idx=1739, axis=1)
+
+    assert selds.data[0].shape == (3,)
 
 
 def test_is_geo_UTM():
@@ -308,34 +297,3 @@ def test_create_invalid_data_closes_and_deletes_file(tmpdir):
 
     assert not os.path.exists(filename)
 
-
-def test_write_invalid_data_closes_file(tmpdir):
-
-    infilename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    outfilename = os.path.join(tmpdir.dirname, "adjusted.dfsu")
-
-    copyfile(infilename, outfilename)
-    dfs = Dfsu()
-
-    (data, t, items) = dfs.read(infilename)
-
-    # Do some mistake, such as only trying to writing one item
-
-    baddata = [data[0]]
-    try:
-        dfs.write(outfilename, baddata)
-    except:
-        print("Failed as expected")
-
-    # Ok, it failed, try again, to write to the same file
-
-    # Do arbitrary calculation
-    newdata = data.copy()
-    newdata[0] = newdata[0] * 2.0
-
-    dfs.write(outfilename, newdata)
-
-    (addata, t, items) = dfs.read(outfilename)
-
-    assert addata[0][0, 0] == 2 * data[0][0, 0]
-    assert addata[1][0, 0] == data[1][0, 0]

@@ -61,8 +61,8 @@ def test_read():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1()
 
-    data = dfs.read(filename, [0])[0]
-    data = data[0]
+    ds = dfs.read(filename, [0])
+    data = ds.data[0]
     assert data.shape == (100, 3)  # time, x
 
 
@@ -71,8 +71,8 @@ def test_read_item_names():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1()
 
-    data = dfs.read(filename, item_names=["testing water level"])[0]
-    data = data[0]
+    ds = dfs.read(filename, item_names=["testing water level"])
+    data = ds.data[0]
     assert data.shape == (100, 3)  # time, x
 
 

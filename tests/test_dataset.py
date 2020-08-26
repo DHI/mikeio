@@ -48,6 +48,25 @@ def test_select_subset_isel():
     assert selds["Foo"][0, 0] == 2.0
     assert selds["Bar"][0, 0] == 3.0
 
+def test_select_temporal_subset_by_idx():
+
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+
+    d1[0, 10, :] = 2.0
+    d2[0, 10, :] = 3.0
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    selds = ds.isel([0,1,2], axis=0)
+
+    assert len(selds) == 2
+    assert selds["Foo"].shape == (3, 100, 30)
+    
 def test_select_item_by_name():
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
@@ -63,6 +82,51 @@ def test_select_item_by_name():
 
     foo_data = ds["Foo"]
     assert foo_data[0, 10, 0] == 2.0
+
+def test_select_multiple_items_by_name():
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+    d3 = np.zeros([nt, 100, 30]) + 3.0
+
+    data = [d1, d2, d3]
+
+    time = _get_time(nt)
+    #items = [ItemInfo("Foo"), ItemInfo("Bar"), ItemInfo("Baz")]
+    items = [ItemInfo(x) for x in ["Foo","Bar","Baz"]]
+    ds = Dataset(data, time, items)
+
+    assert len(ds) == 3 # Length of a dataset is the number of items
+
+    newds = ds[["Baz","Foo"]]
+    assert newds.items[0].name == "Baz"
+    assert newds.items[1].name == "Foo"
+    assert newds["Foo"][0, 10, 0] == 1.5
+
+    assert len(newds) == 2
+
+def test_select_multiple_items_by_index():
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+    d3 = np.zeros([nt, 100, 30]) + 3.0
+
+    data = [d1, d2, d3]
+
+    time = _get_time(nt)
+    items = [ItemInfo(x) for x in ["Foo","Bar","Baz"]]
+    ds = Dataset(data, time, items)
+
+    assert len(ds) == 3 # Length of a dataset is the number of items
+
+    newds = ds[[2,0]]
+    assert newds.items[0].name == "Baz"
+    assert newds.items[1].name == "Foo"
+    assert newds["Foo"][0, 10, 0] == 1.5
+
+    assert len(newds) == 2
+
+
 
 def test_select_item_by_iteminfo():
     nt = 100
@@ -170,20 +234,6 @@ def test_get_bad_name():
 
     with pytest.raises(Exception):
         ds["BAR"]
-
-
-def test_get_data_mulitple_name_fails():
-
-    nt = 100
-    data = []
-    d = np.zeros([nt, 100, 30]) + 1.0
-    data.append(d)
-    time = _get_time(nt)
-    items = [ItemInfo("Foo")]
-    ds = Dataset(data, time, items)
-
-    with pytest.raises(Exception):
-        ds[["Foo", "Foo"]]
 
 
 def test_default_type():
