@@ -691,7 +691,7 @@ class Dfsu(_UnstructuredFile):
         n_lay = self.n_layers
         n_sigma = self.n_sigma_layers
         n_z = n_lay - n_sigma
-        if n > n_z:
+        if n > n_z and n <= n_lay:
             n = n - n_lay
 
         if n < (-n_lay) or n > n_lay:
@@ -704,7 +704,7 @@ class Dfsu(_UnstructuredFile):
             return self.top_element_ids + n 
         else:
             # then it must be a z layer 
-            return self.bottom_element_ids[self.num_layers_per_column >= n] + n 
+            return self.bottom_element_ids[self.num_layers_per_column >= (n_lay-n+1)] + n 
 
     def read(self, items=None, time_steps=None, element_ids=None):
         """
