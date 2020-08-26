@@ -76,9 +76,26 @@ class Dataset:
     [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
     >>> ds['NotFun'][0:5]
     array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
-    >>> data,time,items = ds
-    >>> items
-    [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
+    >>> import mikeio
+    >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
+    >>> ds.items
+    [Surface elevation <Surface Elevation> (meter), U velocity <u velocity component> (meter per sec), V velocity <v velocity component> (meter per sec), Current speed <Current Speed> (meter per sec)]
+    >>> ds2 = ds[['Surface elevation','Current speed']] # item selection
+    >>> ds2.items
+    [Surface elevation <Surface Elevation> (meter), Current speed <Current Speed> (meter per sec)]
+    >>> ds3 = ds2.isel([0,1,2], axis=0) # temporal selection
+    >>> ds3
+    DataSet(data, time, items)
+    Number of items: 2
+    Shape: (3, 884)
+    1985-08-06 07:00:00 - 1985-08-06 12:00:00
+    >>> ds4 = ds3.isel([100,200], axis=1) # element selection
+    >>> ds4
+    DataSet(data, time, items)
+    Number of items: 2
+    Shape: (3, 2)
+    1985-08-06 07:00:00 - 1985-08-06 12:00:00
+>>>
     """
 
     def __init__(self, data, time, items):
@@ -102,10 +119,17 @@ class Dataset:
         n_items = len(self.items)
 
         out = []
-        out.append("DataSet(data, time, items)")
-        out.append(f"Number of items: {n_items}")
-        out.append(f"Shape: {self.data[0].shape}")
-        out.append(f"{self.time[0]} - {self.time[-1]}")
+        out.append("<mikeio.DataSet>")
+        out.append(f"Dimensions: {self.data[0].shape}")
+        out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+        if n_items > 10:
+            out.append(f"Number of items: {n_items}")
+        else:
+            out.append("Items:")
+            for item in self.items:
+                out.append(f"  {item}")
+        
+        
 
         return str.join("\n", out)
 
@@ -160,12 +184,28 @@ class Dataset:
         ----------
         idx: int, scalar or array_like
         axis: int, optional
-            default 1
+            default 1, 0= temporal axis
 
         Returns
         -------
         Dataset
             dataset with subset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
+        >>> ds2 = ds.isel([0,1,2], axis=0) # temporal selection
+        >>> ds2
+        DataSet(data, time, items)
+        Number of items: 2
+        Shape: (3, 884)
+        1985-08-06 07:00:00 - 1985-08-06 12:00:00
+        >>> ds3 = ds2.isel([100,200], axis=1) # element selection
+        >>> ds3
+        DataSet(data, time, items)
+        Number of items: 2
+        Shape: (3, 2)
+        1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
 
         time = self.time
