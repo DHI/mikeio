@@ -35,20 +35,19 @@ def test_read_dfsu_generic_read():
 
     filename = "tests/testdata/HD2D.dfsu"
 
-    (data, t, names) = mikeio.read(filename)
+    ds = mikeio.read(filename)
 
-    assert len(data) == 4
-    assert len(names) == 4
+    assert len(ds) == 4
 
 
 def test_read_dfsu_generic_read_single_item_number():
 
     filename = "tests/testdata/HD2D.dfsu"
 
-    (data, t, names) = mikeio.read(filename, item_numbers=[1])
+    ds = mikeio.read(filename, item_numbers=[1])
 
-    assert len(data) == 1
-    assert len(names) == 1
+    assert len(ds) == 1
+    
 
 
 def test_read_generic_read_unsupported_format():

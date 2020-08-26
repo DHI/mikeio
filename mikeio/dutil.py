@@ -70,34 +70,55 @@ class Dataset:
     --------
     >>> ds = mikeio.read("tests/testdata/random.dfs0")
     >>> ds
-    DataSet(data, time, items)
-    Number of items: 2
-    Shape: (1000,)
-    2017-01-01 00:00:00 - 2017-07-28 03:00:00
-    >>> ds.items
-    [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
+    <mikeio.DataSet>
+    Dimensions: (1000,)
+    Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
+    Items:
+      0:  VarFun01 <Water Level> (meter)
+      1:  NotFun <Water Level> (meter)
     >>> ds['NotFun'][0:5]
     array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
-    >>> import mikeio
     >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
-    >>> ds.items
-    [Surface elevation <Surface Elevation> (meter), U velocity <u velocity component> (meter per sec), V velocity <v velocity component> (meter per sec), Current speed <Current Speed> (meter per sec)]
-    >>> ds2 = ds[['Surface elevation','Current speed']] # item selection
-    >>> ds2.items
-    [Surface elevation <Surface Elevation> (meter), Current speed <Current Speed> (meter per sec)]
+    <mikeio.DataSet>
+    Dimensions: (9, 884)
+    Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  U velocity <u velocity component> (meter per sec)
+      2:  V velocity <v velocity component> (meter per sec)
+      3:  Current speed <Current Speed> (meter per sec)
+    >>> ds2 = ds[['Surface elevation','Current speed']] # item selection by name
+    >>> ds2
+    <mikeio.DataSet>
+    Dimensions: (9, 884)
+    Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  Current speed <Current Speed> (meter per sec)
     >>> ds3 = ds2.isel([0,1,2], axis=0) # temporal selection
     >>> ds3
-    DataSet(data, time, items)
-    Number of items: 2
-    Shape: (3, 884)
-    1985-08-06 07:00:00 - 1985-08-06 12:00:00
+    <mikeio.DataSet>
+    Dimensions: (3, 884)
+    Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  Current speed <Current Speed> (meter per sec)
     >>> ds4 = ds3.isel([100,200], axis=1) # element selection
     >>> ds4
-    DataSet(data, time, items)
-    Number of items: 2
-    Shape: (3, 2)
-    1985-08-06 07:00:00 - 1985-08-06 12:00:00
->>>
+    <mikeio.DataSet>
+    Dimensions: (3, 2)
+    Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  Current speed <Current Speed> (meter per sec)
+    >>>  ds5 = ds[[1,0]] # item selection by position
+    >>>  ds5 
+    <mikeio.DataSet>
+    Dimensions: (1000,)
+    Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
+    Items:
+      0:  NotFun <Water Level> (meter)
+      1:  VarFun01 <Water Level> (meter)
     """
 
     def __init__(self, data, time, items):
@@ -120,16 +141,20 @@ class Dataset:
     def __repr__(self):
         n_items = len(self.items)
 
+        shape = self.data[0].shape
+        if len(self) > 1 and self.items[0].name == "Z coordinate":
+            shape = self.data[1].shape
+
         out = []
         out.append("<mikeio.DataSet>")
-        out.append(f"Dimensions: {self.data[0].shape}")
+        out.append(f"Dimensions: {shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if n_items > 10:
             out.append(f"Number of items: {n_items}")
         else:
             out.append("Items:")
-            for item in self.items:
-                out.append(f"  {item}")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
         
         
 
@@ -141,15 +166,7 @@ class Dataset:
     def __getitem__(self, x):
 
         if isinstance(x, int):
-            if x == 0:
-                return self.data
-            if x == 1:
-                return self.time
-            if x == 2:
-                return self.items
-
-            if x > 2:
-                raise IndexError("")
+            return self.data[x]
 
         if isinstance(x, str):
             item_lookup = {item.name: i for i, item in enumerate(self.items)}
@@ -167,7 +184,11 @@ class Dataset:
 
             for v in x:
                 data_item =  self.__getitem__(v)
-                i = item_lookup[v]
+                if isinstance(v,str):
+                    i = item_lookup[v]
+                if isinstance(v,int):
+                    i = v
+
                 item = self.items[i]
                 items.append(item)
                 data.append(data_item)
