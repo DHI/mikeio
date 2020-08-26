@@ -8,7 +8,7 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile
 
-from .dutil import Dataset, find_item, get_item_info
+from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps 
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
@@ -412,8 +412,8 @@ class _UnstructuredGeometry:
         yn = np.array(list(self._source.Y))
 
         area = np.empty(n_elements)
-        xcoords = np.empty(4)
-        ycoords = np.empty(4)
+        xcoords = np.empty(8)
+        ycoords = np.empty(8)
 
         for j in range(n_elements):
             nodes = self._source.ElementTable[j]
@@ -689,7 +689,7 @@ class Dfsu(_UnstructuredFile):
             dfsu filename
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: list[int], optional
+        time_steps: int or list[int], optional
             Read only selected time_steps
         element_ids: list[int], optional
             Read only selected element ids   
@@ -706,21 +706,13 @@ class Dfsu(_UnstructuredFile):
         dfs = self._source
         
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-        n_items = self.n_items #safe_length(dfs.ItemInfo)
+        #n_items = self.n_items #safe_length(dfs.ItemInfo)
 
         nt = dfs.NumberOfTimeSteps
 
-        if items is not None and isinstance(items[0],str):
-            items = find_item(dfs, items)
+        items, item_numbers, time_steps = get_valid_items_and_timesteps(self, items, time_steps)
 
-        if items is None:
-            item_numbers = list(range(n_items))
-        else:
-            item_numbers = items
-            n_items = len(item_numbers)
-
-        if time_steps is None:
-            time_steps = list(range(nt))
+        n_items = len(item_numbers)
 
         if element_ids is None:
             n_elems = self.n_elements
@@ -734,7 +726,7 @@ class Dfsu(_UnstructuredFile):
 
         data_list = []
 
-        items = get_item_info(dfs, item_numbers)
+        
 
         item0_is_node_based = False
         for item in range(n_items):
