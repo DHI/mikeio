@@ -316,6 +316,17 @@ def test_read_dfs0_single_item_named_access():
 
     assert len(data) == 1
 
+def test_read_dfs0_temporal_subset():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read(time_steps=[1,2])
+    data = ds.data
+
+    assert len(ds.time) == 2
+    assert ds.time[0].strftime("%H") == "05"
+
 
 def test_read_dfs0_single_item_read_by_name():
 
