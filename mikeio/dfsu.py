@@ -149,6 +149,17 @@ class _UnstructuredGeometry:
             elem_tbl.append(elem_nodes)
         return elem_tbl
 
+    def _element_table_to_dotnet(self, elem_table=None):
+        if elem_table is None:
+            elem_table=self._element_table
+        new_elem_table = []
+        n_elements = len(elem_table)
+        for j in range(n_elements):
+            elem_nodes = elem_table[j]
+            elem_nodes = [nd+1 for nd in elem_nodes]   # make 1-based
+            new_elem_table.append(elem_nodes)
+        return asnetarray_v2(elem_table)
+
     @property 
     def max_nodes_per_element(self):
         maxnodes = 0
@@ -433,51 +444,6 @@ class _UnstructuredGeometry:
         self._ec = ec
         return ec
 
-    def to_polygons(self):
-        """generate matlab polygons from element table for plotting
-
-        Returns
-        -------
-        list(matplotlib.patches.Polygon)
-            list of polygons for plotting
-        """
-        from matplotlib.patches import Polygon
-        polygons = []
-
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            pcoords = np.empty([len(nodes), 2])
-            for i in range(len(nodes)):
-                nidx = nodes[i] - 1
-                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
-
-            polygon = Polygon(pcoords, True)
-            polygons.append(polygon)   
-        return polygons
-    
-    def to_shapely(self):
-        """Export mesh as shapely MultiPolygon
-
-        Returns
-        -------
-        shapely.geometry.MultiPolygon
-            polygons with mesh elements
-        """
-        from shapely.geometry import Polygon, MultiPolygon
-
-        polygons = []
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            pcoords = np.empty([len(nodes), 2])
-            for i in range(len(nodes)):
-                nidx = nodes[i] - 1
-                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
-            polygon = Polygon(pcoords)
-            polygons.append(polygon)
-        mp = MultiPolygon(polygons)
-
-        return mp
-
     def find_n_closest_element_index(self, x, y, z=None, n=1):
         ec = self.element_coordinates
 
@@ -676,6 +642,94 @@ class _UnstructuredGeometry:
             # then it must be a z layer 
             return self.bottom_element_ids[self.num_layers_per_column >= (n_lay-n+1)] + n 
 
+    def to_polygons(self, geometry=None):
+        """generate matlab polygons from element table for plotting
+
+        Returns
+        -------
+        list(matplotlib.patches.Polygon)
+            list of polygons for plotting
+        """
+        if geometry is None:
+            geometry = self
+        from matplotlib.patches import Polygon
+        polygons = []
+
+        for j in range(geometry.n_elements):
+            nodes = geometry.element_table[j]
+            pcoords = np.empty([len(nodes), 2])
+            for i in range(len(nodes)):
+                nidx = nodes[i]# - 1
+                pcoords[i, :] = geometry.node_coordinates[nidx, 0:2]
+
+            polygon = Polygon(pcoords, True)
+            polygons.append(polygon)   
+        return polygons
+    
+    def to_shapely(self):
+        """Export mesh as shapely MultiPolygon
+
+        Returns
+        -------
+        shapely.geometry.MultiPolygon
+            polygons with mesh elements
+        """
+        from shapely.geometry import Polygon, MultiPolygon
+
+        polygons = []
+        for j in range(self.n_elements):
+            nodes = self.element_table[j]
+            pcoords = np.empty([len(nodes), 2])
+            for i in range(len(nodes)):
+                nidx = nodes[i]# - 1
+                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
+            polygon = Polygon(pcoords)
+            polygons.append(polygon)
+        mp = MultiPolygon(polygons)
+
+        return mp
+
+    def plot(self, cmap=None, z=None, label=None):
+        """
+        Plot mesh elements
+
+        Parameters
+        ----------
+        cmap: matplotlib.cm.cmap, optional
+            default viridis
+        z: np.array
+            value for each element to plot, default bathymetry
+        label: str, optional
+            colorbar label
+        """
+        if cmap is None:
+            cmap = cm.viridis
+
+        if self.is_2d:
+            geometry = self
+        else:
+            geometry = self.geometry2d
+
+
+        nc = geometry.node_coordinates
+        ec = geometry.element_coordinates
+        ne = ec.shape[0]
+
+        if z is None:
+            z = ec[:, 2]
+            if label is None:
+                label = "Bathymetry (m)"
+
+        fig, ax = plt.subplots()
+        patches = geometry.to_polygons()
+        #p = PatchCollection(patches, cmap=cmap, edgecolor="black")
+        p = PatchCollection(patches, cmap=cmap, edgecolor="lightgray", alpha=0.8, linewidths=0.3)
+
+        p.set_array(z)
+        ax.add_collection(p)
+        fig.colorbar(p, ax=ax, label=label)
+        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
+        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
 class _UnstructuredFile(_UnstructuredGeometry):
     """
@@ -1092,105 +1146,43 @@ class Dfsu(_UnstructuredFile):
 
 class Mesh(_UnstructuredFile):
     def __init__(self, filename):
-        #self._mesh = MeshFile.ReadMesh(filename)
         super().__init__()
         self._filename = filename
         self._read_mesh_header(filename)
 
-    def plot(self, cmap=None, z=None, label=None):
-        """
-        Plot mesh elements
+    def write(self, outfilename):
+        """write mesh to file (will overwrite if file exists)
 
         Parameters
         ----------
-        cmap: matplotlib.cm.cmap, optional
-            default viridis
-        z: np.array
-            value for each element to plot, default bathymetry
-        label: str, optional
-            colorbar label
+        outfilename : str
+            path to file
         """
-        if cmap is None:
-            cmap = cm.viridis
-
-        nc = self.node_coordinates
-        ec = self.element_coordinates
-        ne = ec.shape[0]
-
-        if z is None:
-            z = ec[:, 2]
-            if label is None:
-                label = "Bathymetry (m)"
-
-        # patches = []
-        # for j in range(ne):
-        #     nodes = self._mesh.ElementTable[j]
-        #     pcoords = np.empty([nodes.Length, 2])
-        #     for i in range(nodes.Length):
-        #         nidx = nodes[i] - 1
-        #         pcoords[i, :] = nc[nidx, 0:2]
-
-        #     polygon = Polygon(pcoords, True)
-        #     patches.append(polygon)
-
-        fig, ax = plt.subplots()
-        patches = self.to_polygons()
-        #p = PatchCollection(patches, cmap=cmap, edgecolor="black")
-        p = PatchCollection(patches, cmap=cmap, edgecolor="lightgray", alpha=0.2)
-
-        p.set_array(z)
-        ax.add_collection(p)
-        fig.colorbar(p, ax=ax, label=label)
-        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
-        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
-
-    def write(self, outfilename):
-        projection = self._source.ProjectionString
-        eumQuantity = self._source.EumQuantity
-        # TODO: use member properties instead of using _source
         
         builder = MeshBuilder()
 
         nc = self.node_coordinates
+        builder.SetNodes(nc[:,0], nc[:,1], nc[:,2], self.codes)
 
-        x = self._source.X
-        y = self._source.Y
-        z = self._source.Z
-        c = self._source.Code
-
-        builder.SetNodes(x,y,z,c)
         builder.SetElements(self._source.ElementTable)
-        builder.SetProjection(projection)
-        builder.SetEumQuantity(eumQuantity)
+        builder.SetProjection(self.projection_string)
+        builder.SetEumQuantity(self._source.EumQuantity)
+        
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
     @staticmethod
     def geometry_to_mesh(outfilename, geometry):
-        projection = geometry.projection_string        
-        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-
+        
         builder = MeshBuilder()
 
         nc = geometry.node_coordinates
-
-        x = nc[:,0]
-        y = nc[:,1]
-        z = nc[:,2]
-        c = geometry.codes
-
-        elem_table = []
-        for j in range(geometry.n_elements):
-            elem_nodes = geometry.element_table[j]
-            elem_nodes = [nd+1 for nd in elem_nodes]  
-            elem_table.append(elem_nodes)
-        elem_table = asnetarray_v2(elem_table)
-
-        builder.SetNodes(x,y,z,c)
+        builder.SetNodes(nc[:,0], nc[:,1], nc[:,2], geometry.codes)
         #builder.SetNodeIds(geometry.node_ids+1)
         #builder.SetElementIds(geometry.element_ids+1)
-        builder.SetElements(elem_table)
-        builder.SetProjection(projection)
+        builder.SetElements(geometry._element_table_to_dotnet())
+        builder.SetProjection(geometry.projection_string)
+        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
