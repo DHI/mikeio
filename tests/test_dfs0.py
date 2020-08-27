@@ -10,7 +10,7 @@ from shutil import copyfile
 import pytest
 
 
-def test_simple_create(tmpdir):
+def test_simple_write(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfs0")
 
@@ -22,12 +22,12 @@ def test_simple_create(tmpdir):
 
     dfs = Dfs0()
 
-    dfs.create(filename=filename, data=data)
+    dfs.write(filename=filename, data=data)
 
-    assert True
+    assert os.path.exists(filename)
 
 
-def test_read_units_create_new(tmpdir):
+def test_read_units_write_new(tmpdir):
 
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
@@ -37,8 +37,8 @@ def test_read_units_create_new(tmpdir):
     res = dfs.read(tmpfile)
     data = res.data
 
-    # Create new file
-    dfs.create(tmpfile, data=data, items=res.items)
+    # write new file
+    dfs.write(tmpfile, data=data, items=res.items)
 
     # Verify that new file has same variables/units as original
     ds = dfs.read(tmpfile)
@@ -47,7 +47,7 @@ def test_read_units_create_new(tmpdir):
     assert res.items[0].unit == ds.items[0].unit
 
 
-def test_multiple_create():
+def test_multiple_write():
 
     dfs0File = r"zeros_ones.dfs0"
 
@@ -63,13 +63,13 @@ def test_multiple_create():
 
     dfs = Dfs0()
 
-    dfs.create(filename=dfs0File, data=data, items=items, title="Zeros and ones")
+    dfs.write(filename=dfs0File, data=data, items=items, title="Zeros and ones")
 
     assert True
     os.remove(dfs0File)
 
 
-def test_create_timestep_7days():
+def test_write_timestep_7days():
 
     dfs0File = r"zeros_ones.dfs0"
 
@@ -85,7 +85,7 @@ def test_create_timestep_7days():
 
     dfs = Dfs0()
 
-    dfs.create(
+    dfs.write(
         filename=dfs0File,
         data=data,
         items=items,
@@ -105,7 +105,7 @@ def test_create_timestep_7days():
     os.remove(dfs0File)
 
 
-def test_create_equidistant_calendar():
+def test_write_equidistant_calendar():
 
     dfs0file = r"random.dfs0"
     d1 = np.random.random([1000])
@@ -121,7 +121,7 @@ def test_create_equidistant_calendar():
     data_value_type = [0, 1]  # TODO add data_value_type to ItemInfo
     dt = 5
     dfs = Dfs0()
-    dfs.create(
+    dfs.write(
         filename=dfs0file,
         data=data,
         start_time=start_time,
@@ -136,7 +136,7 @@ def test_create_equidistant_calendar():
     assert True
 
 
-def test_create_non_equidistant_calendar():
+def test_write_non_equidistant_calendar():
     dfs0file = r"neq.dfs0"
     d1 = np.random.random([1000])
     d2 = np.random.random([1000])
@@ -152,7 +152,7 @@ def test_create_non_equidistant_calendar():
     data_value_type = [0, 1]
 
     dfs = Dfs0()
-    dfs.create(
+    dfs.write(
         filename=dfs0file,
         data=data,
         datetimes=time_vector,
@@ -215,14 +215,14 @@ def test_read_dfs0_small_value_not_delete_value(tmpdir):
 
     dfs = Dfs0()
 
-    dfs.create(filename=filename, data=data)
+    dfs.write(filename=filename, data=data)
 
     ds = dfs.read(filename)
 
     assert not np.isnan(ds.data[0]).any()
 
 
-def test_create_from_data_frame(tmpdir):
+def test_write_from_data_frame(tmpdir):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -243,7 +243,7 @@ def test_create_from_data_frame(tmpdir):
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
 
 
-def test_create_from_data_frame_monkey_patched(tmpdir):
+def test_write_from_data_frame_monkey_patched(tmpdir):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -265,7 +265,7 @@ def test_create_from_data_frame_monkey_patched(tmpdir):
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
 
 
-def test_create_from_data_frame_different_types(tmpdir):
+def test_write_from_data_frame_different_types(tmpdir):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -352,7 +352,7 @@ def test_read_dfs0_to_matrix():
     assert len(ds.data) == 2
 
 
-def test_write(tmpdir):
+def test_overwrite(tmpdir):
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
 
@@ -366,10 +366,10 @@ def test_write(tmpdir):
     data[1] = np.ones_like(data[0])
 
     # Overwrite the file
-    dfs.write(tmpfile, data)
+    dfs.overwrite(tmpfile, data)
 
 
-def test_write_data_with_missing_values(tmpdir):
+def test_overwrite_data_with_missing_values(tmpdir):
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
 
@@ -386,7 +386,7 @@ def test_write_data_with_missing_values(tmpdir):
     data[1][0:10] = np.nan
 
     # Overwrite the file
-    dfs.write(tmpfile, data)
+    dfs.overwrite(tmpfile, data)
 
     # Write operation does not modify the data
     assert(np.isnan(data[1][1]))
@@ -394,37 +394,6 @@ def test_write_data_with_missing_values(tmpdir):
     modified = dfs.read(tmpfile)
     assert(np.isnan(modified.data[1][5]))
 
-
-
-def test_write_wrong_n_items(tmpdir):
-    dfs0file = r"tests/testdata/random.dfs0"
-    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
-
-    copyfile(dfs0file, tmpfile)
-    dfs = Dfs0()
-    res = dfs.read(tmpfile)
-    data = res.data
-
-    # One item too many...
-    data[0] = np.zeros_like(data[0])
-    data[1] = np.ones_like(data[0])
-    data.append(np.ones_like(data[0]))
-
-    # Overwrite the file
-    with pytest.raises(Exception):
-        dfs.write(tmpfile, data)
-
-
-def test_write_no_existing_file():
-    dfs0file = r"tests/testdata/random.dfs0"
-
-    dfs = Dfs0()
-    res = dfs.read(dfs0file)
-    data = res.data
-
-    # Overwrite the file
-    with pytest.raises(Exception):
-        dfs.write("not_a_file", data)
 
 
 def test_read_dfs0_main_module():

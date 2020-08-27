@@ -1,4 +1,5 @@
 import os
+import warnings
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -128,7 +129,7 @@ class Dfs0:
         return dfs, n_items, n_time_steps
       
 
-    def write(self, filename, data):
+    def overwrite(self, filename, data):
         """
         Overwrite data in an existing dfs0 file.
 
@@ -139,6 +140,8 @@ class Dfs0:
         data: list[np.array]
             New data to write.
         """
+        warnings.warn("This method is deprecated, use write instead")
+
         dfs, n_items, n_time_steps = self._validate_and_open_dfs(filename, data)
 
         # Get time in seconds from start
@@ -165,7 +168,7 @@ class Dfs0:
 
         raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
-    def create(
+    def write(
             self,
             filename,
             data,
@@ -397,7 +400,7 @@ def dataframe_to_dfs0(
                 items = [ItemInfo(name, itemtype, unit) for name in self.columns]
 
     if self.index.freq is None:  # non-equidistant
-        dfs.create(
+        dfs.write(
             filename=filename,
             data=data,
             datetimes=self.index,
@@ -409,13 +412,15 @@ def dataframe_to_dfs0(
     else:  # equidistant
         dt = self.index.freq.delta.total_seconds()
         start_time = self.index[0].to_pydatetime()
-        dfs.create(
+        dfs.write(
             filename=filename,
             data=data,
             start_time=start_time,
             dt=dt,
             items=items,
             title=title,
+            data_value_type=data_value_type,
+            dtype=dtype,
         )
 
 
