@@ -28,8 +28,7 @@ from .dfs0 import Dfs0
 from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
-from .dfsu import Dfsu
-from .mesh import Mesh
+from .dfsu import Dfsu, Mesh
 
 
 def read(filename, item_numbers=None, item_names=None):
