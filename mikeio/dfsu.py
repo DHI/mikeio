@@ -20,6 +20,7 @@ from .dotnet import (
 )
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length #, dist_in_meters
+from .mesh import Mesh
 
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
@@ -285,6 +286,10 @@ class _UnstructuredGeometry:
         UnstructuredGeometry
             2d geometry (bottom nodes)
         """
+        if self._n_layers is None:
+            print('Object has no layers: cannot export to_2d_geometry')
+            return None
+
         # extract information for selected elements
         elem_ids = self.bottom_element_ids
         node_ids, elem_tbl = self.get_nodes_and_table_for_elements(
@@ -1055,6 +1060,13 @@ class Dfsu(_UnstructuredFile):
             print(e)
             dfs.Close()
             os.remove(filename)
+
+    def to_mesh(self, outfilename):
+        if self.is_2d:
+            geometry = self
+        else:
+            geometry = self.to_2d_geometry()
+        Mesh.geometry_to_mesh(outfilename, geometry)
 
     def get_element_coords(self):
         """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
