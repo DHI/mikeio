@@ -1,5 +1,8 @@
-![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg)
+
+![logo](images/logo.png)
 # mikeio: input/output of MIKE files in python
+ ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
+![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
@@ -9,14 +12,14 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
 
 ## Requirements
 * Windows operating system
-* Python x64 3.6, 3.7 or 3.8 ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
+* Python x64 3.6, 3.7 or 3.8 
 * [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 [More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
 
 ## Installation
 
-From PyPI: [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+From PyPI: 
 
 
 `pip install mikeio`
