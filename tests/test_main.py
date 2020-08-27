@@ -40,13 +40,13 @@ def test_read_dfsu_generic_read():
     assert len(ds) == 4
 
 
-def test_read_dfsu_generic_read_single_item_number():
+#def test_read_dfsu_generic_read_single_item_number():
 
-    filename = "tests/testdata/HD2D.dfsu"
+#   filename = "tests/testdata/HD2D.dfsu"
 
-    ds = mikeio.read(filename, [1])
+#    ds = mikeio.read(filename, [1])
 
-    assert len(ds) == 1
+#    assert len(ds) == 1
     
 
 

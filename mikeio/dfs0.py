@@ -16,68 +16,83 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dutil import Dataset, find_item
+from .dutil import Dataset, find_item, get_valid_items_and_timesteps
 from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
 from .helpers import safe_length
 
 
 class Dfs0:
-    def read(self, filename, item_numbers=None, item_names=None):
+
+    def __init__(self, filename=None):
+        """Create a Dfs0 object for reading, writing
+
+        Parameters
+        ----------
+        filename: str, optional
+            File name including full path to the dfs0 file.
+        """
+        self._filename = filename
+
+
+    def read(self, items=None, time_steps=None):
         """
         Read data from a dfs0 file.
 
         Parameters
         ----------
-        filename: str
-            File name including full path to the dfs0 file.
-        item_numbers: list[int], optional
-            Read only the item_numbers in the array specified (0 base)
-        item_names: list[str], optional
-            Read only the items in the array specified, (takes precedence over item_numbers)
+        
 
         Returns
         -------
             Dataset(data, time, items)
         """
 
-        data, time, items = self.__read(filename)
+        if not os.path.exists(self._filename):
+            raise FileNotFoundError(f"File {self._filename} not found.")
 
-        if item_names is not None:
-            item_numbers = find_item(self._dfs, item_names)
+        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        self._source = dfs
+        self._n_items = safe_length(dfs.ItemInfo)
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        selected_item_numbers = range(data.shape[1]) if item_numbers is None else item_numbers
+        items, item_numbers, time_steps = get_valid_items_and_timesteps(
+            self, items, time_steps
+        )
 
-        self._validate_item_numbers(selected_item_numbers)
+        dfs.Close()
 
-        selected_data = []
-        selected_items = []
-        for item_number in selected_item_numbers:
-            selected_data.append(data[:, item_number])
-            selected_items.append(items[item_number])
+        ds = self.__read(self._filename)
+        ds = ds[item_numbers]
 
-        return Dataset(selected_data, time, selected_items)
+        return ds
 
     def __read(self, filename):
         """
         Read all data from a dfs0 file.
         """
-        if not os.path.exists(filename):
-            raise FileNotFoundError(f"File {filename} not found.")
-
-        self._dfs = DfsFileFactory.DfsGenericOpen(filename)
-        self._n_items = safe_length(self._dfs.ItemInfo)
-        self._n_timesteps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        
+        
+        #self._n_items = safe_length(self._dfs.ItemInfo)
+        #self._n_timesteps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._time_column_index = 0  # First column is time (the rest is data)
-
+        
+        self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
+        
+        matrix = self.__to_numpy_with_nans(raw_data)
 
-        data = self.__to_numpy_with_nans(raw_data)
+        data = []
+        for i in range(matrix.shape[1]):
+            data.append(matrix[:,i])
+
         time = list(self.__get_time(raw_data))
         items = list(self.__get_items())
 
         self._dfs.Close()
 
-        return data, time, items
+        
+
+        return Dataset(data, time, items)
 
     def __to_numpy_with_nans(self, raw_data):
         data = np.fromiter(raw_data, np.float64).reshape(self._n_timesteps, self._n_items + 1)[:, 1::]
@@ -208,6 +223,18 @@ class Dfs0:
             default np.float32
 
         """
+
+        if isinstance(data, Dataset):
+            items = data.items
+            start_time = data.time[0]
+            if dt is None and len(data.time) > 1:
+                if not data.is_equidistant:
+                    raise Exception(
+                        "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
+                    )
+                dt = (data.time[1] - data.time[0]).total_seconds()
+            data = data.data
+
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
 
@@ -225,8 +252,8 @@ class Dfs0:
         if datetimes is None:
             equidistant = True
 
-            if not type(start_time) is datetime:
-                raise Warning("start_time must be of type datetime.")
+            #if not type(start_time) is datetime:
+            #    raise Warning("start_time must be of type datetime.")
 
             dt = np.float(dt)
             datetimes = np.array(
@@ -282,9 +309,11 @@ class Dfs0:
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
+        data = data.copy()
         for i in range(n_items):
             d = data[i].copy()
             d[np.isnan(d)] = delete_value
+            
 
         data_to_write = to_dotnet_array(np.stack(data, axis=1))
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
@@ -292,7 +321,7 @@ class Dfs0:
 
         dfs.Close()
 
-    def to_dataframe(self, filename, unit_in_name=False, round_time='s'):
+    def to_dataframe(self, unit_in_name=False, round_time='s'):
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
         
@@ -308,17 +337,11 @@ class Dfs0:
         -------
         pd.DataFrame
         """
-        data, t, items = self.__read(filename)
-
-        if unit_in_name:
-            names = [f"{item.name} ({item.unit.name})" for item in items]
-        else:
-            names = [item.name for item in items]
-
-        df = pd.DataFrame(data, columns=names)
+        ds = self.read()
+        df = ds.to_dataframe()
 
         if round_time:
-            rounded_idx = pd.DatetimeIndex(t).round(round_time)
+            rounded_idx = pd.DatetimeIndex(ds.time).round(round_time)
             df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
         else:
             df.index = pd.DatetimeIndex(t, freq="infer")
