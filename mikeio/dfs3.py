@@ -19,9 +19,14 @@ from .dotnet import (
     from_dotnet_datetime,
 )
 from .eum import TimeStep
+from .dfs import Dfs123
 
 
-class Dfs3:
+class Dfs3(Dfs123):
+
+    def __init__(self, filename=None):
+        super(Dfs3, self).__init__(filename)
+
     def __calculate_index(self, nx, ny, nz, x, y, z):
         """ Calculates the position in the dfs3 data array based on the
         number of x,y,z layers (nx,ny,nz) at the specified x,y,z position.
@@ -176,7 +181,7 @@ class Dfs3:
 
         return data
 
-    def read(self, dfs3file, item_numbers=None, layers=None, coordinates=None):
+    def read(self, item_numbers=None, layers=None, coordinates=None):
         """ Function: Read data from a dfs3 file
 
         Usage:
@@ -204,7 +209,7 @@ class Dfs3:
         """
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
+        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
@@ -293,7 +298,7 @@ class Dfs3:
 
         return Dataset(data_list, time, items)
 
-    def create(
+    def write(
         self,
         filename,
         data,
@@ -310,7 +315,7 @@ class Dfs3:
         title=None,
     ):
         """
-        Create a dfs3 file
+        Write a dfs3 file
 
         Parameters
         ----------
@@ -415,62 +420,4 @@ class Dfs3:
 
         dfs.Close()
 
-    def write(self, filename, data):
-        """
-        Function: write to a pre-created dfs3 file.
-
-        filename:
-            full path and filename to existing dfs3 file
-
-        data:
-            list of arrays. len(data) must equal the number of items in the dfs3.
-            Each array must be of dimension t,z,y,x
-        """
-
-        # Open the dfs file for writing
-        dfs = DfsFileFactory.Dfs3FileOpenEdit(filename)
-
-        # Determine the size of the grid
-        number_y = dfs.SpatialAxis.YCount
-        number_x = dfs.SpatialAxis.XCount
-        number_z = dfs.SpatialAxis.ZCount
-        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_items = safe_length(dfs.ItemInfo)
-
-        deletevalue = dfs.FileInfo.DeleteValueFloat
-
-        if not all(np.shape(d)[0] == n_time_steps for d in data):
-            raise Warning(
-                "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
-            )
-        if not all(np.shape(d)[1] == number_z for d in data):
-            raise Warning(
-                "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
-            )
-        if not all(np.shape(d)[2] == number_y for d in data):
-            raise Warning(
-                "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
-            )
-        if not all(np.shape(d)[3] == number_x for d in data):
-            raise Warning(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [time, y, x]"
-            )
-        if not len(data) == n_items:
-            raise Warning(
-                "The number of matrices in data do not match the number of items in the dfs3 file."
-            )
-
-        for i in range(n_time_steps):
-            for item in range(n_items):
-                d = data[item][i]
-                d[np.isnan(d)] = deletevalue
-                d = np.flipud(d)
-                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
-
-                dfs.WriteItemTimeStepNext(0, darray)
-
-        dfs.Close()
+    

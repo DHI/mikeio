@@ -11,7 +11,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
-from .dutil import Dataset, find_item, get_item_info
+from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
@@ -20,9 +20,24 @@ from .dotnet import (
 )
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
+from .dfs import Dfs123
 
 
-class Dfs2:
+class Dfs2(Dfs123):
+
+    def __init__(self, filename=None):
+        super(Dfs2, self).__init__(filename)
+
+        if filename:
+            self._read_dfs2_header()
+            
+
+    def _read_dfs2_header(self):
+        dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
+
+        self._read_header(dfs)
+        
+
     def __calculate_index(self, nx, ny, x, y):
         """ Calculates the position in the dfs2 data array based on the
         number of x,y  (nx,ny) at the specified x,y position.
@@ -74,17 +89,17 @@ class Dfs2:
 
         return k, j
 
-    def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
+    def read(self, items=None, time_steps=None):
         """
+        Read data from a dfs2 file
+        
         Parameters
         ---------
         filename: str
             dfs2 filename
-        item_numbers: list[int], optional
-            Read only selected items, by number (0-based)
-        item_names: list[str], optional
-            Read only selected items, by name, takes precedence over item_numbers
-        time_steps: list[int], optional
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time_steps: int or list[int], optional
             Read only selected time_steps
 
         Returns
@@ -96,20 +111,13 @@ class Dfs2:
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
 
         # Open the dfs file for reading
-        dfs = DfsFileFactory.Dfs2FileOpen(filename)
+        dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._dfs = dfs
-
-        if item_names is not None:
-            item_numbers = find_item(dfs, item_names)
-
-        if item_numbers is None:
-            n_items = safe_length(dfs.ItemInfo)
-            item_numbers = list(range(n_items))
+        self._source = dfs
 
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        if time_steps is None:
-            time_steps = list(range(nt))
+        items, item_numbers, time_steps = get_valid_items_and_timesteps(self, items, time_steps)
 
         # Determine the size of the grid
         # axis = dfs.ItemInfo[0].SpatialAxis
@@ -162,68 +170,8 @@ class Dfs2:
         dfs.Close()
         return Dataset(data_list, time, items)
 
-    def write(self, filename, data):
-        """
-        Function: write to a pre-created dfs2 file.
 
-        filename:
-            full path and filename to existing dfs2 file
-
-        data:
-            list of matrices. len(data) must equal the number of items in the dfs2.
-            Easch matrix must be of dimension y,x,time
-
-        usage:
-            write( filename, data) where  data( y, x, nt)
-
-        Returns:
-            Nothing
-
-        """
-
-        # Open the dfs file for writing
-        dfs = DfsFileFactory.Dfs2FileOpenEdit(filename)
-
-        # Determine the size of the grid
-        number_y = dfs.SpatialAxis.YCount
-        number_x = dfs.SpatialAxis.XCount
-        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_items = safe_length(dfs.ItemInfo)
-
-        deletevalue = -1e-035
-
-        if not all(np.shape(d)[0] == n_time_steps for d in data):
-            raise Warning(
-                "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
-            )
-        if not all(np.shape(d)[1] == number_y for d in data):
-            raise Warning(
-                "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
-            )
-        if not all(np.shape(d)[2] == number_x for d in data):
-            raise Warning(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [time, y, x]"
-            )
-        if not len(data) == n_items:
-            raise Warning(
-                "The number of matrices in data do not match the number of items in the dfs2 file."
-            )
-
-        for it in range(n_time_steps):
-            for item in range(n_items):
-                d = data[item][it, :, :]
-                d[np.isnan(d)] = deletevalue
-                d = d.reshape(number_y, number_x)
-                d = np.flipud(d)
-                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
-                dfs.WriteItemTimeStepNext(0, darray)
-
-        dfs.Close()
-
-    def create(
+    def write(
         self,
         filename,
         data,

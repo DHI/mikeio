@@ -25,7 +25,7 @@ def test_read_dfs2_generic_read():
 
     filename = r"tests/testdata/random.dfs2"
 
-    res = mikeio.read(filename, item_names=["testing water level"])
+    res = mikeio.read(filename, ["testing water level"])
     data = res.data[0]
     assert data[0, 11, 0] == 0
     assert data.shape == (3, 100, 2)  # time, y, x
@@ -44,7 +44,7 @@ def test_read_dfsu_generic_read_single_item_number():
 
     filename = "tests/testdata/HD2D.dfsu"
 
-    ds = mikeio.read(filename, item_numbers=[1])
+    ds = mikeio.read(filename, [1])
 
     assert len(ds) == 1
     

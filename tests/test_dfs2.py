@@ -7,7 +7,7 @@ from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
-def test_simple_create():
+def test_simple_write():
 
     filename = r"simple.dfs2"
 
@@ -22,13 +22,13 @@ def test_simple_create():
 
     dfs = Dfs2()
 
-    dfs.create(filename=filename, data=data)
+    dfs.write(filename=filename, data=data)
 
     assert True
     os.remove(filename)
 
 
-def test_create_single_item():
+def test_write_single_item():
 
     start_time = datetime.datetime(2012, 1, 1)
 
@@ -63,7 +63,7 @@ def test_create_single_item():
 
     dfs = Dfs2()
 
-    dfs.create(
+    dfs.write(
         filename=filename,
         data=data,
         start_time=start_time,
@@ -80,7 +80,7 @@ def test_create_single_item():
     os.remove(filename)
 
 
-def test_create_multiple_item():
+def test_write_multiple_item():
 
     start_time = datetime.datetime(2012, 1, 1)
 
@@ -113,7 +113,7 @@ def test_create_multiple_item():
 
     dfs = Dfs2()
 
-    dfs.create(
+    dfs.write(
         filename=filename,
         data=data,
         start_time=start_time,
@@ -147,9 +147,10 @@ def test_non_equidistant_calendar():
 
     dfs = Dfs2()
 
-    dfs.create(filename=filename, data=data, datetimes=datetimes)
+    dfs.write(filename=filename, data=data, datetimes=datetimes)
 
-    ds = dfs.read(filename)
+    newdfs = Dfs2(filename)
+    ds = newdfs.read()
 
     assert ds.time[1] == datetimes[1]
 
@@ -160,8 +161,8 @@ def test_non_equidistant_calendar():
 def test_read():
 
     filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2()
-    ds = dfs.read(filename, item_names=["testing water level"])
+    dfs = Dfs2(filename)
+    ds = dfs.read(["testing water level"])
     data = ds.data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
@@ -171,9 +172,9 @@ def test_read():
 def test_read_item_names():
 
     filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    ds = dfs.read(filename, item_names=["testing water level"])
+    ds = dfs.read(["testing water level"])
     data = ds.data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
@@ -183,9 +184,9 @@ def test_read_item_names():
 def test_read_numbered_access():
 
     filename = r"tests/testdata/random_two_item.dfs2"
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    res = dfs.read(filename, item_numbers=[1])
+    res = dfs.read([1])
 
     assert np.isnan(res.data[0][0, 0, 0])
     assert res.time is not None
@@ -195,47 +196,22 @@ def test_read_numbered_access():
 def test_read_some_time_step():
 
     filename = r"tests/testdata/random_two_item.dfs2"
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    res = dfs.read(filename, time_steps=[1, 2])
+    res = dfs.read(time_steps=[1, 2])
 
     assert res.data[0].shape[0] == 2
     assert len(res.time) == 2
-
-
-def test_write():
-
-    filename1 = r"tests/testdata/random.dfs2"
-    filename2 = r"tests/testdata/random_for_write.dfs2"
-    copyfile(filename1, filename2)
-
-    # read contents of original file
-    dfs = Dfs2()
-    res1 = dfs.read(filename1, [0])
-
-    # overwrite
-    res1.data[0] = -2 * res1.data[0]
-    dfs.write(filename2, res1.data)
-
-    # read contents of manipulated file
-    res1 = dfs.read(filename1, [0])
-    res2 = dfs.read(filename2, [0])
-
-    data1 = res1.data[0]
-    data2 = res2.data[0]
-    assert data2[0, 11, 0] == -2 * data1[0, 11, 0]
-
-    # clean
-    os.remove(filename2)
 
 
 def test_find_index_from_coordinate():
 
     filename = "tests/testdata/gebco_sound.dfs2"
 
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    ds = dfs.read(filename)
+    # TODO it should not be necessary to read the data to get coordinates
+    ds = dfs.read()
 
     i, j = dfs.find_closest_element_index(lon=12.74792, lat=55.865)
 

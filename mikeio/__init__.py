@@ -56,11 +56,13 @@ def read(filename, item_numbers=None, item_names=None):
 
     elif ext == ".dfs1":
 
-        dfs = Dfs1()
+        dfs = Dfs1(filename)
+        return dfs.read(item_numbers, item_names)
 
     elif ext == ".dfs2":
 
-        dfs = Dfs2()
+        dfs = Dfs2(filename)
+        return dfs.read(item_numbers, item_names)
 
     elif ext == ".dfsu":
 

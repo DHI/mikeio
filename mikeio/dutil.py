@@ -4,6 +4,30 @@ from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 
+def get_valid_items_and_timesteps(dfs, items, time_steps):
+    # TODO consider if this should be part of a DFS base class
+
+        if isinstance(items,int) or isinstance(items,str):
+            items = [items]
+
+        if items is not None and isinstance(items[0],str):
+            items = find_item(dfs._source, items)
+
+        if items is None:
+            item_numbers = list(range(dfs._n_items))
+        else:
+            item_numbers = items
+
+        if time_steps is None:
+            time_steps = list(range(dfs._n_timesteps))
+        
+        if isinstance(time_steps,int):
+            time_steps = [time_steps]
+
+        items = get_item_info(dfs._source, item_numbers)
+
+        return items, item_numbers, time_steps
+
 def find_item(dfs, item_names):
     """Utility function to find item numbers
 
