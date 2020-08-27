@@ -48,7 +48,7 @@ def test_write_single_item(tmpdir):
         data=data,
         start_time=datetime.datetime(2012, 1, 1),
         dt=12,
-        length_x=100,
+        dx=100,
         items=items,
         title=title,
     )
@@ -83,6 +83,24 @@ def test_read_time_steps():
     ds = dfs.read(time_steps=[0,1,2,3,4,5])
     data = ds.data[0]
     assert data.shape == (6, 3)  # time, x
+
+def test_write_some_time_steps_new_file(tmpdir):
+
+    outfilename = os.path.join(tmpdir.dirname, "subset.dfs1")
+    filename = r"tests/testdata/random.dfs1"
+    dfs = Dfs1(filename)
+
+    ds = dfs.read(time_steps=[0,1,2,3,4,5])
+    data = ds.data[0]
+    assert data.shape == (6, 3)  # time, x
+
+    dfs.write(outfilename, ds)
+
+    dfsnew = Dfs1(outfilename)
+
+    dsnew = dfsnew.read()
+
+    assert dsnew["testing water level"].shape == (6,3)
 
 
 

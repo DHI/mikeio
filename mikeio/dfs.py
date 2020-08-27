@@ -9,6 +9,8 @@ from .dotnet import (
 
 class Dfs123:
 
+    _projstr = None
+
     def __init__(self, filename = None):
         self._filename = filename
         # TODO self._read_header(filename)
@@ -19,4 +21,9 @@ class Dfs123:
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         #self._timestep_in_seconds = dfs.FileInfo.TimeAxis.TimeStepInSeconds
+        self._projstr = dfs.FileInfo.Projection.WKTString
+        self._longitude = dfs.FileInfo.Projection.Longitude
+        self._latitude = dfs.FileInfo.Projection.Latitude
+        self._orientation = dfs.FileInfo.Projection.Orientation
+
         dfs.Close()

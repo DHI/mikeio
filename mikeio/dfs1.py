@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from datetime import datetime, timedelta
 
@@ -24,6 +25,8 @@ from .dfs import Dfs123
 
 class Dfs1(Dfs123):
 
+    _dx = None
+
     def __init__(self, filename=None):
         super(Dfs1, self).__init__(filename)
 
@@ -33,6 +36,7 @@ class Dfs1(Dfs123):
 
     def _read_dfs1_header(self):
         dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
+        self._dx = dfs.SpatialAxis.Dx
 
         self._read_header(dfs)
 
@@ -115,7 +119,7 @@ class Dfs1(Dfs123):
         start_time=None,
         dt=1,
         items=None,
-        length_x=1,
+        dx=1,
         x0=0,
         coordinate=None,
         timeseries_unit=TimeStep.SECOND,
@@ -145,7 +149,7 @@ class Dfs1(Dfs123):
             [TODO: Support not Local Coordinates ...]
         x0:
             Lower right position
-        length_x:
+        dx:
             length of each grid in the x direction (meters)
         title:
             title of the dfs2 file (can be blank)
@@ -163,7 +167,31 @@ class Dfs1(Dfs123):
             start_time = datetime.now()
 
         if coordinate is None:
-            coordinate = ["LONG/LAT", 0, 0, 0]
+            if self._projstr is not None:
+                coordinate = [
+                    self._projstr,
+                    self._longitude,
+                    self._latitude,
+                    self._orientation,
+                ]
+            else:
+                warnings.warn("No coordinate system provided")
+                coordinate = ["LONG/LAT", 0, 0, 0]
+
+        if dx is None:
+            if self._dx is not None:
+                dx = self._dx
+            else:
+                dx = 1
+
+        if isinstance(data, Dataset):
+            items = data.items
+            start_time = data.time[0]
+            if dt is None and len(data.time) > 1:
+                if not data.is_equidistant:
+                    raise Exception("Data is not equidistant in time.")
+                dt = (data.time[1] - data.time[0]).total_seconds()
+            data = data.data
 
         if items is None:
             items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
@@ -184,8 +212,8 @@ class Dfs1(Dfs123):
                 "names must be an array of strings with the same number as matrices in data list"
             )
 
-        if not type(start_time) is datetime:
-            raise Warning("start_time must be of type datetime ")
+        #if not type(start_time) is datetime:
+        #    raise Warning("start_time must be of type datetime ")
 
         system_start_time = to_dotnet_datetime(start_time)
 
@@ -206,7 +234,7 @@ class Dfs1(Dfs123):
             )
         )
         builder.SetSpatialAxis(
-            factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, length_x)
+            factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, dx)
         )
 
         for i in range(n_items):

@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from datetime import datetime, timedelta
 
@@ -25,18 +26,21 @@ from .dfs import Dfs123
 
 class Dfs2(Dfs123):
 
+    _dx = None
+    _dy = None
+
     def __init__(self, filename=None):
         super(Dfs2, self).__init__(filename)
 
         if filename:
             self._read_dfs2_header()
-            
 
     def _read_dfs2_header(self):
         dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
+        self._dx = dfs.SpatialAxis.Dx
+        self._dy = dfs.SpatialAxis.Dy
 
         self._read_header(dfs)
-        
 
     def __calculate_index(self, nx, ny, x, y):
         """ Calculates the position in the dfs2 data array based on the
@@ -117,7 +121,9 @@ class Dfs2(Dfs123):
 
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(self, items, time_steps)
+        items, item_numbers, time_steps = get_valid_items_and_timesteps(
+            self, items, time_steps
+        )
 
         # Determine the size of the grid
         # axis = dfs.ItemInfo[0].SpatialAxis
@@ -170,7 +176,6 @@ class Dfs2(Dfs123):
         dfs.Close()
         return Dataset(data_list, time, items)
 
-
     def write(
         self,
         filename,
@@ -179,8 +184,8 @@ class Dfs2(Dfs123):
         dt=1,
         datetimes=None,
         items=None,
-        length_x=1,
-        length_y=1,
+        dx=None,
+        dy=None,
         x0=0,
         y0=0,
         coordinate=None,
@@ -214,9 +219,9 @@ class Dfs2(Dfs123):
             Lower right position
         x0: float, optional
             Lower right position
-        length_x: float, optional
+        dx: float, optional
             length of each grid in the x direction (projection units)
-        length_y: float, optional
+        dy: float, optional
             length of each grid in the y direction (projection units)
         
         title: str, optional
@@ -236,7 +241,39 @@ class Dfs2(Dfs123):
             start_time = datetime.now()
 
         if coordinate is None:
-            coordinate = ["LONG/LAT", 0, 0, 0]
+            if self._projstr is not None:
+                coordinate = [
+                    self._projstr,
+                    self._longitude,
+                    self._latitude,
+                    self._orientation,
+                ]
+            else:
+                warnings.warn("No coordinate system provided")
+                coordinate = ["LONG/LAT", 0, 0, 0]
+
+        if dx is None:
+            if self._dx is not None:
+                dx = self._dx
+            else:
+                dx = 1
+
+        if dy is None:
+            if self._dy is not None:
+                dy = self._dy
+            else:
+                dy = 1
+
+        if isinstance(data, Dataset):
+            items = data.items
+            start_time = data.time[0]
+            if dt is None and len(data.time) > 1:
+                if not data.is_equidistant:
+                    raise Exception(
+                        "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
+                    )
+                dt = (data.time[1] - data.time[0]).total_seconds()
+            data = data.data
 
         if items is None:
             items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
@@ -265,8 +302,8 @@ class Dfs2(Dfs123):
         if datetimes is None:
             equidistant = True
 
-            if not type(start_time) is datetime:
-                raise Warning("start_time must be of type datetime ")
+            # if not type(start_time) is datetime:
+            #    raise Warning("start_time must be of type datetime ")
         else:
             equidistant = False
             start_time = datetimes[0]
@@ -308,7 +345,7 @@ class Dfs2(Dfs123):
 
         builder.SetSpatialAxis(
             factory.CreateAxisEqD2(
-                eumUnit.eumUmeter, number_x, x0, length_x, number_y, y0, length_y
+                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy
             )
         )
 

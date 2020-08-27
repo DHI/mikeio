@@ -28,17 +28,9 @@ def test_simple_write():
     os.remove(filename)
 
 
-def test_write_single_item():
+def test_write_single_item(tmpdir):
 
-    start_time = datetime.datetime(2012, 1, 1)
-
-    # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
-    timeseries_unit = 1402
-    dt = 12
-
-    items = [ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)]
-
-    filename = r"random.dfs2"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
     data = []
     d = np.random.random([100, 2, 3])
@@ -55,79 +47,22 @@ def test_write_single_item():
     north = 6098907
     orientation = 0
 
-    coordinate = ["UTM-33", east, north, orientation]
-    length_x = 100
-    length_y = 100
-
-    title = "test dfs2"
-
     dfs = Dfs2()
 
     dfs.write(
         filename=filename,
         data=data,
-        start_time=start_time,
-        timeseries_unit=timeseries_unit,
-        dt=dt,
-        items=items,
-        coordinate=coordinate,
-        length_x=length_x,
-        length_y=length_y,
-        title=title,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+        coordinate=["UTM-33", east, north, orientation],
+        dx=100,
+        dy=100,
+        title="test dfs2",
     )
 
     assert True
-    os.remove(filename)
 
-
-def test_write_multiple_item():
-
-    start_time = datetime.datetime(2012, 1, 1)
-
-    # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
-    timeseries_unit = 1402
-    dt = 12
-
-    # TODO change int to enum
-    items = [
-        ItemInfo("testing water level", 100000, 1000),
-        ItemInfo("testing rainfall", 100004, 1002),
-        ItemInfo("testing drain time constant", 100362, 2605),
-    ]
-
-    filename = r"multiple.dfs2"
-
-    data = []
-    d = np.zeros([100, 100, 30]) + 1.0
-    data.append(d)
-    d = np.zeros([100, 100, 30]) + 2.0
-    data.append(d)
-    d = np.zeros([100, 100, 30]) + 3.0
-    data.append(d)
-
-    coordinate = ["LONG/LAT", 12.4387, 55.2257, 0]
-    length_x = 0.1
-    length_y = 0.1
-
-    title = "test dfs2"
-
-    dfs = Dfs2()
-
-    dfs.write(
-        filename=filename,
-        data=data,
-        start_time=start_time,
-        timeseries_unit=timeseries_unit,
-        dt=dt,
-        items=items,
-        coordinate=coordinate,
-        length_x=length_x,
-        length_y=length_y,
-        title=title,
-    )
-
-    assert True
-    os.remove(filename)
 
 
 def test_non_equidistant_calendar():
@@ -191,6 +126,44 @@ def test_read_numbered_access():
     assert np.isnan(res.data[0][0, 0, 0])
     assert res.time is not None
     assert res.items[0].name == "Untitled"
+
+
+def test_write_selected_item_to_new_file(tmpdir):
+
+    filename = r"tests/testdata/random_two_item.dfs2"
+    dfs = Dfs2(filename)
+
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfs2")
+
+    ds = dfs.read(["Untitled"])
+
+    dfs.write(outfilename, ds)
+
+    dfs2 = Dfs2(outfilename)
+
+    ds2 = dfs2.read()
+
+    assert len(ds2) == 1
+    assert ds.items[0].name == "Untitled"
+
+def test_write_modified_data_to_new_file(tmpdir):
+
+    filename = r"tests/testdata/gebco_sound.dfs2"
+    dfs = Dfs2(filename)
+
+    outfilename = os.path.join(tmpdir.dirname, "mod.dfs2")
+
+    ds = dfs.read()
+
+    ds.data[0] = ds.data[0] + 10.0
+
+    dfs.write(outfilename, ds)
+
+    dfsmod = Dfs2(outfilename)
+
+    assert dfs._longitude == dfsmod._longitude
+    
+
 
 
 def test_read_some_time_step():
