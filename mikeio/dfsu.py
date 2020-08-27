@@ -51,6 +51,8 @@ class _UnstructuredGeometry:
             out.append(f"Number of nodes: {self.n_nodes}")
         if self.n_elements:
             out.append(f"Number of elements: {self.n_elements}")
+        if self._n_layers:
+            out.append(f"Number of layers: {self._n_layers}")
         if self._projstr:
             out.append(f"Projection: {self.projection_string}")
         return str.join("\n", out)
@@ -221,8 +223,8 @@ class _UnstructuredGeometry:
                 new_elem_nodes.append(node_dict[idx])
             self._element_table[j] = new_elem_nodes
             
-        self._node_ids = list(new_node_ids)
-        self._element_ids = list(new_element_ids)
+        self._node_ids = np.array(list(new_node_ids))
+        self._element_ids = np.array(list(new_element_ids))
 
     def get_element_table_for_elements(self, element_ids):
         elem_tbl = []        
@@ -605,7 +607,7 @@ class _UnstructuredGeometry:
 
     @property 
     def top_element_ids(self):
-        if self._n_layers is not None:
+        if self._n_layers is None:
             print('Object has no layers: cannot find top_element_ids')
         elif self._top_elems is None:
             self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
@@ -613,7 +615,7 @@ class _UnstructuredGeometry:
 
     @property 
     def num_layers_per_column(self):
-        if self._n_layers is not None:
+        if self._n_layers is None:
             print('Object has no layers: cannot find num_layers_per_column')
         elif self._n_layers_column is None:
             top_elems = self.top_element_ids
@@ -626,7 +628,7 @@ class _UnstructuredGeometry:
 
     @property 
     def bottom_element_ids(self):
-        if self._n_layers is not None:
+        if self._n_layers is None:
             print('Object has no layers: cannot find bottom_element_ids')
         elif self._bot_elems is None:
             self._bot_elems = self.top_element_ids - self.num_layers_per_column + 1
