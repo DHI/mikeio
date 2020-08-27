@@ -10,6 +10,7 @@ from .dotnet import (
 class Dfs123:
 
     _projstr = None
+    _start_time = None
 
     def __init__(self, filename = None):
         self._filename = filename

@@ -237,9 +237,6 @@ class Dfs2(Dfs123):
 
         n_items = len(data)
 
-        if start_time is None:
-            start_time = datetime.now()
-
         if coordinate is None:
             if self._projstr is not None:
                 coordinate = [
@@ -275,8 +272,17 @@ class Dfs2(Dfs123):
                 dt = (data.time[1] - data.time[0]).total_seconds()
             data = data.data
 
+        if start_time is None:
+            if self._start_time is None:
+                start_time = datetime.now()
+                warnings.warn(f"No start time supplied. Using current time: {start_time} as start time.")
+            else:
+                start_time = self._start_time 
+                warnings.warn(f"No start time supplied. Using start time from source: {start_time} as start time.")
+
+
         if items is None:
-            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
+            items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
 
         if not all(np.shape(d)[0] == n_time_steps for d in data):
             raise Warning(

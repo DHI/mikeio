@@ -7,9 +7,9 @@ from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
-def test_simple_write():
+def test_simple_write(tmpdir):
 
-    filename = r"simple.dfs2"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
     data = []
 
@@ -24,8 +24,14 @@ def test_simple_write():
 
     dfs.write(filename=filename, data=data)
 
-    assert True
-    os.remove(filename)
+
+    newdfs = Dfs2(filename)
+
+    ds = newdfs.read()
+
+    assert len(ds) == 1
+    assert ds.items[0].type == EUMType.Undefined
+    
 
 
 def test_write_single_item(tmpdir):
