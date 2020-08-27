@@ -1,6 +1,6 @@
 import os
 import pytest
-from mikeio.mesh import Mesh
+from mikeio import Mesh
 
 
 def test_get_number_of_elements():
