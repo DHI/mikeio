@@ -684,10 +684,14 @@ class _UnstructuredFile(_UnstructuredGeometry):
     """
     _filename = None
     _source = None
+    _deletevalue = None
+
+    _n_timesteps = None
     _start_time = None
     _timestep_in_seconds = None
-    _items = None
-    _deletevalue = None
+    
+    _n_items = None
+    _items = None    
 
     def __repr__(self):
         out = []
@@ -695,6 +699,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
             out.append(self.type_as_string)        
         out.append(f"Number of elements: {self.n_elements}")
         out.append(f"Number of nodes: {self.n_nodes}")
+        if self._projstr:
+            out.append(f"Projection: {self.projection_string}")
         if self._type > 0:
             out.append(f"Number of sigma layers: {self.n_sigma_layers}")
         if self._type == 3 or self._type == 5:
@@ -705,7 +711,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
             if self._n_timesteps == 1:
                 out.append(f"Time: time-invariant file (1 step) at {self._start_time}")
             else:
-                out.append(f"Time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s and start {self._start_time}")
+                out.append(f"Time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s")
+                out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)
 
     def __init__(self):       
@@ -834,7 +841,7 @@ class Dfsu(_UnstructuredFile):
 
     @property
     def end_time(self):
-        return self.start_time + timedelta(self.n_timesteps * self.timestep)
+        return self.start_time + timedelta(seconds=((self.n_timesteps-1) * self.timestep))
 
     def read(self, items=None, time_steps=None, element_ids=None):
         """
@@ -1069,7 +1076,7 @@ class Dfsu(_UnstructuredFile):
             geometry = self
         else:
             geometry = self.to_2d_geometry()
-        #Mesh.geometry_to_mesh(outfilename, geometry)
+        Mesh.geometry_to_mesh(outfilename, geometry)
 
     def get_element_coords(self):
         """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
