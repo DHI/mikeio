@@ -1,8 +1,7 @@
-import warnings
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
+from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
@@ -76,7 +75,7 @@ class Dfs1(Dfs123):
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         if nt == 0:
             raise Warning("Static dfs1 files (with no time steps) are not supported.")
-            nt = 1
+
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         n_items = len(item_numbers)

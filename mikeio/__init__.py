@@ -17,11 +17,9 @@ clr.AddReference("System.Runtime.InteropServices")
 clr.AddReference("System.Runtime")
 
 p = platform.architecture()
-x64 = False
-x64 = "64" in p[0]
 
-if not x64:
-    print("This library has not been tested in a 32 bit system!!!!")
+if not "64" in p[0]:
+    raise Exception("This library has not been tested in a 32 bit system!!!!")
 
 
 from .dfs0 import Dfs0
@@ -43,7 +41,7 @@ def read(filename, items=None, time_steps=None):
             Read only selected items, by number (0-based), or by name
     time_steps: int or list[int], optional
             Read only selected time_steps
-    
+            
     Return:
         Dataset(data, time, names)
     """
@@ -51,9 +49,9 @@ def read(filename, items=None, time_steps=None):
     _, ext = os.path.splitext(filename)
 
     if ext == ".dfsu":
-        
+
         dfs = Dfsu()
-        return dfs.read(filename) # Fixed in other branch
+        return dfs.read(filename)  # Fixed in other branch
 
     if ext == ".dfs0":
 
@@ -66,12 +64,9 @@ def read(filename, items=None, time_steps=None):
     elif ext == ".dfs2":
 
         dfs = Dfs2(filename)
-    
+
     else:
         raise Exception(f"{ext} is an unsupported extension")
-        
-    return dfs.read(items, time_steps)
-    
-    
 
-    
+    return dfs.read(items, time_steps)
+

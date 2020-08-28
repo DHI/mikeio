@@ -6,7 +6,7 @@ import mikeio
 from mikeio.dfs0 import Dfs0
 from mikeio.eum import TimeStep, EUMType, EUMUnit, ItemInfo
 from datetime import timedelta
-from shutil import copyfile
+
 import pytest
 
 
@@ -34,14 +34,13 @@ def test_read_units_write_new(tmpdir):
 
     dfs = Dfs0(dfs0file)
     ds = dfs.read()
-    data = ds.data
 
     # write new file
     dfs.write(tmpfile, ds)
 
     # Verify that new file has same variables/units as original
     newdfs = Dfs0(tmpfile)
-    ds2 = dfs.read()
+    ds2 = newdfs.read()
 
     assert ds2.items[0].type == ds.items[0].type
     assert ds2.items[0].unit == ds.items[0].unit
@@ -133,7 +132,6 @@ def test_write_equidistant_calendar(tmpdir):
     )
 
 
-
 def test_write_non_equidistant_calendar(tmpdir):
     dfs0file = os.path.join(tmpdir.dirname, "neq.dfs0")
     d1 = np.zeros(1000)
@@ -160,7 +158,6 @@ def test_write_non_equidistant_calendar(tmpdir):
     )
 
     assert os.path.exists(dfs0file)
-    
 
 
 def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
@@ -317,13 +314,13 @@ def test_read_dfs0_single_item_named_access():
 
     assert len(data) == 1
 
+
 def test_read_dfs0_temporal_subset():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
-    ds = dfs.read(time_steps=[1,2])
-    data = ds.data
+    ds = dfs.read(time_steps=[1, 2])
 
     assert len(ds.time) == 2
     assert ds.time[0].strftime("%H") == "05"
@@ -334,8 +331,7 @@ def test_read_dfs0_single_item_read_by_name():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
-    res = dfs.read(["NotFun", "VarFun01"]
-    )  # reversed order compare to original file
+    res = dfs.read(["NotFun", "VarFun01"])  # reversed order compare to original file
     data = res.data
 
     assert len(data) == 2
@@ -363,6 +359,7 @@ def test_read_dfs0_to_matrix():
 
     assert len(ds.data) == 2
 
+
 def test_write_data_with_missing_values(tmpdir):
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
@@ -381,8 +378,9 @@ def test_write_data_with_missing_values(tmpdir):
     dfs.write(tmpfile, ds)
 
     # Write operation does not modify the data
-    assert(np.isnan(ds.data[1][1]))
+    assert np.isnan(ds.data[1][1])
 
     moddfs = Dfs0(tmpfile)
     modified = moddfs.read()
-    assert(np.isnan(modified.data[1][5]))
+    assert np.isnan(modified.data[1][5])
+

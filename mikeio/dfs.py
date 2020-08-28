@@ -2,15 +2,13 @@ from datetime import datetime
 import warnings
 import numpy as np
 from .helpers import safe_length
-from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
+from .dutil import Dataset, get_item_info
 from .dotnet import (
-    to_numpy,
-    to_dotnet_float_array,
     to_dotnet_datetime,
     from_dotnet_datetime,
 )
-from .eum import TimeStep, ItemInfo
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
+from .eum import ItemInfo
+from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
     DataValueType,
@@ -23,6 +21,8 @@ class Dfs123:
     _start_time = None
     _is_equidistant = True
     _items = None
+    _builder = None
+    _factory = None
 
     def __init__(self, filename=None):
         self._filename = filename

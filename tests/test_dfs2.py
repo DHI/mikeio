@@ -1,8 +1,6 @@
 import os
-import numpy as np
 import datetime
-from shutil import copyfile
-
+import numpy as np
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 

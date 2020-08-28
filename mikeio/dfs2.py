@@ -1,8 +1,6 @@
-import warnings
 import numpy as np
-from datetime import datetime, timedelta
-
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
+from datetime import timedelta
+from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
@@ -126,7 +124,6 @@ class Dfs2(Dfs123):
 
         if nt == 0:
             raise Warning("Static files (with no dynamic items) are not supported.")
-            nt = 1
 
         for t in time_steps:
             if t > (nt - 1):
@@ -143,7 +140,7 @@ class Dfs2(Dfs123):
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        startTime = dfs.FileInfo.TimeAxis.StartDateTime
+        # startTime = dfs.FileInfo.TimeAxis.StartDateTime
         for i in range(len(time_steps)):
             it = time_steps[i]
             for item in range(self._n_items):

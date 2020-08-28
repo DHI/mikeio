@@ -60,6 +60,17 @@ def find_item(dfs, item_names):
 
 
 def get_item_info(dfs, item_numbers):
+    """Read DFS ItemInfo
+
+    Parameters
+    ----------
+    dfs : MIKE dfs object
+    item_numbers : list[int]
+        
+    Returns
+    -------
+    list[Iteminfo]
+    """
     items = []
     for item in item_numbers:
         name = dfs.ItemInfo[item].Name
@@ -303,7 +314,7 @@ class Dataset:
         return df
 
     def _ipython_key_completions_(self):
-        return self.names
+        return [x.name for x in self.items]
 
     @property
     def is_equidistant(self):
