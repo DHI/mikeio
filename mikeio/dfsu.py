@@ -46,7 +46,11 @@ class _UnstructuredGeometry:
     _bot_elems = None
     _n_layers = None
     _n_sigma = None
+    
     _geom2d = None
+    _e2_e3_table = None
+    _2d_ids = None
+    _layer_ids = None
 
     def __repr__(self):
         out = []
@@ -248,7 +252,7 @@ class _UnstructuredGeometry:
             elem_tbl.append(elem_nodes)  
         return elem_tbl
 
-    def elements_to_geometry(self, elements, node_layers='all'):        
+    def elements_to_geometry(self, element_ids, node_layers='all'):        
         """export elements to new geometry
 
         Parameters
@@ -266,7 +270,7 @@ class _UnstructuredGeometry:
         """
         # extract information for selected elements
         node_ids, elem_tbl = self.get_nodes_and_table_for_elements(
-            elements, 
+            element_ids, 
             node_layers=node_layers
             )
         node_coords = self.node_coordinates[node_ids]
@@ -280,15 +284,32 @@ class _UnstructuredGeometry:
             node_ids=node_ids, 
             projection_string=self.projection_string
             )
-        geom.set_elements(elem_tbl, self.element_ids[elements])
-        
-        geom._type = self._type  # 
-        if geom._type > 0:
-            geom._top_elems = self._top_elems[elements]
-            geom._n_layers = self._n_layers
-            geom._n_sigma = self._n_sigma
-
+        geom.set_elements(elem_tbl, self.element_ids[element_ids])
         geom.reindex()
+
+        geom._type = self._type  # 
+        if self._type > 0:
+            # original file was 3d
+            
+            layers_used = self.layer_ids[element_ids]
+            unique_layer_ids = np.unique(layers_used)
+            n_layers = len(unique_layer_ids)
+
+            if n_layers == 1:
+                geom._type = 0
+                geom._n_layers = None
+                if node_layers=='all':
+                    print("Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'")
+            else:
+                geom._type = self._type
+                geom._n_layers = n_layers
+                lowest_sigma = self.n_layers - self.n_sigma_layers + 1
+                geom._n_sigma = sum(unique_layer_ids>=lowest_sigma)
+                
+                if (self._type == 3 or self._type == 5) and n_layers == geom._n_sigma:
+                    geom._type = self._type-1  # no-longer any z-layers! type is changed
+
+                geom._top_elems = np.intersect1d(self._top_elems, element_ids, assume_unique=True)
         
         return geom
 
@@ -563,9 +584,44 @@ class _UnstructuredGeometry:
     # 3D dfsu stuff
     @property
     def geometry2d(self):
+        if self._n_layers is None:
+            print('Object has no layers: cannot return geometry2d')           
         if self._geom2d is None:
             self._geom2d = self.to_2d_geometry()
         return self._geom2d
+
+    @property
+    def e2_e3_table(self):
+        if self._n_layers is None:
+            print('Object has no layers: cannot return e2_e3_table')        
+        if self._e2_e3_table is None:
+            res = self._get_2d_to_3d_association()            
+            self._e2_e3_table = res[0]
+            self._2d_ids = res[1]
+            self._layer_ids = res[2]            
+        return self._e2_e3_table
+
+    @property
+    def elem2d_ids(self):
+        if self._n_layers is None:
+            print('Object has no layers: cannot return elem2d_ids')        
+        if self._2d_ids is None:
+            res = self._get_2d_to_3d_association()            
+            self._e2_e3_table = res[0]
+            self._2d_ids = res[1]
+            self._layer_ids = res[2]            
+        return self._2d_ids
+
+    @property
+    def layer_ids(self):
+        if self._n_layers is None:
+            print('Object has no layers: cannot return layer_ids')        
+        if self._layer_ids is None:
+            res = self._get_2d_to_3d_association()            
+            self._e2_e3_table = res[0]
+            self._2d_ids = res[1]
+            self._layer_ids = res[2]            
+        return self._layer_ids        
 
     @property
     def n_layers(self):
@@ -641,6 +697,31 @@ class _UnstructuredGeometry:
         else:
             # then it must be a z layer 
             return self.bottom_element_ids[self.num_layers_per_column >= (n_lay-n+1)] + n 
+
+    def _get_2d_to_3d_association(self):
+        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
+        index2d = []   # for each 3d element: the associated 2d element id
+        layerid = []   # for each 3d element: the associated layer number
+        n2d = len(self.top_element_ids)
+        topid = self.top_element_ids
+        botid = self.bottom_element_ids
+        global_layer_ids = np.arange(1,self.n_layers+1) # layer_ids = 1, 2, 3...
+        for j in range(n2d):
+            col = np.array(list(range(botid[j],topid[j]+1)))
+            
+            e2_to_e3.append(col)
+            for jj in col:
+                index2d.append(j)
+
+            n_local_layers = len(col)
+            local_layers = global_layer_ids[-n_local_layers:]
+            for ll in local_layers:
+                layerid.append(ll)
+
+        e2_to_e3 = np.array(e2_to_e3)
+        index2d = np.array(index2d)
+        layerid = np.array(layerid)
+        return e2_to_e3, index2d, layerid
 
     def to_polygons(self, geometry=None):
         """generate matlab polygons from element table for plotting
@@ -1056,6 +1137,19 @@ class Dfsu(_UnstructuredFile):
             geometry = self
         else:
             geometry = self.elements_to_geometry(element_ids)
+            if (self._type > 0) and (geometry._type == 0):
+                # redo extraction as 2d:
+                print('will redo extraction in 2d!')
+                geometry = self.elements_to_geometry(element_ids, node_layers='bottom')
+                if items[0].name == "Z coordinate":
+                    # get rid of z-item
+                    items = items[1:(n_items+1)]
+                    n_items = n_items-1
+                    new_data = []
+                    for j in range(n_items):
+                        new_data.append(data[j+1])
+                    data = new_data
+
 
         # Default filetype;
         if geometry._type == -1:
