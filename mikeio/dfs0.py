@@ -286,13 +286,10 @@ class Dfs0:
         dfs = builder.GetFile()
 
         delete_value = dfs.FileInfo.DeleteValueFloat
-
-        data = data.copy()
-        for i in range(n_items):
-            d = data[i].copy()
-            d[np.isnan(d)] = delete_value
-
-        data_to_write = to_dotnet_array(np.stack(data, axis=1))
+        
+        data = np.array(data)
+        data[np.isnan(data)] = delete_value
+        data_to_write = to_dotnet_array(data.T)
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
         Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
 
