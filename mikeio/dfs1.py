@@ -143,14 +143,12 @@ class Dfs1(Dfs123):
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         coordinate:
             ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
-            OR
-            [TODO: Support not Local Coordinates ...]
         x0:
             Lower right position
         dx:
             length of each grid in the x direction (meters)
-        title:
-            title of the dfs2 file (can be blank)
+        title: str, optional
+            title of the dfs file (can be blank)
 
         """
 
