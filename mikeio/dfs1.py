@@ -32,7 +32,6 @@ class Dfs1(Dfs123):
 
         if filename:
             self._read_dfs1_header()
-            
 
     def _read_dfs1_header(self):
         dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
@@ -40,23 +39,21 @@ class Dfs1(Dfs123):
 
         self._read_header(dfs)
 
-
     def read(self, items=None, time_steps=None):
         """
         Read data from a dfs1 file
         
         Parameters
         ---------
-        filename: str
-            dfs2 filename
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
         time_steps: int or list[int], optional
             Read only selected time_steps
 
-        Return:
-            Dataset(data, time, items)
-            where data[nt,x]
+        Returns
+        -------
+        Dataset
+            A dataset with data dimensions [t,x]
         """
 
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
@@ -68,7 +65,9 @@ class Dfs1(Dfs123):
 
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(self, items, time_steps)
+        items, item_numbers, time_steps = get_valid_items_and_timesteps(
+            self, items, time_steps
+        )
 
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
@@ -212,45 +211,20 @@ class Dfs1(Dfs123):
                 "names must be an array of strings with the same number as matrices in data list"
             )
 
-        #if not type(start_time) is datetime:
-        #    raise Warning("start_time must be of type datetime ")
-
-        system_start_time = to_dotnet_datetime(start_time)
-
-        # Create an empty dfs1 file object
         factory = DfsFactory()
         builder = Dfs1Builder.Create(title, "mikeio", 0)
 
-        # Set up the header
-        builder.SetDataType(0)
-        builder.SetGeographicalProjection(
-            factory.CreateProjectionGeoOrigin(
-                coordinate[0], coordinate[1], coordinate[2], coordinate[3]
-            )
-        )
-        builder.SetTemporalAxis(
-            factory.CreateTemporalEqCalendarAxis(
-                timeseries_unit, system_start_time, 0, dt
-            )
-        )
+        self._builder = builder
+        self._factory = factory
+
         builder.SetSpatialAxis(
             factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, dx)
         )
 
-        for i in range(n_items):
-            builder.AddDynamicItem(
-                items[i].name,
-                eumQuantity.Create(items[i].type, items[i].unit),
-                DfsSimpleType.Float,
-                DataValueType.Instantaneous,
-            )
+        dfs = self._setup_header(
+            coordinate, start_time, dt, timeseries_unit, items, filename
+        )
 
-        try:
-            builder.CreateFile(filename)
-        except IOError:
-            print("cannot create dfs2 file: ", filename)
-
-        dfs = builder.GetFile()
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
         for i in range(n_time_steps):

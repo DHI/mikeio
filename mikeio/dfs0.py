@@ -38,11 +38,15 @@ class Dfs0:
 
         Parameters
         ----------
-        
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time_steps: int or list[int], optional
+            Read only selected time_steps
 
         Returns
         -------
-            Dataset(data, time, items)
+        Dataset
+            A dataset with data dimensions [t]
         """
 
         if not os.path.exists(self._filename):
@@ -223,9 +227,6 @@ class Dfs0:
 
         if datetimes is None:
             equidistant = True
-
-            # if not type(start_time) is datetime:
-            #    raise Warning("start_time must be of type datetime.")
 
             dt = np.float(dt)
             datetimes = np.array(

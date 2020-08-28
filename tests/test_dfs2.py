@@ -24,14 +24,12 @@ def test_simple_write(tmpdir):
 
     dfs.write(filename=filename, data=data)
 
-
     newdfs = Dfs2(filename)
 
     ds = newdfs.read()
 
     assert len(ds) == 1
     assert ds.items[0].type == EUMType.Undefined
-    
 
 
 def test_write_single_item(tmpdir):
@@ -70,10 +68,9 @@ def test_write_single_item(tmpdir):
     assert True
 
 
+def test_non_equidistant_calendar(tmpdir):
 
-def test_non_equidistant_calendar():
-
-    filename = r"neq.dfs2"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
     data = []
 
@@ -93,10 +90,7 @@ def test_non_equidistant_calendar():
     newdfs = Dfs2(filename)
     ds = newdfs.read()
 
-    assert ds.time[1] == datetimes[1]
-
-    assert True
-    os.remove(filename)
+    assert not ds.is_equidistant
 
 
 def test_read():
@@ -152,6 +146,7 @@ def test_write_selected_item_to_new_file(tmpdir):
     assert len(ds2) == 1
     assert ds.items[0].name == "Untitled"
 
+
 def test_write_modified_data_to_new_file(tmpdir):
 
     filename = r"tests/testdata/gebco_sound.dfs2"
@@ -168,8 +163,6 @@ def test_write_modified_data_to_new_file(tmpdir):
     dfsmod = Dfs2(outfilename)
 
     assert dfs._longitude == dfsmod._longitude
-    
-
 
 
 def test_read_some_time_step():

@@ -7,26 +7,27 @@ from mikeio.eum import EUMType, EUMUnit, ItemInfo
 def get_valid_items_and_timesteps(dfs, items, time_steps):
     # TODO consider if this should be part of a DFS base class
 
-        if isinstance(items,int) or isinstance(items,str):
-            items = [items]
+    if isinstance(items, int) or isinstance(items, str):
+        items = [items]
 
-        if items is not None and isinstance(items[0],str):
-            items = find_item(dfs._source, items)
+    if items is not None and isinstance(items[0], str):
+        items = find_item(dfs._source, items)
 
-        if items is None:
-            item_numbers = list(range(dfs._n_items))
-        else:
-            item_numbers = items
+    if items is None:
+        item_numbers = list(range(dfs._n_items))
+    else:
+        item_numbers = items
 
-        if time_steps is None:
-            time_steps = list(range(dfs._n_timesteps))
-        
-        if isinstance(time_steps,int):
-            time_steps = [time_steps]
+    if time_steps is None:
+        time_steps = list(range(dfs._n_timesteps))
 
-        items = get_item_info(dfs._source, item_numbers)
+    if isinstance(time_steps, int):
+        time_steps = [time_steps]
 
-        return items, item_numbers, time_steps
+    items = get_item_info(dfs._source, item_numbers)
+
+    return items, item_numbers, time_steps
+
 
 def find_item(dfs, item_names):
     """Utility function to find item numbers
@@ -159,7 +160,7 @@ class Dataset:
                 f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
             )
         self.data = data
-        self.time = pd.DatetimeIndex(time, freq='infer')
+        self.time = pd.DatetimeIndex(time, freq="infer")
         self.items = items
 
     def __repr__(self):
@@ -179,8 +180,6 @@ class Dataset:
             out.append("Items:")
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
-        
-        
 
         return str.join("\n", out)
 
@@ -207,10 +206,10 @@ class Dataset:
             item_lookup = {item.name: i for i, item in enumerate(self.items)}
 
             for v in x:
-                data_item =  self.__getitem__(v)
-                if isinstance(v,str):
+                data_item = self.__getitem__(v)
+                if isinstance(v, str):
                     i = item_lookup[v]
-                if isinstance(v,int):
+                if isinstance(v, int):
                     i = v
 
                 item = self.items[i]
@@ -218,8 +217,6 @@ class Dataset:
                 data.append(data_item)
 
             return Dataset(data, self.time, items)
-        
-        
 
         raise Exception("Invalid operation")
 
@@ -257,7 +254,7 @@ class Dataset:
 
         items = self.items
 
-        if axis==1 and items[0].name == "Z coordinate":
+        if axis == 1 and items[0].name == "Z coordinate":
             items = deepcopy(items)
             items.pop(0)
 
@@ -307,3 +304,7 @@ class Dataset:
 
     def _ipython_key_completions_(self):
         return self.names
+
+    @property
+    def is_equidistant(self):
+        return self.time.freq is not None
