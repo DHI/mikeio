@@ -287,8 +287,10 @@ class Dfs0:
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
-        nan_indices = np.isclose(data, self._dfs.FileInfo.DeleteValueFloat, atol=1e-36)
-        data[nan_indices] = np.nan
+        data = data.copy()
+        for i in range(n_items):
+            d = data[i].copy()
+            d[np.isnan(d)] = delete_value
 
         data_to_write = to_dotnet_array(np.stack(data, axis=1))
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
