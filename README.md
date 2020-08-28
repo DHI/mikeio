@@ -19,6 +19,12 @@ Facilitates common data processing workflows for MIKE files.
 
 [More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
 
+## Important Note!
+
+The upcoming version 0.5 of mikeio, will have a lot of new functionality, but also several breaking changes to the API !!
+It is planned to be released at latest Sept 7.
+
+
 ## Installation
 
 From PyPI: 
