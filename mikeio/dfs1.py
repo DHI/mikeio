@@ -155,27 +155,11 @@ class Dfs1(Dfs123):
 
         """
 
-        if title is None:
-            title = ""
+        self._write_handle_common_arguments(
+            title, data, items, coordinate, start_time, dt
+        )
 
-        n_time_steps = np.shape(data[0])[0]
         number_x = np.shape(data[0])[1]
-        n_items = len(data)
-
-        if start_time is None:
-            start_time = datetime.now()
-
-        if coordinate is None:
-            if self._projstr is not None:
-                coordinate = [
-                    self._projstr,
-                    self._longitude,
-                    self._latitude,
-                    self._orientation,
-                ]
-            else:
-                warnings.warn("No coordinate system provided")
-                coordinate = ["LONG/LAT", 0, 0, 0]
 
         if dx is None:
             if self._dx is not None:
@@ -183,32 +167,10 @@ class Dfs1(Dfs123):
             else:
                 dx = 1
 
-        if isinstance(data, Dataset):
-            items = data.items
-            start_time = data.time[0]
-            if dt is None and len(data.time) > 1:
-                if not data.is_equidistant:
-                    raise Exception("Data is not equidistant in time.")
-                dt = (data.time[1] - data.time[0]).total_seconds()
-            data = data.data
-
-        if items is None:
-            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
-
-        if not all(np.shape(d)[0] == n_time_steps for d in data):
-            raise Warning(
-                "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [t, x]"
-            )
         if not all(np.shape(d)[1] == number_x for d in data):
             raise Warning(
                 "ERROR data matrices in the X dimension do not all match in the data list. "
                 "Data is list of matices [t, x]"
-            )
-
-        if len(items) != n_items:
-            raise Warning(
-                "names must be an array of strings with the same number as matrices in data list"
             )
 
         factory = DfsFactory()
@@ -227,8 +189,8 @@ class Dfs1(Dfs123):
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
-        for i in range(n_time_steps):
-            for item in range(n_items):
+        for i in range(self._n_time_steps):
+            for item in range(self._n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
 

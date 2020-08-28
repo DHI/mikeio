@@ -22,6 +22,7 @@ class Dfs123:
     _projstr = None
     _start_time = None
     _is_equidistant = True
+    _items = None
 
     def __init__(self, filename=None):
         self._filename = filename
@@ -86,10 +87,11 @@ class Dfs123:
         else:
             self._start_time = start_time
 
-        if items is None:
-            self._items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
-        else:
+        if items:
             self._items = items
+
+        if self._items is None:
+            self._items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
 
     def _setup_header(
         self, coordinate, start_time, dt, timeseries_unit, items, filename
