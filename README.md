@@ -1,12 +1,14 @@
 
-![logo](images/logo.png)
-# mikeio: input/output of MIKE files in python
+![logo](images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg)
+# MIKE IO: input/output of MIKE files in python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
 ![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
-Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
+Reading, writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
+
+Facilitates common data processing workflows for MIKE files.
 
 
 
