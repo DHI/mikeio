@@ -68,9 +68,7 @@ Items:
 >>>  from datetime import datetime
 >>>  import numpy as np
 >>>  from mikeio import Dfs0
->>>  data = []
->>>  d = np.random.random([100])
->>>  data.append(d)
+>>>  data = [np.random.random([100])]
 >>>  dfs = Dfs0()
 >>>  dfs.write('simple.dfs0', data, start_time=datetime(2017, 1, 1), dt=60)
 
