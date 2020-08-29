@@ -301,8 +301,6 @@ class Dfs0:
         
         Parameters
         ----------
-        filename: str
-            full path and file name to the dfs0 file.
         unit_in_name: bool, optional
             include unit in column name, default False
         round_time: string, bool, optional
