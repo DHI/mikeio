@@ -760,7 +760,7 @@ class _UnstructuredGeometry:
             nodes = geometry.element_table[j]
             pcoords = np.empty([len(nodes), 2])
             for i in range(len(nodes)):
-                nidx = nodes[i]# - 1
+                nidx = nodes[i]
                 pcoords[i, :] = geometry.node_coordinates[nidx, 0:2]
 
             polygon = Polygon(pcoords, True)
@@ -782,7 +782,7 @@ class _UnstructuredGeometry:
             nodes = self.element_table[j]
             pcoords = np.empty([len(nodes), 2])
             for i in range(len(nodes)):
-                nidx = nodes[i]# - 1
+                nidx = nodes[i]
                 pcoords[i, :] = self.node_coordinates[nidx, 0:2]
             polygon = Polygon(pcoords)
             polygons.append(polygon)
@@ -790,28 +790,36 @@ class _UnstructuredGeometry:
 
         return mp
 
-    def plot(self, cmap=None, z=None, label=None):
+    def plot(self, z=None, element_ids=None, label=None, cmap=None):
         """
         Plot mesh elements
 
         Parameters
         ----------
-        cmap: matplotlib.cm.cmap, optional
-            default viridis
-        z: np.array
+        z: np.array, optional
             value for each element to plot, default bathymetry
+        element_ids: list(int), optional
+            list of element ids to be plotted
         label: str, optional
             colorbar label
+        cmap: matplotlib.cm.cmap, optional
+            default viridis
         """
         if cmap is None:
             cmap = cm.viridis
 
-        if self.is_2d:
-            geometry = self
-        else:
-            geometry = self.geometry2d
-
-
+        if element_ids is None:
+            if self.is_2d:
+                geometry = self
+            else:
+                geometry = self.geometry2d
+        else:              
+            # spatial subset 
+            if self.is_2d:
+                geometry = self.elements_to_geometry(element_ids)
+            else:
+                geometry = self.elements_to_geometry(element_ids, node_layers='bottom')       
+            
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates
         ne = ec.shape[0]
@@ -820,6 +828,9 @@ class _UnstructuredGeometry:
             z = ec[:, 2]
             if label is None:
                 label = "Bathymetry (m)"
+        else: 
+            if len(z) != ne:
+                raise Exception(f'Length of z ({len(z)}) does not match geometry ({ne})')
 
         fig, ax = plt.subplots()
         patches = geometry.to_polygons()
@@ -1272,23 +1283,44 @@ class Mesh(_UnstructuredFile):
         self._filename = filename
         self._read_mesh_header(filename)
 
-    def write(self, outfilename):
+    def set_z(self, z):
+        if len(z) != self.n_nodes:
+            raise Exception(f'z should have length of nodes ({self.n_nodes})')
+        self._nc[:,2] = z
+
+    def set_codes(self, codes):
+        if len(codes) != self.n_nodes:
+            raise Exception(f'codes should have length of nodes ({self.n_nodes})')
+        self._codes = codes
+
+    def write(self, outfilename, element_ids=None):
         """write mesh to file (will overwrite if file exists)
 
         Parameters
         ----------
         outfilename : str
             path to file
+        element_ids : list(int)
+            list of element ids (subset) to be saved to new mesh
         """
         
         builder = MeshBuilder()
 
-        nc = self.node_coordinates
-        builder.SetNodes(nc[:,0], nc[:,1], nc[:,2], self.codes)
+        if element_ids is None:
+            geometry = self
+            quantity = self._source.EumQuantity
+            elem_table = self._source.ElementTable
+        else:
+            geometry = self.elements_to_geometry(element_ids)
+            quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
+            elem_table = geometry._element_table_to_dotnet()
 
-        builder.SetElements(self._source.ElementTable)
-        builder.SetProjection(self.projection_string)
-        builder.SetEumQuantity(self._source.EumQuantity)
+        nc = geometry.node_coordinates
+        builder.SetNodes(nc[:,0], nc[:,1], nc[:,2], geometry.codes)
+
+        builder.SetElements(elem_table)
+        builder.SetProjection(geometry.projection_string)
+        builder.SetEumQuantity(quantity)
         
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
