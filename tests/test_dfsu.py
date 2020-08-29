@@ -222,7 +222,6 @@ def test_n_sigma_layers():
     assert dfs.n_sigma_layers == 10
 
 
-@pytest.mark.skip(reason="Fails")
 def test_n_z_layers():
 
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
@@ -416,9 +415,6 @@ def test_plot_bathymetry():
     dfs.plot()
 
 
-@pytest.mark.skip(
-    reason="Failes: At least one element has an invalid node number. Node numbers must be within [1,numberOfNodes]"
-)
 def test_to_mesh(tmpdir):
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
@@ -433,5 +429,5 @@ def test_to_mesh(tmpdir):
 
     mesh = Mesh(outfilename)
 
-    assert true
+    assert True
 
