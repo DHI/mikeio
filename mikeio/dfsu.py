@@ -203,7 +203,7 @@ class _UnstructuredGeometry:
             return 'Dfsu3DSigmaZ'
         return None
 
-    def set_nodes(self, node_coordinates, codes=None, node_ids=None, projection_string=None):
+    def _set_nodes(self, node_coordinates, codes=None, node_ids=None, projection_string=None):
         self._nc = np.asarray(node_coordinates)
         if codes is None:
             codes = np.zeros(len(node_coordinates), dtype=int)
@@ -216,7 +216,7 @@ class _UnstructuredGeometry:
             projection_string = "LONG/LAT"
         self._projstr = projection_string
 
-    def set_elements(self, element_table, element_ids=None, geometry_type=None):
+    def _set_elements(self, element_table, element_ids=None, geometry_type=None):
         self._element_table = element_table
         self._n_elements = len(element_table)
         if element_ids is None:
@@ -231,7 +231,7 @@ class _UnstructuredGeometry:
                 geometry_type = 4
         self._type = geometry_type
 
-    def reindex(self):
+    def _reindex(self):
         new_node_ids = range(self.n_nodes)
         new_element_ids = range(self.n_elements)
         node_dict = dict(zip(self.node_ids, new_node_ids))        
@@ -269,7 +269,7 @@ class _UnstructuredGeometry:
             which can be used for further extraction or saved to file
         """
         # extract information for selected elements
-        node_ids, elem_tbl = self.get_nodes_and_table_for_elements(
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
             element_ids, 
             node_layers=node_layers
             )
@@ -278,14 +278,14 @@ class _UnstructuredGeometry:
         
         # create new geometry 
         geom = _UnstructuredGeometry()
-        geom.set_nodes(
+        geom._set_nodes(
             node_coords, 
             codes=codes, 
             node_ids=node_ids, 
             projection_string=self.projection_string
             )
-        geom.set_elements(elem_tbl, self.element_ids[element_ids])
-        geom.reindex()
+        geom._set_elements(elem_tbl, self.element_ids[element_ids])
+        geom._reindex()
 
         geom._type = self._type  # 
         if self._type > 0:
@@ -309,7 +309,7 @@ class _UnstructuredGeometry:
                 if (self._type == 3 or self._type == 5) and n_layers == geom._n_sigma:
                     geom._type = self._type-1  # no-longer any z-layers! type is changed
 
-                geom._top_elems = np.intersect1d(self._top_elems, element_ids, assume_unique=True)
+                geom._top_elems = np.intersect1d(self.top_element_ids, element_ids, assume_unique=True)
         
         return geom
 
@@ -327,7 +327,7 @@ class _UnstructuredGeometry:
 
         # extract information for selected elements
         elem_ids = self.bottom_element_ids
-        node_ids, elem_tbl = self.get_nodes_and_table_for_elements(
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
             elem_ids, 
             node_layers='bottom'
             )
@@ -336,21 +336,21 @@ class _UnstructuredGeometry:
         
         # create new geometry 
         geom = _UnstructuredGeometry()
-        geom.set_nodes(
+        geom._set_nodes(
             node_coords, 
             codes=codes, 
             node_ids=node_ids, 
             projection_string=self.projection_string
             )
-        geom.set_elements(elem_tbl, self.element_ids[elem_ids])
+        geom._set_elements(elem_tbl, self.element_ids[elem_ids])
         
         geom._type = -1 # -1:Mesh, 0:Dfsu2D
         
-        geom.reindex()
+        geom._reindex()
         
         return geom
 
-    def get_nodes_for_elements(self, element_ids, node_layers = 'all'): 
+    def _get_nodes_for_elements(self, element_ids, node_layers = 'all'): 
         """list of (unique) nodes for a list of elements
 
         Parameters
@@ -366,12 +366,12 @@ class _UnstructuredGeometry:
         np.array(int)
             array of node ids (unique)
         """
-        new_nodes, _ = self.get_nodes_and_table_for_elements(
+        new_nodes, _ = self._get_nodes_and_table_for_elements(
             element_ids, 
             node_layers=node_layers)
         return new_nodes
 
-    def get_nodes_and_table_for_elements(self, element_ids, node_layers = 'all'): 
+    def _get_nodes_and_table_for_elements(self, element_ids, node_layers = 'all'): 
         """list of nodes and element table for a list of elements
 
         Parameters
@@ -522,21 +522,22 @@ class _UnstructuredGeometry:
         np.array
             areas in m2
         """
-        n_elements = self._source.NumberOfElements
+        n_elements = self.n_elements
 
         # Node coordinates
-        xn = np.array(list(self._source.X))
-        yn = np.array(list(self._source.Y))
+        xn = self.node_coordinates[:,0] 
+        yn = self.node_coordinates[:,1]
 
         area = np.empty(n_elements)
         xcoords = np.empty(8)
         ycoords = np.empty(8)
 
         for j in range(n_elements):
-            nodes = self._source.ElementTable[j]
+            nodes = self.element_table[j] #_source.ElementTable[j]
+            n_nodes = len(nodes)
 
-            for i in range(nodes.Length):
-                nidx = nodes[i] - 1
+            for i in range(n_nodes):
+                nidx = nodes[i] # - 1
                 xcoords[i] = xn[nidx]
                 ycoords[i] = yn[nidx]
 
@@ -549,7 +550,7 @@ class _UnstructuredGeometry:
             acy = ycoords[2] - ycoords[0]
 
             isquad = False
-            if nodes.Length > 3:
+            if n_nodes > 3:
                 isquad = True
                 # ad : edge vector corner a to d
                 adx = xcoords[3] - xcoords[0]
@@ -562,7 +563,7 @@ class _UnstructuredGeometry:
                 earth_radius_deg_to_rad = earth_radius * deg_to_rad
 
                 # Y on element centers
-                Ye = np.sum(ycoords[: nodes.Length]) / nodes.Length
+                Ye = np.sum(ycoords[: n_nodes]) / n_nodes
                 cosYe = np.cos(np.deg2rad(Ye))
 
                 abx = earth_radius_deg_to_rad * abx * cosYe
@@ -625,26 +626,37 @@ class _UnstructuredGeometry:
 
     @property
     def n_layers(self):
+        """Maximum number of layers
+        """
         return self._n_layers
 
     @property
     def n_sigma_layers(self):
+        """Number of sigma layers
+        """
         return self._n_sigma
 
     @property
     def n_z_layers(self):
-        return self._n_z_layers
+        """Maximum number of z-layers
+        """
+        return self._n_layers - self._n_sigma
 
     @property 
     def top_element_ids(self):
+        """List of 3d element ids of surface layer
+        """
         if self._n_layers is None:
             print('Object has no layers: cannot find top_element_ids')
-        elif self._top_elems is None:
+        elif (self._top_elems is None) and (self._source is not None):
+            # note: if subset of elements is selected then this cannot be done!
             self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
         return self._top_elems
 
     @property 
     def num_layers_per_column(self):
+        """List of number of layers for each column
+        """
         if self._n_layers is None:
             print('Object has no layers: cannot find num_layers_per_column')
         elif self._n_layers_column is None:
@@ -658,18 +670,20 @@ class _UnstructuredGeometry:
 
     @property 
     def bottom_element_ids(self):
+        """List of 3d element ids of bottom layer
+        """
         if self._n_layers is None:
             print('Object has no layers: cannot find bottom_element_ids')
         elif self._bot_elems is None:
             self._bot_elems = self.top_element_ids - self.num_layers_per_column + 1
         return self._bot_elems
 
-    def get_element_ids_layer_n(self, n):
-        """3D element ids for a specific layer
+    def get_layer_n_element_ids(self, n):
+        """3d element ids for one (or more) specific layer(s)
 
         Parameters
         ----------
-        n : int
+        n : int or list(int)
             layer between 1 (bottom) and n_layers (top) 
             (can also be negative with 0 as top layer )
 
@@ -677,10 +691,16 @@ class _UnstructuredGeometry:
         -------
         np.array(int)
             element ids
-        """        
+        """
+        if hasattr(n, "__len__"):
+            elem_ids = []
+            for nn in n:
+                elem_ids.append(self.get_layer_n_element_ids(nn))
+            return np.concatenate(elem_ids, axis=0)
+
         n_lay = self.n_layers
         if n_lay is None:
-            print('Object has no layers: cannot get_element_ids_layer_n')
+            print('Object has no layers: cannot get_layer_n_element_ids')
             return None
         n_sigma = self.n_sigma_layers
         n_z = n_lay - n_sigma
@@ -724,7 +744,7 @@ class _UnstructuredGeometry:
         return e2_to_e3, index2d, layerid
 
     def to_polygons(self, geometry=None):
-        """generate matlab polygons from element table for plotting
+        """generate matplotlib polygons from element table for plotting
 
         Returns
         -------
@@ -967,12 +987,12 @@ class Dfsu(_UnstructuredFile):
     def timestep(self):
         return self._timestep_in_seconds
 
-    @timestep.setter
-    def timestep(self, value):
-        if value <= 0:
-            print(f'timestep must be positive scalar!')
-        else:
-            self._timestep_in_seconds = value
+    # @timestep.setter
+    # def timestep(self, value):
+    #     if value <= 0:
+    #         print(f'timestep must be positive scalar!')
+    #     else:
+    #         self._timestep_in_seconds = value
 
     @property
     def end_time(self):
@@ -1021,11 +1041,11 @@ class Dfsu(_UnstructuredFile):
             n_elems = self.n_elements
             n_nodes = self.n_nodes
         else:
-            node_ids = self.get_nodes_for_elements(element_ids)
+            node_ids = self._get_nodes_for_elements(element_ids)
             n_elems = len(element_ids)
             n_nodes = len(node_ids)
 
-        deletevalue = self.deletevalue # dfs.DeleteValueFloat
+        deletevalue = self.deletevalue
 
         data_list = []
 
@@ -1094,6 +1114,8 @@ class Dfsu(_UnstructuredFile):
         dt: float, optional
             The time step (in seconds)
         items: list[ItemInfo], optional
+        element_ids: list[int], optional
+            write only these 
         title: str
             title of the dfsu file. Default is blank.
         """
@@ -1156,8 +1178,7 @@ class Dfsu(_UnstructuredFile):
             # create dfs2d from mesh
             filetype = DfsuFileType.Dfsu2D
         else:
-            # same as source
-            # TODO: if subset is 2d or slice... 
+            # TODO: if subset is slice... 
             filetype = geometry._type
         
         if filetype != DfsuFileType.Dfsu2D:
@@ -1189,7 +1210,7 @@ class Dfsu(_UnstructuredFile):
         builder.SetProjection(proj)
         builder.SetTimeInfo(file_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
-
+        
         if filetype != DfsuFileType.Dfsu2D:
             builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
            
@@ -1201,9 +1222,9 @@ class Dfsu(_UnstructuredFile):
             dfs = builder.CreateFile(filename)
         except IOError:
             print("cannot create dfsu file: ", filename)
-
+        
         deletevalue = dfs.DeleteValueFloat
-
+        
         try:
             # Add data for all item-timesteps, copying from source
             for i in range(n_time_steps):
@@ -1220,11 +1241,18 @@ class Dfsu(_UnstructuredFile):
             os.remove(filename)
 
     def to_mesh(self, outfilename):
+        """write object to mesh file
+
+        Parameters
+        ----------
+        outfilename : str
+            path to file to be written
+        """
         if self.is_2d:
             geometry = self
         else:
             geometry = self.to_2d_geometry()
-        Mesh.geometry_to_mesh(outfilename, geometry)
+        Mesh._geometry_to_mesh(outfilename, geometry)
 
     def get_element_coords(self):
         """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
@@ -1266,7 +1294,7 @@ class Mesh(_UnstructuredFile):
         newMesh.Write(outfilename)
 
     @staticmethod
-    def geometry_to_mesh(outfilename, geometry):
+    def _geometry_to_mesh(outfilename, geometry):
         
         builder = MeshBuilder()
 
