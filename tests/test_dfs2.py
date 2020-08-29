@@ -161,9 +161,8 @@ def test_read():
 
     filename = r"tests/testdata/random.dfs2"
     dfs = Dfs2()
-    data = dfs.read(filename, [0])[0]
-    data = dfs.read(filename, item_names=["testing water level"])[0]
-    data = data[0]
+    ds = dfs.read(filename, item_names=["testing water level"])
+    data = ds.data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
@@ -174,8 +173,8 @@ def test_read_item_names():
     filename = r"tests/testdata/random.dfs2"
     dfs = Dfs2()
 
-    data = dfs.read(filename, item_names=["testing water level"])[0]
-    data = data[0]
+    ds = dfs.read(filename, item_names=["testing water level"])
+    data = ds.data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
     assert data.shape == (3, 100, 2)  # time, y, x

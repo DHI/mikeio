@@ -300,9 +300,9 @@ def test_read_dfs0_single_item():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0()
-    (data, t, items) = dfs.read(dfs0file, item_numbers=[1])
+    ds = dfs.read(dfs0file, item_numbers=[1])
 
-    assert len(data) == 1
+    assert len(ds.data) == 1
 
 
 def test_read_dfs0_single_item_named_access():
@@ -347,9 +347,9 @@ def test_read_dfs0_to_matrix():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0()
-    (data, t, items) = dfs.read(filename=dfs0file)
+    ds = dfs.read(filename=dfs0file)
 
-    assert len(data) == 2
+    assert len(ds.data) == 2
 
 
 def test_write(tmpdir):
@@ -432,6 +432,6 @@ def test_read_dfs0_main_module():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = mikeio.Dfs0()
-    (data, t, items) = dfs.read(dfs0file, item_numbers=[1])
+    ds = dfs.read(dfs0file, item_numbers=[1])
 
-    assert len(data) == 1
+    assert len(ds.data) == 1

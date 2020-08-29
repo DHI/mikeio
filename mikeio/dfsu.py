@@ -18,6 +18,8 @@ from .helpers import safe_length
 
 
 class Dfsu:
+    _ec = None     # element coordinates
+
     def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
         """
         Read a dfsu file
@@ -42,6 +44,7 @@ class Dfsu:
         # Open the dfs file for reading
         dfs = DfsuFile.Open(filename)
         self._dfs = dfs
+        self._ec = None
 
         # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
         item_offset = 0
@@ -97,8 +100,6 @@ class Dfsu:
 
         start_time = from_dotnet_datetime(dfs.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
-
-        
 
         dfs.Close()
         return Dataset(data_list, time, items)
@@ -192,6 +193,9 @@ class Dfsu:
 
         system_start_time = to_dotnet_datetime(start_time)
 
+        # Default filetype;
+        filetype = DfsuFileType.Dfsu2D
+        
         _, ext = os.path.splitext(meshfilename)
 
         if ext == ".mesh":
@@ -203,6 +207,7 @@ class Dfsu:
 
             source = DfsuFile.Open(meshfilename)
             projstr = source.Projection.WKTString
+            filetype = source.DfsuFileType
 
         xn = source.X
         yn = source.Y
@@ -213,20 +218,25 @@ class Dfsu:
         nodecodes = source.Code
         elementtable = source.ElementTable
 
-        # TODO support all types of Dfsu
-        builder = DfsuBuilder.Create(DfsuFileType.Dfsu2D)
+        builder = DfsuBuilder.Create(filetype)
 
         builder.SetNodes(xn, yn, zn, nodecodes)
-
         builder.SetElements(elementtable)
+        builder.SetNodeIds(source.NodeIds)
+        builder.SetElementIds(source.ElementIds)
+
         factory = DfsFactory()
         proj = factory.CreateProjection(projstr)
         builder.SetProjection(proj)
         builder.SetTimeInfo(system_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
 
+        if filetype != DfsuFileType.Dfsu2D:
+            builder.SetNumberOfSigmaLayers(source.NumberOfSigmaLayers)
+           
         for item in items:
-            builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
+            if item.name != "Z coordinate":
+                builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
 
         try:
             dfs = builder.CreateFile(filename)
@@ -302,22 +312,30 @@ class Dfsu:
 
         ec = np.empty([n_elements, 3])
 
+        # pre-allocate for speed
+        maxnodes = 8
+        idx = np.zeros(maxnodes, dtype=np.int)
+        xcoords = np.zeros([maxnodes, n_elements])
+        ycoords = np.zeros([maxnodes, n_elements])
+        zcoords = np.zeros([maxnodes, n_elements])
+        nnodes_per_elem = np.zeros(n_elements)
+
         for j in range(n_elements):
             nodes = self._dfs.ElementTable[j]
+            nnodes = len(nodes)
+            nnodes_per_elem[j] = nnodes
+            for i in range(nnodes):
+                idx[i] = nodes[i] - 1
 
-            xcoords = np.empty(nodes.Length)
-            ycoords = np.empty(nodes.Length)
-            zcoords = np.empty(nodes.Length)
-            for i in range(nodes.Length):
-                nidx = nodes[i] - 1
-                xcoords[i] = xn[nidx]
-                ycoords[i] = yn[nidx]
-                zcoords[i] = zn[nidx]
+            xcoords[:nnodes,j] = xn[idx[:nnodes]]
+            ycoords[:nnodes,j] = yn[idx[:nnodes]]
+            zcoords[:nnodes,j] = zn[idx[:nnodes]]
+        
+        ec[:, 0] = np.sum(xcoords, axis=0)/nnodes_per_elem
+        ec[:, 1] = np.sum(ycoords, axis=0)/nnodes_per_elem
+        ec[:, 2] = np.sum(zcoords, axis=0)/nnodes_per_elem
 
-            ec[j, 0] = xcoords.mean()
-            ec[j, 1] = ycoords.mean()
-            ec[j, 2] = zcoords.mean()
-
+        self._ec = ec
         return ec
 
     def find_closest_element_index(self, x, y, z=None):
@@ -333,8 +351,10 @@ class Dfsu:
         z: float, optional
           Z coordinate(depth, positive upwards)
         """
-
-        ec = self.get_element_coords()
+        if self._ec is None:
+            self._ec = self.get_element_coords()
+        
+        ec = self._ec
 
         if z is None:
             poi = np.array([x, y])

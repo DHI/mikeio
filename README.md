@@ -1,22 +1,33 @@
-![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg)
-# mikeio: input/output of MIKE files in python
+
+![logo](images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg)
+# MIKE IO: input/output of MIKE files in python
+ ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
+![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
-Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
+Reading, writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
+
+Facilitates common data processing workflows for MIKE files.
 
 
 
 ## Requirements
 * Windows operating system
-* Python x64 3.6, 3.7 or 3.8 ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
+* Python x64 3.6, 3.7 or 3.8 
 * [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 [More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
 
+## Important Note!
+
+The upcoming version 0.5 of mikeio, will have a lot of new functionality, but also several breaking changes to the API !!
+It is planned to be released at latest Sept 7.
+
+
 ## Installation
 
-From PyPI: [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+From PyPI: 
 
 
 `pip install mikeio`
@@ -36,18 +47,20 @@ Generic `read` method to read values, if you need additional features such as co
 >>> import mikeio
 >>> ds = mikeio.read("random.dfs0")
 >>> ds
-DataSet(data, time, items)
-Number of items: 2
-Shape: (1000,)
-2017-01-01 00:00:00 - 2017-07-28 03:00:00
-
+<mikeio.DataSet>
+Dimensions: (1000,)
+Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
+Items:
+  0:  VarFun01 <Water Level> (meter)
+  1:  NotFun <Water Level> (meter)
 >>> ds = mikeio.read("random.dfs1")
 >>> ds
-DataSet(data, time, items)
-Number of items: 1
-Shape: (100, 3)
-2012-01-01 00:00:00 - 2012-01-01 00:19:48
-```
+<mikeio.DataSet>
+Dimensions: (100, 3)
+Time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48
+Items:
+  0:  testing water level <Water Level> (meter)
+ ```
 
 ### Reading dfs0 file into Pandas DataFrame
 ```python
@@ -90,14 +103,13 @@ For more examples on timeseries data see this [notebook](notebooks/Dfs0%20-%20Ti
 ### Read dfs2 data
 ```python
 >>>  from mikeio import Dfs2
->>> ds = dfs.read("tests/testdata/random.dfs2")
+>>> ds = dfs.read("random.dfs2")
 >>> ds
-DataSet(data, time, items)
-Number of items: 1
-Shape: (3, 100, 2)
-2012-01-01 00:00:00 - 2012-01-01 00:00:24
->>> ds.items
-[testing water level <Water Level> (meter)]
+<mikeio.DataSet>
+Dimensions: (3, 100, 2)
+Time: 2012-01-01 00:00:00 - 2012-01-01 00:00:24
+Items:
+  0:  testing water level <Water Level> (meter)
 ```
 
 ### Create dfs2

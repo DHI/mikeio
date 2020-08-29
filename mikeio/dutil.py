@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
 
 def find_item(dfs, item_names):
     """Utility function to find item numbers
@@ -68,17 +70,55 @@ class Dataset:
     --------
     >>> ds = mikeio.read("tests/testdata/random.dfs0")
     >>> ds
-    DataSet(data, time, items)
-    Number of items: 2
-    Shape: (1000,)
-    2017-01-01 00:00:00 - 2017-07-28 03:00:00
-    >>> ds.items
-    [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
+    <mikeio.DataSet>
+    Dimensions: (1000,)
+    Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
+    Items:
+      0:  VarFun01 <Water Level> (meter)
+      1:  NotFun <Water Level> (meter)
     >>> ds['NotFun'][0:5]
     array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
-    >>> data,time,items = ds
-    >>> items
-    [VarFun01 <Water Level> (meter), NotFun <Water Level> (meter)]
+    >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
+    <mikeio.DataSet>
+    Dimensions: (9, 884)
+    Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  U velocity <u velocity component> (meter per sec)
+      2:  V velocity <v velocity component> (meter per sec)
+      3:  Current speed <Current Speed> (meter per sec)
+    >>> ds2 = ds[['Surface elevation','Current speed']] # item selection by name
+    >>> ds2
+    <mikeio.DataSet>
+    Dimensions: (9, 884)
+    Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  Current speed <Current Speed> (meter per sec)
+    >>> ds3 = ds2.isel([0,1,2], axis=0) # temporal selection
+    >>> ds3
+    <mikeio.DataSet>
+    Dimensions: (3, 884)
+    Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  Current speed <Current Speed> (meter per sec)
+    >>> ds4 = ds3.isel([100,200], axis=1) # element selection
+    >>> ds4
+    <mikeio.DataSet>
+    Dimensions: (3, 2)
+    Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
+    Items:
+      0:  Surface elevation <Surface Elevation> (meter)
+      1:  Current speed <Current Speed> (meter per sec)
+    >>>  ds5 = ds[[1,0]] # item selection by position
+    >>>  ds5 
+    <mikeio.DataSet>
+    Dimensions: (1000,)
+    Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
+    Items:
+      0:  NotFun <Water Level> (meter)
+      1:  VarFun01 <Water Level> (meter)
     """
 
     def __init__(self, data, time, items):
@@ -95,40 +135,67 @@ class Dataset:
                 f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
             )
         self.data = data
-        self.time = time
+        self.time = pd.DatetimeIndex(time, freq='infer')
         self.items = items
 
     def __repr__(self):
         n_items = len(self.items)
 
+        shape = self.data[0].shape
+        if len(self) > 1 and self.items[0].name == "Z coordinate":
+            shape = self.data[1].shape
+
         out = []
-        out.append("DataSet(data, time, items)")
-        out.append(f"Number of items: {n_items}")
-        out.append(f"Shape: {self.data[0].shape}")
-        out.append(f"{self.time[0]} - {self.time[-1]}")
+        out.append("<mikeio.DataSet>")
+        out.append(f"Dimensions: {shape}")
+        out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+        if n_items > 10:
+            out.append(f"Number of items: {n_items}")
+        else:
+            out.append("Items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        
+        
 
         return str.join("\n", out)
 
     def __len__(self):
-        return 3  # [data,time,items]
+        return len(self.items)
 
     def __getitem__(self, x):
 
         if isinstance(x, int):
-            if x == 0:
-                return self.data
-            if x == 1:
-                return self.time
-            if x == 2:
-                return self.items
-
-            if x > 2:
-                raise IndexError("")
+            return self.data[x]
 
         if isinstance(x, str):
             item_lookup = {item.name: i for i, item in enumerate(self.items)}
             x = item_lookup[x]
             return self.data[x]
+
+        if isinstance(x, ItemInfo):
+            return self.__getitem__(x.name)
+
+        if isinstance(x, list):
+            data = []
+            items = []
+
+            item_lookup = {item.name: i for i, item in enumerate(self.items)}
+
+            for v in x:
+                data_item =  self.__getitem__(v)
+                if isinstance(v,str):
+                    i = item_lookup[v]
+                if isinstance(v,int):
+                    i = v
+
+                item = self.items[i]
+                items.append(item)
+                data.append(data_item)
+
+            return Dataset(data, self.time, items)
+        
+        
 
         raise Exception("Invalid operation")
 
@@ -140,23 +207,46 @@ class Dataset:
         ----------
         idx: int, scalar or array_like
         axis: int, optional
-            default 1
+            default 1, 0= temporal axis
 
         Returns
         -------
         Dataset
             dataset with subset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
+        >>> ds2 = ds.isel([0,1,2], axis=0) # temporal selection
+        >>> ds2
+        DataSet(data, time, items)
+        Number of items: 2
+        Shape: (3, 884)
+        1985-08-06 07:00:00 - 1985-08-06 12:00:00
+        >>> ds3 = ds2.isel([100,200], axis=1) # element selection
+        >>> ds3
+        DataSet(data, time, items)
+        Number of items: 2
+        Shape: (3, 2)
+        1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
 
+        items = self.items
+
+        if axis==1 and items[0].name == "Z coordinate":
+            items = deepcopy(items)
+            items.pop(0)
+
+        time = self.time
         if axis == 0:
-            raise ValueError("Subsetting along time axis not supported")
+            time = time[idx]
 
         res = []
-        for item in self.items:
+        for item in items:
             x = np.take(self[item.name], idx, axis=axis)
             res.append(x)
 
-        ds = Dataset(res, self.time, self.items)
+        ds = Dataset(res, time, items)
         return ds
 
     def to_dataframe(self, unit_in_name=False):
