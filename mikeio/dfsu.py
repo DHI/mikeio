@@ -162,7 +162,7 @@ class _UnstructuredGeometry:
             elem_nodes = elem_table[j]
             elem_nodes = [nd+1 for nd in elem_nodes]   # make 1-based
             new_elem_table.append(elem_nodes)
-        return asnetarray_v2(elem_table)
+        return asnetarray_v2(new_elem_table)
 
     @property 
     def max_nodes_per_element(self):
