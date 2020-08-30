@@ -92,6 +92,17 @@ def test_read_selected_item_names_returns_correct_items():
     assert ds.items[0].name == "Surface elevation"
     assert ds.items[1].name == "Current speed"
 
+def test_read_returns_correct_items_sigma_z():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+
+    ds = dfs.read()
+
+    assert len(ds) == 3
+    assert ds.items[0].name == "Z coordinate"
+    assert ds.items[1].name == "Temperature"
+    assert ds.items[2].name == "Salinity"
+
 
 def test_read_all_time_steps():
 
@@ -141,6 +152,14 @@ def test_get_number_of_time_steps():
     dfs = Dfsu(filename)
 
     assert dfs.n_timesteps == 9
+
+
+def test_number_of_nodes_and_elements_sigma_z():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+
+    assert dfs.n_elements == 17118
+    assert dfs.n_nodes == 12042
 
 
 def test_get_node_coords():
@@ -214,12 +233,36 @@ def test_n_layers():
     dfs = Dfsu(filename)
     assert dfs.n_layers == 10
 
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_layers == 9
+
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_layers == 9    
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_layers is None 
+
 
 def test_n_sigma_layers():
 
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = Dfsu(filename)
     assert dfs.n_sigma_layers == 10
+
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_sigma_layers == 4
+
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_sigma_layers == 4
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_sigma_layers is None 
 
 
 def test_n_z_layers():
@@ -228,6 +271,17 @@ def test_n_z_layers():
     dfs = Dfsu(filename)
     assert dfs.n_z_layers == 0
 
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_z_layers == 5
+
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_z_layers == 5
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_z_layers is None 
 
 def test_boundary_codes():
 

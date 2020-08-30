@@ -640,6 +640,8 @@ class _UnstructuredGeometry:
     def n_z_layers(self):
         """Maximum number of z-layers
         """
+        if self._n_layers is None:
+            return None
         return self._n_layers - self._n_sigma
 
     @property 
