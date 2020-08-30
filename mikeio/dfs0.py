@@ -158,6 +158,62 @@ class Dfs0:
 
         raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
+    def _setup_header(
+        self,
+        filename,
+        equidistant,
+        start_time,
+        dt,
+        items,
+        dtype,
+        data_value_type,
+        title,
+        timeseries_unit,
+    ):
+        factory = DfsFactory()
+        builder = DfsBuilder.Create(title, "DFS", 0)
+        builder.SetDataType(1)
+        builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
+
+        system_start_time = to_dotnet_datetime(start_time)
+
+        if equidistant:
+            temporal_axis = factory.CreateTemporalEqCalendarAxis(
+                timeseries_unit, system_start_time, 0, dt
+            )
+        else:
+            temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
+                timeseries_unit, system_start_time
+            )
+
+        builder.SetTemporalAxis(temporal_axis)
+        builder.SetItemStatisticsType(StatType.RegularStat)
+
+        dtype_dfs = self._to_dfs_datatype(dtype)
+
+        for i in range(len(items)):
+            item = items[i]
+            newitem = builder.CreateDynamicItemBuilder()
+            quantity = eumQuantity.Create(item.type, item.unit)
+            newitem.Set(
+                item.name, quantity, dtype_dfs,
+            )
+
+            if data_value_type is not None:
+                newitem.SetValueType(data_value_type[i])
+            else:
+                newitem.SetValueType(DataValueType.Instantaneous)
+
+            newitem.SetAxis(factory.CreateAxisEqD0())
+            builder.AddDynamicItem(newitem.GetDynamicItemInfo())
+
+        try:
+            builder.CreateFile(filename)
+        except IOError:
+            raise IOError(f"Cannot create dfs0 file: {filename}")
+
+        return builder.GetFile()
+
     def write(
         self,
         filename,
@@ -167,7 +223,7 @@ class Dfs0:
         dt=1.0,
         datetimes=None,
         items=None,
-        title=None,
+        title="",
         data_value_type=None,
         dtype=None,
     ):
@@ -191,7 +247,7 @@ class Dfs0:
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         title: str, optional
-            title
+            title, default blank
         data_value_type: list[DataValueType], optional
             DataValueType default DataValueType.INSTANTANEOUS
         dtype : np.dtype, optional
@@ -239,54 +295,20 @@ class Dfs0:
             start_time = datetimes[0]
             equidistant = False
 
-        system_start_time = to_dotnet_datetime(start_time)
-
-        if title is None:
-            title = "dfs0 file"
-
-        factory = DfsFactory()
-        builder = DfsBuilder.Create(title, "DFS", 0)
-        builder.SetDataType(1)
-        builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
-
-        if equidistant:
-            temporal_axis = factory.CreateTemporalEqCalendarAxis(
-                timeseries_unit, system_start_time, 0, dt
-            )
-        else:
-            temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
-                timeseries_unit, system_start_time
-            )
-
-        builder.SetTemporalAxis(temporal_axis)
-        builder.SetItemStatisticsType(StatType.RegularStat)
-
-        dtype_dfs = self._to_dfs_datatype(dtype)
-
-        for i in range(n_items):
-            item = builder.CreateDynamicItemBuilder()
-            quantity = eumQuantity.Create(items[i].type, items[i].unit)
-            item.Set(
-                items[i].name, quantity, dtype_dfs,
-            )
-
-            if data_value_type is not None:
-                item.SetValueType(data_value_type[i])
-            else:
-                item.SetValueType(DataValueType.Instantaneous)
-
-            item.SetAxis(factory.CreateAxisEqD0())
-            builder.AddDynamicItem(item.GetDynamicItemInfo())
-
-        try:
-            builder.CreateFile(filename)
-        except IOError:
-            raise IOError(f"Cannot create dfs0 file: {filename}")
-
-        dfs = builder.GetFile()
+        dfs = self._setup_header(
+            filename,
+            equidistant,
+            start_time,
+            dt,
+            items,
+            dtype,
+            data_value_type,
+            title,
+            timeseries_unit,
+        )
 
         delete_value = dfs.FileInfo.DeleteValueFloat
-        
+
         data = np.array(data)
         data[np.isnan(data)] = delete_value
         data_to_write = to_dotnet_array(data.T)
@@ -310,7 +332,7 @@ class Dfs0:
         pd.DataFrame
         """
         ds = self.read()
-        df = ds.to_dataframe()
+        df = ds.to_dataframe(unit_in_name)
 
         if round_time:
             rounded_idx = pd.DatetimeIndex(ds.time).round(round_time)
