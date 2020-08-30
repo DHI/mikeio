@@ -183,7 +183,7 @@ def test_find_index_from_coordinate():
     # TODO it should not be necessary to read the data to get coordinates
     ds = dfs.read()
 
-    i, j = dfs.find_closest_element_index(lon=12.74792, lat=55.865)
+    i, j = dfs.find_nearest_element(lon=12.74792, lat=55.865)
 
     assert i == 104
     assert j == 131
@@ -191,12 +191,12 @@ def test_find_index_from_coordinate():
     assert ds.data[0][0, i, j] == -43.0
 
     # try some outside the domain
-    i, j = dfs.find_closest_element_index(lon=11.0, lat=57.0)
+    i, j = dfs.find_nearest_element(lon=11.0, lat=57.0)
 
     assert i == 0
     assert j == 0
 
-    i, j = dfs.find_closest_element_index(lon=15.0, lat=50.0)
+    i, j = dfs.find_nearest_element(lon=15.0, lat=50.0)
 
     assert i == 263
     assert j == 215

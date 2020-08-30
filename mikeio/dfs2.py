@@ -53,7 +53,7 @@ class Dfs2(Dfs123):
 
         return y * nx + x
 
-    def find_closest_element_index(
+    def find_nearest_element(
         self, lon, lat,
     ):
         """Find index of closest element
