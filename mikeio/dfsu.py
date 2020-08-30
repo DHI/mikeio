@@ -468,17 +468,28 @@ class _UnstructuredGeometry:
     def find_n_closest_element_index(self, x, y, z=None, n=1):
         ec = self.element_coordinates
 
-        if z is None:
+        if self.is_2d:
             poi = np.array([x, y])
 
             d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
             idx = d.argsort()[0:n]
         else:
-            poi = np.array([x, y, z])
+            poi = np.array([x, y])
 
-            d = ((ec - poi) ** 2).sum(axis=1)
-            idx = d.argsort()[0:n]
-        if n == 1:
+            ec = self.geometry2d.element_coordinates
+            d2d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
+            elem2d = d2d.argsort()[0:n]    # n nearest 2d elements
+            
+            # TODO: loop over 2d elements, to get n lateral 3d neighbors
+            elem3d = self.e2_e3_table[elem2d[0]]
+            zc = self.element_coordinates[elem3d, 2]
+
+            if z is None:
+                z = 0   # should we rarther return whole column?
+            d3d = np.abs(z-zc)
+            idx = elem3d[d3d.argsort()[0]]
+
+        if n == 1 and (not np.isscalar(idx)):
             idx = idx[0]
         return idx
 
@@ -493,7 +504,7 @@ class _UnstructuredGeometry:
         y: float or list(float)
             Y coordinate(s) (northing or latitude)
         z: float or list(float), optional
-          Z coordinate(s)  (depth, positive upwards)
+            Z coordinate(s)  (depth, positive upwards)
         """
         if np.isscalar(x):
             return self.find_n_closest_element_index(x, y, z, n=1)
@@ -514,6 +525,41 @@ class _UnstructuredGeometry:
                 for j in range(nx):
                     idx[j] = self.find_n_closest_element_index(x[j], y[j], z[j], n=1)
         return idx
+
+    def _find_closest_2d_element(self, x, y):
+        if self.is_2d:
+            return self.find_closest_element_index(x, y)
+        else:
+            geom2d = self.geometry2d
+            return geom2d.find_closest_element_index(x, y)
+
+    def _get_profile_from_2d_element(self, elem2d):
+        if self.is_2d:
+            raise Exception('Object is 2d. Cannot get_profile_from_2d_element')
+        else:
+            return self.e2_e3_table[elem2d]
+
+    def find_closest_profile_elements(self, x, y):
+        """Find 3d elements of profile closest to (x,y) coordinates
+
+        Parameters
+        ----------
+        x : float
+            x-coordinate of profile to be extracted
+        y : float
+            y-coordinate of profile to be extracted 
+
+        Returns
+        -------
+        list(int)
+            element ids of vertical profile
+        """
+        if self.is_2d:
+            raise Exception('Object is 2d. Cannot get_closest_profile')
+        else: 
+            elem2d = self.geometry2d.find_closest_element_index(x, y)
+            elem3d = self.e2_e3_table[elem2d]
+            return elem3d
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.

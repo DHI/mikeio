@@ -238,7 +238,7 @@ def test_n_layers():
 
     filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_layers == 9    
+    assert dfs.n_layers == 9
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -379,6 +379,14 @@ def test_get_layer_element_ids():
     with pytest.raises(Exception):
         elem_ids = dfs.get_layer_element_ids(12)
 
+def test_find_closest_profile_elements():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    elem_ids = dfs.find_closest_profile_elements(358337, 6196090)
+    assert len(elem_ids) == 8
+    assert elem_ids[-1] == 3042
+
+
 def test_is_geo_UTM():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -408,8 +416,7 @@ def test_get_element_area_3D():
 def test_get_element_area_LONGLAT():
     filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
     dfs = Dfsu(filename)
-    # dfs.read()
-
+    
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
 
@@ -569,6 +576,7 @@ def test_to_mesh(tmpdir):
 
     assert True
 
+
 def test_plot_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -581,4 +589,3 @@ def test_plot_3d():
     dfs = Dfsu(filename)
     dfs.plot()
     assert True
-    
