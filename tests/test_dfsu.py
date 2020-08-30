@@ -569,3 +569,16 @@ def test_to_mesh(tmpdir):
 
     assert True
 
+def test_plot_2d():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    dfs.plot()
+    assert True
+
+
+def test_plot_3d():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    dfs.plot()
+    assert True
+    
