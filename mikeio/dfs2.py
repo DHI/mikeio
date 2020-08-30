@@ -47,9 +47,9 @@ class Dfs2(Dfs123):
         Error checking is done here to see if the x,y coordinates are out of range.
         """
         if x >= nx:
-            raise Warning("x coordinate is off the grid: ", x)
+            raise IndexError("x coordinate is off the grid: ", x)
         if y >= ny:
-            raise Warning("y coordinate is off the grid: ", y)
+            raise IndexError("y coordinate is off the grid: ", y)
 
         return y * nx + x
 
@@ -123,7 +123,7 @@ class Dfs2(Dfs123):
         xNum = axis.XCount
 
         if nt == 0:
-            raise Warning("Static files (with no dynamic items) are not supported.")
+            raise ValueError("Static files (with no dynamic items) are not supported.")
 
         for t in time_steps:
             if t > (nt - 1):
@@ -236,19 +236,19 @@ class Dfs2(Dfs123):
                 dy = 1
 
         if not all(np.shape(d)[0] == self._n_time_steps for d in data):
-            raise Warning(
+            raise ValueError(
                 "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [t,y,x]"
+                "Data is list of matrices [t,y,x]"
             )
         if not all(np.shape(d)[1] == number_y for d in data):
-            raise Warning(
+            raise ValueError(
                 "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [t,y,x]"
+                "Data is list of matrices [t,y,x]"
             )
         if not all(np.shape(d)[2] == number_x for d in data):
-            raise Warning(
+            raise ValueError(
                 "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [t,y,x,]"
+                "Data is list of matrices [t,y,x]"
             )
 
         if datetimes is None:

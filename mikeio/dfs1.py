@@ -74,7 +74,9 @@ class Dfs1(Dfs123):
         xNum = axis.XCount
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         if nt == 0:
-            raise Warning("Static dfs1 files (with no time steps) are not supported.")
+            raise ValueError(
+                "Static dfs1 files (with no time steps) are not supported."
+            )
 
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
@@ -165,7 +167,7 @@ class Dfs1(Dfs123):
                 dx = 1
 
         if not all(np.shape(d)[1] == number_x for d in data):
-            raise Warning(
+            raise ValueError(
                 "ERROR data matrices in the X dimension do not all match in the data list. "
                 "Data is list of matices [t, x]"
             )

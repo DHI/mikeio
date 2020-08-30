@@ -23,7 +23,6 @@ from .dfs import Dfs123
 
 
 class Dfs3(Dfs123):
-
     def __init__(self, filename=None):
         super(Dfs3, self).__init__(filename)
 
@@ -34,11 +33,11 @@ class Dfs3(Dfs123):
         Error checking is done here to see if the x,y,z coordinates are out of range.
         """
         if x >= nx:
-            raise Warning("x coordinate is off the grid: ", x)
+            raise IndexError("x coordinate is off the grid: ", x)
         if y >= ny:
-            raise Warning("y coordinate is off the grid: ", y)
+            raise IndexError("y coordinate is off the grid: ", y)
         if z >= nz:
-            raise Warning("z coordinate is off the grid: ", z)
+            raise IndexError("z coordinate is off the grid: ", z)
 
         return y * nx + x + z * nx * ny
 
@@ -156,19 +155,19 @@ class Dfs3(Dfs123):
             upper_right_y_index = int(np.floor(upper_right_y_index))
 
         if lower_left_x_index < 0:
-            raise Warning("lower_left_x_index < 0.")
+            raise IndexError("lower_left_x_index < 0.")
             lower_left_x_index = 0
 
         if upper_right_y_index < 0:
-            raise Warning("upper_right_y_index < 0.")
+            raise IndexError("upper_right_y_index < 0.")
             upper_right_y_index = 0
 
         if lower_left_y_index > yNum - 1:
-            raise Warning("lower_left_y_index > yNum - 1")
+            raise IndexError("lower_left_y_index > yNum - 1")
             lower_left_y_index = yNum - 1
 
         if upper_right_x_index > xNum - 1:
-            raise Warning("upper_right_x_index > xNum - 1")
+            raise IndexError("upper_right_x_index > xNum - 1")
             upper_right_x_index = xNum - 1
 
         for i in range(len(data[0])):
@@ -420,4 +419,3 @@ class Dfs3(Dfs123):
 
         dfs.Close()
 
-    
