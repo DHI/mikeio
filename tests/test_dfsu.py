@@ -153,7 +153,6 @@ def test_get_number_of_time_steps():
 
     assert dfs.n_timesteps == 9
 
-
 def test_number_of_nodes_and_elements_sigma_z():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
@@ -283,6 +282,7 @@ def test_n_z_layers():
     dfs = Dfsu(filename)
     assert dfs.n_z_layers is None 
 
+
 def test_boundary_codes():
 
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
@@ -294,6 +294,90 @@ def test_boundary_codes():
 
     assert len(dfs.boundary_codes) == 3
 
+
+def test_top_element_ids():
+    filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.top_element_ids) == 174
+    assert dfs.top_element_ids[3] == 39
+
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.top_element_ids) == 3700
+    assert dfs.top_element_ids[3] == 16
+
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.top_element_ids) == 99
+    assert dfs.top_element_ids[3] == 19
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.top_element_ids is None 
+
+
+def test_bottom_element_ids():
+    filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.bottom_element_ids) == 174
+    assert dfs.bottom_element_ids[3] == 30
+
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.bottom_element_ids) == 3700
+    assert dfs.bottom_element_ids[3] == 13
+
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.bottom_element_ids) == 99
+    assert dfs.bottom_element_ids[3] == 15
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.bottom_element_ids is None     
+
+    
+def test_n_layers_per_column():
+    filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.n_layers_per_column) == 174
+    assert dfs.n_layers_per_column[3] == 10
+
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.n_layers_per_column) == 3700
+    assert dfs.n_layers_per_column[3] == 4
+    assert max(dfs.n_layers_per_column) == dfs.n_layers
+
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
+    dfs = Dfsu(filename)
+    assert len(dfs.n_layers_per_column) == 99
+    assert dfs.n_layers_per_column[3] == 5
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.n_layers_per_column is None         
+
+
+def test_get_layer_element_ids():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+
+    elem_ids = dfs.get_layer_element_ids(0)
+    assert np.all(elem_ids == dfs.top_element_ids)
+
+    elem_ids = dfs.get_layer_element_ids(-1)
+    assert elem_ids[5] == 23
+
+    elem_ids = dfs.get_layer_element_ids(1)
+    assert elem_ids[5] == 8639
+    assert len(elem_ids) == 10
+
+    elem_ids = dfs.get_layer_element_ids([1,3])
+    assert len(elem_ids) == 197
+
+    with pytest.raises(Exception):
+        elem_ids = dfs.get_layer_element_ids(12)
 
 def test_is_geo_UTM():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")

@@ -656,11 +656,11 @@ class _UnstructuredGeometry:
         return self._top_elems
 
     @property 
-    def num_layers_per_column(self):
+    def n_layers_per_column(self):
         """List of number of layers for each column
         """
         if self._n_layers is None:
-            print('Object has no layers: cannot find num_layers_per_column')
+            print('Object has no layers: cannot find n_layers_per_column')
         elif self._n_layers_column is None:
             top_elems = self.top_element_ids
             n = len(top_elems)
@@ -677,10 +677,10 @@ class _UnstructuredGeometry:
         if self._n_layers is None:
             print('Object has no layers: cannot find bottom_element_ids')
         elif self._bot_elems is None:
-            self._bot_elems = self.top_element_ids - self.num_layers_per_column + 1
+            self._bot_elems = self.top_element_ids - self.n_layers_per_column + 1
         return self._bot_elems
 
-    def get_layer_n_element_ids(self, n):
+    def get_layer_element_ids(self, n):
         """3d element ids for one (or more) specific layer(s)
 
         Parameters
@@ -697,12 +697,12 @@ class _UnstructuredGeometry:
         if hasattr(n, "__len__"):
             elem_ids = []
             for nn in n:
-                elem_ids.append(self.get_layer_n_element_ids(nn))
+                elem_ids.append(self.get_layer_element_ids(nn))
             return np.concatenate(elem_ids, axis=0)
 
         n_lay = self.n_layers
         if n_lay is None:
-            print('Object has no layers: cannot get_layer_n_element_ids')
+            print('Object has no layers: cannot get_layer_element_ids')
             return None
         n_sigma = self.n_sigma_layers
         n_z = n_lay - n_sigma
@@ -718,7 +718,7 @@ class _UnstructuredGeometry:
             return self.top_element_ids + n 
         else:
             # then it must be a z layer 
-            return self.bottom_element_ids[self.num_layers_per_column >= (n_lay-n+1)] + n 
+            return self.bottom_element_ids[self.n_layers_per_column >= (n_lay-n+1)] + n 
 
     def _get_2d_to_3d_association(self):
         e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
