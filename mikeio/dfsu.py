@@ -465,7 +465,7 @@ class _UnstructuredGeometry:
         self._ec = ec
         return ec
 
-    def find_n_closest_element_index(self, x, y, z=None, n=1):
+    def find_n_nearest_element_index(self, x, y, z=None, n=1):
         ec = self.element_coordinates
 
         if self.is_2d:
@@ -493,8 +493,8 @@ class _UnstructuredGeometry:
             idx = idx[0]
         return idx
 
-    def find_closest_element_index(self, x, y, z=None):
-        """Find index of closest element 
+    def find_nearest_element(self, x, y, z=None):
+        """Find index of _nearest element 
 
         Parameters
         ----------
@@ -507,7 +507,7 @@ class _UnstructuredGeometry:
             Z coordinate(s)  (depth, positive upwards)
         """
         if np.isscalar(x):
-            return self.find_n_closest_element_index(x, y, z, n=1)
+            return self.find_n_nearest_element_index(x, y, z, n=1)
         else:
             nx = len(x)
             ny = len(y)
@@ -517,21 +517,21 @@ class _UnstructuredGeometry:
             idx = np.zeros(nx, dtype=int)
             if z is None:
                 for j in range(nx):
-                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z=None, n=1)
+                    idx[j] = self.find_n_nearest_element_index(x[j], y[j], z=None, n=1)
             else: 
                 nz = len(z)
                 if nx != nz:
                     print(f"z must have same length as x and y")
                 for j in range(nx):
-                    idx[j] = self.find_n_closest_element_index(x[j], y[j], z[j], n=1)
+                    idx[j] = self.find_n_nearest_element_index(x[j], y[j], z[j], n=1)
         return idx
 
-    def _find_closest_2d_element(self, x, y):
+    def _find_nearest_2d_element(self, x, y):
         if self.is_2d:
-            return self.find_closest_element_index(x, y)
+            return self.find_nearest_element(x, y)
         else:
             geom2d = self.geometry2d
-            return geom2d.find_closest_element_index(x, y)
+            return geom2d.find_nearest_element(x, y)
 
     def _get_profile_from_2d_element(self, elem2d):
         if self.is_2d:
@@ -539,8 +539,8 @@ class _UnstructuredGeometry:
         else:
             return self.e2_e3_table[elem2d]
 
-    def find_closest_profile_elements(self, x, y):
-        """Find 3d elements of profile closest to (x,y) coordinates
+    def find_nearest_profile_elements(self, x, y):
+        """Find 3d elements of profile _nearest to (x,y) coordinates
 
         Parameters
         ----------
@@ -555,9 +555,9 @@ class _UnstructuredGeometry:
             element ids of vertical profile
         """
         if self.is_2d:
-            raise Exception('Object is 2d. Cannot get_closest_profile')
+            raise Exception('Object is 2d. Cannot get_nearest_profile')
         else: 
-            elem2d = self.geometry2d.find_closest_element_index(x, y)
+            elem2d = self.geometry2d.find_nearest_element(x, y)
             elem3d = self.e2_e3_table[elem2d]
             return elem3d
 

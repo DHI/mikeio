@@ -149,7 +149,7 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 >>>  dfs = Dfsu()
 >>>  filename = "HD.dfsu"
 >>>  res = dfs.read(filename)
->>>  idx = dfs.find_closest_element_index(x=608000, y=6907000)
+>>>  idx = dfs.find_nearest_element(x=608000, y=6907000)
 >>>  plt.plot(res.time, res.data[0][:,idx])
 ```
 ![Timeseries](images/dfsu_ts.png)

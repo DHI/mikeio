@@ -177,12 +177,32 @@ def test_get_element_coords():
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
 
-def test_find_closest_element_index():
+def test_find_nearest_element_3d():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+
+    elem_id = dfs.find_nearest_element(333934, 6158101)
+    assert elem_id == 5323
+    assert elem_id in dfs.top_element_ids
+
+    elem_id = dfs.find_nearest_element(333934, 6158101, -7)
+    assert elem_id == 5320
+
+def test_find_nearest_element():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    idx = dfs.find_closest_element_index(606200, 6905480)
-    assert idx == 317
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+    assert elem_id == 317
+
+
+def find__nearest_profile_elements():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    elem_ids = dfs.find__nearest_profile_elements(333934, 6158101)
+    
+    assert elem_ids[0] == 5320
+    assert elem_ids[-1] == 5323
 
 
 def test_read_and_select_single_element():
@@ -194,7 +214,7 @@ def test_read_and_select_single_element():
 
     assert ds.data[0].shape == (9, 884)
 
-    idx = dfs.find_closest_element_index(606200, 6905480)
+    idx = dfs.find_nearest_element(606200, 6905480)
 
     selds = ds.isel(idx=idx, axis=1)
 
@@ -379,10 +399,10 @@ def test_get_layer_element_ids():
     with pytest.raises(Exception):
         elem_ids = dfs.get_layer_element_ids(12)
 
-def test_find_closest_profile_elements():
+def test_find_nearest_profile_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
-    elem_ids = dfs.find_closest_profile_elements(358337, 6196090)
+    elem_ids = dfs.find_nearest_profile_elements(358337, 6196090)
     assert len(elem_ids) == 8
     assert elem_ids[-1] == 3042
 
