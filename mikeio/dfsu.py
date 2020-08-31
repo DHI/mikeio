@@ -86,8 +86,8 @@ class _UnstructuredGeometry:
         return str.join("\n", out)
 
     @property
-    def filetype(self):
-        return self._type
+    def type_name(self):
+        return self._type.name
 
     @property
     def n_nodes(self):
@@ -156,31 +156,31 @@ class _UnstructuredGeometry:
     def is_2d(self):
         return self._type <= 0
 
-    @property
-    def type_as_string(self):
-        """
-        0: Dfsu2D: 2D area series
-        1: DfsuVerticalColumn: 1D vertical column
-        2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
-        3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
-        4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
-        5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
-        """
-        if self._type == -1:
-            return "Mesh"
-        if self._type == 0:
-            return "Dfsu2D"
-        if self._type == 1:
-            return "DfsuVerticalColumn"
-        if self._type == 2:
-            return "DfsuVerticalProfileSigma"
-        if self._type == 3:
-            return "DfsuVerticalProfileSigmaZ"
-        if self._type == 4:
-            return "Dfsu3DSigma"
-        if self._type == 5:
-            return "Dfsu3DSigmaZ"
-        return None
+    # @property
+    # def type_as_string(self):
+    #     """
+    #     0: Dfsu2D: 2D area series
+    #     1: DfsuVerticalColumn: 1D vertical column
+    #     2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
+    #     3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
+    #     4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
+    #     5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
+    #     """
+    #     if self._type == -1:
+    #         return "Mesh"
+    #     if self._type == 0:
+    #         return "Dfsu2D"
+    #     if self._type == 1:
+    #         return "DfsuVerticalColumn"
+    #     if self._type == 2:
+    #         return "DfsuVerticalProfileSigma"
+    #     if self._type == 3:
+    #         return "DfsuVerticalProfileSigmaZ"
+    #     if self._type == 4:
+    #         return "Dfsu3DSigma"
+    #     if self._type == 5:
+    #         return "Dfsu3DSigmaZ"
+    #     return None
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
@@ -201,7 +201,6 @@ class _UnstructuredGeometry:
                 print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
                 raise Exception
             return nc[self.codes == code]
-
         return nc
 
     def _get_element_table_from_dotnet(self):
@@ -247,9 +246,9 @@ class _UnstructuredGeometry:
         if geometry_type is None:
             # guess type
             if self.max_nodes_per_element < 5:
-                geometry_type = 0
+                geometry_type = UnstructuredType.Dfsu2D
             else:
-                geometry_type = 4
+                geometry_type = UnstructuredType.Dfsu3DSigma
         self._type = geometry_type
 
     def _reindex(self):
@@ -310,15 +309,17 @@ class _UnstructuredGeometry:
         geom._reindex()
 
         geom._type = self._type  #
-        if self._type > 0:
+        if not self.is_2d:
             # original file was 3d
 
             layers_used = self.layer_ids[element_ids]
             unique_layer_ids = np.unique(layers_used)
             n_layers = len(unique_layer_ids)
 
-            if n_layers == 1:
-                geom._type = 0
+            if (self._type == UnstructuredType.Dfsu3DSigma or UnstructuredType.Dfsu3DSigmaZ) and n_layers == 1:
+                # If source is 3d, but output only has 1 layer
+                # then change type to 2d
+                geom._type = UnstructuredType.Dfsu2D
                 geom._n_layers = None
                 if node_layers == "all":
                     print(
@@ -330,18 +331,11 @@ class _UnstructuredGeometry:
                 lowest_sigma = self.n_layers - self.n_sigma_layers + 1
                 geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
 
-                if (self._type == 3 or self._type == 5) and n_layers == geom._n_sigma:
-                    geom._type = (
-                        self._type - 1
-                    )  # no-longer any z-layers! type is changed
+                # If source is sigma-z but output only has sigma layers
+                # then change type accordingly 
+                if (self._type == UnstructuredType.DfsuVerticalProfileSigmaZ or self._type == UnstructuredType.Dfsu3DSigmaZ) and n_layers == geom._n_sigma:
+                    geom._type = UnstructuredType(self._type.value - 1)                    
 
-                # this is wrong - find top elements manually instead by looping over all
-                # 2d elements, that can be done directly on new element_ids
-                # geom._top_elems = np.intersect1d(self.top_element_ids, element_ids, assume_unique=True)
-                # elem_dict = dict(zip(element_ids, geom.element_ids))  # old-to-new
-                # for idx in range(len(geom._top_elems)):
-                #     old_idx = geom._top_elems[idx]
-                #     geom._top_elems[idx] = elem_dict[old_idx]
                 geom._top_elems = geom._get_top_elements_from_coordinates()
 
         return geom
@@ -397,7 +391,7 @@ class _UnstructuredGeometry:
         )
         geom._set_elements(elem_tbl, self.element_ids[elem_ids])
 
-        geom._type = -1  # -1:Mesh, 0:Dfsu2D
+        geom._type = UnstructuredType.Mesh 
 
         geom._reindex()
 
@@ -444,7 +438,7 @@ class _UnstructuredGeometry:
         """
         nodes = []
         elem_tbl = []
-        if (node_layers is None) or (node_layers == "all") or self._type <= 0:
+        if (node_layers is None) or (node_layers == "all") or self.is_2d:
             for j in element_ids:
                 elem_nodes = self.element_table[j]
                 elem_tbl.append(elem_nodes)
@@ -1015,14 +1009,14 @@ class _UnstructuredFile(_UnstructuredGeometry):
     def __repr__(self):
         out = []
         if self._type is not None:
-            out.append(self.type_as_string)
+            out.append(self.type_name)
         out.append(f"Number of elements: {self.n_elements}")
         out.append(f"Number of nodes: {self.n_nodes}")
         if self._projstr:
             out.append(f"Projection: {self.projection_string}")
-        if self._type > 0:
+        if not self.is_2d:
             out.append(f"Number of sigma layers: {self.n_sigma_layers}")
-        if self._type == 3 or self._type == 5:
+        if self._type == UnstructuredType.DfsuVerticalProfileSigmaZ or self._type == UnstructuredType.Dfsu3DSigmaZ:
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if self._n_items is not None:
             out.append(f"Number of items: {self._n_items}")
@@ -1060,7 +1054,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
         self._projstr = msh.ProjectionString
-        self._type = -1
+        self._type = UnstructuredType.Mesh
 
         # geometry
         self._set_nodes_from_source(msh)
@@ -1073,14 +1067,14 @@ class _UnstructuredFile(_UnstructuredGeometry):
         dfs = DfsuFile.Open(filename)
         self._source = dfs
         self._projstr = dfs.Projection.WKTString
-        self._type = dfs.DfsuFileType
+        self._type = UnstructuredType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
 
         # geometry
         self._set_nodes_from_source(dfs)
         self._set_elements_from_source(dfs)
 
-        if self._type > 0:
+        if not self.is_2d:
             self._n_layers = dfs.NumberOfLayers
             self._n_sigma = dfs.NumberOfSigmaLayers
 
@@ -1338,7 +1332,7 @@ class Dfsu(_UnstructuredFile):
             geometry = self
         else:
             geometry = self.elements_to_geometry(element_ids)
-            if (self._type > 0) and (geometry._type == 0):
+            if (not self.is_2d) and (geometry._type == UnstructuredType.Dfsu2D):
                 # redo extraction as 2d:
                 print("will redo extraction in 2d!")
                 geometry = self.elements_to_geometry(element_ids, node_layers="bottom")
@@ -1352,14 +1346,14 @@ class Dfsu(_UnstructuredFile):
                     data = new_data
 
         # Default filetype;
-        if geometry._type == -1:
+        if geometry._type == UnstructuredType.Mesh:
             # create dfs2d from mesh
-            filetype = DfsuFileType.Dfsu2D
+            dfsu_filetype = DfsuFileType.Dfsu2D
         else:
             # TODO: if subset is slice...
-            filetype = geometry._type
+            dfsu_filetype = geometry._type.value
 
-        if filetype != DfsuFileType.Dfsu2D:
+        if dfsu_filetype != DfsuFileType.Dfsu2D:
             if items[0].name != "Z coordinate":
                 raise Exception("First item must be z coordinates of the nodes!")
 
@@ -1376,7 +1370,7 @@ class Dfsu(_UnstructuredFile):
             elem_table.append(elem_nodes)
         elem_table = asnetarray_v2(elem_table)
 
-        builder = DfsuBuilder.Create(filetype)
+        builder = DfsuBuilder.Create(dfsu_filetype)
 
         builder.SetNodes(xn, yn, zn, geometry.codes)
         builder.SetElements(elem_table)
@@ -1389,7 +1383,7 @@ class Dfsu(_UnstructuredFile):
         builder.SetTimeInfo(file_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
 
-        if filetype != DfsuFileType.Dfsu2D:
+        if dfsu_filetype != DfsuFileType.Dfsu2D:
             builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
 
         for item in items:
