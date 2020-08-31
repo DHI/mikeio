@@ -1225,7 +1225,11 @@ class ItemInfo:
 
     def __init__(self, name=None, itemtype=None, unit=None):
 
+        # Handle arguments in the wrong place
         if isinstance(name, EUMType):
+            if isinstance(itemtype, EUMUnit):
+                unit = itemtype
+
             itemtype = name
             name = name.display_name
 

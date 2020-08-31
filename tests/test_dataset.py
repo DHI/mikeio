@@ -48,6 +48,7 @@ def test_select_subset_isel():
     assert selds["Foo"][0, 0] == 2.0
     assert selds["Bar"][0, 0] == 3.0
 
+
 def test_select_temporal_subset_by_idx():
 
     nt = 100
@@ -62,11 +63,12 @@ def test_select_temporal_subset_by_idx():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
-    selds = ds.isel([0,1,2], axis=0)
+    selds = ds.isel([0, 1, 2], axis=0)
 
     assert len(selds) == 2
     assert selds["Foo"].shape == (3, 100, 30)
-    
+
+
 def test_select_item_by_name():
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
@@ -83,6 +85,7 @@ def test_select_item_by_name():
     foo_data = ds["Foo"]
     assert foo_data[0, 10, 0] == 2.0
 
+
 def test_select_multiple_items_by_name():
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
@@ -92,18 +95,19 @@ def test_select_multiple_items_by_name():
     data = [d1, d2, d3]
 
     time = _get_time(nt)
-    #items = [ItemInfo("Foo"), ItemInfo("Bar"), ItemInfo("Baz")]
-    items = [ItemInfo(x) for x in ["Foo","Bar","Baz"]]
+    # items = [ItemInfo("Foo"), ItemInfo("Bar"), ItemInfo("Baz")]
+    items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
     ds = Dataset(data, time, items)
 
-    assert len(ds) == 3 # Length of a dataset is the number of items
+    assert len(ds) == 3  # Length of a dataset is the number of items
 
-    newds = ds[["Baz","Foo"]]
+    newds = ds[["Baz", "Foo"]]
     assert newds.items[0].name == "Baz"
     assert newds.items[1].name == "Foo"
     assert newds["Foo"][0, 10, 0] == 1.5
 
     assert len(newds) == 2
+
 
 def test_select_multiple_items_by_index():
     nt = 100
@@ -114,18 +118,17 @@ def test_select_multiple_items_by_index():
     data = [d1, d2, d3]
 
     time = _get_time(nt)
-    items = [ItemInfo(x) for x in ["Foo","Bar","Baz"]]
+    items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
     ds = Dataset(data, time, items)
 
-    assert len(ds) == 3 # Length of a dataset is the number of items
+    assert len(ds) == 3  # Length of a dataset is the number of items
 
-    newds = ds[[2,0]]
+    newds = ds[[2, 0]]
     assert newds.items[0].name == "Baz"
     assert newds.items[1].name == "Foo"
     assert newds["Foo"][0, 10, 0] == 1.5
 
     assert len(newds) == 2
-
 
 
 def test_select_item_by_iteminfo():
@@ -145,7 +148,6 @@ def test_select_item_by_iteminfo():
 
     foo_data = ds[foo_item]
     assert foo_data[0, 10, 0] == 2.0
-
 
 
 def test_select_subset_isel_multiple_idxs():
@@ -276,6 +278,21 @@ def test_default_unit_from_type():
     assert item.type == EUMType.Temperature
     assert item.unit == EUMUnit.degree_Celsius
     assert repr(item.unit) == "degree Celsius"
+
+
+def test_default_name_from_type():
+
+    item = ItemInfo(EUMType.Current_Speed)
+    assert item.name == "Current Speed"
+    assert item.unit == EUMUnit.meter_per_sec
+
+    item2 = ItemInfo(EUMType.Current_Direction, EUMUnit.degree)
+    assert item2.unit == EUMUnit.degree
+    item3 = ItemInfo(
+        "Current direction (going to)", EUMType.Current_Direction, EUMUnit.degree
+    )
+    assert item3.type == EUMType.Current_Direction
+    assert item3.unit == EUMUnit.degree
 
 
 def test_iteminfo_string_type_should_fail_with_helpful_message():
