@@ -1,4 +1,5 @@
 import os
+import warnings
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -21,6 +22,15 @@ from .helpers import safe_length
 
 
 class Dfs0:
+
+    _start_time = None
+    _n_items = None
+    _dt = None
+    _is_equidistant = None
+    _title = None
+    _data_value_type = None
+    _items = None
+
     def __init__(self, filename=None):
         """Create a Dfs0 object for reading, writing
 
@@ -158,49 +168,38 @@ class Dfs0:
 
         raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
-    def _setup_header(
-        self,
-        filename,
-        equidistant,
-        start_time,
-        dt,
-        items,
-        dtype,
-        data_value_type,
-        title,
-        timeseries_unit,
-    ):
+    def _setup_header(self):
         factory = DfsFactory()
-        builder = DfsBuilder.Create(title, "DFS", 0)
+        builder = DfsBuilder.Create(self._title, "DFS", 0)
         builder.SetDataType(1)
         builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
-        system_start_time = to_dotnet_datetime(start_time)
+        system_start_time = to_dotnet_datetime(self._start_time)
 
-        if equidistant:
+        if self._is_equidistant:
             temporal_axis = factory.CreateTemporalEqCalendarAxis(
-                timeseries_unit, system_start_time, 0, dt
+                self._timeseries_unit, system_start_time, 0, self._dt
             )
         else:
             temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
-                timeseries_unit, system_start_time
+                self._timeseries_unit, system_start_time
             )
 
         builder.SetTemporalAxis(temporal_axis)
         builder.SetItemStatisticsType(StatType.RegularStat)
 
-        dtype_dfs = self._to_dfs_datatype(dtype)
+        dtype_dfs = self._to_dfs_datatype(self._dtype)
 
-        for i in range(len(items)):
-            item = items[i]
+        for i in range(self._n_items):
+            item = self._items[i]
             newitem = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(item.type, item.unit)
             newitem.Set(
                 item.name, quantity, dtype_dfs,
             )
 
-            if data_value_type is not None:
-                newitem.SetValueType(data_value_type[i])
+            if self._data_value_type is not None:
+                newitem.SetValueType(self._data_value_type[i])
             else:
                 newitem.SetValueType(DataValueType.Instantaneous)
 
@@ -208,9 +207,9 @@ class Dfs0:
             builder.AddDynamicItem(newitem.GetDynamicItemInfo())
 
         try:
-            builder.CreateFile(filename)
+            builder.CreateFile(self._filename)
         except IOError:
-            raise IOError(f"Cannot create dfs0 file: {filename}")
+            raise IOError(f"Cannot create dfs0 file: {self._filename}")
 
         return builder.GetFile()
 
@@ -254,58 +253,59 @@ class Dfs0:
             default np.float32
 
         """
+        self._filename = filename
+        self._title = title
+        self._timeseries_unit = timeseries_unit
+        self._dtype = dtype
+        self._data_value_type = data_value_type
 
         if isinstance(data, Dataset):
-            items = data.items
-            start_time = data.time[0]
+            self._items = data.items
+            self._start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 if not data.is_equidistant:
                     raise Exception(
                         "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
                     )
-                dt = (data.time[1] - data.time[0]).total_seconds()
+                self._dt = (data.time[1] - data.time[0]).total_seconds()
             data = data.data
 
-        n_items = len(data)
-        n_time_steps = np.shape(data[0])[0]
+        self._n_items = len(data)
+        self._n_time_steps = np.shape(data[0])[0]
 
-        if start_time is None:
-            start_time = datetime.now()
+        if self._start_time is None:
+            self._start_time = datetime.now()
+            warnings.warn(
+                f"No start time supplied. Using current time: {self._start_time} as start time."
+            )
+        if items:
+            self._items = items
 
-        if items is None:
-            items = [ItemInfo(f"Item {i + 1}") for i in range(n_items)]
+        if self._items is None:
+            warnings.warn("No items info supplied. Using Item 1, 2, 3,...")
+            self._items = [ItemInfo(f"Item {i + 1}") for i in range(self._n_items)]
 
-        if len(items) != n_items:
-            raise Warning(
+        if len(self._items) != self._n_items:
+            raise ValueError(
                 "names must be an array of strings with the same number of elements as data columns"
             )
 
         if datetimes is None:
-            equidistant = True
+            self._equidistant = True
 
-            dt = np.float(dt)
+            self._dt = np.float(dt)
             datetimes = np.array(
                 [
-                    start_time + timedelta(seconds=(step * dt))
-                    for step in np.arange(n_time_steps)
+                    self._start_time + timedelta(seconds=(step * self._dt))
+                    for step in np.arange(self._n_time_steps)
                 ]
             )
 
         else:
-            start_time = datetimes[0]
-            equidistant = False
+            self._start_time = datetimes[0]
+            self._equidistant = False
 
-        dfs = self._setup_header(
-            filename,
-            equidistant,
-            start_time,
-            dt,
-            items,
-            dtype,
-            data_value_type,
-            title,
-            timeseries_unit,
-        )
+        dfs = self._setup_header()
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
