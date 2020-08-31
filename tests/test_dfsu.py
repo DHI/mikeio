@@ -92,6 +92,7 @@ def test_read_selected_item_names_returns_correct_items():
     assert ds.items[0].name == "Surface elevation"
     assert ds.items[1].name == "Current speed"
 
+
 def test_read_returns_correct_items_sigma_z():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
@@ -153,6 +154,7 @@ def test_get_number_of_time_steps():
 
     assert dfs.n_timesteps == 9
 
+
 def test_number_of_nodes_and_elements_sigma_z():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
@@ -188,6 +190,7 @@ def test_find_nearest_element_3d():
     elem_id = dfs.find_nearest_element(333934, 6158101, -7)
     assert elem_id == 5320
 
+
 def test_find_nearest_element():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -200,7 +203,7 @@ def find__nearest_profile_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
     elem_ids = dfs.find__nearest_profile_elements(333934, 6158101)
-    
+
     assert elem_ids[0] == 5320
     assert elem_ids[-1] == 5323
 
@@ -262,7 +265,7 @@ def test_n_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_layers is None 
+    assert dfs.n_layers is None
 
 
 def test_n_sigma_layers():
@@ -281,7 +284,7 @@ def test_n_sigma_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_sigma_layers is None 
+    assert dfs.n_sigma_layers is None
 
 
 def test_n_z_layers():
@@ -300,7 +303,7 @@ def test_n_z_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_z_layers is None 
+    assert dfs.n_z_layers is None
 
 
 def test_boundary_codes():
@@ -333,7 +336,7 @@ def test_top_element_ids():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.top_element_ids is None 
+    assert dfs.top_element_ids is None
 
 
 def test_bottom_element_ids():
@@ -354,9 +357,9 @@ def test_bottom_element_ids():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.bottom_element_ids is None     
+    assert dfs.bottom_element_ids is None
 
-    
+
 def test_n_layers_per_column():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = Dfsu(filename)
@@ -376,7 +379,7 @@ def test_n_layers_per_column():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_layers_per_column is None         
+    assert dfs.n_layers_per_column is None
 
 
 def test_get_layer_element_ids():
@@ -393,11 +396,12 @@ def test_get_layer_element_ids():
     assert elem_ids[5] == 8639
     assert len(elem_ids) == 10
 
-    elem_ids = dfs.get_layer_element_ids([1,3])
+    elem_ids = dfs.get_layer_element_ids([1, 3])
     assert len(elem_ids) == 197
 
     with pytest.raises(Exception):
         elem_ids = dfs.get_layer_element_ids(12)
+
 
 def test_find_nearest_profile_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
@@ -436,7 +440,7 @@ def test_get_element_area_3D():
 def test_get_element_area_LONGLAT():
     filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
     dfs = Dfsu(filename)
-    
+
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
 
@@ -475,6 +479,22 @@ def test_write_from_dfsu(tmpdir):
     assert os.path.exists(outfilename)
 
 
+def test_write_from_dfsu_default_items_numbered(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    ds = dfs.read([0, 1])
+
+    dfs.write(outfilename, ds.data)
+
+    assert os.path.exists(outfilename)
+
+    newdfs = Dfsu(outfilename)
+    assert newdfs.items[0].name == "Item 1"
+
+
 def test_write_from_dfsu3D(tmpdir):
 
     sourcefilename = os.path.join("tests", "testdata", "basin_3d.dfsu")
@@ -486,6 +506,20 @@ def test_write_from_dfsu3D(tmpdir):
     dfs.write(outfilename, ds)
 
     assert os.path.exists(outfilename)
+
+
+def test_write_from_dfsu3D_withou_z_coords_fails(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple3D_fail.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    ds = dfs.read([1, 2])
+    with pytest.raises(Exception) as excinfo:
+        dfs.write(outfilename, ds)
+
+    assert "coord" in str(excinfo.value)
+    assert not os.path.exists(outfilename)
 
 
 def test_write_invalid_data_closes_and_deletes_file(tmpdir):
@@ -580,13 +614,31 @@ def test_plot_bathymetry():
     dfs.plot()
 
 
-def test_to_mesh(tmpdir):
+def test_to_mesh_3d(tmpdir):
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
 
     dfs = Dfsu(filename)
 
     outfilename = os.path.join(tmpdir, "oresund.mesh")
+
+    dfs.to_mesh(outfilename)
+
+    assert os.path.exists(outfilename)
+
+    mesh = Mesh(outfilename)
+
+    assert True
+
+
+@pytest.mark.skip(reason="Fails with no element table")
+def test_to_mesh_2d(tmpdir):
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+
+    dfs = Dfsu(filename)
+
+    outfilename = os.path.join(tmpdir, "hd2d.mesh")
 
     dfs.to_mesh(outfilename)
 
@@ -609,3 +661,13 @@ def test_plot_3d():
     dfs = Dfsu(filename)
     dfs.plot()
     assert True
+
+
+def test_elements_to_geometry():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
+    geom = dfs.elements_to_geometry(prof_ids)
+
+    assert geom.n_layers == 5
+

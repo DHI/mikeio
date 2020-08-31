@@ -17,3 +17,5 @@ dist/
 \.spyproject
 \.pytest_cache
 .vs
+cov_html
+cov_annotate
