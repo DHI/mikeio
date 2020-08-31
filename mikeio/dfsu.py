@@ -1492,6 +1492,33 @@ class Mesh(_UnstructuredFile):
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
+    def plot_boundary_nodes(self, boundary_names=None):
+        """
+        Plot mesh boundary nodes and their codes
+        """        
+        nc = self.node_coordinates
+        c = self.codes        
+        
+        if boundary_names is not None:
+            if len(self.boundary_codes) != len(boundary_names):
+                raise Exception(f'Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})')
+            user_defined_labels = dict(zip(self.boundary_codes, boundary_names))
+
+        fig, ax = plt.subplots()
+        for code in self.boundary_codes:
+            xn = nc[c==code,0]
+            yn = nc[c==code,1]            
+            if boundary_names is None:
+                label = f'Code {code}'
+            else:
+                label = user_defined_labels[code]
+            plt.plot(xn, yn, '.', label=label)
+
+        plt.legend()
+        plt.title("Boundary nodes")
+        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
+        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+
     @staticmethod
     def _geometry_to_mesh(outfilename, geometry):
 
