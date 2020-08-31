@@ -24,7 +24,7 @@ from .dotnet import (
     asnetarray_v2,
 )
 from .eum import TimeStep, ItemInfo, EUMType, EUMUnit
-from .helpers import safe_length 
+from .helpers import safe_length
 
 
 class UnstructuredType(IntEnum):
@@ -176,11 +176,11 @@ class _UnstructuredGeometry:
         """
         return self._type <= 0
 
-    @property 
+    @property
     def is_tri_only(self):
         """Does the mesh consist of triangles only?
         """
-        return (self.max_nodes_per_element==3 or self.max_nodes_per_element==6)
+        return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
@@ -537,7 +537,7 @@ class _UnstructuredGeometry:
             else:
                 # 3d elements for n nearest 2d elements
                 elem3d = self.e2_e3_table[elem2d]
-                elem3d = np.concatenate(elem3d, axis=0) 
+                elem3d = np.concatenate(elem3d, axis=0)
                 layer_ids = self.layer_ids[elem3d]
                 idx = elem3d[layer_ids == layer]  # return at most n ids
 
@@ -839,7 +839,8 @@ class _UnstructuredGeometry:
         else:
             # then it must be a z layer
             return (
-                self.bottom_elements[self.n_layers_per_column >= (n_lay - layer + 1)] + layer
+                self.bottom_elements[self.n_layers_per_column >= (n_lay - layer + 1)]
+                + layer
             )
 
     def _get_2d_to_3d_association(self):
@@ -1008,7 +1009,12 @@ class _UnstructuredFile(_UnstructuredGeometry):
         ):
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if self._n_items is not None:
-            out.append(f"Number of items: {self._n_items}")
+            if self._n_items < 10:
+                out.append("Items:")
+                for i, item in enumerate(self.items):
+                    out.append(f"  {i}:  {item}")
+            else:
+                out.append(f"Number of items: {self._n_items}")
         if self._n_timesteps is not None:
             if self._n_timesteps == 1:
                 out.append(f"Time: time-invariant file (1 step) at {self._start_time}")
@@ -1112,16 +1118,11 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source,
-            to_dotnet_array(xc),
-            to_dotnet_array(yc),
-            to_dotnet_array(zc),
+            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
         )
-        ec = np.column_stack(
-            [asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)]
-        )
+        ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
-    
+
     @property
     def deletevalue(self):
         """File delete value
@@ -1430,7 +1431,7 @@ class Dfsu(_UnstructuredFile):
             path to file to be written
         """
         if self.is_2d:
-            _ = self.element_table # make sure element table has been constructured 
+            _ = self.element_table  # make sure element table has been constructured
             geometry = self
         else:
             geometry = self.to_2d_geometry()
@@ -1504,24 +1505,26 @@ class Mesh(_UnstructuredFile):
     def plot_boundary_nodes(self, boundary_names=None):
         """
         Plot mesh boundary nodes and their codes
-        """        
+        """
         nc = self.node_coordinates
-        c = self.codes        
-        
+        c = self.codes
+
         if boundary_names is not None:
             if len(self.boundary_codes) != len(boundary_names):
-                raise Exception(f'Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})')
+                raise Exception(
+                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})"
+                )
             user_defined_labels = dict(zip(self.boundary_codes, boundary_names))
 
         fig, ax = plt.subplots()
         for code in self.boundary_codes:
-            xn = nc[c==code,0]
-            yn = nc[c==code,1]            
+            xn = nc[c == code, 0]
+            yn = nc[c == code, 1]
             if boundary_names is None:
-                label = f'Code {code}'
+                label = f"Code {code}"
             else:
                 label = user_defined_labels[code]
-            plt.plot(xn, yn, '.', label=label)
+            plt.plot(xn, yn, ".", label=label)
 
         plt.legend()
         plt.title("Boundary nodes")
