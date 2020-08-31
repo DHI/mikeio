@@ -8,7 +8,8 @@ setuptools.setup(
     version="0.4.3",
     install_requires=["pythonnet", "numpy", "pandas", "matplotlib"],
     extras_require={
-        "dev": ["pytest", "black", "sphinx", "sphinx", "sphinx-rtd-theme", "shapely"]
+        "dev": ["pytest", "black", "sphinx", "sphinx", "sphinx-rtd-theme", "shapely"],
+        "test": ["pytest", "shapely"],
     },
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",

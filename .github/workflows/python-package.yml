@@ -39,4 +39,4 @@ jobs:
         pip install .[dev]
     - name: Test with pytest
       run: |
-        pytest --cov=mikeio
+        pytest --cov=mikeio tests
