@@ -535,11 +535,10 @@ class _UnstructuredGeometry:
                 d3d = np.abs(z - zc)
                 idx = elem3d[d3d.argsort()[0]]
             else:
-                elem3d = self.e2_e3_table[
-                    elem2d
-                ]  # 3d elements for n nearest 2d elements
+                # 3d elements for n nearest 2d elements
+                elem3d = self.e2_e3_table[elem2d][0]  
                 layer_ids = self.layer_ids[elem3d]
-                idx = elem3d[layer_ids == layer]  # return at most
+                idx = elem3d[layer_ids == layer]  # return at most n ids
 
         if n == 1 and (not np.isscalar(idx)):
             idx = idx[0]

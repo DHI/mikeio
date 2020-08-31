@@ -200,6 +200,14 @@ def test_get_element_coords():
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
 
+def test_find_nearest_element_2d():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+    assert elem_id == 317
+
+
 def test_find_nearest_element_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
@@ -208,16 +216,11 @@ def test_find_nearest_element_3d():
     assert elem_id == 5323
     assert elem_id in dfs.top_elements
 
+    elem_id = dfs.find_nearest_element(333934, 6158101, layer=8)
+    assert elem_id == 5322    
+
     elem_id = dfs.find_nearest_element(333934, 6158101, -7)
     assert elem_id == 5320
-
-
-def test_find_nearest_element():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
-
-    elem_id = dfs.find_nearest_element(606200, 6905480)
-    assert elem_id == 317
 
 
 def find_nearest_profile_elements():
