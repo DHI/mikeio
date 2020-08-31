@@ -158,32 +158,6 @@ class _UnstructuredGeometry:
     def is_2d(self):
         return self._type <= 0
 
-    # @property
-    # def type_as_string(self):
-    #     """
-    #     0: Dfsu2D: 2D area series
-    #     1: DfsuVerticalColumn: 1D vertical column
-    #     2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
-    #     3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
-    #     4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
-    #     5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
-    #     """
-    #     if self._type == -1:
-    #         return "Mesh"
-    #     if self._type == 0:
-    #         return "Dfsu2D"
-    #     if self._type == 1:
-    #         return "DfsuVerticalColumn"
-    #     if self._type == 2:
-    #         return "DfsuVerticalProfileSigma"
-    #     if self._type == 3:
-    #         return "DfsuVerticalProfileSigmaZ"
-    #     if self._type == 4:
-    #         return "Dfsu3DSigma"
-    #     if self._type == 5:
-    #         return "Dfsu3DSigmaZ"
-    #     return None
-
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
 
@@ -269,7 +243,7 @@ class _UnstructuredGeometry:
         self._node_ids = np.array(list(new_node_ids))
         self._element_ids = np.array(list(new_element_ids))
 
-    def get_element_table_for_elements(self, element_ids):
+    def _get_element_table_for_elements(self, element_ids):
         return [self.element_table[j] for j in element_ids]
 
     def elements_to_geometry(self, elements, node_layers="all"):
@@ -403,27 +377,6 @@ class _UnstructuredGeometry:
 
         return geom
 
-    def _get_nodes_for_elements(self, elements, node_layers="all"):
-        """list of (unique) nodes for a list of elements
-
-        Parameters
-        ----------
-        elements : np.array(int)
-            array of element ids
-        node_layers : str, optional
-            for 3D files 'all', 'bottom' or 'top' nodes 
-            of each element, by default 'all'
-
-        Returns
-        -------
-        np.array(int)
-            array of node ids (unique)
-        """
-        new_nodes, _ = self._get_nodes_and_table_for_elements(
-            elements, node_layers=node_layers
-        )
-        return new_nodes
-
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
         """list of nodes and element table for a list of elements
 
@@ -467,11 +420,6 @@ class _UnstructuredGeometry:
                     nodes.append(node)
 
         return np.unique(nodes), elem_tbl
-
-    # def validate(self):
-    #     """ validate consistency of this mesh geometry
-    #     """
-    #     return False
 
     @property
     def element_coordinates(self):
@@ -518,7 +466,7 @@ class _UnstructuredGeometry:
         self._ec = ec
         return ec
 
-    def find_n_nearest_elements(self, x, y, z=None, n=1, layer=None):
+    def _find_n_nearest_elements(self, x, y, z=None, n=1, layer=None):
         """Find n nearest elements (for each of the points given) 
 
         Parameters
@@ -595,7 +543,7 @@ class _UnstructuredGeometry:
             element ids of nearest element(s)
         """
         if np.isscalar(x):
-            return self.find_n_nearest_elements(x, y, z, n=1, layer=layer)
+            return self._find_n_nearest_elements(x, y, z, n=1, layer=layer)
         else:
             nx = len(x)
             ny = len(y)
@@ -605,7 +553,7 @@ class _UnstructuredGeometry:
             idx = np.zeros(nx, dtype=int)
             if z is None:
                 for j in range(nx):
-                    idx[j] = self.find_n_nearest_elements(
+                    idx[j] = self._find_n_nearest_elements(
                         x[j], y[j], z=None, n=1, layer=layer
                     )
             else:
@@ -613,7 +561,7 @@ class _UnstructuredGeometry:
                 if nx != nz:
                     print(f"z must have same length as x and y")
                 for j in range(nx):
-                    idx[j] = self.find_n_nearest_elements(
+                    idx[j] = self._find_n_nearest_elements(
                         x[j], y[j], z[j], n=1, layer=layer
                     )
         return idx
@@ -889,7 +837,7 @@ class _UnstructuredGeometry:
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
 
-    def to_polygons(self, geometry=None):
+    def _to_polygons(self, geometry=None):
         """generate matplotlib polygons from element table for plotting
 
         Returns
@@ -982,7 +930,7 @@ class _UnstructuredGeometry:
                 )
 
         fig, ax = plt.subplots()
-        patches = geometry.to_polygons()
+        patches = geometry._to_polygons()
         # p = PatchCollection(patches, cmap=cmap, edgecolor="black")
         p = PatchCollection(
             patches, cmap=cmap, edgecolor="lightgray", alpha=0.8, linewidths=0.3
@@ -1220,7 +1168,7 @@ class Dfsu(_UnstructuredFile):
             n_elems = self.n_elements
             n_nodes = self.n_nodes
         else:
-            node_ids = self._get_nodes_for_elements(elements)
+            node_ids, _ = self._get_nodes_and_table_for_elements(elements)
             n_elems = len(elements)
             n_nodes = len(node_ids)
 

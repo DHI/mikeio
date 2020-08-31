@@ -34,7 +34,7 @@ def test_get_land_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 
-    nc = msh.get_node_coords(code=1)
+    nc = msh.node_coordinates[msh.codes==1]
 
     assert nc.shape == (134, 3)
 
