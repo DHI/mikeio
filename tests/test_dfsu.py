@@ -185,7 +185,7 @@ def test_find_nearest_element_3d():
 
     elem_id = dfs.find_nearest_element(333934, 6158101)
     assert elem_id == 5323
-    assert elem_id in dfs.top_element_ids
+    assert elem_id in dfs.top_elements
 
     elem_id = dfs.find_nearest_element(333934, 6158101, -7)
     assert elem_id == 5320
@@ -199,11 +199,11 @@ def test_find_nearest_element():
     assert elem_id == 317
 
 
-def find__nearest_profile_elements():
+def find_nearest_profile_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
-    elem_ids = dfs.find__nearest_profile_elements(333934, 6158101)
-
+    elem_ids = dfs.find_nearest_profile_elements(333934, 6158101)
+    
     assert elem_ids[0] == 5320
     assert elem_ids[-1] == 5323
 
@@ -265,7 +265,7 @@ def test_n_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_layers is None
+    assert dfs.n_layers is None 
 
 
 def test_n_sigma_layers():
@@ -284,7 +284,7 @@ def test_n_sigma_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_sigma_layers is None
+    assert dfs.n_sigma_layers is None 
 
 
 def test_n_z_layers():
@@ -303,7 +303,7 @@ def test_n_z_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_z_layers is None
+    assert dfs.n_z_layers is None 
 
 
 def test_boundary_codes():
@@ -318,48 +318,48 @@ def test_boundary_codes():
     assert len(dfs.boundary_codes) == 3
 
 
-def test_top_element_ids():
+def test_top_elements():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = Dfsu(filename)
-    assert len(dfs.top_element_ids) == 174
-    assert dfs.top_element_ids[3] == 39
+    assert len(dfs.top_elements) == 174
+    assert dfs.top_elements[3] == 39
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
-    assert len(dfs.top_element_ids) == 3700
-    assert dfs.top_element_ids[3] == 16
+    assert len(dfs.top_elements) == 3700
+    assert dfs.top_elements[3] == 16
 
     filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
     dfs = Dfsu(filename)
-    assert len(dfs.top_element_ids) == 99
-    assert dfs.top_element_ids[3] == 19
+    assert len(dfs.top_elements) == 99
+    assert dfs.top_elements[3] == 19
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.top_element_ids is None
+    assert dfs.top_elements is None 
 
 
-def test_bottom_element_ids():
+def test_bottom_elements():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = Dfsu(filename)
-    assert len(dfs.bottom_element_ids) == 174
-    assert dfs.bottom_element_ids[3] == 30
+    assert len(dfs.bottom_elements) == 174
+    assert dfs.bottom_elements[3] == 30
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
-    assert len(dfs.bottom_element_ids) == 3700
-    assert dfs.bottom_element_ids[3] == 13
+    assert len(dfs.bottom_elements) == 3700
+    assert dfs.bottom_elements[3] == 13
 
     filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
     dfs = Dfsu(filename)
-    assert len(dfs.bottom_element_ids) == 99
-    assert dfs.bottom_element_ids[3] == 15
+    assert len(dfs.bottom_elements) == 99
+    assert dfs.bottom_elements[3] == 15
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.bottom_element_ids is None
+    assert dfs.bottom_elements is None     
 
-
+    
 def test_n_layers_per_column():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = Dfsu(filename)
@@ -379,29 +379,28 @@ def test_n_layers_per_column():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_layers_per_column is None
+    assert dfs.n_layers_per_column is None         
 
 
-def test_get_layer_element_ids():
+def test_get_layer_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
 
-    elem_ids = dfs.get_layer_element_ids(0)
-    assert np.all(elem_ids == dfs.top_element_ids)
+    elem_ids = dfs.get_layer_elements(0)
+    assert np.all(elem_ids == dfs.top_elements)
 
-    elem_ids = dfs.get_layer_element_ids(-1)
+    elem_ids = dfs.get_layer_elements(-1)
     assert elem_ids[5] == 23
 
-    elem_ids = dfs.get_layer_element_ids(1)
+    elem_ids = dfs.get_layer_elements(1)
     assert elem_ids[5] == 8639
     assert len(elem_ids) == 10
 
-    elem_ids = dfs.get_layer_element_ids([1, 3])
+    elem_ids = dfs.get_layer_elements([1,3])
     assert len(elem_ids) == 197
 
     with pytest.raises(Exception):
-        elem_ids = dfs.get_layer_element_ids(12)
-
+        elem_ids = dfs.get_layer_elements(12)
 
 def test_find_nearest_profile_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
@@ -440,7 +439,7 @@ def test_get_element_area_3D():
 def test_get_element_area_LONGLAT():
     filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
     dfs = Dfsu(filename)
-
+    
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
 
@@ -581,12 +580,12 @@ def test_extract_top_layer_to_2d(tmpdir):
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
 
     dfs = Dfsu(filename)
-    top_ids = dfs.top_element_ids
+    top_ids = dfs.top_elements
 
-    ds = dfs.read(element_ids=top_ids)
+    ds = dfs.read(elements=top_ids)
 
     outfilename = os.path.join(tmpdir, "toplayer.dfsu")
-    dfs.write(outfilename, ds, element_ids=top_ids)
+    dfs.write(outfilename, ds, elements=top_ids)
 
     newdfs = Dfsu(outfilename)
     assert os.path.exists(outfilename)
@@ -670,4 +669,3 @@ def test_elements_to_geometry():
     geom = dfs.elements_to_geometry(prof_ids)
 
     assert geom.n_layers == 5
-

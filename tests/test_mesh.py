@@ -55,11 +55,21 @@ def test_plot_mesh():
 
     assert True
 
+
 def test_plot_mesh_part():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 
-    msh.plot(element_ids=list(range(0,100)))
+    msh.plot(elements=list(range(0,100)))
+
+    assert True
+
+
+def test_plot_mesh_boundary_nodes():
+    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
+    msh = Mesh(filename)
+
+    msh.plot_boundary_nodes()
 
     assert True
 
@@ -73,6 +83,7 @@ def test_set_z():
     zn = msh.node_coordinates[:,2]
     assert zn.min() == -3
 
+
 def test_set_codes():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
@@ -81,6 +92,7 @@ def test_set_codes():
     codes[codes==2] = 7
     msh.set_codes(codes)
     assert msh.codes[2] == 7
+
 
 def test_write(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple.mesh")
@@ -92,12 +104,13 @@ def test_write(tmpdir):
 
     assert os.path.exists(outfilename)
 
+
 def test_write_part(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple_sub.mesh")
     meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
 
     msh = Mesh(meshfilename)
 
-    msh.write(outfilename, element_ids=list(range(0,100)))
+    msh.write(outfilename, elements=list(range(0,100)))
 
     assert os.path.exists(outfilename)
