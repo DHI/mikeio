@@ -536,7 +536,8 @@ class _UnstructuredGeometry:
                 idx = elem3d[d3d.argsort()[0]]
             else:
                 # 3d elements for n nearest 2d elements
-                elem3d = self.e2_e3_table[elem2d][0]  
+                elem3d = self.e2_e3_table[elem2d]
+                elem3d = np.concatenate(elem3d, axis=0) 
                 layer_ids = self.layer_ids[elem3d]
                 idx = elem3d[layer_ids == layer]  # return at most n ids
 
