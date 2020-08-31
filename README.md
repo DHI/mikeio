@@ -17,7 +17,7 @@ Facilitates common data processing workflows for MIKE files.
 * Python x64 3.6, 3.7 or 3.8 
 * [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
-[More info about dependancies](http://docs.mikepoweredbydhi.com/nuget/)
+[More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
 
 ## Important Note!
 
@@ -69,22 +69,17 @@ Items:
 >>>  ts = dfs.to_dataframe('simple.dfs0')
 ```
 
-### Create simple timeseries
+### Write simple timeseries
 ```python
->>>  from datetime import datetime, timedelta
+>>>  from datetime import datetime
 >>>  import numpy as np
 >>>  from mikeio import Dfs0
->>>  data = []
->>>  d = np.random.random([100])
->>>  data.append(d)
+>>>  data = [np.random.random([100])]
 >>>  dfs = Dfs0()
->>>  dfs.create(filename='simple.dfs0',
->>>            data=data,
->>>            start_time=datetime(2017, 1, 1),
->>>            dt=60)
+>>>  dfs.write('simple.dfs0', data, start_time=datetime(2017, 1, 1), dt=60)
 
 ```
-### Create timeseries from dataframe
+### Write timeseries from dataframe
 ```python
 import pandas as pd
 import mikeio
@@ -115,7 +110,7 @@ Items:
 ### Create dfs2
 For a complete example of conversion from netcdf to dfs2 see this [notebook](notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb).
 
-Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of downloading meteorlogical forecast from the Global Forecasting System and converting it to a dfs2 ready to be used by a MIKE 21 model.
+Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of downloading meteorological forecast from the Global Forecasting System and converting it to a dfs2 ready to be used by a MIKE 21 model.
 
 
 ### Read Res1D file Return Pandas DataFrame

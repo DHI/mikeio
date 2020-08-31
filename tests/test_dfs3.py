@@ -7,8 +7,8 @@ from mikeio.eum import EUMType, ItemInfo, TimeStep
 
 
 def test_read_dfs3():
-    dfs = Dfs3()
-    ds = dfs.read("tests/testdata/Grid1.dfs3")
+    dfs = Dfs3("tests/testdata/Grid1.dfs3")
+    ds = dfs.read()
 
     assert len(ds.data) == 2
     assert len(ds.time) == 30
@@ -16,7 +16,7 @@ def test_read_dfs3():
     assert ds.items[0].name == "Untitled"
 
 
-def test_create_single_item(tmpdir):
+def test_write_single_item(tmpdir):
 
     outfilename = os.path.join(tmpdir.dirname, "simple.dfs3")
 
@@ -35,7 +35,7 @@ def test_create_single_item(tmpdir):
 
     dfs = Dfs3()
 
-    dfs.create(
+    dfs.write(
         filename=outfilename,
         data=data,
         start_time=start_time,
@@ -50,10 +50,10 @@ def test_create_single_item(tmpdir):
     )
 
 
-def test_read_create(tmpdir):
+def test_read_write(tmpdir):
 
-    dfs = Dfs3()
-    ds = dfs.read("tests/testdata/Grid1.dfs3")
+    dfs = Dfs3("tests/testdata/Grid1.dfs3")
+    ds = dfs.read()
 
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
 
@@ -67,7 +67,7 @@ def test_read_create(tmpdir):
 
     dfs = Dfs3()
 
-    dfs.create(
+    dfs.write(
         filename=outfilename,
         data=data,
         start_time=ds.time[0],
@@ -79,18 +79,3 @@ def test_read_create(tmpdir):
         length_y=0.1,
         title=title,
     )
-
-
-def test_write(tmpdir):
-
-    filename1 = "tests/testdata/Grid1.dfs3"
-    filename2 = os.path.join(tmpdir.dirname, "written.dfs3")
-    copyfile(filename1, filename2)
-
-    # read contents of original file
-    dfs = Dfs3()
-    res1 = dfs.read(filename1)
-
-    # overwrite
-    res1.data[0] = -2 * res1.data[0]
-    dfs.write(filename2, res1.data)

@@ -1,7 +1,6 @@
 import numpy as np
-from datetime import datetime, timedelta
-
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
+from datetime import timedelta
+from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
@@ -11,7 +10,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
-from .dutil import Dataset, find_item, get_item_info
+from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
@@ -20,9 +19,27 @@ from .dotnet import (
 )
 from .eum import TimeStep, ItemInfo
 from .helpers import safe_length
+from .dfs import Dfs123
 
 
-class Dfs2:
+class Dfs2(Dfs123):
+
+    _dx = None
+    _dy = None
+
+    def __init__(self, filename=None):
+        super(Dfs2, self).__init__(filename)
+
+        if filename:
+            self._read_dfs2_header()
+
+    def _read_dfs2_header(self):
+        dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
+        self._dx = dfs.SpatialAxis.Dx
+        self._dy = dfs.SpatialAxis.Dy
+
+        self._read_header(dfs)
+
     def __calculate_index(self, nx, ny, x, y):
         """ Calculates the position in the dfs2 data array based on the
         number of x,y  (nx,ny) at the specified x,y position.
@@ -30,13 +47,13 @@ class Dfs2:
         Error checking is done here to see if the x,y coordinates are out of range.
         """
         if x >= nx:
-            raise Warning("x coordinate is off the grid: ", x)
+            raise IndexError("x coordinate is off the grid: ", x)
         if y >= ny:
-            raise Warning("y coordinate is off the grid: ", y)
+            raise IndexError("y coordinate is off the grid: ", y)
 
         return y * nx + x
 
-    def find_closest_element_index(
+    def find_nearest_element(
         self, lon, lat,
     ):
         """Find index of closest element
@@ -74,17 +91,15 @@ class Dfs2:
 
         return k, j
 
-    def read(self, filename, item_numbers=None, item_names=None, time_steps=None):
+    def read(self, items=None, time_steps=None):
         """
+        Read data from a dfs2 file
+        
         Parameters
         ---------
-        filename: str
-            dfs2 filename
-        item_numbers: list[int], optional
-            Read only selected items, by number (0-based)
-        item_names: list[str], optional
-            Read only selected items, by name, takes precedence over item_numbers
-        time_steps: list[int], optional
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time_steps: int or list[int], optional
             Read only selected time_steps
 
         Returns
@@ -92,34 +107,23 @@ class Dfs2:
         Dataset
             A dataset with data dimensions [t,y,x]
         """
-
-        # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-
-        # Open the dfs file for reading
-        dfs = DfsFileFactory.Dfs2FileOpen(filename)
+        dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._dfs = dfs
-
-        if item_names is not None:
-            item_numbers = find_item(dfs, item_names)
-
-        if item_numbers is None:
-            n_items = safe_length(dfs.ItemInfo)
-            item_numbers = list(range(n_items))
+        self._source = dfs
 
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        if time_steps is None:
-            time_steps = list(range(nt))
+        items, item_numbers, time_steps = get_valid_items_and_timesteps(
+            self, items, time_steps
+        )
 
         # Determine the size of the grid
-        # axis = dfs.ItemInfo[0].SpatialAxis
         axis = dfs.SpatialAxis
         yNum = axis.YCount
         xNum = axis.XCount
 
         if nt == 0:
-            raise Warning("Static files (with no dynamic items) are not supported.")
-            nt = 1
+            raise ValueError("Static files (with no dynamic items) are not supported.")
 
         for t in time_steps:
             if t > (nt - 1):
@@ -127,20 +131,19 @@ class Dfs2:
 
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
-        n_items = len(item_numbers)
+        self._n_items = len(item_numbers)
         data_list = []
 
-        for item in range(n_items):
-            # Initialize an empty data block
+        for item in range(self._n_items):
             data = np.ndarray(shape=(len(time_steps), yNum, xNum), dtype=float)
             data_list.append(data)
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        startTime = dfs.FileInfo.TimeAxis.StartDateTime
+        # startTime = dfs.FileInfo.TimeAxis.StartDateTime
         for i in range(len(time_steps)):
             it = time_steps[i]
-            for item in range(n_items):
+            for item in range(self._n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
@@ -162,68 +165,7 @@ class Dfs2:
         dfs.Close()
         return Dataset(data_list, time, items)
 
-    def write(self, filename, data):
-        """
-        Function: write to a pre-created dfs2 file.
-
-        filename:
-            full path and filename to existing dfs2 file
-
-        data:
-            list of matrices. len(data) must equal the number of items in the dfs2.
-            Easch matrix must be of dimension y,x,time
-
-        usage:
-            write( filename, data) where  data( y, x, nt)
-
-        Returns:
-            Nothing
-
-        """
-
-        # Open the dfs file for writing
-        dfs = DfsFileFactory.Dfs2FileOpenEdit(filename)
-
-        # Determine the size of the grid
-        number_y = dfs.SpatialAxis.YCount
-        number_x = dfs.SpatialAxis.XCount
-        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_items = safe_length(dfs.ItemInfo)
-
-        deletevalue = -1e-035
-
-        if not all(np.shape(d)[0] == n_time_steps for d in data):
-            raise Warning(
-                "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
-            )
-        if not all(np.shape(d)[1] == number_y for d in data):
-            raise Warning(
-                "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [time,y,x]"
-            )
-        if not all(np.shape(d)[2] == number_x for d in data):
-            raise Warning(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [time, y, x]"
-            )
-        if not len(data) == n_items:
-            raise Warning(
-                "The number of matrices in data do not match the number of items in the dfs2 file."
-            )
-
-        for it in range(n_time_steps):
-            for item in range(n_items):
-                d = data[item][it, :, :]
-                d[np.isnan(d)] = deletevalue
-                d = d.reshape(number_y, number_x)
-                d = np.flipud(d)
-                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
-                dfs.WriteItemTimeStepNext(0, darray)
-
-        dfs.Close()
-
-    def create(
+    def write(
         self,
         filename,
         data,
@@ -231,8 +173,8 @@ class Dfs2:
         dt=1,
         datetimes=None,
         items=None,
-        length_x=1,
-        length_y=1,
+        dx=None,
+        dy=None,
         x0=0,
         y0=0,
         coordinate=None,
@@ -247,12 +189,10 @@ class Dfs2:
 
         filename: str
             Location to write the dfs2 file
-        data: list[np.array]
+        data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, y, x
         start_time: datetime, optional
             start date of type datetime.
-        timeseries_unit: Timestep, optional
-            TimeStep default TimeStep.SECOND
         dt: float, optional
             The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
             means 5 mins and 30 seconds. Default 1
@@ -260,139 +200,94 @@ class Dfs2:
             datetimes, creates a non-equidistant calendar axis
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
+        x0: float, optional
+            Lower right position
+        x0: float, optional
+            Lower right position
+        dx: float, optional
+            length of each grid in the x direction (projection units)
+        dy: float, optional
+            length of each grid in the y direction (projection units)
         coordinate:
             ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
-        x0: float, optional
-            Lower right position
-        x0: float, optional
-            Lower right position
-        length_x: float, optional
-            length of each grid in the x direction (projection units)
-        length_y: float, optional
-            length of each grid in the y direction (projection units)
-        
+        timeseries_unit: Timestep, optional
+            TimeStep default TimeStep.SECOND
         title: str, optional
             title of the dfs2 file. Default is blank.
         """
 
-        if title is None:
-            title = ""
+        self._write_handle_common_arguments(
+            title, data, items, coordinate, start_time, dt
+        )
 
-        n_time_steps = np.shape(data[0])[0]
         number_y = np.shape(data[0])[1]
         number_x = np.shape(data[0])[2]
 
-        n_items = len(data)
+        if dx is None:
+            if self._dx is not None:
+                dx = self._dx
+            else:
+                dx = 1
 
-        if start_time is None:
-            start_time = datetime.now()
+        if dy is None:
+            if self._dy is not None:
+                dy = self._dy
+            else:
+                dy = 1
 
-        if coordinate is None:
-            coordinate = ["LONG/LAT", 0, 0, 0]
-
-        if items is None:
-            items = [ItemInfo(f"temItem {i+1}") for i in range(n_items)]
-
-        if not all(np.shape(d)[0] == n_time_steps for d in data):
-            raise Warning(
+        if not all(np.shape(d)[0] == self._n_time_steps for d in data):
+            raise ValueError(
                 "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matices [t,y,x]"
+                "Data is list of matrices [t,y,x]"
             )
         if not all(np.shape(d)[1] == number_y for d in data):
-            raise Warning(
+            raise ValueError(
                 "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matices [t,y,x]"
+                "Data is list of matrices [t,y,x]"
             )
         if not all(np.shape(d)[2] == number_x for d in data):
-            raise Warning(
+            raise ValueError(
                 "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [t,y,x,]"
-            )
-
-        if len(items) != n_items:
-            raise Warning(
-                "number of items must correspond to the number of arrays in data list"
+                "Data is list of matrices [t,y,x]"
             )
 
         if datetimes is None:
-            equidistant = True
-
-            if not type(start_time) is datetime:
-                raise Warning("start_time must be of type datetime ")
+            self._is_equidistant = True
         else:
-            equidistant = False
+            self._is_equidistant = False
             start_time = datetimes[0]
 
-        system_start_time = to_dotnet_datetime(start_time)
-
-        # Create an empty dfs2 file object
         factory = DfsFactory()
         builder = Dfs2Builder.Create(title, "mikeio", 0)
 
-        # Set up the header
-        builder.SetDataType(0)
-
-        if coordinate[0] == "LONG/LAT":
-            builder.SetGeographicalProjection(
-                factory.CreateProjectionGeoOrigin(
-                    coordinate[0], coordinate[1], coordinate[2], coordinate[3]
-                )
-            )
-        else:
-            builder.SetGeographicalProjection(
-                factory.CreateProjectionProjOrigin(
-                    coordinate[0], coordinate[1], coordinate[2], coordinate[3]
-                )
-            )
-
-        if equidistant:
-            builder.SetTemporalAxis(
-                factory.CreateTemporalEqCalendarAxis(
-                    timeseries_unit, system_start_time, 0, dt
-                )
-            )
-        else:
-            builder.SetTemporalAxis(
-                factory.CreateTemporalNonEqCalendarAxis(
-                    eumUnit.eumUsec, system_start_time
-                )
-            )
+        self._builder = builder
+        self._factory = factory
 
         builder.SetSpatialAxis(
             factory.CreateAxisEqD2(
-                eumUnit.eumUmeter, number_x, x0, length_x, number_y, y0, length_y
+                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy
             )
         )
 
-        for i in range(n_items):
-            builder.AddDynamicItem(
-                items[i].name,
-                eumQuantity.Create(items[i].type, items[i].unit),
-                DfsSimpleType.Float,
-                DataValueType.Instantaneous,
-            )
+        dfs = self._setup_header(
+            coordinate, start_time, dt, timeseries_unit, items, filename
+        )
 
-        try:
-            builder.CreateFile(filename)
-        except IOError:
-            print("cannot create dfs2 file: ", filename)
-
-        dfs = builder.GetFile()
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
-        for i in range(n_time_steps):
-            for item in range(n_items):
-                d = data[item][i, :, :]
+        for i in range(self._n_time_steps):
+            for item in range(self._n_items):
+                d = self._data[item][i, :, :]
                 d[np.isnan(d)] = deletevalue
                 d = d.reshape(number_y, number_x)
                 d = np.flipud(d)
                 darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
 
-                if equidistant:
+                if self._is_equidistant:
                     dfs.WriteItemTimeStepNext(0, darray)
                 else:
                     t = datetimes[i]
-                    relt = (t - start_time).total_seconds()
+                    relt = (t - self._start_time).total_seconds()
                     dfs.WriteItemTimeStepNext(relt, darray)
 
         dfs.Close()

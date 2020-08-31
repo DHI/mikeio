@@ -1,15 +1,13 @@
 import os
-import numpy as np
 import datetime
-from shutil import copyfile
-
+import numpy as np
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
-def test_simple_create():
+def test_simple_write(tmpdir):
 
-    filename = r"simple.dfs2"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
     data = []
 
@@ -22,23 +20,19 @@ def test_simple_create():
 
     dfs = Dfs2()
 
-    dfs.create(filename=filename, data=data)
+    dfs.write(filename=filename, data=data)
 
-    assert True
-    os.remove(filename)
+    newdfs = Dfs2(filename)
+
+    ds = newdfs.read()
+
+    assert len(ds) == 1
+    assert ds.items[0].type == EUMType.Undefined
 
 
-def test_create_single_item():
+def test_write_single_item(tmpdir):
 
-    start_time = datetime.datetime(2012, 1, 1)
-
-    # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
-    timeseries_unit = 1402
-    dt = 12
-
-    items = [ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)]
-
-    filename = r"random.dfs2"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
     data = []
     d = np.random.random([100, 2, 3])
@@ -55,84 +49,26 @@ def test_create_single_item():
     north = 6098907
     orientation = 0
 
-    coordinate = ["UTM-33", east, north, orientation]
-    length_x = 100
-    length_y = 100
-
-    title = "test dfs2"
-
     dfs = Dfs2()
 
-    dfs.create(
+    dfs.write(
         filename=filename,
         data=data,
-        start_time=start_time,
-        timeseries_unit=timeseries_unit,
-        dt=dt,
-        items=items,
-        coordinate=coordinate,
-        length_x=length_x,
-        length_y=length_y,
-        title=title,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+        coordinate=["UTM-33", east, north, orientation],
+        dx=100,
+        dy=100,
+        title="test dfs2",
     )
 
     assert True
-    os.remove(filename)
 
 
-def test_create_multiple_item():
+def test_non_equidistant_calendar(tmpdir):
 
-    start_time = datetime.datetime(2012, 1, 1)
-
-    # timeseries_unit = second=1400, minute=1401, hour=1402, day=1403, month=1405, year= 1404
-    timeseries_unit = 1402
-    dt = 12
-
-    # TODO change int to enum
-    items = [
-        ItemInfo("testing water level", 100000, 1000),
-        ItemInfo("testing rainfall", 100004, 1002),
-        ItemInfo("testing drain time constant", 100362, 2605),
-    ]
-
-    filename = r"multiple.dfs2"
-
-    data = []
-    d = np.zeros([100, 100, 30]) + 1.0
-    data.append(d)
-    d = np.zeros([100, 100, 30]) + 2.0
-    data.append(d)
-    d = np.zeros([100, 100, 30]) + 3.0
-    data.append(d)
-
-    coordinate = ["LONG/LAT", 12.4387, 55.2257, 0]
-    length_x = 0.1
-    length_y = 0.1
-
-    title = "test dfs2"
-
-    dfs = Dfs2()
-
-    dfs.create(
-        filename=filename,
-        data=data,
-        start_time=start_time,
-        timeseries_unit=timeseries_unit,
-        dt=dt,
-        items=items,
-        coordinate=coordinate,
-        length_x=length_x,
-        length_y=length_y,
-        title=title,
-    )
-
-    assert True
-    os.remove(filename)
-
-
-def test_non_equidistant_calendar():
-
-    filename = r"neq.dfs2"
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
     data = []
 
@@ -147,21 +83,19 @@ def test_non_equidistant_calendar():
 
     dfs = Dfs2()
 
-    dfs.create(filename=filename, data=data, datetimes=datetimes)
+    dfs.write(filename=filename, data=data, datetimes=datetimes)
 
-    ds = dfs.read(filename)
+    newdfs = Dfs2(filename)
+    ds = newdfs.read()
 
-    assert ds.time[1] == datetimes[1]
-
-    assert True
-    os.remove(filename)
+    assert not ds.is_equidistant
 
 
 def test_read():
 
     filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2()
-    ds = dfs.read(filename, item_names=["testing water level"])
+    dfs = Dfs2(filename)
+    ds = dfs.read(["testing water level"])
     data = ds.data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
@@ -171,9 +105,9 @@ def test_read():
 def test_read_item_names():
 
     filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    ds = dfs.read(filename, item_names=["testing water level"])
+    ds = dfs.read(["testing water level"])
     data = ds.data[0]
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
@@ -183,61 +117,73 @@ def test_read_item_names():
 def test_read_numbered_access():
 
     filename = r"tests/testdata/random_two_item.dfs2"
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    res = dfs.read(filename, item_numbers=[1])
+    res = dfs.read([1])
 
     assert np.isnan(res.data[0][0, 0, 0])
     assert res.time is not None
     assert res.items[0].name == "Untitled"
 
 
+def test_write_selected_item_to_new_file(tmpdir):
+
+    filename = r"tests/testdata/random_two_item.dfs2"
+    dfs = Dfs2(filename)
+
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfs2")
+
+    ds = dfs.read(["Untitled"])
+
+    dfs.write(outfilename, ds)
+
+    dfs2 = Dfs2(outfilename)
+
+    ds2 = dfs2.read()
+
+    assert len(ds2) == 1
+    assert ds.items[0].name == "Untitled"
+
+
+def test_write_modified_data_to_new_file(tmpdir):
+
+    filename = r"tests/testdata/gebco_sound.dfs2"
+    dfs = Dfs2(filename)
+
+    outfilename = os.path.join(tmpdir.dirname, "mod.dfs2")
+
+    ds = dfs.read()
+
+    ds.data[0] = ds.data[0] + 10.0
+
+    dfs.write(outfilename, ds)
+
+    dfsmod = Dfs2(outfilename)
+
+    assert dfs._longitude == dfsmod._longitude
+
+
 def test_read_some_time_step():
 
     filename = r"tests/testdata/random_two_item.dfs2"
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    res = dfs.read(filename, time_steps=[1, 2])
+    res = dfs.read(time_steps=[1, 2])
 
     assert res.data[0].shape[0] == 2
     assert len(res.time) == 2
-
-
-def test_write():
-
-    filename1 = r"tests/testdata/random.dfs2"
-    filename2 = r"tests/testdata/random_for_write.dfs2"
-    copyfile(filename1, filename2)
-
-    # read contents of original file
-    dfs = Dfs2()
-    res1 = dfs.read(filename1, [0])
-
-    # overwrite
-    res1.data[0] = -2 * res1.data[0]
-    dfs.write(filename2, res1.data)
-
-    # read contents of manipulated file
-    res1 = dfs.read(filename1, [0])
-    res2 = dfs.read(filename2, [0])
-
-    data1 = res1.data[0]
-    data2 = res2.data[0]
-    assert data2[0, 11, 0] == -2 * data1[0, 11, 0]
-
-    # clean
-    os.remove(filename2)
 
 
 def test_find_index_from_coordinate():
 
     filename = "tests/testdata/gebco_sound.dfs2"
 
-    dfs = Dfs2()
+    dfs = Dfs2(filename)
 
-    ds = dfs.read(filename)
+    # TODO it should not be necessary to read the data to get coordinates
+    ds = dfs.read()
 
-    i, j = dfs.find_closest_element_index(lon=12.74792, lat=55.865)
+    i, j = dfs.find_nearest_element(lon=12.74792, lat=55.865)
 
     assert i == 104
     assert j == 131
@@ -245,12 +191,12 @@ def test_find_index_from_coordinate():
     assert ds.data[0][0, i, j] == -43.0
 
     # try some outside the domain
-    i, j = dfs.find_closest_element_index(lon=11.0, lat=57.0)
+    i, j = dfs.find_nearest_element(lon=11.0, lat=57.0)
 
     assert i == 0
     assert j == 0
 
-    i, j = dfs.find_closest_element_index(lon=15.0, lat=50.0)
+    i, j = dfs.find_nearest_element(lon=15.0, lat=50.0)
 
     assert i == 263
     assert j == 215
