@@ -172,3 +172,35 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 >>> EUMUnit.degree_Kelvin
 degree Kelvin
 ```
+
+## Tested
+
+MIKE IO is tested extensively. **92%** total test coverage.
+
+See detailed test coverage report below:
+
+```
+----------- coverage: platform win32, python 3.7.4-final-0 -----------
+Name                     Stmts   Miss  Cover
+--------------------------------------------
+mikeio\__init__.py          35      1    97%
+mikeio\aggregator.py       104      9    91%
+mikeio\bin\__init__.py       0      0   100%
+mikeio\dfs.py               75      5    93%
+mikeio\dfs0.py             186     34    82%
+mikeio\dfs1.py              75      5    93%
+mikeio\dfs2.py             118     10    92%
+mikeio\dfs3.py             160     78    51%
+mikeio\dfs_util.py          40     14    65%
+mikeio\dfsu.py             218     35    84%
+mikeio\dotnet.py            42      2    95%
+mikeio\dutil.py            117     21    82%
+mikeio\eum.py             1194      3    99%
+mikeio\generic.py          126      1    99%
+mikeio\helpers.py            6      0   100%
+mikeio\mesh.py              92     16    83%
+mikeio\res1d.py            202      7    97%
+mikeio\xns11.py            199      6    97%
+--------------------------------------------
+TOTAL                     2989    247    92%
+```
