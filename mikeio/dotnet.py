@@ -46,7 +46,6 @@ def from_dotnet_datetime(x):
 def asNumpyArray(x):
     """
     Convert .NET array to numpy array
-
     Parameters
     ----------
     x : System.Array
@@ -103,7 +102,6 @@ def to_dotnet_array(x):
     dims = x.shape
     dtype = x.dtype
 
-
     if not x.flags.c_contiguous:
         x = x.copy(order="C")
     assert x.flags.c_contiguous
@@ -124,6 +122,7 @@ def to_dotnet_array(x):
         if destHandle.IsAllocated:
             destHandle.Free()
     return netArray
+
 
 def asnetarray_v2(x):
     if any([type(xi) is list for xi in x]):

@@ -6,11 +6,11 @@ import mikeio
 from mikeio.dfs0 import Dfs0
 from mikeio.eum import TimeStep, EUMType, EUMUnit, ItemInfo
 from datetime import timedelta
-from shutil import copyfile
+
 import pytest
 
 
-def test_simple_create(tmpdir):
+def test_simple_write(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfs0")
 
@@ -22,56 +22,33 @@ def test_simple_create(tmpdir):
 
     dfs = Dfs0()
 
-    dfs.create(filename=filename, data=data)
+    dfs.write(filename=filename, data=data)
 
-    assert True
+    assert os.path.exists(filename)
 
 
-def test_read_units_create_new(tmpdir):
+def test_read_units_write_new(tmpdir):
 
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
 
-    copyfile(dfs0file, tmpfile)
-    dfs = Dfs0()
-    res = dfs.read(tmpfile)
-    data = res.data
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read()
 
-    # Create new file
-    dfs.create(tmpfile, data=data, items=res.items)
+    # write new file
+    dfs.write(tmpfile, ds)
 
     # Verify that new file has same variables/units as original
-    ds = dfs.read(tmpfile)
+    newdfs = Dfs0(tmpfile)
+    ds2 = newdfs.read()
 
-    assert res.items[0].type == ds.items[0].type
-    assert res.items[0].unit == ds.items[0].unit
-
-
-def test_multiple_create():
-
-    dfs0File = r"zeros_ones.dfs0"
-
-    data = []
-
-    nt = 10
-    d1 = np.zeros(nt)
-    data.append(d1)
-    d2 = np.ones(nt)
-    data.append(d2)
-
-    items = [ItemInfo("Zeros"), ItemInfo("Ones")]
-
-    dfs = Dfs0()
-
-    dfs.create(filename=dfs0File, data=data, items=items, title="Zeros and ones")
-
-    assert True
-    os.remove(dfs0File)
+    assert ds2.items[0].type == ds.items[0].type
+    assert ds2.items[0].unit == ds.items[0].unit
 
 
-def test_create_timestep_7days():
+def test_multiple_write(tmpdir):
 
-    dfs0File = r"zeros_ones.dfs0"
+    filename = os.path.join(tmpdir.dirname, "random.dfs0")
 
     data = []
 
@@ -85,8 +62,29 @@ def test_create_timestep_7days():
 
     dfs = Dfs0()
 
-    dfs.create(
-        filename=dfs0File,
+    dfs.write(filename=filename, data=data, items=items, title="Zeros and ones")
+
+    assert os.path.exists(filename)
+
+
+def test_write_timestep_7days(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "random.dfs0")
+
+    data = []
+
+    nt = 10
+    d1 = np.zeros(nt)
+    data.append(d1)
+    d2 = np.ones(nt)
+    data.append(d2)
+
+    items = [ItemInfo("Zeros"), ItemInfo("Ones")]
+
+    dfs = Dfs0()
+
+    dfs.write(
+        filename=filename,
         data=data,
         items=items,
         title="Zeros and ones",
@@ -94,20 +92,21 @@ def test_create_timestep_7days():
         dt=7,
     )
 
-    assert True
+    assert os.path.exists(filename)
 
-    res = dfs.read(dfs0File)
+    newdfs = Dfs0(filename)
+    res = newdfs.read()
 
     dt = res.time[1] - res.time[0]
 
     assert dt == timedelta(days=7)
+    assert res["Zeros"][-1] == 0.0
+    assert res["Ones"][-1] == 1.0
 
-    os.remove(dfs0File)
 
+def test_write_equidistant_calendar(tmpdir):
 
-def test_create_equidistant_calendar():
-
-    dfs0file = r"random.dfs0"
+    dfs0file = os.path.join(tmpdir.dirname, "random.dfs0")
     d1 = np.random.random([1000])
     d2 = np.random.random([1000])
     data = []
@@ -121,7 +120,7 @@ def test_create_equidistant_calendar():
     data_value_type = [0, 1]  # TODO add data_value_type to ItemInfo
     dt = 5
     dfs = Dfs0()
-    dfs.create(
+    dfs.write(
         filename=dfs0file,
         data=data,
         start_time=start_time,
@@ -132,14 +131,11 @@ def test_create_equidistant_calendar():
         data_value_type=data_value_type,
     )
 
-    os.remove(dfs0file)
-    assert True
 
-
-def test_create_non_equidistant_calendar():
-    dfs0file = r"neq.dfs0"
-    d1 = np.random.random([1000])
-    d2 = np.random.random([1000])
+def test_write_non_equidistant_calendar(tmpdir):
+    dfs0file = os.path.join(tmpdir.dirname, "neq.dfs0")
+    d1 = np.zeros(1000)
+    d2 = np.ones([1000])
     data = []
     data.append(d1)
     data.append(d2)
@@ -152,7 +148,7 @@ def test_create_non_equidistant_calendar():
     data_value_type = [0, 1]
 
     dfs = Dfs0()
-    dfs.create(
+    dfs.write(
         filename=dfs0file,
         data=data,
         datetimes=time_vector,
@@ -161,26 +157,37 @@ def test_create_non_equidistant_calendar():
         data_value_type=data_value_type,
     )
 
-    assert True
-    os.remove(dfs0file)
+    assert os.path.exists(dfs0file)
 
 
 def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = Dfs0()
-    df = dfs.to_dataframe(dfs0file)
+    dfs = Dfs0(dfs0file)
+    df = dfs.to_dataframe()
 
     assert df.index.freq is not None
+
+    df = dfs.to_dataframe(round_time=False)
+
+
+def test_read_equidistant_dfs0_to_dataframe_unit_in_name():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = Dfs0(dfs0file)
+    df = dfs.to_dataframe(unit_in_name=True)
+
+    assert "meter" in df.columns[0]
 
 
 def test_read_nonequidistant_dfs0_to_dataframe_no_freq():
 
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
-    dfs = Dfs0()
-    df = dfs.to_dataframe(dfs0file)
+    dfs = Dfs0(dfs0file)
+    df = dfs.to_dataframe()
 
     assert df.index.freq is None
 
@@ -189,15 +196,15 @@ def test_read_dfs0_delete_value_conversion():
 
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
-    dfs = Dfs0()
-    ds = dfs.read(dfs0file)
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read()
 
     assert np.isnan(ds.data[3][1])
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = Dfs0()
-    ds = dfs.read(dfs0file)
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read()
 
     assert np.isnan(ds.data[0][2])
 
@@ -215,14 +222,15 @@ def test_read_dfs0_small_value_not_delete_value(tmpdir):
 
     dfs = Dfs0()
 
-    dfs.create(filename=filename, data=data)
+    dfs.write(filename=filename, data=data)
 
-    ds = dfs.read(filename)
+    dfs = Dfs0(filename)
+    ds = dfs.read()
 
     assert not np.isnan(ds.data[0]).any()
 
 
-def test_create_from_data_frame(tmpdir):
+def test_write_from_data_frame(tmpdir):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -236,6 +244,8 @@ def test_create_from_data_frame(tmpdir):
         df, filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
     )  # Could not find better type
 
+    assert os.path.exists(filename)
+
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 5
@@ -243,7 +253,7 @@ def test_create_from_data_frame(tmpdir):
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
 
 
-def test_create_from_data_frame_monkey_patched(tmpdir):
+def test_write_from_data_frame_monkey_patched(tmpdir):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -263,9 +273,10 @@ def test_create_from_data_frame_monkey_patched(tmpdir):
     assert len(ds.items) == 5
     assert ds.items[0].type == EUMType.Concentration
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"][3])
 
 
-def test_create_from_data_frame_different_types(tmpdir):
+def test_write_from_data_frame_different_types(tmpdir):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -299,8 +310,8 @@ def test_read_dfs0_single_item():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = Dfs0()
-    ds = dfs.read(dfs0file, item_numbers=[1])
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read([1])
 
     assert len(ds.data) == 1
 
@@ -309,21 +320,30 @@ def test_read_dfs0_single_item_named_access():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = Dfs0()
-    res = dfs.read(dfs0file, item_numbers=[1])
+    dfs = Dfs0(dfs0file)
+    res = dfs.read(items=[1])
     data = res.data
 
     assert len(data) == 1
+
+
+def test_read_dfs0_temporal_subset():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read(time_steps=[1, 2])
+
+    assert len(ds.time) == 2
+    assert ds.time[0].strftime("%H") == "05"
 
 
 def test_read_dfs0_single_item_read_by_name():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = Dfs0()
-    res = dfs.read(
-        dfs0file, item_names=["NotFun", "VarFun01"]
-    )  # reversed order compare to original file
+    dfs = Dfs0(dfs0file)
+    res = dfs.read(["NotFun", "VarFun01"])  # reversed order compare to original file
     data = res.data
 
     assert len(data) == 2
@@ -337,8 +357,8 @@ def test_read_dfs0_to_dataframe():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = Dfs0()
-    pd = dfs.to_dataframe(dfs0file)
+    dfs = Dfs0(dfs0file)
+    pd = dfs.to_dataframe()
 
     assert np.isnan(pd[pd.columns[0]][2])
 
@@ -346,92 +366,33 @@ def test_read_dfs0_to_dataframe():
 def test_read_dfs0_to_matrix():
     dfs0file = r"tests/testdata/random.dfs0"
 
-    dfs = Dfs0()
-    ds = dfs.read(filename=dfs0file)
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read()
 
     assert len(ds.data) == 2
-
-
-def test_write(tmpdir):
-    dfs0file = r"tests/testdata/random.dfs0"
-    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
-
-    copyfile(dfs0file, tmpfile)
-    dfs = Dfs0()
-    res = dfs.read(tmpfile)
-    data = res.data
-
-    # Do something with the data
-    data[0] = np.zeros_like(data[0])
-    data[1] = np.ones_like(data[0])
-
-    # Overwrite the file
-    dfs.write(tmpfile, data)
 
 
 def test_write_data_with_missing_values(tmpdir):
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
 
-    copyfile(dfs0file, tmpfile)
-    dfs = Dfs0()
-    res = dfs.read(tmpfile)
-    data = res.data
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read()
 
     # Do something with the data
-    data[0] = np.zeros_like(data[0])
-    data[1] = np.ones_like(data[0])
+    ds.data[0] = np.zeros_like(ds.data[0])
+    ds.data[1] = np.ones_like(ds.data[0])
 
     # Add some NaNs
-    data[1][0:10] = np.nan
+    ds.data[1][0:10] = np.nan
 
     # Overwrite the file
-    dfs.write(tmpfile, data)
+    dfs.write(tmpfile, ds)
 
     # Write operation does not modify the data
-    assert(np.isnan(data[1][1]))
+    assert np.isnan(ds.data[1][1])
 
-    modified = dfs.read(tmpfile)
-    assert(np.isnan(modified.data[1][5]))
+    moddfs = Dfs0(tmpfile)
+    modified = moddfs.read()
+    assert np.isnan(modified.data[1][5])
 
-
-
-def test_write_wrong_n_items(tmpdir):
-    dfs0file = r"tests/testdata/random.dfs0"
-    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
-
-    copyfile(dfs0file, tmpfile)
-    dfs = Dfs0()
-    res = dfs.read(tmpfile)
-    data = res.data
-
-    # One item too many...
-    data[0] = np.zeros_like(data[0])
-    data[1] = np.ones_like(data[0])
-    data.append(np.ones_like(data[0]))
-
-    # Overwrite the file
-    with pytest.raises(Exception):
-        dfs.write(tmpfile, data)
-
-
-def test_write_no_existing_file():
-    dfs0file = r"tests/testdata/random.dfs0"
-
-    dfs = Dfs0()
-    res = dfs.read(dfs0file)
-    data = res.data
-
-    # Overwrite the file
-    with pytest.raises(Exception):
-        dfs.write("not_a_file", data)
-
-
-def test_read_dfs0_main_module():
-
-    dfs0file = r"tests/testdata/random.dfs0"
-
-    dfs = mikeio.Dfs0()
-    ds = dfs.read(dfs0file, item_numbers=[1])
-
-    assert len(ds.data) == 1

@@ -43,7 +43,7 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
     ax = dfs_in.ItemInfo[0].SpatialAxis
     n_time_steps = fileInfo.TimeAxis.NumberOfTimeSteps
     if n_time_steps == 0:
-        raise Warning("Static dfs2 files (with no time steps) are not supported.")
+        raise ValueError("Static dfs2 files (with no time steps) are not supported.")
 
     # Create an empty dfs1 file object
     factory = DfsFactory()
@@ -72,7 +72,7 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
 
     # assume no compression keys
     if fileInfo.IsFileCompressed:
-        raise Warning("Compressed files not supported")
+        raise ValueError("Compressed files not supported")
 
     # custom blocks
     # cb = fileInfo.CustomBlocks #[0]
@@ -137,7 +137,7 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
     # Basic info from input file
     n_time_steps = fileInfo.TimeAxis.NumberOfTimeSteps
     if n_time_steps == 0:
-        raise Warning("Static dfs files (with no time steps) are not supported.")
+        raise ValueError("Static dfs files (with no time steps) are not supported.")
 
     # Create an empty dfs1 file object
     factory = DfsFactory()
