@@ -43,6 +43,45 @@ def from_dotnet_datetime(x):
     return datetime.datetime(x.Year, x.Month, x.Day, x.Hour, x.Minute, x.Second)
 
 
+def asNumpyArray(x):
+    """
+    Convert .NET array to numpy array
+    Parameters
+    ----------
+    x : System.Array
+        
+    Returns
+    -------
+    np.ndarray
+        
+    Notes
+    -----
+    Given a CLR `System.Array` returns a `numpy.ndarray`.  See _MAP_NET_NP for 
+    the mapping of CLR types to Numpy dtypes.
+    """
+    dims = np.empty(x.Rank, dtype=int)
+    for I in range(x.Rank):
+        dims[I] = x.GetLength(I)
+    netType = x.GetType().GetElementType().Name
+
+    try:
+        npArray = np.empty(dims, order="C", dtype=_MAP_NET_NP[netType])
+    except KeyError:
+        raise NotImplementedError(
+            "asNumpyArray does not yet support System type {}".format(netType)
+        )
+
+    try:  # Memmove
+        sourceHandle = GCHandle.Alloc(x, GCHandleType.Pinned)
+        sourcePtr = sourceHandle.AddrOfPinnedObject().ToInt64()
+        destPtr = npArray.__array_interface__["data"][0]
+        ctypes.memmove(destPtr, sourcePtr, npArray.nbytes)
+    finally:
+        if sourceHandle.IsAllocated:
+            sourceHandle.Free()
+    return npArray
+
+
 def to_dotnet_array(x):
     """
     Convert numpy array to .NET array with same data type (single, double,...)
@@ -83,6 +122,7 @@ def to_dotnet_array(x):
         if destHandle.IsAllocated:
             destHandle.Free()
     return netArray
+
 
 def asnetarray_v2(x):
     if any([type(xi) is list for xi in x]):

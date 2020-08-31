@@ -47,11 +47,7 @@ def read(filename, items=None, time_steps=None):
 
     _, ext = os.path.splitext(filename)
 
-    if ext == ".dfsu":
-
-        dfs = Dfsu()
-
-    elif ext == ".dfs0":
+    if ext == ".dfs0":
 
         dfs = Dfs0(filename)
 
