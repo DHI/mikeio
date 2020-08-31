@@ -241,7 +241,7 @@ class _UnstructuredGeometry:
             for idx in elem_nodes:
                 new_elem_nodes.append(node_dict[idx])
             self._element_table[j] = new_elem_nodes
-            
+
         self._node_ids = np.array(list(new_node_ids))
         self._element_ids = np.array(list(new_element_ids))
 
@@ -268,6 +268,8 @@ class _UnstructuredGeometry:
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
+        element_ids = np.sort(element_ids) # make sure elements are sorted!
+
         # extract information for selected elements
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
             element_ids, 
@@ -309,9 +311,37 @@ class _UnstructuredGeometry:
                 if (self._type == 3 or self._type == 5) and n_layers == geom._n_sigma:
                     geom._type = self._type-1  # no-longer any z-layers! type is changed
 
-                geom._top_elems = np.intersect1d(self.top_element_ids, element_ids, assume_unique=True)
-        
+                # this is wrong - find top elements manually instead by looping over all 
+                # 2d elements, that can be done directly on new element_ids 
+                # geom._top_elems = np.intersect1d(self.top_element_ids, element_ids, assume_unique=True)
+                # elem_dict = dict(zip(element_ids, geom.element_ids))  # old-to-new
+                # for idx in range(len(geom._top_elems)):
+                #     old_idx = geom._top_elems[idx]
+                #     geom._top_elems[idx] = elem_dict[old_idx]
+                geom._top_elems = geom._get_top_elements_from_coordinates()
+            
         return geom
+
+    def _get_top_elements_from_coordinates(self, ec=None):
+        """Get list of top element ids based on element coordinates        
+        """
+        if ec is None:
+            ec = self.element_coordinates
+
+        d_eps = 1e-4
+        top_elems = []
+        x_old = ec[0,0]
+        y_old = ec[0,1]
+        for j in range(1,len(ec)):
+            d2 = (ec[j,0]-x_old)**2 + (ec[j,1]-y_old)**2
+            #print(d2)
+            if d2 > d_eps:
+                # this is a new x,y point
+                # then the previous element must be a top element
+                top_elems.append(j-1)
+            x_old = ec[j,0]
+            y_old = ec[j,1]
+        return np.array(top_elems)
 
     def to_2d_geometry(self):        
         """extract 2d geometry from 3d geometry
@@ -465,7 +495,27 @@ class _UnstructuredGeometry:
         self._ec = ec
         return ec
 
-    def find_n_nearest_element_index(self, x, y, z=None, n=1):
+    def find_n_nearest_elements(self, x, y, z=None, n=1, layer=None):
+        """Find n nearest elements (for each of the points given) 
+
+        Parameters
+        ----------
+
+        x: float or list(float)
+            X coordinate(s) (easting or longitude)
+        y: float or list(float)
+            Y coordinate(s) (northing or latitude)
+        z: float or list(float), optional
+            Z coordinate(s)  (vertical coordinate, positive upwards)
+            If not provided for a 3d file, the surface element is returned
+        layer: int, optional
+            Search in a specific layer only (3D files only)
+
+        Returns
+        -------
+        np.array
+            element ids of nearest element(s)            
+        """        
         ec = self.element_coordinates
 
         if self.is_2d:
@@ -480,21 +530,26 @@ class _UnstructuredGeometry:
             d2d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
             elem2d = d2d.argsort()[0:n]    # n nearest 2d elements
             
-            # TODO: loop over 2d elements, to get n lateral 3d neighbors
-            elem3d = self.e2_e3_table[elem2d[0]]
-            zc = self.element_coordinates[elem3d, 2]
+            if layer is None:
+                # TODO: loop over 2d elements, to get n lateral 3d neighbors
+                elem3d = self.e2_e3_table[elem2d[0]]
+                zc = self.element_coordinates[elem3d, 2]
 
-            if z is None:
-                z = 0   # should we rarther return whole column?
-            d3d = np.abs(z-zc)
-            idx = elem3d[d3d.argsort()[0]]
+                if z is None:
+                    z = 0   # should we rarther return whole column?
+                d3d = np.abs(z-zc)
+                idx = elem3d[d3d.argsort()[0]]
+            else:
+                elem3d = self.e2_e3_table[elem2d]  # 3d elements for n nearest 2d elements
+                layer_ids = self.layer_ids[elem3d]
+                idx = elem3d[layer_ids==layer]   # return at most 
 
         if n == 1 and (not np.isscalar(idx)):
             idx = idx[0]
         return idx
 
-    def find_nearest_element(self, x, y, z=None):
-        """Find index of _nearest element 
+    def find_nearest_element(self, x, y, z=None, layer=None):
+        """Find index of nearest element (optionally for a list)
 
         Parameters
         ----------
@@ -504,10 +559,18 @@ class _UnstructuredGeometry:
         y: float or list(float)
             Y coordinate(s) (northing or latitude)
         z: float or list(float), optional
-            Z coordinate(s)  (depth, positive upwards)
+            Z coordinate(s)  (vertical coordinate, positive upwards)
+            If not provided for a 3d file, the surface element is returned
+        layer: int, optional
+            Search in a specific layer only (3D files only)
+
+        Returns
+        -------
+        np.array
+            element ids of nearest element(s)
         """
         if np.isscalar(x):
-            return self.find_n_nearest_element_index(x, y, z, n=1)
+            return self.find_n_nearest_elements(x, y, z, n=1, layer=layer)
         else:
             nx = len(x)
             ny = len(y)
@@ -517,13 +580,13 @@ class _UnstructuredGeometry:
             idx = np.zeros(nx, dtype=int)
             if z is None:
                 for j in range(nx):
-                    idx[j] = self.find_n_nearest_element_index(x[j], y[j], z=None, n=1)
+                    idx[j] = self.find_n_nearest_elements(x[j], y[j], z=None, n=1, layer=layer)
             else: 
                 nz = len(z)
                 if nx != nz:
                     print(f"z must have same length as x and y")
                 for j in range(nx):
-                    idx[j] = self.find_n_nearest_element_index(x[j], y[j], z[j], n=1)
+                    idx[j] = self.find_n_nearest_elements(x[j], y[j], z[j], n=1, layer=layer)
         return idx
 
     def _find_nearest_2d_element(self, x, y):
@@ -540,18 +603,18 @@ class _UnstructuredGeometry:
             return self.e2_e3_table[elem2d]
 
     def find_nearest_profile_elements(self, x, y):
-        """Find 3d elements of profile _nearest to (x,y) coordinates
+        """Find 3d elements of profile nearest to (x,y) coordinates
 
         Parameters
         ----------
         x : float
-            x-coordinate of profile to be extracted
+            x-coordinate of point
         y : float
-            y-coordinate of profile to be extracted 
+            y-coordinate of point
 
         Returns
         -------
-        list(int)
+        np.array(int)
             element ids of vertical profile
         """
         if self.is_2d:
@@ -565,7 +628,7 @@ class _UnstructuredGeometry:
         """Calculate the horizontal area of each element.
 
         Returns:
-        np.array
+        np.array(float)
             areas in m2
         """
         n_elements = self.n_elements
@@ -579,11 +642,11 @@ class _UnstructuredGeometry:
         ycoords = np.empty(8)
 
         for j in range(n_elements):
-            nodes = self.element_table[j] #_source.ElementTable[j]
+            nodes = self.element_table[j]
             n_nodes = len(nodes)
 
             for i in range(n_nodes):
-                nidx = nodes[i] # - 1
+                nidx = nodes[i]
                 xcoords[i] = xn[nidx]
                 ycoords[i] = yn[nidx]
 
@@ -733,18 +796,19 @@ class _UnstructuredGeometry:
         ----------
         n : int or list(int)
             layer between 1 (bottom) and n_layers (top) 
-            (can also be negative with 0 as top layer )
+            (can also be negative counting from 0 at the top layer)
 
         Returns
         -------
         np.array(int)
             element ids
         """
-        if hasattr(n, "__len__"):
+        if not np.isscalar(n):
             elem_ids = []
             for nn in n:
                 elem_ids.append(self.get_layer_element_ids(nn))
-            return np.concatenate(elem_ids, axis=0)
+            elem_ids = np.concatenate(elem_ids, axis=0)
+            return np.sort(elem_ids)
 
         n_lay = self.n_layers
         if n_lay is None:
