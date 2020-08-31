@@ -15,7 +15,28 @@ def test_read_all_items_returns_all_items_and_names():
 
     ds = dfs.read()
 
+    ds_text = repr(ds)
+    dfs_text = repr(dfs)
+
     assert len(ds) == 4
+
+
+def test_read_item_0():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(1)
+
+    assert len(ds) == 1
+
+
+def test_read_timestep_1():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(time_steps=1)
+
+    assert len(ds.time) == 1
 
 
 def test_read_simple_3d():
@@ -476,7 +497,14 @@ def test_write_from_dfsu(tmpdir):
 
     dfs.write(outfilename, ds)
 
+    assert dfs.start_time.hour == 7
+
     assert os.path.exists(outfilename)
+
+    newdfs = Dfsu(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time
 
 
 def test_write_from_dfsu_default_items_numbered(tmpdir):
@@ -670,4 +698,11 @@ def test_elements_to_geometry():
     geom = dfs.elements_to_geometry(prof_ids)
 
     assert geom.n_layers == 5
+
+
+def test_to_shapely():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    shp = dfs.to_shapely()
+    assert True
 
