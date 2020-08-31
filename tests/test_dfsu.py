@@ -658,11 +658,8 @@ def test_to_mesh_3d(tmpdir):
     assert True
 
 
-@pytest.mark.skip(reason="Fails with no element table")
 def test_to_mesh_2d(tmpdir):
-
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-
     dfs = Dfsu(filename)
 
     outfilename = os.path.join(tmpdir, "hd2d.mesh")

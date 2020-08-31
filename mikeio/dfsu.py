@@ -1432,6 +1432,7 @@ class Dfsu(_UnstructuredFile):
             path to file to be written
         """
         if self.is_2d:
+            _ = self.element_table # make sure element table has been constructured 
             geometry = self
         else:
             geometry = self.to_2d_geometry()
