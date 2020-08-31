@@ -338,7 +338,7 @@ class Dfs0:
             rounded_idx = pd.DatetimeIndex(ds.time).round(round_time)
             df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
         else:
-            df.index = pd.DatetimeIndex(t, freq="infer")
+            df.index = pd.DatetimeIndex(ds.time, freq="infer")
 
         return df
 

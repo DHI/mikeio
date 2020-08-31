@@ -169,6 +169,18 @@ def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
 
     assert df.index.freq is not None
 
+    df = dfs.to_dataframe(round_time=False)
+
+
+def test_read_equidistant_dfs0_to_dataframe_unit_in_name():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = Dfs0(dfs0file)
+    df = dfs.to_dataframe(unit_in_name=True)
+
+    assert "meter" in df.columns[0]
+
 
 def test_read_nonequidistant_dfs0_to_dataframe_no_freq():
 
