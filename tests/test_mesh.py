@@ -34,7 +34,7 @@ def test_get_land_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 
-    nc = msh.node_coordinates[msh.codes==1]
+    nc = msh.node_coordinates[msh.codes == 1]
 
     assert nc.shape == (134, 3)
 
@@ -60,7 +60,7 @@ def test_plot_mesh_part():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 
-    msh.plot(elements=list(range(0,100)))
+    msh.plot(elements=list(range(0, 100)))
 
     assert True
 
@@ -70,6 +70,7 @@ def test_plot_mesh_boundary_nodes():
     msh = Mesh(filename)
 
     msh.plot_boundary_nodes()
+    msh.plot_boundary_nodes(["Land", "Sea"])
 
     assert True
 
@@ -77,10 +78,10 @@ def test_plot_mesh_boundary_nodes():
 def test_set_z():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
-    zn = msh.node_coordinates[:,2]
-    zn[zn<-3] = -3
+    zn = msh.node_coordinates[:, 2]
+    zn[zn < -3] = -3
     msh.set_z(zn)
-    zn = msh.node_coordinates[:,2]
+    zn = msh.node_coordinates[:, 2]
     assert zn.min() == -3
 
 
@@ -89,7 +90,7 @@ def test_set_codes():
     msh = Mesh(filename)
     codes = msh.codes
     assert msh.codes[2] == 2
-    codes[codes==2] = 7
+    codes[codes == 2] = 7
     msh.set_codes(codes)
     assert msh.codes[2] == 7
 
@@ -111,6 +112,6 @@ def test_write_part(tmpdir):
 
     msh = Mesh(meshfilename)
 
-    msh.write(outfilename, elements=list(range(0,100)))
+    msh.write(outfilename, elements=list(range(0, 100)))
 
     assert os.path.exists(outfilename)

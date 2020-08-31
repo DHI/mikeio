@@ -15,6 +15,8 @@ def test_read_all_items_returns_all_items_and_names():
 
     ds = dfs.read()
 
+    assert dfs.n_items == 4
+
     ds_text = repr(ds)
     dfs_text = repr(dfs)
 
@@ -24,6 +26,8 @@ def test_read_all_items_returns_all_items_and_names():
 def test_read_item_0():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
+
+    assert dfs.n_items == 4
 
     ds = dfs.read(1)
 
@@ -208,6 +212,16 @@ def test_find_nearest_element_2d():
     assert elem_id == 317
 
 
+def test_find_nearest_element_2d_array():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    elem_ids = dfs.find_nearest_element(x=[606200, 606200], y=[6905480, 6905480])
+    assert len(elem_ids) == 2
+    assert elem_ids[0] == 317
+    assert elem_ids[1] == 317
+
+
 def test_find_nearest_element_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
@@ -217,7 +231,7 @@ def test_find_nearest_element_3d():
     assert elem_id in dfs.top_elements
 
     elem_id = dfs.find_nearest_element(333934, 6158101, layer=8)
-    assert elem_id == 5322    
+    assert elem_id == 5322
 
     elem_id = dfs.find_nearest_element(333934, 6158101, -7)
     assert elem_id == 5320
@@ -227,7 +241,7 @@ def find_nearest_profile_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
     elem_ids = dfs.find_nearest_profile_elements(333934, 6158101)
-    
+
     assert elem_ids[0] == 5320
     assert elem_ids[-1] == 5323
 
@@ -289,7 +303,7 @@ def test_n_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_layers is None 
+    assert dfs.n_layers is None
 
 
 def test_n_sigma_layers():
@@ -308,7 +322,7 @@ def test_n_sigma_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_sigma_layers is None 
+    assert dfs.n_sigma_layers is None
 
 
 def test_n_z_layers():
@@ -327,7 +341,7 @@ def test_n_z_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_z_layers is None 
+    assert dfs.n_z_layers is None
 
 
 def test_boundary_codes():
@@ -360,7 +374,7 @@ def test_top_elements():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.top_elements is None 
+    assert dfs.top_elements is None
 
 
 def test_bottom_elements():
@@ -381,9 +395,9 @@ def test_bottom_elements():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.bottom_elements is None     
+    assert dfs.bottom_elements is None
 
-    
+
 def test_n_layers_per_column():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = Dfsu(filename)
@@ -403,7 +417,7 @@ def test_n_layers_per_column():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_layers_per_column is None         
+    assert dfs.n_layers_per_column is None
 
 
 def test_get_layer_elements():
@@ -420,11 +434,12 @@ def test_get_layer_elements():
     assert elem_ids[5] == 8639
     assert len(elem_ids) == 10
 
-    elem_ids = dfs.get_layer_elements([1,3])
+    elem_ids = dfs.get_layer_elements([1, 3])
     assert len(elem_ids) == 197
 
     with pytest.raises(Exception):
         elem_ids = dfs.get_layer_elements(12)
+
 
 def test_find_nearest_profile_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
@@ -463,7 +478,7 @@ def test_get_element_area_3D():
 def test_get_element_area_LONGLAT():
     filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
     dfs = Dfsu(filename)
-    
+
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
 
@@ -696,7 +711,11 @@ def test_elements_to_geometry():
     prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
     geom = dfs.elements_to_geometry(prof_ids)
 
+    text = repr(geom)
+
     assert geom.n_layers == 5
+
+    assert "nodes" in text
 
 
 def test_to_shapely():
