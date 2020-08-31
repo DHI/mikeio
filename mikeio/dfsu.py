@@ -28,7 +28,7 @@ from .helpers import safe_length  # , dist_in_meters
 
 
 class UnstructuredType(IntEnum):
-        """
+    """
         -1: Mesh: 2D unstructured MIKE mesh
         0: Dfsu2D: 2D area series
         1: DfsuVerticalColumn: 1D vertical column
@@ -36,14 +36,16 @@ class UnstructuredType(IntEnum):
         3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
         4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
         5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
-        """    
-        Mesh = -1
-        Dfsu2D = 0
-        DfsuVerticalColumn = 1
-        DfsuVerticalProfileSigma = 2        
-        DfsuVerticalProfileSigmaZ = 3
-        Dfsu3DSigma = 4
-        Dfsu3DSigmaZ = 5
+        """
+
+    Mesh = -1
+    Dfsu2D = 0
+    DfsuVerticalColumn = 1
+    DfsuVerticalProfileSigma = 2
+    DfsuVerticalProfileSigmaZ = 3
+    Dfsu3DSigma = 4
+    Dfsu3DSigmaZ = 5
+
 
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
@@ -223,7 +225,9 @@ class _UnstructuredGeometry:
             new_elem_table.append(elem_nodes)
         return asnetarray_v2(new_elem_table)
 
-    def _set_nodes(self, node_coordinates, codes=None, node_ids=None, projection_string=None):
+    def _set_nodes(
+        self, node_coordinates, codes=None, node_ids=None, projection_string=None
+    ):
         self._nc = np.asarray(node_coordinates)
         if codes is None:
             codes = np.zeros(len(node_coordinates), dtype=int)
@@ -265,12 +269,8 @@ class _UnstructuredGeometry:
         self._node_ids = np.array(list(new_node_ids))
         self._element_ids = np.array(list(new_element_ids))
 
-    def get_element_table_for_elements(self, elements):
-        elem_tbl = []
-        for j in elements:
-            elem_nodes = self.element_table[j]
-            elem_tbl.append(elem_nodes)
-        return elem_tbl
+    def get_element_table_for_elements(self, element_ids):
+        return [self.element_table[j] for j in element_ids]
 
     def elements_to_geometry(self, elements, node_layers="all"):
         """export elements to new geometry
@@ -316,7 +316,10 @@ class _UnstructuredGeometry:
             unique_layer_ids = np.unique(layers_used)
             n_layers = len(unique_layer_ids)
 
-            if (self._type == UnstructuredType.Dfsu3DSigma or UnstructuredType.Dfsu3DSigmaZ) and n_layers == 1:
+            if (
+                self._type == UnstructuredType.Dfsu3DSigma
+                or UnstructuredType.Dfsu3DSigmaZ
+            ) and n_layers == 1:
                 # If source is 3d, but output only has 1 layer
                 # then change type to 2d
                 geom._type = UnstructuredType.Dfsu2D
@@ -332,9 +335,12 @@ class _UnstructuredGeometry:
                 geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
 
                 # If source is sigma-z but output only has sigma layers
-                # then change type accordingly 
-                if (self._type == UnstructuredType.DfsuVerticalProfileSigmaZ or self._type == UnstructuredType.Dfsu3DSigmaZ) and n_layers == geom._n_sigma:
-                    geom._type = UnstructuredType(self._type.value - 1)                    
+                # then change type accordingly
+                if (
+                    self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
+                    or self._type == UnstructuredType.Dfsu3DSigmaZ
+                ) and n_layers == geom._n_sigma:
+                    geom._type = UnstructuredType(self._type.value - 1)
 
                 geom._top_elems = geom._get_top_elements_from_coordinates()
 
@@ -391,7 +397,7 @@ class _UnstructuredGeometry:
         )
         geom._set_elements(elem_tbl, self.element_ids[elem_ids])
 
-        geom._type = UnstructuredType.Mesh 
+        geom._type = UnstructuredType.Mesh
 
         geom._reindex()
 
@@ -1016,7 +1022,10 @@ class _UnstructuredFile(_UnstructuredGeometry):
             out.append(f"Projection: {self.projection_string}")
         if not self.is_2d:
             out.append(f"Number of sigma layers: {self.n_sigma_layers}")
-        if self._type == UnstructuredType.DfsuVerticalProfileSigmaZ or self._type == UnstructuredType.Dfsu3DSigmaZ:
+        if (
+            self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
+            or self._type == UnstructuredType.Dfsu3DSigmaZ
+        ):
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if self._n_items is not None:
             out.append(f"Number of items: {self._n_items}")
@@ -1429,6 +1438,7 @@ class Dfsu(_UnstructuredFile):
             # TODO: print warning if sigma-z
         Mesh._geometry_to_mesh(outfilename, geometry)
 
+
 class Mesh(_UnstructuredFile):
     def __init__(self, filename):
         super().__init__()
@@ -1446,7 +1456,7 @@ class Mesh(_UnstructuredFile):
         if len(z) != self.n_nodes:
             raise Exception(f"z must have length of nodes ({self.n_nodes})")
         self._nc[:, 2] = z
-        self._ec = None 
+        self._ec = None
 
     def set_codes(self, codes):
         """Change the code values of the nodes
@@ -1457,7 +1467,7 @@ class Mesh(_UnstructuredFile):
             code of each node
         """
         if len(codes) != self.n_nodes:
-            raise Exception(f"codes must have length of nodes ({self.n_nodes})")        
+            raise Exception(f"codes must have length of nodes ({self.n_nodes})")
         self._codes = codes
         self._valid_codes = None
 
