@@ -455,10 +455,10 @@ class _UnstructuredGeometry:
         """Center coordinates of each element
         """
         if self._ec is None:
-            self._ec = self.get_element_coords()
+            self._ec = self._get_element_coords()
         return self._ec
 
-    def get_element_coords(self):
+    def _get_element_coords(self):
         """Calculates the coordinates of the center of each element.
         Returns
         -------
@@ -1079,12 +1079,22 @@ class Dfsu(_UnstructuredFile):
     def element_coordinates(self):
         # faster way of getting element coordinates than base class implementation
         if self._ec is None:
-            xc = np.zeros(self.n_elements)
-            yc = np.zeros(self.n_elements)
-            zc = np.zeros(self.n_elements)
-            _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc))
-            self._ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
+            self._ec = _get_element_coords_from_source
         return self._ec
+
+    def _get_element_coords_from_source(self):
+        """Calculates the coordinates of the center of each element using DfsuUtil
+        Returns
+        -------
+        np.array
+            x,y,z of each element
+        """
+        xc = np.zeros(self.n_elements)
+        yc = np.zeros(self.n_elements)
+        zc = np.zeros(self.n_elements)
+        _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc))
+        ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
+        return ec
 
     @property 
     def deletevalue(self):
@@ -1377,15 +1387,15 @@ class Dfsu(_UnstructuredFile):
             geometry = self.to_2d_geometry()
         Mesh._geometry_to_mesh(outfilename, geometry)
 
-    def get_element_coords(self):
-        """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
-        """
-        return self.element_coordinates
+    # def get_element_coords(self):
+    #     """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
+    #     """
+    #     return self.element_coordinates
 
-    def get_number_of_time_steps(self):
-        """FOR BACKWARD COMPATIBILITY ONLY. Use n_timesteps instead.
-        """
-        return self.n_timesteps
+    # def get_number_of_time_steps(self):
+    #     """FOR BACKWARD COMPATIBILITY ONLY. Use n_timesteps instead.
+    #     """
+    #     return self.n_timesteps
 
 
 
