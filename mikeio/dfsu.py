@@ -24,7 +24,7 @@ from .dotnet import (
     asnetarray_v2,
 )
 from .eum import TimeStep, ItemInfo, EUMType, EUMUnit
-from .helpers import safe_length  # , dist_in_meters
+from .helpers import safe_length 
 
 
 class UnstructuredType(IntEnum):
@@ -93,10 +93,14 @@ class _UnstructuredGeometry:
 
     @property
     def n_nodes(self):
+        """Number of nodes
+        """
         return self._n_nodes
 
     @property
     def node_coordinates(self):
+        """Coordinates (x,y,z) of all nodes
+        """
         return self._nc
 
     @property
@@ -105,6 +109,8 @@ class _UnstructuredGeometry:
 
     @property
     def n_elements(self):
+        """Number of elements
+        """
         return self._n_elements
 
     @property
@@ -113,10 +119,14 @@ class _UnstructuredGeometry:
 
     @property
     def codes(self):
+        """Node codes of all nodes
+        """
         return self._codes
 
     @property
     def valid_codes(self):
+        """Unique list of node codes
+        """
         if self._valid_codes is None:
             self._valid_codes = list(set(self.codes))
         return self._valid_codes
@@ -133,6 +143,8 @@ class _UnstructuredGeometry:
 
     @property
     def is_geo(self):
+        """Are coordinates geographical (LONG/LAT)?
+        """
         return self._projstr == "LONG/LAT"
 
     @property
@@ -141,12 +153,16 @@ class _UnstructuredGeometry:
 
     @property
     def element_table(self):
+        """Element to node connectivity
+        """
         if (self._element_table is None) and (self._element_table_dotnet is not None):
             self._element_table = self._get_element_table_from_dotnet()
         return self._element_table
 
     @property
     def max_nodes_per_element(self):
+        """The maximum number of nodes for an element
+        """
         maxnodes = 0
         for local_nodes in self.element_table:
             n = len(local_nodes)
@@ -156,7 +172,15 @@ class _UnstructuredGeometry:
 
     @property
     def is_2d(self):
+        """Type is either mesh or Dfsu2D (2 horizontal dimensions)
+        """
         return self._type <= 0
+
+    @property 
+    def is_tri_only(self):
+        """Does the mesh consist of triangles only?
+        """
+        return (self.max_nodes_per_element==3 or self.max_nodes_per_element==6)
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
@@ -243,8 +267,8 @@ class _UnstructuredGeometry:
         self._node_ids = np.array(list(new_node_ids))
         self._element_ids = np.array(list(new_element_ids))
 
-    def _get_element_table_for_elements(self, element_ids):
-        return [self.element_table[j] for j in element_ids]
+    def _get_element_table_for_elements(self, elements):
+        return [self.element_table[j] for j in elements]
 
     def elements_to_geometry(self, elements, node_layers="all"):
         """export elements to new geometry
@@ -566,18 +590,18 @@ class _UnstructuredGeometry:
                     )
         return idx
 
-    def _find_nearest_2d_element(self, x, y):
-        if self.is_2d:
-            return self.find_nearest_element(x, y)
-        else:
-            geom2d = self.geometry2d
-            return geom2d.find_nearest_element(x, y)
+    # def _find_nearest_2d_element(self, x, y):
+    #     if self.is_2d:
+    #         return self.find_nearest_element(x, y)
+    #     else:
+    #         geom2d = self.geometry2d
+    #         return geom2d.find_nearest_element(x, y)
 
-    def _get_profile_from_2d_element(self, elem2d):
-        if self.is_2d:
-            raise Exception("Object is 2d. Cannot get_profile_from_2d_element")
-        else:
-            return self.e2_e3_table[elem2d]
+    # def _get_profile_from_2d_element(self, elem2d):
+    #     if self.is_2d:
+    #         raise Exception("Object is 2d. Cannot get_profile_from_2d_element")
+    #     else:
+    #         return self.e2_e3_table[elem2d]
 
     def find_nearest_profile_elements(self, x, y):
         """Find 3d elements of profile nearest to (x,y) coordinates
@@ -670,6 +694,8 @@ class _UnstructuredGeometry:
     # 3D dfsu stuff
     @property
     def geometry2d(self):
+        """The 2d geometry for a 3d object
+        """
         if self._n_layers is None:
             print("Object has no layers: cannot return geometry2d")
         if self._geom2d is None:
@@ -678,6 +704,8 @@ class _UnstructuredGeometry:
 
     @property
     def e2_e3_table(self):
+        """The 2d-to-3d element connectivity table for a 3d object
+        """
         if self._n_layers is None:
             print("Object has no layers: cannot return e2_e3_table")
         if self._e2_e3_table is None:
@@ -689,6 +717,8 @@ class _UnstructuredGeometry:
 
     @property
     def elem2d_ids(self):
+        """The associated 2d element id for each 3d element
+        """
         if self._n_layers is None:
             print("Object has no layers: cannot return elem2d_ids")
         if self._2d_ids is None:
@@ -700,6 +730,8 @@ class _UnstructuredGeometry:
 
     @property
     def layer_ids(self):
+        """The layer number for each 3d element
+        """
         if self._n_layers is None:
             print("Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
@@ -1072,42 +1104,58 @@ class Dfsu(_UnstructuredFile):
     def element_coordinates(self):
         # faster way of getting element coordinates than base class implementation
         if self._ec is None:
-            xc = np.zeros(self.n_elements)
-            yc = np.zeros(self.n_elements)
-            zc = np.zeros(self.n_elements)
-            _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-                self._source,
-                to_dotnet_array(xc),
-                to_dotnet_array(yc),
-                to_dotnet_array(zc),
-            )
-            self._ec = np.column_stack(
-                [asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)]
-            )
+            self._ec = self._get_element_coords_from_source()
         return self._ec
 
+    def _get_element_coords_from_source(self):
+        xc = np.zeros(self.n_elements)
+        yc = np.zeros(self.n_elements)
+        zc = np.zeros(self.n_elements)
+        _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
+            self._source,
+            to_dotnet_array(xc),
+            to_dotnet_array(yc),
+            to_dotnet_array(zc),
+        )
+        ec = np.column_stack(
+            [asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)]
+        )
+        return ec
+    
     @property
     def deletevalue(self):
+        """File delete value
+        """
         return self._deletevalue
 
     @property
     def n_items(self):
+        """Number of items
+        """
         return self._n_items
 
     @property
     def items(self):
+        """List of items
+        """
         return self._items
 
     @property
     def start_time(self):
+        """File start time
+        """
         return self._start_time
 
     @property
     def n_timesteps(self):
+        """Number of time steps
+        """
         return self._n_timesteps
 
     @property
     def timestep(self):
+        """Time step size in seconds
+        """
         return self._timestep_in_seconds
 
     # @timestep.setter
@@ -1119,6 +1167,8 @@ class Dfsu(_UnstructuredFile):
 
     @property
     def end_time(self):
+        """File end time
+        """
         return self.start_time + timedelta(
             seconds=((self.n_timesteps - 1) * self.timestep)
         )
@@ -1225,7 +1275,7 @@ class Dfsu(_UnstructuredFile):
         elements=None,
         title=None,
     ):
-        """Create a new dfsu file
+        """Write a new dfsu file
 
         Parameters
         -----------
@@ -1239,7 +1289,7 @@ class Dfsu(_UnstructuredFile):
             The time step (in seconds)
         items: list[ItemInfo], optional
         elements: list[int], optional
-            write only these 
+            write only these element ids to file
         title: str
             title of the dfsu file. Default is blank.
         """
