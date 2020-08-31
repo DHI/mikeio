@@ -1,4 +1,5 @@
 import os
+from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
@@ -25,6 +26,24 @@ from .dotnet import (
 from .eum import TimeStep, ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length  # , dist_in_meters
 
+
+class UnstructuredType(IntEnum):
+        """
+        -1: Mesh: 2D unstructured MIKE mesh
+        0: Dfsu2D: 2D area series
+        1: DfsuVerticalColumn: 1D vertical column
+        2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
+        3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
+        4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
+        5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
+        """    
+        Mesh = -1
+        Dfsu2D = 0
+        DfsuVerticalColumn = 1
+        DfsuVerticalProfileSigma = 2        
+        DfsuVerticalProfileSigmaZ = 3
+        Dfsu3DSigma = 4
+        Dfsu3DSigmaZ = 5
 
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
@@ -67,12 +86,12 @@ class _UnstructuredGeometry:
         return str.join("\n", out)
 
     @property
-    def n_nodes(self):
-        return self._n_nodes
+    def filetype(self):
+        return self._type
 
     @property
-    def n_elements(self):
-        return self._n_elements
+    def n_nodes(self):
+        return self._n_nodes
 
     @property
     def node_coordinates(self):
@@ -81,6 +100,10 @@ class _UnstructuredGeometry:
     @property
     def node_ids(self):
         return self._node_ids
+
+    @property
+    def n_elements(self):
+        return self._n_elements
 
     @property
     def element_ids(self):
@@ -102,31 +125,6 @@ class _UnstructuredGeometry:
         """
         return [code for code in self.valid_codes if code > 0]
 
-    def get_node_coords(self, code=None):
-        """Get the coordinates of each node.
-
-
-        Parameters
-        ----------
-
-        code: int
-            Get only nodes with specific code, e.g. land == 1
-
-        Returns
-        -------
-            np.array
-                x,y,z of each node
-        """
-        nc = self.node_coordinates
-
-        if code is not None:
-            if code not in self.valid_codes:
-                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
-                raise Exception
-            return nc[self.codes == code]
-
-        return nc
-
     @property
     def projection_string(self):
         return self._projstr
@@ -144,26 +142,6 @@ class _UnstructuredGeometry:
         if (self._element_table is None) and (self._element_table_dotnet is not None):
             self._element_table = self._get_element_table_from_dotnet()
         return self._element_table
-
-    def _get_element_table_from_dotnet(self):
-        # Note: this can tak 10-20 seconds for large dfsu3d!
-        elem_tbl = []
-        for j in range(self.n_elements):
-            elem_nodes = list(self._element_table_dotnet[j])
-            elem_nodes = [nd - 1 for nd in elem_nodes]  # make 0-based
-            elem_tbl.append(elem_nodes)
-        return elem_tbl
-
-    def _element_table_to_dotnet(self, elem_table=None):
-        if elem_table is None:
-            elem_table = self._element_table
-        new_elem_table = []
-        n_elements = len(elem_table)
-        for j in range(n_elements):
-            elem_nodes = elem_table[j]
-            elem_nodes = [nd + 1 for nd in elem_nodes]  # make 1-based
-            new_elem_table.append(elem_nodes)
-        return asnetarray_v2(new_elem_table)
 
     @property
     def max_nodes_per_element(self):
@@ -204,9 +182,49 @@ class _UnstructuredGeometry:
             return "Dfsu3DSigmaZ"
         return None
 
-    def _set_nodes(
-        self, node_coordinates, codes=None, node_ids=None, projection_string=None
-    ):
+    def get_node_coords(self, code=None):
+        """Get the coordinates of each node.
+
+        Parameters
+        ----------
+        code: int
+            Get only nodes with specific code, e.g. land == 1
+
+        Returns
+        -------
+        np.array
+            x,y,z of each node
+        """
+        nc = self.node_coordinates
+        if code is not None:
+            if code not in self.valid_codes:
+                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
+                raise Exception
+            return nc[self.codes == code]
+
+        return nc
+
+    def _get_element_table_from_dotnet(self):
+        # Note: this can tak 10-20 seconds for large dfsu3d!
+        elem_tbl = []
+        for j in range(self.n_elements):
+            elem_nodes = list(self._element_table_dotnet[j])
+            elem_nodes = [nd - 1 for nd in elem_nodes]  # make 0-based
+            elem_tbl.append(elem_nodes)
+        return elem_tbl
+
+    def _element_table_to_dotnet(self, elem_table=None):
+        if elem_table is None:
+            elem_table = self._element_table
+        new_elem_table = []
+        n_elements = len(elem_table)
+        for j in range(n_elements):
+            elem_nodes = elem_table[j]
+            elem_nodes = [nd + 1 for nd in elem_nodes]  # make 1-based
+            new_elem_table.append(elem_nodes)
+        return asnetarray_v2(new_elem_table)
+
+    def _set_nodes(self, node_coordinates, codes=None, node_ids=None, projection_string=None):
         self._nc = np.asarray(node_coordinates)
         if codes is None:
             codes = np.zeros(len(node_coordinates), dtype=int)
@@ -1414,18 +1432,8 @@ class Dfsu(_UnstructuredFile):
             geometry = self
         else:
             geometry = self.to_2d_geometry()
+            # TODO: print warning if sigma-z
         Mesh._geometry_to_mesh(outfilename, geometry)
-
-    # def get_element_coords(self):
-    #     """FOR BACKWARD COMPATIBILITY ONLY. Use element_coordinates instead.
-    #     """
-    #     return self.element_coordinates
-
-    # def get_number_of_time_steps(self):
-    #     """FOR BACKWARD COMPATIBILITY ONLY. Use n_timesteps instead.
-    #     """
-    #     return self.n_timesteps
-
 
 class Mesh(_UnstructuredFile):
     def __init__(self, filename):
@@ -1434,14 +1442,30 @@ class Mesh(_UnstructuredFile):
         self._read_mesh_header(filename)
 
     def set_z(self, z):
+        """Change the depth by setting the z value of each node
+
+        Parameters
+        ----------
+        z : np.array(float)
+            new z value at each node
+        """
         if len(z) != self.n_nodes:
-            raise Exception(f"z should have length of nodes ({self.n_nodes})")
+            raise Exception(f"z must have length of nodes ({self.n_nodes})")
         self._nc[:, 2] = z
+        self._ec = None 
 
     def set_codes(self, codes):
+        """Change the code values of the nodes
+
+        Parameters
+        ----------
+        codes : list(int)
+            code of each node
+        """
         if len(codes) != self.n_nodes:
-            raise Exception(f"codes should have length of nodes ({self.n_nodes})")
+            raise Exception(f"codes must have length of nodes ({self.n_nodes})")        
         self._codes = codes
+        self._valid_codes = None
 
     def write(self, outfilename, element_ids=None):
         """write mesh to file (will overwrite if file exists)
@@ -1453,7 +1477,6 @@ class Mesh(_UnstructuredFile):
         element_ids : list(int)
             list of element ids (subset) to be saved to new mesh
         """
-
         builder = MeshBuilder()
 
         if element_ids is None:
