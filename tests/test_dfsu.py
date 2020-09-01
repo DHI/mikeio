@@ -524,6 +524,26 @@ def test_write_from_dfsu(tmpdir):
     assert dfs.end_time == newdfs.end_time
 
 
+def test_write_from_dfsu_2_time_steps(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    ds = dfs.read(time_steps=[0, 1])
+
+    assert ds.is_equidistant  # Data with two time steps is per definition equidistant
+
+    dfs.write(outfilename, ds)
+
+    assert os.path.exists(outfilename)
+
+    newdfs = Dfsu(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time != newdfs.end_time
+
+
 def test_write_from_dfsu_default_items_numbered(tmpdir):
 
     sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")

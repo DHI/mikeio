@@ -318,4 +318,7 @@ class Dataset:
 
     @property
     def is_equidistant(self):
+        if len(self.time) < 3:
+            return True
+
         return self.time.freq is not None

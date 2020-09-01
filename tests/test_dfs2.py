@@ -72,7 +72,11 @@ def test_non_equidistant_calendar(tmpdir):
 
     data = []
 
-    datetimes = [datetime.datetime(2012, 1, 1), datetime.datetime(2012, 2, 1)]
+    datetimes = [
+        datetime.datetime(2012, 1, 1),
+        datetime.datetime(2012, 2, 1),
+        datetime.datetime(2012, 2, 10),
+    ]
 
     nt = len(datetimes)
     nx = 20
