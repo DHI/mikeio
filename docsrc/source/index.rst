@@ -3,7 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-mikeio: input/output of MIKE files in Python
+.. image:: https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg
+
+MIKE IO: input/output of MIKE files in Python
 ============================================
 
 Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
@@ -23,8 +25,8 @@ Getting started
 ---------------
     
     >>>  from mikeio import Dfs0
-    >>>  dfs = Dfs0()
-    >>>  df = dfs.to_dataframe('simple.dfs0')
+    >>>  dfs = Dfs0('simple.dfs0')
+    >>>  df = dfs.to_dataframe()
     >>> df.head()
                          VarFun01    NotFun
     2017-01-01 00:00:00  0.843547  0.640486
