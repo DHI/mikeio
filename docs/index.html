@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mikeio: input/output of MIKE files in Python &mdash; mikeio  documentation</title>
+  <title>MIKE IO: input/output of MIKE files in Python &mdash; mikeio  documentation</title>
   
 
   
@@ -127,7 +127,7 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>mikeio: input/output of MIKE files in Python</li>
+      <li>MIKE IO: input/output of MIKE files in Python</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -146,8 +146,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="mikeio-input-output-of-mike-files-in-python">
-<h1>mikeio: input/output of MIKE files in Python<a class="headerlink" href="#mikeio-input-output-of-mike-files-in-python" title="Permalink to this headline">¶</a></h1>
+  <img alt="https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg" src="https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg" /><div class="section" id="mike-io-input-output-of-mike-files-in-python">
+<h1>MIKE IO: input/output of MIKE files in Python<a class="headerlink" href="#mike-io-input-output-of-mike-files-in-python" title="Permalink to this headline">¶</a></h1>
 <p>Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.</p>
 <div class="section" id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
@@ -165,8 +165,8 @@
 <div class="section" id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs0</span>
-<span class="gp">&gt;&gt;&gt; </span> <span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">                     VarFun01    NotFun</span>
 <span class="go">2017-01-01 00:00:00  0.843547  0.640486</span>

@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="mikeio: input/output of MIKE files in Python" href="index.html" /> 
+    <link rel="prev" title="MIKE IO: input/output of MIKE files in Python" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -207,7 +207,6 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path and file name to the dfs0 file.</p></li>
 <li><p><strong>unit_in_name</strong> (<em>bool</em><em>, </em><em>optional</em>) – include unit in column name, default False</p></li>
 <li><p><strong>round_time</strong> (<em>string</em><em>, </em><em>bool</em><em>, </em><em>optional</em>) – round time to avoid problem with floating point inaccurcy, set to False to avoid rounding</p></li>
 </ul>
@@ -223,7 +222,7 @@
 
 <dl class="method">
 <dt id="mikeio.Dfs0.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">dt=1.0</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em>, <em class="sig-param">data_value_type=None</em>, <em class="sig-param">dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">dt=1.0</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=''</em>, <em class="sig-param">data_value_type=None</em>, <em class="sig-param">dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -236,7 +235,7 @@
 means 5 mins and 30 seconds. default to 1.0</p></li>
 <li><p><strong>datetimes</strong> (<em>list</em><em>[</em><em>datetime</em><em>]</em>) – </p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.dutil.ItemInfo" title="mikeio.dutil.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title, default blank</p></li>
 <li><p><strong>data_value_type</strong> (<em>list</em><em>[</em><em>DataValueType</em><em>]</em><em>, </em><em>optional</em>) – DataValueType default DataValueType.INSTANTANEOUS</p></li>
 <li><p><strong>dtype</strong> (<em>np.dtype</em><em>, </em><em>optional</em>) – default np.float32</p></li>
 </ul>
@@ -304,8 +303,8 @@ means 5 mins and 30 seconds.</p></li>
 <dt id="mikeio.Dfs2">
 <em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs2</code><span class="sig-paren">(</span><em class="sig-param">filename=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="mikeio.Dfs2.find_closest_element_index">
-<code class="sig-name descname">find_closest_element_index</code><span class="sig-paren">(</span><em class="sig-param">lon</em>, <em class="sig-param">lat</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.find_closest_element_index" title="Permalink to this definition">¶</a></dt>
+<dt id="mikeio.Dfs2.find_nearest_element">
+<code class="sig-name descname">find_nearest_element</code><span class="sig-paren">(</span><em class="sig-param">lon</em>, <em class="sig-param">lat</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.find_nearest_element" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find index of closest element</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -376,115 +375,54 @@ means 5 mins and 30 seconds. Default 1</p></li>
 <h2>Dfsu<a class="headerlink" href="#dfsu" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="mikeio.Dfsu">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfsu</code><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfsu</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="mikeio.Dfsu.create">
-<code class="sig-name descname">create</code><span class="sig-paren">(</span><em class="sig-param">meshfilename</em>, <em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">dt=1</em>, <em class="sig-param">timeseries_unit=&lt;TimeStep.SECOND: 1400&gt;</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a dfsu file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>meshfilename</strong> (<em>str</em><em>,</em>) – full path to a mesh or dfsu file</p></li>
-<li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
-<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
-<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime, default is datetime.now()</p></li>
-<li><p><strong>dt</strong> (<em>float</em>) – The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
-means 5 mins and 30 seconds. Default 1</p></li>
-<li><p><strong>timeseries_unit</strong> (<em>TimeStep</em><em>, </em><em>optional</em>) – default TimeStep.SECOND</p></li>
-<li><p><strong>unit</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.dutil.ItemInfo" title="mikeio.dutil.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – Name, item, unit, default is undefined</p></li>
-<li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
-</ul>
-</dd>
-</dl>
+<dt id="mikeio.Dfsu.deletevalue">
+<em class="property">property </em><code class="sig-name descname">deletevalue</code><a class="headerlink" href="#mikeio.Dfsu.deletevalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>File delete value</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Dfsu.find_closest_element_index">
-<code class="sig-name descname">find_closest_element_index</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">y</em>, <em class="sig-param">z=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.find_closest_element_index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find index of closest element</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em>) – X coordinate(easting or longitude)</p></li>
-<li><p><strong>y</strong> (<em>float</em>) – Y coordinate(northing or latitude)</p></li>
-<li><p><strong>z</strong> (<em>float</em><em>, </em><em>optional</em>) – Z coordinate(depth, positive upwards)</p></li>
-</ul>
-</dd>
-</dl>
+<dt id="mikeio.Dfsu.element_coordinates">
+<em class="property">property </em><code class="sig-name descname">element_coordinates</code><a class="headerlink" href="#mikeio.Dfsu.element_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Center coordinates of each element</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Dfsu.get_element_area">
-<code class="sig-name descname">get_element_area</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_element_area" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the horizontal area of each element.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>np.array</dt><dd><p>areas in m2</p>
-</dd>
-</dl>
-</p>
-</dd>
-</dl>
+<dt id="mikeio.Dfsu.end_time">
+<em class="property">property </em><code class="sig-name descname">end_time</code><a class="headerlink" href="#mikeio.Dfsu.end_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>File end time</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Dfsu.get_element_coords">
-<code class="sig-name descname">get_element_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_element_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the coordinates of the center of each element.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>x,y,z of each element</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array</p>
-</dd>
-</dl>
+<dt id="mikeio.Dfsu.items">
+<em class="property">property </em><code class="sig-name descname">items</code><a class="headerlink" href="#mikeio.Dfsu.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of items</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Dfsu.get_node_coords">
-<code class="sig-name descname">get_node_coords</code><span class="sig-paren">(</span><em class="sig-param">code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_node_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the coordinates of each node.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<em>int</em>) – Get only nodes with specific code, e.g. land == 1</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>x,y,z of each node</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
-</dd>
-</dl>
+<dt id="mikeio.Dfsu.n_items">
+<em class="property">property </em><code class="sig-name descname">n_items</code><a class="headerlink" href="#mikeio.Dfsu.n_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of items</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Dfsu.is_geo">
-<em class="property">property </em><code class="sig-name descname">is_geo</code><a class="headerlink" href="#mikeio.Dfsu.is_geo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determines if dfsu file is defined on geographical LONG/LAT mesh.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><dl class="simple">
-<dt>bool</dt><dd><p>True if LONG/LAT, FALSE otherwise</p>
-</dd>
-</dl>
-</p>
-</dd>
-</dl>
+<dt id="mikeio.Dfsu.n_timesteps">
+<em class="property">property </em><code class="sig-name descname">n_timesteps</code><a class="headerlink" href="#mikeio.Dfsu.n_timesteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of time steps</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="mikeio.Dfsu.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">item_numbers=None</em>, <em class="sig-param">item_names=None</em>, <em class="sig-param">time_steps=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read a dfsu file</p>
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param">items=None</em>, <em class="sig-param">time_steps=None</em>, <em class="sig-param">elements=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from a dfsu file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – dfsu filename</p></li>
-<li><p><strong>item_numbers</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based)</p></li>
-<li><p><strong>item_names</strong> (<em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by name, takes precedence over item_numbers</p></li>
-<li><p><strong>time_steps</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected time_steps</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><em>int</em><em>] or </em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
+<li><p><strong>time_steps</strong> (<em>int</em><em> or </em><em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected time_steps</p></li>
+<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected element ids</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -497,15 +435,42 @@ means 5 mins and 30 seconds. Default 1</p></li>
 </dd></dl>
 
 <dl class="method">
+<dt id="mikeio.Dfsu.start_time">
+<em class="property">property </em><code class="sig-name descname">start_time</code><a class="headerlink" href="#mikeio.Dfsu.start_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>File start time</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.timestep">
+<em class="property">property </em><code class="sig-name descname">timestep</code><a class="headerlink" href="#mikeio.Dfsu.timestep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time step size in seconds</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Dfsu.to_mesh">
+<code class="sig-name descname">to_mesh</code><span class="sig-paren">(</span><em class="sig-param">outfilename</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_mesh" title="Permalink to this definition">¶</a></dt>
+<dd><p>write object to mesh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>outfilename</strong> (<em>str</em>) – path to file to be written</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="mikeio.Dfsu.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Overwrite a pre-created dfsu file.</p>
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">dt=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">elements=None</em>, <em class="sig-param">title=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a new dfsu file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path and filename to existing dfsu file</p></li>
-<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices. len(data) must equal the number of items in the dfsu.
-Each matrix must be of dimension time,elements</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>] or </em><a class="reference internal" href="#mikeio.dutil.Dataset" title="mikeio.dutil.Dataset"><em>Dataset</em></a>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
+<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime, default is datetime.now()</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.dutil.ItemInfo" title="mikeio.dutil.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
+<li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
 </ul>
 </dd>
 </dl>
@@ -520,42 +485,42 @@ Each matrix must be of dimension time,elements</p></li>
 <dt id="mikeio.Mesh">
 <em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="mikeio.Mesh.get_element_coords">
-<code class="sig-name descname">get_element_coords</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_element_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate element center coordinates</p>
-<dl class="simple">
-<dt>Returns</dt><dd><p>np.array((number_of_elements, 3)</p>
-</dd>
-</dl>
+<dt id="mikeio.Mesh.plot_boundary_nodes">
+<code class="sig-name descname">plot_boundary_nodes</code><span class="sig-paren">(</span><em class="sig-param">boundary_names=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_boundary_nodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot mesh boundary nodes and their codes</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Mesh.get_node_coords">
-<code class="sig-name descname">get_node_coords</code><span class="sig-paren">(</span><em class="sig-param">code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_node_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get node coordinates</p>
+<dt id="mikeio.Mesh.set_codes">
+<code class="sig-name descname">set_codes</code><span class="sig-paren">(</span><em class="sig-param">codes</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_codes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the code values of the nodes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<em>int</em><em>, </em><em>optional</em>) – filter results by code, land==1</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
+<dd class="field-odd"><p><strong>codes</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – code of each node</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="mikeio.Mesh.plot">
-<code class="sig-name descname">plot</code><span class="sig-paren">(</span><em class="sig-param">cmap=None</em>, <em class="sig-param">z=None</em>, <em class="sig-param">label=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot mesh elements</p>
+<dt id="mikeio.Mesh.set_z">
+<code class="sig-name descname">set_z</code><span class="sig-paren">(</span><em class="sig-param">z</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_z" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the depth by setting the z value of each node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>z</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – new z value at each node</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="mikeio.Mesh.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">outfilename</em>, <em class="sig-param">elements=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>write mesh to file (will overwrite if file exists)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – default viridis</p></li>
-<li><p><strong>z</strong> (<em>np.array</em>) – value for each element to plot, default bathymetry</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label</p></li>
+<li><p><strong>outfilename</strong> (<em>str</em>) – path to file</p></li>
+<li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – list of element ids (subset) to be saved to new mesh</p></li>
 </ul>
 </dd>
 </dl>
@@ -995,7 +960,7 @@ return a Pandas DataFrame.</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="index.html" class="btn btn-neutral float-left" title="mikeio: input/output of MIKE files in Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="MIKE IO: input/output of MIKE files in Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

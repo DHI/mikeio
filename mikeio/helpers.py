@@ -18,3 +18,4 @@ def safe_length(input_list):
         n = len(input_list)
 
     return n
+    

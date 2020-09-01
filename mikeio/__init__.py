@@ -26,8 +26,7 @@ from .dfs0 import Dfs0
 from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
-from .dfsu import Dfsu
-from .mesh import Mesh
+from .dfsu import Dfsu, Mesh
 
 
 def read(filename, items=None, time_steps=None):
@@ -48,11 +47,6 @@ def read(filename, items=None, time_steps=None):
 
     _, ext = os.path.splitext(filename)
 
-    if ext == ".dfsu":
-
-        dfs = Dfsu()
-        return dfs.read(filename)  # Fixed in other branch
-
     if ext == ".dfs0":
 
         dfs = Dfs0(filename)
@@ -65,6 +59,9 @@ def read(filename, items=None, time_steps=None):
 
         dfs = Dfs2(filename)
 
+    elif ext == ".dfsu":
+
+        dfs = Dfsu(filename)
     else:
         raise Exception(f"{ext} is an unsupported extension")
 
