@@ -139,3 +139,7 @@ class Dfs123:
 
         return self._builder.GetFile()
 
+    @property
+    def projection_string(self):
+        return self._projstr
+

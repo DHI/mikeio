@@ -204,3 +204,19 @@ def test_find_index_from_coordinate():
 
     assert i == 263
     assert j == 215
+
+
+def test_reproject(tmpdir):
+
+    filename = "tests/testdata/gebco_sound.dfs2"
+
+    dfs = Dfs2(filename)
+
+    assert dfs.projection_string == "LONG/LAT"
+    outfilename = os.path.join(tmpdir.dirname, "utm.dfs2")
+
+    dfs.reproject(outfilename, "UTM-33", dx=200.0, dy=200.0, nx=285, ny=612)
+
+    newdfs = Dfs2(outfilename)
+    assert "UTM-33" in newdfs.projection_string
+

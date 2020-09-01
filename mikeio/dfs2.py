@@ -7,7 +7,7 @@ from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
     DataValueType,
 )
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
+from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder, Dfs2Reprojector
 from DHI.Projections import Cartography
 
 from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
@@ -291,3 +291,31 @@ class Dfs2(Dfs123):
                     dfs.WriteItemTimeStepNext(relt, darray)
 
         dfs.Close()
+
+    def reproject(self, filename, projection, dx=1000, dy=1000, nx=10, ny=10):
+        dfs2File = DfsFileFactory.Dfs2FileOpen(self._filename)
+
+        # TODO calculate default values
+        # axis = dfs2File.SpatialAxis
+        # nx = axis.XCount
+        # ny = axis.YCount
+        # dx = axis.Dx
+        # dy = axis.Dy
+        proj = dfs2File.FileInfo.Projection
+
+        tool = Dfs2Reprojector(dfs2File, filename)
+        tool.Interpolate = True
+
+        tool.SetTarget(
+            projection,
+            proj.Longitude,
+            proj.Latitude,
+            proj.Orientation,
+            nx,
+            0.0,
+            dx,
+            ny,
+            0.0,
+            dy,
+        )
+        tool.Process()
