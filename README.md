@@ -65,8 +65,8 @@ Items:
 ### Reading dfs0 file into Pandas DataFrame
 ```python
 >>>  from mikeio import Dfs0
->>>  dfs = Dfs0()
->>>  ts = dfs.to_dataframe('simple.dfs0')
+>>>  dfs = Dfs0('simple.dfs0')
+>>>  ts = dfs.to_dataframe()
 ```
 
 ### Write simple timeseries
@@ -98,7 +98,8 @@ For more examples on timeseries data see this [notebook](notebooks/Dfs0%20-%20Ti
 ### Read dfs2 data
 ```python
 >>>  from mikeio import Dfs2
->>> ds = dfs.read("random.dfs2")
+>>> dfs = Dfs2("random.dfs2")
+>>> ds = dfs.read()
 >>> ds
 <mikeio.DataSet>
 Dimensions: (3, 100, 2)
