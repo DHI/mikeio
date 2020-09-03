@@ -21,8 +21,8 @@ Facilitates common data processing workflows for MIKE files.
 
 ## Important Note!
 
-The upcoming version 0.5 of mikeio, will have a lot of new functionality, but also several breaking changes to the API !!
-It is planned to be released at latest Sept 7.
+The latest version of mikeio (v 0.5), has a lot of new functionality, but also several breaking changes to the API !!
+It was released on 2020-09-03.
 
 
 ## Installation
