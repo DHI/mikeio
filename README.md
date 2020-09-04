@@ -1,12 +1,12 @@
 
-![logo](images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
+![logo](https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
 # MIKE IO: input/output of MIKE files in python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
 ![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
-Reading, writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
+Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. Read res1d and xns11 files.
 
 Facilitates common data processing workflows for MIKE files.
 
@@ -21,8 +21,8 @@ Facilitates common data processing workflows for MIKE files.
 
 ## Important Note!
 
-The upcoming version 0.5 of mikeio, will have a lot of new functionality, but also several breaking changes to the API !!
-It is planned to be released at latest Sept 7.
+The latest version of mikeio (v 0.5), has a lot of new functionality, but also several breaking changes to the API !!
+It was released on 2020-09-03.
 
 
 ## Installation
@@ -148,7 +148,7 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 >>>  plt.xlabel('Horizontal [meter]')
 >>>  plt.ylabel('Elevation [meter]')
 ```
-![Geometry](images/xns11_geometry.png)
+![Geometry](https://raw.githubusercontent.com/DHI/mikeio/master/images/xns11_geometry.png)
 
 ### Read dfsu files
 ```python
@@ -159,7 +159,7 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 >>>  idx = dfs.find_nearest_element(x=608000, y=6907000)
 >>>  plt.plot(ds.time, ds.data[0][:,idx])
 ```
-![Timeseries](images/dfsu_ts.png)
+![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/master/images/dfsu_ts.png)
 
 ## Items, units
  Useful when creating a new dfs file
@@ -184,7 +184,6 @@ Name                     Stmts   Miss  Cover
 --------------------------------------------
 mikeio\__init__.py          33      1    97%
 mikeio\aggregator.py       104      9    91%
-mikeio\bin\__init__.py       0      0   100%
 mikeio\dfs.py               75      5    93%
 mikeio\dfs0.py             186     34    82%
 mikeio\dfs1.py              75      5    93%
