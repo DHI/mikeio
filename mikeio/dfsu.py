@@ -918,7 +918,52 @@ class _UnstructuredGeometry:
 
         return mp
 
-    def plot(self, z=None, elements=None, label=None, cmap=None):
+    def get_node_centered_data(self, data, extra_allowed=True):
+        nc = self.get_node_coords()
+        ec = self._get_element_coords()
+        elements = [list(self._element_table[i]) for i in range(len(list(self._element_table)))]
+        if self.is_tri_only:
+            elements = np.asarray(elements)
+        else:  # if it is a mix of tri and quad
+            tmp_elements = elements.copy()
+            for el , item in enumerate(tmp_elements):
+                if len(item)==4:
+                    elements.pop(el)
+                    elements.insert(el,item[:3])
+                    elements.append([item[i] for i in [2,3,0]])
+                    data = np.append(data, data[el])
+                    ec = np.append(ec,ec[el].reshape(1,-1), axis=0)
+
+
+            elements = np.asarray(elements)
+
+        node_cellID = [list(np.argwhere(elements == i)[:, 0]) for i in np.unique(elements.reshape(-1, ))]
+        node_centered_data = np.zeros(shape=nc.shape[0])
+        for n, item in enumerate(node_cellID):
+            I = ec[item][:, :2] - nc[n][:2]
+            I2 = (I ** 2).sum(axis=0)
+            Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
+            lamb = I2[0] * I2[1] - Ixy ** 2
+            omega=np.zeros(1)
+            if lamb > 1e-10 * (I2[0] * I2[1]):
+                # Standard case - Pseudo
+                lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
+                lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
+                omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
+                if not extra_allowed:
+                    omega[np.where(omega > 2)] = 2
+                    omega[np.where(omega < 0)] = 0
+            if omega.sum()>0:
+                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
+            else:
+                # We did not succeed using pseudo laplace procedure, use inverse distance instead
+                InvDis = [1 / np.hypot(case[0], case[1]) for case in ec[item][:, :2] - nc[n][:2]]
+                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
+
+        return node_centered_data
+
+
+    def plot(self, z=None, elements=None, label=None, cmap=None, vmin=None, vmax=None, do_contour = False):
         """
         Plot mesh elements
 
@@ -932,6 +977,8 @@ class _UnstructuredGeometry:
             colorbar label
         cmap: matplotlib.cm.cmap, optional
             default viridis
+        do_contour: Boolean, optional
+            default False, It creates contour plot
         """
         if cmap is None:
             cmap = cm.viridis
@@ -962,6 +1009,12 @@ class _UnstructuredGeometry:
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
                 )
 
+        if vmin is None:
+            vmin = z.min()
+
+        if vmax is None:
+            vmax = z.max()
+
         fig, ax = plt.subplots()
         patches = geometry._to_polygons()
         # p = PatchCollection(patches, cmap=cmap, edgecolor="black")
@@ -970,10 +1023,46 @@ class _UnstructuredGeometry:
         )
 
         p.set_array(z)
+        p.set_clim(vmin, vmax)
         ax.add_collection(p)
         fig.colorbar(p, ax=ax, label=label)
         ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+
+        if do_contour:
+            import matplotlib.tri as tri
+            n_contour = 10
+            zz = self.get_node_centered_data(z)
+            elements = [list(self._element_table[i]) for i in range(len(list(self._element_table)))]
+            if self.is_tri_only:
+                elements = np.asarray(elements)
+            else:  # if it is a mix of tri and quad
+                tmp_elements = elements.copy()
+                for el , item in enumerate(tmp_elements):
+                    if len(item)==4:
+                        elements.pop(el)
+                        elements.insert(el,item[:3])
+                        elements.append([item[i] for i in [2,3,0]])
+                        ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
+
+                elements = np.asarray(elements)
+
+            triang = tri.Triangulation(nc[:, 0], nc[:, 1], elements)
+            refiner = tri.UniformTriRefiner(triang)
+            tri_refi, z_test_refi = refiner.refine_field(zz, subdiv=3)
+
+            fig, ax = plt.subplots()
+            ax.triplot(triang, lw=0.0, color='white')
+            tr_fig = ax.tripcolor(tri_refi, z_test_refi, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap)
+            levels = np.linspace(vmin, vmax, n_contour)
+            ax.tricontourf(tri_refi, z_test_refi, levels=levels, cmap=cmap)
+            ax.tricontour(tri_refi, z_test_refi, levels=levels,
+                          colors=['0.5'],
+                          linewidths=[0.5])
+            plt.colorbar(tr_fig, label=label)
+
+
+
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
