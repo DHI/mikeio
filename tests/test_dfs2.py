@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
+import pytest
 
 
 def test_simple_write(tmpdir):
@@ -63,7 +64,10 @@ def test_write_single_item(tmpdir):
         title="test dfs2",
     )
 
-    assert True
+    newdfs = Dfs2(filename)
+    assert newdfs.projection_string == "UTM-33"
+    assert pytest.approx(newdfs.longitude) == 12.0
+    assert pytest.approx(newdfs.latitude) == 55.0
 
 
 def test_non_equidistant_calendar(tmpdir):
@@ -147,6 +151,11 @@ def test_write_selected_item_to_new_file(tmpdir):
 
     assert len(ds2) == 1
     assert ds.items[0].name == "Untitled"
+    assert dfs.start_time == dfs2.start_time
+    assert dfs.projection_string == dfs2.projection_string
+    assert dfs.longitude == dfs2.longitude
+    assert dfs.latitude == dfs2.latitude
+    assert dfs.orientation == dfs2.orientation
 
 
 def test_write_modified_data_to_new_file(tmpdir):

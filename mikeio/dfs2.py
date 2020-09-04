@@ -256,6 +256,7 @@ class Dfs2(Dfs123):
         else:
             self._is_equidistant = False
             start_time = datetimes[0]
+            self._start_time = start_time
 
         factory = DfsFactory()
         builder = Dfs2Builder.Create(title, "mikeio", 0)

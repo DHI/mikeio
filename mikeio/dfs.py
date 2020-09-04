@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import warnings
 import numpy as np
 from .helpers import safe_length
@@ -23,6 +23,8 @@ class Dfs123:
     _items = None
     _builder = None
     _factory = None
+    _deletevalue = None
+    _override_coordinates = False
 
     def __init__(self, filename=None):
         self._filename = filename
@@ -36,6 +38,7 @@ class Dfs123:
         self._longitude = dfs.FileInfo.Projection.Longitude
         self._latitude = dfs.FileInfo.Projection.Latitude
         self._orientation = dfs.FileInfo.Projection.Orientation
+        self._deletevalue = dfs.FileInfo.DeleteValueFloat
 
         dfs.Close()
 
@@ -60,6 +63,7 @@ class Dfs123:
                 warnings.warn("No coordinate system provided")
                 self._coordinate = ["LONG/LAT", 0, 0, 0]
         else:
+            self._override_coordinates = True
             self._coordinate = coordinate
 
         if isinstance(data, Dataset):
@@ -77,13 +81,10 @@ class Dfs123:
             if self._start_time is None:
                 self._start_time = datetime.now()
                 warnings.warn(
-                    f"No start time supplied. Using current time: {start_time} as start time."
+                    f"No start time supplied. Using current time: {self._start_time} as start time."
                 )
             else:
                 self._start_time = self._start_time
-                warnings.warn(
-                    f"No start time supplied. Using start time from source: {start_time} as start time."
-                )
         else:
             self._start_time = start_time
 
@@ -102,13 +103,14 @@ class Dfs123:
         self._builder.SetDataType(0)
 
         if self._coordinate[0] == "LONG/LAT":
-            self._builder.SetGeographicalProjection(
-                self._factory.CreateProjectionGeoOrigin(*self._coordinate)
-            )
+            proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
         else:
-            self._builder.SetGeographicalProjection(
-                self._factory.CreateProjectionProjOrigin(*self._coordinate)
-            )
+            if self._override_coordinates:
+                proj = self._factory.CreateProjectionProjOrigin(*self._coordinate)
+            else:
+                proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
+
+        self._builder.SetGeographicalProjection(proj)
 
         if self._is_equidistant:
             self._builder.SetTemporalAxis(
@@ -139,3 +141,54 @@ class Dfs123:
 
         return self._builder.GetFile()
 
+    @property
+    def deletevalue(self):
+        """File delete value
+        """
+        return self._deletevalue
+
+    @property
+    def n_items(self):
+        """Number of items
+        """
+        return self._n_items
+
+    @property
+    def items(self):
+        """List of items
+        """
+        return self._items
+
+    @property
+    def start_time(self):
+        """File start time
+        """
+        return self._start_time
+
+    @property
+    def n_timesteps(self):
+        """Number of time steps
+        """
+        return self._n_timesteps
+
+    @property
+    def projection_string(self):
+        return self._projstr
+
+    @property
+    def longitude(self):
+        """Origin longitude
+        """
+        return self._longitude
+
+    @property
+    def latitude(self):
+        """Origin latitude
+        """
+        return self._latitude
+
+    @property
+    def orientation(self):
+        """North to Y orientation
+        """
+        return self._orientation
