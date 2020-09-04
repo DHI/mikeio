@@ -677,6 +677,8 @@ def test_plot_bathymetry():
     dfs = Dfsu(filename)
 
     dfs.plot()
+    
+    assert True
 
 
 def test_to_mesh_3d(tmpdir):
@@ -744,3 +746,15 @@ def test_to_shapely():
     shp = dfs.to_shapely()
     assert True
 
+def test_plot_dfsu_contour():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    dfs.plot(do_contour=True)
+    assert True
+
+def test_plot_dfsu():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    data = dfs.read()
+    dfs.plot(z=data[1][0,:])
+    assert True
