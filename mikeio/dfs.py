@@ -17,6 +17,7 @@ from DHI.Generic.MikeZero.DFS import (
 
 class Dfs123:
 
+    _filename = None
     _projstr = None
     _start_time = None
     _is_equidistant = True
@@ -25,6 +26,8 @@ class Dfs123:
     _factory = None
     _deletevalue = None
     _override_coordinates = False
+    _timeseries_unit = None
+    _dt = None
 
     def __init__(self, filename=None):
         self._filename = filename
@@ -43,8 +46,9 @@ class Dfs123:
         dfs.Close()
 
     def _write_handle_common_arguments(
-        self, title, data, items, coordinate, start_time, dt
+        self, title, data, items, coordinate, start_time, dt, timeseries_unit
     ):
+
         if title is None:
             self._title = ""
 
@@ -88,15 +92,18 @@ class Dfs123:
         else:
             self._start_time = start_time
 
+        if dt:
+            self._dt = dt
+
         if items:
             self._items = items
 
         if self._items is None:
             self._items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
 
-    def _setup_header(
-        self, coordinate, start_time, dt, timeseries_unit, items, filename
-    ):
+        self._timeseries_unit = timeseries_unit
+
+    def _setup_header(self, filename):
 
         system_start_time = to_dotnet_datetime(self._start_time)
 
@@ -115,13 +122,13 @@ class Dfs123:
         if self._is_equidistant:
             self._builder.SetTemporalAxis(
                 self._factory.CreateTemporalEqCalendarAxis(
-                    timeseries_unit, system_start_time, 0, dt
+                    self._timeseries_unit, system_start_time, 0, self._dt
                 )
             )
         else:
             self._builder.SetTemporalAxis(
                 self._factory.CreateTemporalNonEqCalendarAxis(
-                    timeseries_unit, system_start_time
+                    self._timeseries_unit, system_start_time
                 )
             )
 

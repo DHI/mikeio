@@ -60,7 +60,7 @@ def test_write_single_item(tmpdir):
         items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
         coordinate=["UTM-33", east, north, orientation],
         dx=100,
-        dy=100,
+        dy=200,
         title="test dfs2",
     )
 
@@ -68,6 +68,8 @@ def test_write_single_item(tmpdir):
     assert newdfs.projection_string == "UTM-33"
     assert pytest.approx(newdfs.longitude) == 12.0
     assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.dx == 100.0
+    assert newdfs.dy == 200.0
 
 
 def test_non_equidistant_calendar(tmpdir):

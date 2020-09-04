@@ -217,7 +217,7 @@ class Dfs2(Dfs123):
         """
 
         self._write_handle_common_arguments(
-            title, data, items, coordinate, start_time, dt
+            title, data, items, coordinate, start_time, dt, timeseries_unit
         )
 
         number_y = np.shape(data[0])[1]
@@ -270,9 +270,9 @@ class Dfs2(Dfs123):
             )
         )
 
-        dfs = self._setup_header(
-            coordinate, start_time, dt, timeseries_unit, items, filename
-        )
+        dfs = self._setup_header(filename)
+        # coordinate, start_time, dt, timeseries_unit, items, filename
+        # )
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
@@ -292,3 +292,16 @@ class Dfs2(Dfs123):
                     dfs.WriteItemTimeStepNext(relt, darray)
 
         dfs.Close()
+
+    @property
+    def dx(self):
+        """Step size in x direction
+        """
+        return self._dx
+
+    @property
+    def dy(self):
+        """Step size in y direction
+        """
+        return self._dy
+

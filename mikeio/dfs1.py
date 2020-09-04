@@ -155,7 +155,7 @@ class Dfs1(Dfs123):
         """
 
         self._write_handle_common_arguments(
-            title, data, items, coordinate, start_time, dt
+            title, data, items, coordinate, start_time, dt, timeseries_unit
         )
 
         number_x = np.shape(data[0])[1]
@@ -182,9 +182,7 @@ class Dfs1(Dfs123):
             factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, dx)
         )
 
-        dfs = self._setup_header(
-            coordinate, start_time, dt, timeseries_unit, items, filename
-        )
+        dfs = self._setup_header(filename)
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
