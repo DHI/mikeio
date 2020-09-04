@@ -919,9 +919,10 @@ class _UnstructuredGeometry:
         return mp
 
     def get_node_centered_data(self, data, extra_allowed=True):
-        nc = self.get_node_coords()
-        ec = self._get_element_coords()
-        elements = [list(self._element_table[i]) for i in range(len(list(self._element_table)))]
+        nc = self.node_coordinates
+        ec = self.element_coordinates
+        # TODO: call _create_tri_only_element_table
+        elements = [list(self.element_table[i]) for i in range(len(list(self.element_table)))]
         if self.is_tri_only:
             elements = np.asarray(elements)
         else:  # if it is a mix of tri and quad
@@ -933,7 +934,6 @@ class _UnstructuredGeometry:
                     elements.append([item[i] for i in [2,3,0]])
                     data = np.append(data, data[el])
                     ec = np.append(ec,ec[el].reshape(1,-1), axis=0)
-
 
             elements = np.asarray(elements)
 
@@ -963,7 +963,7 @@ class _UnstructuredGeometry:
         return node_centered_data
 
 
-    def plot(self, z=None, elements=None, label=None, cmap=None, vmin=None, vmax=None, do_contour = False):
+    def plot(self, z=None, elements=None, label=None, cmap=None, vmin=None, vmax=None, plot_type='patch', n_levels=10, n_refinements=0, plot_mesh=True):
         """
         Plot mesh elements
 
@@ -1016,53 +1016,73 @@ class _UnstructuredGeometry:
             vmax = z.max()
 
         fig, ax = plt.subplots()
-        patches = geometry._to_polygons()
-        # p = PatchCollection(patches, cmap=cmap, edgecolor="black")
-        p = PatchCollection(
-            patches, cmap=cmap, edgecolor="lightgray", alpha=0.8, linewidths=0.3
-        )
+        if geometry.is_geo:
+            mean_lat = 0.5*(max(nc[:,1])-min(nc[:,1]))
+            ax.set_aspect(1./np.cos(np.pi*mean_lat/180))            
+        else:
+            ax.set_aspect('equal')
 
-        p.set_array(z)
-        p.set_clim(vmin, vmax)
-        ax.add_collection(p)
-        fig.colorbar(p, ax=ax, label=label)
+        if plot_type == 'patch':
+            # do plot as patches (like MZ "box contour")
+            # with (constant) element center values
+            patches = geometry._to_polygons()
+            p = PatchCollection(
+                patches, cmap=cmap, edgecolor="none", linewidths=0.0
+            ) #  alpha=0.8, 
+
+            # TODO: how to hide mesh lines?? 
+
+            p.set_array(z)
+            p.set_clim(vmin, vmax)
+            ax.add_collection(p)
+            fig.colorbar(p, ax=ax, label=label)
+        else: 
+            # do node-based triangular plot
+            import matplotlib.tri as tri
+            mesh_linewidth = 0.0
+            if plot_mesh == True:
+                mesh_linewidth = 0.2
+            zn = geometry.get_node_centered_data(z)
+
+            elem_table = self._create_tri_only_element_table(geometry)
+            triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)  
+            # TODO: refinements doesn't seem to work for 3d files? 
+            if n_refinements>0:
+                refiner = tri.UniformTriRefiner(triang)
+                triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
+            
+            ax.triplot(triang, lw=mesh_linewidth, color='lightgray')
+            if plot_type == 'shaded':
+                tr_fig = ax.tripcolor(triang, zn, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap, linewidths=0.3, shading='gouraud')
+            else:
+                # must be contourf plot then
+                levels = np.linspace(vmin, vmax, n_levels)
+                tr_fig = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
+                if plot_type == 'contour_lines':
+                    ax.tricontour(triang, zn, levels=levels,
+                            colors=['0.5'],
+                            linewidths=[0.5])
+            
+            plt.colorbar(tr_fig, label=label)
+
         ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
-        if do_contour:
-            import matplotlib.tri as tri
-            n_contour = 10
-            zz = self.get_node_centered_data(z)
-            elements = [list(self._element_table[i]) for i in range(len(list(self._element_table)))]
-            if self.is_tri_only:
-                elements = np.asarray(elements)
-            else:  # if it is a mix of tri and quad
-                tmp_elements = elements.copy()
-                for el , item in enumerate(tmp_elements):
-                    if len(item)==4:
-                        elements.pop(el)
-                        elements.insert(el,item[:3])
-                        elements.append([item[i] for i in [2,3,0]])
-                        ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
+    def _create_tri_only_element_table(self, geometry=None):
+        if geometry is None:
+            geometry = self
+        if geometry.is_tri_only:
+            return geometry.element_table 
 
-                elements = np.asarray(elements)
-
-            triang = tri.Triangulation(nc[:, 0], nc[:, 1], elements)
-            refiner = tri.UniformTriRefiner(triang)
-            tri_refi, z_test_refi = refiner.refine_field(zz, subdiv=3)
-
-            fig, ax = plt.subplots()
-            ax.triplot(triang, lw=0.0, color='white')
-            tr_fig = ax.tripcolor(tri_refi, z_test_refi, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap)
-            levels = np.linspace(vmin, vmax, n_contour)
-            ax.tricontourf(tri_refi, z_test_refi, levels=levels, cmap=cmap)
-            ax.tricontour(tri_refi, z_test_refi, levels=levels,
-                          colors=['0.5'],
-                          linewidths=[0.5])
-            plt.colorbar(tr_fig, label=label)
-
-
-
+        elem_table = [list(geometry.element_table[i]) for i in range(geometry.n_elements)]
+        tmp_elmnt_nodes = elem_table.copy()
+        for el , item in enumerate(tmp_elmnt_nodes):
+            if len(item)==4:
+                elem_table.pop(el)
+                elem_table.insert(el,item[:3])
+                elem_table.append([item[i] for i in [2,3,0]])
+                ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
+        return np.asarray(elem_table)
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
