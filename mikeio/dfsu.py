@@ -920,24 +920,9 @@ class _UnstructuredGeometry:
 
     def get_node_centered_data(self, data, extra_allowed=True):
         nc = self.node_coordinates
-        ec = self.element_coordinates
-        # TODO: call _create_tri_only_element_table
-        elements = [list(self.element_table[i]) for i in range(len(list(self.element_table)))]
-        if self.is_tri_only:
-            elements = np.asarray(elements)
-        else:  # if it is a mix of tri and quad
-            tmp_elements = elements.copy()
-            for el , item in enumerate(tmp_elements):
-                if len(item)==4:
-                    elements.pop(el)
-                    elements.insert(el,item[:3])
-                    elements.append([item[i] for i in [2,3,0]])
-                    data = np.append(data, data[el])
-                    ec = np.append(ec,ec[el].reshape(1,-1), axis=0)
-
-            elements = np.asarray(elements)
-
-        node_cellID = [list(np.argwhere(elements == i)[:, 0]) for i in np.unique(elements.reshape(-1, ))]
+        elem_table, ec = self._create_tri_only_element_table()
+        
+        node_cellID = [list(np.argwhere(elem_table == i)[:, 0]) for i in np.unique(elem_table.reshape(-1, ))]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
             I = ec[item][:, :2] - nc[n][:2]
@@ -976,9 +961,20 @@ class _UnstructuredGeometry:
         label: str, optional
             colorbar label
         cmap: matplotlib.cm.cmap, optional
-            default viridis
-        do_contour: Boolean, optional
-            default False, It creates contour plot
+            colormap, default viridis
+        vmin: real, optional 
+            lower bound of values to be shown on plot, default:None 
+        vmax: real, optional 
+            upper bound of values to be shown on plot, default:None 
+        plot_type: str, optional 
+            type of plot: 'patch' (default), 'shaded' or 'contour' 
+        n_levels: int, optional
+            for contour plots: how many levels, default:10
+        plot_mesh: bool, optional
+            should the mesh be shown on the plot? default=True
+        n_refinements: int
+            for 'shaded' and 'contour' plots (and if plot_mesh=False) 
+            do this number of mesh refinements for smoother plotting         
         """
         if cmap is None:
             cmap = cm.viridis
@@ -999,7 +995,9 @@ class _UnstructuredGeometry:
         ec = geometry.element_coordinates
         ne = ec.shape[0]
 
+        is_bathy = False
         if z is None:
+            is_bathy = True
             z = ec[:, 2]
             if label is None:
                 label = "Bathymetry (m)"
@@ -1015,6 +1013,7 @@ class _UnstructuredGeometry:
         if vmax is None:
             vmax = z.max()
 
+        # set aspect ratio
         fig, ax = plt.subplots()
         if geometry.is_geo:
             mean_lat = 0.5*(max(nc[:,1])-min(nc[:,1]))
@@ -1042,12 +1041,20 @@ class _UnstructuredGeometry:
             mesh_linewidth = 0.0
             if plot_mesh == True:
                 mesh_linewidth = 0.2
-            zn = geometry.get_node_centered_data(z)
+                if n_refinements > 0: 
+                    n_refinements = 0
+                    print('Warning: mesh refinement is not possible if plot_mesh=True')
+            
+            if is_bathy:
+                zn = geometry.node_coordinates[:,2]
+            else:            
+                zn = geometry.get_node_centered_data(z)
 
-            elem_table = self._create_tri_only_element_table(geometry)
+            elem_table, ec = self._create_tri_only_element_table(geometry)
             triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)  
-            # TODO: refinements doesn't seem to work for 3d files? 
+            
             if n_refinements>0:
+                # TODO: refinements doesn't seem to work for 3d files? 
                 refiner = tri.UniformTriRefiner(triang)
                 triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
             
@@ -1071,18 +1078,21 @@ class _UnstructuredGeometry:
     def _create_tri_only_element_table(self, geometry=None):
         if geometry is None:
             geometry = self
+        
+        ec = geometry.element_coordinates
         if geometry.is_tri_only:
-            return geometry.element_table 
-
+            return np.asarray(geometry.element_table), ec 
+        
         elem_table = [list(geometry.element_table[i]) for i in range(geometry.n_elements)]
         tmp_elmnt_nodes = elem_table.copy()
-        for el , item in enumerate(tmp_elmnt_nodes):
+        for el, item in enumerate(tmp_elmnt_nodes):
             if len(item)==4:
                 elem_table.pop(el)
                 elem_table.insert(el,item[:3])
                 elem_table.append([item[i] for i in [2,3,0]])
                 ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
-        return np.asarray(elem_table)
+
+        return np.asarray(elem_table), ec
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
