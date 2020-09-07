@@ -722,6 +722,8 @@ def test_plot_bathymetry():
     dfs = Dfsu(filename)
 
     dfs.plot()
+    
+    assert True
 
 
 def test_to_mesh_3d(tmpdir):
@@ -789,3 +791,47 @@ def test_to_shapely():
     shp = dfs.to_shapely()
     assert True
 
+
+def test_element_table():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    eid = 31
+    nid = dfs.element_table[eid]
+    assert nid == [32, 28, 23]   
+
+
+def test_get_node_centered_data():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    ds = dfs.read(items='Surface elevation')
+    time_step = 0
+    wl_cc = ds.data[0][time_step,:]
+    wl_nodes = dfs.get_node_centered_data(wl_cc)
+    
+    eid = 31
+    assert wl_cc[eid] == 0.4593418836593628
+    nid = dfs.element_table[eid]    
+    assert wl_nodes[nid].mean() == 0.45935017355903907
+    
+
+def test_plot_dfsu_contour():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    dfs.plot(plot_type='contour', n_levels=5)
+    assert True
+
+def test_plot_dfsu_shaded():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    ds = dfs.read(items='Surface elevation', time_steps=0)
+    elem40 = np.arange(40)
+    wl_40 = ds.data[0][0, elem40]
+    dfs.plot(wl_40, elements=elem40, plot_type='shaded', n_levels=5)
+    assert True
+
+def test_plot_dfsu():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    data = dfs.read()
+    dfs.plot(z=data[1][0,:])
+    assert True
