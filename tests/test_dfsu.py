@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 import pytest
 
-from mikeio import Dfsu, Mesh
+from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
 from mikeio.dutil import Dataset
 
@@ -210,6 +210,51 @@ def test_find_nearest_element_2d():
 
     elem_id = dfs.find_nearest_element(606200, 6905480)
     assert elem_id == 317
+
+
+def test_dfsu_to_dfs0_via_dataframe(tmpdir):
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.start_time.year == 1985
+
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+
+    ds = dfs.read(elements=[elem_id])
+    dss = ds.isel(idx=0)
+    df = dss.to_dataframe()
+
+    outfilename = os.path.join(tmpdir, "out.dfs0")
+    df.to_dfs0(outfilename)
+
+    dfs0 = Dfs0(outfilename)
+    newds = dfs0.read()
+
+    assert newds.items[0].name == ds.items[0].name
+    assert ds.time[0] == newds.time[0]
+    assert ds.time[-1] == newds.time[-1]
+
+
+def test_dfsu_to_dfs0(tmpdir):
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.start_time.year == 1985
+
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+
+    ds = dfs.read(elements=[elem_id])
+    dss = ds.isel(idx=0)
+
+    outfilename = os.path.join(tmpdir, "out.dfs0")
+
+    dfs0 = Dfs0()
+    dfs0.write(outfilename, dss)
+
+    dfs0 = Dfs0(outfilename)
+    newds = dfs0.read()
+
+    assert newds.items[0].name == ds.items[0].name
+    assert ds.time[0] == newds.time[0]
+    assert ds.time[-1] == newds.time[-1]
 
 
 def test_find_nearest_element_2d_array():
@@ -746,10 +791,42 @@ def test_to_shapely():
     shp = dfs.to_shapely()
     assert True
 
+
+def test_element_table():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    eid = 31
+    nid = dfs.element_table[eid]
+    assert nid == [32, 28, 23]   
+
+
+def test_get_node_centered_data():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    ds = dfs.read(items='Surface elevation')
+    time_step = 0
+    wl_cc = ds.data[0][time_step,:]
+    wl_nodes = dfs.get_node_centered_data(wl_cc)
+    
+    eid = 31
+    assert wl_cc[eid] == 0.4593418836593628
+    nid = dfs.element_table[eid]    
+    assert wl_nodes[nid].mean() == 0.45935017355903907
+    
+
 def test_plot_dfsu_contour():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    dfs.plot(do_contour=True)
+    dfs.plot(plot_type='contour', n_levels=5)
+    assert True
+
+def test_plot_dfsu_shaded():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    ds = dfs.read(items='Surface elevation', time_steps=0)
+    elem40 = np.arange(40)
+    wl_40 = ds.data[0][0, elem40]
+    dfs.plot(wl_40, elements=elem40, plot_type='shaded', n_levels=5)
     assert True
 
 def test_plot_dfsu():
