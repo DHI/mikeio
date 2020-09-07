@@ -918,7 +918,21 @@ class _UnstructuredGeometry:
 
         return mp
 
-    def get_node_centered_data(self, data, extra_allowed=True):
+    def get_node_centered_data(self, data, extrapolate=True):
+        """convert cell-centered data to node-centered by pseudo-laplacian method
+
+        Parameters
+        ----------
+        data : np.array(float)
+            cell-centered data 
+        extrapolate : bool, optional
+            allow the method to extrapolate, default:True
+
+        Returns
+        -------
+        np.array(float)
+            node-centered data 
+        """
         nc = self.node_coordinates
         elem_table, ec = self._create_tri_only_element_table()
         
@@ -935,7 +949,7 @@ class _UnstructuredGeometry:
                 lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
                 lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
                 omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
-                if not extra_allowed:
+                if not extrapolate:
                     omega[np.where(omega > 2)] = 2
                     omega[np.where(omega < 0)] = 0
             if omega.sum()>0:
@@ -1025,11 +1039,15 @@ class _UnstructuredGeometry:
             # do plot as patches (like MZ "box contour")
             # with (constant) element center values
             patches = geometry._to_polygons()
-            p = PatchCollection(
-                patches, cmap=cmap, edgecolor="none", linewidths=0.0
-            ) #  alpha=0.8, 
 
-            # TODO: how to hide mesh lines?? 
+            if plot_mesh:
+                p = PatchCollection(
+                    patches, cmap=cmap, edgecolor="face", linewidths=0.0
+                ) 
+            else:
+                p = PatchCollection(
+                    patches, cmap=cmap, edgecolor="face", alpha=None, linewidths=None
+                )
 
             p.set_array(z)
             p.set_clim(vmin, vmax)
@@ -1040,7 +1058,7 @@ class _UnstructuredGeometry:
             import matplotlib.tri as tri
             mesh_linewidth = 0.0
             if plot_mesh == True:
-                mesh_linewidth = 0.2
+                mesh_linewidth = 0.4
                 if n_refinements > 0: 
                     n_refinements = 0
                     print('Warning: mesh refinement is not possible if plot_mesh=True')
@@ -1065,10 +1083,10 @@ class _UnstructuredGeometry:
                 # must be contourf plot then
                 levels = np.linspace(vmin, vmax, n_levels)
                 tr_fig = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
-                if plot_type == 'contour_lines':
-                    ax.tricontour(triang, zn, levels=levels,
-                            colors=['0.5'],
-                            linewidths=[0.5])
+                # if plot_type == 'contour_lines':
+                #     ax.tricontour(triang, zn, levels=levels,
+                #             colors=['0.5'],
+                #             linewidths=[0.5])
             
             plt.colorbar(tr_fig, label=label)
 
@@ -1076,6 +1094,8 @@ class _UnstructuredGeometry:
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
     def _create_tri_only_element_table(self, geometry=None):
+        """Convert quad/tri mesh to pure tri-mesh
+        """
         if geometry is None:
             geometry = self
         
