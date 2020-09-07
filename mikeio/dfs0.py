@@ -270,6 +270,9 @@ class Dfs0:
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
             data = data.data
 
+        if start_time is not None:
+            self._start_time = start_time
+
         self._n_items = len(data)
         self._n_time_steps = np.shape(data[0])[0]
 
