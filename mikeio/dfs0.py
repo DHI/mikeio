@@ -282,11 +282,6 @@ class Dfs0:
         self._n_items = len(data)
         self._n_time_steps = np.shape(data[0])[0]
 
-        if self._start_time is None:
-            self._start_time = datetime.now()
-            warnings.warn(
-                f"No start time supplied. Using current time: {self._start_time} as start time."
-            )
         if items:
             self._items = items
 
@@ -309,10 +304,15 @@ class Dfs0:
                     for step in np.arange(self._n_time_steps)
                 ]
             )
-
         else:
             self._start_time = datetimes[0]
             self._equidistant = False
+
+        if self._start_time is None:
+            self._start_time = datetime.now()
+            warnings.warn(
+                f"No start time supplied. Using current time: {self._start_time} as start time."
+            )
 
         dfs = self._setup_header()
 
