@@ -918,7 +918,51 @@ class _UnstructuredGeometry:
 
         return mp
 
-    def plot(self, z=None, elements=None, label=None, cmap=None):
+    def get_node_centered_data(self, data, extrapolate=True):
+        """convert cell-centered data to node-centered by pseudo-laplacian method
+
+        Parameters
+        ----------
+        data : np.array(float)
+            cell-centered data 
+        extrapolate : bool, optional
+            allow the method to extrapolate, default:True
+
+        Returns
+        -------
+        np.array(float)
+            node-centered data 
+        """
+        nc = self.node_coordinates
+        elem_table, ec = self._create_tri_only_element_table()
+        
+        node_cellID = [list(np.argwhere(elem_table == i)[:, 0]) for i in np.unique(elem_table.reshape(-1, ))]
+        node_centered_data = np.zeros(shape=nc.shape[0])
+        for n, item in enumerate(node_cellID):
+            I = ec[item][:, :2] - nc[n][:2]
+            I2 = (I ** 2).sum(axis=0)
+            Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
+            lamb = I2[0] * I2[1] - Ixy ** 2
+            omega=np.zeros(1)
+            if lamb > 1e-10 * (I2[0] * I2[1]):
+                # Standard case - Pseudo
+                lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
+                lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
+                omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
+                if not extrapolate:
+                    omega[np.where(omega > 2)] = 2
+                    omega[np.where(omega < 0)] = 0
+            if omega.sum()>0:
+                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
+            else:
+                # We did not succeed using pseudo laplace procedure, use inverse distance instead
+                InvDis = [1 / np.hypot(case[0], case[1]) for case in ec[item][:, :2] - nc[n][:2]]
+                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
+
+        return node_centered_data
+
+
+    def plot(self, z=None, elements=None, label=None, cmap=None, vmin=None, vmax=None, plot_type='patch', n_levels=10, n_refinements=0, plot_mesh=True):
         """
         Plot mesh elements
 
@@ -931,7 +975,20 @@ class _UnstructuredGeometry:
         label: str, optional
             colorbar label
         cmap: matplotlib.cm.cmap, optional
-            default viridis
+            colormap, default viridis
+        vmin: real, optional 
+            lower bound of values to be shown on plot, default:None 
+        vmax: real, optional 
+            upper bound of values to be shown on plot, default:None 
+        plot_type: str, optional 
+            type of plot: 'patch' (default), 'shaded' or 'contour' 
+        n_levels: int, optional
+            for contour plots: how many levels, default:10
+        plot_mesh: bool, optional
+            should the mesh be shown on the plot? default=True
+        n_refinements: int
+            for 'shaded' and 'contour' plots (and if plot_mesh=False) 
+            do this number of mesh refinements for smoother plotting         
         """
         if cmap is None:
             cmap = cm.viridis
@@ -952,7 +1009,9 @@ class _UnstructuredGeometry:
         ec = geometry.element_coordinates
         ne = ec.shape[0]
 
+        is_bathy = False
         if z is None:
+            is_bathy = True
             z = ec[:, 2]
             if label is None:
                 label = "Bathymetry (m)"
@@ -962,18 +1021,98 @@ class _UnstructuredGeometry:
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
                 )
 
-        fig, ax = plt.subplots()
-        patches = geometry._to_polygons()
-        # p = PatchCollection(patches, cmap=cmap, edgecolor="black")
-        p = PatchCollection(
-            patches, cmap=cmap, edgecolor="lightgray", alpha=0.8, linewidths=0.3
-        )
+        if vmin is None:
+            vmin = z.min()
 
-        p.set_array(z)
-        ax.add_collection(p)
-        fig.colorbar(p, ax=ax, label=label)
+        if vmax is None:
+            vmax = z.max()
+
+        # set aspect ratio
+        fig, ax = plt.subplots()
+        if geometry.is_geo:
+            mean_lat = 0.5*(max(nc[:,1])-min(nc[:,1]))
+            ax.set_aspect(1./np.cos(np.pi*mean_lat/180))            
+        else:
+            ax.set_aspect('equal')
+
+        if plot_type == 'patch':
+            # do plot as patches (like MZ "box contour")
+            # with (constant) element center values
+            patches = geometry._to_polygons()
+
+            if plot_mesh:
+                p = PatchCollection(
+                    patches, cmap=cmap, edgecolor="face", linewidths=0.0
+                ) 
+            else:
+                p = PatchCollection(
+                    patches, cmap=cmap, edgecolor="face", alpha=None, linewidths=None
+                )
+
+            p.set_array(z)
+            p.set_clim(vmin, vmax)
+            ax.add_collection(p)
+            fig.colorbar(p, ax=ax, label=label)
+        else: 
+            # do node-based triangular plot
+            import matplotlib.tri as tri
+            mesh_linewidth = 0.0
+            if plot_mesh == True:
+                mesh_linewidth = 0.4
+                if n_refinements > 0: 
+                    n_refinements = 0
+                    print('Warning: mesh refinement is not possible if plot_mesh=True')
+            
+            if is_bathy:
+                zn = geometry.node_coordinates[:,2]
+            else:            
+                zn = geometry.get_node_centered_data(z)
+
+            elem_table, ec = self._create_tri_only_element_table(geometry)
+            triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)  
+            
+            if n_refinements>0:
+                # TODO: refinements doesn't seem to work for 3d files? 
+                refiner = tri.UniformTriRefiner(triang)
+                triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
+            
+            ax.triplot(triang, lw=mesh_linewidth, color='lightgray')
+            if plot_type == 'shaded':
+                tr_fig = ax.tripcolor(triang, zn, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap, linewidths=0.3, shading='gouraud')
+            else:
+                # must be contourf plot then
+                levels = np.linspace(vmin, vmax, n_levels)
+                tr_fig = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
+                # if plot_type == 'contour_lines':
+                #     ax.tricontour(triang, zn, levels=levels,
+                #             colors=['0.5'],
+                #             linewidths=[0.5])
+            
+            plt.colorbar(tr_fig, label=label)
+
         ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+
+    def _create_tri_only_element_table(self, geometry=None):
+        """Convert quad/tri mesh to pure tri-mesh
+        """
+        if geometry is None:
+            geometry = self
+        
+        ec = geometry.element_coordinates
+        if geometry.is_tri_only:
+            return np.asarray(geometry.element_table), ec 
+        
+        elem_table = [list(geometry.element_table[i]) for i in range(geometry.n_elements)]
+        tmp_elmnt_nodes = elem_table.copy()
+        for el, item in enumerate(tmp_elmnt_nodes):
+            if len(item)==4:
+                elem_table.pop(el)
+                elem_table.insert(el,item[:3])
+                elem_table.append([item[i] for i in [2,3,0]])
+                ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
+
+        return np.asarray(elem_table), ec
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
