@@ -934,7 +934,7 @@ class _UnstructuredGeometry:
             node-centered data 
         """
         nc = self.node_coordinates
-        elem_table, ec = self._create_tri_only_element_table()
+        elem_table, ec, data = self._create_tri_only_element_table(data=data)
         
         node_cellID = [list(np.argwhere(elem_table == i)[:, 0]) for i in np.unique(elem_table.reshape(-1, ))]
         node_centered_data = np.zeros(shape=nc.shape[0])
@@ -1042,7 +1042,7 @@ class _UnstructuredGeometry:
 
             if plot_mesh:
                 p = PatchCollection(
-                    patches, cmap=cmap, edgecolor="face", linewidths=0.0
+                    patches, cmap=cmap, edgecolor="lightgray", linewidths=0.4
                 ) 
             else:
                 p = PatchCollection(
@@ -1068,7 +1068,7 @@ class _UnstructuredGeometry:
             else:            
                 zn = geometry.get_node_centered_data(z)
 
-            elem_table, ec = self._create_tri_only_element_table(geometry)
+            elem_table, ec, zn = self._create_tri_only_element_table(data=zn, geometry=geometry)
             triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)  
             
             if n_refinements>0:
@@ -1093,7 +1093,8 @@ class _UnstructuredGeometry:
         ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
-    def _create_tri_only_element_table(self, geometry=None):
+
+    def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh
         """
         if geometry is None:
@@ -1101,8 +1102,11 @@ class _UnstructuredGeometry:
         
         ec = geometry.element_coordinates
         if geometry.is_tri_only:
-            return np.asarray(geometry.element_table), ec 
+            return np.asarray(geometry.element_table), ec, data 
         
+        if data is None:
+            data = []
+
         elem_table = [list(geometry.element_table[i]) for i in range(geometry.n_elements)]
         tmp_elmnt_nodes = elem_table.copy()
         for el, item in enumerate(tmp_elmnt_nodes):
@@ -1110,9 +1114,10 @@ class _UnstructuredGeometry:
                 elem_table.pop(el)
                 elem_table.insert(el,item[:3])
                 elem_table.append([item[i] for i in [2,3,0]])
+                data = np.append(data, data[el])
                 ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
 
-        return np.asarray(elem_table), ec
+        return np.asarray(elem_table), ec, data
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
