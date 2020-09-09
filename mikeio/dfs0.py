@@ -219,7 +219,7 @@ class Dfs0:
         data,
         start_time=None,
         timeseries_unit=TimeStep.SECOND,
-        dt=1.0,
+        dt=None,
         datetimes=None,
         items=None,
         title="",
@@ -270,6 +270,15 @@ class Dfs0:
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
             data = data.data
 
+        if dt:
+            self._dt = dt
+
+        if self._dt is None:
+            self._dt = 1.0
+
+        if start_time:
+            self._start_time = start_time
+
         self._n_items = len(data)
         self._n_time_steps = np.shape(data[0])[0]
 
@@ -293,7 +302,7 @@ class Dfs0:
         if datetimes is None:
             self._equidistant = True
 
-            self._dt = np.float(dt)
+            self._dt = np.float(self._dt)
             datetimes = np.array(
                 [
                     self._start_time + timedelta(seconds=(step * self._dt))

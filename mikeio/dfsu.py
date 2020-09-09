@@ -1082,11 +1082,12 @@ class _UnstructuredGeometry:
             else:
                 # must be contourf plot then
                 levels = np.linspace(vmin, vmax, n_levels)
+                ax.tripcolor(triang, zn, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap)
                 tr_fig = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
-                # if plot_type == 'contour_lines':
-                #     ax.tricontour(triang, zn, levels=levels,
-                #             colors=['0.5'],
-                #             linewidths=[0.5])
+                if plot_type == 'contour_lines':
+                    ax.tricontour(triang, zn, levels=levels,
+                            colors=['0.5'],
+                            linewidths=[0.5])
             
             plt.colorbar(tr_fig, label=label)
 

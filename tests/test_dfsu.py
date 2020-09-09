@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime
 import pytest
 
-from mikeio import Dfsu, Mesh
+from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
 from mikeio.dutil import Dataset
 
@@ -210,6 +210,51 @@ def test_find_nearest_element_2d():
 
     elem_id = dfs.find_nearest_element(606200, 6905480)
     assert elem_id == 317
+
+
+def test_dfsu_to_dfs0_via_dataframe(tmpdir):
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.start_time.year == 1985
+
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+
+    ds = dfs.read(elements=[elem_id])
+    dss = ds.isel(idx=0)
+    df = dss.to_dataframe()
+
+    outfilename = os.path.join(tmpdir, "out.dfs0")
+    df.to_dfs0(outfilename)
+
+    dfs0 = Dfs0(outfilename)
+    newds = dfs0.read()
+
+    assert newds.items[0].name == ds.items[0].name
+    assert ds.time[0] == newds.time[0]
+    assert ds.time[-1] == newds.time[-1]
+
+
+def test_dfsu_to_dfs0(tmpdir):
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.start_time.year == 1985
+
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+
+    ds = dfs.read(elements=[elem_id])
+    dss = ds.isel(idx=0)
+
+    outfilename = os.path.join(tmpdir, "out.dfs0")
+
+    dfs0 = Dfs0()
+    dfs0.write(outfilename, dss)
+
+    dfs0 = Dfs0(outfilename)
+    newds = dfs0.read()
+
+    assert newds.items[0].name == ds.items[0].name
+    assert ds.time[0] == newds.time[0]
+    assert ds.time[-1] == newds.time[-1]
 
 
 def test_find_nearest_element_2d_array():
