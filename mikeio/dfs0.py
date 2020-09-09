@@ -261,13 +261,12 @@ class Dfs0:
 
         if isinstance(data, Dataset):
             self._items = data.items
-            self._start_time = data.time[0]
-            if dt is None and len(data.time) > 1:
-                if not data.is_equidistant:
-                    raise Exception(
-                        "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
-                    )
+
+            if data.is_equidistant:
+                self._start_time = data.time[0]
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
+            else:
+                datetimes = data.time
             data = data.data
 
         if dt:
@@ -282,11 +281,6 @@ class Dfs0:
         self._n_items = len(data)
         self._n_time_steps = np.shape(data[0])[0]
 
-        if self._start_time is None:
-            self._start_time = datetime.now()
-            warnings.warn(
-                f"No start time supplied. Using current time: {self._start_time} as start time."
-            )
         if items:
             self._items = items
 
@@ -299,8 +293,16 @@ class Dfs0:
                 "names must be an array of strings with the same number of elements as data columns"
             )
 
-        if datetimes is None:
-            self._equidistant = True
+        if datetimes is not None:
+            self._start_time = datetimes[0]
+            self._is_equidistant = False
+        else:
+            self._is_equidistant = True
+            if self._start_time is None:
+                self._start_time = datetime.now()
+                warnings.warn(
+                    f"No start time supplied. Using current time: {self._start_time} as start time."
+                )
 
             self._dt = np.float(self._dt)
             datetimes = np.array(
@@ -309,10 +311,6 @@ class Dfs0:
                     for step in np.arange(self._n_time_steps)
                 ]
             )
-
-        else:
-            self._start_time = datetimes[0]
-            self._equidistant = False
 
         dfs = self._setup_header()
 

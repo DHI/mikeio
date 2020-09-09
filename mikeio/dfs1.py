@@ -122,7 +122,6 @@ class Dfs1(Dfs123):
         dx=1,
         x0=0,
         coordinate=None,
-        timeseries_unit=TimeStep.SECOND,
         title=None,
     ):
         """
@@ -136,11 +135,8 @@ class Dfs1(Dfs123):
             list of matrices, one for each item. Matrix dimension: x, time
         start_time: datetime, optional
             start datetime
-        timeseries_unit: Timestep, optional
-            TimeStep unit default TimeStep.SECOND
         dt: float
-            The time step (double based on the timeseries_unit). Therefore dt of 5.5 with timeseries_unit of minutes
-            means 5 mins and 30 seconds.
+            The time step in seconds. 
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         coordinate:
@@ -155,7 +151,7 @@ class Dfs1(Dfs123):
         """
 
         self._write_handle_common_arguments(
-            title, data, items, coordinate, start_time, dt, timeseries_unit
+            title, data, items, coordinate, start_time, dt
         )
 
         number_x = np.shape(data[0])[1]

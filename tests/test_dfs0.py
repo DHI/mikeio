@@ -274,6 +274,7 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     assert ds.items[0].type == EUMType.Concentration
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"][3])
+    assert ds.time[0].year == 1958
 
 
 def test_write_from_data_frame_different_types(tmpdir):

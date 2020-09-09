@@ -178,7 +178,6 @@ class Dfs2(Dfs123):
         x0=0,
         y0=0,
         coordinate=None,
-        timeseries_unit=TimeStep.SECOND,
         title=None,
     ):
         """
@@ -194,8 +193,7 @@ class Dfs2(Dfs123):
         start_time: datetime, optional
             start date of type datetime.
         dt: float, optional
-            The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
-            means 5 mins and 30 seconds. Default 1
+            The time step in seconds.
         datetimes: list[datetime], optional
             datetimes, creates a non-equidistant calendar axis
         items: list[ItemInfo], optional
@@ -210,14 +208,12 @@ class Dfs2(Dfs123):
             length of each grid in the y direction (projection units)
         coordinate:
             ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
-        timeseries_unit: Timestep, optional
-            TimeStep default TimeStep.SECOND
         title: str, optional
             title of the dfs2 file. Default is blank.
         """
 
         self._write_handle_common_arguments(
-            title, data, items, coordinate, start_time, dt, timeseries_unit
+            title, data, items, coordinate, start_time, dt
         )
 
         number_y = np.shape(data[0])[1]
