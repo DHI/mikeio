@@ -294,8 +294,16 @@ class Dfs0:
                 "names must be an array of strings with the same number of elements as data columns"
             )
 
-        if datetimes is None:
+        if datetimes is not None:
+            self._start_time = datetimes[0]
+            self._equidistant = False
+        else:
             self._equidistant = True
+            if self._start_time is None:
+                self._start_time = datetime.now()
+                warnings.warn(
+                    f"No start time supplied. Using current time: {self._start_time} as start time."
+                )
 
             self._dt = np.float(self._dt)
             datetimes = np.array(
@@ -303,15 +311,6 @@ class Dfs0:
                     self._start_time + timedelta(seconds=(step * self._dt))
                     for step in np.arange(self._n_time_steps)
                 ]
-            )
-        else:
-            self._start_time = datetimes[0]
-            self._equidistant = False
-
-        if self._start_time is None:
-            self._start_time = datetime.now()
-            warnings.warn(
-                f"No start time supplied. Using current time: {self._start_time} as start time."
             )
 
         dfs = self._setup_header()
