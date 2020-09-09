@@ -261,13 +261,12 @@ class Dfs0:
 
         if isinstance(data, Dataset):
             self._items = data.items
-            self._start_time = data.time[0]
-            if dt is None and len(data.time) > 1:
-                if not data.is_equidistant:
-                    raise Exception(
-                        "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
-                    )
+
+            if data.is_equidistant:
+                self._start_time = data.time[0]
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
+            else:
+                datetimes = data.time
             data = data.data
 
         if dt:
@@ -296,9 +295,9 @@ class Dfs0:
 
         if datetimes is not None:
             self._start_time = datetimes[0]
-            self._equidistant = False
+            self._is_equidistant = False
         else:
-            self._equidistant = True
+            self._is_equidistant = True
             if self._start_time is None:
                 self._start_time = datetime.now()
                 warnings.warn(
