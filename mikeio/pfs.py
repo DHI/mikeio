@@ -1,5 +1,6 @@
 from datetime import datetime
 import yaml
+import pandas as pd
 
 
 from types import SimpleNamespace
@@ -34,9 +35,33 @@ class Pfs:
         if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
             self.data.HD = self.data.HYDRODYNAMIC_MODULE
 
-    def __getitem__(self, x):
+    def get_outputs(self, section, included_only=False):
 
-        return self._data[x]
+        sub = self._data[section]["OUTPUTS"]
+        n = sub["number_of_outputs"]
+
+        sel_keys = [
+            "file_name",
+            "include",
+            "type",
+            "format",
+            "first_time_step",
+            "last_time_step",
+            "use_end_time",
+            "time_step_frequency",
+        ]
+        rows = []
+        for i in range(n):
+
+            output = sub[f"OUTPUT_{i+1}"]
+            row = {key: output[key] for key in sel_keys}
+
+            rows.append(row)
+        df = pd.DataFrame(rows)
+
+        if included_only:
+            df = df[df.include == 1]
+        return df
 
     def _pfs2yaml(self):
 

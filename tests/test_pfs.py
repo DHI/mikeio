@@ -32,3 +32,22 @@ def test_sw():
 
     assert data.TIME.start_time.year == 2002
     assert data.TIME.start_time.month == 1
+
+
+def test_outputs():
+
+    pfs = Pfs("tests/testdata/lake.sw")
+    df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE")
+
+    assert df["file_name"][0] == "Wave_parameters.dfsu"
+
+
+def test_included_outputs():
+
+    pfs = Pfs("tests/testdata/lake.sw")
+    df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
+
+    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df.shape[0] == 3
+
+    # df.to_csv("outputs.csv")

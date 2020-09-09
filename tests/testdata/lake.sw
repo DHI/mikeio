@@ -555,7 +555,7 @@
 
          [OUTPUT_2]
             Touched = 1
-            include = 1
+            include = 0
             title = 'Wave parameters along line'
             file_name = 'Wave_line.dfs1'
             type = 1
