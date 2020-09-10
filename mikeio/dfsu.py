@@ -1676,6 +1676,8 @@ class Mesh(_UnstructuredFile):
         """
         Plot mesh boundary nodes and their codes
         """
+        import matplotlib.pyplot as plt
+
         nc = self.node_coordinates
         c = self.codes
 

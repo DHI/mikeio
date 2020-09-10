@@ -47,34 +47,6 @@ def test_get_bad_node_coordinates():
         nc = msh.get_node_coords(code="foo")
 
 
-def test_plot_mesh():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
-
-    msh.plot()
-
-    assert True
-
-
-def test_plot_mesh_part():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
-
-    msh.plot(elements=list(range(0, 100)))
-
-    assert True
-
-
-def test_plot_mesh_boundary_nodes():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
-
-    msh.plot_boundary_nodes()
-    msh.plot_boundary_nodes(["Land", "Sea"])
-
-    assert True
-
-
 def test_set_z():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
