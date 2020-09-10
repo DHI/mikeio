@@ -3,10 +3,6 @@ from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -1009,6 +1005,12 @@ class _UnstructuredGeometry:
             for 'shaded' and 'contour' plots (and if plot_mesh=False) 
             do this number of mesh refinements for smoother plotting         
         """
+
+        import matplotlib.cm as cm
+        import matplotlib.pyplot as plt
+        from matplotlib.patches import Polygon
+        from matplotlib.collections import PatchCollection
+
         if cmap is None:
             cmap = cm.viridis
 
@@ -1676,6 +1678,8 @@ class Mesh(_UnstructuredFile):
         """
         Plot mesh boundary nodes and their codes
         """
+        import matplotlib.pyplot as plt
+
         nc = self.node_coordinates
         c = self.codes
 
