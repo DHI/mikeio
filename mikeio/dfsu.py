@@ -698,6 +698,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return geometry2d")
+            return None
         if self._geom2d is None:
             self._geom2d = self.to_2d_geometry()
         return self._geom2d
@@ -708,6 +709,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return e2_e3_table")
+            return None
         if self._e2_e3_table is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -721,6 +723,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return elem2d_ids")
+            return None
         if self._2d_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -734,6 +737,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return layer_ids")
+            return None
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -767,6 +771,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot find top_elements")
+            return None
         elif (self._top_elems is None) and (self._source is not None):
             # note: if subset of elements is selected then this cannot be done!
             self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
@@ -778,6 +783,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot find n_layers_per_column")
+            return None
         elif self._n_layers_column is None:
             top_elems = self.top_elements
             n = len(top_elems)
@@ -793,6 +799,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot find bottom_elements")
+            return None
         elif self._bot_elems is None:
             self._bot_elems = self.top_elements - self.n_layers_per_column + 1
         return self._bot_elems
@@ -1041,18 +1048,21 @@ class _UnstructuredGeometry:
             patches = geometry._to_polygons()
 
             if plot_mesh:
+                # p = PatchCollection(
+                #     patches, cmap=cmap, edgecolor="lightgray", linewidths=0.4
+                # ) 
                 p = PatchCollection(
-                    patches, cmap=cmap, edgecolor="lightgray", linewidths=0.4
+                    patches, edgecolor="lightgray", facecolor='none', linewidths=0.4
                 ) 
             else:
                 p = PatchCollection(
                     patches, cmap=cmap, edgecolor="face", alpha=None, linewidths=None
                 )
 
-            p.set_array(z)
-            p.set_clim(vmin, vmax)
+            p.set_array(z*0.0)
+            #p.set_clim(vmin, vmax)
             ax.add_collection(p)
-            fig.colorbar(p, ax=ax, label=label)
+            #fig.colorbar(p, ax=ax, label=label)
         else: 
             # do node-based triangular plot
             import matplotlib.tri as tri
@@ -1063,14 +1073,16 @@ class _UnstructuredGeometry:
                     n_refinements = 0
                     print('Warning: mesh refinement is not possible if plot_mesh=True')
             
-            if is_bathy:
-                zn = geometry.node_coordinates[:,2]
-            else:            
-                zn = geometry.get_node_centered_data(z)
+            # if is_bathy:
+            #     zn = geometry.node_coordinates[:,2]
+            # else:            
 
-            elem_table, ec, zn = self._create_tri_only_element_table(data=zn, geometry=geometry)
+            elem_table, ec, z = self._create_tri_only_element_table(data=z, geometry=geometry)
             triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)  
-            
+
+            zn = geometry.get_node_centered_data(z)
+
+
             if n_refinements>0:
                 # TODO: refinements doesn't seem to work for 3d files? 
                 refiner = tri.UniformTriRefiner(triang)
@@ -1116,7 +1128,7 @@ class _UnstructuredGeometry:
                 elem_table.insert(el,item[:3])
                 elem_table.append([item[i] for i in [2,3,0]])
                 data = np.append(data, data[el])
-                ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
+                ec = np.append(ec, ec[el].reshape(1, -1), axis=0)    # THIS IS NOT CORRECT! 
 
         return np.asarray(elem_table), ec, data
 
@@ -1588,7 +1600,12 @@ class Mesh(_UnstructuredFile):
     def __init__(self, filename):
         super().__init__()
         self._filename = filename
-        self._read_mesh_header(filename)
+        self._read_header(filename)
+        self._n_timesteps = None
+        self._n_items = None
+        self._n_layers = None
+        self._n_sigma = None
+        self._type = UnstructuredType.Mesh
 
     def set_z(self, z):
         """Change the depth by setting the z value of each node
