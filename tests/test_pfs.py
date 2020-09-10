@@ -42,6 +42,22 @@ def test_outputs():
     assert df["file_name"][0] == "Wave_parameters.dfsu"
 
 
+def test_sw_outputs():
+
+    pfs = Pfs("tests/testdata/lake.sw")
+    df = pfs.data.SW.get_outputs()
+
+    assert df["file_name"][0] == "Wave_parameters.dfsu"
+
+
+def test_hd_outputs():
+
+    pfs = Pfs("tests/testdata/lake.m21fm")
+    df = pfs.data.HD.get_outputs()
+
+    assert df["file_name"][1] == "ts.dfs0"
+
+
 def test_included_outputs():
 
     pfs = Pfs("tests/testdata/lake.sw")

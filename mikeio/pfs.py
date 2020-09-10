@@ -31,9 +31,17 @@ class Pfs:
         # create aliases
         if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
             self.data.SW = self.data.SPECTRAL_WAVE_MODULE
+            self.data.SW.get_outputs = self._get_sw_outputs
 
         if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
             self.data.HD = self.data.HYDRODYNAMIC_MODULE
+            self.data.HD.get_outputs = self._get_hd_outputs
+
+    def _get_sw_outputs(self, included_only=False):
+        return self.get_outputs("SPECTRAL_WAVE_MODULE", included_only=included_only)
+
+    def _get_hd_outputs(self, included_only=False):
+        return self.get_outputs("HYDRODYNAMIC_MODULE", included_only=included_only)
 
     def get_outputs(self, section, included_only=False):
 
