@@ -63,6 +63,8 @@ def _clone(infilename, outfilename):
     # Get the file
     file = builder.GetFile()
 
+    source.Close()
+
     return file
 
 
@@ -231,6 +233,7 @@ def concat(infilenames, outfilename):
     dfs_o = _clone(infilenames[0], outfilename)
 
     n_items = safe_length(dfs_i_a.ItemInfo)
+    dfs_i_a.Close()
 
     current_time = datetime(1, 1, 1)  # beginning of time...
 
@@ -255,6 +258,7 @@ def concat(infilenames, outfilename):
             next_start_time = datetime(
                 nf.Year, nf.Month, nf.Day, nf.Hour, nf.Minute, nf.Second
             )
+            dfs_n.Close()
 
         for timestep in range(n_time_steps):
 
@@ -271,5 +275,6 @@ def concat(infilenames, outfilename):
                 darray = to_dotnet_float_array(d)
 
                 dfs_o.WriteItemTimeStepNext(0, darray)
+        dfs_i.Close()
 
     dfs_o.Close()
