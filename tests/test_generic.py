@@ -1,4 +1,5 @@
 import os
+from shutil import copyfile
 import numpy as np
 import mikeio
 from mikeio.generic import scale
@@ -36,6 +37,7 @@ def test_multiply_constant(tmpdir):
     scaledvalue = scaled.data[0][0]
     assert scaledvalue == pytest.approx(expected)
 
+
 def test_multiply_constant_single_item_number(tmpdir):
 
     infilename = "tests/testdata/wind_north_sea.dfsu"
@@ -56,6 +58,7 @@ def test_multiply_constant_single_item_number(tmpdir):
     scaledvalue_dir = scaled.data[1][0][0]
     assert scaledvalue_dir == pytest.approx(expected_dir)
 
+
 def test_multiply_constant_single_item_name(tmpdir):
 
     infilename = "tests/testdata/wind_north_sea.dfsu"
@@ -66,15 +69,16 @@ def test_multiply_constant_single_item_name(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue_speed = org["Wind speed"][0,0]
+    orgvalue_speed = org["Wind speed"][0, 0]
     expected_speed = orgvalue_speed * 1.5
-    scaledvalue_speed = scaled["Wind speed"][0,0]
+    scaledvalue_speed = scaled["Wind speed"][0, 0]
     assert scaledvalue_speed == pytest.approx(expected_speed)
 
-    orgvalue_dir = org["Wind direction"][0,0]
+    orgvalue_dir = org["Wind direction"][0, 0]
     expected_dir = orgvalue_dir
-    scaledvalue_dir = scaled["Wind direction"][0,0]
+    scaledvalue_dir = scaled["Wind direction"][0, 0]
     assert scaledvalue_dir == pytest.approx(expected_dir)
+
 
 def test_add_constant_delete_values_unchanged(tmpdir):
 
@@ -86,15 +90,16 @@ def test_add_constant_delete_values_unchanged(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org['Elevation'][0,0,0]
-    scaledvalue = scaled['Elevation'][0,0,0]
+    orgvalue = org["Elevation"][0, 0, 0]
+    scaledvalue = scaled["Elevation"][0, 0, 0]
     assert scaledvalue == pytest.approx(orgvalue - 2.1)
 
-    orgvalue = org['Elevation'][0,100,0]
+    orgvalue = org["Elevation"][0, 100, 0]
     assert np.isnan(orgvalue)
 
-    scaledvalue = scaled['Elevation'][0,100,0]
+    scaledvalue = scaled["Elevation"][0, 100, 0]
     assert np.isnan(scaledvalue)
+
 
 def test_multiply_constant_delete_values_unchanged_2(tmpdir):
 
@@ -109,17 +114,15 @@ def test_multiply_constant_delete_values_unchanged_2(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org[item_name][0,0,0]
-    scaledvalue = scaled[item_name][0,0,0]
-    assert scaledvalue == pytest.approx(orgvalue*1000.0)
+    orgvalue = org[item_name][0, 0, 0]
+    scaledvalue = scaled[item_name][0, 0, 0]
+    assert scaledvalue == pytest.approx(orgvalue * 1000.0)
 
-
-    orgvalue = org[item_name][0,10,0]
+    orgvalue = org[item_name][0, 10, 0]
     assert np.isnan(orgvalue)
 
-    scaledvalue = scaled[item_name][0,10,0]
+    scaledvalue = scaled[item_name][0, 10, 0]
     assert np.isnan(scaledvalue)
-
 
 
 def test_linear_transform(tmpdir):
@@ -218,3 +221,30 @@ def test_concat_three_files(tmpdir):
 
     ds = mikeio.read(outfilename)
     assert len(ds.time) == (5 * 48 + 1)
+
+
+def test_concat_closes_files(tmpdir):
+    infiles = [
+        "tests/testdata/tide1.dfs1",
+        "tests/testdata/tide2.dfs1",
+        "tests/testdata/tide4.dfs1",
+    ]
+
+    tmpfiles = []
+
+    for file in infiles:
+        tmp_path = os.path.join(tmpdir.dirname, os.path.basename(file))
+        copyfile(file, tmp_path)
+        tmpfiles.append(tmp_path)
+
+    outfilename = os.path.join(tmpdir.dirname, "concat.dfs1")
+
+    mikeio.generic.concat(tmpfiles, outfilename)
+
+    for file in tmpfiles:
+        os.remove(file)
+        assert not os.path.exists(file)
+
+    # ds = mikeio.read(outfilename)
+    # assert len(ds.time) == (5 * 48 + 1)
+
