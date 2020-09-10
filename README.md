@@ -167,6 +167,13 @@ For more examples on working with dfsu see these notebooks:
 * [3d](notebooks/Dfsu%20-%203D%20sigma-z.ipynb)
 * [Speed & direction](notebooks/Dfsu%20-%20Speed%20and%20direction.ipynb)
 
+## Pfs
+
+Pfs is the format used for MIKE setup files (.m21fm, .m3fm, .sw etc.)
+
+![pfs](images/pfs.gif)
+
+
 ## Items, units
  Useful when creating a new dfs file
 ```python
