@@ -15,6 +15,8 @@ setuptools.setup(
             "sphinx",
             "sphinx-rtd-theme",
             "shapely",
+            "xarray",
+            "netcdf4",
             "matplotlib",
             "jupyterlab",
         ],
