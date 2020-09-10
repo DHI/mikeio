@@ -194,7 +194,9 @@ class _UnstructuredGeometry:
         nc = self.node_coordinates
         if code is not None:
             if code not in self.valid_codes:
-                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
+                print(
+                    f"Selected code: {code} is not valid. Valid codes: {self.valid_codes}"
+                )
                 raise Exception
             return nc[self.codes == code]
         return nc
