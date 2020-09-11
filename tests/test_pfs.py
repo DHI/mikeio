@@ -48,6 +48,12 @@ def test_sw_outputs():
     df = pfs.data.SW.get_outputs()
 
     assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df.shape[0] == 4
+
+    df = pfs.data.SW.get_outputs(included_only=True)
+
+    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df.shape[0] == 3
 
 
 def test_hd_outputs():
@@ -56,6 +62,11 @@ def test_hd_outputs():
     df = pfs.data.HD.get_outputs()
 
     assert df["file_name"][1] == "ts.dfs0"
+    assert df.shape[0] == 3
+
+    df = pfs.data.HD.get_outputs(included_only=True)
+
+    assert df.shape[0] == 2
 
 
 def test_included_outputs():
