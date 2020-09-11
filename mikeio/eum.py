@@ -16,6 +16,16 @@ from enum import IntEnum
 from mikeio.dfs_util import unit_list, type_list
 
 
+class TimeAxisType(IntEnum):
+
+    EquidistantCalendar = 3
+    NonEquidistantCalendar = 4
+
+    def __repr__(self):
+
+        return self.name
+
+
 class TimeStep(IntEnum):
 
     SECOND = 1400
