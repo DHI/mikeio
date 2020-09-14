@@ -62,21 +62,20 @@ class Dfs0:
         return str.join("\n", out)
 
     def _read_header(self):
-        if not os.path.isfile(self._filename):
-            raise Exception(f"file {self._filename} does not exist!")
+        if not os.path.exists(self._filename):
+            raise FileNotFoundError(f"File {self._filename} not found.")
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._deletevalue = dfs.FileInfo.DeleteValueFloat
 
-        # items
+        # Read items
         self._n_items = safe_length(dfs.ItemInfo)
         self._items = get_item_info(dfs, list(range(self._n_items)))
 
-        # time
+        # Read time
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
-        # self._n_timesteps = dfs.NumberOfTimeSteps
-        # self._timestep_in_seconds = dfs.TimeStepInSeconds
         self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
+
         dfs.Close()
 
     def read(self, items=None, time_steps=None):
@@ -165,8 +164,8 @@ class Dfs0:
             isinstance(item_number, int) and 0 <= item_number < 1e15
             for item_number in item_numbers
         ):
-            raise Warning(
-                "item_numbers must be a list or array of values between 0 and 1e15"
+            raise ValueError(
+                "'item_numbers' must be a list or array of values between 0 and 1e15"
             )
 
     @staticmethod
@@ -184,12 +183,12 @@ class Dfs0:
 
         # Match the data to write to the existing dfs0 file
         if n_time_steps != data[0].shape[0]:
-            raise Exception(
+            raise ValueError(
                 f"Inconsistent data size. Number of time steps (row count) is {data[0].shape[0]}. Expected {n_time_steps}."
             )
 
         if n_items != len(data):
-            raise Exception(f"The number of items is {len(data)}. Expected {n_items}.")
+            raise ValueError(f"The number of items is {len(data)}. Expected {n_items}.")
 
         return dfs, n_items, n_time_steps
 
@@ -328,7 +327,7 @@ class Dfs0:
 
         if len(self._items) != self._n_items:
             raise ValueError(
-                "names must be an array of strings with the same number of elements as data columns"
+                "Number of items must match the number of data columns."
             )
 
         if datetimes is not None:
