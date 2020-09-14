@@ -10,6 +10,26 @@ from datetime import timedelta
 import pytest
 
 
+def test_repr():
+    filename = os.path.join("tests", "testdata", "da_diagnostic.dfs0")
+    dfs = Dfs0(filename)
+
+    text = repr(dfs)
+
+    assert "NonEquidistant" in text
+
+
+def test_repr_equidistant():
+    filename = os.path.join("tests", "testdata", "random.dfs0")
+    dfs = Dfs0(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs0" in text
+    assert "Equidistant" in text
+    assert "NonEquidistant" not in text
+
+
 def test_simple_write(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfs0")
