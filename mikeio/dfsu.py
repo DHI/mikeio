@@ -3,10 +3,6 @@ from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
-import matplotlib.cm as cm
-import matplotlib.pyplot as plt
-from matplotlib.patches import Polygon
-from matplotlib.collections import PatchCollection
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -198,7 +194,9 @@ class _UnstructuredGeometry:
         nc = self.node_coordinates
         if code is not None:
             if code not in self.valid_codes:
-                print(f"Selected code: {code} is not valid. Valid codes: {valid_codes}")
+                print(
+                    f"Selected code: {code} is not valid. Valid codes: {self.valid_codes}"
+                )
                 raise Exception
             return nc[self.codes == code]
         return nc
@@ -941,16 +939,19 @@ class _UnstructuredGeometry:
             node-centered data 
         """
         nc = self.node_coordinates
-        elem_table, ec, data = self._create_tri_only_element_table(data=data)
-        
-        node_cellID = [list(np.argwhere(elem_table == i)[:, 0]) for i in np.unique(elem_table.reshape(-1, ))]
+        elem_table, ec, data = self._create_tri_only_element_table(data)
+
+        node_cellID = [
+            list(np.argwhere(elem_table == i)[:, 0])
+            for i in np.unique(elem_table.reshape(-1,))
+        ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
             I = ec[item][:, :2] - nc[n][:2]
             I2 = (I ** 2).sum(axis=0)
             Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
             lamb = I2[0] * I2[1] - Ixy ** 2
-            omega=np.zeros(1)
+            omega = np.zeros(1)
             if lamb > 1e-10 * (I2[0] * I2[1]):
                 # Standard case - Pseudo
                 lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
@@ -959,17 +960,31 @@ class _UnstructuredGeometry:
                 if not extrapolate:
                     omega[np.where(omega > 2)] = 2
                     omega[np.where(omega < 0)] = 0
-            if omega.sum()>0:
+            if omega.sum() > 0:
                 node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
             else:
                 # We did not succeed using pseudo laplace procedure, use inverse distance instead
-                InvDis = [1 / np.hypot(case[0], case[1]) for case in ec[item][:, :2] - nc[n][:2]]
+                InvDis = [
+                    1 / np.hypot(case[0], case[1])
+                    for case in ec[item][:, :2] - nc[n][:2]
+                ]
                 node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
 
         return node_centered_data
 
-
-    def plot(self, z=None, elements=None, label=None, cmap=None, vmin=None, vmax=None, plot_type='patch', n_levels=10, n_refinements=0, plot_mesh=True):
+    def plot(
+        self,
+        z=None,
+        elements=None,
+        label=None,
+        cmap=None,
+        vmin=None,
+        vmax=None,
+        plot_type="patch",
+        n_levels=10,
+        n_refinements=0,
+        show_mesh=True,
+    ):
         """
         Plot mesh elements
 
@@ -988,15 +1003,21 @@ class _UnstructuredGeometry:
         vmax: real, optional 
             upper bound of values to be shown on plot, default:None 
         plot_type: str, optional 
-            type of plot: 'patch' (default), 'shaded' or 'contour' 
+            type of plot: 'patch' (default), 'mesh_only', 'shaded' or 'contour' 
         n_levels: int, optional
             for contour plots: how many levels, default:10
-        plot_mesh: bool, optional
+        show_mesh: bool, optional
             should the mesh be shown on the plot? default=True
         n_refinements: int
             for 'shaded' and 'contour' plots (and if plot_mesh=False) 
             do this number of mesh refinements for smoother plotting         
         """
+
+        import matplotlib.cm as cm
+        import matplotlib.pyplot as plt
+        from matplotlib.patches import Polygon
+        from matplotlib.collections import PatchCollection
+
         if cmap is None:
             cmap = cm.viridis
 
@@ -1023,6 +1044,9 @@ class _UnstructuredGeometry:
             if label is None:
                 label = "Bathymetry (m)"
         else:
+            if plot_type == 'mesh_only':
+                print(f'Cannot plot data in mesh_only plot!')
+
             if len(z) != ne:
                 raise Exception(
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
@@ -1037,39 +1061,45 @@ class _UnstructuredGeometry:
         # set aspect ratio
         fig, ax = plt.subplots()
         if geometry.is_geo:
-            mean_lat = 0.5*(max(nc[:,1])-min(nc[:,1]))
-            ax.set_aspect(1./np.cos(np.pi*mean_lat/180))            
+            mean_lat = 0.5 * (max(nc[:, 1]) - min(nc[:, 1]))
+            ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
         else:
-            ax.set_aspect('equal')
+            ax.set_aspect("equal")
 
-        if plot_type == 'patch':
+        if plot_type == "mesh_only":
+            if show_mesh == False:
+                print('Not possible to use show_mesh=False on a mesh_only plot!')
+            patches = geometry._to_polygons()
+            p = PatchCollection(
+                    patches, edgecolor="#222222", facecolor='none', linewidths=0.3
+                )   
+            ax.add_collection(p)
+
+        elif plot_type == 'patch':
+            patches = geometry._to_polygons()
             # do plot as patches (like MZ "box contour")
             # with (constant) element center values
-            patches = geometry._to_polygons()
-
-            if plot_mesh:
-                # p = PatchCollection(
-                #     patches, cmap=cmap, edgecolor="lightgray", linewidths=0.4
-                # ) 
+            if show_mesh:
                 p = PatchCollection(
-                    patches, edgecolor="lightgray", facecolor='none', linewidths=0.4
+                    patches, cmap=cmap, edgecolor="lightgray", linewidths=0.4
                 ) 
             else:
                 p = PatchCollection(
                     patches, cmap=cmap, edgecolor="face", alpha=None, linewidths=None
                 )
 
-            p.set_array(z*0.0)
-            #p.set_clim(vmin, vmax)
+            p.set_array(z)
+            p.set_clim(vmin, vmax)
             ax.add_collection(p)
-            #fig.colorbar(p, ax=ax, label=label)
+            fig.colorbar(p, ax=ax, label=label)
         else: 
             # do node-based triangular plot
             import matplotlib.tri as tri
+
             mesh_linewidth = 0.0
-            if plot_mesh == True:
+            if show_mesh == True:
                 mesh_linewidth = 0.4
-                if n_refinements > 0: 
+                if n_refinements > 0:
                     n_refinements = 0
                     print('Warning: mesh refinement is not possible if plot_mesh=True')
             
@@ -1087,10 +1117,19 @@ class _UnstructuredGeometry:
                 # TODO: refinements doesn't seem to work for 3d files? 
                 refiner = tri.UniformTriRefiner(triang)
                 triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
-            
-            ax.triplot(triang, lw=mesh_linewidth, color='lightgray')
-            if plot_type == 'shaded':
-                tr_fig = ax.tripcolor(triang, zn, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap, linewidths=0.3, shading='gouraud')
+
+            ax.triplot(triang, lw=mesh_linewidth, color="lightgray")
+            if plot_type == "shaded":
+                tr_fig = ax.tripcolor(
+                    triang,
+                    zn,
+                    edgecolors="face",
+                    vmin=vmin,
+                    vmax=vmax,
+                    cmap=cmap,
+                    linewidths=0.3,
+                    shading="gouraud",
+                )
             else:
                 # must be contourf plot then
                 levels = np.linspace(vmin, vmax, n_levels)
@@ -1112,7 +1151,7 @@ class _UnstructuredGeometry:
         """
         if geometry is None:
             geometry = self
-        
+
         ec = geometry.element_coordinates
         if geometry.is_tri_only:
             return np.asarray(geometry.element_table), ec, data 
@@ -1123,7 +1162,7 @@ class _UnstructuredGeometry:
         elem_table = [list(geometry.element_table[i]) for i in range(geometry.n_elements)]
         tmp_elmnt_nodes = elem_table.copy()
         for el, item in enumerate(tmp_elmnt_nodes):
-            if len(item)==4:
+            if len(item) == 4:
                 elem_table.pop(el)
                 elem_table.insert(el,item[:3])
                 elem_table.append([item[i] for i in [2,3,0]])
@@ -1668,6 +1707,8 @@ class Mesh(_UnstructuredFile):
         """
         Plot mesh boundary nodes and their codes
         """
+        import matplotlib.pyplot as plt
+
         nc = self.node_coordinates
         c = self.codes
 
