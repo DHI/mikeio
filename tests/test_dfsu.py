@@ -9,6 +9,15 @@ from mikeio.eum import ItemInfo
 from mikeio.dutil import Dataset
 
 
+def test_repr():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    text = repr(dfs)
+
+    assert "Dfsu2D" in text
+
+
 def test_read_all_items_returns_all_items_and_names():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)

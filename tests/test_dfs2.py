@@ -160,6 +160,31 @@ def test_write_selected_item_to_new_file(tmpdir):
     assert dfs.orientation == dfs2.orientation
 
 
+def test_repr():
+
+    filename = r"tests/testdata/gebco_sound.dfs2"
+    dfs = Dfs2(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+    assert "Items" in text
+    assert "dx" in text
+
+
+def test_repr_time():
+
+    filename = r"tests/testdata/random.dfs2"
+    dfs = Dfs2(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+    assert "Items" in text
+    assert "dx" in text
+    assert "steps" in text
+
+
 def test_write_modified_data_to_new_file(tmpdir):
 
     filename = r"tests/testdata/gebco_sound.dfs2"

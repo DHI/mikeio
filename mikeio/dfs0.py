@@ -16,8 +16,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dutil import Dataset, get_valid_items_and_timesteps
-from .eum import TimeStep, EUMType, EUMUnit, ItemInfo
+from .dutil import Dataset, get_valid_items_and_timesteps, get_item_info
+from .eum import TimeStep, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
 
 
@@ -40,6 +40,43 @@ class Dfs0:
             File name including full path to the dfs0 file.
         """
         self._filename = filename
+
+        if filename:
+            self._read_header()
+
+    def __repr__(self):
+        out = ["Dfs0"]
+
+        if self._filename:
+
+            out.append(f"Timeaxis: {str(self._timeaxistype)}")
+
+        if self._n_items is not None:
+            if self._n_items < 10:
+                out.append("Items:")
+                for i, item in enumerate(self.items):
+                    out.append(f"  {i}:  {item}")
+            else:
+                out.append(f"Number of items: {self._n_items}")
+
+        return str.join("\n", out)
+
+    def _read_header(self):
+        if not os.path.exists(self._filename):
+            raise FileNotFoundError(f"File {self._filename} not found.")
+
+        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        self._deletevalue = dfs.FileInfo.DeleteValueFloat
+
+        # Read items
+        self._n_items = safe_length(dfs.ItemInfo)
+        self._items = get_item_info(dfs, list(range(self._n_items)))
+
+        # Read time
+        self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
+
+        dfs.Close()
 
     def read(self, items=None, time_steps=None):
         """
@@ -127,8 +164,8 @@ class Dfs0:
             isinstance(item_number, int) and 0 <= item_number < 1e15
             for item_number in item_numbers
         ):
-            raise Warning(
-                "item_numbers must be a list or array of values between 0 and 1e15"
+            raise ValueError(
+                "'item_numbers' must be a list or array of values between 0 and 1e15"
             )
 
     @staticmethod
@@ -146,12 +183,12 @@ class Dfs0:
 
         # Match the data to write to the existing dfs0 file
         if n_time_steps != data[0].shape[0]:
-            raise Exception(
+            raise ValueError(
                 f"Inconsistent data size. Number of time steps (row count) is {data[0].shape[0]}. Expected {n_time_steps}."
             )
 
         if n_items != len(data):
-            raise Exception(f"The number of items is {len(data)}. Expected {n_items}.")
+            raise ValueError(f"The number of items is {len(data)}. Expected {n_items}.")
 
         return dfs, n_items, n_time_steps
 
@@ -290,7 +327,7 @@ class Dfs0:
 
         if len(self._items) != self._n_items:
             raise ValueError(
-                "names must be an array of strings with the same number of elements as data columns"
+                "Number of items must match the number of data columns."
             )
 
         if datetimes is not None:
@@ -369,6 +406,30 @@ class Dfs0:
             Different types, units for each items, similar to `create`
         """
         return dataframe_to_dfs0(df, filename, itemtype, unit, items)
+
+    @property
+    def deletevalue(self):
+        """File delete value
+        """
+        return self._deletevalue
+
+    @property
+    def n_items(self):
+        """Number of items
+        """
+        return self._n_items
+
+    @property
+    def items(self):
+        """List of items
+        """
+        return self._items
+
+    @property
+    def start_time(self):
+        """File start time
+        """
+        return self._start_time
 
 
 def dataframe_to_dfs0(
