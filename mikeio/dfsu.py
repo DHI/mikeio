@@ -1154,7 +1154,7 @@ class _UnstructuredGeometry:
 
             elif plot_type == "contour" or plot_type == "contour_lines":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
-                levels = np.linspace(vmin, vmax, n_levels)                
+                levels = np.linspace(vmin, vmax, n_levels)
                 fig_obj = ax.tricontour(triang, zn, levels=levels, linewidths=[1.0], cmap=cmap)
                 plt.clabel(fig_obj, fmt='%1.2f', inline=1, fontsize=9)
                 if len(label) > 0:
@@ -1163,7 +1163,8 @@ class _UnstructuredGeometry:
             elif plot_type == "contourf" or plot_type == "contour_filled":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
                 levels = np.linspace(vmin, vmax, n_levels)
-                ax.tripcolor(triang, zn, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap)
+                vbuf = .01*(vmax-vmin)/n_levels
+                zn = np.clip(zn, vmin+vbuf, vmax-vbuf) # avoid white outside limits
                 fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
                 plt.colorbar(fig_obj, label=label, fraction=cbar_frac)
                 
@@ -1185,7 +1186,8 @@ class _UnstructuredGeometry:
             out_col = "0.4"
             plt.plot(*domain.exterior.xy, color=out_col, linewidth=1.0)
             for j in range(len(domain.interiors)):
-                plt.plot(*domain.interiors[j].xy, color=out_col, linewidth=1.0)
+                interj = domain.interiors[j]
+                plt.plot(*interj.xy, color=out_col, linewidth=1.0)
 
         return fig_obj
 
