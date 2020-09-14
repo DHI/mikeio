@@ -984,6 +984,7 @@ class _UnstructuredGeometry:
         n_levels=10,
         n_refinements=0,
         show_mesh=True,
+        show_outline=True,
     ):
         """
         Plot mesh elements
@@ -1003,13 +1004,16 @@ class _UnstructuredGeometry:
         vmax: real, optional 
             upper bound of values to be shown on plot, default:None 
         plot_type: str, optional 
-            type of plot: 'patch' (default), 'mesh_only', 'shaded' or 'contour' 
+            type of plot: 'patch' (default), 'mesh_only', 'shaded', 
+            'contour', 'contourf' or 'outline_only' 
         n_levels: int, optional
             for contour plots: how many levels, default:10
         show_mesh: bool, optional
             should the mesh be shown on the plot? default=True
+        show_outline: bool, optional
+            should domain outline be shown on the plot? default=True
         n_refinements: int
-            for 'shaded' and 'contour' plots (and if plot_mesh=False) 
+            for 'shaded' and 'contour' plots (and if show_mesh=False) 
             do this number of mesh refinements for smoother plotting         
         """
 
@@ -1041,16 +1045,13 @@ class _UnstructuredGeometry:
         if z is None:
             is_bathy = True
             z = ec[:, 2]
-            if label is None:
-                label = "Bathymetry (m)"
+            if label is None: label = "Bathymetry (m)"
         else:
-            if plot_type == 'mesh_only':
-                print(f'Cannot plot data in mesh_only plot!')
-
             if len(z) != ne:
                 raise Exception(
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
                 )
+            if label is None: label = ""
 
         if vmin is None:
             vmin = z.min()
@@ -1066,32 +1067,35 @@ class _UnstructuredGeometry:
         else:
             ax.set_aspect("equal")
 
-        if plot_type == "mesh_only":
+        if plot_type == "mesh_only" or plot_type == 'mesh':
+            if z is not None:
+                print(f'Cannot plot data in mesh_only plot!')
+
             if show_mesh == False:
                 print('Not possible to use show_mesh=False on a mesh_only plot!')
             patches = geometry._to_polygons()
-            p = PatchCollection(
+            fig_obj = PatchCollection(
                     patches, edgecolor="#222222", facecolor='none', linewidths=0.3
                 )   
-            ax.add_collection(p)
+            ax.add_collection(fig_obj)
 
-        elif plot_type == 'patch':
+        elif plot_type == 'patch' or plot_type == 'box':
             patches = geometry._to_polygons()
             # do plot as patches (like MZ "box contour")
             # with (constant) element center values
             if show_mesh:
-                p = PatchCollection(
-                    patches, cmap=cmap, edgecolor="lightgray", linewidths=0.4
+                fig_obj = PatchCollection(
+                    patches, cmap=cmap, edgecolor="0.95", linewidths=0.4
                 ) 
             else:
-                p = PatchCollection(
+                fig_obj = PatchCollection(
                     patches, cmap=cmap, edgecolor="face", alpha=None, linewidths=None
                 )
 
-            p.set_array(z)
-            p.set_clim(vmin, vmax)
-            ax.add_collection(p)
-            fig.colorbar(p, ax=ax, label=label)
+            fig_obj.set_array(z)
+            fig_obj.set_clim(vmin, vmax)
+            ax.add_collection(fig_obj)
+            fig.colorbar(fig_obj, ax=ax, label=label)
         else: 
             # do node-based triangular plot
             import matplotlib.tri as tri
@@ -1118,9 +1122,9 @@ class _UnstructuredGeometry:
                 refiner = tri.UniformTriRefiner(triang)
                 triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
 
-            ax.triplot(triang, lw=mesh_linewidth, color="lightgray")
-            if plot_type == "shaded":
-                tr_fig = ax.tripcolor(
+            if plot_type == "shaded" or plot_type == "smooth":
+                ax.triplot(triang, lw=mesh_linewidth, color="0.95")
+                fig_obj = ax.tripcolor(
                     triang,
                     zn,
                     edgecolors="face",
@@ -1130,21 +1134,39 @@ class _UnstructuredGeometry:
                     linewidths=0.3,
                     shading="gouraud",
                 )
-            else:
-                # must be contourf plot then
+                plt.colorbar(fig_obj, label=label)
+
+            elif plot_type == "contour" or plot_type == "contour_lines":
+                ax.triplot(triang, lw=mesh_linewidth, color="0.6")
+                levels = np.linspace(vmin, vmax, n_levels)                
+                fig_obj = ax.tricontour(triang, zn, levels=levels, linewidths=[1.0], cmap=cmap)
+                plt.clabel(fig_obj, fmt='%1.2f', inline=1, fontsize=9)                
+
+            elif plot_type == "contourf" or plot_type == "contour_filled":
+                ax.triplot(triang, lw=mesh_linewidth, color="0.95")
                 levels = np.linspace(vmin, vmax, n_levels)
                 ax.tripcolor(triang, zn, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap)
-                tr_fig = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
-                if plot_type == 'contour_lines':
-                    ax.tricontour(triang, zn, levels=levels,
-                            colors=['0.5'],
-                            linewidths=[0.5])
-            
-            plt.colorbar(tr_fig, label=label)
+                fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
+                plt.colorbar(fig_obj, label=label)
 
+            else:
+                if (plot_type is not None) and plot_type != 'outline_only':
+                    raise Exception(f'plot_type {plot_type} unknown!')
+                if z is not None:
+                    print(f'Cannot plot data in outline_only plot!')
+                fig_obj = None
+                
         ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
         ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
+        if show_outline:
+            mp = self.to_shapely()
+            domain = mp.buffer(0)
+            plt.plot(*domain.exterior.xy, color="0.4", linewidth=1.0)
+            for j in range(len(domain.interiors)):
+                plt.plot(*domain.interiors[j].xy, color="0.4", linewidth=1.0)
+
+        return fig_obj
 
     def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh
