@@ -1022,6 +1022,16 @@ class _UnstructuredGeometry:
         from matplotlib.patches import Polygon
         from matplotlib.collections import PatchCollection
 
+        mesh_col = "0.95"
+        mesh_col_dark = "0.6"
+
+        if plot_type is None:
+            plot_type = 'outline_only'
+
+        plot_data = True
+        if plot_type == 'mesh_only' or plot_type == 'outline_only':
+            plot_data = False
+
         if cmap is None:
             cmap = cm.viridis
 
@@ -1044,19 +1054,21 @@ class _UnstructuredGeometry:
         is_bathy = False
         if z is None:
             is_bathy = True
-            z = ec[:, 2]
-            if label is None: label = "Bathymetry (m)"
+            if plot_data:
+                z = ec[:, 2]
+                if label is None: label = "Bathymetry (m)"
         else:
             if len(z) != ne:
                 raise Exception(
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
                 )
             if label is None: label = ""
+            if not plot_data:
+                print(f'Cannot plot data in {plot_type} plot!')
 
-        if vmin is None:
+        if plot_data and vmin is None:            
             vmin = z.min()
-
-        if vmax is None:
+        if plot_data and vmax is None:
             vmax = z.max()
 
         # set aspect ratio
@@ -1067,15 +1079,23 @@ class _UnstructuredGeometry:
         else:
             ax.set_aspect("equal")
 
-        if plot_type == "mesh_only" or plot_type == 'mesh':
-            if z is not None:
-                print(f'Cannot plot data in mesh_only plot!')
+        # set plot limits for blot 
+        xybuf = 3e-3*(nc[:, 0].ptp())
+        ax.set_xlim(nc[:, 0].min()-xybuf, nc[:, 0].max()+xybuf)
+        ax.set_ylim(nc[:, 1].min()-xybuf, nc[:, 1].max()+xybuf)
 
+        # scale height of colorbar
+        cbar_frac = 0.046 * nc[:, 1].ptp()/nc[:, 0].ptp()
+
+        if plot_type == 'outline_only': 
+            fig_obj = None
+
+        elif plot_type == "mesh_only":
             if show_mesh == False:
                 print('Not possible to use show_mesh=False on a mesh_only plot!')
             patches = geometry._to_polygons()
             fig_obj = PatchCollection(
-                    patches, edgecolor="#222222", facecolor='none', linewidths=0.3
+                    patches, edgecolor=mesh_col_dark, facecolor='none', linewidths=0.3
                 )   
             ax.add_collection(fig_obj)
 
@@ -1085,7 +1105,7 @@ class _UnstructuredGeometry:
             # with (constant) element center values
             if show_mesh:
                 fig_obj = PatchCollection(
-                    patches, cmap=cmap, edgecolor="0.95", linewidths=0.4
+                    patches, cmap=cmap, edgecolor=mesh_col, linewidths=0.4
                 ) 
             else:
                 fig_obj = PatchCollection(
@@ -1095,27 +1115,23 @@ class _UnstructuredGeometry:
             fig_obj.set_array(z)
             fig_obj.set_clim(vmin, vmax)
             ax.add_collection(fig_obj)
-            fig.colorbar(fig_obj, ax=ax, label=label)
-        else: 
+            fig.colorbar(fig_obj, ax=ax, label=label, fraction=cbar_frac)
+            
+        else:
             # do node-based triangular plot
             import matplotlib.tri as tri
 
             mesh_linewidth = 0.0
-            if show_mesh == True:
+            if show_mesh and geometry.is_tri_only:
                 mesh_linewidth = 0.4
                 if n_refinements > 0:
                     n_refinements = 0
                     print('Warning: mesh refinement is not possible if plot_mesh=True')
             
-            # if is_bathy:
-            #     zn = geometry.node_coordinates[:,2]
-            # else:            
-
             elem_table, ec, z = self._create_tri_only_element_table(data=z, geometry=geometry)
             triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)  
 
             zn = geometry.get_node_centered_data(z)
-
 
             if n_refinements>0:
                 # TODO: refinements doesn't seem to work for 3d files? 
@@ -1123,7 +1139,7 @@ class _UnstructuredGeometry:
                 triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
 
             if plot_type == "shaded" or plot_type == "smooth":
-                ax.triplot(triang, lw=mesh_linewidth, color="0.95")
+                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
                 fig_obj = ax.tripcolor(
                     triang,
                     zn,
@@ -1134,37 +1150,42 @@ class _UnstructuredGeometry:
                     linewidths=0.3,
                     shading="gouraud",
                 )
-                plt.colorbar(fig_obj, label=label)
+                plt.colorbar(fig_obj, label=label, fraction=cbar_frac)
 
             elif plot_type == "contour" or plot_type == "contour_lines":
-                ax.triplot(triang, lw=mesh_linewidth, color="0.6")
+                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
                 levels = np.linspace(vmin, vmax, n_levels)                
                 fig_obj = ax.tricontour(triang, zn, levels=levels, linewidths=[1.0], cmap=cmap)
-                plt.clabel(fig_obj, fmt='%1.2f', inline=1, fontsize=9)                
+                plt.clabel(fig_obj, fmt='%1.2f', inline=1, fontsize=9)
+                if len(label) > 0:
+                    plt.title(label)
 
             elif plot_type == "contourf" or plot_type == "contour_filled":
-                ax.triplot(triang, lw=mesh_linewidth, color="0.95")
+                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
                 levels = np.linspace(vmin, vmax, n_levels)
                 ax.tripcolor(triang, zn, edgecolors='face', vmin=vmin, vmax=vmax, cmap=cmap)
                 fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
-                plt.colorbar(fig_obj, label=label)
-
+                plt.colorbar(fig_obj, label=label, fraction=cbar_frac)
+                
             else:
                 if (plot_type is not None) and plot_type != 'outline_only':
                     raise Exception(f'plot_type {plot_type} unknown!')
-                if z is not None:
-                    print(f'Cannot plot data in outline_only plot!')
-                fig_obj = None
-                
-        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
-        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
 
+            if show_mesh and (not geometry.is_tri_only):
+                # if mesh is not tri only, we need to add it manually on top
+                patches = geometry._to_polygons()
+                mesh_linewidth = 0.4
+                if plot_type == 'contour': mesh_col = mesh_col_dark
+                p = PatchCollection(patches, edgecolor=mesh_col, facecolor='none', linewidths=mesh_linewidth)
+                ax.add_collection(p)    
+           
         if show_outline:
             mp = self.to_shapely()
             domain = mp.buffer(0)
-            plt.plot(*domain.exterior.xy, color="0.4", linewidth=1.0)
+            out_col = "0.4"
+            plt.plot(*domain.exterior.xy, color=out_col, linewidth=1.0)
             for j in range(len(domain.interiors)):
-                plt.plot(*domain.interiors[j].xy, color="0.4", linewidth=1.0)
+                plt.plot(*domain.interiors[j].xy, color=out_col, linewidth=1.0)
 
         return fig_obj
 
