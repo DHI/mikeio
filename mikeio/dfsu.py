@@ -1080,7 +1080,7 @@ class _UnstructuredGeometry:
             vmax = z.max()
 
         # set levels
-        if plot_type[:7] == 'contour':
+        if 'contour' in plot_type:
             if levels is None:
                 levels = 10            
             if np.isscalar(levels): 
