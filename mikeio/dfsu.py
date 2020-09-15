@@ -1238,11 +1238,20 @@ class _UnstructuredGeometry:
         tmp_elmnt_nodes = elem_table.copy()
         for el, item in enumerate(tmp_elmnt_nodes):
             if len(item) == 4:
-                elem_table.pop(el)
-                elem_table.insert(el,item[:3])
-                elem_table.append([item[i] for i in [2,3,0]])
+                elem_table.pop(el) # remove quad element
+                
+                # insert two new tri elements in table
+                elem_table.insert(el, item[:3])
+                tri2_nodes = [item[i] for i in [2, 3, 0]]
+                elem_table.append(tri2_nodes)
+
+                # new center coordinates for new tri-elements
+                ec[el] = geometry.node_coordinates[item[:3]].mean(axis=1)
+                tri2_ec = geometry.node_coordinates[tri2_nodes].mean(axis=1)
+                ec = np.append(ec, tri2_ec.reshape(1, -1), axis=0) 
+                
+                # use same data in two new tri elements
                 data = np.append(data, data[el])
-                ec = np.append(ec, ec[el].reshape(1, -1), axis=0)    # THIS IS NOT CORRECT! 
 
         return np.asarray(elem_table), ec, data
 
