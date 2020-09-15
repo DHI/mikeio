@@ -976,15 +976,17 @@ class _UnstructuredGeometry:
         self,
         z=None,
         elements=None,
+        plot_type="patch",
+        title=None,
         label=None,
         cmap=None,
         vmin=None,
-        vmax=None,
-        plot_type="patch",
-        n_levels=10,
+        vmax=None,        
+        levels=10,
         n_refinements=0,
         show_mesh=True,
         show_outline=True,
+        ax=None,
     ):
         """
         Plot mesh elements
@@ -995,32 +997,38 @@ class _UnstructuredGeometry:
             value for each element to plot, default bathymetry
         elements: list(int), optional
             list of element ids to be plotted
+        plot_type: str, optional 
+            type of plot: 'patch' (default), 'mesh_only', 'shaded', 
+            'contour', 'contourf' or 'outline_only' 
+        title: str, optional
+            axes title 
         label: str, optional
-            colorbar label
+            colorbar label (or title if contour plot)
         cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis
+            colormap, default viridis            
         vmin: real, optional 
             lower bound of values to be shown on plot, default:None 
         vmax: real, optional 
             upper bound of values to be shown on plot, default:None 
-        plot_type: str, optional 
-            type of plot: 'patch' (default), 'mesh_only', 'shaded', 
-            'contour', 'contourf' or 'outline_only' 
-        n_levels: int, optional
+        levels: int, list(float), optional
             for contour plots: how many levels, default:10
+            or a list of discrete levels e.g. [3.0, 4.5, 6.0]
         show_mesh: bool, optional
             should the mesh be shown on the plot? default=True
         show_outline: bool, optional
             should domain outline be shown on the plot? default=True
         n_refinements: int
             for 'shaded' and 'contour' plots (and if show_mesh=False) 
-            do this number of mesh refinements for smoother plotting         
+            do this number of mesh refinements for smoother plotting  
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
         """
 
         import matplotlib.cm as cm
         import matplotlib.pyplot as plt
         from matplotlib.patches import Polygon
         from matplotlib.collections import PatchCollection
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
 
         mesh_col = "0.95"
         mesh_col_dark = "0.6"
@@ -1071,8 +1079,23 @@ class _UnstructuredGeometry:
         if plot_data and vmax is None:
             vmax = z.max()
 
+        # set levels
+        if plot_type[:7] == 'contour':
+            if levels is None:
+                levels = 10            
+            if np.isscalar(levels): 
+                n_levels = levels
+                levels = np.linspace(vmin, vmax, n_levels)
+            else:
+                n_levels = len(levels)
+                vmin = min(levels)
+                vmax = max(levels)
+
+        # plot in existing or new axes?
+        if ax is None:
+            fig, ax = plt.subplots()
+
         # set aspect ratio
-        fig, ax = plt.subplots()
         if geometry.is_geo:
             mean_lat = 0.5 * (max(nc[:, 1]) - min(nc[:, 1]))
             ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
@@ -1080,7 +1103,7 @@ class _UnstructuredGeometry:
             ax.set_aspect("equal")
 
         # set plot limits for blot 
-        xybuf = 3e-3*(nc[:, 0].ptp())
+        xybuf = 6e-3*(nc[:, 0].ptp())
         ax.set_xlim(nc[:, 0].min()-xybuf, nc[:, 0].max()+xybuf)
         ax.set_ylim(nc[:, 1].min()-xybuf, nc[:, 1].max()+xybuf)
 
@@ -1115,7 +1138,9 @@ class _UnstructuredGeometry:
             fig_obj.set_array(z)
             fig_obj.set_clim(vmin, vmax)
             ax.add_collection(fig_obj)
-            fig.colorbar(fig_obj, ax=ax, label=label, fraction=cbar_frac)
+
+            cax = make_axes_locatable(ax).append_axes("right",size="5%",pad=0.05)
+            plt.colorbar(fig_obj, label=label, cax=cax)
             
         else:
             # do node-based triangular plot
@@ -1150,23 +1175,25 @@ class _UnstructuredGeometry:
                     linewidths=0.3,
                     shading="gouraud",
                 )
-                plt.colorbar(fig_obj, label=label, fraction=cbar_frac)
-
+                
+                cax = make_axes_locatable(ax).append_axes("right",size="5%",pad=0.05)
+                plt.colorbar(fig_obj, label=label, cax=cax)
+                
             elif plot_type == "contour" or plot_type == "contour_lines":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
-                levels = np.linspace(vmin, vmax, n_levels)
-                fig_obj = ax.tricontour(triang, zn, levels=levels, linewidths=[1.0], cmap=cmap)
-                plt.clabel(fig_obj, fmt='%1.2f', inline=1, fontsize=9)
-                if len(label) > 0:
-                    plt.title(label)
+                fig_obj = ax.tricontour(triang, zn, levels=levels, linewidths=[1.2], cmap=cmap)
+                ax.clabel(fig_obj, fmt='%1.2f', inline=1, fontsize=9)
+                if len(label) > 0: ax.set_title(label)
 
             elif plot_type == "contourf" or plot_type == "contour_filled":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-                levels = np.linspace(vmin, vmax, n_levels)
                 vbuf = .01*(vmax-vmin)/n_levels
                 zn = np.clip(zn, vmin+vbuf, vmax-vbuf) # avoid white outside limits
                 fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
-                plt.colorbar(fig_obj, label=label, fraction=cbar_frac)
+                
+                # colorbar 
+                cax = make_axes_locatable(ax).append_axes("right",size="5%",pad=0.05)
+                plt.colorbar(fig_obj, label=label, cax=cax)
                 
             else:
                 if (plot_type is not None) and plot_type != 'outline_only':
@@ -1184,10 +1211,13 @@ class _UnstructuredGeometry:
             mp = self.to_shapely()
             domain = mp.buffer(0)
             out_col = "0.4"
-            plt.plot(*domain.exterior.xy, color=out_col, linewidth=1.0)
+            ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
             for j in range(len(domain.interiors)):
                 interj = domain.interiors[j]
-                plt.plot(*interj.xy, color=out_col, linewidth=1.0)
+                ax.plot(*interj.xy, color=out_col, linewidth=1.2)
+
+        if title is not None:
+            ax.set_title(title)
 
         return fig_obj
 
