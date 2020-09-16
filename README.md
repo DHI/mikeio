@@ -162,10 +162,23 @@ For more examples on Res1D see this [notebook](notebooks/Res1D.ipynb)
 ```
 ![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/master/images/dfsu_ts.png)
 
-For more examples on working with dfsu see these notebooks:
-* [Basic](notebooks/Dfsu%20-%20Read.ipynb)
-* [3d](notebooks/Dfsu%20-%203D%20sigma-z.ipynb)
+```python
+>>>  from mikeio import Dfsu
+>>>  msh = Mesh("FakeLake.dfsu")
+>>>  msh.plot()
+```
+![Mesh](https://raw.githubusercontent.com/DHI/mikeio/master/images/FakeLake.png)
+
+
+For more examples on working with dfsu and mesh see these notebooks:
+* [Basic dfsu](notebooks/Dfsu%20-%20Read.ipynb)
+* [3d dfsu](notebooks/Dfsu%20-%203D%20sigma-z.ipynb)
+* [Mesh](notebooks/Mesh.ipynb)
 * [Speed & direction](notebooks/Dfsu%20-%20Speed%20and%20direction.ipynb)
+* [Dfsu and mesh plotting](notebooks/Dfsu%20and%20Mesh%20-%20Plotting.ipynb)
+* [Export to netcdf](notebooks/Dfsu%20-%20Export%20to%20netcdf.ipynb)
+* [Export to shapefile](notebooks/Dfsu%20-%20Export%20to%20shapefile.ipynb)
+
 
 ## Items, units
  Useful when creating a new dfs file
