@@ -163,7 +163,7 @@ For more examples on Res1D see this [notebook](notebooks/Res1D.ipynb)
 ![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/master/images/dfsu_ts.png)
 
 ```python
->>>  from mikeio import Dfsu
+>>>  from mikeio import Mesh
 >>>  msh = Mesh("FakeLake.dfsu")
 >>>  msh.plot()
 ```
