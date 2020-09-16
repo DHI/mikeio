@@ -26,9 +26,9 @@ jobs:
         pip install .[dev]
     
     - name: Sphinx Build
-      uses: ammaraskar/sphinx-action@0.4
-      with:
-        docs-folder: docsrc
+      run:
+        cd docsrc
+        make html
 
     - name: Upload html
       uses: actions/upload-artifact@v1
