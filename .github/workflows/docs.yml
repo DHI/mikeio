@@ -26,7 +26,7 @@ jobs:
         pip install .[dev]
     
     - name: Sphinx Build
-      run:
+      run: |
         cd docsrc
         make html
 
