@@ -43,6 +43,22 @@ def test_read_item_0():
     assert len(ds) == 1
 
 
+def test_read_single_precision():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename, dtype=np.float32)
+
+    ds = dfs.read(1)
+
+    assert len(ds) == 1
+    assert ds[0].dtype == np.float32
+
+
+def test_read_int_not_accepted():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    with pytest.raises(Exception):
+        dfs = Dfsu(filename, dtype=np.int)
+
+
 def test_read_timestep_1():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
