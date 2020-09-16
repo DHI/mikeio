@@ -199,6 +199,11 @@ class Dataset:
 
     def __getitem__(self, x):
 
+        if isinstance(x, slice):
+            s = self.time.slice_indexer(x.start, x.stop)
+            time_steps = list(range(s.start, s.stop))
+            return self.isel(time_steps, axis=0)
+
         if isinstance(x, int):
             return self.data[x]
 

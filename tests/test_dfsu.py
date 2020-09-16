@@ -696,6 +696,26 @@ def test_temporal_resample_by_reading_selected_timesteps(tmpdir):
     assert pytest.approx(dfs.timestep) == newdfs.timestep / 2
 
 
+def test_write_temporal_subset(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    ds = dfs.read()  # TODO read temporal subset with slice e.g. "1985-08-06 12:00":
+    selds = ds["1985-08-06 12:00":]
+    dfs.write(outfilename, selds)
+
+    assert os.path.exists(outfilename)
+
+    newdfs = Dfsu(outfilename)
+
+    assert newdfs.start_time.hour == 12
+    assert newdfs.n_timesteps == 7
+
+
 def test_extract_top_layer_to_2d(tmpdir):
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
 

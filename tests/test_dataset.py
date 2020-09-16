@@ -1,5 +1,5 @@
 from datetime import datetime
-from dateutil.rrule import rrule, SECONDLY
+from dateutil.rrule import rrule, SECONDLY, HOURLY
 import numpy as np
 import pandas as pd
 import pytest
@@ -67,6 +67,35 @@ def test_select_temporal_subset_by_idx():
 
     assert len(selds) == 2
     assert selds["Foo"].shape == (3, 100, 30)
+
+
+def test_temporal_subset_fancy():
+
+    nt = (24 * 31) + 1
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+    data = [d1, d2]
+
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    assert ds.time[0].hour == 0
+    assert ds.time[-1].hour == 0
+
+    selds = ds["2000-01-01 00:00":"2000-01-02 00:00"]
+
+    assert len(selds) == 2
+    assert selds["Foo"].shape == (25, 100, 30)
+
+    selds = ds[:"2000-01-02 00:00"]
+    assert selds["Foo"].shape == (25, 100, 30)
+
+    selds = ds["2000-01-31 00:00":]
+    assert selds["Foo"].shape == (25, 100, 30)
+
+    selds = ds["2000-01-30":]
+    assert selds["Foo"].shape == (49, 100, 30)
 
 
 def test_select_item_by_name():
