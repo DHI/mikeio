@@ -19,7 +19,7 @@ from .dotnet import (
     to_dotnet_array,
     asnetarray_v2,
 )
-from .eum import TimeStep, ItemInfo, EUMType, EUMUnit
+from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
 
 

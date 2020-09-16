@@ -18,7 +18,7 @@ from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
 )
-from .eum import TimeStep
+from .eum import TimeStepUnit
 from .dfs import Dfs123
 
 
@@ -310,7 +310,7 @@ class Dfs3(Dfs123):
         x0=0,
         y0=0,
         coordinate=None,
-        timeseries_unit=TimeStep.SECOND,
+        timeseries_unit=TimeStepUnit.SECOND,
         title=None,
     ):
         """

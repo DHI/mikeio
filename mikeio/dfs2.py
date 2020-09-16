@@ -18,7 +18,7 @@ from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
 )
-from .eum import TimeStep, ItemInfo
+from .eum import ItemInfo
 from .helpers import safe_length
 from .dfs import Dfs123
 

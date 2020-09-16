@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 from .dutil import Dataset, get_valid_items_and_timesteps, get_item_info
-from .eum import TimeStep, EUMType, EUMUnit, ItemInfo, TimeAxisType
+from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
 
 
@@ -255,7 +255,7 @@ class Dfs0:
         filename,
         data,
         start_time=None,
-        timeseries_unit=TimeStep.SECOND,
+        timeseries_unit=TimeStepUnit.SECOND,
         dt=None,
         datetimes=None,
         items=None,
@@ -274,8 +274,8 @@ class Dfs0:
             values
         start_time: datetime.datetime, , optional
             start date of type datetime.
-        timeseries_unit: Timestep, optional
-            Timestep  unitdefault Timestep.SECOND
+        timeseries_unit: TimestepUnit, optional
+            Timestep  unit, default TimeStepUnit.SECOND
         dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds. default to 1.0
@@ -326,9 +326,7 @@ class Dfs0:
             self._items = [ItemInfo(f"Item {i + 1}") for i in range(self._n_items)]
 
         if len(self._items) != self._n_items:
-            raise ValueError(
-                "Number of items must match the number of data columns."
-            )
+            raise ValueError("Number of items must match the number of data columns.")
 
         if datetimes is not None:
             self._start_time = datetimes[0]

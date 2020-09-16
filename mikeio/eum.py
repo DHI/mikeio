@@ -26,7 +26,7 @@ class TimeAxisType(IntEnum):
         return self.name
 
 
-class TimeStep(IntEnum):
+class TimeStepUnit(IntEnum):
 
     SECOND = 1400
     MINUTE = 1401

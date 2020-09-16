@@ -4,7 +4,7 @@ import pandas as pd
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
-from mikeio.eum import TimeStep, EUMType, EUMUnit, ItemInfo
+from mikeio.eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from datetime import timedelta
 
 import pytest
@@ -108,7 +108,7 @@ def test_write_timestep_7days(tmpdir):
         data=data,
         items=items,
         title="Zeros and ones",
-        timeseries_unit=TimeStep.DAY,
+        timeseries_unit=TimeStepUnit.DAY,
         dt=7,
     )
 

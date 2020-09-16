@@ -7,7 +7,7 @@ from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
 )
-from .eum import ItemInfo, TimeStep
+from .eum import ItemInfo, TimeStepUnit
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
@@ -26,7 +26,7 @@ class Dfs123:
     _factory = None
     _deletevalue = None
     _override_coordinates = False
-    _timeseries_unit = TimeStep.SECOND
+    _timeseries_unit = TimeStepUnit.SECOND
     _dt = None
 
     def __init__(self, filename=None):
@@ -101,7 +101,7 @@ class Dfs123:
         if self._items is None:
             self._items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
 
-        self._timeseries_unit = TimeStep.SECOND
+        self._timeseries_unit = TimeStepUnit.SECOND
 
     def _setup_header(self, filename):
 
