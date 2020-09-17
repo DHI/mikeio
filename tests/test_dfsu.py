@@ -696,6 +696,19 @@ def test_temporal_resample_by_reading_selected_timesteps(tmpdir):
     assert pytest.approx(dfs.timestep) == newdfs.timestep / 2
 
 
+def test_read_temporal_subset(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    ds = dfs.read(time_steps=slice("1985-08-06 00:00", "1985-08-06 12:00"))
+
+    assert len(ds.time) == 3
+
+
 def test_write_temporal_subset(tmpdir):
 
     sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")

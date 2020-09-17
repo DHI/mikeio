@@ -24,6 +24,12 @@ def get_valid_items_and_timesteps(dfs, items, time_steps):
     if isinstance(time_steps, int):
         time_steps = [time_steps]
 
+    if isinstance(time_steps, slice):
+        freq = pd.tseries.offsets.DateOffset(seconds=dfs.timestep)
+        time = pd.date_range(dfs.start_time, periods=dfs.n_timesteps, freq=freq)
+        s = time.slice_indexer(time_steps.start, time_steps.stop)
+        time_steps = list(range(s.start, s.stop))
+
     items = get_item_info(dfs._source, item_numbers)
 
     return items, item_numbers, time_steps
