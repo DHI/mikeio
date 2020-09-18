@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.interpolate import interp1d
 from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
@@ -280,6 +281,54 @@ class Dataset:
 
         ds = Dataset(res, time, items)
         return ds
+
+    def interp(self, dt):
+        """Temporal interpolation
+
+        Parameters
+        ----------
+        dt: float
+            output timestep in seconds
+        
+        Returns
+        -------
+        Dataset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
+        >>> ds
+        <mikeio.DataSet>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
+        >>> dsi = ds.interp(dt=1800)
+        >>> dsi
+        <mikeio.DataSet>
+        Dimensions: (41, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
+        """
+        intime = self.time.values.astype(float)
+        offset = pd.tseries.offsets.DateOffset(seconds=dt)
+        out_t = pd.date_range(start=self.time[0], end=self.time[-1], freq=offset)
+        outtime = out_t.values.astype(float)
+
+        data_out = []
+        for dataitem in self:
+            f_out = interp1d(intime, dataitem, axis=0)
+            t_out = f_out(outtime)
+            data_out.append(t_out)
+
+        return Dataset(data_out, out_t, self.items)
 
     def to_dataframe(self, unit_in_name=False):
         """Convert Dataset to a Pandas DataFrame

@@ -1,5 +1,5 @@
 from datetime import datetime
-from dateutil.rrule import rrule, SECONDLY
+from dateutil.rrule import rrule, SECONDLY, DAILY
 import numpy as np
 import pandas as pd
 import pytest
@@ -197,6 +197,26 @@ def test_get_data():
     ds = Dataset(data, time, items)
 
     assert ds.data[0].shape == (100, 100, 30)
+
+
+def test_time_interp():
+
+    data = []
+    nt = 4
+    d = np.zeros([nt, 10, 3])
+    d[1] = 2.0
+    d[3] = 4.0
+    data.append(d)
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    assert ds.data[0].shape == (nt, 10, 3)
+
+    dsi = ds.interp(dt=3600)
+
+    assert ds.time[0] == dsi.time[0]
+    assert dsi.data[0].shape == (73, 10, 3)
 
 
 def test_get_data_2():
