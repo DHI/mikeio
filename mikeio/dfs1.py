@@ -144,7 +144,7 @@ class Dfs1(Dfs123):
         filename,
         data,
         start_time=None,
-        dt=1,
+        dt=None,
         items=None,
         dx=1,
         x0=0,

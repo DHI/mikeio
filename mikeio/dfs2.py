@@ -197,7 +197,7 @@ class Dfs2(Dfs123):
         filename,
         data,
         start_time=None,
-        dt=1,
+        dt=None,
         datetimes=None,
         items=None,
         dx=None,

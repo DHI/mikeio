@@ -223,6 +223,28 @@ def test_read_some_time_step():
     assert len(res.time) == 2
 
 
+def test_write_some_time_step(tmpdir):
+
+    filename = r"tests/testdata/waves.dfs2"
+    dfs = Dfs2(filename)
+
+    ds = dfs.read(time_steps=[1, 2])
+
+    assert ds.data[0].shape[0] == 2
+    assert len(ds.time) == 2
+
+    assert dfs.timestep == 86400.0
+    assert dfs.start_time.day == 1
+
+    outfilename = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
+
+    dfs.write(outfilename, ds)
+
+    dfs2 = Dfs2(outfilename)
+    assert dfs2.timestep == 86400.0
+    assert dfs2.start_time.day == 2
+
+
 def test_find_index_from_coordinate():
 
     filename = "tests/testdata/gebco_sound.dfs2"

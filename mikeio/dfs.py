@@ -99,6 +99,10 @@ class Dfs123:
         if dt:
             self._dt = dt
 
+        if self._dt is None:
+            self._dt = 1
+            warnings.warn(f"No timestep supplied. Using 1s.")
+
         if items:
             self._items = items
 
