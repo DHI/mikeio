@@ -36,6 +36,10 @@ class Dfs123:
         self._n_items = safe_length(dfs.ItemInfo)
         self._items = get_item_info(dfs, list(range(self._n_items)))
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
+            self._timestep_in_seconds = (
+                dfs.FileInfo.TimeAxis.TimeStep
+            )  # TODO handle other timeunits
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._projstr = dfs.FileInfo.Projection.WKTString
         self._longitude = dfs.FileInfo.Projection.Longitude
@@ -177,6 +181,12 @@ class Dfs123:
         """Number of time steps
         """
         return self._n_timesteps
+
+    @property
+    def timestep(self):
+        """Time step size in seconds
+        """
+        return self._timestep_in_seconds
 
     @property
     def projection_string(self):

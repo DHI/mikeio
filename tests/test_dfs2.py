@@ -112,6 +112,15 @@ def test_read():
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
+def test_read_temporal_subset_slice():
+
+    filename = r"tests/testdata/eq.dfs2"
+    dfs = Dfs2(filename)
+    ds = dfs.read(time_steps=slice("2000-01-01 00:00", "2000-01-01 12:00"))
+
+    assert len(ds.time) == 13
+
+
 def test_read_item_names():
 
     filename = r"tests/testdata/random.dfs2"
