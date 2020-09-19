@@ -25,6 +25,21 @@ def get_valid_items_and_timesteps(dfs, items, time_steps):
     if isinstance(time_steps, int):
         time_steps = [time_steps]
 
+    if isinstance(time_steps, str):
+        parts = time_steps.split(",")
+        if parts[0] == "":
+            time_steps = slice(parts[1])  # stop only
+        elif parts[1] == "":
+            time_steps = slice(parts[0], None)  # start only
+        else:
+            time_steps = slice(parts[0], parts[1])
+
+    if isinstance(time_steps, slice):
+        freq = pd.tseries.offsets.DateOffset(seconds=dfs.timestep)
+        time = pd.date_range(dfs.start_time, periods=dfs.n_timesteps, freq=freq)
+        s = time.slice_indexer(time_steps.start, time_steps.stop)
+        time_steps = list(range(s.start, s.stop))
+
     items = get_item_info(dfs._source, item_numbers)
 
     return items, item_numbers, time_steps
@@ -199,6 +214,11 @@ class Dataset:
         return len(self.items)
 
     def __getitem__(self, x):
+
+        if isinstance(x, slice):
+            s = self.time.slice_indexer(x.start, x.stop)
+            time_steps = list(range(s.start, s.stop))
+            return self.isel(time_steps, axis=0)
 
         if isinstance(x, int):
             return self.data[x]

@@ -1503,6 +1503,27 @@ class Dfsu(_UnstructuredFile):
         -------
         Dataset
             A dataset with data dimensions [t,elements]
+
+        Examples
+        --------
+        >>> dfsu.read()
+        <mikeio.DataSet>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
+        >>> dfsu.read(time_steps="1985-08-06 12:00,1985-08-07 00:00")
+        <mikeio.DataSet>
+        Dimensions: (5, 884)
+        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
         """
 
         # Open the dfs file for reading
