@@ -302,7 +302,7 @@ class Dataset:
         ds = Dataset(res, time, items)
         return ds
 
-    def time_interp(
+    def interp_time(
         self,
         dt,
         kind="linear",
