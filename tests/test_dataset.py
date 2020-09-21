@@ -242,7 +242,7 @@ def test_interp_time():
 
     assert ds.data[0].shape == (nt, 10, 3)
 
-    dsi = ds.interp_time(dt=3600)
+    dsi = ds.interpolate_time(dt=3600)
 
     assert ds.time[0] == dsi.time[0]
     assert dsi.data[0].shape == (73, 10, 3)
@@ -268,7 +268,7 @@ def test_interp_time_to_other_dataset():
 
     # Act
     ## interp_timeolate
-    dsi = ds1.interp_time(dt=ds2.time)
+    dsi = ds1.interpolate_time(dt=ds2.time)
 
     # Assert
     assert dsi.time[0] == ds2.time[0]

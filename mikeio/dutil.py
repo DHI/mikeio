@@ -302,14 +302,8 @@ class Dataset:
         ds = Dataset(res, time, items)
         return ds
 
-    def interp_time(
-        self,
-        dt,
-        kind="linear",
-        copy=True,
-        bounds_error=None,
-        fill_value=np.nan,
-        assume_sorted=False,
+    def interpolate_time(
+        self, dt, method="linear", extrapolate=True, fill_value=np.nan,
     ):
         """Temporal interpolation
 
@@ -319,14 +313,12 @@ class Dataset:
         ----------
         dt: float or pd.DatetimeIndex
             output timestep in seconds
-        kind: str or int, optional
+        method: str or int, optional
             Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.
-        copy: bool, optional
-            If True, the class makes internal copies of x and y. If False, references to x and y are used. The default is to copy
-        bounds_error: bool, optional
-            If True, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If False, out of bounds values are assigned fill_value
-        fill_value: array-like or “extrapolate”, optional
-            if a ndarray (or float), this value will be used to fill in for requested points outside of the data range. If not provided, then the default is NaN. The array-like must broadcast properly to the dimensions of the non-interpolation axes.
+        extrapolate: bool, optional
+            Default True. If False, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If True, out of bounds values are assigned fill_value
+        fill_value: float or array-like, optional
+            Default NaN. this value will be used to fill in for points outside of the time range.
 
         Returns
         -------
@@ -344,7 +336,7 @@ class Dataset:
         1:  U velocity <u velocity component> (meter per sec)
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
-        >>> dsi = ds.interp(dt=1800)
+        >>> dsi = ds.interpolate_time(dt=1800)
         >>> dsi
         <mikeio.DataSet>
         Dimensions: (41, 884)
@@ -357,30 +349,35 @@ class Dataset:
         """
 
         if isinstance(dt, pd.DatetimeIndex):
-            out_t = dt
+            t_out_index = dt
         else:
             offset = pd.tseries.offsets.DateOffset(seconds=dt)
-            out_t = pd.date_range(start=self.time[0], end=self.time[-1], freq=offset)
-
-        intime = self.time.values.astype(float)
-        outtime = out_t.values.astype(float)
-
-        data_out = []
-        for dataitem in self:
-            f_out = interp1d(
-                intime,
-                dataitem,
-                axis=0,
-                kind=kind,
-                copy=copy,
-                bounds_error=bounds_error,
-                fill_value=fill_value,
-                assume_sorted=assume_sorted,
+            t_out_index = pd.date_range(
+                start=self.time[0], end=self.time[-1], freq=offset
             )
-            t_out = f_out(outtime)
-            data_out.append(t_out)
 
-        return Dataset(data_out, out_t, self.items)
+        t_in = self.time.values.astype(float)
+        t_out = t_out_index.values.astype(float)
+
+        data = [
+            self._interpolate_item(t_in, t_out, item, method, extrapolate, fill_value)
+            for item in self
+        ]
+
+        return Dataset(data, t_out_index, self.items.copy())
+
+    @staticmethod
+    def _interpolate_item(intime, outtime, dataitem, method, extrapolate, fill_value):
+
+        interpolator = interp1d(
+            intime,
+            dataitem,
+            axis=0,
+            kind=method,
+            bounds_error=not extrapolate,
+            fill_value=fill_value,
+        )
+        return interpolator(outtime)
 
     def to_dataframe(self, unit_in_name=False):
         """Convert Dataset to a Pandas DataFrame
