@@ -302,14 +302,32 @@ class Dataset:
         ds = Dataset(res, time, items)
         return ds
 
-    def interp(self, dt):
+    def time_interp(
+        self,
+        dt,
+        kind="linear",
+        copy=True,
+        bounds_error=None,
+        fill_value=np.nan,
+        assume_sorted=False,
+    ):
         """Temporal interpolation
+
+        Wrapper of `scipy.interpolate.interp`
 
         Parameters
         ----------
         dt: float or pd.DatetimeIndex
             output timestep in seconds
-        
+        kind: str or int, optional
+            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.
+        copy: bool, optional
+            If True, the class makes internal copies of x and y. If False, references to x and y are used. The default is to copy
+        bounds_error: bool, optional
+            If True, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If False, out of bounds values are assigned fill_value
+        fill_value: array-like or “extrapolate”, optional
+            if a ndarray (or float), this value will be used to fill in for requested points outside of the data range. If not provided, then the default is NaN. The array-like must broadcast properly to the dimensions of the non-interpolation axes.
+
         Returns
         -------
         Dataset
@@ -349,7 +367,16 @@ class Dataset:
 
         data_out = []
         for dataitem in self:
-            f_out = interp1d(intime, dataitem, axis=0)
+            f_out = interp1d(
+                intime,
+                dataitem,
+                axis=0,
+                kind=kind,
+                copy=copy,
+                bounds_error=bounds_error,
+                fill_value=fill_value,
+                assume_sorted=assume_sorted,
+            )
             t_out = f_out(outtime)
             data_out.append(t_out)
 
