@@ -248,6 +248,35 @@ def test_time_interp():
     assert dsi.data[0].shape == (73, 10, 3)
 
 
+def test_time_interp_to_other_dataset():
+
+    # Arrange
+    ## Dataset 1
+    nt = 4
+    data = [np.zeros([nt, 10, 3])]
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds1 = Dataset(data, time, items)
+    assert ds1.data[0].shape == (nt, 10, 3)
+
+    ## Dataset 2
+    nt = 12
+    data = [np.ones([nt, 10, 3])]
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds2 = Dataset(data, time, items)
+
+    # Act
+    ## Interpolate
+    dsi = ds1.interp(dt=ds2.time)
+
+    # Assert
+    assert dsi.time[0] == ds2.time[0]
+    assert dsi.time[-1] == ds2.time[-1]
+    assert len(dsi.time) == len(ds2.time)
+    assert dsi.data[0].shape[0] == ds2.data[0].shape[0]
+
+
 def test_get_data_2():
 
     nt = 100

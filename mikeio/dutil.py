@@ -307,7 +307,7 @@ class Dataset:
 
         Parameters
         ----------
-        dt: float
+        dt: float or pd.DatetimeIndex
             output timestep in seconds
         
         Returns
@@ -337,9 +337,14 @@ class Dataset:
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
+
+        if isinstance(dt, pd.DatetimeIndex):
+            out_t = dt
+        else:
+            offset = pd.tseries.offsets.DateOffset(seconds=dt)
+            out_t = pd.date_range(start=self.time[0], end=self.time[-1], freq=offset)
+
         intime = self.time.values.astype(float)
-        offset = pd.tseries.offsets.DateOffset(seconds=dt)
-        out_t = pd.date_range(start=self.time[0], end=self.time[-1], freq=offset)
         outtime = out_t.values.astype(float)
 
         data_out = []
