@@ -351,7 +351,7 @@ class Dfs0:
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
-        data = np.array(data)
+        data = np.array(data).astype(np.float64)
         data[np.isnan(data)] = delete_value
         data_to_write = to_dotnet_array(data.T)
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
