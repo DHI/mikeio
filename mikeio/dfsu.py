@@ -1099,7 +1099,7 @@ class _UnstructuredGeometry:
 
         # set aspect ratio
         if geometry.is_geo:
-            mean_lat = 0.5 * (max(nc[:, 1]) - min(nc[:, 1]))
+            mean_lat = np.mean(nc[:,1]) 
             ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
         else:
             ax.set_aspect("equal")
@@ -1221,13 +1221,21 @@ class _UnstructuredGeometry:
                 ax.add_collection(p)
 
         if show_outline:
-            mp = self.to_shapely()
-            domain = mp.buffer(0)
-            out_col = "0.4"
-            ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
-            for j in range(len(domain.interiors)):
-                interj = domain.interiors[j]
-                ax.plot(*interj.xy, color=out_col, linewidth=1.2)
+            try:
+                mp = geometry.to_shapely()
+                domain = mp.buffer(0)
+            except:
+                print('Warning: could not plot outline. Failed to convert to_shapely()')
+            try:
+                if domain:
+                    out_col = "0.4"
+                    ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
+                    for j in range(len(domain.interiors)):
+                        interj = domain.interiors[j]
+                        ax.plot(*interj.xy, color=out_col, linewidth=1.2)
+            except:
+                print('Warning: could not plot outline')
+
 
         if title is not None:
             ax.set_title(title)
