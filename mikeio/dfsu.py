@@ -986,6 +986,7 @@ class _UnstructuredGeometry:
         n_refinements=0,
         show_mesh=True,
         show_outline=True,
+        figsize=None,
         ax=None,
     ):
         """
@@ -1017,9 +1018,11 @@ class _UnstructuredGeometry:
             should the mesh be shown on the plot? default=True
         show_outline: bool, optional
             should domain outline be shown on the plot? default=True
-        n_refinements: int
+        n_refinements: int, optional
             for 'shaded' and 'contour' plots (and if show_mesh=False) 
             do this number of mesh refinements for smoother plotting  
+        figsize: (float, float), optional
+            specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
         """
@@ -1095,7 +1098,7 @@ class _UnstructuredGeometry:
 
         # plot in existing or new axes?
         if ax is None:
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=figsize)
 
         # set aspect ratio
         if geometry.is_geo:
