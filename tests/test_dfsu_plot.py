@@ -71,7 +71,7 @@ def test_plot_dfsu():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
     data = dfs.read()
-    dfs.plot(z=data[1][0, :])
+    dfs.plot(z=data[1][0, :], figsize=(3,3))
     assert True
 
 

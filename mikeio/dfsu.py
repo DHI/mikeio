@@ -986,6 +986,7 @@ class _UnstructuredGeometry:
         n_refinements=0,
         show_mesh=True,
         show_outline=True,
+        figsize=None,
         ax=None,
     ):
         """
@@ -1017,9 +1018,11 @@ class _UnstructuredGeometry:
             should the mesh be shown on the plot? default=True
         show_outline: bool, optional
             should domain outline be shown on the plot? default=True
-        n_refinements: int
+        n_refinements: int, optional
             for 'shaded' and 'contour' plots (and if show_mesh=False) 
             do this number of mesh refinements for smoother plotting  
+        figsize: (float, float), optional
+            specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
         """
@@ -1095,11 +1098,11 @@ class _UnstructuredGeometry:
 
         # plot in existing or new axes?
         if ax is None:
-            fig, ax = plt.subplots()
+            fig, ax = plt.subplots(figsize=figsize)
 
         # set aspect ratio
         if geometry.is_geo:
-            mean_lat = 0.5 * (max(nc[:, 1]) - min(nc[:, 1]))
+            mean_lat = np.mean(nc[:,1]) 
             ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
         else:
             ax.set_aspect("equal")
@@ -1221,13 +1224,21 @@ class _UnstructuredGeometry:
                 ax.add_collection(p)
 
         if show_outline:
-            mp = self.to_shapely()
-            domain = mp.buffer(0)
-            out_col = "0.4"
-            ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
-            for j in range(len(domain.interiors)):
-                interj = domain.interiors[j]
-                ax.plot(*interj.xy, color=out_col, linewidth=1.2)
+            try:
+                mp = geometry.to_shapely()
+                domain = mp.buffer(0)
+            except:
+                warnings.warn('Could not plot outline. Failed to convert to_shapely()')
+            try:
+                if domain:
+                    out_col = "0.4"
+                    ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
+                    for j in range(len(domain.interiors)):
+                        interj = domain.interiors[j]
+                        ax.plot(*interj.xy, color=out_col, linewidth=1.2)
+            except:
+                warnings.warn('Could not plot outline')
+
 
         if title is not None:
             ax.set_title(title)
