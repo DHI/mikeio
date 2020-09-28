@@ -1228,7 +1228,7 @@ class _UnstructuredGeometry:
                 mp = geometry.to_shapely()
                 domain = mp.buffer(0)
             except:
-                print('Warning: could not plot outline. Failed to convert to_shapely()')
+                warnings.warn('Could not plot outline. Failed to convert to_shapely()')
             try:
                 if domain:
                     out_col = "0.4"
@@ -1237,7 +1237,7 @@ class _UnstructuredGeometry:
                         interj = domain.interiors[j]
                         ax.plot(*interj.xy, color=out_col, linewidth=1.2)
             except:
-                print('Warning: could not plot outline')
+                warnings.warn('Could not plot outline')
 
 
         if title is not None:
