@@ -302,7 +302,7 @@ class Dataset:
         ds = Dataset(res, time, items)
         return ds
 
-    def interpolate_time(
+    def interp_time(
         self, dt, method="linear", extrapolate=True, fill_value=np.nan,
     ):
         """Temporal interpolation
