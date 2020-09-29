@@ -336,7 +336,7 @@ class Dataset:
         1:  U velocity <u velocity component> (meter per sec)
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
-        >>> dsi = ds.interpolate_time(dt=1800)
+        >>> dsi = ds.interp_time(dt=1800)
         >>> dsi
         <mikeio.DataSet>
         Dimensions: (41, 884)
