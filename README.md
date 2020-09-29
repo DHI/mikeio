@@ -19,11 +19,10 @@ Facilitates common data processing workflows for MIKE files.
 
 [More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
 
-## Important note!
+## Where can I get help?
 
-The latest version of mikeio (v 0.5), has a lot of new functionality, but also several breaking changes to the API !!
-It was released on 2020-09-03.
-
+* Bugs & feature request - GitHub Issues(http://github.com/DHI/mikeio/issues) 
+* General help, FAQ [Stackoverflow with the tag `mikeio`](https://stackoverflow.com/questions/tagged/mikeio)
 
 ## Installation
 
