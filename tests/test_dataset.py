@@ -1,5 +1,5 @@
 from datetime import datetime
-from dateutil.rrule import rrule, SECONDLY, HOURLY
+from dateutil.rrule import rrule, SECONDLY, HOURLY, DAILY
 import numpy as np
 import pandas as pd
 import pytest
@@ -226,6 +226,105 @@ def test_get_data():
     ds = Dataset(data, time, items)
 
     assert ds.data[0].shape == (100, 100, 30)
+
+
+def test_interp_time():
+
+    data = []
+    nt = 4
+    d = np.zeros([nt, 10, 3])
+    d[1] = 2.0
+    d[3] = 4.0
+    data.append(d)
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    assert ds.data[0].shape == (nt, 10, 3)
+
+    dsi = ds.interp_time(dt=3600)
+
+    assert ds.time[0] == dsi.time[0]
+    assert dsi.data[0].shape == (73, 10, 3)
+
+
+def test_interp_time_to_other_dataset():
+
+    # Arrange
+    ## Dataset 1
+    nt = 4
+    data = [np.zeros([nt, 10, 3])]
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds1 = Dataset(data, time, items)
+    assert ds1.data[0].shape == (nt, 10, 3)
+
+    ## Dataset 2
+    nt = 12
+    data = [np.ones([nt, 10, 3])]
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds2 = Dataset(data, time, items)
+
+    # Act
+    ## interp
+    dsi = ds1.interp_time(dt=ds2.time)
+
+    # Assert
+    assert dsi.time[0] == ds2.time[0]
+    assert dsi.time[-1] == ds2.time[-1]
+    assert len(dsi.time) == len(ds2.time)
+    assert dsi.data[0].shape[0] == ds2.data[0].shape[0]
+
+
+def test_extrapolate():
+    # Arrange
+    ## Dataset 1
+    nt = 2
+    data = [np.zeros([nt, 10, 3])]
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds1 = Dataset(data, time, items)
+    assert ds1.data[0].shape == (nt, 10, 3)
+
+    ## Dataset 2 partly overlapping with Dataset 1
+    nt = 3
+    data = [np.ones([nt, 10, 3])]
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 2)))
+    items = [ItemInfo("Foo")]
+    ds2 = Dataset(data, time, items)
+
+    # Act
+    ## interp
+    dsi = ds1.interp_time(dt=ds2.time, fill_value=1.0)
+
+    # Assert
+    assert dsi.time[0] == ds2.time[0]
+    assert dsi.time[-1] == ds2.time[-1]
+    assert len(dsi.time) == len(ds2.time)
+    assert dsi.data[0][0] == pytest.approx(0.0)
+    assert dsi.data[0][1] == pytest.approx(1.0)  # filled
+    assert dsi.data[0][2] == pytest.approx(1.0)  # filled
+
+
+def test_extrapolate_not_allowed():
+    ## Dataset 1
+    nt = 2
+    data = [np.zeros([nt, 10, 3])]
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds1 = Dataset(data, time, items)
+    assert ds1.data[0].shape == (nt, 10, 3)
+
+    ## Dataset 2 partly overlapping with Dataset 1
+    nt = 3
+    data = [np.ones([nt, 10, 3])]
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 2)))
+    items = [ItemInfo("Foo")]
+    ds2 = Dataset(data, time, items)
+
+    with pytest.raises(ValueError):
+        dsi = ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
 
 
 def test_get_data_2():
