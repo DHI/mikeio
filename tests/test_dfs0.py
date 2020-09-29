@@ -47,6 +47,48 @@ def test_simple_write(tmpdir):
     assert os.path.exists(filename)
 
 
+def test_write_float(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
+
+    data = []
+
+    nt = 100
+    d = np.random.random([nt]).astype(np.float32)
+    data.append(d)
+
+    dfs = Dfs0()
+
+    dfs.write(filename=filename, data=data)
+
+    assert os.path.exists(filename)
+
+
+def test_write_2darray(tmpdir):
+    """
+    Data should be ideally be supplied as a list of 1d timeseries.
+    But if I supply a 2d array (nitems, nt), that could work as well
+    """
+
+    filename = os.path.join(tmpdir.dirname, "from2darray.dfs0")
+
+    nt = 100
+    nitems = 2
+    data = np.random.random([nitems, nt])
+
+    dfs = Dfs0()
+
+    dfs.write(filename=filename, data=data)
+
+    assert os.path.exists(filename)
+
+    dfsnew = Dfs0(filename)
+    assert dfsnew.n_items == nitems
+
+    ds = dfsnew.read()
+    assert ds[0].shape == (nt,)
+
+
 def test_read_units_write_new(tmpdir):
 
     dfs0file = r"tests/testdata/random.dfs0"
