@@ -459,3 +459,12 @@ def test_write_data_with_missing_values(tmpdir):
     modified = moddfs.read()
     assert np.isnan(modified.data[1][5])
 
+
+def test_read_relative_time_axis():
+
+    filename = r"tests/testdata/eq_relative.dfs0"
+
+    dfs0 = Dfs0(filename)
+
+    ds = dfs0.read()
+    assert len(ds) == 19

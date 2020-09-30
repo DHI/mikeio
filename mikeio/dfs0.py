@@ -73,7 +73,11 @@ class Dfs0:
         self._items = get_item_info(dfs, list(range(self._n_items)))
 
         # Read time
-        self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        try:
+            self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        except AttributeError:  # e.g. relative time axis
+            self._start_time = datetime(1970, 1, 1)
+
         self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
 
         dfs.Close()
@@ -145,7 +149,7 @@ class Dfs0:
         return data
 
     def __get_time(self, raw_data):
-        start_time = from_dotnet_datetime(self._dfs.FileInfo.TimeAxis.StartDateTime)
+        start_time = self.start_time
 
         for t in range(self._n_timesteps):
             t_sec = raw_data[t, self._time_column_index]
