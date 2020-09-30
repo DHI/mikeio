@@ -18,6 +18,8 @@ from mikeio.dfs_util import unit_list, type_list
 
 class TimeAxisType(IntEnum):
 
+    EquidistantRelative = 1
+    NonEquidistantRelative = 2
     EquidistantCalendar = 3
     NonEquidistantCalendar = 4
 
