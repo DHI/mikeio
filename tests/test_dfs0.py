@@ -467,4 +467,4 @@ def test_read_relative_time_axis():
     dfs0 = Dfs0(filename)
 
     ds = dfs0.read()
-    assert len(ds) == 19
+    assert len(ds) == 5
