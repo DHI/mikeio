@@ -93,9 +93,9 @@ def test_read_time_steps():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(time_steps=[0, 1, 2, 3, 4, 5])
+    ds = dfs.read(time_steps=[3, 5])
     data = ds.data[0]
-    assert data.shape == (6, 3)  # time, x
+    assert data.shape == (2, 3)  # time, x
 
 
 def test_write_some_time_steps_new_file(tmpdir):
