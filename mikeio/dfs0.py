@@ -72,13 +72,15 @@ class Dfs0:
         self._n_items = safe_length(dfs.ItemInfo)
         self._items = get_item_info(dfs, list(range(self._n_items)))
 
-        # Read time
-        try:
-            self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
-        except AttributeError:  # e.g. relative time axis
-            self._start_time = datetime(1970, 1, 1)
-
         self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
+
+        if self._timeaxistype in [
+            TimeAxisType.EquidistantCalendar,
+            TimeAxisType.NonEquidistantCalendar,
+        ]:
+            self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        else:  # relative time axis
+            self._start_time = datetime(1970, 1, 1)
 
         dfs.Close()
 
