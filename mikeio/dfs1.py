@@ -104,7 +104,8 @@ class Dfs1(Dfs123):
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        for it in time_steps:
+        for i in range(nt):
+            it = time_steps[i]
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -113,9 +114,9 @@ class Dfs1(Dfs123):
                 d = to_numpy(src)
 
                 d[d == self._deletevalue] = np.nan
-                data_list[item][it, :] = d
+                data_list[item][i, :] = d
 
-            t_seconds[it] = itemdata.Time
+            t_seconds[i] = itemdata.Time
 
         time = [self._start_time + timedelta(seconds=t) for t in t_seconds]
 
