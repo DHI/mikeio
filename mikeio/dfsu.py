@@ -980,7 +980,7 @@ class _UnstructuredGeometry:
         ax=None,
     ):
         """
-        Plot mesh elements
+        Plot unstructured data and/or mesh, mesh outline  
 
         Parameters
         ----------
@@ -1015,6 +1015,10 @@ class _UnstructuredGeometry:
             specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
+
+        Returns
+        -------
+        <matplotlib.axes>          
         """
 
         import matplotlib.cm as cm
@@ -1241,7 +1245,7 @@ class _UnstructuredGeometry:
         if title is not None:
             ax.set_title(title)
 
-        return fig_obj, ax
+        return ax 
 
     def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh
