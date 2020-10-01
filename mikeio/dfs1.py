@@ -89,36 +89,22 @@ class Dfs1(Dfs123):
         self._dfs = dfs
         self._source = dfs
 
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
         items, item_numbers, time_steps = get_valid_items_and_timesteps(
             self, items, time_steps
         )
 
-        # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
 
-        xNum = axis.XCount
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        if nt == 0:
-            raise ValueError(
-                "Static dfs1 files (with no time steps) are not supported."
-            )
-
-        deleteValue = dfs.FileInfo.DeleteValueFloat
+        nx = axis.XCount
 
         n_items = len(item_numbers)
-        data_list = []
+        nt = len(time_steps)
 
-        for item in range(n_items):
-            # Initialize an empty data block
-            data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
-            data_list.append(data)
+        data_list = [np.ndarray(shape=(nt, nx), dtype=float) for item in range(n_items)]
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        for i in range(len(time_steps)):
-            it = time_steps[i]
+        for it in time_steps:
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -126,13 +112,12 @@ class Dfs1(Dfs123):
                 src = itemdata.Data
                 d = to_numpy(src)
 
-                d[d == deleteValue] = np.nan
+                d[d == self._deletevalue] = np.nan
                 data_list[item][it, :] = d
 
             t_seconds[it] = itemdata.Time
 
-        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
-        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        time = [self._start_time + timedelta(seconds=t) for t in t_seconds]
 
         items = get_item_info(dfs, item_numbers)
 
