@@ -52,7 +52,7 @@ class Dfs1(Dfs123):
 
     def _read_dfs1_header(self):
         if not os.path.isfile(self._filename):
-            raise FileDoesNotExist(self._filename)
+            raise FileNotFoundError(self._filename)
 
         dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
         self._dx = dfs.SpatialAxis.Dx

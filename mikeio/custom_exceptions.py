@@ -1,7 +1,3 @@
-class FileDoesNotExist(Exception):
-    def __init__(self, filename=""):
-        super().__init__(f"File {filename} does not exist.")
-
 
 class DataDimensionMismatch(ValueError):
     def __init__(self):
