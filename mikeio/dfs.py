@@ -3,12 +3,19 @@ import warnings
 import numpy as np
 import pandas as pd
 from .dutil import Dataset
-from .dotnet import to_dotnet_datetime, from_dotnet_datetime, to_numpy
+from .dotnet import (
+    to_dotnet_datetime,
+    from_dotnet_datetime,
+    to_numpy,
+    to_dotnet_float_array,
+)
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
+from .custom_exceptions import DataDimensionMismatch
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
     DataValueType,
+    DfsFactory,
 )
 
 
@@ -111,6 +118,58 @@ class AbstractDfs:
 
         dfs.Close()
 
+    def _write(
+        self, filename, data, start_time, dt, items, coordinate, title,
+    ):
+        self._write_handle_common_arguments(
+            title, data, items, coordinate, start_time, dt
+        )
+
+        shape = np.shape(data[0])
+        if self._ndim == 1:
+            self._nx = shape[1]
+        elif self._ndim == 2:
+            self._ny = shape[1]
+            self._nx = shape[2]
+
+        self._factory = DfsFactory()
+        self._set_spatial_axis()
+
+        if self._ndim == 1:
+            if not all(np.shape(d)[1] == self._nx for d in data):
+                raise DataDimensionMismatch()
+
+        if self._ndim == 2:
+            if not all(np.shape(d)[1] == self._ny for d in data):
+                raise DataDimensionMismatch()
+
+            if not all(np.shape(d)[2] == self._nx for d in data):
+                raise DataDimensionMismatch()
+
+        dfs = self._setup_header(filename)
+
+        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
+
+        for i in range(self._n_timesteps):
+            for item in range(self._n_items):
+
+                if self._ndim == 1:
+                    d = data[item][i]
+                    d[np.isnan(d)] = deletevalue
+
+                    darray = to_dotnet_float_array(d)
+
+                if self._ndim == 2:
+                    d = self._data[item][i, :, :]
+                    d[np.isnan(d)] = deletevalue
+                    d = d.reshape(self.shape[1:])
+                    d = np.flipud(d)
+                    darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+
+                dfs.WriteItemTimeStepNext(0, darray)
+
+        dfs.Close()
+
     def _write_handle_common_arguments(
         self, title, data, items, coordinate, start_time, dt
     ):
@@ -118,7 +177,7 @@ class AbstractDfs:
         if title is None:
             self._title = ""
 
-        self._n_time_steps = np.shape(data[0])[0]
+        self._n_timesteps = np.shape(data[0])[0]
         self._n_items = len(data)
 
         if coordinate is None:
@@ -255,6 +314,9 @@ class AbstractDfs:
         return items, item_numbers, time_steps
 
     def _open(self):
+        raise NotImplementedError("Should be implemented by subclass")
+
+    def _set_spatial_axis(self):
         raise NotImplementedError("Should be implemented by subclass")
 
     def _find_item(self, item_names):

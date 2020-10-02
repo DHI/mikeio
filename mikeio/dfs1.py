@@ -1,15 +1,9 @@
 import os
-import numpy as np
 
 from DHI.Generic.MikeZero import eumUnit
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-)
+from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .custom_exceptions import DataDimensionMismatch
-from .dotnet import to_dotnet_float_array
 from .dfs import AbstractDfs
 
 
@@ -17,6 +11,7 @@ class Dfs1(AbstractDfs):
     _ndim = 1
     _dx = None
     _nx = None
+    _x0 = 0
 
     def __init__(self, filename=None):
         super(Dfs1, self).__init__(filename)
@@ -98,41 +93,16 @@ class Dfs1(AbstractDfs):
 
         """
 
-        self._write_handle_common_arguments(
-            title, data, items, coordinate, start_time, dt
-        )
-
-        number_x = np.shape(data[0])[1]
-
-        if dx is None:
-            if self._dx is not None:
-                dx = self._dx
-            else:
-                dx = 1
-
-        if not all(np.shape(d)[1] == number_x for d in data):
-            raise DataDimensionMismatch()
-
-        self._factory = DfsFactory()
         self._builder = Dfs1Builder.Create(title, "mikeio", 0)
+        self._dx = dx
+        self._write(filename, data, start_time, dt, items, coordinate, title)
 
+    def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, dx)
+            self._factory.CreateAxisEqD1(
+                eumUnit.eumUmeter, self._nx, self._x0, self._dx
+            )
         )
-
-        dfs = self._setup_header(filename)
-
-        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
-
-        for i in range(self._n_time_steps):
-            for item in range(self._n_items):
-                d = data[item][i, :]
-                d[np.isnan(d)] = deletevalue
-
-                darray = to_dotnet_float_array(d)
-                dfs.WriteItemTimeStepNext(0, darray)
-
-        dfs.Close()
 
     @property
     def dx(self):

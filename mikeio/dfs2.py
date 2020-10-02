@@ -1,14 +1,9 @@
 import os
-import numpy as np
 from DHI.Generic.MikeZero import eumUnit
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-)
+from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
-from .dotnet import to_dotnet_float_array
 from .dfs import AbstractDfs
 
 
@@ -19,6 +14,8 @@ class Dfs2(AbstractDfs):
     _dy = None
     _nx = None
     _ny = None
+    _x0 = 0
+    _y0 = 0
 
     def __init__(self, filename=None):
         super(Dfs2, self).__init__(filename)
@@ -109,12 +106,9 @@ class Dfs2(AbstractDfs):
         data,
         start_time=None,
         dt=None,
-        datetimes=None,
         items=None,
         dx=None,
         dy=None,
-        x0=0,
-        y0=0,
         coordinate=None,
         title=None,
     ):
@@ -132,98 +126,44 @@ class Dfs2(AbstractDfs):
             start date of type datetime.
         dt: float, optional
             The time step in seconds.
-        datetimes: list[datetime], optional
-            datetimes, creates a non-equidistant calendar axis
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
-        x0: float, optional
-            Lower right position
-        x0: float, optional
-            Lower right position
         dx: float, optional
             length of each grid in the x direction (projection units)
         dy: float, optional
             length of each grid in the y direction (projection units)
         coordinate:
-            ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
+            list of [projection, origin_x, origin_y, orientation]
+            e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         title: str, optional
             title of the dfs2 file. Default is blank.
         """
 
-        self._write_handle_common_arguments(
-            title, data, items, coordinate, start_time, dt
-        )
+        self._builder = Dfs2Builder.Create(title, "mikeio", 0)
+        if not self._dx:
+            self._dx = 1
+        if dx:
+            self._dx = dx
 
-        number_y = np.shape(data[0])[1]
-        number_x = np.shape(data[0])[2]
+        if not self._dy:
+            self._dy = 1
+        if dy:
+            self._dy = dy
 
-        if dx is None:
-            if self._dx is not None:
-                dx = self._dx
-            else:
-                dx = 1
+        self._write(filename, data, start_time, dt, items, coordinate, title)
 
-        if dy is None:
-            if self._dy is not None:
-                dy = self._dy
-            else:
-                dy = 1
-
-        if not all(np.shape(d)[0] == self._n_time_steps for d in data):
-            raise ValueError(
-                "ERROR data matrices in the time dimension do not all match in the data list. "
-                "Data is list of matrices [t,y,x]"
-            )
-        if not all(np.shape(d)[1] == number_y for d in data):
-            raise ValueError(
-                "ERROR data matrices in the Y dimension do not all match in the data list. "
-                "Data is list of matrices [t,y,x]"
-            )
-        if not all(np.shape(d)[2] == number_x for d in data):
-            raise ValueError(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matrices [t,y,x]"
-            )
-
-        if datetimes is None:
-            self._is_equidistant = True
-        else:
-            self._is_equidistant = False
-            start_time = datetimes[0]
-            self._start_time = start_time
-
-        factory = DfsFactory()
-        builder = Dfs2Builder.Create(title, "mikeio", 0)
-
-        self._builder = builder
-        self._factory = factory
-
-        builder.SetSpatialAxis(
-            factory.CreateAxisEqD2(
-                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy
+    def _set_spatial_axis(self):
+        self._builder.SetSpatialAxis(
+            self._factory.CreateAxisEqD2(
+                eumUnit.eumUmeter,
+                self._nx,
+                self._x0,
+                self._dx,
+                self._ny,
+                self._y0,
+                self._dy,
             )
         )
-
-        dfs = self._setup_header(filename)
-
-        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
-
-        for i in range(self._n_time_steps):
-            for item in range(self._n_items):
-                d = self._data[item][i, :, :]
-                d[np.isnan(d)] = deletevalue
-                d = d.reshape(number_y, number_x)
-                d = np.flipud(d)
-                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
-
-                if self._is_equidistant:
-                    dfs.WriteItemTimeStepNext(0, darray)
-                else:
-                    t = datetimes[i]
-                    relt = (t - self._start_time).total_seconds()
-                    dfs.WriteItemTimeStepNext(relt, darray)
-
-        dfs.Close()
 
     @property
     def dx(self):
@@ -236,4 +176,8 @@ class Dfs2(AbstractDfs):
         """Step size in y direction
         """
         return self._dy
+
+    @property
+    def shape(self):
+        return (self._n_timesteps, self._ny, self._nx)
 
