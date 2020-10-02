@@ -366,6 +366,90 @@ def test_get_bad_name():
         ds["BAR"]
 
 
+def test_head():
+
+    nt = 100
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dshead = ds.head()
+
+    assert len(dshead.time) == 5
+    assert ds.time[0] == dshead.time[0]
+
+    dshead10 = ds.head(n=10)
+
+    assert len(dshead10.time) == 10
+
+
+def test_head_small_dataset():
+
+    nt = 2
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dshead = ds.head()
+
+    assert len(dshead.time) == nt
+
+
+def test_tail():
+
+    nt = 100
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dstail = ds.tail()
+
+    assert len(dstail.time) == 5
+    assert ds.time[-1] == dstail.time[-1]
+
+    dstail10 = ds.tail(n=10)
+
+    assert len(dstail10.time) == 10
+
+
+def test_thin():
+
+    nt = 100
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dsthin = ds.thin(2)
+
+    assert len(dsthin.time) == 50
+
+
+def test_tail_small_dataset():
+    nt = 2
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dstail = ds.tail()
+
+    assert len(dstail.time) == nt
+
+
 def test_default_type():
 
     item = ItemInfo("Foo")

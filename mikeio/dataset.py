@@ -208,6 +208,48 @@ class Dataset:
         ds = Dataset(res, time, items)
         return ds
 
+    def head(self, n=5):
+        "Return the first n timesteps"
+        nt = len(self.time)
+        n = min(n, nt)
+        time_steps = range(n)
+        return self.isel(time_steps, axis=0)
+
+    def tail(self, n=5):
+        "Return the last n timesteps"
+        nt = len(self.time)
+        start = max(0, nt - n)
+        time_steps = range(start, nt)
+        return self.isel(time_steps, axis=0)
+
+    def thin(self, step):
+        "Return every n:th timesteps"
+        nt = len(self.time)
+        time_steps = range(0, nt, step)
+        return self.isel(time_steps, axis=0)
+
+    def squeeze(self):
+        """
+        Remove axes of length 1
+
+        Returns
+        -------
+        Dataset
+        """
+
+        items = self.items
+
+        if items[0].name == "Z coordinate":
+            items = deepcopy(items)
+            items.pop(0)
+
+        time = self.time
+
+        res = [np.squeeze(self[item.name]) for item in items]
+
+        ds = Dataset(res, time, items)
+        return ds
+
     def interp_time(
         self, dt, method="linear", extrapolate=True, fill_value=np.nan,
     ):
@@ -299,6 +341,7 @@ class Dataset:
         -------
         pd.DataFrame
         """
+        self = self.squeeze()
 
         if len(self.data[0].shape) != 1:
             raise ValueError(

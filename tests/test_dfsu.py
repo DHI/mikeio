@@ -245,8 +245,7 @@ def test_dfsu_to_dfs0_via_dataframe(tmpdir):
     elem_id = dfs.find_nearest_element(606200, 6905480)
 
     ds = dfs.read(elements=[elem_id])
-    dss = ds.isel(idx=0)
-    df = dss.to_dataframe()
+    df = ds.to_dataframe()
 
     outfilename = os.path.join(tmpdir, "out.dfs0")
     df.to_dfs0(outfilename)
@@ -267,7 +266,7 @@ def test_dfsu_to_dfs0(tmpdir):
     elem_id = dfs.find_nearest_element(606200, 6905480)
 
     ds = dfs.read(elements=[elem_id])
-    dss = ds.isel(idx=0)
+    dss = ds.squeeze()
 
     outfilename = os.path.join(tmpdir, "out.dfs0")
 
