@@ -19,10 +19,10 @@ from .dotnet import (
     from_dotnet_datetime,
 )
 from .eum import TimeStepUnit
-from .dfs import Dfs123
+from .dfs import AbstractDfs
 
 
-class Dfs3(Dfs123):
+class Dfs3(AbstractDfs):
     def __init__(self, filename=None):
         super(Dfs3, self).__init__(filename)
 

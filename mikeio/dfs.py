@@ -1,13 +1,11 @@
 from datetime import datetime, timedelta
 import warnings
 import numpy as np
+import pandas as pd
 from .helpers import safe_length
-from .dutil import Dataset, get_item_info
-from .dotnet import (
-    to_dotnet_datetime,
-    from_dotnet_datetime,
-)
-from .eum import ItemInfo, TimeStepUnit
+from .dutil import Dataset
+from .dotnet import to_dotnet_datetime, from_dotnet_datetime, to_numpy
+from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
@@ -15,7 +13,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 
 
-class Dfs123:
+class AbstractDfs:
 
     _filename = None
     _projstr = None
@@ -32,9 +30,78 @@ class Dfs123:
     def __init__(self, filename=None):
         self._filename = filename
 
-    def _read_header(self, dfs):
+    def read(self, items=None, time_steps=None):
+        """
+        Read data from a dfs file
+        
+        Parameters
+        ---------
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time_steps: int or list[int], optional
+            Read only selected time_steps
+
+        Returns
+        -------
+        Dataset
+        """
+        self._open()
+
+        items, item_numbers, time_steps = self._get_valid_items_and_timesteps(
+            items, time_steps
+        )
+
+        for t in time_steps:
+            if t > (self.n_timesteps - 1):
+                raise ValueError(
+                    f"Trying to read timestep {t}: max timestep is {self.n_timesteps-1}"
+                )
+
+        n_items = len(item_numbers)
+        nt = len(time_steps)
+
+        if self._ndim == 1:
+            data_shape = (nt, self._nx)
+        elif self._ndim == 2:
+            data_shape = (nt, self._ny, self._nx)
+        else:
+            data_shape = (nt, self._nz, self._ny, self._nx)
+
+        data_list = [
+            np.ndarray(shape=data_shape, dtype=float) for item in range(n_items)
+        ]
+
+        t_seconds = np.zeros(len(time_steps), dtype=float)
+
+        for i in range(nt):
+            it = time_steps[i]
+            for item in range(n_items):
+
+                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+
+                src = itemdata.Data
+                d = to_numpy(src)
+
+                d[d == self.deletevalue] = np.nan
+                if self._ndim == 2:
+                    d = d.reshape(self._ny, self._nx)
+                    d = np.flipud(d)
+
+                data_list[item][i] = d
+
+            t_seconds[i] = itemdata.Time
+
+        time = [self.start_time + timedelta(seconds=t) for t in t_seconds]
+
+        items = self._get_item_info(item_numbers)
+
+        self._dfs.Close()
+        return Dataset(data_list, time, items)
+
+    def _read_header(self):
+        dfs = self._dfs
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs, list(range(self._n_items)))
+        self._items = self._get_item_info(list(range(self._n_items)))
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
@@ -156,22 +223,114 @@ class Dfs123:
 
         return self._builder.GetFile()
 
+    def _get_valid_items_and_timesteps(self, items, time_steps):
+
+        dfs = self._dfs
+
+        if isinstance(items, int) or isinstance(items, str):
+            items = [items]
+
+        if items is not None and isinstance(items[0], str):
+            items = self._find_item(items)
+
+        if items is None:
+            item_numbers = list(range(self.n_items))
+        else:
+            item_numbers = items
+
+        if time_steps is None:
+            time_steps = list(range(self.n_timesteps))
+
+        if isinstance(time_steps, int):
+            time_steps = [time_steps]
+
+        if isinstance(time_steps, str):
+            parts = time_steps.split(",")
+            if parts[0] == "":
+                time_steps = slice(parts[1])  # stop only
+            elif parts[1] == "":
+                time_steps = slice(parts[0], None)  # start only
+            else:
+                time_steps = slice(parts[0], parts[1])
+
+        if isinstance(time_steps, slice):
+            freq = pd.tseries.offsets.DateOffset(seconds=self.timestep)
+            time = pd.date_range(self.start_time, periods=self.n_timesteps, freq=freq)
+            s = time.slice_indexer(time_steps.start, time_steps.stop)
+            time_steps = list(range(s.start, s.stop))
+
+        items = self._get_item_info(item_numbers)
+
+        return items, item_numbers, time_steps
+
+    def _open(self):
+        raise NotImplementedError("Should be implemented by subclass")
+
+    def _find_item(self, item_names):
+        """Utility function to find item numbers
+
+        Parameters
+        ----------
+        dfs : DfsFile
+
+        item_names : list[str]
+            Names of items to be found
+
+        Returns
+        -------
+        list[int]
+            item numbers (0-based)
+
+        Raises
+        ------
+        KeyError
+            In case item is not found in the dfs file
+        """
+        names = [x.Name for x in self._dfs.ItemInfo]
+        item_lookup = {name: i for i, name in enumerate(names)}
+        try:
+            item_numbers = [item_lookup[x] for x in item_names]
+        except KeyError:
+            raise KeyError(f"Selected item name not found. Valid names are {names}")
+
+        return item_numbers
+
+    def _get_item_info(self, item_numbers):
+        """Read DFS ItemInfo
+
+        Parameters
+        ----------
+        dfs : MIKE dfs object
+        item_numbers : list[int]
+            
+        Returns
+        -------
+        list[Iteminfo]
+        """
+        items = []
+        for item in item_numbers:
+            name = self._dfs.ItemInfo[item].Name
+            eumItem = self._dfs.ItemInfo[item].Quantity.Item
+            eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
+            itemtype = EUMType(eumItem)
+            unit = EUMUnit(eumUnit)
+            item = ItemInfo(name, itemtype, unit)
+            items.append(item)
+        return items
+
     @property
     def deletevalue(self):
-        """File delete value
-        """
+        "File delete value"
         return self._deletevalue
 
     @property
     def n_items(self):
-        """Number of items
-        """
+        "Number of items"
         return self._n_items
 
     @property
     def items(self):
-        """List of items
-        """
+        "List of items"
         return self._items
 
     @property

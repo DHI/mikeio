@@ -20,13 +20,16 @@ from .dotnet import (
 )
 from .eum import ItemInfo
 from .helpers import safe_length
-from .dfs import Dfs123
+from .dfs import AbstractDfs
 
 
-class Dfs2(Dfs123):
+class Dfs2(AbstractDfs):
 
+    _ndim = 2
     _dx = None
     _dy = None
+    _nx = None
+    _ny = None
 
     def __init__(self, filename=None):
         super(Dfs2, self).__init__(filename)
@@ -61,11 +64,13 @@ class Dfs2(Dfs123):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
 
-        dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
-        self._dx = dfs.SpatialAxis.Dx
-        self._dy = dfs.SpatialAxis.Dy
+        self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
+        self._dx = self._dfs.SpatialAxis.Dx
+        self._dy = self._dfs.SpatialAxis.Dy
+        self._nx = self._dfs.SpatialAxis.XCount
+        self._ny = self._dfs.SpatialAxis.YCount
 
-        self._read_header(dfs)
+        self._read_header()
 
     def find_nearest_element(
         self, lon, lat,
@@ -105,72 +110,9 @@ class Dfs2(Dfs123):
 
         return k, j
 
-    def read(self, items=None, time_steps=None):
-        """
-        Read data from a dfs2 file
-        
-        Parameters
-        ---------
-        items: list[int] or list[str], optional
-            Read only selected items, by number (0-based), or by name
-        time_steps: int or list[int], optional
-            Read only selected time_steps
-
-        Returns
-        -------
-        Dataset
-            A dataset with data dimensions [t,y,x]
-        """
-        dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
-        self._dfs = dfs
-        self._source = dfs
-
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(
-            self, items, time_steps
-        )
-
-        # Determine the size of the grid
-        axis = dfs.SpatialAxis
-        ny = axis.YCount
-        nx = axis.XCount
-
-        for t in time_steps:
-            if t > (self.n_timesteps - 1):
-                raise ValueError(
-                    f"Trying to read timestep {t}: max timestep is {self.n_timesteps-1}"
-                )
-
-        n_items = len(item_numbers)
-        nt = len(time_steps)
-
-        data_list = [
-            np.ndarray(shape=(nt, ny, nx), dtype=float) for item in range(n_items)
-        ]
-
-        t_seconds = np.zeros(len(time_steps), dtype=float)
-
-        for i in range(nt):
-            it = time_steps[i]
-            for item in range(n_items):
-
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-
-                src = itemdata.Data
-                d = to_numpy(src)
-
-                d = d.reshape(ny, nx)
-                d = np.flipud(d)
-                d[d == self.deletevalue] = np.nan
-                data_list[item][i, :, :] = d
-
-            t_seconds[i] = itemdata.Time
-
-        time = [self.start_time + timedelta(seconds=t) for t in t_seconds]
-
-        items = get_item_info(dfs, item_numbers)
-
-        dfs.Close()
-        return Dataset(data_list, time, items)
+    def _open(self):
+        self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
+        self._source = self._dfs
 
     def write(
         self,

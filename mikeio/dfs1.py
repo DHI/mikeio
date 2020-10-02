@@ -20,12 +20,13 @@ from .dotnet import (
 )
 from .eum import ItemInfo
 from .helpers import safe_length
-from .dfs import Dfs123
+from .dfs import AbstractDfs
 
 
-class Dfs1(Dfs123):
-
+class Dfs1(AbstractDfs):
+    _ndim = 1
     _dx = None
+    _nx = None
 
     def __init__(self, filename=None):
         super(Dfs1, self).__init__(filename)
@@ -60,70 +61,15 @@ class Dfs1(Dfs123):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
 
-        dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
-        self._dx = dfs.SpatialAxis.Dx
+        self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
+        self._dx = self._dfs.SpatialAxis.Dx
+        self._nx = self._dfs.SpatialAxis.XCount
 
-        self._read_header(dfs)
+        self._read_header()
 
-    def read(self, items=None, time_steps=None):
-        """
-        Read data from a dfs1 file
-        
-        Parameters
-        ---------
-        items: list[int] or list[str], optional
-            Read only selected items, by number (0-based), or by name
-        time_steps: int or list[int], optional
-            Read only selected time_steps
-
-        Returns
-        -------
-        Dataset
-            A dataset with data dimensions [t,x]
-        """
-
-        # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-
-        # Open the dfs file for reading
-        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
-        self._dfs = dfs
-        self._source = dfs
-
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(
-            self, items, time_steps
-        )
-
-        axis = dfs.ItemInfo[0].SpatialAxis
-
-        nx = axis.XCount
-
-        n_items = len(item_numbers)
-        nt = len(time_steps)
-
-        data_list = [np.ndarray(shape=(nt, nx), dtype=float) for item in range(n_items)]
-
-        t_seconds = np.zeros(len(time_steps), dtype=float)
-
-        for i in range(nt):
-            it = time_steps[i]
-            for item in range(n_items):
-
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-
-                src = itemdata.Data
-                d = to_numpy(src)
-
-                d[d == self._deletevalue] = np.nan
-                data_list[item][i, :] = d
-
-            t_seconds[i] = itemdata.Time
-
-        time = [self._start_time + timedelta(seconds=t) for t in t_seconds]
-
-        items = get_item_info(dfs, item_numbers)
-
-        dfs.Close()
-        return Dataset(data_list, time, items)
+    def _open(self):
+        self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
+        self._source = self._dfs
 
     def write(
         self,
