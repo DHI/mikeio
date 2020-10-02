@@ -9,7 +9,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .custom_exceptions import FileDoesNotExist
+from .custom_exceptions import FileDoesNotExist, DataDimensionMismatch
 from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
 from .dotnet import (
     to_numpy,
@@ -169,10 +169,7 @@ class Dfs1(Dfs123):
                 dx = 1
 
         if not all(np.shape(d)[1] == number_x for d in data):
-            raise ValueError(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [t, x]"
-            )
+            raise DataDimensionMismatch()
 
         factory = DfsFactory()
         builder = Dfs1Builder.Create(title, "mikeio", 0)
