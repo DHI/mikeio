@@ -4,7 +4,6 @@ import os
 import numpy as np
 import pytest
 
-from mikeio.custom_exceptions import FileDoesNotExist
 from mikeio.dfs1 import Dfs1
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 

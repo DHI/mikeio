@@ -9,7 +9,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .custom_exceptions import FileDoesNotExist, DataDimensionMismatch
+from .custom_exceptions import DataDimensionMismatch
 from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
 from .dotnet import (
     to_numpy,
