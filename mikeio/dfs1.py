@@ -1,6 +1,5 @@
 import os
 import numpy as np
-from datetime import timedelta
 
 from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
@@ -10,11 +9,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
 from .custom_exceptions import DataDimensionMismatch
-from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
-from .dotnet import (
-    to_numpy,
-    to_dotnet_float_array,
-)
+from .dotnet import to_dotnet_float_array
 from .dfs import AbstractDfs
 
 
@@ -44,7 +39,7 @@ class Dfs1(AbstractDfs):
                     out.append(f"Number of items: {self._n_items}")
             if self._filename:
                 if self._n_timesteps == 1:
-                    out.append(f"Time: time-invariant file (1 step)")
+                    out.append("Time: time-invariant file (1 step)")
                 else:
                     out.append(f"Time: {self._n_timesteps} steps")
                     out.append(f"Start time: {self._start_time}")
@@ -88,11 +83,12 @@ class Dfs1(AbstractDfs):
         start_time: datetime, optional
             start datetime
         dt: float
-            The time step in seconds. 
+            The time step in seconds.
         items: list[ItemInfo], optional
-            List of ItemInfo corresponding to a variable types (ie. Water Level).
+            List of ItemInfo (e.g. Water Level).
         coordinate:
-            ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
+            list of [projection, origin_x, origin_y, orientation]
+            e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         x0:
             Lower right position
         dx:
