@@ -314,7 +314,7 @@ class _UnstructuredGeometry:
 
             if (
                 self._type == UnstructuredType.Dfsu3DSigma
-                or UnstructuredType.Dfsu3DSigmaZ
+                or self._type == UnstructuredType.Dfsu3DSigmaZ
             ) and n_layers == 1:
                 # If source is 3d, but output only has 1 layer
                 # then change type to 2d
@@ -827,26 +827,16 @@ class _UnstructuredGeometry:
         if n_lay is None:
             print("Object has no layers: cannot get_layer_elements")
             return None
-        n_sigma = self.n_sigma_layers
-        n_z = n_lay - n_sigma
-        if layer > n_z and layer <= n_lay:
-            layer = layer - n_lay
 
-        if layer < (-n_lay) or layer > n_lay:
+        if layer < (-n_lay+1) or layer > n_lay:
             raise Exception(
-                f"Layer {layer} not allowed must be between -{n_lay} and {n_lay}"
+                f"Layer {layer} not allowed; must be between -{n_lay-1} and {n_lay}"
             )
-        if layer <= 0:
-            # sigma layers, counting from the top
-            if layer < -n_sigma:
-                raise Exception(f"Negative layers only possible for sigma layers")
-            return self.top_elements + layer
-        else:
-            # then it must be a z layer
-            return (
-                self.bottom_elements[self.n_layers_per_column >= (n_lay - layer + 1)]
-                + layer
-            )
+
+        if layer <=0:
+            layer = layer + n_lay
+
+        return self.element_ids[self.layer_ids==layer]
 
     def _get_2d_to_3d_association(self):
         e2_to_e3 = (
@@ -990,7 +980,7 @@ class _UnstructuredGeometry:
         ax=None,
     ):
         """
-        Plot mesh elements
+        Plot unstructured data and/or mesh, mesh outline  
 
         Parameters
         ----------
@@ -1025,6 +1015,10 @@ class _UnstructuredGeometry:
             specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
+
+        Returns
+        -------
+        <matplotlib.axes>          
         """
 
         import matplotlib.cm as cm
@@ -1107,10 +1101,9 @@ class _UnstructuredGeometry:
         else:
             ax.set_aspect("equal")
 
-        # set plot limits for blot
-        xybuf = 6e-3 * (nc[:, 0].ptp())
-        ax.set_xlim(nc[:, 0].min() - xybuf, nc[:, 0].max() + xybuf)
-        ax.set_ylim(nc[:, 1].min() - xybuf, nc[:, 1].max() + xybuf)
+        # set plot limits   
+        xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
+        ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
 
         # scale height of colorbar
         cbar_frac = 0.046 * nc[:, 1].ptp() / nc[:, 0].ptp()
@@ -1225,6 +1218,8 @@ class _UnstructuredGeometry:
 
         if show_outline:
             try:
+                if not self.is_2d:
+                    geometry = self.geometry2d
                 mp = geometry.to_shapely()
                 domain = mp.buffer(0)
             except:
@@ -1233,17 +1228,24 @@ class _UnstructuredGeometry:
                 if domain:
                     out_col = "0.4"
                     ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
+                    xd, yd = domain.exterior.xy[0], domain.exterior.xy[1]                    
+                    xmin, xmax = min(xmin,np.min(xd)), max(xmax,np.max(xd))
+                    ymin, ymax = min(ymin,np.min(yd)), max(ymax,np.max(yd))
                     for j in range(len(domain.interiors)):
                         interj = domain.interiors[j]
                         ax.plot(*interj.xy, color=out_col, linewidth=1.2)
             except:
                 warnings.warn('Could not plot outline')
 
+        # set plot limits
+        xybuf = 6e-3 * (xmax - xmin)
+        ax.set_xlim(xmin - xybuf, xmax + xybuf)
+        ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
         if title is not None:
             ax.set_title(title)
 
-        return fig_obj
+        return ax 
 
     def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh

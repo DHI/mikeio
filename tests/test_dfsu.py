@@ -501,7 +501,7 @@ def test_get_layer_elements():
     assert elem_ids[5] == 23
 
     elem_ids = dfs.get_layer_elements(1)
-    assert elem_ids[5] == 8639
+    assert elem_ids[5] == 8638
     assert len(elem_ids) == 10
 
     elem_ids = dfs.get_layer_elements([1, 3])
