@@ -153,15 +153,13 @@ class AbstractDfs:
         for i in range(self._n_timesteps):
             for item in range(self._n_items):
 
-                if self._ndim == 1:
-                    d = data[item][i]
-                    d[np.isnan(d)] = deletevalue
+                d = self._data[item][i]
+                d[np.isnan(d)] = deletevalue
 
+                if self._ndim == 1:
                     darray = to_dotnet_float_array(d)
 
                 if self._ndim == 2:
-                    d = self._data[item][i, :, :]
-                    d[np.isnan(d)] = deletevalue
                     d = d.reshape(self.shape[1:])
                     d = np.flipud(d)
                     darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
