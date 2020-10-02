@@ -1,18 +1,14 @@
 import os
 import numpy as np
-from datetime import timedelta
 from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
-    DfsSimpleType,
-    DataValueType,
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
 from .dotnet import to_dotnet_float_array
-from .eum import ItemInfo
 from .dfs import AbstractDfs
 
 
@@ -46,7 +42,7 @@ class Dfs2(AbstractDfs):
                     out.append(f"Number of items: {self._n_items}")
 
                 if self._n_timesteps == 1:
-                    out.append(f"Time: time-invariant file (1 step)")
+                    out.append("Time: time-invariant file (1 step)")
                 else:
                     out.append(f"Time: {self._n_timesteps} steps")
                     out.append(f"Start time: {self._start_time}")
@@ -209,8 +205,6 @@ class Dfs2(AbstractDfs):
         )
 
         dfs = self._setup_header(filename)
-        # coordinate, start_time, dt, timeseries_unit, items, filename
-        # )
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 

@@ -52,25 +52,21 @@ class AbstractDfs:
 
         for t in time_steps:
             if t > (self.n_timesteps - 1):
-                raise ValueError(
-                    f"Trying to read timestep {t}: max timestep is {self.n_timesteps-1}"
-                )
+                raise IndexError(f"Timestep {t} is > {self.n_timesteps-1}")
 
         n_items = len(item_numbers)
         nt = len(time_steps)
 
         if self._ndim == 1:
-            data_shape = (nt, self._nx)
+            shape = (nt, self._nx)
         elif self._ndim == 2:
-            data_shape = (nt, self._ny, self._nx)
+            shape = (nt, self._ny, self._nx)
         else:
-            data_shape = (nt, self._nz, self._ny, self._nx)
+            shape = (nt, self._nz, self._ny, self._nx)
 
-        data_list = [
-            np.ndarray(shape=data_shape, dtype=float) for item in range(n_items)
-        ]
+        data_list = [np.ndarray(shape=shape) for item in range(n_items)]
 
-        t_seconds = np.zeros(len(time_steps), dtype=float)
+        t_seconds = np.zeros(len(time_steps))
 
         for i, it in enumerate(time_steps):
             for item in range(n_items):
@@ -144,8 +140,6 @@ class AbstractDfs:
             self._items = data.items
             self._start_time = data.time[0]
             if dt is None and len(data.time) > 1:
-                if not data.is_equidistant:
-                    datetimes = data.time
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
             self._data = data.data
         else:
@@ -167,7 +161,7 @@ class AbstractDfs:
 
         if self._dt is None:
             self._dt = 1
-            warnings.warn(f"No timestep supplied. Using 1s.")
+            warnings.warn("No timestep supplied. Using 1s.")
 
         if items:
             self._items = items
@@ -223,8 +217,6 @@ class AbstractDfs:
         return self._builder.GetFile()
 
     def _get_valid_items_and_timesteps(self, items, time_steps):
-
-        dfs = self._dfs
 
         if isinstance(items, int) or isinstance(items, str):
             items = [items]
