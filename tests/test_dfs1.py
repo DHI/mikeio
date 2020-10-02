@@ -10,9 +10,8 @@ from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 
 def test_filenotexist():
-    filename = "random_file_that_does_not_exist.dfs1"
     with pytest.raises(FileDoesNotExist):
-        dfs = Dfs1(filename)
+        Dfs1("file_that_does_not_exist.dfs1")
 
 
 def test_repr():
