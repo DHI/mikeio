@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 import warnings
 import numpy as np
 from .helpers import safe_length
-from .dutil import Dataset, get_item_info
+from .dutil import get_item_info
+from .dataset import Dataset
+
 from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,

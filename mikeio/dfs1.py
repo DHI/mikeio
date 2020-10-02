@@ -11,7 +11,8 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dutil import Dataset, find_item, get_item_info, get_valid_items_and_timesteps
+from .dutil import find_item, get_item_info, get_valid_items_and_timesteps
+from .dataset import Dataset
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,

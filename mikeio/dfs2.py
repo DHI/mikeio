@@ -11,7 +11,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
-from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
+from .dutil import get_item_info, get_valid_items_and_timesteps
+from .dataset import Dataset
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,

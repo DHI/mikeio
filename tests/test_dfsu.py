@@ -6,7 +6,7 @@ import pytest
 
 from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
-from mikeio.dutil import Dataset
+from mikeio import Dataset
 
 
 def test_repr():

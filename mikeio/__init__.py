@@ -28,6 +28,7 @@ from .dfs2 import Dfs2
 from .dfs3 import Dfs3
 from .dfsu import Dfsu, Mesh
 from .xyz import read_xyz
+from .dataset import Dataset
 
 
 def read(filename, items=None, time_steps=None):

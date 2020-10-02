@@ -16,7 +16,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dutil import Dataset, get_valid_items_and_timesteps, get_item_info
+from .dutil import get_valid_items_and_timesteps, get_item_info
+from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
 

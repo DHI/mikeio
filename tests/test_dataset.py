@@ -3,7 +3,7 @@ from dateutil.rrule import rrule, SECONDLY, HOURLY, DAILY
 import numpy as np
 import pandas as pd
 import pytest
-from mikeio.dutil import Dataset
+from mikeio import Dataset
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
