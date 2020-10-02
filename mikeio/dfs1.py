@@ -6,18 +6,19 @@ from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
-    DfsSimpleType,
-    DataValueType,
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dotnet import to_dotnet_float_array
-from .eum import ItemInfo
-from .dfs import AbstractDfs
+from .custom_exceptions import DataDimensionMismatch
+from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
+from .dotnet import (
+    to_numpy,
+    to_dotnet_float_array,
+)
+from .dfs import Dfs123
 
 
-class Dfs1(AbstractDfs):
-    _ndim = 1
+class Dfs1(Dfs123):
     _dx = None
     _nx = None
 
@@ -51,7 +52,7 @@ class Dfs1(AbstractDfs):
 
     def _read_dfs1_header(self):
         if not os.path.isfile(self._filename):
-            raise Exception(f"file {self._filename} does not exist!")
+            raise FileNotFoundError(self._filename)
 
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
         self._dx = self._dfs.SpatialAxis.Dx
@@ -61,7 +62,6 @@ class Dfs1(AbstractDfs):
 
     def _open(self):
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
-        self._source = self._dfs
 
     def write(
         self,
@@ -114,19 +114,13 @@ class Dfs1(AbstractDfs):
                 dx = 1
 
         if not all(np.shape(d)[1] == number_x for d in data):
-            raise ValueError(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [t, x]"
-            )
+            raise DataDimensionMismatch()
 
-        factory = DfsFactory()
-        builder = Dfs1Builder.Create(title, "mikeio", 0)
+        self._factory = DfsFactory()
+        self._builder = Dfs1Builder.Create(title, "mikeio", 0)
 
-        self._builder = builder
-        self._factory = factory
-
-        builder.SetSpatialAxis(
-            factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, dx)
+        self._builder.SetSpatialAxis(
+            self._factory.CreateAxisEqD1(eumUnit.eumUmeter, number_x, x0, dx)
         )
 
         dfs = self._setup_header(filename)
@@ -148,4 +142,3 @@ class Dfs1(AbstractDfs):
         """Step size in x direction
         """
         return self._dx
-

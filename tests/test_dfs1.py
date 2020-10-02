@@ -1,11 +1,16 @@
-import os
-import numpy as np
 import datetime
+import os
+
+import numpy as np
 import pytest
-from shutil import copyfile
 
 from mikeio.dfs1 import Dfs1
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
+
+def test_filenotexist():
+    with pytest.raises(FileNotFoundError):
+        Dfs1("file_that_does_not_exist.dfs1")
 
 
 def test_repr():
