@@ -6,25 +6,19 @@ from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
-    DfsSimpleType,
-    DataValueType,
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dutil import Dataset, find_item, get_item_info, get_valid_items_and_timesteps
+from .custom_exceptions import FileDoesNotExist
+from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
-    to_dotnet_datetime,
-    from_dotnet_datetime,
 )
-from .eum import ItemInfo
-from .helpers import safe_length
 from .dfs import Dfs123
 
 
 class Dfs1(Dfs123):
-
     _dx = None
 
     def __init__(self, filename=None):
@@ -58,7 +52,7 @@ class Dfs1(Dfs123):
 
     def _read_dfs1_header(self):
         if not os.path.isfile(self._filename):
-            raise Exception(f"file {self._filename} does not exist!")
+            raise FileDoesNotExist(self._filename)
 
         dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
         self._dx = dfs.SpatialAxis.Dx
@@ -107,7 +101,6 @@ class Dfs1(Dfs123):
         for i in range(nt):
             it = time_steps[i]
             for item in range(n_items):
-
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
                 src = itemdata.Data
@@ -126,16 +119,16 @@ class Dfs1(Dfs123):
         return Dataset(data_list, time, items)
 
     def write(
-        self,
-        filename,
-        data,
-        start_time=None,
-        dt=None,
-        items=None,
-        dx=1,
-        x0=0,
-        coordinate=None,
-        title=None,
+            self,
+            filename,
+            data,
+            start_time=None,
+            dt=None,
+            items=None,
+            dx=1,
+            x0=0,
+            coordinate=None,
+            title=None,
     ):
         """
         Write a dfs1 file
@@ -210,4 +203,3 @@ class Dfs1(Dfs123):
         """Step size in x direction
         """
         return self._dx
-
