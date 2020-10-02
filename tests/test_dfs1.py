@@ -20,6 +20,15 @@ def test_repr():
     assert "dx" in text
 
 
+def test_repr_empty():
+
+    dfs = Dfs1()
+
+    text = repr(dfs)
+
+    assert "Dfs1" in text
+
+
 def test_simple_write(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfs1")

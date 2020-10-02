@@ -2,7 +2,6 @@ from datetime import datetime, timedelta
 import warnings
 import numpy as np
 import pandas as pd
-from .helpers import safe_length
 from .dutil import Dataset
 from .dotnet import to_dotnet_datetime, from_dotnet_datetime, to_numpy
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
@@ -73,8 +72,7 @@ class AbstractDfs:
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        for i in range(nt):
-            it = time_steps[i]
+        for i, it in enumerate(time_steps):
             for item in range(n_items):
 
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -83,6 +81,7 @@ class AbstractDfs:
                 d = to_numpy(src)
 
                 d[d == self.deletevalue] = np.nan
+
                 if self._ndim == 2:
                     d = d.reshape(self._ny, self._nx)
                     d = np.flipud(d)
@@ -100,7 +99,7 @@ class AbstractDfs:
 
     def _read_header(self):
         dfs = self._dfs
-        self._n_items = safe_length(dfs.ItemInfo)
+        self._n_items = len(dfs.ItemInfo)
         self._items = self._get_item_info(list(range(self._n_items)))
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):

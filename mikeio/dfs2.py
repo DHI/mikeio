@@ -11,15 +11,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
-from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
-from .dotnet import (
-    to_numpy,
-    to_dotnet_float_array,
-    to_dotnet_datetime,
-    from_dotnet_datetime,
-)
+from .dotnet import to_dotnet_float_array
 from .eum import ItemInfo
-from .helpers import safe_length
 from .dfs import AbstractDfs
 
 
@@ -44,19 +37,19 @@ class Dfs2(AbstractDfs):
             out.append(f"dx: {self.dx:.5f}")
             out.append(f"dy: {self.dy:.5f}")
 
-        if self._n_items is not None:
-            if self._n_items < 10:
-                out.append("Items:")
-                for i, item in enumerate(self.items):
-                    out.append(f"  {i}:  {item}")
-            else:
-                out.append(f"Number of items: {self._n_items}")
-        if self._filename:
-            if self._n_timesteps == 1:
-                out.append(f"Time: time-invariant file (1 step)")
-            else:
-                out.append(f"Time: {self._n_timesteps} steps")
-                out.append(f"Start time: {self._start_time}")
+            if self._n_items is not None:
+                if self._n_items < 10:
+                    out.append("Items:")
+                    for i, item in enumerate(self.items):
+                        out.append(f"  {i}:  {item}")
+                else:
+                    out.append(f"Number of items: {self._n_items}")
+
+                if self._n_timesteps == 1:
+                    out.append(f"Time: time-invariant file (1 step)")
+                else:
+                    out.append(f"Time: {self._n_timesteps} steps")
+                    out.append(f"Start time: {self._start_time}")
 
         return str.join("\n", out)
 

@@ -181,6 +181,15 @@ def test_repr():
     assert "dx" in text
 
 
+def test_repr_empty():
+
+    dfs = Dfs2()
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+
+
 def test_repr_time():
 
     filename = r"tests/testdata/random.dfs2"
