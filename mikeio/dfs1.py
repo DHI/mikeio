@@ -15,10 +15,11 @@ from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
 )
-from .dfs import Dfs123
+from .dfs import AbstractDfs
 
 
-class Dfs1(Dfs123):
+class Dfs1(AbstractDfs):
+    _ndim = 1
     _dx = None
     _nx = None
 
