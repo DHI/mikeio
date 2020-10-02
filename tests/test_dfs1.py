@@ -10,7 +10,7 @@ from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 
 def test_filenotexist():
-    with pytest.raises(FileDoesNotExist):
+    with pytest.raises(FileNotFoundError):
         Dfs1("file_that_does_not_exist.dfs1")
 
 
