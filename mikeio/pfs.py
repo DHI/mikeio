@@ -1,6 +1,7 @@
 from datetime import datetime
 import yaml
 import pandas as pd
+import warnings
 
 
 from types import SimpleNamespace
@@ -19,23 +20,34 @@ class NestedNamespace(SimpleNamespace):
 class Pfs:
     def __init__(self, filename):
 
-        self._filename = filename
-        self._pfs2yaml()
-        self._data = yaml.load(self._yaml, Loader=yaml.CLoader)
-        targets = list(self._data.keys())
-        if len(targets) == 1:
-            self._data = self._data[targets[0]]
+        warnings.warn(
+            "Support for PFS files in mikeio is experimental. The API is likely to change!"
+        )
 
-        self.data = NestedNamespace(self._data)
+        try:
+            self._filename = filename
+            self._pfs2yaml()
+            self._data = yaml.load(self._yaml, Loader=yaml.CLoader)
+            targets = list(self._data.keys())
+            if len(targets) == 1:
+                self._data = self._data[targets[0]]
 
-        # create aliases
-        if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
-            self.data.SW = self.data.SPECTRAL_WAVE_MODULE
-            self.data.SW.get_outputs = self._get_sw_outputs
+            self.data = NestedNamespace(self._data)
 
-        if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
-            self.data.HD = self.data.HYDRODYNAMIC_MODULE
-            self.data.HD.get_outputs = self._get_hd_outputs
+            # create aliases
+            if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
+                self.data.SW = self.data.SPECTRAL_WAVE_MODULE
+                self.data.SW.get_outputs = self._get_sw_outputs
+
+            if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
+                self.data.HD = self.data.HYDRODYNAMIC_MODULE
+                self.data.HD.get_outputs = self._get_hd_outputs
+
+        except Exception:
+            raise ValueError(
+                f"""Support for PFS files in mikeio is limited
+                and the file: {filename} could not be parsed."""
+            )
 
     def _get_sw_outputs(self, included_only=False):
         return self.get_outputs("SPECTRAL_WAVE_MODULE", included_only=included_only)
@@ -110,7 +122,7 @@ class Pfs:
                 value = s[(idx + 1) :]
                 key = key.lower()
 
-                if s.count("'") == 2:  # This is a quoted string and not an array
+                if s.count("'") == 2:  # This is a quoted string and not a list
                     s = s
                 else:
                     if "," in value:
