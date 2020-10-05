@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 import warnings
 import numpy as np
 import pandas as pd
-from .dutil import Dataset
+from .dataset import Dataset
+
 from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
