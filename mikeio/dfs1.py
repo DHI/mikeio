@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from datetime import timedelta
 
@@ -5,25 +6,19 @@ from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import (
     DfsFileFactory,
     DfsFactory,
-    DfsSimpleType,
-    DataValueType,
 )
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dutil import Dataset, find_item, get_item_info, get_valid_items_and_timesteps
+from .custom_exceptions import DataDimensionMismatch
+from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
-    to_dotnet_datetime,
-    from_dotnet_datetime,
 )
-from .eum import TimeStep, ItemInfo
-from .helpers import safe_length
 from .dfs import Dfs123
 
 
 class Dfs1(Dfs123):
-
     _dx = None
 
     def __init__(self, filename=None):
@@ -32,7 +27,33 @@ class Dfs1(Dfs123):
         if filename:
             self._read_dfs1_header()
 
+    def __repr__(self):
+        out = ["Dfs1"]
+
+        if self._filename:
+            pass
+            out.append(f"dx: {self.dx:.5f}")
+
+        if self._n_items is not None:
+            if self._n_items < 10:
+                out.append("Items:")
+                for i, item in enumerate(self.items):
+                    out.append(f"  {i}:  {item}")
+            else:
+                out.append(f"Number of items: {self._n_items}")
+        if self._filename:
+            if self._n_timesteps == 1:
+                out.append(f"Time: time-invariant file (1 step)")
+            else:
+                out.append(f"Time: {self._n_timesteps} steps")
+                out.append(f"Start time: {self._start_time}")
+
+        return str.join("\n", out)
+
     def _read_dfs1_header(self):
+        if not os.path.isfile(self._filename):
+            raise FileNotFoundError(self._filename)
+
         dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
         self._dx = dfs.SpatialAxis.Dx
 
@@ -62,50 +83,35 @@ class Dfs1(Dfs123):
         self._dfs = dfs
         self._source = dfs
 
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
         items, item_numbers, time_steps = get_valid_items_and_timesteps(
             self, items, time_steps
         )
 
-        # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
 
-        xNum = axis.XCount
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        if nt == 0:
-            raise ValueError(
-                "Static dfs1 files (with no time steps) are not supported."
-            )
-
-        deleteValue = dfs.FileInfo.DeleteValueFloat
+        nx = axis.XCount
 
         n_items = len(item_numbers)
-        data_list = []
+        nt = len(time_steps)
 
-        for item in range(n_items):
-            # Initialize an empty data block
-            data = np.ndarray(shape=(len(time_steps), xNum), dtype=float)
-            data_list.append(data)
+        data_list = [np.ndarray(shape=(nt, nx), dtype=float) for item in range(n_items)]
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        for i in range(len(time_steps)):
+        for i in range(nt):
             it = time_steps[i]
             for item in range(n_items):
-
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
                 src = itemdata.Data
                 d = to_numpy(src)
 
-                d[d == deleteValue] = np.nan
-                data_list[item][it, :] = d
+                d[d == self._deletevalue] = np.nan
+                data_list[item][i, :] = d
 
-            t_seconds[it] = itemdata.Time
+            t_seconds[i] = itemdata.Time
 
-        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
-        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        time = [self._start_time + timedelta(seconds=t) for t in t_seconds]
 
         items = get_item_info(dfs, item_numbers)
 
@@ -113,16 +119,16 @@ class Dfs1(Dfs123):
         return Dataset(data_list, time, items)
 
     def write(
-        self,
-        filename,
-        data,
-        start_time=None,
-        dt=1,
-        items=None,
-        dx=1,
-        x0=0,
-        coordinate=None,
-        title=None,
+            self,
+            filename,
+            data,
+            start_time=None,
+            dt=None,
+            items=None,
+            dx=1,
+            x0=0,
+            coordinate=None,
+            title=None,
     ):
         """
         Write a dfs1 file
@@ -163,10 +169,7 @@ class Dfs1(Dfs123):
                 dx = 1
 
         if not all(np.shape(d)[1] == number_x for d in data):
-            raise ValueError(
-                "ERROR data matrices in the X dimension do not all match in the data list. "
-                "Data is list of matices [t, x]"
-            )
+            raise DataDimensionMismatch()
 
         factory = DfsFactory()
         builder = Dfs1Builder.Create(title, "mikeio", 0)
@@ -191,3 +194,9 @@ class Dfs1(Dfs123):
                 dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
+
+    @property
+    def dx(self):
+        """Step size in x direction
+        """
+        return self._dx

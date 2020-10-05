@@ -7,7 +7,7 @@ from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
 )
-from .eum import ItemInfo, TimeStep
+from .eum import ItemInfo, TimeStepUnit
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
@@ -26,7 +26,7 @@ class Dfs123:
     _factory = None
     _deletevalue = None
     _override_coordinates = False
-    _timeseries_unit = TimeStep.SECOND
+    _timeseries_unit = TimeStepUnit.SECOND
     _dt = None
 
     def __init__(self, filename=None):
@@ -36,6 +36,10 @@ class Dfs123:
         self._n_items = safe_length(dfs.ItemInfo)
         self._items = get_item_info(dfs, list(range(self._n_items)))
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
+            self._timestep_in_seconds = (
+                dfs.FileInfo.TimeAxis.TimeStep
+            )  # TODO handle other timeunits
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._projstr = dfs.FileInfo.Projection.WKTString
         self._longitude = dfs.FileInfo.Projection.Longitude
@@ -95,13 +99,17 @@ class Dfs123:
         if dt:
             self._dt = dt
 
+        if self._dt is None:
+            self._dt = 1
+            warnings.warn(f"No timestep supplied. Using 1s.")
+
         if items:
             self._items = items
 
         if self._items is None:
             self._items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
 
-        self._timeseries_unit = TimeStep.SECOND
+        self._timeseries_unit = TimeStepUnit.SECOND
 
     def _setup_header(self, filename):
 
@@ -177,6 +185,12 @@ class Dfs123:
         """Number of time steps
         """
         return self._n_timesteps
+
+    @property
+    def timestep(self):
+        """Time step size in seconds
+        """
+        return self._timestep_in_seconds
 
     @property
     def projection_string(self):

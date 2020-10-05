@@ -19,7 +19,7 @@ from .dotnet import (
     to_dotnet_array,
     asnetarray_v2,
 )
-from .eum import TimeStep, ItemInfo, EUMType, EUMUnit
+from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
 
 
@@ -314,7 +314,7 @@ class _UnstructuredGeometry:
 
             if (
                 self._type == UnstructuredType.Dfsu3DSigma
-                or UnstructuredType.Dfsu3DSigmaZ
+                or self._type == UnstructuredType.Dfsu3DSigmaZ
             ) and n_layers == 1:
                 # If source is 3d, but output only has 1 layer
                 # then change type to 2d
@@ -696,6 +696,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return geometry2d")
+            return None
         if self._geom2d is None:
             self._geom2d = self.to_2d_geometry()
         return self._geom2d
@@ -706,6 +707,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return e2_e3_table")
+            return None
         if self._e2_e3_table is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -719,6 +721,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return elem2d_ids")
+            return None
         if self._2d_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -732,6 +735,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot return layer_ids")
+            return None
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -765,6 +769,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot find top_elements")
+            return None
         elif (self._top_elems is None) and (self._source is not None):
             # note: if subset of elements is selected then this cannot be done!
             self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
@@ -776,6 +781,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot find n_layers_per_column")
+            return None
         elif self._n_layers_column is None:
             top_elems = self.top_elements
             n = len(top_elems)
@@ -791,6 +797,7 @@ class _UnstructuredGeometry:
         """
         if self._n_layers is None:
             print("Object has no layers: cannot find bottom_elements")
+            return None
         elif self._bot_elems is None:
             self._bot_elems = self.top_elements - self.n_layers_per_column + 1
         return self._bot_elems
@@ -820,26 +827,16 @@ class _UnstructuredGeometry:
         if n_lay is None:
             print("Object has no layers: cannot get_layer_elements")
             return None
-        n_sigma = self.n_sigma_layers
-        n_z = n_lay - n_sigma
-        if layer > n_z and layer <= n_lay:
-            layer = layer - n_lay
 
-        if layer < (-n_lay) or layer > n_lay:
+        if layer < (-n_lay+1) or layer > n_lay:
             raise Exception(
-                f"Layer {layer} not allowed must be between -{n_lay} and {n_lay}"
+                f"Layer {layer} not allowed; must be between -{n_lay-1} and {n_lay}"
             )
-        if layer <= 0:
-            # sigma layers, counting from the top
-            if layer < -n_sigma:
-                raise Exception(f"Negative layers only possible for sigma layers")
-            return self.top_elements + layer
-        else:
-            # then it must be a z layer
-            return (
-                self.bottom_elements[self.n_layers_per_column >= (n_lay - layer + 1)]
-                + layer
-            )
+
+        if layer <=0:
+            layer = layer + n_lay
+
+        return self.element_ids[self.layer_ids==layer]
 
     def _get_2d_to_3d_association(self):
         e2_to_e3 = (
@@ -932,7 +929,7 @@ class _UnstructuredGeometry:
             node-centered data 
         """
         nc = self.node_coordinates
-        elem_table, ec = self._create_tri_only_element_table()
+        elem_table, ec, data = self._create_tri_only_element_table(data)
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
@@ -969,17 +966,21 @@ class _UnstructuredGeometry:
         self,
         z=None,
         elements=None,
+        plot_type="patch",
+        title=None,
         label=None,
         cmap=None,
         vmin=None,
         vmax=None,
-        plot_type="patch",
-        n_levels=10,
+        levels=10,
         n_refinements=0,
-        plot_mesh=True,
+        show_mesh=True,
+        show_outline=True,
+        figsize=None,
+        ax=None,
     ):
         """
-        Plot mesh elements
+        Plot unstructured data and/or mesh, mesh outline  
 
         Parameters
         ----------
@@ -987,29 +988,54 @@ class _UnstructuredGeometry:
             value for each element to plot, default bathymetry
         elements: list(int), optional
             list of element ids to be plotted
+        plot_type: str, optional 
+            type of plot: 'patch' (default), 'mesh_only', 'shaded', 
+            'contour', 'contourf' or 'outline_only' 
+        title: str, optional
+            axes title 
         label: str, optional
-            colorbar label
+            colorbar label (or title if contour plot)
         cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis
+            colormap, default viridis            
         vmin: real, optional 
             lower bound of values to be shown on plot, default:None 
         vmax: real, optional 
             upper bound of values to be shown on plot, default:None 
-        plot_type: str, optional 
-            type of plot: 'patch' (default), 'shaded' or 'contour' 
-        n_levels: int, optional
+        levels: int, list(float), optional
             for contour plots: how many levels, default:10
-        plot_mesh: bool, optional
+            or a list of discrete levels e.g. [3.0, 4.5, 6.0]
+        show_mesh: bool, optional
             should the mesh be shown on the plot? default=True
-        n_refinements: int
-            for 'shaded' and 'contour' plots (and if plot_mesh=False) 
-            do this number of mesh refinements for smoother plotting         
+        show_outline: bool, optional
+            should domain outline be shown on the plot? default=True
+        n_refinements: int, optional
+            for 'shaded' and 'contour' plots (and if show_mesh=False) 
+            do this number of mesh refinements for smoother plotting  
+        figsize: (float, float), optional
+            specify size of figure
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+
+        Returns
+        -------
+        <matplotlib.axes>          
         """
 
         import matplotlib.cm as cm
         import matplotlib.pyplot as plt
         from matplotlib.patches import Polygon
         from matplotlib.collections import PatchCollection
+        from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+        mesh_col = "0.95"
+        mesh_col_dark = "0.6"
+
+        if plot_type is None:
+            plot_type = "outline_only"
+
+        plot_data = True
+        if plot_type == "mesh_only" or plot_type == "outline_only":
+            plot_data = False
 
         if cmap is None:
             cmap = cm.viridis
@@ -1033,74 +1059,113 @@ class _UnstructuredGeometry:
         is_bathy = False
         if z is None:
             is_bathy = True
-            z = ec[:, 2]
-            if label is None:
-                label = "Bathymetry (m)"
+            if plot_data:
+                z = ec[:, 2]
+                if label is None:
+                    label = "Bathymetry (m)"
         else:
             if len(z) != ne:
                 raise Exception(
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
                 )
+            if label is None:
+                label = ""
+            if not plot_data:
+                print(f"Cannot plot data in {plot_type} plot!")
 
-        if vmin is None:
+        if plot_data and vmin is None:
             vmin = z.min()
-
-        if vmax is None:
+        if plot_data and vmax is None:
             vmax = z.max()
 
+        # set levels
+        if "contour" in plot_type:
+            if levels is None:
+                levels = 10
+            if np.isscalar(levels):
+                n_levels = levels
+                levels = np.linspace(vmin, vmax, n_levels)
+            else:
+                n_levels = len(levels)
+                vmin = min(levels)
+                vmax = max(levels)
+
+        # plot in existing or new axes?
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
+
         # set aspect ratio
-        fig, ax = plt.subplots()
         if geometry.is_geo:
-            mean_lat = 0.5 * (max(nc[:, 1]) - min(nc[:, 1]))
+            mean_lat = np.mean(nc[:,1]) 
             ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
         else:
             ax.set_aspect("equal")
 
-        if plot_type == "patch":
+        # set plot limits   
+        xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
+        ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
+
+        # scale height of colorbar
+        cbar_frac = 0.046 * nc[:, 1].ptp() / nc[:, 0].ptp()
+
+        if plot_type == "outline_only":
+            fig_obj = None
+
+        elif plot_type == "mesh_only":
+            if show_mesh == False:
+                print("Not possible to use show_mesh=False on a mesh_only plot!")
+            patches = geometry._to_polygons()
+            fig_obj = PatchCollection(
+                patches, edgecolor=mesh_col_dark, facecolor="none", linewidths=0.3
+            )
+            ax.add_collection(fig_obj)
+
+        elif plot_type == "patch" or plot_type == "box":
+            patches = geometry._to_polygons()
             # do plot as patches (like MZ "box contour")
             # with (constant) element center values
-            patches = geometry._to_polygons()
-
-            if plot_mesh:
-                p = PatchCollection(
-                    patches, cmap=cmap, edgecolor="face", linewidths=0.0
+            if show_mesh:
+                fig_obj = PatchCollection(
+                    patches, cmap=cmap, edgecolor=mesh_col, linewidths=0.4
                 )
             else:
-                p = PatchCollection(
+                fig_obj = PatchCollection(
                     patches, cmap=cmap, edgecolor="face", alpha=None, linewidths=None
                 )
 
-            p.set_array(z)
-            p.set_clim(vmin, vmax)
-            ax.add_collection(p)
-            fig.colorbar(p, ax=ax, label=label)
+            fig_obj.set_array(z)
+            fig_obj.set_clim(vmin, vmax)
+            ax.add_collection(fig_obj)
+
+            cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+            plt.colorbar(fig_obj, label=label, cax=cax)
+
         else:
             # do node-based triangular plot
             import matplotlib.tri as tri
 
             mesh_linewidth = 0.0
-            if plot_mesh == True:
+            if show_mesh and geometry.is_tri_only:
                 mesh_linewidth = 0.4
                 if n_refinements > 0:
                     n_refinements = 0
                     print("Warning: mesh refinement is not possible if plot_mesh=True")
 
-            if is_bathy:
-                zn = geometry.node_coordinates[:, 2]
-            else:
-                zn = geometry.get_node_centered_data(z)
-
-            elem_table, ec = self._create_tri_only_element_table(geometry)
+            elem_table, ec, z = self._create_tri_only_element_table(
+                data=z, geometry=geometry
+            )
             triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
+
+            zn = geometry.get_node_centered_data(z)
 
             if n_refinements > 0:
                 # TODO: refinements doesn't seem to work for 3d files?
                 refiner = tri.UniformTriRefiner(triang)
                 triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
 
-            ax.triplot(triang, lw=mesh_linewidth, color="lightgray")
-            if plot_type == "shaded":
-                tr_fig = ax.tripcolor(
+            if plot_type == "shaded" or plot_type == "smooth":
+                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
+                fig_obj = ax.tripcolor(
                     triang,
                     zn,
                     edgecolors="face",
@@ -1110,21 +1175,79 @@ class _UnstructuredGeometry:
                     linewidths=0.3,
                     shading="gouraud",
                 )
+
+                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+                plt.colorbar(fig_obj, label=label, cax=cax)
+
+            elif plot_type == "contour" or plot_type == "contour_lines":
+                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
+                fig_obj = ax.tricontour(
+                    triang, zn, levels=levels, linewidths=[1.2], cmap=cmap
+                )
+                ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
+                if len(label) > 0:
+                    ax.set_title(label)
+
+            elif plot_type == "contourf" or plot_type == "contour_filled":
+                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
+                vbuf = 0.01 * (vmax - vmin) / n_levels
+                zn = np.clip(zn, vmin + vbuf, vmax - vbuf)  # avoid white outside limits
+                fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
+
+                # colorbar
+                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+                plt.colorbar(fig_obj, label=label, cax=cax)
+
             else:
-                # must be contourf plot then
-                levels = np.linspace(vmin, vmax, n_levels)
-                tr_fig = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
-                # if plot_type == 'contour_lines':
-                #     ax.tricontour(triang, zn, levels=levels,
-                #             colors=['0.5'],
-                #             linewidths=[0.5])
+                if (plot_type is not None) and plot_type != "outline_only":
+                    raise Exception(f"plot_type {plot_type} unknown!")
 
-            plt.colorbar(tr_fig, label=label)
+            if show_mesh and (not geometry.is_tri_only):
+                # if mesh is not tri only, we need to add it manually on top
+                patches = geometry._to_polygons()
+                mesh_linewidth = 0.4
+                if plot_type == "contour":
+                    mesh_col = mesh_col_dark
+                p = PatchCollection(
+                    patches,
+                    edgecolor=mesh_col,
+                    facecolor="none",
+                    linewidths=mesh_linewidth,
+                )
+                ax.add_collection(p)
 
-        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
-        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+        if show_outline:
+            try:
+                if not self.is_2d:
+                    geometry = self.geometry2d
+                mp = geometry.to_shapely()
+                domain = mp.buffer(0)
+            except:
+                warnings.warn('Could not plot outline. Failed to convert to_shapely()')
+            try:
+                if domain:
+                    out_col = "0.4"
+                    ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
+                    xd, yd = domain.exterior.xy[0], domain.exterior.xy[1]                    
+                    xmin, xmax = min(xmin,np.min(xd)), max(xmax,np.max(xd))
+                    ymin, ymax = min(ymin,np.min(yd)), max(ymax,np.max(yd))
+                    for j in range(len(domain.interiors)):
+                        interj = domain.interiors[j]
+                        ax.plot(*interj.xy, color=out_col, linewidth=1.2)
+            except:
+                warnings.warn('Could not plot outline')
 
-    def _create_tri_only_element_table(self, geometry=None):
+        # set plot limits
+        xybuf = 6e-3 * (xmax - xmin)
+        ax.set_xlim(xmin - xybuf, xmax + xybuf)
+        ax.set_ylim(ymin - xybuf, ymax + xybuf)
+
+        if title is not None:
+            ax.set_title(title)
+
+        return ax 
+
+    def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh
         """
         if geometry is None:
@@ -1132,7 +1255,10 @@ class _UnstructuredGeometry:
 
         ec = geometry.element_coordinates
         if geometry.is_tri_only:
-            return np.asarray(geometry.element_table), ec
+            return np.asarray(geometry.element_table), ec, data
+
+        if data is None:
+            data = []
 
         elem_table = [
             list(geometry.element_table[i]) for i in range(geometry.n_elements)
@@ -1140,12 +1266,22 @@ class _UnstructuredGeometry:
         tmp_elmnt_nodes = elem_table.copy()
         for el, item in enumerate(tmp_elmnt_nodes):
             if len(item) == 4:
-                elem_table.pop(el)
-                elem_table.insert(el, item[:3])
-                elem_table.append([item[i] for i in [2, 3, 0]])
-                ec = np.append(ec, ec[el].reshape(1, -1), axis=0)
+                elem_table.pop(el)  # remove quad element
 
-        return np.asarray(elem_table), ec
+                # insert two new tri elements in table
+                elem_table.insert(el, item[:3])
+                tri2_nodes = [item[i] for i in [2, 3, 0]]
+                elem_table.append(tri2_nodes)
+
+                # new center coordinates for new tri-elements
+                ec[el] = geometry.node_coordinates[item[:3]].mean(axis=1)
+                tri2_ec = geometry.node_coordinates[tri2_nodes].mean(axis=1)
+                ec = np.append(ec, tri2_ec.reshape(1, -1), axis=0)
+
+                # use same data in two new tri elements
+                data = np.append(data, data[el])
+
+        return np.asarray(elem_table), ec, data
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
@@ -1164,6 +1300,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
     _n_items = None
     _items = None
+    _dtype = np.float64
 
     def __repr__(self):
         out = []
@@ -1273,10 +1410,24 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
 
 class Dfsu(_UnstructuredFile):
-    def __init__(self, filename):
+    def __init__(self, filename, dtype=np.float64):
+        """
+        Create a Dfsu object
+
+        Parameters
+        ---------
+        filename: str
+            dfsu or mesh filename
+        dtype: np.dtype, optional
+            default np.float64, valid options are np.float32, np.float64
+        """
+        if dtype not in [np.float32, np.float64]:
+            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+
         super().__init__()
         self._filename = filename
         self._read_header(filename)
+        self._dtype = dtype
 
     @property
     def element_coordinates(self):
@@ -1365,6 +1516,27 @@ class Dfsu(_UnstructuredFile):
         -------
         Dataset
             A dataset with data dimensions [t,elements]
+
+        Examples
+        --------
+        >>> dfsu.read()
+        <mikeio.DataSet>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
+        >>> dfsu.read(time_steps="1985-08-06 12:00,1985-08-07 00:00")
+        <mikeio.DataSet>
+        Dimensions: (5, 884)
+        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
         """
 
         # Open the dfs file for reading
@@ -1404,9 +1576,9 @@ class Dfsu(_UnstructuredFile):
             # Initialize an empty data block
             if item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(len(time_steps), n_nodes), dtype=float)
+                data = np.ndarray(shape=(len(time_steps), n_nodes), dtype=self._dtype)
             else:
-                data = np.ndarray(shape=(len(time_steps), n_elems), dtype=float)
+                data = np.ndarray(shape=(len(time_steps), n_elems), dtype=self._dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
@@ -1615,7 +1787,12 @@ class Mesh(_UnstructuredFile):
     def __init__(self, filename):
         super().__init__()
         self._filename = filename
-        self._read_mesh_header(filename)
+        self._read_header(filename)
+        self._n_timesteps = None
+        self._n_items = None
+        self._n_layers = None
+        self._n_sigma = None
+        self._type = UnstructuredType.Mesh
 
     def set_z(self, z):
         """Change the depth by setting the z value of each node

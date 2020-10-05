@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from datetime import timedelta
 from DHI.Generic.MikeZero import eumUnit
@@ -17,7 +18,7 @@ from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
 )
-from .eum import TimeStep, ItemInfo
+from .eum import ItemInfo
 from .helpers import safe_length
 from .dfs import Dfs123
 
@@ -33,25 +34,38 @@ class Dfs2(Dfs123):
         if filename:
             self._read_dfs2_header()
 
+    def __repr__(self):
+        out = ["Dfs2"]
+
+        if self._filename:
+            out.append(f"dx: {self.dx:.5f}")
+            out.append(f"dy: {self.dy:.5f}")
+
+        if self._n_items is not None:
+            if self._n_items < 10:
+                out.append("Items:")
+                for i, item in enumerate(self.items):
+                    out.append(f"  {i}:  {item}")
+            else:
+                out.append(f"Number of items: {self._n_items}")
+        if self._filename:
+            if self._n_timesteps == 1:
+                out.append(f"Time: time-invariant file (1 step)")
+            else:
+                out.append(f"Time: {self._n_timesteps} steps")
+                out.append(f"Start time: {self._start_time}")
+
+        return str.join("\n", out)
+
     def _read_dfs2_header(self):
+        if not os.path.isfile(self._filename):
+            raise Exception(f"file {self._filename} does not exist!")
+
         dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._dx = dfs.SpatialAxis.Dx
         self._dy = dfs.SpatialAxis.Dy
 
         self._read_header(dfs)
-
-    def __calculate_index(self, nx, ny, x, y):
-        """ Calculates the position in the dfs2 data array based on the
-        number of x,y  (nx,ny) at the specified x,y position.
-
-        Error checking is done here to see if the x,y coordinates are out of range.
-        """
-        if x >= nx:
-            raise IndexError("x coordinate is off the grid: ", x)
-        if y >= ny:
-            raise IndexError("y coordinate is off the grid: ", y)
-
-        return y * nx + x
 
     def find_nearest_element(
         self, lon, lat,
@@ -111,54 +125,47 @@ class Dfs2(Dfs123):
         self._dfs = dfs
         self._source = dfs
 
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
         items, item_numbers, time_steps = get_valid_items_and_timesteps(
             self, items, time_steps
         )
 
         # Determine the size of the grid
         axis = dfs.SpatialAxis
-        yNum = axis.YCount
-        xNum = axis.XCount
-
-        if nt == 0:
-            raise ValueError("Static files (with no dynamic items) are not supported.")
+        ny = axis.YCount
+        nx = axis.XCount
 
         for t in time_steps:
-            if t > (nt - 1):
-                raise ValueError(f"Trying to read timestep {t}: max timestep is {nt-1}")
+            if t > (self.n_timesteps - 1):
+                raise ValueError(
+                    f"Trying to read timestep {t}: max timestep is {self.n_timesteps-1}"
+                )
 
-        deleteValue = dfs.FileInfo.DeleteValueFloat
+        n_items = len(item_numbers)
+        nt = len(time_steps)
 
-        self._n_items = len(item_numbers)
-        data_list = []
-
-        for item in range(self._n_items):
-            data = np.ndarray(shape=(len(time_steps), yNum, xNum), dtype=float)
-            data_list.append(data)
+        data_list = [
+            np.ndarray(shape=(nt, ny, nx), dtype=float) for item in range(n_items)
+        ]
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        # startTime = dfs.FileInfo.TimeAxis.StartDateTime
-        for i in range(len(time_steps)):
+        for i in range(nt):
             it = time_steps[i]
-            for item in range(self._n_items):
+            for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
                 src = itemdata.Data
                 d = to_numpy(src)
 
-                d = d.reshape(yNum, xNum)
+                d = d.reshape(ny, nx)
                 d = np.flipud(d)
-                d[d == deleteValue] = np.nan
+                d[d == self.deletevalue] = np.nan
                 data_list[item][i, :, :] = d
 
             t_seconds[i] = itemdata.Time
 
-        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
-        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        time = [self.start_time + timedelta(seconds=t) for t in t_seconds]
 
         items = get_item_info(dfs, item_numbers)
 
@@ -170,7 +177,7 @@ class Dfs2(Dfs123):
         filename,
         data,
         start_time=None,
-        dt=1,
+        dt=None,
         datetimes=None,
         items=None,
         dx=None,

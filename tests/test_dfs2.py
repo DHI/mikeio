@@ -112,6 +112,15 @@ def test_read():
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
+def test_read_temporal_subset_slice():
+
+    filename = r"tests/testdata/eq.dfs2"
+    dfs = Dfs2(filename)
+    ds = dfs.read(time_steps=slice("2000-01-01 00:00", "2000-01-01 12:00"))
+
+    assert len(ds.time) == 13
+
+
 def test_read_item_names():
 
     filename = r"tests/testdata/random.dfs2"
@@ -160,6 +169,31 @@ def test_write_selected_item_to_new_file(tmpdir):
     assert dfs.orientation == dfs2.orientation
 
 
+def test_repr():
+
+    filename = r"tests/testdata/gebco_sound.dfs2"
+    dfs = Dfs2(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+    assert "Items" in text
+    assert "dx" in text
+
+
+def test_repr_time():
+
+    filename = r"tests/testdata/random.dfs2"
+    dfs = Dfs2(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+    assert "Items" in text
+    assert "dx" in text
+    assert "steps" in text
+
+
 def test_write_modified_data_to_new_file(tmpdir):
 
     filename = r"tests/testdata/gebco_sound.dfs2"
@@ -187,6 +221,28 @@ def test_read_some_time_step():
 
     assert res.data[0].shape[0] == 2
     assert len(res.time) == 2
+
+
+def test_write_some_time_step(tmpdir):
+
+    filename = r"tests/testdata/waves.dfs2"
+    dfs = Dfs2(filename)
+
+    ds = dfs.read(time_steps=[1, 2])
+
+    assert ds.data[0].shape[0] == 2
+    assert len(ds.time) == 2
+
+    assert dfs.timestep == 86400.0
+    assert dfs.start_time.day == 1
+
+    outfilename = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
+
+    dfs.write(outfilename, ds)
+
+    dfs2 = Dfs2(outfilename)
+    assert dfs2.timestep == 86400.0
+    assert dfs2.start_time.day == 2
 
 
 def test_find_index_from_coordinate():

@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.interpolate import interp1d
 from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
@@ -23,6 +24,21 @@ def get_valid_items_and_timesteps(dfs, items, time_steps):
 
     if isinstance(time_steps, int):
         time_steps = [time_steps]
+
+    if isinstance(time_steps, str):
+        parts = time_steps.split(",")
+        if parts[0] == "":
+            time_steps = slice(parts[1])  # stop only
+        elif parts[1] == "":
+            time_steps = slice(parts[0], None)  # start only
+        else:
+            time_steps = slice(parts[0], parts[1])
+
+    if isinstance(time_steps, slice):
+        freq = pd.tseries.offsets.DateOffset(seconds=dfs.timestep)
+        time = pd.date_range(dfs.start_time, periods=dfs.n_timesteps, freq=freq)
+        s = time.slice_indexer(time_steps.start, time_steps.stop)
+        time_steps = list(range(s.start, s.stop))
 
     items = get_item_info(dfs._source, item_numbers)
 
@@ -199,6 +215,11 @@ class Dataset:
 
     def __getitem__(self, x):
 
+        if isinstance(x, slice):
+            s = self.time.slice_indexer(x.start, x.stop)
+            time_steps = list(range(s.start, s.stop))
+            return self.isel(time_steps, axis=0)
+
         if isinstance(x, int):
             return self.data[x]
 
@@ -280,6 +301,83 @@ class Dataset:
 
         ds = Dataset(res, time, items)
         return ds
+
+    def interp_time(
+        self, dt, method="linear", extrapolate=True, fill_value=np.nan,
+    ):
+        """Temporal interpolation
+
+        Wrapper of `scipy.interpolate.interp`
+
+        Parameters
+        ----------
+        dt: float or pd.DatetimeIndex
+            output timestep in seconds
+        method: str or int, optional
+            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.
+        extrapolate: bool, optional
+            Default True. If False, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If True, out of bounds values are assigned fill_value
+        fill_value: float or array-like, optional
+            Default NaN. this value will be used to fill in for points outside of the time range.
+
+        Returns
+        -------
+        Dataset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
+        >>> ds
+        <mikeio.DataSet>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
+        >>> dsi = ds.interp_time(dt=1800)
+        >>> dsi
+        <mikeio.DataSet>
+        Dimensions: (41, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  U velocity <u velocity component> (meter per sec)
+        2:  V velocity <v velocity component> (meter per sec)
+        3:  Current speed <Current Speed> (meter per sec)
+        """
+
+        if isinstance(dt, pd.DatetimeIndex):
+            t_out_index = dt
+        else:
+            offset = pd.tseries.offsets.DateOffset(seconds=dt)
+            t_out_index = pd.date_range(
+                start=self.time[0], end=self.time[-1], freq=offset
+            )
+
+        t_in = self.time.values.astype(float)
+        t_out = t_out_index.values.astype(float)
+
+        data = [
+            self._interpolate_item(t_in, t_out, item, method, extrapolate, fill_value)
+            for item in self
+        ]
+
+        return Dataset(data, t_out_index, self.items.copy())
+
+    @staticmethod
+    def _interpolate_item(intime, outtime, dataitem, method, extrapolate, fill_value):
+
+        interpolator = interp1d(
+            intime,
+            dataitem,
+            axis=0,
+            kind=method,
+            bounds_error=not extrapolate,
+            fill_value=fill_value,
+        )
+        return interpolator(outtime)
 
     def to_dataframe(self, unit_in_name=False):
         """Convert Dataset to a Pandas DataFrame

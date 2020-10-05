@@ -9,6 +9,15 @@ from mikeio.eum import ItemInfo
 from mikeio.dutil import Dataset
 
 
+def test_repr():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    text = repr(dfs)
+
+    assert "Dfsu2D" in text
+
+
 def test_read_all_items_returns_all_items_and_names():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -32,6 +41,22 @@ def test_read_item_0():
     ds = dfs.read(1)
 
     assert len(ds) == 1
+
+
+def test_read_single_precision():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename, dtype=np.float32)
+
+    ds = dfs.read(1)
+
+    assert len(ds) == 1
+    assert ds[0].dtype == np.float32
+
+
+def test_read_int_not_accepted():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    with pytest.raises(Exception):
+        dfs = Dfsu(filename, dtype=np.int)
 
 
 def test_read_timestep_1():
@@ -476,7 +501,7 @@ def test_get_layer_elements():
     assert elem_ids[5] == 23
 
     elem_ids = dfs.get_layer_elements(1)
-    assert elem_ids[5] == 8639
+    assert elem_ids[5] == 8638
     assert len(elem_ids) == 10
 
     elem_ids = dfs.get_layer_elements([1, 3])
@@ -685,6 +710,68 @@ def test_temporal_resample_by_reading_selected_timesteps(tmpdir):
     newdfs = Dfsu(outfilename)
 
     assert pytest.approx(dfs.timestep) == newdfs.timestep / 2
+
+
+def test_read_temporal_subset():
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    ds = dfs.read(time_steps=slice("1985-08-06 00:00", "1985-08-06 12:00"))
+
+    assert len(ds.time) == 3
+
+    # Specify start
+    ds = dfs.read(time_steps=slice("1985-08-06 12:00", None))
+
+    assert len(ds.time) == 7
+
+    # Specify end
+    ds = dfs.read(time_steps=slice(None, "1985-08-06 12:00"))
+
+    assert len(ds.time) == 3
+
+
+def test_read_temporal_subset_string():
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    # start,end
+    ds = dfs.read(time_steps="1985-08-06 00:00,1985-08-06 12:00")
+    assert len(ds.time) == 3
+
+    # start,
+    ds = dfs.read(time_steps="1985-08-06 12:00,")
+    assert len(ds.time) == 7
+
+    # ,end
+    ds = dfs.read(time_steps=",1985-08-06 11:30")
+    assert len(ds.time) == 2
+
+
+def test_write_temporal_subset(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    ds = dfs.read()  # TODO read temporal subset with slice e.g. "1985-08-06 12:00":
+    selds = ds["1985-08-06 12:00":]
+    dfs.write(outfilename, selds)
+
+    assert os.path.exists(outfilename)
+
+    newdfs = Dfsu(outfilename)
+
+    assert newdfs.start_time.hour == 12
+    assert newdfs.n_timesteps == 7
 
 
 def test_extract_top_layer_to_2d(tmpdir):

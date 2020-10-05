@@ -18,7 +18,7 @@ from .dotnet import (
     to_dotnet_datetime,
     from_dotnet_datetime,
 )
-from .eum import TimeStep
+from .eum import TimeStepUnit
 from .dfs import Dfs123
 
 
@@ -304,13 +304,13 @@ class Dfs3(Dfs123):
         start_time=None,
         dt=1,
         items=None,
-        length_x=1.0,
-        length_y=1.0,
-        length_z=1.0,
+        dx=1.0,
+        dy=1.0,
+        dz=1.0,
         x0=0,
         y0=0,
         coordinate=None,
-        timeseries_unit=TimeStep.SECOND,
+        timeseries_unit=TimeStepUnit.SECOND,
         title=None,
     ):
         """
@@ -338,11 +338,11 @@ class Dfs3(Dfs123):
             Lower right position
         y0: float, optional
             Lower right position
-        length_x: float, optional
+        dx: float, optional
             length of each grid in the x direction (projection units)
-        length_y: float, optional
+        dy: float, optional
             length of each grid in the y direction (projection units)
-        length_z: float, optional
+        dz: float, optional
             length of each grid in the z direction (projection units)
         
         title: str, optional
@@ -368,9 +368,7 @@ class Dfs3(Dfs123):
         # Set up the header
         builder.SetDataType(1)
         builder.SetGeographicalProjection(
-            factory.CreateProjectionGeoOrigin(
-                coordinate[0], coordinate[1], coordinate[2], coordinate[3]
-            )
+            factory.CreateProjectionGeoOrigin(*coordinate)
         )
         builder.SetTemporalAxis(
             factory.CreateTemporalEqCalendarAxis(
@@ -379,16 +377,7 @@ class Dfs3(Dfs123):
         )
         builder.SetSpatialAxis(
             factory.CreateAxisEqD3(
-                eumUnit.eumUmeter,
-                number_x,
-                x0,
-                length_x,
-                number_y,
-                y0,
-                length_y,
-                number_z,
-                0,
-                length_z,
+                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy, number_z, 0, dz,
             )
         )
 

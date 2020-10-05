@@ -1,11 +1,28 @@
-import os
-import numpy as np
 import datetime
+import os
+
+import numpy as np
 import pytest
-from shutil import copyfile
 
 from mikeio.dfs1 import Dfs1
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
+
+def test_filenotexist():
+    with pytest.raises(FileNotFoundError):
+        Dfs1("file_that_does_not_exist.dfs1")
+
+
+def test_repr():
+
+    filename = r"tests/testdata/random.dfs1"
+    dfs = Dfs1(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs1" in text
+    assert "Items" in text
+    assert "dx" in text
 
 
 def test_simple_write(tmpdir):
@@ -75,14 +92,16 @@ def test_read_item_names():
     data = ds.data[0]
     assert data.shape == (100, 3)  # time, x
 
+
 def test_read_time_steps():
 
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(time_steps=[0,1,2,3,4,5])
+    ds = dfs.read(time_steps=[3, 5])
     data = ds.data[0]
-    assert data.shape == (6, 3)  # time, x
+    assert data.shape == (2, 3)  # time, x
+
 
 def test_write_some_time_steps_new_file(tmpdir):
 
@@ -90,7 +109,7 @@ def test_write_some_time_steps_new_file(tmpdir):
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(time_steps=[0,1,2,3,4,5])
+    ds = dfs.read(time_steps=[0, 1, 2, 3, 4, 5])
     data = ds.data[0]
     assert data.shape == (6, 3)  # time, x
 
@@ -100,8 +119,7 @@ def test_write_some_time_steps_new_file(tmpdir):
 
     dsnew = dfsnew.read()
 
-    assert dsnew["testing water level"].shape == (6,3)
-
+    assert dsnew["testing water level"].shape == (6, 3)
 
 
 def test_read_item_names_not_in_dataset_fails():

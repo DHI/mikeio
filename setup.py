@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.5.2",
-    install_requires=["pythonnet", "numpy", "pandas", "pyyaml"],
+    version="0.5.3",
+    install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml"],
     extras_require={
         "dev": [
             "pytest",
