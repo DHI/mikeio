@@ -15,6 +15,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
+from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 from .dutil import get_valid_items_and_timesteps, get_item_info
 from .dataset import Dataset
@@ -49,7 +50,6 @@ class Dfs0:
         out = ["Dfs0"]
 
         if self._filename:
-
             out.append(f"Timeaxis: {str(self._timeaxistype)}")
 
         if self._n_items is not None:
@@ -64,7 +64,7 @@ class Dfs0:
 
     def _read_header(self):
         if not os.path.exists(self._filename):
-            raise FileNotFoundError(f"File {self._filename} not found.")
+            raise FileNotFoundError(self._filename)
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._deletevalue = dfs.FileInfo.DeleteValueFloat
@@ -171,14 +171,12 @@ class Dfs0:
             isinstance(item_number, int) and 0 <= item_number < 1e15
             for item_number in item_numbers
         ):
-            raise ValueError(
-                "'item_numbers' must be a list or array of values between 0 and 1e15"
-            )
+            raise ItemNumbersError()
 
     @staticmethod
     def _validate_and_open_dfs(filename, data):
         if not os.path.exists(filename):
-            raise FileNotFoundError(f"File {filename} not found.")
+            raise FileNotFoundError(filename)
 
         try:
             dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
@@ -210,7 +208,7 @@ class Dfs0:
         if dtype in (np.float32, DfsSimpleType.Float, "float", "single"):
             return DfsSimpleType.Float
 
-        raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        raise InvalidDataType()
 
     def _setup_header(self):
         factory = DfsFactory()
