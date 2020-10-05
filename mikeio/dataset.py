@@ -158,6 +158,15 @@ class Dataset:
 
         raise Exception("Invalid operation")
 
+    def copy(self):
+        "Returns a copy of this dataset."
+
+        items = deepcopy(self.items)
+        data = [self[x].copy() for x in self.items]
+        time = self.time.copy()
+
+        return Dataset(data, time, items)
+
     def isel(self, idx, axis=1):
         """
         Select subset along an axis.

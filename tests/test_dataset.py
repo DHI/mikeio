@@ -483,6 +483,29 @@ def test_weighted_average(tmpdir):
     assert os.path.isfile(outfilename)
 
 
+def test_copy():
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    assert len(ds.items) == 2
+    assert len(ds.data) == 2
+    assert ds.items[0].name == "Foo"
+
+    ds2 = ds.copy()
+
+    ds2.items[0].name = "New name"
+
+    assert ds2.items[0].name == "New name"
+    assert ds.items[0].name == "Foo"
+
+
 def test_default_type():
 
     item = ItemInfo("Foo")
