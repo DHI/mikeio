@@ -4,10 +4,10 @@ from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
 
-from .dfs import AbstractDfs
+from .dfs import _Dfs123
 
 
-class Dfs1(AbstractDfs):
+class Dfs1(_Dfs123):
     _ndim = 1
     _dx = None
     _nx = None

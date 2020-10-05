@@ -19,7 +19,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 
 
-class AbstractDfs:
+class _Dfs123:
 
     _filename = None
     _projstr = None

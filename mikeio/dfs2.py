@@ -4,10 +4,10 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
-from .dfs import AbstractDfs
+from .dfs import _Dfs123
 
 
-class Dfs2(AbstractDfs):
+class Dfs2(_Dfs123):
 
     _ndim = 2
     _dx = None
