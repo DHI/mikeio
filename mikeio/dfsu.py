@@ -840,9 +840,7 @@ class _UnstructuredGeometry:
         return self.element_ids[self.layer_ids == layer]
 
     def _get_2d_to_3d_association(self):
-        e2_to_e3 = (
-            []
-        )  # for each 2d element: the corresponding 3d element ids from bot to top
+        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
         index2d = []  # for each 3d element: the associated 2d element id
         layerid = []  # for each 3d element: the associated layer number
         n2d = len(self.top_elements)
@@ -850,7 +848,7 @@ class _UnstructuredGeometry:
         botid = self.bottom_elements
         global_layer_ids = np.arange(1, self.n_layers + 1)  # layer_ids = 1, 2, 3...
         for j in range(n2d):
-            col = np.array(list(range(botid[j], topid[j] + 1)))
+            col = list(range(botid[j], topid[j] + 1))
 
             e2_to_e3.append(col)
             for jj in col:
@@ -861,7 +859,7 @@ class _UnstructuredGeometry:
             for ll in local_layers:
                 layerid.append(ll)
 
-        e2_to_e3 = np.array(e2_to_e3)
+        e2_to_e3 = np.array(e2_to_e3) 
         index2d = np.array(index2d)
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
