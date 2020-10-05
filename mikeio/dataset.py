@@ -208,6 +208,138 @@ class Dataset:
         ds = Dataset(res, time, items)
         return ds
 
+    def aggregate(self, axis=1, func=np.nanmean):
+        """Aggregate along an axis
+        
+
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+        func: function, optional
+            default np.nanmean
+        
+        Returns
+        -------
+        Dataset
+            dataset with aggregated values
+        """
+
+        items = self.items
+
+        if items[0].name == "Z coordinate":
+            items = deepcopy(items)
+            items.pop(0)
+
+        time = self.time
+
+        res = [func(self[item.name], axis=axis) for item in items]
+
+        ds = Dataset(res, time, items)
+        return ds
+
+    def max(self, axis=1):
+        """Max value along an axis
+        
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+
+        See Also
+        --------
+            nanmax : Max values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.max)
+
+    def min(self, axis=1):
+        """Min value along an axis
+        
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+
+        See Also
+        --------
+            nanmin : Min values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.min)
+
+    def mean(self, axis=1):
+        """Mean value along an axis
+        
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with mean value
+        
+        See Also
+        --------
+            nanmean : Mean values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.mean)
+
+    def nanmax(self, axis=1):
+        """Max value along an axis (NaN removed)
+        
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+        """
+        return self.aggregate(axis=axis, func=np.nanmax)
+
+    def nanmin(self, axis=1):
+        """Min value along an axis (NaN removed)
+        
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+        """
+        return self.aggregate(axis=axis, func=np.nanmin)
+
+    def nanmean(self, axis=1):
+        """Mean value along an axis (NaN removed)
+        
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with mean value
+        """
+        return self.aggregate(axis=axis, func=np.nanmean)
+
     def head(self, n=5):
         "Return the first n timesteps"
         nt = len(self.time)
@@ -332,8 +464,6 @@ class Dataset:
         
         Parameters
         ----------
-        filename: str
-            full path and file name to the dfs0 file.
         unit_in_name: bool, optional
             include unit in column name, default False
         

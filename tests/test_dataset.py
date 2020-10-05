@@ -1,9 +1,10 @@
+import os
 from datetime import datetime
 from dateutil.rrule import rrule, SECONDLY, HOURLY, DAILY
 import numpy as np
 import pandas as pd
 import pytest
-from mikeio import Dataset
+from mikeio import Dataset, Dfsu
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
@@ -448,6 +449,24 @@ def test_tail_small_dataset():
     dstail = ds.tail()
 
     assert len(dstail.time) == nt
+
+
+def test_aggregation_workflows(tmpdir):
+    filename = "tests/testdata/HD2D.dfsu"
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(["Surface elevation", "Current speed"])
+    ds2 = ds.max()
+
+    outfilename = os.path.join(tmpdir.dirname, "max.dfs0")
+    ds2.to_dfs0(outfilename)
+    assert os.path.isfile(outfilename)
+
+    ds3 = ds.min()
+
+    outfilename = os.path.join(tmpdir.dirname, "min.dfs0")
+    ds3.to_dfs0(outfilename)
+    assert os.path.isfile(outfilename)
 
 
 def test_default_type():
