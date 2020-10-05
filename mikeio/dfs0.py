@@ -320,7 +320,7 @@ class Dfs0:
             self._start_time = start_time
 
         self._n_items = len(data)
-        self._n_time_steps = np.shape(data[0])[0]
+        self._n_timesteps = np.shape(data[0])[0]
 
         if items:
             self._items = items
@@ -347,7 +347,7 @@ class Dfs0:
             datetimes = np.array(
                 [
                     self._start_time + timedelta(seconds=(step * self._dt))
-                    for step in np.arange(self._n_time_steps)
+                    for step in np.arange(self._n_timesteps)
                 ]
             )
 

@@ -72,35 +72,6 @@ def test_write_single_item(tmpdir):
     assert newdfs.dy == 200.0
 
 
-def test_non_equidistant_calendar(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
-
-    data = []
-
-    datetimes = [
-        datetime.datetime(2012, 1, 1),
-        datetime.datetime(2012, 2, 1),
-        datetime.datetime(2012, 2, 10),
-    ]
-
-    nt = len(datetimes)
-    nx = 20
-    ny = 5
-    d = np.random.random([nt, ny, nx])
-
-    data.append(d)
-
-    dfs = Dfs2()
-
-    dfs.write(filename=filename, data=data, datetimes=datetimes)
-
-    newdfs = Dfs2(filename)
-    ds = newdfs.read()
-
-    assert not ds.is_equidistant
-
-
 def test_read():
 
     filename = r"tests/testdata/random.dfs2"
@@ -179,6 +150,15 @@ def test_repr():
     assert "Dfs2" in text
     assert "Items" in text
     assert "dx" in text
+
+
+def test_repr_empty():
+
+    dfs = Dfs2()
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
 
 
 def test_repr_time():
