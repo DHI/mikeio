@@ -27,6 +27,7 @@ from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
 from .dfsu import Dfsu, Mesh
+from .pfs import Pfs
 from .xyz import read_xyz
 
 

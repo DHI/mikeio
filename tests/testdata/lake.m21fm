@@ -1,0 +1,3304 @@
+// Created     : 2018-08-20 10:53:59
+// DLL         : C:\Program Files (x86)\DHI\2019\bin\x64\pfs2004.dll
+// Version     : 17.0.0.12230
+
+[FemEngineHD]
+   [DOMAIN]
+      Touched = 1
+      discretization = 2
+      number_of_dimensions = 2
+      number_of_meshes = 1
+      file_name = |.\lake.mesh|
+      type_of_reordering = 1
+      number_of_domains = 16
+      coordinate_type = 'UTM-32'
+      minimum_depth = -9.999999999939542
+      datum_depth = 0.0
+      vertical_mesh_type_overall = 1
+      number_of_layers = 11
+      z_sigma = 0.0
+      vertical_mesh_type = 1
+      layer_thickness = 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.0
+      sigma_c = 0.0
+      theta = 2.0
+      b = 0.0
+      number_of_layers_zlevel = 10
+      vertical_mesh_type_zlevel = 1
+      constant_layer_thickness_zlevel = 0.0
+      variable_layer_thickness_zlevel = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+      type_of_bathymetry_adjustment = 1
+      minimum_layer_thickness_zlevel = 0.0
+      type_of_mesh = 0
+      type_of_gauss = 3
+      [BOUNDARY_NAMES]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         [CODE_2]
+            Touched = 0
+            name = 'Code 2'
+         EndSect  // CODE_2
+
+      EndSect  // BOUNDARY_NAMES
+
+   EndSect  // DOMAIN
+
+   [TIME]
+      Touched = 1
+      start_time = 2004, 1, 1, 0, 0, 0
+      time_step_interval = 2.0
+      number_of_time_steps = 7200
+   EndSect  // TIME
+
+   [MODULE_SELECTION]
+      Touched = 1
+      mode_of_hydrodynamic_module = 2
+      hydrodynamic_features = 1
+      fluid_property = 1
+      mode_of_spectral_wave_module = 0
+      mode_of_transport_module = 0
+      mode_of_mud_transport_module = 0
+      mode_of_eco_lab_module = 0
+      mode_of_sand_transport_module = 0
+      mode_of_particle_tracking_module = 0
+      mode_of_oil_spill_module = 0
+      mode_of_shoreline_module = 0
+   EndSect  // MODULE_SELECTION
+
+   [HYDRODYNAMIC_MODULE]
+      mode = 2
+      [EQUATION]
+         formulation = 4
+      EndSect  // EQUATION
+
+      [TIME]
+         start_time_step = 0
+         time_step_factor = 1
+      EndSect  // TIME
+
+      [SPACE]
+         number_of_2D_mesh_geometry = 1
+         number_of_2D_mesh_velocity = 1
+         number_of_2D_mesh_elevation = 1
+         number_of_3D_mesh_geometry = 2
+         number_of_3D_mesh_velocity = 2
+         number_of_3D_mesh_pressure = 2
+      EndSect  // SPACE
+
+      [SOLUTION_TECHNIQUE]
+         Touched = 1
+         scheme_of_time_integration = 1
+         scheme_of_space_discretization_horizontal = 1
+         scheme_of_space_discretization_vertical = 1
+         method_of_space_discretization_horizontal = 0
+         CFL_critical_HD = 1.0
+         dt_min_HD = 0.01
+         dt_max_HD = 2.0
+         CFL_critical_AD = 1.0
+         dt_min_AD = 0.01
+         dt_max_AD = 2.0
+         error_level = 0
+         maximum_number_of_errors = 200
+         number_of_time_steps = 1
+         time_step_interval = 30
+         tolerance1 = 0.0001
+         tolerance2 = 0.001
+         maximum_number_of_iterations = 3000
+         minimum_number_of_iterations = 1
+         type_overall = 0
+         input_format = 1
+         file_name_overall = 'HD_convergence_overall.dfs0'
+         coordinate_type = ''
+         input_file_name = ||
+         number_of_points = 0
+         type_domain = 0
+         file_name_domain = 'HD_convergence_domain.dfsu'
+         output_frequency = 5
+      EndSect  // SOLUTION_TECHNIQUE
+
+      [DEPTH]
+         Touched = 1
+         type = 0
+         format = 2
+         file_name = ||
+         item_number = 1
+      EndSect  // DEPTH
+
+      [FLOOD_AND_DRY]
+         Touched = 1
+         type = 0
+         drying_depth = 0.005
+         mass_depth = 0.1
+      EndSect  // FLOOD_AND_DRY
+
+      [FLUID_PROPERTIES]
+         Touched = 1
+         density = 1010.0
+         viscosity_Bingham = 0.0
+         yield_stress = 0.0
+      EndSect  // FLUID_PROPERTIES
+
+      [DENSITY]
+         Touched = 1
+         type = 0
+         temperature_reference = 10.0
+         salinity_reference = 32.0
+      EndSect  // DENSITY
+
+      [EDDY_VISCOSITY]
+         Touched = 1
+         [HORIZONTAL_EDDY_VISCOSITY]
+            Touched = 1
+            type = 3
+            [CONSTANT_EDDY_FORMULATION]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.002
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // CONSTANT_EDDY_FORMULATION
+
+            [SMAGORINSKY_FORMULATION]
+               Touched = 1
+               type = 3
+               format = 0
+               constant_value = 0.28
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+               minimum_eddy_viscosity = 1.8e-06
+               maximum_eddy_viscosity = 10000000000
+            EndSect  // SMAGORINSKY_FORMULATION
+
+            [K_EPSILON_FORMULATION]
+               Touched = 0
+               minimum_eddy_viscosity = 1.8e-06
+               maximum_eddy_viscosity = 0.4
+            EndSect  // K_EPSILON_FORMULATION
+
+         EndSect  // HORIZONTAL_EDDY_VISCOSITY
+
+         [VERTICAL_EDDY_VISCOSITY]
+            Touched = 0
+            type = 4
+            [CONSTANT_EDDY_FORMULATION]
+               Touched = 0
+               type = 1
+               format = 0
+               constant_value = 0.002
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+               Ri_damping = 0
+               Ri_a = 10.0
+               Ri_b = 0.5
+               mixing_length_constants = 0.41, -0.41
+            EndSect  // CONSTANT_EDDY_FORMULATION
+
+            [LOG_LAW_FORMULATION]
+               Touched = 0
+               minimum_eddy_viscosity = 1.8e-06
+               maximum_eddy_viscosity = 10000000000
+               Ri_damping = 0
+               Ri_a = 10.0
+               Ri_b = 0.5
+               mixing_length_constants = 0.41, -0.41
+            EndSect  // LOG_LAW_FORMULATION
+
+            [K_EPSILON_FORMULATION]
+               Touched = 0
+               minimum_eddy_viscosity = 1.8e-06
+               maximum_eddy_viscosity = 10000000000
+            EndSect  // K_EPSILON_FORMULATION
+
+         EndSect  // VERTICAL_EDDY_VISCOSITY
+
+      EndSect  // EDDY_VISCOSITY
+
+      [BED_RESISTANCE]
+         Touched = 1
+         type = 4
+         [DRAG_COEFFICIENT]
+            Touched = 1
+            type = 2
+            format = 0
+            constant_value = 0.01
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // DRAG_COEFFICIENT
+
+         [CHEZY_NUMBER]
+            Touched = 1
+            type = 3
+            format = 0
+            constant_value = 32.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // CHEZY_NUMBER
+
+         [MANNING_NUMBER]
+            Touched = 1
+            type = 4
+            format = 0
+            constant_value = 32.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+            type_of_Bottom_layer = 3
+            thickness_of_Bottom_layer = 1.0
+            fraction_of_depth = 0.5
+            fraction_of_Bottom_layer = 0.5
+         EndSect  // MANNING_NUMBER
+
+         [ROUGHNESS]
+            Touched = 1
+            type = 5
+            format = 0
+            constant_value = 0.05
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+            type_of_Bottom_layer = 3
+            thickness_of_Bottom_layer = 1.0
+            fraction_of_depth = 0.5
+            fraction_of_Bottom_layer = 0.5
+         EndSect  // ROUGHNESS
+
+         [WAVE_INDUCED_ROUGHNESS]
+            Touched = 1
+            type = 7
+            format = 0
+            constant_value = 0.2
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+            type_of_wave_induced_roughness = 0
+            type_of_wave_height_correction = 1
+            wave_height_over_depth_limit = 0.85
+            update_frequency = 1
+            relative_density = 2.65
+         EndSect  // WAVE_INDUCED_ROUGHNESS
+
+      EndSect  // BED_RESISTANCE
+
+      [CORIOLIS]
+         Touched = 1
+         type = 2
+         latitude = 0.0
+      EndSect  // CORIOLIS
+
+      [WIND_FORCING]
+         type = 1
+         format = 0
+         constant_speed = 35.0
+         constant_direction = 270.0
+         file_name = ||
+         neutral_pressure = 1013.0
+         type_of_soft_start = 2
+         soft_time_interval = 7200.0
+         [WIND_FRICTION]
+            Touched = 1
+            type = 0
+            constant_friction = 0.002425
+            linear_friction_low = 0.001255
+            linear_friction_high = 0.002425
+            linear_speed_low = 7.0
+            linear_speed_high = 25.0
+         EndSect  // WIND_FRICTION
+
+      EndSect  // WIND_FORCING
+
+      [ICE]
+         Touched = 1
+         type = 0
+         format = 3
+         c_cut_off = 0.9
+         file_name = ||
+         item_number_concentration = -1
+         item_number_thickness = 2606030
+         item_name_concentration = ''
+         item_name_thickness = ''
+         [ROUGHNESS]
+            Touched = 1
+            type = 0
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // ROUGHNESS
+
+      EndSect  // ICE
+
+      [TIDAL_POTENTIAL]
+         Touched = 1
+         MzSEPfsListItemCount = 11
+         type = 0
+         format = 0
+         constituent_file_name = ||
+         number_of_constituents = 11
+         [CONSTITUENT_1]
+            Touched = 1
+            name = 'M2'
+            species = 2
+            constituent = 1
+            amplitude = 0.242334
+            earthtide = 0.6929999999999999
+            period_scaling = 3600
+            period = 12.4206012
+            nodal_number_1 = 1.0
+            nodal_number_2 = -0.037
+            nodal_number_3 = -2.1
+            arguments = 0, 0, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_1
+
+         [CONSTITUENT_2]
+            Touched = 1
+            name = 'O1'
+            species = 1
+            constituent = 2
+            amplitude = 0.100514
+            earthtide = 0.695
+            period_scaling = 3600
+            period = 25.8193417
+            nodal_number_1 = 1.009
+            nodal_number_2 = 0.187
+            nodal_number_3 = 10.8
+            arguments = -1, 0, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_2
+
+         [CONSTITUENT_3]
+            Touched = 1
+            name = 'S2'
+            species = 2
+            constituent = 2
+            amplitude = 0.112841
+            earthtide = 0.6929999999999999
+            period_scaling = 3600
+            period = 12.0
+            nodal_number_1 = 1.0
+            nodal_number_2 = 0.0
+            nodal_number_3 = 0.0
+            arguments = 2, -2, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_3
+
+         [CONSTITUENT_4]
+            Touched = 1
+            name = 'K2'
+            species = 2
+            constituent = 4
+            amplitude = 0.030704
+            earthtide = 0.6929999999999999
+            period_scaling = 3600
+            period = 11.9672348
+            nodal_number_1 = 1.024
+            nodal_number_2 = 0.286
+            nodal_number_3 = -17.7
+            arguments = 2, 0, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_4
+
+         [CONSTITUENT_5]
+            Touched = 1
+            name = 'N2'
+            species = 2
+            constituent = 3
+            amplitude = 0.046398
+            earthtide = 0.6929999999999999
+            period_scaling = 3600
+            period = 12.6583482
+            nodal_number_1 = 1.0
+            nodal_number_2 = -0.037
+            nodal_number_3 = -2.1
+            arguments = -1, 0, 1, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_5
+
+         [CONSTITUENT_6]
+            Touched = 1
+            name = 'K1'
+            species = 1
+            constituent = 1
+            amplitude = 0.141565
+            earthtide = 0.736
+            period_scaling = 3600
+            period = 23.9344696
+            nodal_number_1 = 1.006
+            nodal_number_2 = 0.115
+            nodal_number_3 = -8.9
+            arguments = 1, 0, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_6
+
+         [CONSTITUENT_7]
+            Touched = 1
+            name = 'P1'
+            species = 1
+            constituent = 3
+            amplitude = 0.046843
+            earthtide = 0.706
+            period_scaling = 3600
+            period = 24.0658902
+            nodal_number_1 = 1.0
+            nodal_number_2 = 0.0
+            nodal_number_3 = 0.0
+            arguments = 1, -2, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_7
+
+         [CONSTITUENT_8]
+            Touched = 1
+            name = 'Q1'
+            species = 1
+            constituent = 4
+            amplitude = 0.019256
+            earthtide = 0.695
+            period_scaling = 3600
+            period = 26.8683566
+            nodal_number_1 = 1.009
+            nodal_number_2 = 0.187
+            nodal_number_3 = 10.8
+            arguments = -2, 0, 1, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_8
+
+         [CONSTITUENT_9]
+            Touched = 1
+            name = 'Mf'
+            species = 0
+            constituent = 1
+            amplitude = 0.041742
+            earthtide = 0.6929999999999999
+            period_scaling = 86400
+            period = 13.660791
+            nodal_number_1 = 1.043
+            nodal_number_2 = 0.414
+            nodal_number_3 = -23.7
+            arguments = 2, 0, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_9
+
+         [CONSTITUENT_10]
+            Touched = 1
+            name = 'Mm'
+            species = 0
+            constituent = 2
+            amplitude = 0.022026
+            earthtide = 0.6929999999999999
+            period_scaling = 86400
+            period = 27.554553
+            nodal_number_1 = 1.0
+            nodal_number_2 = -0.13
+            nodal_number_3 = 0.0
+            arguments = 1, 0, -1, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_10
+
+         [CONSTITUENT_11]
+            Touched = 1
+            name = 'Ssa'
+            species = 0
+            constituent = 3
+            amplitude = 0.019446
+            earthtide = 0.6929999999999999
+            period_scaling = 86400
+            period = 182.6211
+            nodal_number_1 = 1.0
+            nodal_number_2 = 0.0
+            nodal_number_3 = 0.0
+            arguments = 0, 2, 0, 0, 0
+            phase = 0
+         EndSect  // CONSTITUENT_11
+
+      EndSect  // TIDAL_POTENTIAL
+
+      [PRECIPITATION_EVAPORATION]
+         Touched = 1
+         type_of_precipitation = 0
+         type_of_evaporation = 0
+         [PRECIPITATION]
+            Touched = 1
+            type = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // PRECIPITATION
+
+         [EVAPORATION]
+            Touched = 1
+            type = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // EVAPORATION
+
+      EndSect  // PRECIPITATION_EVAPORATION
+
+      [INFILTRATION]
+         Touched = 1
+         type = 0
+         type_groundwater_depth = 1
+         type_initial_condition = 1
+      EndSect  // INFILTRATION
+
+      [RADIATION_STRESS]
+         Touched = 1
+         type = 0
+         format = 3
+         file_name = ||
+         soft_time_interval = 0.0
+      EndSect  // RADIATION_STRESS
+
+      [SOURCES]
+         Touched = 1
+         MzSEPfsListItemCount = 0
+         number_of_sources = 0
+         output_type = 0
+         output_frequency = 1
+         output_file_name = 'Jet_data.dfs0'
+      EndSect  // SOURCES
+
+      [STRUCTURE_MODULE]
+         Structure_Version = 1, 1
+         [CROSSSECTIONS]
+            CrossSectionDataBridge = 'xns11'
+            CrossSectionFile = ||
+         EndSect  // CROSSSECTIONS
+
+         [WEIR]
+         EndSect  // WEIR
+
+         [CULVERTS]
+         EndSect  // CULVERTS
+
+      EndSect  // STRUCTURE_MODULE
+
+      [STRUCTURES]
+         [RIVER_LINKS]
+            type_of_coupling = 2
+            line_information = 2
+            output_of_link_data = 0
+            file_name_curve = 'river_curve.xyz'
+            file_name_section = 'river_section.xyz'
+         EndSect  // RIVER_LINKS
+
+         [URBAN_LINKS]
+            output_of_link_data = 0
+            file_name_curve = 'urban_curve.xyz'
+            file_name_section = 'urban_section.xyz'
+         EndSect  // URBAN_LINKS
+
+         [GATES]
+            Touched = 1
+            MzSEPfsListItemCount = 0
+            number_of_gates = 0
+         EndSect  // GATES
+
+         [DIKES]
+            Touched = 1
+            MzSEPfsListItemCount = 0
+            output_of_link_data = 0
+            file_name_section = 'line_section.xyz'
+            number_of_dikes = 0
+         EndSect  // DIKES
+
+         [PIERS]
+            Touched = 1
+            MzSEPfsListItemCount = 0
+            format = 0
+            number_of_piers = 0
+         EndSect  // PIERS
+
+         [TURBINES]
+            Touched = 1
+            MzSEPfsListItemCount = 0
+            format = 0
+            number_of_turbines = 0
+            output_type = 0
+            output_frequency = 1
+            output_file_name = 'turbine_data.dfs0'
+         EndSect  // TURBINES
+
+      EndSect  // STRUCTURES
+
+      [WAVES]
+         Touched = 1
+         type = 1
+         [WAVE_FIELD]
+            Touched = 1
+            format = 0
+            type_of_wave_height = 2
+            type_of_wave_period = 1
+            wave_height = 1.0
+            wave_period = 3.0
+            wave_direction = 180.0
+            file_name = ||
+            item_number_for_wave_height = 1
+            item_number_for_wave_period = 2
+            item_number_for_wave_direction = 3
+            item_name_for_wave_height = ''
+            item_name_for_wave_period = ''
+            item_name_for_wave_direction = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+         EndSect  // WAVE_FIELD
+
+      EndSect  // WAVES
+
+      [INITIAL_CONDITIONS]
+         Touched = 1
+         type = 0
+         surface_elevation_constant = 0.0
+         u_velocity_constant = 0.0
+         v_velocity_constant = 0.0
+         w_velocity_constant = 0.0
+      EndSect  // INITIAL_CONDITIONS
+
+      [BOUNDARY_CONDITIONS]
+         Touched = 1
+         MzSEPfsListItemCount = 1
+         internal_land_boundary_Type = 1
+         [CODE_1]
+            type = 1
+         EndSect  // CODE_1
+
+         [CODE_2]
+            identifier = ''
+            type = 6
+            type_interpolation_constrain = 0
+            type_secondary = 1
+            type_of_vertical_profile = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+            type_of_space_interpolation = 1
+            type_of_coriolis_correction = 0
+            type_of_wind_correction = 0
+            type_of_tilting = 1
+            type_of_tilting_point = 1
+            point_tilting = 1
+            type_of_radiation_stress_correction = 1
+            type_of_pressure_correction = 1
+            type_of_radiation_stress_correction = 1
+         EndSect  // CODE_2
+
+      EndSect  // BOUNDARY_CONDITIONS
+
+      [TEMPERATURE_SALINITY_MODULE]
+         temperature_mode = 0
+         salinity_mode = 0
+         [TIME]
+            start_time_step = 0
+            time_step_factor = 1
+         EndSect  // TIME
+
+         [SPACE]
+            number_of_2D_mesh_geometry = 1
+            number_of_3D_mesh_geometry = 2
+         EndSect  // SPACE
+
+         [EQUATION]
+            Touched = 0
+            minimum_temperature = 0.0
+            maximum_temperature = 10000000000
+            minimum_salinity = 0.0
+            maximum_salinity = 10000000000
+         EndSect  // EQUATION
+
+         [SOLUTION_TECHNIQUE]
+            Touched = 0
+            scheme_of_time_integration = 1
+            scheme_of_space_discretization_horizontal = 1
+            scheme_of_space_discretization_vertical = 1
+            method_of_space_discretization_horizontal = 0
+         EndSect  // SOLUTION_TECHNIQUE
+
+         [DIFFUSION]
+            [HORIZONTAL_DIFFUSION]
+               Touched = 0
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DIFFUSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DIFFUSION_COEFFICIENT
+
+            EndSect  // HORIZONTAL_DIFFUSION
+
+            [VERTICAL_DIFFUSION]
+               Touched = 0
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DIFFUSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DIFFUSION_COEFFICIENT
+
+            EndSect  // VERTICAL_DIFFUSION
+
+         EndSect  // DIFFUSION
+
+         [HEAT_EXCHANGE]
+            Touched = 0
+            type = 0
+            type_of_latent_heat = 1
+            Daltons_law_A = 0.5
+            Daltons_law_B = 0.9
+            latent_heat_critical_wind_speed = 2.0
+            type_of_sensible_heat = 1
+            sensible_heat_transfer_coefficient_heating = 0.0011
+            sensible_heat_transfer_coefficient_cooling = 0.0011
+            sensible_heat_critical_wind_speed = 2.0
+            type_of_short_wave_radiation = 1
+            Angstroms_law_A = 0.295
+            Angstroms_law_B = 0.371
+            displacement_hours = 0.0
+            standard_meridian = 0.0
+            Beers_law_beta = 0.3
+            light_extinction = 1.0
+            type_of_long_wave_radiation = 1
+            long_wave_radiation_A = 0.5600000000000001
+            long_wave_radiation_B = 0.077
+            long_wave_radiation_C = 0.1
+            long_wave_radiation_D = 0.9
+            storage = 0
+            [SHORT_WAVE_RADIATION_DATA]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // SHORT_WAVE_RADIATION_DATA
+
+            [LONG_WAVE_RADIATION_DATA]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // LONG_WAVE_RADIATION_DATA
+
+            [air_temperature]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 15.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // air_temperature
+
+            [relative_humidity]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 88.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // relative_humidity
+
+            [clearness_coefficient]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 70.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // clearness_coefficient
+
+         EndSect  // HEAT_EXCHANGE
+
+         [PRECIPITATION_EVAPORATION]
+            Touched = 0
+            type_of_precipitation = 1
+            type_of_evaporation = 1
+            [PRECIPITATION]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // PRECIPITATION
+
+            [EVAPORATION]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // EVAPORATION
+
+         EndSect  // PRECIPITATION_EVAPORATION
+
+         [INFILTRATION]
+            Touched = 1
+            type_of_infiltration_temperature = 1
+            [INFILTRATION]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // INFILTRATION
+
+         EndSect  // INFILTRATION
+
+         [SOURCES]
+            Touched = 0
+            MzSEPfsListItemCount = 0
+         EndSect  // SOURCES
+
+         [INITIAL_CONDITIONS]
+            Touched = 0
+            [TEMPERATURE]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 10.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // TEMPERATURE
+
+            [SALINITY]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 32.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // SALINITY
+
+         EndSect  // INITIAL_CONDITIONS
+
+         [BOUNDARY_CONDITIONS]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [CODE_1]
+               [TEMPERATURE]
+               EndSect  // TEMPERATURE
+
+               [SALINITY]
+               EndSect  // SALINITY
+
+            EndSect  // CODE_1
+
+            [CODE_2]
+               [TEMPERATURE]
+                  identifier = 'Temperature'
+                  type = 2
+                  type_interpolation_constrain = 0
+                  type_secondary = 1
+                  type_of_vertical_profile = 1
+                  format = 0
+                  constant_value = 10.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+                  type_of_space_interpolation = 1
+                  type_of_coriolis_correction = 0
+                  type_of_wind_correction = 0
+                  type_of_tilting = 1
+                  type_of_tilting_point = 1
+                  point_tilting = 1
+                  type_of_radiation_stress_correction = 1
+                  type_of_pressure_correction = 1
+                  type_of_radiation_stress_correction = 1
+               EndSect  // TEMPERATURE
+
+               [SALINITY]
+                  identifier = 'Salinity'
+                  type = 2
+                  type_interpolation_constrain = 0
+                  type_secondary = 1
+                  type_of_vertical_profile = 1
+                  format = 0
+                  constant_value = 32.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+                  type_of_space_interpolation = 1
+                  type_of_coriolis_correction = 0
+                  type_of_wind_correction = 0
+                  type_of_tilting = 1
+                  type_of_tilting_point = 1
+                  point_tilting = 1
+                  type_of_radiation_stress_correction = 1
+                  type_of_pressure_correction = 1
+                  type_of_radiation_stress_correction = 1
+               EndSect  // SALINITY
+
+            EndSect  // CODE_2
+
+         EndSect  // BOUNDARY_CONDITIONS
+
+      EndSect  // TEMPERATURE_SALINITY_MODULE
+
+      [TURBULENCE_MODULE]
+         mode = 0
+         [TIME]
+            start_time_step = 0
+            time_step_factor = 1
+         EndSect  // TIME
+
+         [SPACE]
+            number_of_2D_mesh_geometry = 1
+            number_of_3D_mesh_geometry = 2
+         EndSect  // SPACE
+
+         [EQUATION]
+            Touched = 0
+            c1e = 1.44
+            c2e = 1.92
+            c3e = 0.0
+            prandtl_number = 0.9
+            cmy = 0.09
+            minimum_kinetic_energy = 1e-07
+            maximum_kinetic_energy = 10000000000
+            minimum_dissipation_of_kinetic_energy = 5e-10
+            maximum_dissipation_of_kinetic_energy = 10000000000
+            surface_dissipation_parameter = 0.07000000000000001
+            Ri_damping = 1
+         EndSect  // EQUATION
+
+         [SOLUTION_TECHNIQUE]
+            Touched = 0
+            scheme_of_time_integration = 1
+            scheme_of_space_discretization_horizontal = 1
+            scheme_of_space_discretization_vertical = 1
+            method_of_space_discretization_horizontal = 0
+         EndSect  // SOLUTION_TECHNIQUE
+
+         [DIFFUSION]
+            Touched = 0
+            sigma_k_h = 1.0
+            sigma_e_h = 1.3
+            sigma_k = 1.0
+            sigma_e = 1.3
+         EndSect  // DIFFUSION
+
+         [SOURCES]
+            Touched = 1
+            MzSEPfsListItemCount = 0
+         EndSect  // SOURCES
+
+         [INITIAL_CONDITIONS]
+            Touched = 0
+            [KINETIC_ENERGY]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 1e-07
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // KINETIC_ENERGY
+
+            [DISSIPATION_OF_KINETIC_ENERGY]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 5e-10
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // DISSIPATION_OF_KINETIC_ENERGY
+
+         EndSect  // INITIAL_CONDITIONS
+
+         [BOUNDARY_CONDITIONS]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [CODE_1]
+               [KINETIC_ENERGY]
+               EndSect  // KINETIC_ENERGY
+
+               [DISSIPATION_OF_KINETIC_ENERGY]
+               EndSect  // DISSIPATION_OF_KINETIC_ENERGY
+
+            EndSect  // CODE_1
+
+            [CODE_2]
+               [KINETIC_ENERGY]
+                  identifier = 'Turbulent kinetic energy'
+                  type = 2
+                  type_interpolation_constrain = 0
+                  type_secondary = 1
+                  type_of_vertical_profile = 1
+                  format = 0
+                  constant_value = 1e-07
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+                  type_of_space_interpolation = 1
+                  type_of_coriolis_correction = 0
+                  type_of_wind_correction = 0
+                  type_of_tilting = 1
+                  type_of_tilting_point = 1
+                  point_tilting = 1
+                  type_of_radiation_stress_correction = 1
+                  type_of_pressure_correction = 1
+                  type_of_radiation_stress_correction = 1
+               EndSect  // KINETIC_ENERGY
+
+               [DISSIPATION_OF_KINETIC_ENERGY]
+                  identifier = 'Dissipation of turbulent kinetic energy'
+                  type = 2
+                  type_interpolation_constrain = 0
+                  type_secondary = 1
+                  type_of_vertical_profile = 1
+                  format = 0
+                  constant_value = 5e-10
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+                  type_of_space_interpolation = 1
+                  type_of_coriolis_correction = 0
+                  type_of_wind_correction = 0
+                  type_of_tilting = 1
+                  type_of_tilting_point = 1
+                  point_tilting = 1
+                  type_of_radiation_stress_correction = 1
+                  type_of_pressure_correction = 1
+                  type_of_radiation_stress_correction = 1
+               EndSect  // DISSIPATION_OF_KINETIC_ENERGY
+
+            EndSect  // CODE_2
+
+         EndSect  // BOUNDARY_CONDITIONS
+
+      EndSect  // TURBULENCE_MODULE
+
+      [DECOUPLING]
+         Touched = 1
+         type = 0
+         file_name_flux = ||
+         file_name_area = ||
+         file_name_volume = ||
+         specification_file = ||
+         first_time_step = 0
+         last_time_step = 7200
+         time_step_frequency = 1
+      EndSect  // DECOUPLING
+
+      [OUTPUTS]
+         Touched = 1
+         MzSEPfsListItemCount = 3
+         number_of_outputs = 3
+         [OUTPUT_1]
+            Touched = 1
+            include = 1
+            title = 'Output 1'
+            file_name = 'area.dfsu'
+            type = 1
+            format = 2
+            flood_and_dry = 2
+            coordinate_type = 'UTM-32'
+            zone = 0
+            input_file_name = ||
+            input_format = 1
+            interpolation_type = 1
+            use_end_time = 1
+            first_time_step = 0
+            last_time_step = 7200
+            time_step_frequency = 600
+            number_of_points = 1
+            [POINT_1]
+               name = 'Point 1'
+               x = 2400.0
+               y = 950.0
+               z = -9.99999999997063
+               layer = 1
+            EndSect  // POINT_1
+
+            [LINE]
+               npoints = 3
+               x_first = -100.0
+               y_first = 0.0
+               z_first = -10.00000000000172
+               x_last = 4900.0
+               y_last = 1900.0
+               z_last = -9.999999999939542
+            EndSect  // LINE
+
+            [AREA]
+               number_of_points = 4
+               [POINT_1]
+                  x = -150.0
+                  y = -19.0
+               EndSect  // POINT_1
+
+               [POINT_2]
+                  x = -150.0
+                  y = 1919.0
+               EndSect  // POINT_2
+
+               [POINT_3]
+                  x = 4950.0
+                  y = 1919.0
+               EndSect  // POINT_3
+
+               [POINT_4]
+                  x = 4950.0
+                  y = -19.0
+               EndSect  // POINT_4
+
+               layer_min = 1
+               layer_max = 11
+               orientation = 0.0
+               x_origo = -100.0
+               x_ds = 263.1578947368421
+               x_npoints = 20
+               y_origo = 0.0
+               y_ds = 263.1578947368421
+               y_npoints = 9
+               z_origo = -10.00000000000172
+               z_ds = 1.333333333333562
+               z_npoints = 10
+            EndSect  // AREA
+
+            [PARAMETERS_2D]
+               Touched = 1
+               SURFACE_ELEVATION = 1
+               STILL_WATER_DEPTH = 0
+               TOTAL_WATER_DEPTH = 0
+               U_VELOCITY = 1
+               V_VELOCITY = 1
+               P_FLUX = 0
+               Q_FLUX = 0
+               CURRENT_SPEED = 1
+               CURRENT_DIRECTION = 0
+               WIND_U_VELOCITY = 0
+               WIND_V_VELOCITY = 0
+               AIR_PRESSURE = 0
+               PRECIPITATION = 0
+               EVAPORATION = 0
+               DRAG_COEFFICIENT = 0
+               BED_SHEARSTRESS = 0
+               BED_SHEARSTRESS_X_COMPONENT = 0
+               BED_SHEARSTRESS_Y_COMPONENT = 0
+               EDDY_VISCOSITY = 0
+               CFL_NUMBER = 1
+               CONVERGENCE_ANGLE = 0
+               AREA = 0
+            EndSect  // PARAMETERS_2D
+
+            [PARAMETERS_3D]
+               Touched = 1
+               U_VELOCITY = 1
+               V_VELOCITY = 1
+               W_VELOCITY = 0
+               WS_VELOCITY = 0
+               CURRENT_SPEED = 0
+               CURRENT_DIRECTION_HORIZONTAL = 0
+               CURRENT_DIRECTION_VERTICAL = 0
+               HORIZONTAL_EDDY_VISCOSITY = 0
+               VERTICAL_EDDY_VISCOSITY = 0
+               CFL_NUMBER = 0
+               VOLUME = 0
+            EndSect  // PARAMETERS_3D
+
+            [DISCHARGE]
+               Touched = 0
+               Type = 1
+               domain = 1
+               DISCHARGE = 1
+               ACCUMULATED_DISCHARGE = 1
+               DISCHARGE_POSITIVE = 0
+               ACCUMULATED_DISCHARGE_POSITIVE = 0
+               DISCHARGE_NEGATIVE = 0
+               ACCUMULATED_DISCHARGE_NEGATIVE = 0
+               FLOW = 0
+            EndSect  // DISCHARGE
+
+            [MASSBUDGET]
+               Touched = 0
+               DISCHARGE = 1
+               ACCUMULATED_DISCHARGE = 1
+               FLOW = 1
+            EndSect  // MASSBUDGET
+
+            [INUNDATION]
+               Touched = 0
+               MAXIMUM_HEIGHT = 1
+               TIME_MAXIMUM_HEIGHT = 1
+               MAXIMUM_CURRENT_SPEED = 1
+               TIME_MAXIMUM_CURRENT_SPEED = 1
+               DURATION_ABOVE_THRESHOLD = 1
+               threshold_height = 0.0
+            EndSect  // INUNDATION
+
+         EndSect  // OUTPUT_1
+
+         [OUTPUT_2]
+            Touched = 1
+            include = 1
+            title = 'Output 2'
+            file_name = 'ts.dfs0'
+            type = 1
+            format = 0
+            flood_and_dry = 2
+            coordinate_type = 'UTM-32'
+            zone = 0
+            input_file_name = ||
+            input_format = 1
+            interpolation_type = 1
+            use_end_time = 1
+            first_time_step = 0
+            last_time_step = 7200
+            time_step_frequency = 1
+            number_of_points = 1
+            [POINT_1]
+               name = 'Point 1'
+               x = 4900.0
+               y = 950.0
+               z = -9.99999999997063
+               layer = 1
+            EndSect  // POINT_1
+
+            [LINE]
+               npoints = 3
+               x_first = -100.0
+               y_first = 0.0
+               z_first = -10.00000000000172
+               x_last = 4900.0
+               y_last = 1900.0
+               z_last = -9.999999999939542
+            EndSect  // LINE
+
+            [AREA]
+               number_of_points = 4
+               [POINT_1]
+                  x = -150.0
+                  y = -19.0
+               EndSect  // POINT_1
+
+               [POINT_2]
+                  x = -150.0
+                  y = 1919.0
+               EndSect  // POINT_2
+
+               [POINT_3]
+                  x = 4950.0
+                  y = 1919.0
+               EndSect  // POINT_3
+
+               [POINT_4]
+                  x = 4950.0
+                  y = -19.0
+               EndSect  // POINT_4
+
+               layer_min = 1
+               layer_max = 11
+               orientation = 0.0
+               x_origo = -100.0
+               x_ds = 263.1578947368421
+               x_npoints = 20
+               y_origo = 0.0
+               y_ds = 263.1578947368421
+               y_npoints = 9
+               z_origo = -10.00000000000172
+               z_ds = 1.333333333333562
+               z_npoints = 10
+            EndSect  // AREA
+
+            [PARAMETERS_2D]
+               Touched = 1
+               SURFACE_ELEVATION = 1
+               STILL_WATER_DEPTH = 0
+               TOTAL_WATER_DEPTH = 0
+               U_VELOCITY = 0
+               V_VELOCITY = 0
+               P_FLUX = 0
+               Q_FLUX = 0
+               CURRENT_SPEED = 0
+               CURRENT_DIRECTION = 0
+               WIND_U_VELOCITY = 0
+               WIND_V_VELOCITY = 0
+               AIR_PRESSURE = 0
+               PRECIPITATION = 0
+               EVAPORATION = 0
+               DRAG_COEFFICIENT = 0
+               BED_SHEARSTRESS = 0
+               BED_SHEARSTRESS_X_COMPONENT = 0
+               BED_SHEARSTRESS_Y_COMPONENT = 0
+               EDDY_VISCOSITY = 0
+               CFL_NUMBER = 0
+               CONVERGENCE_ANGLE = 0
+               AREA = 0
+            EndSect  // PARAMETERS_2D
+
+            [PARAMETERS_3D]
+               Touched = 1
+               U_VELOCITY = 1
+               V_VELOCITY = 1
+               W_VELOCITY = 0
+               WS_VELOCITY = 0
+               CURRENT_SPEED = 0
+               CURRENT_DIRECTION_HORIZONTAL = 0
+               CURRENT_DIRECTION_VERTICAL = 0
+               HORIZONTAL_EDDY_VISCOSITY = 0
+               VERTICAL_EDDY_VISCOSITY = 0
+               CFL_NUMBER = 0
+               VOLUME = 0
+            EndSect  // PARAMETERS_3D
+
+            [DISCHARGE]
+               Touched = 0
+               Type = 1
+               domain = 1
+               DISCHARGE = 1
+               ACCUMULATED_DISCHARGE = 1
+               DISCHARGE_POSITIVE = 0
+               ACCUMULATED_DISCHARGE_POSITIVE = 0
+               DISCHARGE_NEGATIVE = 0
+               ACCUMULATED_DISCHARGE_NEGATIVE = 0
+               FLOW = 0
+            EndSect  // DISCHARGE
+
+            [MASSBUDGET]
+               Touched = 0
+               DISCHARGE = 1
+               ACCUMULATED_DISCHARGE = 1
+               FLOW = 1
+            EndSect  // MASSBUDGET
+
+            [INUNDATION]
+               Touched = 0
+               MAXIMUM_HEIGHT = 1
+               TIME_MAXIMUM_HEIGHT = 1
+               MAXIMUM_CURRENT_SPEED = 1
+               TIME_MAXIMUM_CURRENT_SPEED = 1
+               DURATION_ABOVE_THRESHOLD = 1
+               threshold_height = 0.0
+            EndSect  // INUNDATION
+
+         EndSect  // OUTPUT_2
+
+         [OUTPUT_3]
+            Touched = 1
+            include = 0
+            title = 'Output 3'
+            file_name = 'ts_2.dfs0'
+            type = 1
+            format = 0
+            flood_and_dry = 2
+            coordinate_type = 'UTM-32'
+            zone = 0
+            input_file_name = ||
+            input_format = 1
+            interpolation_type = 1
+            use_end_time = 1
+            first_time_step = 0
+            last_time_step = 7200
+            time_step_frequency = 2
+            number_of_points = 1
+            [POINT_1]
+               name = 'Point 2'
+               x = 4940.0
+               y = 952.0
+               z = -2
+               layer = 1
+            EndSect  // POINT_1
+
+            [LINE]
+               npoints = 3
+               x_first = -100.0
+               y_first = 0.0
+               z_first = -10.00000000000172
+               x_last = 4900.0
+               y_last = 1900.0
+               z_last = -9.999999999939542
+            EndSect  // LINE
+
+            [AREA]
+               number_of_points = 4
+               [POINT_1]
+                  x = -150.0
+                  y = -19.0
+               EndSect  // POINT_1
+
+               [POINT_2]
+                  x = -150.0
+                  y = 1919.0
+               EndSect  // POINT_2
+
+               [POINT_3]
+                  x = 4950.0
+                  y = 1919.0
+               EndSect  // POINT_3
+
+               [POINT_4]
+                  x = 4950.0
+                  y = -19.0
+               EndSect  // POINT_4
+
+               layer_min = 1
+               layer_max = 11
+               orientation = 0.0
+               x_origo = -100.0
+               x_ds = 263.1578947368421
+               x_npoints = 20
+               y_origo = 0.0
+               y_ds = 263.1578947368421
+               y_npoints = 9
+               z_origo = -10.00000000000172
+               z_ds = 1.333333333333562
+               z_npoints = 10
+            EndSect  // AREA
+
+            [PARAMETERS_2D]
+               Touched = 1
+               SURFACE_ELEVATION = 1
+               STILL_WATER_DEPTH = 0
+               TOTAL_WATER_DEPTH = 0
+               U_VELOCITY = 0
+               V_VELOCITY = 0
+               P_FLUX = 0
+               Q_FLUX = 0
+               CURRENT_SPEED = 0
+               CURRENT_DIRECTION = 0
+               WIND_U_VELOCITY = 0
+               WIND_V_VELOCITY = 0
+               AIR_PRESSURE = 0
+               PRECIPITATION = 0
+               EVAPORATION = 0
+               DRAG_COEFFICIENT = 0
+               BED_SHEARSTRESS = 0
+               BED_SHEARSTRESS_X_COMPONENT = 0
+               BED_SHEARSTRESS_Y_COMPONENT = 0
+               EDDY_VISCOSITY = 0
+               CFL_NUMBER = 0
+               CONVERGENCE_ANGLE = 0
+               AREA = 0
+            EndSect  // PARAMETERS_2D
+
+            [PARAMETERS_3D]
+               Touched = 1
+               U_VELOCITY = 1
+               V_VELOCITY = 1
+               W_VELOCITY = 0
+               WS_VELOCITY = 0
+               CURRENT_SPEED = 0
+               CURRENT_DIRECTION_HORIZONTAL = 0
+               CURRENT_DIRECTION_VERTICAL = 0
+               HORIZONTAL_EDDY_VISCOSITY = 0
+               VERTICAL_EDDY_VISCOSITY = 0
+               CFL_NUMBER = 0
+               VOLUME = 0
+            EndSect  // PARAMETERS_3D
+
+            [DISCHARGE]
+               Touched = 0
+               Type = 1
+               domain = 1
+               DISCHARGE = 1
+               ACCUMULATED_DISCHARGE = 1
+               DISCHARGE_POSITIVE = 0
+               ACCUMULATED_DISCHARGE_POSITIVE = 0
+               DISCHARGE_NEGATIVE = 0
+               ACCUMULATED_DISCHARGE_NEGATIVE = 0
+               FLOW = 0
+            EndSect  // DISCHARGE
+
+            [MASSBUDGET]
+               Touched = 0
+               DISCHARGE = 1
+               ACCUMULATED_DISCHARGE = 1
+               FLOW = 1
+            EndSect  // MASSBUDGET
+
+            [INUNDATION]
+               Touched = 0
+               MAXIMUM_HEIGHT = 1
+               TIME_MAXIMUM_HEIGHT = 1
+               MAXIMUM_CURRENT_SPEED = 1
+               TIME_MAXIMUM_CURRENT_SPEED = 1
+               DURATION_ABOVE_THRESHOLD = 1
+               threshold_height = 0.0
+            EndSect  // INUNDATION
+
+         EndSect  // OUTPUT_3
+
+      EndSect  // OUTPUTS
+
+   EndSect  // HYDRODYNAMIC_MODULE
+
+   [TRANSPORT_MODULE]
+      mode = 0
+      [EQUATION]
+         formulation = 4
+      EndSect  // EQUATION
+
+      [TIME]
+         start_time_step = 0
+         time_step_factor = 1
+      EndSect  // TIME
+
+      [SPACE]
+         number_of_2D_mesh_geometry = 1
+         number_of_2D_mesh_velocity = 1
+         number_of_2D_mesh_concentration = 1
+         number_of_3D_mesh_geometry = 2
+         number_of_3D_mesh_velocity = 2
+         number_of_3D_mesh_concentration = 2
+      EndSect  // SPACE
+
+      [COMPONENTS]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         number_of_components = 1
+         [COMPONENT_1]
+            Touched = 0
+            name = 'Component 1'
+            type = 2
+            dimension = 3
+            description = 'Concentration - component 1'
+            EUM_type = 100201
+            EUM_unit = 99000
+            unit = ''
+            minimum_value = 0.0
+            maximum_value = 10000000000
+         EndSect  // COMPONENT_1
+
+      EndSect  // COMPONENTS
+
+      [SOLUTION_TECHNIQUE]
+         Touched = 0
+         scheme_of_time_integration = 1
+         scheme_of_space_discretization_horizontal = 1
+         scheme_of_space_discretization_vertical = 1
+         method_of_space_discretization_horizontal = 0
+      EndSect  // SOLUTION_TECHNIQUE
+
+      [HYDRODYNAMIC_CONDITIONS]
+         Touched = 0
+         type = 0
+         format = 0
+         surface_elevation_constant = 0.0
+         u_velocity_constant = 0.0
+         v_velocity_constant = 0.0
+         w_velocity_constant = 0.0
+         file_name = ||
+      EndSect  // HYDRODYNAMIC_CONDITIONS
+
+      [DISPERSION]
+         [HORIZONTAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [COMPONENT_1]
+               Touched = 0
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // COMPONENT_1
+
+         EndSect  // HORIZONTAL_DISPERSION
+
+         [VERTICAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [COMPONENT_1]
+               Touched = 0
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // COMPONENT_1
+
+         EndSect  // VERTICAL_DISPERSION
+
+      EndSect  // DISPERSION
+
+      [DECAY]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         [COMPONENT_1]
+            Touched = 0
+            type = 0
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // COMPONENT_1
+
+      EndSect  // DECAY
+
+      [PRECIPITATION_EVAPORATION]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         [COMPONENT_1]
+            Touched = 0
+            type_of_precipitation = 1
+            type_of_evaporation = 1
+            [PRECIPITATION]
+               Touched = 0
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // PRECIPITATION
+
+            [EVAPORATION]
+               Touched = 0
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // EVAPORATION
+
+         EndSect  // COMPONENT_1
+
+      EndSect  // PRECIPITATION_EVAPORATION
+
+      [INFILTRATION]
+         Touched = 1
+         MzSEPfsListItemCount = 1
+         [COMPONENT_1]
+            Touched = 1
+            type_of_infiltration = 1
+            [Infiltration]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // Infiltration
+
+         EndSect  // COMPONENT_1
+
+      EndSect  // INFILTRATION
+
+      [SOURCES]
+         Touched = 0
+         MzSEPfsListItemCount = 0
+      EndSect  // SOURCES
+
+      [INITIAL_CONDITIONS]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         [COMPONENT_1]
+            Touched = 0
+            type = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // COMPONENT_1
+
+      EndSect  // INITIAL_CONDITIONS
+
+      [BOUNDARY_CONDITIONS]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         [CODE_1]
+         EndSect  // CODE_1
+
+         [CODE_2]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [COMPONENT_1]
+               Touched = 0
+               type = 2
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+               type_of_space_interpolation = 1
+            EndSect  // COMPONENT_1
+
+         EndSect  // CODE_2
+
+      EndSect  // BOUNDARY_CONDITIONS
+
+      [OUTPUTS]
+         Touched = 0
+         MzSEPfsListItemCount = 0
+         number_of_outputs = 0
+      EndSect  // OUTPUTS
+
+   EndSect  // TRANSPORT_MODULE
+
+   [ECOLAB_MODULE]
+      mode = 0
+      [EQUATION]
+         formulation = 4
+      EndSect  // EQUATION
+
+      [TIME]
+         start_time_step = 0
+         time_step_factor = 1
+      EndSect  // TIME
+
+      [SPACE]
+         number_of_2D_mesh_geometry = 1
+         number_of_2D_mesh_velocity = 1
+         number_of_2D_mesh_concentration = 1
+         number_of_3D_mesh_geometry = 2
+         number_of_3D_mesh_velocity = 2
+         number_of_3D_mesh_concentration = 2
+      EndSect  // SPACE
+
+      [MODEL_DEFINITION]
+         Touched = 0
+         model_definition_file = ||
+         integration_method = 1
+         update_frequency = 1
+         type_of_processes = 1
+      EndSect  // MODEL_DEFINITION
+
+      [DISPERSION]
+         [HORIZONTAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 0
+         EndSect  // HORIZONTAL_DISPERSION
+
+         [VERTICAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 0
+         EndSect  // VERTICAL_DISPERSION
+
+      EndSect  // DISPERSION
+
+   EndSect  // ECOLAB_MODULE
+
+   [MUD_TRANSPORT_MODULE]
+      mode = 0
+      [EQUATION]
+         formulation = 4
+      EndSect  // EQUATION
+
+      [TIME]
+         start_time_step = 0
+         time_step_factor = 1
+      EndSect  // TIME
+
+      [SPACE]
+         number_of_2D_mesh_geometry = 1
+         number_of_2D_mesh_velocity = 1
+         number_of_2D_mesh_concentration = 1
+         number_of_3D_mesh_geometry = 2
+         number_of_3D_mesh_velocity = 2
+         number_of_3D_mesh_concentration = 2
+      EndSect  // SPACE
+
+      [MODEL_DEFINITION]
+         Touched = 0
+         number_of_fractions = 1
+         number_of_layers = 1
+      EndSect  // MODEL_DEFINITION
+
+      [SOLUTION_TECHNIQUE]
+         Touched = 0
+         scheme_of_time_integration = 1
+         scheme_of_space_discretization_horizontal = 1
+         scheme_of_space_discretization_vertical = 1
+         method_of_space_discretization_horizontal = 0
+         integration_method = 1
+         update_frequency = 1
+      EndSect  // SOLUTION_TECHNIQUE
+
+      [WATER_COLUMN]
+         [SAND_FRACTIONS]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            sand_fraction_description = 0
+            [FRACTION_1]
+               Touched = 0
+               include_sand = true
+               mean_settling_velocity = 0.001
+            EndSect  // FRACTION_1
+
+         EndSect  // SAND_FRACTIONS
+
+         [SETTLING_VELOCITY]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            flocculation_description = 1
+            hindered_settling_description = 0
+            rho_sediment = 2650.0
+            cfloc = 0.01
+            cgel = 50.0
+            chinder = 10.0
+            c1_salt = 0.5
+            c2_salt = -0.33
+            [FRACTION_1]
+               Touched = 0
+               gamma = 1.0
+               wsn = 1.0
+               [CONSTANT_SETTLING_VELOCITY]
+                  Touched = 0
+                  type = 1
+                  format = 0
+                  constant_value = 0.0005
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+               EndSect  // CONSTANT_SETTLING_VELOCITY
+
+               [SETTLING_VELOCITY_COEFFICIENT]
+                  Touched = 0
+                  type = 1
+                  format = 0
+                  constant_value = 5.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+               EndSect  // SETTLING_VELOCITY_COEFFICIENT
+
+            EndSect  // FRACTION_1
+
+         EndSect  // SETTLING_VELOCITY
+
+         [DEPOSITION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            concentration_profile = 1
+            centroid_height = 0.3
+            [FRACTION_1]
+               Touched = 0
+               [CRITICAL_SHEARSTRESS_FOR_DEPOSITION]
+                  Touched = 0
+                  type = 1
+                  format = 0
+                  constant_value = 0.07000000000000001
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+               EndSect  // CRITICAL_SHEARSTRESS_FOR_DEPOSITION
+
+            EndSect  // FRACTION_1
+
+         EndSect  // DEPOSITION
+
+         [DENSITY_AND_VISCOSITY]
+            Touched = 0
+            include_density_feedback_on_HD = false
+            density_of_sediment = 2650.0
+            base_in_viscosity_formula = 1.0
+            concentration_in_viscosity_formula = 1.0
+         EndSect  // DENSITY_AND_VISCOSITY
+
+      EndSect  // WATER_COLUMN
+
+      [BED]
+         [EROSION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            max_concentration_due_to_erosion = 50.0
+            [LAYER_1]
+               Touched = 0
+               description = 1
+               [EROSION_COEFFICIENT]
+                  Touched = 0
+                  type = 1
+                  format = 0
+                  constant_value = 5e-05
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+               EndSect  // EROSION_COEFFICIENT
+
+               [CRITICAL_SHEARSTRESS_FOR_EROSION]
+                  Touched = 0
+                  type = 1
+                  format = 0
+                  constant_value = 0.1
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+               EndSect  // CRITICAL_SHEARSTRESS_FOR_EROSION
+
+               [POWER_OF_EROSION]
+                  Touched = 0
+                  type = 1
+                  format = 0
+                  constant_value = 8.300000000000001
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+               EndSect  // POWER_OF_EROSION
+
+            EndSect  // LAYER_1
+
+         EndSect  // EROSION
+
+         [BED_DENSITY]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [LAYER_1]
+               Touched = 0
+               type = 1
+               format = 0
+               constant_value = 180.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // LAYER_1
+
+         EndSect  // BED_DENSITY
+
+         [ROUGHNESS]
+            Touched = 0
+            type = 0
+            format = 0
+            constant_value = 0.1
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // ROUGHNESS
+
+         [TRANSITION]
+            Touched = 0
+            MzSEPfsListItemCount = 0
+            include_transition = false
+         EndSect  // TRANSITION
+
+      EndSect  // BED
+
+      [FORCINGS]
+         [WAVES]
+            Touched = 0
+            minimum_waterdepth_for_including_waves = 0
+            include_liquefaction = false
+            liquefaction_factor = 1.0
+            shearstress_formulation = 0
+            type = 1
+            [WAVE_FIELD]
+               Touched = 0
+               format = 0
+               wave_height = 1.0
+               wave_period = 3.0
+               wave_direction = 180.0
+               file_name = ||
+               item_number_for_wave_height = 1
+               item_number_for_wave_period = 2
+               item_number_for_wave_direction = 3
+               item_name_for_wave_height = ''
+               item_name_for_wave_period = ''
+               item_name_for_wave_direction = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+            EndSect  // WAVE_FIELD
+
+            [WAVE_DATABASE]
+               Touched = 0
+               MzSEPfsListItemCount = 1
+               [Data_Base_Item_1_1_1]
+                  file_name = ||
+                  item_number_for_wave_height = 1
+                  item_number_for_wave_period = 2
+                  item_number_for_wave_direction = 3
+               EndSect  // Data_Base_Item_1_1_1
+
+               [WIND_SPEED]
+                  Touched = 0
+                  starting_value_of_wind_speed = 5
+                  increment_value_of_wind_speed = 5
+                  number_of_wind_speeds = 1
+               EndSect  // WIND_SPEED
+
+               [WIND_DIRECTION]
+                  Touched = 0
+                  starting_value_of_wind_direction = 90
+                  increment_value_of_wind_direction = 90
+                  number_of_wind_directions = 1
+               EndSect  // WIND_DIRECTION
+
+               [WATER_LEVEL]
+                  Touched = 0
+                  starting_value_of_water_level = 0
+                  increment_value_of_water_level = 1
+                  number_of_water_levels = 1
+               EndSect  // WATER_LEVEL
+
+            EndSect  // WAVE_DATABASE
+
+         EndSect  // WAVES
+
+      EndSect  // FORCINGS
+
+      [DREDGING]
+         Touched = 1
+         MzSEPfsListItemCount = 0
+         number_of_dredgers = 0
+         update_bed = true
+      EndSect  // DREDGING
+
+      [DISPERSION]
+         [HORIZONTAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [SSC_FRACTION_1]
+               Touched = 0
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // SSC_FRACTION_1
+
+         EndSect  // HORIZONTAL_DISPERSION
+
+         [VERTICAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [SSC_FRACTION_1]
+               Touched = 0
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // SSC_FRACTION_1
+
+         EndSect  // VERTICAL_DISPERSION
+
+      EndSect  // DISPERSION
+
+      [SOURCES]
+         Touched = 0
+         MzSEPfsListItemCount = 0
+      EndSect  // SOURCES
+
+      [INITIAL_CONDITIONS]
+         [SSC_FRACTION_1]
+            Touched = 0
+            type = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // SSC_FRACTION_1
+
+         [BED_THICKNESS_LAYER_1]
+            Touched = 0
+            type = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // BED_THICKNESS_LAYER_1
+
+         [BED_DISTRIBUTION_LAYER_1]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            format = 0
+            [BED_DISTRIBUTION_FRACTION_1]
+               Touched = 0
+               constant_value = 100
+               file_name = ||
+               item_number = 1
+            EndSect  // BED_DISTRIBUTION_FRACTION_1
+
+         EndSect  // BED_DISTRIBUTION_LAYER_1
+
+      EndSect  // INITIAL_CONDITIONS
+
+      [BOUNDARY_CONDITIONS]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         [CODE_1]
+         EndSect  // CODE_1
+
+         [CODE_2]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [SSC_FRACTION_1]
+               Touched = 0
+               type = 2
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+               type_of_space_interpolation = 1
+            EndSect  // SSC_FRACTION_1
+
+         EndSect  // CODE_2
+
+      EndSect  // BOUNDARY_CONDITIONS
+
+      [MORPHOLOGY]
+         Touched = 0
+         include_morphological_update = false
+         include_speedup = false
+         speedup_factor = 1.0
+      EndSect  // MORPHOLOGY
+
+      [OUTPUTS]
+         Touched = 0
+         MzSEPfsListItemCount = 0
+         number_of_outputs = 0
+      EndSect  // OUTPUTS
+
+   EndSect  // MUD_TRANSPORT_MODULE
+
+   [SAND_TRANSPORT_MODULE]
+      mode = 0
+      [EQUATION]
+         Touched = 0
+         formulation = 4
+      EndSect  // EQUATION
+
+      [SPACE]
+         Touched = 0
+         number_of_2D_mesh_geometry = 1
+         number_of_2D_mesh_velocity = 1
+         number_of_2D_mesh_concentration = 1
+         number_of_3D_mesh_geometry = 2
+         number_of_3D_mesh_velocity = 2
+         number_of_3D_mesh_concentration = 2
+      EndSect  // SPACE
+
+      [MODEL_DEFINITION]
+         Touched = 0
+         model = 1
+         transport_description = 1
+         helical_flow_description = 0
+         formulation_forcing = 1
+         number_of_fractions = 1
+         number_of_layers = 0
+         equilibrium_layer_thickness = 0.0005
+         data_file = ||
+         [FRACTION_1]
+            Touched = 0
+            bed_load_formula = 1
+            bed_load_factor = 1.0
+            suspended_load_formula = 1
+            suspended_load_factor = 1.0
+            distribute = 0
+            minimum_value = 0.0
+            maximum_value = 10000.0
+         EndSect  // FRACTION_1
+
+      EndSect  // MODEL_DEFINITION
+
+      [TIME]
+         Touched = 0
+         start_time_step = 0
+         time_step_factor = 1
+         time_step_factor_AD = 1
+      EndSect  // TIME
+
+      [SOLUTION_TECHNIQUE]
+         Touched = 0
+         scheme_of_time_integration = 1
+         scheme_of_space_discretization_horizontal = 1
+         scheme_of_space_discretization_vertical = 1
+         method_of_space_discretization_horizontal = 0
+         number_of_iterations = 1
+         time_step = 30.0
+      EndSect  // SOLUTION_TECHNIQUE
+
+      [SEDIMENT_PROPERTIES]
+         Touched = 0
+         porosity = 0.4
+         [SEDIMENT_DATA]
+            Touched = 1
+            format = 0
+            grain_diameter = 0.2
+            grading_coefficient = 1.1
+            file_name = ||
+            item_number_for_grain_diameter = 1
+            item_number_for_grading_coefficient = 2
+            item_name_for_grain_diameter = ''
+            item_name_for_grading_coefficient = ''
+            relative_density = 2.65
+         EndSect  // SEDIMENT_DATA
+
+      EndSect  // SEDIMENT_PROPERTIES
+
+      [BED_RESISTANCE]
+         Touched = 0
+         type = 2
+         [CHEZY_NUMBER]
+            Touched = 0
+            type = 1
+            format = 0
+            constant_value = 32.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // CHEZY_NUMBER
+
+         [MANNING_NUMBER]
+            Touched = 0
+            type = 1
+            format = 0
+            constant_value = 32.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // MANNING_NUMBER
+
+         [ALLUVIAL_RESISTANCE]
+            Touched = 0
+            resistance_power = 0.0
+            minimum_resistance = 5.0
+            maximum_resistance = 100.0
+            type = 1
+            format = 0
+            constant_value = 32.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // ALLUVIAL_RESISTANCE
+
+      EndSect  // BED_RESISTANCE
+
+      [FORCINGS]
+         [WAVES]
+            Touched = 0
+            minimum_waterdepth_for_including_waves = 0
+            include_liquefaction = false
+            liquefaction_factor = 1.0
+            shearstress_formulation = 0
+            type = 1
+            [WAVE_FIELD]
+               Touched = 0
+               format = 0
+               type_of_wave_height = 2
+               type_of_wave_period = 1
+               wave_height = 1.0
+               wave_period = 3.0
+               wave_direction = 180.0
+               file_name = ||
+               item_number_for_wave_height = 1
+               item_number_for_wave_period = 2
+               item_number_for_wave_direction = 3
+               item_name_for_wave_height = ''
+               item_name_for_wave_period = ''
+               item_name_for_wave_direction = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+            EndSect  // WAVE_FIELD
+
+            [WAVE_DATABASE]
+               Touched = 0
+               MzSEPfsListItemCount = 1
+               [Data_Base_Item_1_1_1]
+                  file_name = ||
+                  item_number_for_wave_height = 1
+                  item_number_for_wave_period = 2
+                  item_number_for_wave_direction = 3
+               EndSect  // Data_Base_Item_1_1_1
+
+               [WIND_SPEED]
+                  Touched = 0
+                  starting_value_of_wind_speed = 5
+                  increment_value_of_wind_speed = 5
+                  number_of_wind_speeds = 1
+               EndSect  // WIND_SPEED
+
+               [WIND_DIRECTION]
+                  Touched = 0
+                  starting_value_of_wind_direction = 90
+                  increment_value_of_wind_direction = 90
+                  number_of_wind_directions = 1
+               EndSect  // WIND_DIRECTION
+
+               [WATER_LEVEL]
+                  Touched = 0
+                  starting_value_of_water_level = 0
+                  increment_value_of_water_level = 1
+                  number_of_water_levels = 1
+               EndSect  // WATER_LEVEL
+
+            EndSect  // WAVE_DATABASE
+
+         EndSect  // WAVES
+
+         [FLOW]
+            Touched = 0
+            type = 1
+            minimum_water_depth = 0.01
+            [FLOW_FIELD]
+               Touched = 0
+               format = 3
+               file_name = ||
+               item_number_for_s = 1
+               item_number_for_u = 2
+               item_number_for_v = 3
+               item_name_for_s = ''
+               item_name_for_u = ''
+               item_name_for_v = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+            EndSect  // FLOW_FIELD
+
+         EndSect  // FLOW
+
+      EndSect  // FORCINGS
+
+      [DISPERSION]
+         [HORIZONTAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [SSC_FRACTION_1]
+               Touched = 0
+               type = 2
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // SSC_FRACTION_1
+
+         EndSect  // HORIZONTAL_DISPERSION
+
+         [VERTICAL_DISPERSION]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [SSC_FRACTION_1]
+               Touched = 0
+               type = 2
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // SSC_FRACTION_1
+
+         EndSect  // VERTICAL_DISPERSION
+
+      EndSect  // DISPERSION
+
+      [SOURCES]
+         Touched = 0
+         MzSEPfsListItemCount = 0
+      EndSect  // SOURCES
+
+      [INITIAL_CONDITIONS]
+         [SSC_FRACTION_1]
+            Touched = 0
+            type = 2
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // SSC_FRACTION_1
+
+         [BED_THICKNESS_LAYER_1]
+            Touched = 0
+            type = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // BED_THICKNESS_LAYER_1
+
+      EndSect  // INITIAL_CONDITIONS
+
+      [BOUNDARY_CONDITIONS]
+         Touched = 0
+         MzSEPfsListItemCount = 1
+         [CODE_1]
+         EndSect  // CODE_1
+
+         [CODE_2]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [SSC_FRACTION_1]
+               Touched = 0
+               type = 4
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+               type_of_space_interpolation = 1
+            EndSect  // SSC_FRACTION_1
+
+         EndSect  // CODE_2
+
+      EndSect  // BOUNDARY_CONDITIONS
+
+      [MORPHOLOGY]
+         [MODEL_DEFINITION]
+            Touched = 0
+            method = 1
+            max_bed_level_change = 1.0
+            include_morphology_update = 1
+            [SPEEDUP_FACTOR]
+               format = 0
+               constant_value = 1.0
+               file_name = ||
+               item_number = 1
+            EndSect  // SPEEDUP_FACTOR
+
+         EndSect  // MODEL_DEFINITION
+
+         [TIME]
+            Touched = 0
+            start_time_step = 0
+         EndSect  // TIME
+
+         [BANK_EROSION]
+            Touched = 1
+            type = 0
+            [ANGLE_OF_REPOSE]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 30.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+            EndSect  // ANGLE_OF_REPOSE
+
+         EndSect  // BANK_EROSION
+
+         [BOUNDARY_CONDITIONS]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [CODE_1]
+            EndSect  // CODE_1
+
+            [CODE_2]
+               Touched = 0
+               type = 2
+            EndSect  // CODE_2
+
+         EndSect  // BOUNDARY_CONDITIONS
+
+         [ONE_LINE_MODEL]
+            [BOUNDARY_CONDITIONS]
+               type_of_boundary_conditions = 1
+            EndSect  // BOUNDARY_CONDITIONS
+
+            [FILTER]
+               n = 0
+               gamma = 0
+               order = 0
+            EndSect  // FILTER
+
+            [BLEND_FACTOR]
+               type = 0
+               blend_type = 0
+               file_name = ||
+               item_number = 1
+            EndSect  // BLEND_FACTOR
+
+            [STRUCTURES]
+               [GROINS]
+                  number_of_groins = 0
+               EndSect  // GROINS
+
+            EndSect  // STRUCTURES
+
+            [SOLUTION_TECHNIQUE]
+               Touched = 1
+               tolerance = 0.001
+               maximum_number_of_iterations = 100
+               relaxation_factor = 0.5
+               include_offshore_transport = 0
+               type_of_print = 1
+               method = 1
+               type = 1
+               distance_method = 1
+               minimum_active_area = 1000
+               type_of_volume_limit = 1
+            EndSect  // SOLUTION_TECHNIQUE
+
+            [BASELINE]
+               Touched = 1
+               MzSEPfsListItemCount = 0
+               input_format = 2
+               input_file_name = ||
+               coordinate_type = ''
+            EndSect  // BASELINE
+
+            [COASTLINE]
+               Touched = 1
+               MzSEPfsListItemCount = 0
+               line_type = 1
+               input_format = 2
+               input_file_name = ||
+               coordinate_type = ''
+               file_name = ||
+               item_x = 1
+               item_y = 2
+            EndSect  // COASTLINE
+
+            [ELEMENT_2_EDGE_MAP]
+               Touched = 1
+               file_name = ||
+               item_number = 1
+            EndSect  // ELEMENT_2_EDGE_MAP
+
+            [PROFILE]
+               Touched = 1
+               profile_type = 1
+               profile_update_type = 1
+               [BASIS_PROFILE]
+                  input_format = 2
+                  input_file_name = ||
+                  file_name = ||
+                  item_distance = 1
+                  item_bedlevel = 2
+               EndSect  // BASIS_PROFILE
+
+               [CLOSURE_DEPTH]
+                  type = 1
+                  format = 0
+                  constant_closure_depth = 5
+                  file_name = |closuredepth.dfs1|
+                  item_number = 1
+               EndSect  // CLOSURE_DEPTH
+
+               [DUNE_HEIGHT]
+                  type = 1
+                  format = 0
+                  constant_dune_height = 0
+                  file_name = 'duneheight.dfs1'
+                  item_number = 1
+               EndSect  // DUNE_HEIGHT
+
+            EndSect  // PROFILE
+
+            [INITIAL_CONDITIONS]
+               Touched = 1
+               type = 0
+               file_name = ||
+            EndSect  // INITIAL_CONDITIONS
+
+            [DUNE_EROSION]
+               Touched = 1
+               dune_erosion_type = 0
+               line_type = 1
+               input_format = 2
+               input_file_name = ||
+               coordinate_type = ''
+               dune_erosion_slope = 0.1
+               dune_height = 2.5
+               dune_max_slope = 0.2
+               dune_off_shore_depth = 0.5
+               dune_gamma = 0.9
+               dune_cs = 0.002
+               dune_max_iter = 100
+               dune_active_area_min = 0.01
+               dune_tol = 1e-07
+               dune_repose_angle = 80.0
+               dune_relax = 0.5
+            EndSect  // DUNE_EROSION
+
+         EndSect  // ONE_LINE_MODEL
+
+         [BED_LEVEL_SOURCES]
+            Touched = 1
+            number_of_sources = 0
+         EndSect  // BED_LEVEL_SOURCES
+
+      EndSect  // MORPHOLOGY
+
+      [HELICAL_FLOW_MODULE]
+         mode = 0
+         [EQUATION]
+            Touched = 0
+            formulation = 4
+         EndSect  // EQUATION
+
+         [SPACE]
+            Touched = 0
+            number_of_2D_mesh_geometry = 1
+            number_of_2D_mesh_velocity = 1
+            number_of_2D_mesh_concentration = 1
+         EndSect  // SPACE
+
+         [STATE_VARIABLE]
+            Touched = 0
+            max_deviation_angle = 45.0
+         EndSect  // STATE_VARIABLE
+
+         [TIME]
+            Touched = 0
+            start_time_step = 0
+            time_step_factor = 1.0
+            time_step_factor_AD = 1.0
+         EndSect  // TIME
+
+         [SOLUTION_TECHNIQUE]
+            Touched = 0
+            scheme_of_time_integration = 1
+            scheme_of_space_discretization_horizontal = 1
+            scheme_of_space_discretization_vertical = 1
+            method_of_space_discretization_horizontal = 0
+            number_of_iterations = 1
+            time_step = 30.0
+         EndSect  // SOLUTION_TECHNIQUE
+
+         [FLOW]
+            Touched = 0
+            minimum_water_depth = 0.01
+         EndSect  // FLOW
+
+         [INITIAL_CONDITIONS]
+            [DEVIATION]
+               Touched = 0
+               type = 2
+               format = 0
+               constant_value = 0.0
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // DEVIATION
+
+         EndSect  // INITIAL_CONDITIONS
+
+         [BOUNDARY_CONDITIONS]
+            Touched = 0
+            MzSEPfsListItemCount = 1
+            [CODE_1]
+            EndSect  // CODE_1
+
+            [CODE_2]
+               Touched = 0
+               MzSEPfsListItemCount = 1
+               [DEVIATION]
+                  Touched = 0
+                  type = 4
+                  format = 0
+                  constant_value = 0.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+                  type_of_soft_start = 2
+                  soft_time_interval = 0.0
+                  reference_value = 0.0
+                  type_of_time_interpolation = 1
+                  type_of_space_interpolation = 1
+               EndSect  // DEVIATION
+
+            EndSect  // CODE_2
+
+         EndSect  // BOUNDARY_CONDITIONS
+
+      EndSect  // HELICAL_FLOW_MODULE
+
+      [OUTPUTS]
+         Touched = 0
+         MzSEPfsListItemCount = 0
+         number_of_outputs = 0
+      EndSect  // OUTPUTS
+
+   EndSect  // SAND_TRANSPORT_MODULE
+
+   [PARTICLE_TRACKING_MODULE]
+      mode = 0
+      [TIME]
+         start_time_step = 0
+         time_step_factor = 1
+      EndSect  // TIME
+
+      [SPACE]
+         number_of_2D_mesh_geometry = 1
+         number_of_2D_mesh_velocity = 1
+         number_of_2D_mesh_concentration = 1
+         number_of_3D_mesh_geometry = 2
+         number_of_3D_mesh_velocity = 2
+         number_of_3D_mesh_concentration = 2
+      EndSect  // SPACE
+
+      [MODEL_DEFINITION]
+         Touched = 1
+      EndSect  // MODEL_DEFINITION
+
+      [CLASSES]
+         Touched = 1
+         MzSEPfsListItemCount = 1
+         number_of_classes = 1
+         [CLASS_1]
+            Touched = 1
+            include = true
+            name = 'Class 1'
+            EUM_unit = 1200
+            EUM_type = 100039
+            description = ''
+            minimum_particle_mass = 0.0
+            maximum_particle_age = 0.0
+         EndSect  // CLASS_1
+
+      EndSect  // CLASSES
+
+      [SOURCES]
+         Touched = 1
+         MzSEPfsListItemCount = 0
+         number_of_sources = 0
+      EndSect  // SOURCES
+
+      [DECAY]
+         Touched = 1
+         MzSEPfsListItemCount = 1
+         [CLASS_1]
+            Touched = 1
+            type = 1
+            format = 0
+            constant_value = 0.0
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+         EndSect  // CLASS_1
+
+      EndSect  // DECAY
+
+      [SETTLING]
+         Touched = 1
+         MzSEPfsListItemCount = 1
+         [CLASS_1]
+            Touched = 1
+            type = 2
+            format = 0
+            constant_value = 0.1
+            file_name = ||
+            item_number = 1
+            item_name = ''
+            type_of_soft_start = 2
+            soft_time_interval = 0.0
+            reference_value = 0.0
+            type_of_time_interpolation = 1
+            [DENSITY]
+               density = 2600.0
+            EndSect  // DENSITY
+
+            [FLOCCULATION]
+               min_conc_floc = 0.01
+               max_conc_floc = 10.0
+               alfa = 1.0
+               gamma = 1.0
+            EndSect  // FLOCCULATION
+
+            [HINDERED_SETTLING]
+               gelling_point = 50.0
+            EndSect  // HINDERED_SETTLING
+
+            [SALINITY]
+               c1 = 0.5
+               c2 = -0.33
+            EndSect  // SALINITY
+
+         EndSect  // CLASS_1
+
+      EndSect  // SETTLING
+
+      [DISPERSION]
+         [HORIZONTAL_DISPERSION]
+            Touched = 1
+            MzSEPfsListItemCount = 1
+            [CLASS_1]
+               Touched = 1
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // CLASS_1
+
+         EndSect  // HORIZONTAL_DISPERSION
+
+         [VERTICAL_DISPERSION]
+            Touched = 1
+            MzSEPfsListItemCount = 1
+            [CLASS_1]
+               Touched = 1
+               type = 1
+               [SCALED_EDDY_VISCOSITY]
+                  format = 0
+                  sigma = 1.0
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // SCALED_EDDY_VISCOSITY
+
+               [DISPERSION_COEFFICIENT]
+                  format = 0
+                  constant_value = 0.01
+                  file_name = ||
+                  item_number = 1
+                  item_name = ''
+               EndSect  // DISPERSION_COEFFICIENT
+
+            EndSect  // CLASS_1
+
+         EndSect  // VERTICAL_DISPERSION
+
+      EndSect  // DISPERSION
+
+      [EROSION]
+         Touched = 1
+         MzSEPfsListItemCount = 1
+         [CLASS_1]
+            Touched = 1
+            type = 0
+            [CRITICAL_SHEAR_PARAMETER]
+               Touched = 1
+               type = 1
+               format = 0
+               constant_value = 0.001
+               file_name = ||
+               item_number = 1
+               item_name = ''
+               type_of_soft_start = 2
+               soft_time_interval = 0.0
+               reference_value = 0.0
+               type_of_time_interpolation = 1
+            EndSect  // CRITICAL_SHEAR_PARAMETER
+
+         EndSect  // CLASS_1
+
+      EndSect  // EROSION
+
+      [DRIFT_PROFILE]
+         Touched = 1
+         type = 0
+         [WIND_INDUCED_PROFILE]
+            wind_drift_factor = 1.0
+            depth_of_wind_influence = 100.0
+            offshore_limit = 100.0
+         EndSect  // WIND_INDUCED_PROFILE
+
+         [SURFACE_WIND_ACCELERATION]
+            wind_weight = 0.1
+            wind_drift_angle_parameter = 28.0
+            kinematic_viscosity = 1.14e-06
+         EndSect  // SURFACE_WIND_ACCELERATION
+
+      EndSect  // DRIFT_PROFILE
+
+      [HYDRODYNAMIC_CONDITIONS]
+         Touched = 1
+         type_of_2d_information = 1
+         type_of_still_water_depth = 0
+         file_name_area = ||
+         item_numbers_area = 1, 2, 3
+         file_name_volume = ||
+         item_numbers_volume = 1, 2, 3
+         type_of_space_interpolation = 1
+         include_temperature = 0
+         include_salinity = 0
+         include_density = 0
+         include_wind = 0
+      EndSect  // HYDRODYNAMIC_CONDITIONS
+
+      [TEMPERATURE]
+         Touched = 1
+         type = 2
+         format = 0
+         constant_value = 20.0
+         file_name = ||
+         item_number = 1
+         item_name = ''
+         type_of_space_interpolation = 1
+      EndSect  // TEMPERATURE
+
+      [SALINITY]
+         Touched = 1
+         type = 1
+         format = 0
+         constant_value = 20.0
+         file_name = ||
+         item_number = 1
+         item_name = ''
+         type_of_space_interpolation = 1
+      EndSect  // SALINITY
+
+      [DENSITY]
+         Touched = 1
+         type = 2
+         format = 0
+         constant_value = 1000.0
+         file_name = ||
+         item_number = 1
+         item_name = ''
+         type_of_space_interpolation = 1
+      EndSect  // DENSITY
+
+      [BED_ROUGHNESS]
+         Touched = 1
+         type = 1
+         format = 0
+         constant_value = 0.001
+         file_name = ||
+         item_number = 1
+         item_name = ''
+         type_of_soft_start = 2
+         soft_time_interval = 0.0
+         reference_value = 0.0
+         type_of_time_interpolation = 1
+      EndSect  // BED_ROUGHNESS
+
+      [WIND_FORCING]
+         Touched = 1
+         type = 3
+         format = 0
+         constant_speed = 0.0
+         constant_direction = 0.0
+         file_name = ||
+         soft_time_interval = 0.0
+      EndSect  // WIND_FORCING
+
+      [OUTPUTS]
+         Touched = 1
+         MzSEPfsListItemCount = 0
+         number_of_outputs = 0
+      EndSect  // OUTPUTS
+
+   EndSect  // PARTICLE_TRACKING_MODULE
+
+EndSect  // FemEngineHD
+

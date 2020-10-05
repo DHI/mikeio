@@ -179,6 +179,13 @@ For more examples on working with dfsu and mesh see these notebooks:
 * [Export to shapefile](notebooks/Dfsu%20-%20Export%20to%20shapefile.ipynb)
 
 
+## Pfs
+
+Pfs is the format used for MIKE setup files (.m21fm, .m3fm, .sw etc.)
+
+![pfs](images/pfs.gif)
+
+
 ## Items, units
  Useful when creating a new dfs file
 ```python
