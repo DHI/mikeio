@@ -469,6 +469,20 @@ def test_aggregation_workflows(tmpdir):
     assert os.path.isfile(outfilename)
 
 
+def test_weighted_average(tmpdir):
+    filename = "tests/testdata/HD2D.dfsu"
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(["Surface elevation", "Current speed"])
+
+    area = dfs.get_element_area()
+    ds2 = ds.average(weights=area)
+
+    outfilename = os.path.join(tmpdir.dirname, "average.dfs0")
+    ds2.to_dfs0(outfilename)
+    assert os.path.isfile(outfilename)
+
+
 def test_default_type():
 
     item = ItemInfo("Foo")

@@ -292,8 +292,41 @@ class Dataset:
         See Also
         --------
             nanmean : Mean values with NaN values removed
+            average: Weighted average
         """
         return self.aggregate(axis=axis, func=np.mean)
+
+    def average(self, weights, axis=1):
+        """
+        Compute the weighted average along the specified axis.
+        
+        Parameters
+        ----------
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with weighted average value
+        
+        See Also
+        --------
+            nanmean : Mean values with NaN values removed
+            aggregate: Weighted average
+
+        Examples
+        --------
+        >>> dfs = Dfsu("HD2D.dfsu")
+        >>> ds = dfs.read(["Current speed"])
+        >>> area = dfs.get_element_area()
+        >>> ds2 = ds.average(weights=area)
+        """
+
+        def func(x, axis):
+            return np.average(x, weights=weights, axis=axis)
+
+        return self.aggregate(axis=axis, func=func)
 
     def nanmax(self, axis=1):
         """Max value along an axis (NaN removed)
