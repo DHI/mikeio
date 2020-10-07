@@ -16,7 +16,9 @@ from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
 
 def mike1d_quantities():
-    return [q for q in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
+    """ List all possible Mike1D quantities."""
+    return [quantity for quantity in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
+
 
 def read(file_path):
     """ Read all data in res1d file to a pandas DataFrame."""
@@ -29,6 +31,72 @@ def read(file_path):
                 df[col_name] = values
 
     return df
+
+
+class QueryData:
+    """A query object that declares what data should be
+    extracted from a .res1d file.
+
+    Parameters
+    ----------
+    quantity: str
+        Either 'WaterLevel', 'Discharge', 'Pollutant', 'LeftLatLinkOutflow',
+        'RightLatLinkOutflow'
+    reach_name: str, optional
+        Reach name, consider all the reaches if None
+    chainage: float, optional
+        chainage, considers all the chainages if None
+
+    Examples
+    --------
+    `QueryData('WaterLevel', 'reach1', 10)` is a valid query.
+    `QueryData('WaterLevel', 'reach1')` requests all the WaterLevel points
+    of `reach1`.
+    `QueryData('Discharge')` requests all the Discharge points of the file.
+    """
+
+    def __init__(self, quantity, reach_name=None, chainage=None, validate=True):
+        self._quantity = quantity
+        self._reach_name = reach_name
+        self._chainage = chainage
+
+        if validate:
+            self._validate()
+
+    def _validate(self):
+        if not isinstance(self.quantity, str):
+            raise TypeError("variable_type must be a string.")
+
+        if not self.quantity in mike1d_quantities():
+            raise ValueError(
+                f"Undefined quantity {self.quantity}. Allowed quantities are: "
+                f"{', '.join(mike1d_quantities())}."
+            )
+        if self.reach_name is not None and not isinstance(self.reach_name, str):
+            raise TypeError("reach_name must be either None or a string.")
+        if self.chainage is not None and not isinstance(self.chainage, (int, float)):
+            raise TypeError("chainage must be either None or a number.")
+        if self.reach_name is None and self.chainage is not None:
+            raise ValueError("chainage cannot be set if reach_name is None.")
+
+    @property
+    def quantity(self):
+        return self._quantity
+
+    @property
+    def reach_name(self):
+        return self._reach_name
+
+    @property
+    def chainage(self):
+        return self._chainage
+
+    def __repr__(self):
+        return (
+            f"QueryData(quantity='{self.quantity}', "
+            f"reach_name='{self.reach_name}', "
+            f"chainage={self.chainage})"
+        )
 
 
 class Res1D:
