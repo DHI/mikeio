@@ -1,6 +1,6 @@
 import pytest
 
-from mikeio.res1d import read, Res1D
+from mikeio.res1d import read, Res1D, mike1d_quantities
 import numpy as np
 
 
@@ -17,6 +17,11 @@ def test_file_does_not_exist():
 def test_read(test_file_path):
     ts = read(test_file_path)
     assert len(ts) == 110
+
+
+def test_mike1d_quantities():
+    quantities = mike1d_quantities()
+    assert "WaterLevel" in quantities
 
 
 def test_quantities(test_file_path):

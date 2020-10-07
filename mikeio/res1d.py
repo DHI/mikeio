@@ -5,12 +5,18 @@ import pandas as pd
 
 from mikeio.dotnet import from_dotnet_datetime
 
+clr.AddReference("System")
+from System import Enum
+
 clr.AddReference("DHI.Mike1D.ResultDataAccess")
 from DHI.Mike1D.ResultDataAccess import ResultData, ResultDataQuery
 
 clr.AddReference("DHI.Mike1D.Generic")
-from DHI.Mike1D.Generic import Connection, Diagnostics
+from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
+
+def mike1d_quantities():
+    return [q for q in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
 
 def read(file_path):
     """ Read all data in res1d file to a pandas DataFrame."""
@@ -18,6 +24,7 @@ def read(file_path):
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
         for data_item in data_set.DataItems:
+            # data_set.Id + data_item.get_Quantity().Id + chainage 
             for values, col_name in Res1D.get_values(data_item, data_set.Id):
                 df[col_name] = values
 
