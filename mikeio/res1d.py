@@ -60,4 +60,4 @@ class Res1D:
 
     @property
     def quantities(self):
-        return [q.Id for q in self.data.Quantities]
+        return [quantity.Id for quantity in self.data.Quantities]
