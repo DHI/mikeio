@@ -1,6 +1,6 @@
 import pytest
 
-from mikeio.res1d import read, Res1D, mike1d_quantities
+from mikeio.res1d import read, Res1D, mike1d_quantities, QueryDataReach
 import numpy as np
 
 
@@ -43,3 +43,10 @@ def test_read_reach(test_file_path):
     expected_max = 197.046
 
     assert pytest.approx(round(np.max(data), 3)) == expected_max
+
+
+def test_read_reach1(test_file_path):
+    queries = [QueryDataReach("WaterLevel", "104l1", 34.4131)]
+    data = read(test_file_path, queries)
+    expected_max = 197.046
+    assert pytest.approx(round(data.max().values[0], 3)) == expected_max

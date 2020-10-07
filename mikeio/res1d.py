@@ -2,6 +2,7 @@ import os.path
 
 import clr
 import pandas as pd
+import numpy as np
 
 from mikeio.dotnet import from_dotnet_datetime
 
@@ -20,9 +21,14 @@ def mike1d_quantities():
     return [quantity for quantity in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
 
 
-def read(file_path):
-    """ Read all data in res1d file to a pandas DataFrame."""
+def read(file_path, queries=None):
+    """ Read all or queried data in res1d file to a pandas DataFrame."""
     res1d = Res1D(file_path)
+
+    if queries is not None:
+        return res1d.read(queries)
+    # else: create_all_queries(res1d)
+
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
         for data_item in data_set.DataItems:
@@ -42,10 +48,8 @@ class QueryData:
     quantity: str
         Either 'WaterLevel', 'Discharge', 'Pollutant', 'LeftLatLinkOutflow',
         'RightLatLinkOutflow'
-    reach_name: str, optional
-        Reach name, consider all the reaches if None
-    chainage: float, optional
-        chainage, considers all the chainages if None
+    name: str, optional
+        Reach or node or catchment name, consider all if None
 
     Examples
     --------
@@ -55,48 +59,78 @@ class QueryData:
     `QueryData('Discharge')` requests all the Discharge points of the file.
     """
 
-    def __init__(self, quantity, reach_name=None, chainage=None, validate=True):
+    def __init__(self, quantity, name=None, validate=True):
+        self._name = name
         self._quantity = quantity
-        self._reach_name = reach_name
-        self._chainage = chainage
 
         if validate:
             self._validate()
 
     def _validate(self):
         if not isinstance(self.quantity, str):
-            raise TypeError("variable_type must be a string.")
+            raise TypeError("quantity must be a string.")
 
         if not self.quantity in mike1d_quantities():
             raise ValueError(
                 f"Undefined quantity {self.quantity}. Allowed quantities are: "
                 f"{', '.join(mike1d_quantities())}."
             )
-        if self.reach_name is not None and not isinstance(self.reach_name, str):
-            raise TypeError("reach_name must be either None or a string.")
-        if self.chainage is not None and not isinstance(self.chainage, (int, float)):
-            raise TypeError("chainage must be either None or a number.")
-        if self.reach_name is None and self.chainage is not None:
-            raise ValueError("chainage cannot be set if reach_name is None.")
+        if self.name is not None and not isinstance(self.name, str):
+            raise TypeError("name must be either None or a string.")
+
+    @staticmethod
+    def from_dotnet_to_python(array):
+        return np.fromiter(array, np.float64)
 
     @property
     def quantity(self):
         return self._quantity
 
     @property
-    def reach_name(self):
-        return self._reach_name
+    def name(self):
+        return self._name
+
+    def __repr__(self):
+        return ':'.join([self._quantity, self._name])
+
+
+class QueryDataReach(QueryData):
+
+    def __init__(self, quantity, name=None, chainage=None, validate=True):
+        super().__init__(quantity, name, validate=False)
+        self._chainage = chainage
+
+        if validate:
+            self._validate()
+
+    def _validate(self):
+        super()._validate()
+
+        if self.chainage is not None and not isinstance(self.chainage, (int, float)):
+            raise TypeError("chainage must be either None or a number.")
+        if self.name is None and self.chainage is not None:
+            raise ValueError("chainage cannot be set if name is None.")
+
+    def get_values(self, res1d):
+        values = res1d.query.GetReachValues(self._name, self._chainage, self._quantity)
+        return self.from_dotnet_to_python(values)
 
     @property
     def chainage(self):
         return self._chainage
 
     def __repr__(self):
-        return (
-            f"QueryData(quantity='{self.quantity}', "
-            f"reach_name='{self.reach_name}', "
-            f"chainage={self.chainage})"
-        )
+        return ':'.join([self._quantity, self._name, str(self._chainage)])
+
+
+class QueryDataNode(QueryData):
+
+    def __init__(self, quantity, name=None, validate=True):
+        super().__init__(quantity, name, validate)
+
+    def get_values(self, res1d):
+        values = res1d.query.GetNodeValues(self._name, self._quantity)
+        return self.from_dotnet_to_python(values)
 
 
 class Res1D:
@@ -104,6 +138,13 @@ class Res1D:
         self.file_path = file_path
         self._time_index = None
         self._load_file()
+
+    def read(self, queries):
+        df = pd.DataFrame(index=self.time_index)
+        for query in queries:
+            df[str(query)] = query.get_values(self)
+
+        return df
 
     def _load_file(self):
         if not os.path.exists(self.file_path):
