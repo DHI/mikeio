@@ -1,11 +1,7 @@
-from collections import defaultdict, namedtuple
-from contextlib import contextmanager
-import functools
+import os.path
 
 import clr
-import os.path
 import pandas as pd
-import numpy as np
 
 from mikeio.dotnet import from_dotnet_datetime
 
@@ -15,17 +11,6 @@ from DHI.Mike1D.ResultDataAccess import ResultData, ResultDataQuery  # noqa
 clr.AddReference("DHI.Mike1D.Generic")
 from DHI.Mike1D.Generic import Connection  # noqa
 
-clr.AddReference("System")
-
-
-def get_values(data_item, data_set_name):
-    if data_item.IndexList is None:
-        yield data_item.CreateTimeSeriesData(0), data_set_name
-    else:
-        for i in range(0, data_item.NumberOfElements):
-            col_name_i = ':'.join([data_set_name, str(i)])
-            yield data_item.CreateTimeSeriesData(i), col_name_i
-
 
 def read(file_path):
     res1d = Res1D(file_path)
@@ -33,7 +18,7 @@ def read(file_path):
     for data_set in res1d.data.DataSets:
         for data_item in data_set.DataItems:
             data_set_name = str(data_set.ToString())
-            for values, col_name in get_values(data_item, data_set_name):
+            for values, col_name in Res1D.get_values(data_item, data_set_name):
                 df[col_name] = values
 
     return df
@@ -53,6 +38,15 @@ class Res1D:
         self.data.Connection = Connection.Create(self.file_path)
         self.data.Load()  # TODO add diagnostics
         self.query = ResultDataQuery(self.data)
+
+    @staticmethod
+    def get_values(data_item, data_set_name):
+        if data_item.IndexList is None:
+            yield data_item.CreateTimeSeriesData(0), data_set_name
+        else:
+            for i in range(0, data_item.NumberOfElements):
+                col_name_i = ':'.join([data_set_name, str(i)])
+                yield data_item.CreateTimeSeriesData(i), col_name_i
 
     @property
     def time_index(self):
