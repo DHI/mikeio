@@ -26,6 +26,7 @@ def read(file_path, queries=None):
     res1d = Res1D(file_path)
 
     if queries is not None:
+        queries = queries if isinstance(queries, list) else [queries]
         return res1d.read(queries)
     # else: create_all_queries(res1d)
 
