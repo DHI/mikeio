@@ -13,6 +13,7 @@ from DHI.Mike1D.Generic import Connection, Diagnostics
 
 
 def read(file_path):
+    """ Read all data in res1d file to a pandas DataFrame."""
     res1d = Res1D(file_path)
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
@@ -41,6 +42,7 @@ class Res1D:
 
     @staticmethod
     def get_values(data_item, data_set_name):
+        """ Get all time series values in given data_item."""
         if data_item.IndexList is None:
             yield data_item.CreateTimeSeriesData(0), data_set_name
         else:
@@ -60,6 +62,7 @@ class Res1D:
 
     @property
     def quantities(self):
+        """Quantities in res1d file."""
         return [quantity.Id for quantity in self._data.Quantities]
 
     @property
