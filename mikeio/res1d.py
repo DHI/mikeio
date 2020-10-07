@@ -18,8 +18,7 @@ def read(file_path):
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
         for data_item in data_set.DataItems:
-            data_set_name = str(data_set.ToString())
-            for values, col_name in Res1D.get_values(data_item, data_set_name):
+            for values, col_name in Res1D.get_values(data_item, data_set.Id):
                 df[col_name] = values
 
     return df
@@ -43,7 +42,7 @@ class Res1D:
     @staticmethod
     def get_values(data_item, data_set_name):
         """ Get all time series values in given data_item."""
-        if data_item.IndexList is None:
+        if data_item.IndexList is None or data_item.NumberOfElements == 1:
             yield data_item.CreateTimeSeriesData(0), data_set_name
         else:
             for i in range(0, data_item.NumberOfElements):
