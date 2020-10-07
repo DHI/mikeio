@@ -30,12 +30,6 @@ def test_quantities(test_file_path):
     assert len(quantities) == 2
 
 
-# @pytest.mark.parametrize("query,expected_max", [
-#    (QueryData("WaterLevel", "104l1", 34.4131), 197.046),
-#    (QueryData("WaterLevel", "9l1", 10), 195.165),
-#    (QueryData("Discharge", "100l1", 23.8414), 0.1),
-#    (QueryData("Discharge", "9l1", 5), 0.761)
-# ])
 def test_read_reach(test_file_path):
     res1d = Res1D(test_file_path)
     data = res1d.query.GetReachValues("104l1", 34.4131, "WaterLevel")
@@ -45,8 +39,12 @@ def test_read_reach(test_file_path):
     assert pytest.approx(round(np.max(data), 3)) == expected_max
 
 
-def test_read_reach1(test_file_path):
-    queries = [QueryDataReach("WaterLevel", "104l1", 34.4131)]
-    data = read(test_file_path, queries)
-    expected_max = 197.046
+@pytest.mark.parametrize("query,expected_max", [
+   (QueryDataReach("WaterLevel", "104l1", 34.4131), 197.046),
+   (QueryDataReach("WaterLevel", "9l1", 10), 195.165),
+   (QueryDataReach("Discharge", "100l1", 23.8414), 0.1),
+   (QueryDataReach("Discharge", "9l1", 5), 0.761)
+])
+def test_read_reach1(test_file_path, query, expected_max):
+    data = read(test_file_path, query)
     assert pytest.approx(round(data.max().values[0], 3)) == expected_max
