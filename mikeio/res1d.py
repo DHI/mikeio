@@ -18,18 +18,23 @@ from DHI.Mike1D.Generic import Connection  # noqa
 clr.AddReference("System")
 
 
+def get_values(data_item, data_set_name):
+    if data_item.IndexList is None:
+        yield data_item.CreateTimeSeriesData(0), data_set_name
+    else:
+        for i in range(0, data_item.NumberOfElements):
+            col_name_i = ':'.join([data_set_name, str(i)])
+            yield data_item.CreateTimeSeriesData(i), col_name_i
+
+
 def read(file_path):
     res1d = Res1D(file_path)
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
         for data_item in data_set.DataItems:
-            col_name = str(data_set.ToString())
-            if data_item.IndexList is None:
-                df[col_name] = data_item.CreateTimeSeriesData(0)
-            else:
-                for i in range(0, data_item.NumberOfElements):
-                    col_name_i = ':'.join([col_name, str(i)])
-                    df[col_name_i] = data_item.CreateTimeSeriesData(i)
+            data_set_name = str(data_set.ToString())
+            for values, col_name in get_values(data_item, data_set_name):
+                df[col_name] = values
 
     return df
 
