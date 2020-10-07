@@ -840,7 +840,9 @@ class _UnstructuredGeometry:
         return self.element_ids[self.layer_ids == layer]
 
     def _get_2d_to_3d_association(self):
-        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
+        e2_to_e3 = (
+            []
+        )  # for each 2d element: the corresponding 3d element ids from bot to top
         index2d = []  # for each 3d element: the associated 2d element id
         layerid = []  # for each 3d element: the associated layer number
         n2d = len(self.top_elements)
@@ -859,7 +861,7 @@ class _UnstructuredGeometry:
             for ll in local_layers:
                 layerid.append(ll)
 
-        e2_to_e3 = np.array(e2_to_e3) 
+        e2_to_e3 = np.array(e2_to_e3)
         index2d = np.array(index2d)
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
@@ -1618,6 +1620,7 @@ class Dfsu(_UnstructuredFile):
         items=None,
         elements=None,
         title=None,
+        keep_open=False,
     ):
         """Write a new dfsu file
 
@@ -1636,6 +1639,8 @@ class Dfsu(_UnstructuredFile):
             write only these element ids to file
         title: str
             title of the dfsu file. Default is blank.
+        keep_open: bool, optional
+            Keep file open for appending
         """
 
         if isinstance(data, Dataset):
@@ -1744,11 +1749,11 @@ class Dfsu(_UnstructuredFile):
                 )
 
         try:
-            dfs = builder.CreateFile(filename)
+            self._dfs = builder.CreateFile(filename)
         except IOError:
             print("cannot create dfsu file: ", filename)
 
-        deletevalue = dfs.DeleteValueFloat
+        deletevalue = self._dfs.DeleteValueFloat
 
         try:
             # Add data for all item-timesteps, copying from source
@@ -1757,13 +1762,36 @@ class Dfsu(_UnstructuredFile):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
                     darray = to_dotnet_float_array(d)
-                    dfs.WriteItemTimeStepNext(0, darray)
-            dfs.Close()
+                    self._dfs.WriteItemTimeStepNext(0, darray)
+            if not keep_open:
+                self._dfs.Close()
 
         except Exception as e:
             print(e)
-            dfs.Close()
+            self._dfs.Close()
             os.remove(filename)
+
+    def append(self, data):
+        """Append to a dfsu file opened with `write(...,keep_open=True)`
+
+        Parameters
+        -----------
+        data: list[np.array]
+        """
+
+        deletevalue = self._dfs.DeleteValueFloat
+        n_items = len(data)
+        n_time_steps = np.shape(data[0])[0]
+        for i in range(n_time_steps):
+            for item in range(n_items):
+                d = data[item][i, :]
+                d[np.isnan(d)] = deletevalue
+                darray = to_dotnet_float_array(d)
+                self._dfs.WriteItemTimeStepNext(0, darray)
+
+    def close(self):
+        "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"
+        self._dfs.Close()
 
     def to_mesh(self, outfilename):
         """write object to mesh file
