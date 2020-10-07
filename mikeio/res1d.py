@@ -57,3 +57,7 @@ class Res1D:
         time_stamps = [from_dotnet_datetime(t) for t in self.data.TimesList]
         self._time_index = pd.DatetimeIndex(time_stamps)
         return self._time_index
+
+    @property
+    def quantities(self):
+        return [q.Id for q in self.data.Quantities]

@@ -20,4 +20,6 @@ def test_file_does_not_exist():
 def test_read_single_query(file):
     ts = read(file)
     assert len(ts) == 110
-    # assert pytest.approx(round(ts.max()[0], 3)) == expected_max
+
+    res1d = Res1D(file)
+    q = res1d.quantities
