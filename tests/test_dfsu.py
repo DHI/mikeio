@@ -617,6 +617,29 @@ def test_incremental_write_from_dfsu(tmpdir):
     assert dfs.end_time == newdfs.end_time
 
 
+def test_incremental_write_from_dfsu_context_manager(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read(time_steps=[0])
+
+    with dfs.write(outfilename, ds, keep_open=True) as f:
+        for i in range(1, nt):
+            ds = dfs.read(time_steps=[i])
+            f.append(ds)
+
+        # dfs.close() # should be called automagically by context manager
+
+    newdfs = Dfsu(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time
+
+
 def test_write_from_dfsu_2_time_steps(tmpdir):
 
     sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")

@@ -1765,6 +1765,8 @@ class Dfsu(_UnstructuredFile):
                     self._dfs.WriteItemTimeStepNext(0, darray)
             if not keep_open:
                 self._dfs.Close()
+            else:
+                return self
 
         except Exception as e:
             print(e)
@@ -1791,6 +1793,12 @@ class Dfsu(_UnstructuredFile):
 
     def close(self):
         "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"
+        self._dfs.Close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
         self._dfs.Close()
 
     def to_mesh(self, outfilename):
