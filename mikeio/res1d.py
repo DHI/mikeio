@@ -18,14 +18,15 @@ from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 def mike1d_quantities():
     return [q for q in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
 
+
 def read(file_path):
     """ Read all data in res1d file to a pandas DataFrame."""
     res1d = Res1D(file_path)
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
         for data_item in data_set.DataItems:
-            # data_set.Id + data_item.get_Quantity().Id + chainage 
-            for values, col_name in Res1D.get_values(data_item, data_set.Id):
+            name = data_set.Name if hasattr(data_set, 'Name') else data_set.Id
+            for values, col_name in Res1D.get_values(data_item, name):
                 df[col_name] = values
 
     return df
