@@ -640,6 +640,41 @@ def test_incremental_write_from_dfsu_context_manager(tmpdir):
     assert dfs.end_time == newdfs.end_time
 
 
+def test_write_big_file(tmpdir):
+
+    outfilename = os.path.join(tmpdir.dirname, "big.dfsu")
+    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
+
+    msh = Mesh(meshfilename)
+
+    n_elements = msh.n_elements
+
+    dfs = Dfsu(meshfilename)
+
+    nt = 1000
+
+    n_items = 10
+
+    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+
+    # with dfs.write(outfilename, [], items=items, keep_open=True) as f:
+    with dfs.write_header(
+        outfilename, start_time=datetime(2000, 1, 1), dt=3600, items=items
+    ) as f:
+        for i in range(nt):
+            data = []
+            for i in range(n_items):
+                d = np.random.random((1, n_elements))
+                data.append(d)
+            f.append(data)
+
+    dfsu = Dfsu(outfilename)
+
+    assert dfsu.n_items == n_items
+    assert dfsu.n_timesteps == nt
+    assert dfsu.start_time.year == 2000
+
+
 def test_write_from_dfsu_2_time_steps(tmpdir):
 
     sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")

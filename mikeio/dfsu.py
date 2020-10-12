@@ -1611,6 +1611,53 @@ class Dfsu(_UnstructuredFile):
         dfs.Close()
         return Dataset(data_list, time, items)
 
+    def write_header(
+        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
+    ):
+        """Write the header of a new dfsu file
+
+            Parameters
+            -----------
+            filename: str
+                full path to the new dfsu file
+            start_time: datetime, optional
+                start datetime, default is datetime.now()
+            dt: float, optional
+                The time step (in seconds)
+            items: list[ItemInfo], optional
+            elements: list[int], optional
+                write only these element ids to file
+            title: str
+                title of the dfsu file. Default is blank.
+
+            Examples
+            --------
+            >>> msh = Mesh("foo.mesh")
+            >>> n_elements = msh.n_elements
+            >>> dfs = Dfsu(meshfilename)
+            >>> nt = 1000
+            >>> n_items = 10
+            >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+            >>> with dfs.write_header(outfilename, items=items) as f:
+            >>>     for i in range(1, nt):
+            >>>         data = []
+            >>>         for i in range(n_items):
+            >>>             d = np.random.random((1, n_elements))
+            >>>             data.append(d)
+            >>>             f.append(data)
+            """
+
+        return self.write(
+            filename=filename,
+            data=[],
+            start_time=start_time,
+            dt=dt,
+            items=items,
+            elements=elements,
+            title=title,
+            keep_open=True,
+        )
+
     def write(
         self,
         filename,
@@ -1655,7 +1702,9 @@ class Dfsu(_UnstructuredFile):
             data = data.data
 
         n_items = len(data)
-        n_time_steps = np.shape(data[0])[0]
+        n_time_steps = 0
+        if n_items > 0:
+            n_time_steps = np.shape(data[0])[0]
 
         if dt is None:
             if self.timestep is None:
@@ -1676,6 +1725,10 @@ class Dfsu(_UnstructuredFile):
                 )
 
         if items is None:
+            if n_items == 0:
+                raise ValueError(
+                    "Number of items unknown. Add (..., items=[ItemInfo(...)]"
+                )
             items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
 
         if title is None:
