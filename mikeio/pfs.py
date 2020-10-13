@@ -1,8 +1,10 @@
 from datetime import datetime
 import yaml
 import pandas as pd
+from typing import Union
 import warnings
 
+from DHI.PFS import PFSFile, PFSSection, PFSParameter
 
 from types import SimpleNamespace
 
@@ -147,4 +149,95 @@ class Pfs:
             self._level -= 1
 
         return adj_line
+
+
+class PfsCore:
+    def __init__(self, filename, target):
+
+        self._pfs = PFSFile(filename)
+        self._target = target
+
+    def section(self, name, index=0):
+        pfssection = self._pfs.GetTarget(self._target, 1).GetSection(name, index + 1)
+        return Section(pfssection)
+
+    def write(self, filename):
+
+        self._pfs.Write(filename)
+
+    @property
+    def start_time(self):
+        target = self._pfs.GetTarget(self._target, 1)
+        section = target.GetSection("TIME", 1)
+        start_time = section.GetKeyword("start_time", 1)
+
+        vals = [start_time.GetParameter(i).ToInt() for i in range(1, 7)]
+        return datetime(*vals)
+
+    @start_time.setter
+    def start_time(self, value):
+        target = self._pfs.GetTarget(self._target, 1)
+        section = target.GetSection("TIME", 1)
+        start_time = section.GetKeyword("start_time", 1)
+        start_time.GetParameter(1).ModifyIntParameter(value.year)
+        start_time.GetParameter(2).ModifyIntParameter(value.month)
+        start_time.GetParameter(3).ModifyIntParameter(value.day)
+        start_time.GetParameter(4).ModifyIntParameter(value.hour)
+        start_time.GetParameter(5).ModifyIntParameter(value.minute)
+        start_time.GetParameter(6).ModifyIntParameter(value.second)
+
+
+class Parameter:
+    def __init__(self, parameter: PFSParameter):
+
+        self._parameter = parameter
+
+    def __repr__(self):
+
+        return f"<Parameter>{self.value}"
+
+    @property
+    def value(self):
+        return self._parameter.ToString()
+
+    def modify(self, value: Union[int, float, str]):
+
+        if isinstance(value, float):
+            self._parameter.ModifyDoubleParameter(value)
+        elif isinstance(value, int):
+            self._parameter.ModifyIntParameter(value)
+        elif isinstance(value, str):
+            self._parameter.ModifyStringParameter(value)
+        else:
+            raise ValueError("Parameter type not supported")
+
+
+class Section:
+    def __init__(self, section: PFSSection):
+
+        self._section = section
+
+    def section(self, name, index=0):
+        pfssection = self._section.GetSection(name, index + 1)
+        return Section(pfssection)
+
+    def keyword(self, name, index=0) -> Parameter:
+        parameter = self._section.GetKeyword(name, 1).GetParameter(1)
+        return Parameter(parameter)
+
+    def __getattr__(self, key):
+        return self.keyword(key)
+
+    def __setitem__(self, key, item):
+        self.keyword(key).modify(item)
+
+    def __getitem__(self, key):
+        return self.keyword(key)
+
+
+def get_section(self, name, index=0):
+    return self.GetSection(name, index + 1)
+
+
+PFSSection.section = get_section
 

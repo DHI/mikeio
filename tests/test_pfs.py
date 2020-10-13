@@ -1,4 +1,7 @@
+import os
+from datetime import datetime
 from mikeio import Pfs
+from mikeio.pfs import PfsCore
 
 
 def test_basic():
@@ -78,3 +81,36 @@ def test_included_outputs():
     assert df.shape[0] == 3
 
     # df.to_csv("outputs.csv")
+
+
+## PFSCore wrapping DHI.PFS.PFSFile
+
+
+def test_sw_new_start_time_write(tmpdir):
+
+    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
+
+    new_start = datetime(2020, 6, 10, 12)
+
+    assert pfs.start_time.year == 2002
+    pfs.start_time = new_start
+
+    assert pfs.start_time.year == 2020
+
+    outfilename = os.path.join(tmpdir.dirname, "lake_mod.sw")
+
+    pfs.write(outfilename)
+
+
+def test_sw_modify_charnock(tmpdir):
+
+    # [SPECTRAL_WAVE_MODULE][WIND]Charnock_parameter
+    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
+
+    wind_section = pfs.section("SPECTRAL_WAVE_MODULE").section("WIND")
+    wind_section["Charnock_parameter"] = 0.02
+
+    outfilename = os.path.join(tmpdir.dirname, "lake_mod.sw")
+
+    pfs.write(outfilename)
+
