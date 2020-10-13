@@ -152,10 +152,14 @@ class Pfs:
 
 
 class PfsCore:
-    def __init__(self, filename, target):
+    def __init__(self, filename, target=None):
 
         self._pfs = PFSFile(filename)
-        self._target = target
+
+        if target is None:
+            self._target = self._find_target(filename)
+        else:
+            self._target = target
 
     def section(self, name, index=0):
         pfssection = self._pfs.GetTarget(self._target, 1).GetSection(name, index + 1)
@@ -185,6 +189,25 @@ class PfsCore:
         start_time.GetParameter(4).ModifyIntParameter(value.hour)
         start_time.GetParameter(5).ModifyIntParameter(value.minute)
         start_time.GetParameter(6).ModifyIntParameter(value.second)
+
+    def _find_target(self, filename):
+
+        with open(filename) as f:
+            lines = f.readlines()
+
+        for line in lines:
+            if "//" in line:
+                text, comment = line.split("//")
+            else:
+                text = line
+
+            if "[" in text:
+                startidx = text.index("[") + 1
+                endidx = text.index("]")
+                target = text[startidx:endidx]
+                return target
+
+        return None
 
 
 class Parameter:

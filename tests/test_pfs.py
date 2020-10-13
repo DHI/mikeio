@@ -105,7 +105,7 @@ def test_sw_new_start_time_write(tmpdir):
 def test_sw_modify_charnock(tmpdir):
 
     # [SPECTRAL_WAVE_MODULE][WIND]Charnock_parameter
-    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
+    pfs = PfsCore("tests/testdata/lake.sw")
 
     wind_section = pfs.section("SPECTRAL_WAVE_MODULE").section("WIND")
     wind_section["Charnock_parameter"] = 0.02
