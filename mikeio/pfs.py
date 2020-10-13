@@ -151,6 +151,7 @@ class Pfs:
         return adj_line
 
 
+# TODO come up with a better name
 class PfsCore:
     def __init__(self, filename, target=None):
 
@@ -161,16 +162,23 @@ class PfsCore:
         else:
             self._target = target
 
-    def section(self, name, index=0):
+    def section(self, name: str, index=0):
         pfssection = self._pfs.GetTarget(self._target, 1).GetSection(name, index + 1)
         return Section(pfssection)
 
     def write(self, filename):
+        """
+        Write PFS file
+
+        Parameters
+        ----------
+        filename, str
+        """
 
         self._pfs.Write(filename)
 
     @property
-    def start_time(self):
+    def start_time(self) -> datetime:
         target = self._pfs.GetTarget(self._target, 1)
         section = target.GetSection("TIME", 1)
         start_time = section.GetKeyword("start_time", 1)
@@ -179,7 +187,7 @@ class PfsCore:
         return datetime(*vals)
 
     @start_time.setter
-    def start_time(self, value):
+    def start_time(self, value: datetime):
         target = self._pfs.GetTarget(self._target, 1)
         section = target.GetSection("TIME", 1)
         start_time = section.GetKeyword("start_time", 1)
@@ -221,18 +229,33 @@ class Parameter:
 
     @property
     def value(self):
-        return self._parameter.ToString()
+        par = self._parameter
+
+        if par.IsDouble():
+            return par.ToDouble()
+        elif par.IsInt():
+            return par.ToInt()
+        elif par.IsFilename():
+            return par.ToFileName()
+        elif par.IsClob():
+            return par.ToClob()
+        else:
+            return par.ToString()
 
     def modify(self, value: Union[int, float, str]):
 
-        if isinstance(value, float):
-            self._parameter.ModifyDoubleParameter(value)
-        elif isinstance(value, int):
-            self._parameter.ModifyIntParameter(value)
-        elif isinstance(value, str):
-            self._parameter.ModifyStringParameter(value)
+        par = self._parameter
+
+        if par.IsDouble():
+            par.ModifyDoubleParameter(value)
+        elif par.IsInt():
+            par.ModifyIntParameter(value)
+        elif par.IsFilename():
+            par.ModifyFileNameParameter(value)
+        elif par.IsClob():
+            return par.ModifyClobParameter(value)
         else:
-            raise ValueError("Parameter type not supported")
+            return par.ModifyStringParameter(value)
 
 
 class Section:
@@ -256,11 +279,4 @@ class Section:
 
     def __getitem__(self, key):
         return self.keyword(key)
-
-
-def get_section(self, name, index=0):
-    return self.GetSection(name, index + 1)
-
-
-PFSSection.section = get_section
 

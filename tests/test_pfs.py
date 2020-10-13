@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+
 from mikeio import Pfs
 from mikeio.pfs import PfsCore
 
@@ -102,13 +103,30 @@ def test_sw_new_start_time_write(tmpdir):
     pfs.write(outfilename)
 
 
-def test_sw_modify_charnock(tmpdir):
+def test_sw_modify_and_write(tmpdir):
 
     # [SPECTRAL_WAVE_MODULE][WIND]Charnock_parameter
     pfs = PfsCore("tests/testdata/lake.sw")
 
     wind_section = pfs.section("SPECTRAL_WAVE_MODULE").section("WIND")
+
+    assert type(wind_section["Charnock_parameter"].value) == float
+
+    # modify parameter without needing to specify that the float is a float...
     wind_section["Charnock_parameter"] = 0.02
+
+    # modify a filename
+    pfs.section("DOMAIN")["file_name"] = "tests\\testdata\\odense_rough.mesh"
+
+    # attribute access
+    out_file_1 = (
+        pfs.section("SPECTRAL_WAVE_MODULE")
+        .section("OUTPUTS")
+        .section("OUTPUT_1")
+        .file_name
+    )
+
+    assert out_file_1.value == "Wave_parameters.dfsu"
 
     outfilename = os.path.join(tmpdir.dirname, "lake_mod.sw")
 
