@@ -17,7 +17,8 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dutil import Dataset, get_valid_items_and_timesteps, get_item_info
+from .dutil import get_valid_items_and_timesteps, get_item_info
+from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
 
@@ -320,7 +321,7 @@ class Dfs0:
             self._start_time = start_time
 
         self._n_items = len(data)
-        self._n_time_steps = np.shape(data[0])[0]
+        self._n_timesteps = np.shape(data[0])[0]
 
         if items:
             self._items = items
@@ -347,7 +348,7 @@ class Dfs0:
             datetimes = np.array(
                 [
                     self._start_time + timedelta(seconds=(step * self._dt))
-                    for step in np.arange(self._n_time_steps)
+                    for step in np.arange(self._n_timesteps)
                 ]
             )
 
@@ -512,3 +513,27 @@ def dataframe_to_dfs0(
 
 
 pd.DataFrame.to_dfs0 = dataframe_to_dfs0
+
+
+def dataset_to_dfs0(self, filename):
+    """Write Dataset to a Dfs0 file
+        
+        Parameters
+        ----------
+        filename: str
+            full path and file name to the dfs0 file.
+        """
+    self = self.squeeze()
+
+    if len(self.data[0].shape) != 1:
+        raise ValueError(
+            """Only data with a single dimension can be converted to a dfs0.
+                 Hint: use `isel` to create a subset."""
+        )
+
+    dfs0 = Dfs0()
+
+    dfs0.write(filename, self)
+
+
+Dataset.to_dfs0 = dataset_to_dfs0

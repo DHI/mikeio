@@ -30,6 +30,7 @@ from .dfs3 import Dfs3
 from .dfsu import Dfsu, Mesh
 from .pfs import Pfs
 from .xyz import read_xyz
+from .dataset import Dataset
 
 
 def read(filename, items=None, time_steps=None):

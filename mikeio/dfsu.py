@@ -9,7 +9,8 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
-from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
+from .dutil import get_item_info, get_valid_items_and_timesteps
+from .dataset import Dataset
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
@@ -828,20 +829,18 @@ class _UnstructuredGeometry:
             print("Object has no layers: cannot get_layer_elements")
             return None
 
-        if layer < (-n_lay+1) or layer > n_lay:
+        if layer < (-n_lay + 1) or layer > n_lay:
             raise Exception(
                 f"Layer {layer} not allowed; must be between -{n_lay-1} and {n_lay}"
             )
 
-        if layer <=0:
+        if layer <= 0:
             layer = layer + n_lay
 
-        return self.element_ids[self.layer_ids==layer]
+        return self.element_ids[self.layer_ids == layer]
 
     def _get_2d_to_3d_association(self):
-        e2_to_e3 = (
-            []
-        )  # for each 2d element: the corresponding 3d element ids from bot to top
+        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
         index2d = []  # for each 3d element: the associated 2d element id
         layerid = []  # for each 3d element: the associated layer number
         n2d = len(self.top_elements)
@@ -849,7 +848,7 @@ class _UnstructuredGeometry:
         botid = self.bottom_elements
         global_layer_ids = np.arange(1, self.n_layers + 1)  # layer_ids = 1, 2, 3...
         for j in range(n2d):
-            col = np.array(list(range(botid[j], topid[j] + 1)))
+            col = list(range(botid[j], topid[j] + 1))
 
             e2_to_e3.append(col)
             for jj in col:
@@ -860,7 +859,7 @@ class _UnstructuredGeometry:
             for ll in local_layers:
                 layerid.append(ll)
 
-        e2_to_e3 = np.array(e2_to_e3)
+        e2_to_e3 = np.array(e2_to_e3) 
         index2d = np.array(index2d)
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
@@ -1096,12 +1095,12 @@ class _UnstructuredGeometry:
 
         # set aspect ratio
         if geometry.is_geo:
-            mean_lat = np.mean(nc[:,1]) 
+            mean_lat = np.mean(nc[:, 1])
             ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
         else:
             ax.set_aspect("equal")
 
-        # set plot limits   
+        # set plot limits
         xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
         ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
 
@@ -1223,19 +1222,19 @@ class _UnstructuredGeometry:
                 mp = geometry.to_shapely()
                 domain = mp.buffer(0)
             except:
-                warnings.warn('Could not plot outline. Failed to convert to_shapely()')
+                warnings.warn("Could not plot outline. Failed to convert to_shapely()")
             try:
                 if domain:
                     out_col = "0.4"
                     ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
-                    xd, yd = domain.exterior.xy[0], domain.exterior.xy[1]                    
-                    xmin, xmax = min(xmin,np.min(xd)), max(xmax,np.max(xd))
-                    ymin, ymax = min(ymin,np.min(yd)), max(ymax,np.max(yd))
+                    xd, yd = domain.exterior.xy[0], domain.exterior.xy[1]
+                    xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
+                    ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
                     for j in range(len(domain.interiors)):
                         interj = domain.interiors[j]
                         ax.plot(*interj.xy, color=out_col, linewidth=1.2)
             except:
-                warnings.warn('Could not plot outline')
+                warnings.warn("Could not plot outline")
 
         # set plot limits
         xybuf = 6e-3 * (xmax - xmin)
@@ -1245,7 +1244,7 @@ class _UnstructuredGeometry:
         if title is not None:
             ax.set_title(title)
 
-        return ax 
+        return ax
 
     def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh
