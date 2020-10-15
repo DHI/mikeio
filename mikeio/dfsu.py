@@ -3,6 +3,7 @@ from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
+from scipy.spatial import cKDTree 
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -21,7 +22,6 @@ from .dotnet import (
 )
 from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
-
 
 class UnstructuredType(IntEnum):
     """
@@ -69,6 +69,9 @@ class _UnstructuredGeometry:
     _e2_e3_table = None
     _2d_ids = None
     _layer_ids = None
+
+    _shapely_domain_obj = None
+    _tree2d = None
 
     def __repr__(self):
         out = []
@@ -177,6 +180,14 @@ class _UnstructuredGeometry:
         """Does the mesh consist of triangles only?
         """
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
+
+    @property
+    def _shapely_domain2d(self):
+        """
+        """
+        if self._shapely_domain_obj is None:
+            self._shapely_domain_obj = self.to_shapely().buffer(0)
+        return self._shapely_domain_obj
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
@@ -488,6 +499,119 @@ class _UnstructuredGeometry:
         self._ec = ec
         return ec
 
+    def contains(self, points):
+        import matplotlib.path as mp
+        try:
+            domain = self._shapely_domain2d
+        except:
+            warnings.warn('Could not determine if domain contains points. Failed to convert to_shapely()')
+            return None
+        
+        cnts = mp.Path(domain.exterior).contains_points(points)
+        for interj in domain.interiors:
+            in_hole = mp.Path(interj).contains_points(points) 
+            cnts = np.logical_and(cnts, ~in_hole)
+        return cnts
+
+
+    def _create_tree2d(self):
+        xy = self.geometry2d.element_coordinates[:,:2]
+        self._tree2d = cKDTree(xy)
+
+    def _find_n_nearest_2d_elements(self, x, y=None, n_points=1):        
+        if self._tree2d is None:
+            self._create_tree2d()
+
+        if y is None: 
+            p = x
+        else:
+            p = np.array((x, y))
+        d, elem_id = self._tree2d.query(p, k=n_points)
+        return elem_id, d
+
+    def get_overset_grid(self, dx=None, shape=None):
+        coords = self.node_coordinates   # node_ or element_
+        small = 1e-10        
+        x0 = coords[:,0].min() + small
+        y0 = coords[:,1].min() + small
+        x1 = coords[:,0].max() - small
+        y1 = coords[:,1].max() - small
+        xr = x1 - x0
+        yr = y1 - y0
+        
+        if (dx is None) and (shape is None):
+            if xr <= yr:
+                nx = 10
+                ny = int(np.ceil(yr/xr))*nx
+            else:
+                ny = 10
+                nx = int(np.ceil(xr/yr))*ny
+            dx = xr/(nx-1)
+            dy = yr/(ny-1)
+        else:
+            if dx is None:
+                nx, ny = shape
+                dx = xr/(nx-1)
+                dy = yr/(ny-1)
+            if shape is None:
+                dy = dx
+                nx = int(np.ceil(xr/dx)) + 1
+                ny = int(np.ceil(yr/dy)) + 1
+
+        return x0, dx, nx, y0, dy, ny
+
+    def get_2d_interpolant(self, xy, n_nearest:int=1):
+        elem_ids, distances = self._find_n_nearest_2d_elements(xy, n_points=n_nearest)
+
+        if n_nearest == 1:
+            weights = np.ones(distances.shape)
+            weights[~self.contains(xy)] = np.nan
+        elif n_nearest > 1:
+            p = 1   # inverse distance order 
+            weights = 1 / distances**p
+            denom = weights.sum(axis=1).reshape(-1,1)*np.ones((1,n_nearest))
+            weights = weights / denom
+            weights[~self.contains(xy),:] = np.nan
+        else:
+            ValueError('n_nearest must be at least 1')
+
+        return elem_ids, weights
+
+    def gridded_2d_interpolant(self, x0, dx, nx:int, y0, dy, ny:int, n_nearest:int=1):
+        x1 = x0 + dx*(nx-1)
+        x = np.linspace(x0, x1, nx)
+        y1 = y0 + dy*(ny-1)
+        y = np.linspace(y0, y1, ny)
+        xv, yv = np.meshgrid(x, y)
+        xy = np.empty((nx*ny, 2))
+        xy[:,0] = xv.reshape(-1)
+        xy[:,1] = yv.reshape(-1)
+        return self.get_2d_interpolant(xy, n_nearest)
+
+    def interp2d(self, data, interpolant2d):
+        
+        if len(data) == self.n_elements:
+            return self._interp_itemstep(data, interpolant2d)
+
+        idat = []
+        ni = len(interpolant2d[0])
+        for datitem in data:
+            nt, ne = datitem.shape
+            idatitem = np.empty(shape=(nt,ni)) 
+            for step in range(nt):
+                idatitem[step,:] = self._interp_itemstep(datitem[step,:], interpolant2d)
+            idat.append(idatitem)
+        return idat
+
+    def _interp_itemstep(self, data, interpolant2d):
+        ix = interpolant2d[0]
+        w = interpolant2d[1]
+        ni = len(ix)
+        idat = np.empty(ni)
+        for j in range(ni):
+            idat[j] = np.dot(data[ix[j]], w[j])
+        return idat
+
     def _find_n_nearest_elements(self, x, y, z=None, n=1, layer=None):
         """Find n nearest elements (for each of the points given) 
 
@@ -695,8 +819,8 @@ class _UnstructuredGeometry:
         """The 2d geometry for a 3d object
         """
         if self._n_layers is None:
-            print("Object has no layers: cannot return geometry2d")
-            return None
+            #print("Object has no layers: cannot return geometry2d")
+            return self
         if self._geom2d is None:
             self._geom2d = self.to_2d_geometry()
         return self._geom2d
@@ -1216,10 +1340,7 @@ class _UnstructuredGeometry:
 
         if show_outline:
             try:
-                if not self.is_2d:
-                    geometry = self.geometry2d
-                mp = geometry.to_shapely()
-                domain = mp.buffer(0)
+                domain = self._shapely_domain2d
             except:
                 warnings.warn('Could not plot outline. Failed to convert to_shapely()')
             try:
