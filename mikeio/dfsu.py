@@ -560,18 +560,25 @@ class _UnstructuredGeometry:
 
         return x0, dx, nx, y0, dy, ny
 
-    def get_2d_interpolant(self, xy, n_nearest:int=1):
+    def get_2d_interpolant(self, xy, n_nearest:int=1, extrapolate=False):
         elem_ids, distances = self._find_n_nearest_2d_elements(xy, n_points=n_nearest)
 
         if n_nearest == 1:
             weights = np.ones(distances.shape)
-            weights[~self.contains(xy)] = np.nan
+            if not extrapolate: 
+                weights[~self.contains(xy)] = np.nan
         elif n_nearest > 1:
+            weights = np.zeros(distances.shape)
             p = 1   # inverse distance order 
-            weights = 1 / distances**p
-            denom = weights.sum(axis=1).reshape(-1,1)*np.ones((1,n_nearest))
-            weights = weights / denom
-            weights[~self.contains(xy),:] = np.nan
+            
+            match = distances[:,0] < 1e-8
+            weights[match,0] = 1
+            
+            weights[~match,:] = 1 / distances[~match,:]**p
+            denom = weights[~match,:].sum(axis=1).reshape(-1,1)*np.ones((1,n_nearest))
+            weights[~match,:] = weights[~match,:] / denom
+            if not extrapolate: 
+                weights[~self.contains(xy),:] = np.nan
         else:
             ValueError('n_nearest must be at least 1')
 
@@ -1196,9 +1203,9 @@ class _UnstructuredGeometry:
                 print(f"Cannot plot data in {plot_type} plot!")
 
         if plot_data and vmin is None:
-            vmin = z.min()
+            vmin = np.nanmin(z)
         if plot_data and vmax is None:
-            vmax = z.max()
+            vmax = np.nanmax(z)
 
         # set levels
         if "contour" in plot_type:
