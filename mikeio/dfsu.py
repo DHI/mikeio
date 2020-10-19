@@ -500,6 +500,18 @@ class _UnstructuredGeometry:
         return ec
 
     def contains(self, points):
+        """test if a list of points are contained by mesh
+
+        Parameters
+        ----------
+        points : array-like n-by-2
+            x,y-coordinates of n points to be tested
+
+        Returns
+        -------
+        bool array
+            True for points inside, False otherwise
+        """
         import matplotlib.path as mp
         try:
             domain = self._shapely_domain2d
@@ -530,6 +542,20 @@ class _UnstructuredGeometry:
         return elem_id, d
 
     def get_overset_grid(self, dx=None, shape=None):
+        """get a 2d grid that covers the domain by specifying dx or shape
+
+        Parameters
+        ----------
+        dx : float, optional
+            grid resolution in both x- and y-direction
+        shape : (int, int), optional
+            tuple with nx and ny describing number of points in each direction
+
+        Returns
+        -------
+        tuple
+            x0, dx, nx, y0, dy, ny
+        """
         coords = self.node_coordinates   # node_ or element_
         small = 1e-10        
         x0 = coords[:,0].min() + small
@@ -561,6 +587,22 @@ class _UnstructuredGeometry:
         return x0, dx, nx, y0, dy, ny
 
     def get_2d_interpolant(self, xy, n_nearest:int=1, extrapolate=False):
+        """IDW interpolant for list of coordinates
+
+        Parameters
+        ----------
+        xy : array-like 
+            x,y coordinates of new points 
+        n_nearest : int, optional
+            [description], by default 1
+        extrapolate : bool, optional
+            allow , by default False
+
+        Returns
+        -------
+        (np.array, np.array)
+            element ids and weights 
+        """
         elem_ids, distances = self._find_n_nearest_2d_elements(xy, n_points=n_nearest)
 
         if n_nearest == 1:
