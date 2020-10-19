@@ -229,6 +229,15 @@ def test_get_element_coords():
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
 
+def test_contains():
+    filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
+    dfs = Dfsu(filename)
+
+    pts = [[4, 54],[0, 50]]
+    inside = dfs.contains(pts)
+    assert inside[0] == True
+    assert inside[1] == False
+
 def test_find_nearest_element_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
