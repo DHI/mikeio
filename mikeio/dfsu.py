@@ -541,22 +541,23 @@ class _UnstructuredGeometry:
         d, elem_id = self._tree2d.query(p, k=n_points)
         return elem_id, d
 
-    def get_overset_grid(self, dx=None, shape=None):
-        """get a 2d grid that covers the domain by specifying dx or shape
+    def get_overset_grid(self, dxdy=None, shape=None):
+        """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
         ----------
-        dx : float, optional
-            grid resolution in both x- and y-direction
+        dxdy : float or (float, float), optional
+            grid resolution in x- and y-direction
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
+            one of them can be None, in which case the value will be inferred
 
         Returns
         -------
         tuple
             x0, dx, nx, y0, dy, ny
         """
-        coords = self.node_coordinates   # node_ or element_
+        coords = self.geometry2d.node_coordinates   # node_ or element_
         small = 1e-10        
         x0 = coords[:,0].min() + small
         y0 = coords[:,1].min() + small
@@ -565,22 +566,29 @@ class _UnstructuredGeometry:
         xr = x1 - x0
         yr = y1 - y0
         
-        if (dx is None) and (shape is None):
+        if (dxdy is None) and (shape is None):
             if xr <= yr:
                 nx = 10
-                ny = int(np.ceil(yr/xr))*nx
+                ny = int(np.ceil(nx*yr/xr))
             else:
                 ny = 10
-                nx = int(np.ceil(xr/yr))*ny
+                nx = int(np.ceil(ny*xr/yr))
             dx = xr/(nx-1)
             dy = yr/(ny-1)
         else:
-            if dx is None:
+            if dxdy is None:
                 nx, ny = shape
+                if nx is None:
+                    nx = int(np.ceil(ny*xr/yr))
+                elif ny is None:
+                    ny = int(np.ceil(nx*yr/xr))
                 dx = xr/(nx-1)
                 dy = yr/(ny-1)
             if shape is None:
-                dy = dx
+                if np.isscalar(dxdy):
+                    dy = dx = dxdy
+                else:
+                    dx, dy = dxdy
                 nx = int(np.ceil(xr/dx)) + 1
                 ny = int(np.ceil(yr/dy)) + 1
 
