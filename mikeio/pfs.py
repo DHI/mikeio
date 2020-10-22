@@ -25,6 +25,9 @@ class Pfs:
         warnings.warn(
             "Support for PFS files in mikeio is experimental. The API is likely to change!"
         )
+        print(
+            "Support for PFS files in mikeio is experimental. The API is likely to change!"
+        )
 
         try:
             self._filename = filename
@@ -154,6 +157,13 @@ class Pfs:
 # TODO come up with a better name
 class PfsCore:
     def __init__(self, filename, target=None):
+
+        warnings.warn(
+            "Support for PFS files in mikeio is experimental. The API is likely to change!"
+        )
+        print(
+            "Support for PFS files in mikeio is experimental. The API is likely to change!"
+        )
 
         self._pfs = PFSFile(filename)
 
