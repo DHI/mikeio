@@ -103,6 +103,30 @@ def test_sw_new_start_time_write(tmpdir):
     pfs.write(outfilename)
 
 
+def test_sw_get_end_time(tmpdir):
+
+    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
+
+    assert pfs.start_time.year == 2002
+    assert pfs.end_time.year == 2002
+    assert pfs.end_time.month == 1
+    assert pfs.end_time.day == 1
+    assert pfs.end_time.hour == 15
+
+
+def test_sw_set_end_time(tmpdir):
+
+    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
+
+    assert pfs.start_time.year == 2002
+    assert pfs.section("TIME")["number_of_time_steps"].value == 450
+    new_end_time = datetime(2002, 1, 2, 0)
+    pfs.end_time = new_end_time
+
+    assert pfs.end_time == new_end_time
+    assert pfs.section("TIME")["number_of_time_steps"].value == 720
+
+
 def test_sw_modify_and_write(tmpdir):
 
     # [SPECTRAL_WAVE_MODULE][WIND]Charnock_parameter

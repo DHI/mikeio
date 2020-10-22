@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 import yaml
 import pandas as pd
 from typing import Union
@@ -208,6 +208,27 @@ class PfsCore:
         start_time.GetParameter(5).ModifyIntParameter(value.minute)
         start_time.GetParameter(6).ModifyIntParameter(value.second)
 
+    @property
+    def end_time(self) -> datetime:
+
+        start_time = self.start_time
+
+        nt = self.section("TIME")["number_of_time_steps"].value
+        dt = self.section("TIME")["time_step_interval"].value
+
+        return start_time + timedelta(seconds=nt * dt)
+
+    @end_time.setter
+    def end_time(self, value: datetime):
+
+        print("FOO")
+        start_time = self.start_time
+        dt = self.section("TIME")["time_step_interval"].value
+
+        nt = int((value - start_time).total_seconds() / dt)
+
+        self.section("TIME")["number_of_time_steps"] = nt
+
     def _find_target(self, filename):
 
         with open(filename) as f:
@@ -241,10 +262,10 @@ class Parameter:
     def value(self):
         par = self._parameter
 
-        if par.IsDouble():
-            return par.ToDouble()
-        elif par.IsInt():
+        if par.IsInt():
             return par.ToInt()
+        elif par.IsDouble():
+            return par.ToDouble()
         elif par.IsFilename():
             return par.ToFileName()
         elif par.IsClob():
@@ -256,10 +277,10 @@ class Parameter:
 
         par = self._parameter
 
-        if par.IsDouble():
-            par.ModifyDoubleParameter(value)
-        elif par.IsInt():
+        if par.IsInt():
             par.ModifyIntParameter(value)
+        elif par.IsDouble():
+            par.ModifyDoubleParameter(value)
         elif par.IsFilename():
             par.ModifyFileNameParameter(value)
         elif par.IsClob():
