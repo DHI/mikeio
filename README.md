@@ -181,7 +181,9 @@ For more examples on working with dfsu and mesh see these notebooks:
 
 ## Pfs
 
-Pfs is the format used for MIKE setup files (.m21fm, .m3fm, .sw etc.)
+Pfs is the format used for MIKE setup files (.m21fm, .m3fm, .sw etc.).
+
+There is experimental support for reading pfs files, but the API is likely to change.
 
 ![pfs](images/pfs.gif)
 

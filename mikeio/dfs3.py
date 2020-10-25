@@ -10,7 +10,8 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
-from .dutil import Dataset, get_item_info
+from .dutil import get_item_info
+from .dataset import Dataset
 from .dotnet import (
     to_numpy,
     to_dotnet_array,

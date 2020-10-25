@@ -11,7 +11,8 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
-from .dutil import Dataset, get_item_info, get_valid_items_and_timesteps
+from .dutil import get_item_info, get_valid_items_and_timesteps
+from .dataset import Dataset
 from .dotnet import (
     to_numpy,
     to_dotnet_float_array,
@@ -983,18 +984,20 @@ class _UnstructuredGeometry:
             print("Object has no layers: cannot get_layer_elements")
             return None
 
-        if layer < (-n_lay+1) or layer > n_lay:
+        if layer < (-n_lay + 1) or layer > n_lay:
             raise Exception(
                 f"Layer {layer} not allowed; must be between -{n_lay-1} and {n_lay}"
             )
 
-        if layer <=0:
+        if layer <= 0:
             layer = layer + n_lay
 
-        return self.element_ids[self.layer_ids==layer]
+        return self.element_ids[self.layer_ids == layer]
 
     def _get_2d_to_3d_association(self):
-        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
+        e2_to_e3 = (
+            []
+        )  # for each 2d element: the corresponding 3d element ids from bot to top
         index2d = []  # for each 3d element: the associated 2d element id
         layerid = []  # for each 3d element: the associated layer number
         n2d = len(self.top_elements)
@@ -1013,7 +1016,7 @@ class _UnstructuredGeometry:
             for ll in local_layers:
                 layerid.append(ll)
 
-        e2_to_e3 = np.array(e2_to_e3) 
+        e2_to_e3 = np.array(e2_to_e3)
         index2d = np.array(index2d)
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
@@ -1249,12 +1252,12 @@ class _UnstructuredGeometry:
 
         # set aspect ratio
         if geometry.is_geo:
-            mean_lat = np.mean(nc[:,1]) 
+            mean_lat = np.mean(nc[:, 1])
             ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
         else:
             ax.set_aspect("equal")
 
-        # set plot limits   
+        # set plot limits
         xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
         ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
 
@@ -1373,19 +1376,19 @@ class _UnstructuredGeometry:
             try:
                 domain = self._shapely_domain2d
             except:
-                warnings.warn('Could not plot outline. Failed to convert to_shapely()')
+                warnings.warn("Could not plot outline. Failed to convert to_shapely()")
             try:
                 if domain:
                     out_col = "0.4"
                     ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
-                    xd, yd = domain.exterior.xy[0], domain.exterior.xy[1]                    
-                    xmin, xmax = min(xmin,np.min(xd)), max(xmax,np.max(xd))
-                    ymin, ymax = min(ymin,np.min(yd)), max(ymax,np.max(yd))
+                    xd, yd = domain.exterior.xy[0], domain.exterior.xy[1]
+                    xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
+                    ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
                     for j in range(len(domain.interiors)):
                         interj = domain.interiors[j]
                         ax.plot(*interj.xy, color=out_col, linewidth=1.2)
             except:
-                warnings.warn('Could not plot outline')
+                warnings.warn("Could not plot outline")
 
         # set plot limits
         xybuf = 6e-3 * (xmax - xmin)
@@ -1395,7 +1398,7 @@ class _UnstructuredGeometry:
         if title is not None:
             ax.set_title(title)
 
-        return ax 
+        return ax
 
     def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh
@@ -1760,6 +1763,53 @@ class Dfsu(_UnstructuredFile):
         dfs.Close()
         return Dataset(data_list, time, items)
 
+    def write_header(
+        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
+    ):
+        """Write the header of a new dfsu file
+
+            Parameters
+            -----------
+            filename: str
+                full path to the new dfsu file
+            start_time: datetime, optional
+                start datetime, default is datetime.now()
+            dt: float, optional
+                The time step (in seconds)
+            items: list[ItemInfo], optional
+            elements: list[int], optional
+                write only these element ids to file
+            title: str
+                title of the dfsu file. Default is blank.
+
+            Examples
+            --------
+            >>> msh = Mesh("foo.mesh")
+            >>> n_elements = msh.n_elements
+            >>> dfs = Dfsu(meshfilename)
+            >>> nt = 1000
+            >>> n_items = 10
+            >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+            >>> with dfs.write_header(outfilename, items=items) as f:
+            >>>     for i in range(1, nt):
+            >>>         data = []
+            >>>         for i in range(n_items):
+            >>>             d = np.random.random((1, n_elements))
+            >>>             data.append(d)
+            >>>             f.append(data)
+            """
+
+        return self.write(
+            filename=filename,
+            data=[],
+            start_time=start_time,
+            dt=dt,
+            items=items,
+            elements=elements,
+            title=title,
+            keep_open=True,
+        )
+
     def write(
         self,
         filename,
@@ -1769,6 +1819,7 @@ class Dfsu(_UnstructuredFile):
         items=None,
         elements=None,
         title=None,
+        keep_open=False,
     ):
         """Write a new dfsu file
 
@@ -1787,6 +1838,8 @@ class Dfsu(_UnstructuredFile):
             write only these element ids to file
         title: str
             title of the dfsu file. Default is blank.
+        keep_open: bool, optional
+            Keep file open for appending
         """
 
         if isinstance(data, Dataset):
@@ -1801,7 +1854,9 @@ class Dfsu(_UnstructuredFile):
             data = data.data
 
         n_items = len(data)
-        n_time_steps = np.shape(data[0])[0]
+        n_time_steps = 0
+        if n_items > 0:
+            n_time_steps = np.shape(data[0])[0]
 
         if dt is None:
             if self.timestep is None:
@@ -1822,6 +1877,10 @@ class Dfsu(_UnstructuredFile):
                 )
 
         if items is None:
+            if n_items == 0:
+                raise ValueError(
+                    "Number of items unknown. Add (..., items=[ItemInfo(...)]"
+                )
             items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
 
         if title is None:
@@ -1895,11 +1954,11 @@ class Dfsu(_UnstructuredFile):
                 )
 
         try:
-            dfs = builder.CreateFile(filename)
+            self._dfs = builder.CreateFile(filename)
         except IOError:
             print("cannot create dfsu file: ", filename)
 
-        deletevalue = dfs.DeleteValueFloat
+        deletevalue = self._dfs.DeleteValueFloat
 
         try:
             # Add data for all item-timesteps, copying from source
@@ -1908,13 +1967,44 @@ class Dfsu(_UnstructuredFile):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
                     darray = to_dotnet_float_array(d)
-                    dfs.WriteItemTimeStepNext(0, darray)
-            dfs.Close()
+                    self._dfs.WriteItemTimeStepNext(0, darray)
+            if not keep_open:
+                self._dfs.Close()
+            else:
+                return self
 
         except Exception as e:
             print(e)
-            dfs.Close()
+            self._dfs.Close()
             os.remove(filename)
+
+    def append(self, data):
+        """Append to a dfsu file opened with `write(...,keep_open=True)`
+
+        Parameters
+        -----------
+        data: list[np.array]
+        """
+
+        deletevalue = self._dfs.DeleteValueFloat
+        n_items = len(data)
+        n_time_steps = np.shape(data[0])[0]
+        for i in range(n_time_steps):
+            for item in range(n_items):
+                d = data[item][i, :]
+                d[np.isnan(d)] = deletevalue
+                darray = to_dotnet_float_array(d)
+                self._dfs.WriteItemTimeStepNext(0, darray)
+
+    def close(self):
+        "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"
+        self._dfs.Close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self._dfs.Close()
 
     def to_mesh(self, outfilename):
         """write object to mesh file
