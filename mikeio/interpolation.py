@@ -1,7 +1,7 @@
 import numpy as np
 
 #class Interpolation2D:
-def get_idw_interpolant(self, distances, p=1):
+def get_idw_interpolant(distances, p=1):
     """IDW interpolant for 2d array of distances
 
     Parameters
@@ -29,12 +29,12 @@ def get_idw_interpolant(self, distances, p=1):
 
     return weights
 
-def interp2d(self, data, elem_ids, weights=None):
+def interp2d(data, elem_ids, weights=None):
     
     if isinstance(data, np.ndarray):
         if data.ndim == 1:
             # data is single item and single time step
-            return self._interp_itemstep(data, elem_ids, weights)
+            return _interp_itemstep(data, elem_ids, weights)
         elif data.ndim == 2:
             # data is single item 
             data = [data]
@@ -45,11 +45,11 @@ def interp2d(self, data, elem_ids, weights=None):
         nt, ne = datitem.shape
         idatitem = np.empty(shape=(nt,ni)) 
         for step in range(nt):
-            idatitem[step,:] = self._interp_itemstep(datitem[step,:], elem_ids, weights)
+            idatitem[step,:] = _interp_itemstep(datitem[step,:], elem_ids, weights)
         idat.append(idatitem)
     return idat
 
-def _interp_itemstep(self, data, elem_ids, weights=None):
+def _interp_itemstep(data, elem_ids, weights=None):
     if weights is None:
         # nearest neighbor
         return data[elem_ids]
