@@ -25,6 +25,7 @@ from .dotnet import (
 from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
 from .spatial import Grid2D
+from .interpolation import get_idw_interpolant, interp2d
 
 class UnstructuredType(IntEnum):
     """
@@ -587,21 +588,14 @@ class _UnstructuredGeometry:
             element ids and weights 
         """
         elem_ids, distances = self._find_n_nearest_2d_elements(xy, n_points=n_nearest)
+        weights = None
 
         if n_nearest == 1:
             weights = np.ones(distances.shape)
             if not extrapolate: 
                 weights[~self.contains(xy)] = np.nan
         elif n_nearest > 1:
-            weights = np.zeros(distances.shape)
-            p = 1   # inverse distance order 
-            
-            match = distances[:,0] < 1e-8
-            weights[match,0] = 1
-            
-            weights[~match,:] = 1 / distances[~match,:]**p
-            denom = weights[~match,:].sum(axis=1).reshape(-1,1)*np.ones((1,n_nearest))
-            weights[~match,:] = weights[~match,:] / denom
+            weights = get_idw_interpolant(distances)
             if not extrapolate: 
                 weights[~self.contains(xy),:] = np.nan
         else:
@@ -609,40 +603,20 @@ class _UnstructuredGeometry:
 
         return elem_ids, weights
 
-    # def gridded_2d_interpolant(self, x0, dx, nx:int, y0, dy, ny:int, n_nearest:int=1):
-    #     x1 = x0 + dx*(nx-1)
-    #     x = np.linspace(x0, x1, nx)
-    #     y1 = y0 + dy*(ny-1)
-    #     y = np.linspace(y0, y1, ny)
-    #     xv, yv = np.meshgrid(x, y)
-    #     xy = np.empty((nx*ny, 2))
-    #     xy[:,0] = xv.reshape(-1)
-    #     xy[:,1] = yv.reshape(-1)
-    #     return self.get_2d_interpolant(xy, n_nearest)
-
-    def interp2d(self, data, interpolant2d):
+    # def interp2d(self, data, elem_ids, weights):
         
-        if len(data) == self.n_elements:
-            return self._interp_itemstep(data, interpolant2d)
+    #     if len(data) == self.n_elements:
+    #         return self._interp_itemstep(data, interpolant2d)
 
-        idat = []
-        ni = len(interpolant2d[0])
-        for datitem in data:
-            nt, ne = datitem.shape
-            idatitem = np.empty(shape=(nt,ni)) 
-            for step in range(nt):
-                idatitem[step,:] = self._interp_itemstep(datitem[step,:], interpolant2d)
-            idat.append(idatitem)
-        return idat
-
-    def _interp_itemstep(self, data, interpolant2d):
-        ix = interpolant2d[0]
-        w = interpolant2d[1]
-        ni = len(ix)
-        idat = np.empty(ni)
-        for j in range(ni):
-            idat[j] = np.dot(data[ix[j]], w[j])
-        return idat
+    #     idat = []
+    #     ni = len(interpolant2d[0])
+    #     for datitem in data:
+    #         nt, ne = datitem.shape
+    #         idatitem = np.empty(shape=(nt,ni)) 
+    #         for step in range(nt):
+    #             idatitem[step,:] = self._interp_itemstep(datitem[step,:], interpolant2d)
+    #         idat.append(idatitem)
+    #     return idat
 
     def _find_n_nearest_elements(self, x, y, z=None, n=1, layer=None):
         """Find n nearest elements (for each of the points given) 
