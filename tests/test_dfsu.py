@@ -243,25 +243,25 @@ def test_get_overset_grid():
     filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
     dfs = Dfsu(filename)
 
-    x0, dx, nx, y0, dy, ny = dfs.get_overset_grid()
-    assert nx == 21
-    assert ny == 10
+    g = dfs.get_overset_grid()
+    assert g.nx == 21
+    assert g.ny == 10
 
-    x0, dx, nx, y0, dy, ny = dfs.get_overset_grid(dxdy=0.2)
-    assert dx == 0.2
-    assert dy == 0.2
+    g = dfs.get_overset_grid(dxdy=0.2)
+    assert g.dx == 0.2
+    assert g.dy == 0.2
 
-    x0, dx, nx, y0, dy, ny = dfs.get_overset_grid(dxdy=(0.4,0.2))
-    assert dx == 0.4
-    assert dy == 0.2
+    g = dfs.get_overset_grid(dxdy=(0.4,0.2))
+    assert g.dx == 0.4
+    assert g.dy == 0.2
 
-    x0, dx, nx, y0, dy, ny = dfs.get_overset_grid(shape=(5,4))
-    assert nx == 5
-    assert ny == 4
+    g = dfs.get_overset_grid(shape=(5,4))
+    assert g.nx == 5
+    assert g.ny == 4
 
-    x0, dx, nx, y0, dy, ny = dfs.get_overset_grid(shape=(None,5))
-    assert nx == 11
-    assert ny == 5
+    g = dfs.get_overset_grid(shape=(None,5))
+    assert g.nx == 11
+    assert g.ny == 5
 
 def test_find_nearest_element_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
