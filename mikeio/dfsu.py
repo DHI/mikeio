@@ -1,5 +1,6 @@
 import os
 from enum import IntEnum
+from collections import namedtuple 
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
@@ -22,6 +23,7 @@ from .dotnet import (
 )
 from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
+from .spatial import Grid2D
 
 class UnstructuredType(IntEnum):
     """
@@ -554,8 +556,8 @@ class _UnstructuredGeometry:
 
         Returns
         -------
-        tuple
-            x0, dx, nx, y0, dy, ny
+        <mikeio.Grid2D>
+            2d grid
         """
         coords = self.geometry2d.node_coordinates   # node_ or element_
         small = 1e-10        
@@ -563,37 +565,9 @@ class _UnstructuredGeometry:
         y0 = coords[:,1].min() + small
         x1 = coords[:,0].max() - small
         y1 = coords[:,1].max() - small
-        xr = x1 - x0
-        yr = y1 - y0
+        bbox = [x0, y0, x1, y1]
+        return Grid2D(bbox=bbox, dxdy=dxdy, shape=shape)
         
-        if (dxdy is None) and (shape is None):
-            if xr <= yr:
-                nx = 10
-                ny = int(np.ceil(nx*yr/xr))
-            else:
-                ny = 10
-                nx = int(np.ceil(ny*xr/yr))
-            dx = xr/(nx-1)
-            dy = yr/(ny-1)
-        else:
-            if dxdy is None:
-                nx, ny = shape
-                if nx is None:
-                    nx = int(np.ceil(ny*xr/yr))
-                elif ny is None:
-                    ny = int(np.ceil(nx*yr/xr))
-                dx = xr/(nx-1)
-                dy = yr/(ny-1)
-            if shape is None:
-                if np.isscalar(dxdy):
-                    dy = dx = dxdy
-                else:
-                    dx, dy = dxdy
-                nx = int(np.ceil(xr/dx)) + 1
-                ny = int(np.ceil(yr/dy)) + 1
-
-        return x0, dx, nx, y0, dy, ny
-
     def get_2d_interpolant(self, xy, n_nearest:int=1, extrapolate=False):
         """IDW interpolant for list of coordinates
 
@@ -634,16 +608,16 @@ class _UnstructuredGeometry:
 
         return elem_ids, weights
 
-    def gridded_2d_interpolant(self, x0, dx, nx:int, y0, dy, ny:int, n_nearest:int=1):
-        x1 = x0 + dx*(nx-1)
-        x = np.linspace(x0, x1, nx)
-        y1 = y0 + dy*(ny-1)
-        y = np.linspace(y0, y1, ny)
-        xv, yv = np.meshgrid(x, y)
-        xy = np.empty((nx*ny, 2))
-        xy[:,0] = xv.reshape(-1)
-        xy[:,1] = yv.reshape(-1)
-        return self.get_2d_interpolant(xy, n_nearest)
+    # def gridded_2d_interpolant(self, x0, dx, nx:int, y0, dy, ny:int, n_nearest:int=1):
+    #     x1 = x0 + dx*(nx-1)
+    #     x = np.linspace(x0, x1, nx)
+    #     y1 = y0 + dy*(ny-1)
+    #     y = np.linspace(y0, y1, ny)
+    #     xv, yv = np.meshgrid(x, y)
+    #     xy = np.empty((nx*ny, 2))
+    #     xy[:,0] = xv.reshape(-1)
+    #     xy[:,1] = yv.reshape(-1)
+    #     return self.get_2d_interpolant(xy, n_nearest)
 
     def interp2d(self, data, interpolant2d):
         
