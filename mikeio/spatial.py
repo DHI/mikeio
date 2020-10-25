@@ -249,12 +249,12 @@ class Grid2D:
         self._x0 = x0        
         self._dx = dx
         self._nx = nx
-        self._set_x_axis(x0, dx, nx)
+        self._create_x_axis(x0, dx, nx)
         
         self._y0 = y0
         self._dy = dy
         self._ny = ny
-        self._set_y_axis(y0, dy, ny)
+        self._create_y_axis(y0, dy, ny)
 
     def _create_from_x_and_y(self, x, y):
         
@@ -270,11 +270,11 @@ class Grid2D:
         self._dy = y[1]-y[0]
         self._y = y
 
-    def _set_x_axis(self, x0, dx, nx):
+    def _create_x_axis(self, x0, dx, nx):
         self._x1 = x0 + dx*(nx-1)
         self._x = np.linspace(x0, self._x1, nx)
 
-    def _set_y_axis(self, y0, dy, ny):
+    def _create_y_axis(self, y0, dy, ny):
         self._y1 = y0 + dy*(ny-1)
         self._y = np.linspace(y0, self._y1, ny)
 
@@ -315,8 +315,8 @@ class Grid2D:
     def __repr__(self):
         out = []
         out.append("2D Grid")
-        out.append(f"x-axis: {self.nx} points from {self.x0} to {self.x1}")
-        out.append(f"y-axis: {self.ny} points from {self.y0} to {self.y1}")
+        out.append(f"x-axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}")
+        out.append(f"y-axis: ny={self.ny} points from y0={self.y0:g} to y1={self.y1:g} with dy={self.dy:g}")
         out.append(f"Number of grid points: {self.n}")        
         return str.join("\n", out)
 
