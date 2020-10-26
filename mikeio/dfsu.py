@@ -1,6 +1,5 @@
 import os
 from enum import IntEnum
-from collections import namedtuple 
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
