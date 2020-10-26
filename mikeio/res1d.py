@@ -18,26 +18,6 @@ def mike1d_quantities():
     return [quantity for quantity in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
 
 
-def read_to_dataframe(file_path, queries=None):
-    """ Read all or queried data in res1d file to a pandas DataFrame."""
-
-    res1d = Res1D(file_path)
-
-    if queries is not None:
-        queries = queries if isinstance(queries, list) else [queries]
-        return res1d.read(queries)
-    # TODO else: create_all_queries(res1d)
-
-    df = pd.DataFrame(index=res1d.time_index)
-    for data_set in res1d.data.DataSets:
-        for data_item in data_set.DataItems:
-            name = data_set.Name if hasattr(data_set, 'Name') else data_set.Id
-            for values, col_name in Res1D.get_values(data_item, name):
-                df[col_name] = values
-
-    return df
-
-
 class QueryData:
     """A query object that declares what data should be
     extracted from a .res1d file.
@@ -139,13 +119,6 @@ class Res1D:
         self._start_time = None
         self._load_file()
 
-    def read(self, queries):
-        df = pd.DataFrame(index=self.time_index)
-        for query in queries:
-            df[str(query)] = query.get_values(self)
-
-        return df
-
     def _load_file(self):
         if not os.path.exists(self.file_path):
             raise FileExistsError(f"File {self.file_path} does not exist.")
@@ -154,6 +127,33 @@ class Res1D:
         self._data.Connection = Connection.Create(self.file_path)
         self._data.Load(Diagnostics())
         self._query = ResultDataQuery(self._data)
+
+    def read(self, queries):
+        df = pd.DataFrame(index=self.time_index)
+        for query in queries:
+            df[str(query)] = query.get_values(self)
+
+        return df
+
+    @staticmethod
+    def read_to_dataframe(file_path, queries=None):
+        """ Read all or queried data in res1d file to a pandas DataFrame."""
+
+        res1d = Res1D(file_path)
+
+        if queries is not None:
+            queries = queries if isinstance(queries, list) else [queries]
+            return res1d.read(queries)
+        # TODO else: create_all_queries(res1d)
+
+        df = pd.DataFrame(index=res1d.time_index)
+        for data_set in res1d.data.DataSets:
+            for data_item in data_set.DataItems:
+                name = data_set.Name if hasattr(data_set, 'Name') else data_set.Id
+                for values, col_name in Res1D.get_values(data_item, name):
+                    df[col_name] = values
+
+        return df
 
     @staticmethod
     def get_values(data_item, data_set_name, col_name_delimiter=':'):
