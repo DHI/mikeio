@@ -13,6 +13,7 @@ def test_file_path():
 def test_file(test_file_path):
     return Res1D(test_file_path)
 
+
 def test_file_does_not_exist():
     with pytest.raises(FileExistsError):
         assert read("tests/testdata/not_a_file.res1d")
@@ -57,5 +58,5 @@ def test_read_node(test_file, quantity, id, expected_max):
     assert pytest.approx(actual_max) == expected_max
 
 
-def test_time_index():
-    pass
+def test_time_index(test_file):
+    assert len(test_file.time_index) == 110

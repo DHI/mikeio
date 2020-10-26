@@ -17,6 +17,10 @@ from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
 
 def mike1d_quantities():
+    """
+    Returns all predefined Mike1D quantities.
+    Useful for knowing what quantity string to query.
+    """
     return [q for q in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
 
 
@@ -61,7 +65,7 @@ class Res1D:
     @property
     def time_index(self):
         """panda.DatetimeIndex of the time index."""
-        if self._time_index:
+        if self._time_index is not None:
             return self._time_index
 
         time_stamps = [from_dotnet_datetime(t) for t in self.data.TimesList]
