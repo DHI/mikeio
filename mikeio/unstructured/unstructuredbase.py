@@ -1,4 +1,7 @@
 import numpy as np
+import warnings
+
+from scipy.spatial import cKDTree
 
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuUtil
 
@@ -1397,6 +1400,7 @@ class _UnstructuredGeometry:
 
         return np.asarray(elem_table), ec, data
 
+
 def get_nodes_from_source(source):
     xn = asNumpyArray(source.X)
     yn = asNumpyArray(source.Y)
@@ -1408,6 +1412,7 @@ def get_nodes_from_source(source):
     node_ids = np.array(list(source.NodeIds)) - 1
 
     return nc, codes, n_nodes, node_ids
+
 
 def get_elements_from_source(source):
     n_elements = source.NumberOfElements
