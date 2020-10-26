@@ -160,9 +160,11 @@ class Res1D:
     def get_values(data_item, data_set_name, col_name_delimiter=':'):
         """ Get all time series values in given data_item. """
         if data_item.IndexList is None or data_item.NumberOfElements == 1:
-            yield data_item.CreateTimeSeriesData(0), data_set_name
+            col_name = col_name_delimiter.join([data_item.Quantity.Id, data_set_name])
+            yield data_item.CreateTimeSeriesData(0), col_name
         else:
             for i in range(0, data_item.NumberOfElements):
+
                 col_name_i = col_name_delimiter.join([data_item.Quantity.Id, data_set_name, str(i)])
                 yield data_item.CreateTimeSeriesData(i), col_name_i
 
