@@ -172,7 +172,7 @@ class _UnstructuredGeometry:
     def is_tri_only(self):
         """Does the mesh consist of triangles only?
         """
-        return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
+        return self.max_nodes_per_element in (3, 6)
 
     @property
     def _shapely_domain2d(self):
@@ -730,8 +730,8 @@ class _UnstructuredGeometry:
         yn = self.node_coordinates[:, 1]
 
         area = np.empty(n_elements)
-        xcoords = np.empty(8)
-        ycoords = np.empty(8)
+        xcoords = np.zeros(8)
+        ycoords = np.zeros(8)
 
         for j in range(n_elements):
             nodes = self.element_table[j]
@@ -762,7 +762,7 @@ class _UnstructuredGeometry:
                 earth_radius = 6366707.0 * np.pi / 180.0
 
                 # Y on element centers
-                Ye = np.sum(ycoords[:n_nodes]) / n_nodes
+                Ye = np.sum(ycoords) / n_nodes
                 cosYe = np.cos(np.deg2rad(Ye))
 
                 abx = earth_radius * abx * cosYe
