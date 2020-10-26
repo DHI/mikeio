@@ -27,7 +27,8 @@ from .dfs0 import Dfs0
 from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
-from .dfsu import Dfsu, Mesh
+from .unstructured.dfsu import Dfsu
+from .unstructured.mesh import Mesh
 from .pfs import Pfs
 from .xyz import read_xyz
 from .dataset import Dataset
@@ -69,6 +70,8 @@ def read(filename, items=None, time_steps=None):
 
     elif ext == ".xyz":
         return read_xyz(filename)
+    elif ext == ".mesh":
+        return Mesh(filename)
     else:
         raise Exception(f"{ext} is an unsupported extension")
 

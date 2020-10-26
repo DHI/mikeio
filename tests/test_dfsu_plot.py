@@ -9,6 +9,7 @@ from mikeio import Dfsu, Mesh
 ##################################################
 pytest.importorskip("matplotlib")
 
+
 def test_plot_bathymetry():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
@@ -18,8 +19,8 @@ def test_plot_bathymetry():
 
 def test_plot_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)    
-    dfs.plot(cmap='plasma')
+    dfs = Dfsu(filename)
+    dfs.plot(cmap="plasma")
     assert True
 
 
@@ -36,23 +37,24 @@ def test_plot_dfsu_contour():
     dfs.plot(plot_type="contour", levels=5)
     assert True
 
+
 def test_plot_dfsu_contourf_levels():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    dfs.plot(plot_type="contourf", levels=[-3,-1])
+    dfs.plot(plot_type="contourf", levels=[-3, -1])
     assert True
 
 
 def test_plot_dfsu_contour_mixedmesh():
     filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
-    msh = Mesh(filename)
+    msh = Dfsu(filename)
     msh.plot(plot_type="contour", levels=5)
     assert True
 
 
 def test_plot_dfsu_n_refinements():
     filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
-    msh = Mesh(filename)
+    msh = Dfsu(filename)
     msh.plot(plot_type="contourf", levels=5, n_refinements=1)
     assert True
 
@@ -71,7 +73,7 @@ def test_plot_dfsu():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
     data = dfs.read()
-    dfs.plot(z=data[1][0, :], figsize=(3,3))
+    dfs.plot(z=data[1][0, :], figsize=(3, 3))
     assert True
 
 
@@ -79,7 +81,7 @@ def test_plot_dfsu_arguments():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
     data = dfs.read()
-    dfs.plot(title='test', label='test', vmin=-23, vmax=23)
+    dfs.plot(title="test", label="test", vmin=-23, vmax=23)
     assert True
 
 
@@ -93,7 +95,7 @@ def test_plot_mesh():
 def test_plot_mesh_outline():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
-    msh.plot(plot_type='outline_only')
+    msh.plot(plot_type="outline_only")
     assert True
 
 
@@ -106,11 +108,12 @@ def test_plot_mesh_part():
 
 def test_plot_mesh_ax():
     import matplotlib.pyplot as plt
+
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
     _, ax = plt.subplots()
     msh.plot(ax=ax)
-    assert True   
+    assert True
 
 
 def test_plot_mesh_boundary_nodes():
