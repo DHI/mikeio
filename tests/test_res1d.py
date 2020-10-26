@@ -9,6 +9,10 @@ def test_file_path():
     return "tests/testdata/Exam6Base.res1d"
 
 
+@pytest.fixture
+def test_file(test_file_path):
+    return Res1D(test_file_path)
+
 def test_file_does_not_exist():
     with pytest.raises(FileExistsError):
         assert read("tests/testdata/not_a_file.res1d")
@@ -24,9 +28,8 @@ def test_mike1d_quantities():
     assert "WaterLevel" in quantities
 
 
-def test_quantities(test_file_path):
-    res1d = Res1D(test_file_path)
-    quantities = res1d.quantities
+def test_quantities(test_file):
+    quantities = test_file.quantities
     assert len(quantities) == 2
 
 
@@ -36,9 +39,8 @@ def test_quantities(test_file_path):
     ("Discharge", "100l1", 23.8414, 0.1),
     ("Discharge", "9l1", 5, 0.761)
 ])
-def test_read_reach(test_file_path, quantity, id, chainage, expected_max):
-    res1d = Res1D(test_file_path)
-    data = res1d.query.GetReachValues(id, chainage, quantity)
+def test_read_reach(test_file, quantity, id, chainage, expected_max):
+    data = test_file.query.GetReachValues(id, chainage, quantity)
     data = to_numpy(data)
     actual_max = round(np.max(data), 3)
     assert pytest.approx(actual_max) == expected_max
@@ -48,9 +50,12 @@ def test_read_reach(test_file_path, quantity, id, chainage, expected_max):
     ("WaterLevel", "1", 195.669),
     ("WaterLevel", "2", 195.823)
 ])
-def test_read_node(test_file_path, quantity, id, expected_max):
-    res1d = Res1D(test_file_path)
-    data = res1d.query.GetNodeValues(id, quantity)
+def test_read_node(test_file, quantity, id, expected_max):
+    data = test_file.query.GetNodeValues(id, quantity)
     data = to_numpy(data)
     actual_max = round(np.max(data), 3)
     assert pytest.approx(actual_max) == expected_max
+
+
+def test_time_index():
+    pass
