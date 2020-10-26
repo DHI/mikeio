@@ -3,9 +3,9 @@ import clr
 import pandas as pd
 import numpy as np
 
-from mikeio.dotnet import from_dotnet_datetime
+from mikeio.dotnet import from_dotnet_datetime, to_numpy, to_dotnet_datetime
 
-from System import Enum
+from System import Enum, DateTime
 from DHI.Mike1D.ResultDataAccess import ResultData, ResultDataQuery
 from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
@@ -117,6 +117,7 @@ class Res1D:
         self.file_path = file_path
         self._time_index = None
         self._start_time = None
+        self._end_time = None
         self._load_file()
 
     def _load_file(self):
@@ -181,6 +182,13 @@ class Res1D:
             return self._start_time
 
         return from_dotnet_datetime(self.data.StartTime)
+
+    @property
+    def end_time(self):
+        if self._end_time is not None:
+            return self._end_time
+
+        return from_dotnet_datetime(self.data.EndTime)
 
     @property
     def quantities(self):
@@ -331,6 +339,21 @@ class Res1D:
         """
         return self._data
 
+    def get_node_values(self, node_id, quantity):
+        return to_numpy(self.query.GetNodeValues(node_id, quantity))
 
-def to_numpy(data, dtype=np.float64):
-    return np.fromiter(data, dtype)
+    def get_reach_values(self, reach_name, chainage, quantity):
+        return to_numpy(self.query.GetReachValues(reach_name, chainage, quantity))
+
+    def get_reach_value(self, reach_name, chainage, quantity, time):
+        time_dotnet = time if isinstance(time, DateTime) else to_dotnet_datetime(time)
+        return self.query.GetReachValue(reach_name, chainage, quantity, time_dotnet)
+
+    def get_reach_start_values(self, reach_name, quantity):
+        return to_numpy(self.query.GetReachStartValues(reach_name, quantity))
+
+    def get_reach_end_values(self, reach_name, quantity):
+        return to_numpy(self.query.GetReachEndValues(reach_name, quantity))
+
+    def get_reach_sum_values(self, reach_name, quantity):
+        return to_numpy(self.query.GetReachSumValues(reach_name, quantity))

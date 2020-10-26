@@ -1,6 +1,7 @@
 import pytest
 
-from mikeio.res1d import Res1D, mike1d_quantities, QueryDataReach, to_numpy
+from mikeio.res1d import Res1D, mike1d_quantities, QueryDataReach
+from mikeio.dotnet import to_numpy
 import numpy as np
 
 
@@ -35,10 +36,10 @@ def test_quantities(test_file):
 
 
 @pytest.mark.parametrize("query,expected_max", [
-   (QueryDataReach("WaterLevel", "104l1", 34.4131), 197.046),
-   (QueryDataReach("WaterLevel", "9l1", 10), 195.165),
-   (QueryDataReach("Discharge", "100l1", 23.8414), 0.1),
-   (QueryDataReach("Discharge", "9l1", 5), 0.761)
+    (QueryDataReach("WaterLevel", "104l1", 34.4131), 197.046),
+    (QueryDataReach("WaterLevel", "9l1", 10), 195.165),
+    (QueryDataReach("Discharge", "100l1", 23.8414), 0.1),
+    (QueryDataReach("Discharge", "9l1", 5), 0.761)
 ])
 def test_read_reach_with_queries(test_file_path, query, expected_max):
     data = Res1D.read_to_dataframe(test_file_path, query)
@@ -77,6 +78,24 @@ def test_start_time(test_file):
     assert test_file.start_time == test_file.time_index.min()
 
 
+def test_get_node_values(test_file):
+    values = test_file.get_node_values("1", "WaterLevel")
+    assert len(values) == 110
+
+
+def test_get_reach_values(test_file):
+    values = test_file.get_reach_values("9l1", 5, "WaterLevel")
+    assert len(values) == 110
+    values_end = test_file.get_reach_end_values("9l1", "WaterLevel")
+    values_start = test_file.get_reach_start_values("9l1", "WaterLevel")
+    values_sum = test_file.get_reach_sum_values("9l1", "WaterLevel")
+
+
+def test_get_reach_value(test_file):
+    value = test_file.get_reach_value("9l1", 5, "WaterLevel", test_file.start_time)
+    assert value > 0
+
+
 def test_dotnet_methods(test_file_path):
     res1d = Res1D(test_file_path)
     result_specs = res1d.data.ResultSpecs
@@ -84,7 +103,7 @@ def test_dotnet_methods(test_file_path):
     values = res1d.query.GetNodeValues("1", "WaterLevel")
     values = res1d.query.GetReachValue("9l1", 5, "WaterLevel", res1d.data.StartTime)  # must be dotnet datetime
     values = res1d.query.GetReachValues("9l1", 5, "WaterLevel")
-    values = res1d.query.GetReachEndValues("9l1", "WaterLevel")     # avoid specifying chainage
-    values = res1d.query.GetReachStartValues("9l1", "WaterLevel")   # avoid specifying chainage
+    values = res1d.query.GetReachEndValues("9l1", "WaterLevel")  # avoid specifying chainage
+    values = res1d.query.GetReachStartValues("9l1", "WaterLevel")  # avoid specifying chainage
     values = res1d.query.GetReachSumValues("9l1", "WaterLevel")  # useful for summing volume in reach (all grid points)
     # values = res1d.query.GetCatchmentValues(catchmentId, quantityId)
