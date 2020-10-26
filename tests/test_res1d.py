@@ -75,3 +75,16 @@ def test_time_index(test_file):
 
 def test_start_time(test_file):
     assert test_file.start_time == test_file.time_index.min()
+
+
+def test_dotnet_methods(test_file_path):
+    res1d = Res1D(test_file_path)
+    result_specs = res1d.data.ResultSpecs
+    nodes = res1d.data.Nodes
+    values = res1d.query.GetNodeValues("1", "WaterLevel")
+    values = res1d.query.GetReachValue("9l1", 5, "WaterLevel", res1d.data.StartTime)  # must be dotnet datetime
+    values = res1d.query.GetReachValues("9l1", 5, "WaterLevel")
+    values = res1d.query.GetReachEndValues("9l1", "WaterLevel")     # avoid specifying chainage
+    values = res1d.query.GetReachStartValues("9l1", "WaterLevel")   # avoid specifying chainage
+    values = res1d.query.GetReachSumValues("9l1", "WaterLevel")  # useful for summing volume in reach (all grid points)
+    # values = res1d.query.GetCatchmentValues(catchmentId, quantityId)
