@@ -42,3 +42,15 @@ def test_read_reach(test_file_path, quantity, id, chainage, expected_max):
     data = to_numpy(data)
     actual_max = round(np.max(data), 3)
     assert pytest.approx(actual_max) == expected_max
+
+
+@pytest.mark.parametrize("quantity,id,expected_max", [
+    ("WaterLevel", "1", 195.669),
+    ("WaterLevel", "2", 195.823)
+])
+def test_read_node(test_file_path, quantity, id, expected_max):
+    res1d = Res1D(test_file_path)
+    data = res1d.query.GetNodeValues(id, quantity)
+    data = to_numpy(data)
+    actual_max = round(np.max(data), 3)
+    assert pytest.approx(actual_max) == expected_max
