@@ -41,6 +41,7 @@ class Res1D:
     def __init__(self, file_path=None):
         self.file_path = file_path
         self._time_index = None
+        self._start_time = None
         self._load_file()
 
     def _load_file(self):
@@ -71,6 +72,13 @@ class Res1D:
         time_stamps = [from_dotnet_datetime(t) for t in self.data.TimesList]
         self._time_index = pd.DatetimeIndex(time_stamps)
         return self._time_index
+
+    @property
+    def start_time(self):
+        if self._start_time is not None:
+            return self._start_time
+
+        return from_dotnet_datetime(self.data.StartTime)
 
     @property
     def quantities(self):

@@ -60,3 +60,7 @@ def test_read_node(test_file, quantity, id, expected_max):
 
 def test_time_index(test_file):
     assert len(test_file.time_index) == 110
+
+
+def test_start_time(test_file):
+    assert test_file.start_time == test_file.time_index.min()
