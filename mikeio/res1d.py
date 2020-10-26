@@ -1,6 +1,7 @@
 import os.path
 
 import clr
+import numpy as np
 import pandas as pd
 import numpy as np
 
@@ -17,12 +18,16 @@ from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
 
 def mike1d_quantities():
-    """ List all possible Mike1D quantities."""
+    """
+    Returns all predefined Mike1D quantities.
+    Useful for knowing what quantity string to query.
+    """
     return [quantity for quantity in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
 
 
 def read(file_path, queries=None):
     """ Read all or queried data in res1d file to a pandas DataFrame."""
+
     res1d = Res1D(file_path)
 
     if queries is not None:
@@ -33,8 +38,8 @@ def read(file_path, queries=None):
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
         for data_item in data_set.DataItems:
-            # data_set.Id + data_item.get_Quantity().Id + chainage 
-            for values, col_name in Res1D.get_values(data_item, data_set.Id):
+            name = data_set.Name if hasattr(data_set, 'Name') else data_set.Id
+            for values, col_name in Res1D.get_values(data_item, name):
                 df[col_name] = values
 
     return df
@@ -138,6 +143,7 @@ class Res1D:
     def __init__(self, file_path=None):
         self.file_path = file_path
         self._time_index = None
+        self._start_time = None
         self._load_file()
 
     def read(self, queries):
@@ -157,24 +163,31 @@ class Res1D:
         self._query = ResultDataQuery(self._data)
 
     @staticmethod
-    def get_values(data_item, data_set_name):
-        """ Get all time series values in given data_item."""
+    def get_values(data_item, data_set_name, col_name_delimiter=':'):
+        """ Get all time series values in given data_item. """
         if data_item.IndexList is None or data_item.NumberOfElements == 1:
             yield data_item.CreateTimeSeriesData(0), data_set_name
         else:
             for i in range(0, data_item.NumberOfElements):
-                col_name_i = ':'.join([data_set_name, str(i)])
+                col_name_i = col_name_delimiter.join([data_set_name, str(i)])
                 yield data_item.CreateTimeSeriesData(i), col_name_i
 
     @property
     def time_index(self):
-        """panda.DatetimeIndex of the time index"""
-        if self._time_index:
+        """panda.DatetimeIndex of the time index."""
+        if self._time_index is not None:
             return self._time_index
 
         time_stamps = [from_dotnet_datetime(t) for t in self.data.TimesList]
         self._time_index = pd.DatetimeIndex(time_stamps)
         return self._time_index
+
+    @property
+    def start_time(self):
+        if self._start_time is not None:
+            return self._start_time
+
+        return from_dotnet_datetime(self.data.StartTime)
 
     @property
     def quantities(self):
@@ -324,3 +337,7 @@ class Res1D:
         public string ProjectionString { get; set; }
         """
         return self._data
+
+
+def to_numpy(data, dtype=np.float64):
+    return np.fromiter(data, dtype)
