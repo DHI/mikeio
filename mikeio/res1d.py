@@ -163,7 +163,7 @@ class Res1D:
             yield data_item.CreateTimeSeriesData(0), data_set_name
         else:
             for i in range(0, data_item.NumberOfElements):
-                col_name_i = col_name_delimiter.join([data_set_name, str(i)])
+                col_name_i = col_name_delimiter.join([data_item.Quantity.Id, data_set_name, str(i)])
                 yield data_item.CreateTimeSeriesData(i), col_name_i
 
     @property
