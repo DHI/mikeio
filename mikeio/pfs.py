@@ -1,8 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 import yaml
 import pandas as pd
+from typing import Union
 import warnings
 
+from DHI.PFS import PFSFile, PFSSection, PFSParameter
 
 from types import SimpleNamespace
 
@@ -21,6 +23,9 @@ class Pfs:
     def __init__(self, filename):
 
         warnings.warn(
+            "Support for PFS files in mikeio is experimental. The API is likely to change!"
+        )
+        print(
             "Support for PFS files in mikeio is experimental. The API is likely to change!"
         )
 
@@ -147,4 +152,162 @@ class Pfs:
             self._level -= 1
 
         return adj_line
+
+
+# TODO come up with a better name
+class PfsCore:
+    def __init__(self, filename, target=None):
+
+        warnings.warn(
+            "Support for PFS files in mikeio is experimental. The API is likely to change!"
+        )
+        print(
+            "Support for PFS files in mikeio is experimental. The API is likely to change!"
+        )
+
+        self._pfs = PFSFile(filename)
+
+        if target is None:
+            self._target = self._find_target(filename)
+        else:
+            self._target = target
+
+    def section(self, name: str, index=0):
+        pfssection = self._pfs.GetTarget(self._target, 1).GetSection(name, index + 1)
+        return Section(pfssection)
+
+    def write(self, filename):
+        """
+        Write PFS file
+
+        Parameters
+        ----------
+        filename, str
+        """
+
+        self._pfs.Write(filename)
+
+    @property
+    def start_time(self) -> datetime:
+        target = self._pfs.GetTarget(self._target, 1)
+        section = target.GetSection("TIME", 1)
+        start_time = section.GetKeyword("start_time", 1)
+
+        vals = [start_time.GetParameter(i).ToInt() for i in range(1, 7)]
+        return datetime(*vals)
+
+    @start_time.setter
+    def start_time(self, value: datetime):
+        target = self._pfs.GetTarget(self._target, 1)
+        section = target.GetSection("TIME", 1)
+        start_time = section.GetKeyword("start_time", 1)
+        start_time.GetParameter(1).ModifyIntParameter(value.year)
+        start_time.GetParameter(2).ModifyIntParameter(value.month)
+        start_time.GetParameter(3).ModifyIntParameter(value.day)
+        start_time.GetParameter(4).ModifyIntParameter(value.hour)
+        start_time.GetParameter(5).ModifyIntParameter(value.minute)
+        start_time.GetParameter(6).ModifyIntParameter(value.second)
+
+    @property
+    def end_time(self) -> datetime:
+
+        start_time = self.start_time
+
+        nt = self.section("TIME")["number_of_time_steps"].value
+        dt = self.section("TIME")["time_step_interval"].value
+
+        return start_time + timedelta(seconds=nt * dt)
+
+    @end_time.setter
+    def end_time(self, value: datetime):
+
+        print("FOO")
+        start_time = self.start_time
+        dt = self.section("TIME")["time_step_interval"].value
+
+        nt = int((value - start_time).total_seconds() / dt)
+
+        self.section("TIME")["number_of_time_steps"] = nt
+
+    def _find_target(self, filename):
+
+        with open(filename) as f:
+            lines = f.readlines()
+
+        for line in lines:
+            if "//" in line:
+                text, comment = line.split("//")
+            else:
+                text = line
+
+            if "[" in text:
+                startidx = text.index("[") + 1
+                endidx = text.index("]")
+                target = text[startidx:endidx]
+                return target
+
+        return None
+
+
+class Parameter:
+    def __init__(self, parameter: PFSParameter):
+
+        self._parameter = parameter
+
+    def __repr__(self):
+
+        return f"<Parameter>{self.value}"
+
+    @property
+    def value(self):
+        par = self._parameter
+
+        if par.IsInt():
+            return par.ToInt()
+        elif par.IsDouble():
+            return par.ToDouble()
+        elif par.IsFilename():
+            return par.ToFileName()
+        elif par.IsClob():
+            return par.ToClob()
+        else:
+            return par.ToString()
+
+    def modify(self, value: Union[int, float, str]):
+
+        par = self._parameter
+
+        if par.IsInt():
+            par.ModifyIntParameter(value)
+        elif par.IsDouble():
+            par.ModifyDoubleParameter(value)
+        elif par.IsFilename():
+            par.ModifyFileNameParameter(value)
+        elif par.IsClob():
+            return par.ModifyClobParameter(value)
+        else:
+            return par.ModifyStringParameter(value)
+
+
+class Section:
+    def __init__(self, section: PFSSection):
+
+        self._section = section
+
+    def section(self, name, index=0):
+        pfssection = self._section.GetSection(name, index + 1)
+        return Section(pfssection)
+
+    def keyword(self, name, index=0) -> Parameter:
+        parameter = self._section.GetKeyword(name, 1).GetParameter(1)
+        return Parameter(parameter)
+
+    def __getattr__(self, key):
+        return self.keyword(key)
+
+    def __setitem__(self, key, item):
+        self.keyword(key).modify(item)
+
+    def __getitem__(self, key):
+        return self.keyword(key)
 
