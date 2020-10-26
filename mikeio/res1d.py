@@ -1,5 +1,4 @@
 import os.path
-
 import clr
 import pandas as pd
 import numpy as np
@@ -19,7 +18,7 @@ def mike1d_quantities():
     return [quantity for quantity in Enum.GetNames(clr.GetClrType(PredefinedQuantity))]
 
 
-def read(file_path, queries=None):
+def read_to_dataframe(file_path, queries=None):
     """ Read all or queried data in res1d file to a pandas DataFrame."""
 
     res1d = Res1D(file_path)
@@ -27,7 +26,7 @@ def read(file_path, queries=None):
     if queries is not None:
         queries = queries if isinstance(queries, list) else [queries]
         return res1d.read(queries)
-    # else: create_all_queries(res1d)
+    # TODO else: create_all_queries(res1d)
 
     df = pd.DataFrame(index=res1d.time_index)
     for data_set in res1d.data.DataSets:
