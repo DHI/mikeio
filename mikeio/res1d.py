@@ -1,19 +1,13 @@
 import os.path
 
 import clr
-import numpy as np
 import pandas as pd
 import numpy as np
 
 from mikeio.dotnet import from_dotnet_datetime
 
-clr.AddReference("System")
 from System import Enum
-
-clr.AddReference("DHI.Mike1D.ResultDataAccess")
 from DHI.Mike1D.ResultDataAccess import ResultData, ResultDataQuery
-
-clr.AddReference("DHI.Mike1D.Generic")
 from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
 
