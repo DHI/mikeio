@@ -1,4 +1,8 @@
 import numpy as np
+from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
+from DHI.Generic.MikeZero import eumQuantity
+from .eum import ItemInfo, EUMType, EUMUnit
+from .dotnet import asnetarray_v2
 
 def min_horizontal_dist_meters(coords, targets, is_geo=False):
     xe = coords[:,0]
@@ -269,14 +273,17 @@ class Grid2D:
         self._ny = len(y)
         self._dy = y[1]-y[0]
         self._y = y
+        self._xx, self._yy = None, None
 
     def _create_x_axis(self, x0, dx, nx):
         self._x1 = x0 + dx*(nx-1)
         self._x = np.linspace(x0, self._x1, nx)
+        self._xx, self._yy = None, None
 
     def _create_y_axis(self, y0, dy, ny):
         self._y1 = y0 + dy*(ny-1)
         self._y = np.linspace(y0, self._y1, ny)
+        self._xx, self._yy = None, None
 
     def _create_meshgrid(self, x, y):
         self._xx, self._yy = np.meshgrid(x, y)
@@ -299,6 +306,45 @@ class Grid2D:
         xinside = (self.x0 <= xp) & (xp <= self.x1)
         yinside = (self.y0 <= yp) & (yp <= self.y1)
         return xinside & yinside
+
+    def _to_element_table(self, index_base=0):
+
+        elem_table = []
+        for elx in range(self.nx-1):
+            # each col
+            for ely in range(self.ny-1):
+                # each row (in this col)
+                n1 = ely*self.nx + elx  + index_base
+                n2 = (ely+1)*self.nx + elx  + index_base
+                elem_table.append([n1, n1+1, n2+1, n2])
+        return elem_table
+
+    def to_mesh(self, outfilename, projection=None, z=None):
+        if projection is None:
+            projection = "LONG/LAT"
+
+        x  = self.xy[:,0]
+        y  = self.xy[:,1]
+        if z is None:
+            z  = np.zeros(self.n)
+        codes = np.zeros(self.n, dtype=int)
+        codes[y==self.y1] = 5   # north   
+        codes[x==self.x1] = 4   # east
+        codes[y==self.y0] = 3   # south
+        codes[x==self.x0] = 2   # west
+        codes[(y==self.y1) & (x==self.x0)] = 5   # corner->north
+
+        builder = MeshBuilder()        
+        builder.SetNodes(x, y, z, codes)
+
+        elem_table = self._to_element_table(index_base=1)
+        builder.SetElements(asnetarray_v2(elem_table))
+
+        builder.SetProjection(projection)
+        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
+        builder.SetEumQuantity(quantity)
+        newMesh = builder.CreateMesh()
+        newMesh.Write(outfilename)
 
     @staticmethod
     def xy_to_bbox(xy, buffer=None):
