@@ -1,6 +1,6 @@
 import pytest
 
-from mikeio.res1d import read, Res1D, mike1d_quantities
+from mikeio.res1d import read, Res1D, mike1d_quantities, to_numpy
 import numpy as np
 
 
@@ -30,16 +30,15 @@ def test_quantities(test_file_path):
     assert len(quantities) == 2
 
 
-# @pytest.mark.parametrize("query,expected_max", [
-#    (QueryData("WaterLevel", "104l1", 34.4131), 197.046),
-#    (QueryData("WaterLevel", "9l1", 10), 195.165),
-#    (QueryData("Discharge", "100l1", 23.8414), 0.1),
-#    (QueryData("Discharge", "9l1", 5), 0.761)
-# ])
-def test_read_reach(test_file_path):
+@pytest.mark.parametrize("quantity,id,chainage,expected_max", [
+    ("WaterLevel", "104l1", 34.4131, 197.046),
+    ("WaterLevel", "9l1", 10, 195.165),
+    ("Discharge", "100l1", 23.8414, 0.1),
+    ("Discharge", "9l1", 5, 0.761)
+])
+def test_read_reach(test_file_path, quantity, id, chainage, expected_max):
     res1d = Res1D(test_file_path)
-    data = res1d.query.GetReachValues("104l1", 34.4131, "WaterLevel")
-    data = np.fromiter(data, np.float64)
-    expected_max = 197.046
-
-    assert pytest.approx(round(np.max(data), 3)) == expected_max
+    data = res1d.query.GetReachValues(id, chainage, quantity)
+    data = to_numpy(data)
+    actual_max = round(np.max(data), 3)
+    assert pytest.approx(actual_max) == expected_max

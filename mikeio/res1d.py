@@ -1,6 +1,7 @@
 import os.path
 
 import clr
+import numpy as np
 import pandas as pd
 
 from mikeio.dotnet import from_dotnet_datetime
@@ -215,3 +216,7 @@ class Res1D:
         public string ProjectionString { get; set; }
         """
         return self._data
+
+
+def to_numpy(data, dtype=np.float64):
+    return np.fromiter(data, dtype)
