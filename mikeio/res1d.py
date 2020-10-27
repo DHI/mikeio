@@ -9,6 +9,8 @@ from System import Enum, DateTime
 from DHI.Mike1D.ResultDataAccess import ResultData, ResultDataQuery
 from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
+NAME_DELIMITER = ':'
+
 
 def mike1d_quantities():
     """
@@ -99,7 +101,7 @@ class QueryDataReach(QueryData):
         return self._chainage
 
     def __repr__(self):
-        return ':'.join([self._quantity, self._name, f"{self._chainage:g}"])
+        return NAME_DELIMITER.join([self._quantity, self._name, f"{self._chainage:g}"])
 
 
 class QueryDataNode(QueryData):
@@ -113,12 +115,13 @@ class QueryDataNode(QueryData):
 
 
 class Res1D:
-    def __init__(self, file_path=None):
+    def __init__(self, file_path=None, put_chainage_in_col_name=False):
         self.file_path = file_path
         self._time_index = None
         self._start_time = None
         self._end_time = None
         self._load_file()
+        self._put_chainage_in_col_name = put_chainage_in_col_name
 
     def _load_file(self):
         if not os.path.exists(self.file_path):
@@ -145,7 +148,9 @@ class Res1D:
         df = pd.DataFrame(index=self.time_index)
         for data_set in self.data.DataSets:
             for data_item in data_set.DataItems:
-                for values, col_name in Res1D.get_values(data_set, data_item):
+                for values, col_name in Res1D.get_values(data_set, data_item,
+                                                         NAME_DELIMITER,
+                                                         self._put_chainage_in_col_name):
                     df[col_name] = values
         return df
 
