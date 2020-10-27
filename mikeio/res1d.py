@@ -150,22 +150,27 @@ class Res1D:
         df = pd.DataFrame(index=res1d.time_index)
         for data_set in res1d.data.DataSets:
             for data_item in data_set.DataItems:
-                name = data_set.Name if hasattr(data_set, 'Name') else data_set.Id
-                for values, col_name in Res1D.get_values(data_item, name):
+                for values, col_name in Res1D.get_values(data_set, data_item):
                     df[col_name] = values
 
         return df
 
     @staticmethod
-    def get_values(data_item, data_set_name, col_name_delimiter=':'):
+    def get_values(data_set, data_item, col_name_delimiter=':', put_chainage_in_col_name=True):
         """ Get all time series values in given data_item. """
+        name = data_set.Name if hasattr(data_set, 'Name') else data_set.Id
         if data_item.IndexList is None or data_item.NumberOfElements == 1:
-            col_name = col_name_delimiter.join([data_item.Quantity.Id, data_set_name])
+            col_name = col_name_delimiter.join([data_item.Quantity.Id, name])
             yield data_item.CreateTimeSeriesData(0), col_name
         else:
+            chainages = data_set.GetChainages(data_item)
             for i in range(0, data_item.NumberOfElements):
+                if put_chainage_in_col_name:
+                    postfix = f"{chainages[i]:g}"
+                else:
+                    postfix = str(i)
 
-                col_name_i = col_name_delimiter.join([data_item.Quantity.Id, data_set_name, str(i)])
+                col_name_i = col_name_delimiter.join([data_item.Quantity.Id, name, postfix])
                 yield data_item.CreateTimeSeriesData(i), col_name_i
 
     @property

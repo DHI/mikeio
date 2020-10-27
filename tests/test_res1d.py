@@ -3,6 +3,7 @@ import pytest
 from mikeio.res1d import Res1D, mike1d_quantities, QueryDataReach
 from mikeio.dotnet import to_numpy
 import numpy as np
+import pandas as pd
 
 
 @pytest.fixture
@@ -85,7 +86,9 @@ def test_get_node_values(test_file):
 
 def test_get_reach_values(test_file):
     values = test_file.get_reach_values("9l1", 5, "WaterLevel")
+    time_series = pd.Series(values, index=test_file.time_index)
     assert len(values) == 110
+    assert len(time_series.index) == 110
     values_end = test_file.get_reach_end_values("9l1", "WaterLevel")
     values_start = test_file.get_reach_start_values("9l1", "WaterLevel")
     values_sum = test_file.get_reach_sum_values("9l1", "WaterLevel")
