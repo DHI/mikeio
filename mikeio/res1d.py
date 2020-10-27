@@ -72,7 +72,7 @@ class QueryData:
         return self._name
 
     def __repr__(self):
-        return ':'.join([self._quantity, self._name])
+        return NAME_DELIMITER.join([self._quantity, self._name])
 
 
 class QueryDataReach(QueryData):
