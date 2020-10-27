@@ -129,30 +129,24 @@ class Res1D:
         self._data.Load(Diagnostics())
         self._query = ResultDataQuery(self._data)
 
-    def read(self, queries):
+    def read(self, queries=None):
+        if queries is None:
+            return self.read_all()
+
+        queries = queries if isinstance(queries, list) else [queries]
+
         df = pd.DataFrame(index=self.time_index)
         for query in queries:
             df[str(query)] = query.get_values(self)
 
         return df
 
-    @staticmethod
-    def read_to_dataframe(file_path, queries=None):
-        """ Read all or queried data in res1d file to a pandas DataFrame."""
-
-        res1d = Res1D(file_path)
-
-        if queries is not None:
-            queries = queries if isinstance(queries, list) else [queries]
-            return res1d.read(queries)
-        # TODO else: create_all_queries(res1d)
-
-        df = pd.DataFrame(index=res1d.time_index)
-        for data_set in res1d.data.DataSets:
+    def read_all(self):
+        df = pd.DataFrame(index=self.time_index)
+        for data_set in self.data.DataSets:
             for data_item in data_set.DataItems:
                 for values, col_name in Res1D.get_values(data_set, data_item):
                     df[col_name] = values
-
         return df
 
     @staticmethod

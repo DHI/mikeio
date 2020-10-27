@@ -18,11 +18,11 @@ def test_file(test_file_path):
 
 def test_file_does_not_exist():
     with pytest.raises(FileExistsError):
-        assert Res1D.read_to_dataframe("tests/testdata/not_a_file.res1d")
+        assert Res1D("tests/testdata/not_a_file.res1d")
 
 
 def test_read(test_file_path):
-    df = Res1D.read_to_dataframe(test_file_path)
+    df = Res1D(test_file_path).read()
     assert len(df) == 110
 
 
@@ -43,7 +43,7 @@ def test_quantities(test_file):
     (QueryDataReach("Discharge", "9l1", 5), 0.761)
 ])
 def test_read_reach_with_queries(test_file_path, query, expected_max):
-    data = Res1D.read_to_dataframe(test_file_path, query)
+    data = Res1D(test_file_path).read(query)
     assert pytest.approx(round(data.max().values[0], 3)) == expected_max
 
 
