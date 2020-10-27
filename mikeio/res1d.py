@@ -99,7 +99,7 @@ class QueryDataReach(QueryData):
         return self._chainage
 
     def __repr__(self):
-        return ':'.join([self._quantity, self._name, str(self._chainage)])
+        return ':'.join([self._quantity, self._name, f"{self._chainage:g}"])
 
 
 class QueryDataNode(QueryData):
