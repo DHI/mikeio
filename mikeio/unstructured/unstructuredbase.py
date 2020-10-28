@@ -725,28 +725,23 @@ class _UnstructuredGeometry:
         """
         n_elements = self.n_elements
 
-        # Node coordinates
-        xn = self.node_coordinates[:, 0]
-        yn = self.node_coordinates[:, 1]
+        # Node x,y coordinates
+        nc = self.node_coordinates[:, 0:2]
 
         area = np.empty(n_elements)
-        xcoords = np.zeros(8)
-        ycoords = np.zeros(8)
 
         for j in range(n_elements):
             nodes = self.element_table[j]
-            n_nodes = len(nodes)
+            coords = nc[nodes]
 
-            for i in range(n_nodes):
-                nidx = nodes[i]
-                xcoords[i] = xn[nidx]
-                ycoords[i] = yn[nidx]
-
-            area[j] = self._single_element_area(n_nodes, xcoords, ycoords)
+            area[j] = self._single_element_area(coords)
 
         return area
 
-    def _single_element_area(self, n_nodes, xcoords, ycoords):
+    def _single_element_area(self, coords):
+        n_nodes = len(coords)
+        xcoords = coords[:, 0]
+        ycoords = coords[:, 1]
 
         # ab : edge vector corner a to b
         abx = xcoords[1] - xcoords[0]
