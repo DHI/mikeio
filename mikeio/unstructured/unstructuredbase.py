@@ -742,41 +742,47 @@ class _UnstructuredGeometry:
                 xcoords[i] = xn[nidx]
                 ycoords[i] = yn[nidx]
 
-            # ab : edge vector corner a to b
-            abx = xcoords[1] - xcoords[0]
-            aby = ycoords[1] - ycoords[0]
+            area[j] = self._single_element_area(n_nodes, xcoords, ycoords)
 
-            # ac : edge vector corner a to c
-            acx = xcoords[2] - xcoords[0]
-            acy = ycoords[2] - ycoords[0]
+        return area
 
-            isquad = False
-            if n_nodes > 3:
-                isquad = True
-                # ad : edge vector corner a to d
-                adx = xcoords[3] - xcoords[0]
-                ady = ycoords[3] - ycoords[0]
+    def _single_element_area(self, n_nodes, xcoords, ycoords):
 
-            # if geographical coords, convert all length to meters
-            if self.is_geo:
-                earth_radius = 6366707.0 * np.pi / 180.0
+        # ab : edge vector corner a to b
+        abx = xcoords[1] - xcoords[0]
+        aby = ycoords[1] - ycoords[0]
 
-                # Y on element centers
-                Ye = np.sum(ycoords) / n_nodes
-                cosYe = np.cos(np.deg2rad(Ye))
+        # ac : edge vector corner a to c
+        acx = xcoords[2] - xcoords[0]
+        acy = ycoords[2] - ycoords[0]
 
-                abx = earth_radius * abx * cosYe
-                aby = earth_radius * aby
-                acx = earth_radius * acx * cosYe
-                acy = earth_radius * acy
-                if isquad:
-                    adx = earth_radius * adx * cosYe
-                    ady = earth_radius * ady
+        isquad = False
+        if n_nodes > 3:
+            isquad = True
+            # ad : edge vector corner a to d
+            adx = xcoords[3] - xcoords[0]
+            ady = ycoords[3] - ycoords[0]
 
-            # calculate area in m2
-            area[j] = 0.5 * (abx * acy - aby * acx)
+        # if geographical coords, convert all length to meters
+        if self.is_geo:
+            earth_radius = 6366707.0 * np.pi / 180.0
+
+            # Y on element centers
+            Ye = np.sum(ycoords) / n_nodes
+            cosYe = np.cos(np.deg2rad(Ye))
+
+            abx = earth_radius * abx * cosYe
+            aby = earth_radius * aby
+            acx = earth_radius * acx * cosYe
+            acy = earth_radius * acy
             if isquad:
-                area[j] = area[j] + 0.5 * (acx * ady - acy * adx)
+                adx = earth_radius * adx * cosYe
+                ady = earth_radius * ady
+
+        # calculate area in m2
+        area = 0.5 * (abx * acy - aby * acx)
+        if isquad:
+            area = area + 0.5 * (acx * ady - acy * adx)
 
         return np.abs(area)
 
