@@ -8,6 +8,7 @@ sys.path.append(mike_bin_path)
 
 clr.AddReference("DHI.Generic.MikeZero.DFS")
 clr.AddReference("DHI.Generic.MikeZero.EUM")
+clr.AddReference("DHI.PFS")
 clr.AddReference("DHI.Projections")
 clr.AddReference("DHI.Mike1D.ResultDataAccess")
 clr.AddReference("DHI.Mike1D.Generic")
