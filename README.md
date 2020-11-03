@@ -117,7 +117,7 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 ```python
 >>>  from mikeio.res1d import Res1D, QueryDataReach
 >>>  df = Res1D(filename).read()
->>>  # Read a specific reach and chainage
+
 >>>  query = QueryDataReach("WaterLevel", "104l1", 34.4131)
 >>>  df = res1d.read(query)
 ```
