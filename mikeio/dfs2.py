@@ -184,8 +184,6 @@ class Dfs2(_Dfs123):
     def shape(self):
         return (self._n_timesteps, self._ny, self._nx)
 
-        dfs.Close()
-
     def reproject(
         self,
         filename,
