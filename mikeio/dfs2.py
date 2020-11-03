@@ -1,11 +1,6 @@
 import os
 from DHI.Generic.MikeZero import eumUnit
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-    DfsSimpleType,
-    DataValueType,
-)
+from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder, Dfs2Reprojector
 from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
