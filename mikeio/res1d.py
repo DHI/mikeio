@@ -9,7 +9,7 @@ from System import Enum, DateTime
 from DHI.Mike1D.ResultDataAccess import ResultData, ResultDataQuery
 from DHI.Mike1D.Generic import Connection, Diagnostics, PredefinedQuantity
 
-NAME_DELIMITER = ':'
+NAME_DELIMITER = ":"
 
 
 def mike1d_quantities():
@@ -21,23 +21,8 @@ def mike1d_quantities():
 
 
 class QueryData:
-    """A query object that declares what data should be
-    extracted from a .res1d file.
-
-    Parameters
-    ----------
-    quantity: str
-        Either 'WaterLevel', 'Discharge', 'Pollutant', 'LeftLatLinkOutflow',
-        'RightLatLinkOutflow'
-    name: str, optional
-        Reach or node or catchment name, consider all if None
-
-    Examples
-    --------
-    `QueryData('WaterLevel', 'reach1', 10)` is a valid query.
-    `QueryData('WaterLevel', 'reach1')` requests all the WaterLevel points
-    of `reach1`.
-    `QueryData('Discharge')` requests all the Discharge points of the file.
+    """
+    Base query class that declares what data to extract from a .res1d file.
     """
 
     def __init__(self, quantity, name=None, validate=True):
@@ -49,18 +34,19 @@ class QueryData:
 
     def _validate(self):
         if not isinstance(self.quantity, str):
-            raise TypeError("quantity must be a string.")
+            raise TypeError("Quantity must be a string.")
 
-        if not self.quantity in mike1d_quantities():
+        if self.quantity not in mike1d_quantities():
             raise ValueError(
-                f"Undefined quantity {self.quantity}. Allowed quantities are: "
-                f"{', '.join(mike1d_quantities())}."
+                f"Undefined quantity {self.quantity}. "
+                f"Allowed quantities are: {', '.join(mike1d_quantities())}."
             )
         if self.name is not None and not isinstance(self.name, str):
-            raise TypeError("name must be either None or a string.")
+            raise TypeError("Argument 'name' must be either None or a string.")
 
     @staticmethod
     def from_dotnet_to_python(array):
+        """Convert .NET array to numpy."""
         return np.fromiter(array, np.float64)
 
     @property
@@ -76,6 +62,19 @@ class QueryData:
 
 
 class QueryDataReach(QueryData):
+    """A query object that declares what reach data to extract from a .res1d file.
+
+    Parameters
+    ----------
+    quantity: str
+        e.g. 'WaterLevel' or 'Discharge'. Call mike1d_quantities() to get all quantities.
+    name: str, optional
+        Reachname
+
+    Examples
+    --------
+    `QueryDataReach('WaterLevel', 'reach1', 10)` is a valid query.
+    """
 
     def __init__(self, quantity, name=None, chainage=None, validate=True):
         super().__init__(quantity, name, validate=False)
@@ -88,9 +87,10 @@ class QueryDataReach(QueryData):
         super()._validate()
 
         if self.chainage is not None and not isinstance(self.chainage, (int, float)):
-            raise TypeError("chainage must be either None or a number.")
+            raise TypeError("Argument 'chainage' must be either None or a number.")
+
         if self.name is None and self.chainage is not None:
-            raise ValueError("chainage cannot be set if name is None.")
+            raise ValueError("Argument 'chainage' cannot be set if name is None.")
 
     def get_values(self, res1d):
         values = res1d.query.GetReachValues(self._name, self._chainage, self._quantity)
@@ -105,6 +105,19 @@ class QueryDataReach(QueryData):
 
 
 class QueryDataNode(QueryData):
+    """A query object that declares what node data to extract from a .res1d file.
+
+    Parameters
+    ----------
+    quantity: str
+        e.g. 'WaterLevel' or 'Discharge'. Call mike1d_quantities() to get all quantities.
+    name: str, optional
+        Nodename
+
+    Examples
+    --------
+    `QueryDataNode('WaterLevel', 'reach1')` is a valid query.
+    """
 
     def __init__(self, quantity, name=None, validate=True):
         super().__init__(quantity, name, validate)
@@ -120,8 +133,8 @@ class Res1D:
         self._time_index = None
         self._start_time = None
         self._end_time = None
-        self._load_file()
         self._put_chainage_in_col_name = put_chainage_in_col_name
+        self._load_file()
 
     def _load_file(self):
         if not os.path.exists(self.file_path):
@@ -133,6 +146,14 @@ class Res1D:
         self._query = ResultDataQuery(self._data)
 
     def read(self, queries=None):
+        """
+        Read loaded .res1d file data.
+
+        Parameters
+        ----------
+        queries: A single query or a list of queries.
+        Default is None = reads all data.
+        """
         if queries is None:
             return self.read_all()
 
@@ -145,19 +166,22 @@ class Res1D:
         return df
 
     def read_all(self):
+        """ Read all data from res1d file to dataframe. """
         df = pd.DataFrame(index=self.time_index)
         for data_set in self.data.DataSets:
             for data_item in data_set.DataItems:
-                for values, col_name in Res1D.get_values(data_set, data_item,
-                                                         NAME_DELIMITER,
-                                                         self._put_chainage_in_col_name):
+                for values, col_name in Res1D.get_values(
+                    data_set, data_item, NAME_DELIMITER, self._put_chainage_in_col_name
+                ):
                     df[col_name] = values
         return df
 
     @staticmethod
-    def get_values(data_set, data_item, col_name_delimiter=':', put_chainage_in_col_name=True):
+    def get_values(
+        data_set, data_item, col_name_delimiter=":", put_chainage_in_col_name=True
+    ):
         """ Get all time series values in given data_item. """
-        name = data_set.Name if hasattr(data_set, 'Name') else data_set.Id
+        name = data_set.Name if hasattr(data_set, "Name") else data_set.Id
         if data_item.IndexList is None or data_item.NumberOfElements == 1:
             col_name = col_name_delimiter.join([data_item.Quantity.Id, name])
             yield data_item.CreateTimeSeriesData(0), col_name
@@ -169,12 +193,14 @@ class Res1D:
                 else:
                     postfix = str(i)
 
-                col_name_i = col_name_delimiter.join([data_item.Quantity.Id, name, postfix])
+                col_name_i = col_name_delimiter.join(
+                    [data_item.Quantity.Id, name, postfix]
+                )
                 yield data_item.CreateTimeSeriesData(i), col_name_i
 
     @property
     def time_index(self):
-        """panda.DatetimeIndex of the time index."""
+        """ pandas.DatetimeIndex of the time index. """
         if self._time_index is not None:
             return self._time_index
 
@@ -198,7 +224,7 @@ class Res1D:
 
     @property
     def quantities(self):
-        """Quantities in res1d file."""
+        """ Quantities in res1d file. """
         return [quantity.Id for quantity in self._data.Quantities]
 
     @property
