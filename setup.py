@@ -5,11 +5,22 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.5.1",
-    install_requires=["pythonnet", "numpy", "pandas", "matplotlib"],
+    version="0.5.3",
+    install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml"],
     extras_require={
-        "dev": ["pytest", "black", "sphinx", "sphinx", "sphinx-rtd-theme", "shapely"],
-        "test": ["pytest", "shapely"],
+        "dev": [
+            "pytest",
+            "black",
+            "sphinx",
+            "sphinx",
+            "sphinx-rtd-theme",
+            "shapely",
+            "xarray",
+            "netcdf4",
+            "matplotlib",
+            "jupyterlab",
+        ],
+        "test": ["pytest"],
     },
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
@@ -23,7 +34,7 @@ setuptools.setup(
     include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: BSD License",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Science/Research",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

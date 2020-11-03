@@ -11,6 +11,7 @@ mikebin = os.path.join(dirname, "bin")
 sys.path.append(mikebin)
 clr.AddReference("DHI.Generic.MikeZero.DFS")
 clr.AddReference("DHI.Generic.MikeZero.EUM")
+clr.AddReference("DHI.PFS")
 clr.AddReference("DHI.Projections")
 clr.AddReference("System")
 clr.AddReference("System.Runtime.InteropServices")
@@ -27,6 +28,9 @@ from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
 from .dfsu import Dfsu, Mesh
+from .pfs import Pfs
+from .xyz import read_xyz
+from .dataset import Dataset
 
 
 def read(filename, items=None, time_steps=None):
@@ -62,6 +66,9 @@ def read(filename, items=None, time_steps=None):
     elif ext == ".dfsu":
 
         dfs = Dfsu(filename)
+
+    elif ext == ".xyz":
+        return read_xyz(filename)
     else:
         raise Exception(f"{ext} is an unsupported extension")
 

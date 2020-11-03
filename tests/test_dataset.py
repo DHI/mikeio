@@ -1,9 +1,10 @@
+import os
 from datetime import datetime
-from dateutil.rrule import rrule, SECONDLY
+from dateutil.rrule import rrule, SECONDLY, HOURLY, DAILY
 import numpy as np
 import pandas as pd
 import pytest
-from mikeio.dutil import Dataset
+from mikeio import Dataset, Dfsu
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
@@ -67,6 +68,35 @@ def test_select_temporal_subset_by_idx():
 
     assert len(selds) == 2
     assert selds["Foo"].shape == (3, 100, 30)
+
+
+def test_temporal_subset_fancy():
+
+    nt = (24 * 31) + 1
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+    data = [d1, d2]
+
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    assert ds.time[0].hour == 0
+    assert ds.time[-1].hour == 0
+
+    selds = ds["2000-01-01 00:00":"2000-01-02 00:00"]
+
+    assert len(selds) == 2
+    assert selds["Foo"].shape == (25, 100, 30)
+
+    selds = ds[:"2000-01-02 00:00"]
+    assert selds["Foo"].shape == (25, 100, 30)
+
+    selds = ds["2000-01-31 00:00":]
+    assert selds["Foo"].shape == (25, 100, 30)
+
+    selds = ds["2000-01-30":]
+    assert selds["Foo"].shape == (49, 100, 30)
 
 
 def test_select_item_by_name():
@@ -199,6 +229,105 @@ def test_get_data():
     assert ds.data[0].shape == (100, 100, 30)
 
 
+def test_interp_time():
+
+    data = []
+    nt = 4
+    d = np.zeros([nt, 10, 3])
+    d[1] = 2.0
+    d[3] = 4.0
+    data.append(d)
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    assert ds.data[0].shape == (nt, 10, 3)
+
+    dsi = ds.interp_time(dt=3600)
+
+    assert ds.time[0] == dsi.time[0]
+    assert dsi.data[0].shape == (73, 10, 3)
+
+
+def test_interp_time_to_other_dataset():
+
+    # Arrange
+    ## Dataset 1
+    nt = 4
+    data = [np.zeros([nt, 10, 3])]
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds1 = Dataset(data, time, items)
+    assert ds1.data[0].shape == (nt, 10, 3)
+
+    ## Dataset 2
+    nt = 12
+    data = [np.ones([nt, 10, 3])]
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds2 = Dataset(data, time, items)
+
+    # Act
+    ## interp
+    dsi = ds1.interp_time(dt=ds2.time)
+
+    # Assert
+    assert dsi.time[0] == ds2.time[0]
+    assert dsi.time[-1] == ds2.time[-1]
+    assert len(dsi.time) == len(ds2.time)
+    assert dsi.data[0].shape[0] == ds2.data[0].shape[0]
+
+
+def test_extrapolate():
+    # Arrange
+    ## Dataset 1
+    nt = 2
+    data = [np.zeros([nt, 10, 3])]
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds1 = Dataset(data, time, items)
+    assert ds1.data[0].shape == (nt, 10, 3)
+
+    ## Dataset 2 partly overlapping with Dataset 1
+    nt = 3
+    data = [np.ones([nt, 10, 3])]
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 2)))
+    items = [ItemInfo("Foo")]
+    ds2 = Dataset(data, time, items)
+
+    # Act
+    ## interp
+    dsi = ds1.interp_time(dt=ds2.time, fill_value=1.0)
+
+    # Assert
+    assert dsi.time[0] == ds2.time[0]
+    assert dsi.time[-1] == ds2.time[-1]
+    assert len(dsi.time) == len(ds2.time)
+    assert dsi.data[0][0] == pytest.approx(0.0)
+    assert dsi.data[0][1] == pytest.approx(1.0)  # filled
+    assert dsi.data[0][2] == pytest.approx(1.0)  # filled
+
+
+def test_extrapolate_not_allowed():
+    ## Dataset 1
+    nt = 2
+    data = [np.zeros([nt, 10, 3])]
+    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo")]
+    ds1 = Dataset(data, time, items)
+    assert ds1.data[0].shape == (nt, 10, 3)
+
+    ## Dataset 2 partly overlapping with Dataset 1
+    nt = 3
+    data = [np.ones([nt, 10, 3])]
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 2)))
+    items = [ItemInfo("Foo")]
+    ds2 = Dataset(data, time, items)
+
+    with pytest.raises(ValueError):
+        dsi = ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
+
+
 def test_get_data_2():
 
     nt = 100
@@ -236,6 +365,145 @@ def test_get_bad_name():
 
     with pytest.raises(Exception):
         ds["BAR"]
+
+
+def test_head():
+
+    nt = 100
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dshead = ds.head()
+
+    assert len(dshead.time) == 5
+    assert ds.time[0] == dshead.time[0]
+
+    dshead10 = ds.head(n=10)
+
+    assert len(dshead10.time) == 10
+
+
+def test_head_small_dataset():
+
+    nt = 2
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dshead = ds.head()
+
+    assert len(dshead.time) == nt
+
+
+def test_tail():
+
+    nt = 100
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dstail = ds.tail()
+
+    assert len(dstail.time) == 5
+    assert ds.time[-1] == dstail.time[-1]
+
+    dstail10 = ds.tail(n=10)
+
+    assert len(dstail10.time) == 10
+
+
+def test_thin():
+
+    nt = 100
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dsthin = ds.thin(2)
+
+    assert len(dsthin.time) == 50
+
+
+def test_tail_small_dataset():
+    nt = 2
+    data = []
+    d = np.zeros([nt, 100, 30]) + 1.0
+    data.append(d)
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    dstail = ds.tail()
+
+    assert len(dstail.time) == nt
+
+
+def test_aggregation_workflows(tmpdir):
+    filename = "tests/testdata/HD2D.dfsu"
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(["Surface elevation", "Current speed"])
+    ds2 = ds.max()
+
+    outfilename = os.path.join(tmpdir.dirname, "max.dfs0")
+    ds2.to_dfs0(outfilename)
+    assert os.path.isfile(outfilename)
+
+    ds3 = ds.min()
+
+    outfilename = os.path.join(tmpdir.dirname, "min.dfs0")
+    ds3.to_dfs0(outfilename)
+    assert os.path.isfile(outfilename)
+
+
+def test_weighted_average(tmpdir):
+    filename = "tests/testdata/HD2D.dfsu"
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(["Surface elevation", "Current speed"])
+
+    area = dfs.get_element_area()
+    ds2 = ds.average(weights=area)
+
+    outfilename = os.path.join(tmpdir.dirname, "average.dfs0")
+    ds2.to_dfs0(outfilename)
+    assert os.path.isfile(outfilename)
+
+
+def test_copy():
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    assert len(ds.items) == 2
+    assert len(ds.data) == 2
+    assert ds.items[0].name == "Foo"
+
+    ds2 = ds.copy()
+
+    ds2.items[0].name = "New name"
+
+    assert ds2.items[0].name == "New name"
+    assert ds.items[0].name == "Foo"
 
 
 def test_default_type():

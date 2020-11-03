@@ -4,10 +4,30 @@ import pandas as pd
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
-from mikeio.eum import TimeStep, EUMType, EUMUnit, ItemInfo
+from mikeio.eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from datetime import timedelta
 
 import pytest
+
+
+def test_repr():
+    filename = os.path.join("tests", "testdata", "da_diagnostic.dfs0")
+    dfs = Dfs0(filename)
+
+    text = repr(dfs)
+
+    assert "NonEquidistant" in text
+
+
+def test_repr_equidistant():
+    filename = os.path.join("tests", "testdata", "random.dfs0")
+    dfs = Dfs0(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs0" in text
+    assert "Equidistant" in text
+    assert "NonEquidistant" not in text
 
 
 def test_simple_write(tmpdir):
@@ -25,6 +45,48 @@ def test_simple_write(tmpdir):
     dfs.write(filename=filename, data=data)
 
     assert os.path.exists(filename)
+
+
+def test_write_float(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
+
+    data = []
+
+    nt = 100
+    d = np.random.random([nt]).astype(np.float32)
+    data.append(d)
+
+    dfs = Dfs0()
+
+    dfs.write(filename=filename, data=data)
+
+    assert os.path.exists(filename)
+
+
+def test_write_2darray(tmpdir):
+    """
+    Data should be ideally be supplied as a list of 1d timeseries.
+    But if I supply a 2d array (nitems, nt), that could work as well
+    """
+
+    filename = os.path.join(tmpdir.dirname, "from2darray.dfs0")
+
+    nt = 100
+    nitems = 2
+    data = np.random.random([nitems, nt])
+
+    dfs = Dfs0()
+
+    dfs.write(filename=filename, data=data)
+
+    assert os.path.exists(filename)
+
+    dfsnew = Dfs0(filename)
+    assert dfsnew.n_items == nitems
+
+    ds = dfsnew.read()
+    assert ds[0].shape == (nt,)
 
 
 def test_read_units_write_new(tmpdir):
@@ -88,7 +150,7 @@ def test_write_timestep_7days(tmpdir):
         data=data,
         items=items,
         title="Zeros and ones",
-        timeseries_unit=TimeStep.DAY,
+        timeseries_unit=TimeStepUnit.DAY,
         dt=7,
     )
 
@@ -274,6 +336,7 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     assert ds.items[0].type == EUMType.Concentration
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"][3])
+    assert ds.time[0].year == 1958
 
 
 def test_write_from_data_frame_different_types(tmpdir):
@@ -396,3 +459,12 @@ def test_write_data_with_missing_values(tmpdir):
     modified = moddfs.read()
     assert np.isnan(modified.data[1][5])
 
+
+def test_read_relative_time_axis():
+
+    filename = r"tests/testdata/eq_relative.dfs0"
+
+    dfs0 = Dfs0(filename)
+
+    ds = dfs0.read()
+    assert len(ds) == 5

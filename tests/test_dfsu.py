@@ -4,9 +4,18 @@ import numpy as np
 from datetime import datetime
 import pytest
 
-from mikeio import Dfsu, Mesh
+from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
-from mikeio.dutil import Dataset
+from mikeio import Dataset
+
+
+def test_repr():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    text = repr(dfs)
+
+    assert "Dfsu2D" in text
 
 
 def test_read_all_items_returns_all_items_and_names():
@@ -32,6 +41,22 @@ def test_read_item_0():
     ds = dfs.read(1)
 
     assert len(ds) == 1
+
+
+def test_read_single_precision():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename, dtype=np.float32)
+
+    ds = dfs.read(1)
+
+    assert len(ds) == 1
+    assert ds[0].dtype == np.float32
+
+
+def test_read_int_not_accepted():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    with pytest.raises(Exception):
+        dfs = Dfsu(filename, dtype=np.int)
 
 
 def test_read_timestep_1():
@@ -210,6 +235,50 @@ def test_find_nearest_element_2d():
 
     elem_id = dfs.find_nearest_element(606200, 6905480)
     assert elem_id == 317
+
+
+def test_dfsu_to_dfs0_via_dataframe(tmpdir):
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.start_time.year == 1985
+
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+
+    ds = dfs.read(elements=[elem_id])
+    df = ds.to_dataframe()
+
+    outfilename = os.path.join(tmpdir, "out.dfs0")
+    df.to_dfs0(outfilename)
+
+    dfs0 = Dfs0(outfilename)
+    newds = dfs0.read()
+
+    assert newds.items[0].name == ds.items[0].name
+    assert ds.time[0] == newds.time[0]
+    assert ds.time[-1] == newds.time[-1]
+
+
+def test_dfsu_to_dfs0(tmpdir):
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.start_time.year == 1985
+
+    elem_id = dfs.find_nearest_element(606200, 6905480)
+
+    ds = dfs.read(elements=[elem_id])
+    dss = ds.squeeze()
+
+    outfilename = os.path.join(tmpdir, "out.dfs0")
+
+    dfs0 = Dfs0()
+    dfs0.write(outfilename, dss)
+
+    dfs0 = Dfs0(outfilename)
+    newds = dfs0.read()
+
+    assert newds.items[0].name == ds.items[0].name
+    assert ds.time[0] == newds.time[0]
+    assert ds.time[-1] == newds.time[-1]
 
 
 def test_find_nearest_element_2d_array():
@@ -431,7 +500,7 @@ def test_get_layer_elements():
     assert elem_ids[5] == 23
 
     elem_ids = dfs.get_layer_elements(1)
-    assert elem_ids[5] == 8639
+    assert elem_ids[5] == 8638
     assert len(elem_ids) == 10
 
     elem_ids = dfs.get_layer_elements([1, 3])
@@ -522,6 +591,88 @@ def test_write_from_dfsu(tmpdir):
     assert dfs.start_time == newdfs.start_time
     assert dfs.timestep == newdfs.timestep
     assert dfs.end_time == newdfs.end_time
+
+
+def test_incremental_write_from_dfsu(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read(time_steps=[0])
+
+    dfs.write(outfilename, ds, keep_open=True)
+
+    for i in range(1, nt):
+        ds = dfs.read(time_steps=[i])
+        dfs.append(ds)
+
+    dfs.close()
+
+    newdfs = Dfsu(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time
+
+
+def test_incremental_write_from_dfsu_context_manager(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read(time_steps=[0])
+
+    with dfs.write(outfilename, ds, keep_open=True) as f:
+        for i in range(1, nt):
+            ds = dfs.read(time_steps=[i])
+            f.append(ds)
+
+        # dfs.close() # should be called automagically by context manager
+
+    newdfs = Dfsu(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time
+
+
+def test_write_big_file(tmpdir):
+
+    outfilename = os.path.join(tmpdir.dirname, "big.dfsu")
+    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
+
+    msh = Mesh(meshfilename)
+
+    n_elements = msh.n_elements
+
+    dfs = Dfsu(meshfilename)
+
+    nt = 1000
+
+    n_items = 10
+
+    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+
+    # with dfs.write(outfilename, [], items=items, keep_open=True) as f:
+    with dfs.write_header(
+        outfilename, start_time=datetime(2000, 1, 1), dt=3600, items=items
+    ) as f:
+        for i in range(nt):
+            data = []
+            for i in range(n_items):
+                d = np.random.random((1, n_elements))
+                data.append(d)
+            f.append(data)
+
+    dfsu = Dfsu(outfilename)
+
+    assert dfsu.n_items == n_items
+    assert dfsu.n_timesteps == nt
+    assert dfsu.start_time.year == 2000
 
 
 def test_write_from_dfsu_2_time_steps(tmpdir):
@@ -642,6 +793,68 @@ def test_temporal_resample_by_reading_selected_timesteps(tmpdir):
     assert pytest.approx(dfs.timestep) == newdfs.timestep / 2
 
 
+def test_read_temporal_subset():
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    ds = dfs.read(time_steps=slice("1985-08-06 00:00", "1985-08-06 12:00"))
+
+    assert len(ds.time) == 3
+
+    # Specify start
+    ds = dfs.read(time_steps=slice("1985-08-06 12:00", None))
+
+    assert len(ds.time) == 7
+
+    # Specify end
+    ds = dfs.read(time_steps=slice(None, "1985-08-06 12:00"))
+
+    assert len(ds.time) == 3
+
+
+def test_read_temporal_subset_string():
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    # start,end
+    ds = dfs.read(time_steps="1985-08-06 00:00,1985-08-06 12:00")
+    assert len(ds.time) == 3
+
+    # start,
+    ds = dfs.read(time_steps="1985-08-06 12:00,")
+    assert len(ds.time) == 7
+
+    # ,end
+    ds = dfs.read(time_steps=",1985-08-06 11:30")
+    assert len(ds.time) == 2
+
+
+def test_write_temporal_subset(tmpdir):
+
+    sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
+    dfs = Dfsu(sourcefilename)
+
+    assert dfs.n_timesteps == 9
+
+    ds = dfs.read()  # TODO read temporal subset with slice e.g. "1985-08-06 12:00":
+    selds = ds["1985-08-06 12:00":]
+    dfs.write(outfilename, selds)
+
+    assert os.path.exists(outfilename)
+
+    newdfs = Dfsu(outfilename)
+
+    assert newdfs.start_time.hour == 12
+    assert newdfs.n_timesteps == 7
+
+
 def test_extract_top_layer_to_2d(tmpdir):
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
 
@@ -668,15 +881,6 @@ def test_geometry_2d():
     geom = dfs.to_2d_geometry()
 
     assert geom.is_2d
-
-
-def test_plot_bathymetry():
-
-    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
-
-    dfs = Dfsu(filename)
-
-    dfs.plot()
 
 
 def test_to_mesh_3d(tmpdir):
@@ -711,20 +915,6 @@ def test_to_mesh_2d(tmpdir):
     assert True
 
 
-def test_plot_2d():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
-    dfs.plot()
-    assert True
-
-
-def test_plot_3d():
-    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
-    dfs = Dfsu(filename)
-    dfs.plot()
-    assert True
-
-
 def test_elements_to_geometry():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
@@ -738,9 +928,24 @@ def test_elements_to_geometry():
     assert "nodes" in text
 
 
-def test_to_shapely():
-    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+def test_element_table():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    shp = dfs.to_shapely()
-    assert True
+    eid = 31
+    nid = dfs.element_table[eid]
+    assert nid == [32, 28, 23]
+
+
+def test_get_node_centered_data():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    ds = dfs.read(items="Surface elevation")
+    time_step = 0
+    wl_cc = ds.data[0][time_step, :]
+    wl_nodes = dfs.get_node_centered_data(wl_cc)
+
+    eid = 31
+    assert wl_cc[eid] == 0.4593418836593628
+    nid = dfs.element_table[eid]
+    assert wl_nodes[nid].mean() == 0.45935017355903907
 

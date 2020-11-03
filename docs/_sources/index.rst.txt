@@ -6,7 +6,7 @@
 .. image:: https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg
 
 MIKE IO: input/output of MIKE files in Python
-============================================
+=============================================
 
 Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
 

@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
+import pytest
 
 
 def test_simple_write(tmpdir):
@@ -59,40 +60,16 @@ def test_write_single_item(tmpdir):
         items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
         coordinate=["UTM-33", east, north, orientation],
         dx=100,
-        dy=100,
+        dy=200,
         title="test dfs2",
     )
 
-    assert True
-
-
-def test_non_equidistant_calendar(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
-
-    data = []
-
-    datetimes = [
-        datetime.datetime(2012, 1, 1),
-        datetime.datetime(2012, 2, 1),
-        datetime.datetime(2012, 2, 10),
-    ]
-
-    nt = len(datetimes)
-    nx = 20
-    ny = 5
-    d = np.random.random([nt, ny, nx])
-
-    data.append(d)
-
-    dfs = Dfs2()
-
-    dfs.write(filename=filename, data=data, datetimes=datetimes)
-
     newdfs = Dfs2(filename)
-    ds = newdfs.read()
-
-    assert not ds.is_equidistant
+    assert newdfs.projection_string == "UTM-33"
+    assert pytest.approx(newdfs.longitude) == 12.0
+    assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.dx == 100.0
+    assert newdfs.dy == 200.0
 
 
 def test_read():
@@ -104,6 +81,15 @@ def test_read():
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
+
+
+def test_read_temporal_subset_slice():
+
+    filename = r"tests/testdata/eq.dfs2"
+    dfs = Dfs2(filename)
+    ds = dfs.read(time_steps=slice("2000-01-01 00:00", "2000-01-01 12:00"))
+
+    assert len(ds.time) == 13
 
 
 def test_read_item_names():
@@ -147,6 +133,45 @@ def test_write_selected_item_to_new_file(tmpdir):
 
     assert len(ds2) == 1
     assert ds.items[0].name == "Untitled"
+    assert dfs.start_time == dfs2.start_time
+    assert dfs.projection_string == dfs2.projection_string
+    assert dfs.longitude == dfs2.longitude
+    assert dfs.latitude == dfs2.latitude
+    assert dfs.orientation == dfs2.orientation
+
+
+def test_repr():
+
+    filename = r"tests/testdata/gebco_sound.dfs2"
+    dfs = Dfs2(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+    assert "Items" in text
+    assert "dx" in text
+
+
+def test_repr_empty():
+
+    dfs = Dfs2()
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+
+
+def test_repr_time():
+
+    filename = r"tests/testdata/random.dfs2"
+    dfs = Dfs2(filename)
+
+    text = repr(dfs)
+
+    assert "Dfs2" in text
+    assert "Items" in text
+    assert "dx" in text
+    assert "steps" in text
 
 
 def test_write_modified_data_to_new_file(tmpdir):
@@ -176,6 +201,28 @@ def test_read_some_time_step():
 
     assert res.data[0].shape[0] == 2
     assert len(res.time) == 2
+
+
+def test_write_some_time_step(tmpdir):
+
+    filename = r"tests/testdata/waves.dfs2"
+    dfs = Dfs2(filename)
+
+    ds = dfs.read(time_steps=[1, 2])
+
+    assert ds.data[0].shape[0] == 2
+    assert len(ds.time) == 2
+
+    assert dfs.timestep == 86400.0
+    assert dfs.start_time.day == 1
+
+    outfilename = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
+
+    dfs.write(outfilename, ds)
+
+    dfs2 = Dfs2(outfilename)
+    assert dfs2.timestep == 86400.0
+    assert dfs2.start_time.day == 2
 
 
 def test_find_index_from_coordinate():
