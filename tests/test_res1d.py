@@ -1,154 +1,112 @@
 import pytest
 
-from mikeio.res1d import (
-    read, QueryData, Res1D, FileNotOpenedError, DataNotFoundInFile
-)
-
-
-def test_query_validate():
-    # Good variable types
-    query = QueryData("WaterLevel")
-    query = QueryData("Discharge")
-    query = QueryData("Pollutant")
-
-    # Bad variable type
-    with pytest.raises(TypeError):
-        QueryData(666)
-
-    # Bad string variable type
-    with pytest.raises(ValueError):
-        QueryData("BadVariableType")
-
-    # Bad reach type
-    with pytest.raises(TypeError):
-        QueryData("WaterLevel", reach_name=666)
-
-    # Bad chainage type
-    with pytest.raises(TypeError):
-        QueryData("WaterLevel", "reach", chainage="BadChainage")
-
-    # Cannot set a chainage with no reach
-    with pytest.raises(ValueError):
-        QueryData("WaterLevel", None, 10)
-
-
-def test_query_repr():
-    query = QueryData("WaterLevel", "104l1", 34.4131)
-    expected = ("QueryData(variable_type='WaterLevel', reach_name='104l1', "
-                "chainage=34.4131)")
-    assert repr(query) == expected
+from mikeio.res1d import Res1D, mike1d_quantities, QueryDataReach
+from mikeio.dotnet import to_numpy
+import numpy as np
+import pandas as pd
 
 
 @pytest.fixture
-def file():
+def test_file_path():
     return "tests/testdata/Exam6Base.res1d"
 
 
+@pytest.fixture
+def test_file(test_file_path):
+    return Res1D(test_file_path)
+
+
 def test_file_does_not_exist():
-    file = "tests/testdata/not_a_file.res1d"
-
-    query = QueryData("WaterLevel")
-
     with pytest.raises(FileExistsError):
-        assert read(file, [query])
+        assert Res1D("tests/testdata/not_a_file.res1d")
 
 
-def test_get_properties_if_not_opened(file):
-    """Public properties cannot be accessed if the file is not opened"""
-    r = Res1D(file)
-    r.close()
+def test_read(test_file_path):
+    df = Res1D(test_file_path).read()
+    assert len(df) == 110
 
-    with pytest.raises(FileNotOpenedError) as excinfo:
-        r.data_types
-    assert "data_types" in str(excinfo.value)
 
-    with pytest.raises(FileNotOpenedError) as excinfo:
-        r.reach_names
-    assert "reach_names" in str(excinfo.value)
-    
-    with pytest.raises(FileNotOpenedError) as excinfo:
-        r.time_index
-    assert "time_index" in str(excinfo.value)
+def test_mike1d_quantities():
+    quantities = mike1d_quantities()
+    assert "WaterLevel" in quantities
+
+
+def test_quantities(test_file):
+    quantities = test_file.quantities
+    assert len(quantities) == 2
 
 
 @pytest.mark.parametrize("query,expected_max", [
-    (QueryData("WaterLevel", "104l1", 34.4131), 197.046),
-    (QueryData("WaterLevel", "9l1", 10), 195.165),
-    (QueryData("Discharge", "100l1", 23.8414), 0.1),
-    (QueryData("Discharge", "9l1", 5), 0.761)
+    (QueryDataReach("WaterLevel", "104l1", 34.4131), 197.046),
+    (QueryDataReach("WaterLevel", "9l1", 10), 195.165),
+    (QueryDataReach("Discharge", "100l1", 23.8414), 0.1),
+    (QueryDataReach("Discharge", "9l1", 5), 0.761)
 ])
-def test_read_single_query_as_list(file, query, expected_max):
-    ts = read(file, [query])
-    assert len(ts) == 110
-    assert pytest.approx(round(ts.max()[0], 3)) == expected_max
+def test_read_reach_with_queries(test_file_path, query, expected_max):
+    data = Res1D(test_file_path).read(query)
+    assert pytest.approx(round(data.max().values[0], 3)) == expected_max
 
 
-@pytest.mark.parametrize("query,expected_max", [
-    (QueryData("WaterLevel", "104l1", 34.4131), 197.046),
-    (QueryData("WaterLevel", "9l1", 10), 195.165),
-    (QueryData("Discharge", "100l1", 23.8414), 0.1),
-    (QueryData("Discharge", "9l1", 5), 0.761)
+@pytest.mark.parametrize("quantity,id,chainage,expected_max", [
+    ("WaterLevel", "104l1", 34.4131, 197.046),
+    ("WaterLevel", "9l1", 10, 195.165),
+    ("Discharge", "100l1", 23.8414, 0.1),
+    ("Discharge", "9l1", 5, 0.761)
 ])
-def test_read_single_query(file, query, expected_max):
-    ts = read(file, query)
-    assert len(ts) == 110
-    assert pytest.approx(round(ts.max()[0], 3)) == expected_max
+def test_read_reach(test_file, quantity, id, chainage, expected_max):
+    data = test_file.query.GetReachValues(id, chainage, quantity)
+    data = to_numpy(data)
+    actual_max = round(np.max(data), 3)
+    assert pytest.approx(actual_max) == expected_max
 
 
-def test_read_bad_queries(file):
-    """Querying data not available in the file must return an error"""
-
-    # Bad variable type
-    with pytest.raises(DataNotFoundInFile) as excinfo:
-        read(file, [QueryData("Pollutant")])
-    assert "Pollutant" in str(excinfo.value)
- 
-    # Bad reach name
-    with pytest.raises(DataNotFoundInFile) as excinfo:
-        read(file, [QueryData("WaterLevel", "bad_reach_name")])
-    assert "bad_reach_name" in str(excinfo.value)
-
-    # Bad chainage
-    with pytest.raises(DataNotFoundInFile) as excinfo:
-        read(file, [QueryData("WaterLevel", "104l1", 666)])
-    assert "666" in str(excinfo.value)
+@pytest.mark.parametrize("quantity,id,expected_max", [
+    ("WaterLevel", "1", 195.669),
+    ("WaterLevel", "2", 195.823)
+])
+def test_read_node(test_file, quantity, id, expected_max):
+    data = test_file.query.GetNodeValues(id, quantity)
+    data = to_numpy(data)
+    actual_max = round(np.max(data), 3)
+    assert pytest.approx(actual_max) == expected_max
 
 
-def test_read_multiple_queries(file):
-    q1 = QueryData("WaterLevel", "104l1", 34.4131)
-    q2 = QueryData("Discharge", "9l1", 5)
-    ts = read(file, [q1, q2])
-    assert ts.shape == (110, 2)
-    ts_max = ts.max()
-    assert pytest.approx(round(ts_max[0], 3)) == 197.046
-    assert pytest.approx(round(ts_max[1], 3)) == 0.761
+def test_time_index(test_file):
+    assert len(test_file.time_index) == 110
 
 
-def test_read_reach(file):
-    q_reach = QueryData("WaterLevel", "118l1")
-    ts = read(file, [q_reach])
-    assert ts.shape == (110, 3)
-    assert list(ts.columns) == [
-        'WaterLevel 118l1 0.000',
-        'WaterLevel 118l1 49.443',
-        'WaterLevel 118l1 98.887'
-    ]
+def test_start_time(test_file):
+    assert test_file.start_time == test_file.time_index.min()
 
 
-def test_read_multiple_reaches(file):
-    q_reach1 = QueryData("WaterLevel", "118l1")
-    q_reach2 = QueryData("Discharge", "113l1")
-    ts = read(file, [q_reach1, q_reach2])
-    assert ts.shape == (110, 5)
+def test_get_node_values(test_file):
+    values = test_file.get_node_values("1", "WaterLevel")
+    assert len(values) == 110
 
 
-def test_read_all_reaches(file):
-    q_waterlevel = QueryData("WaterLevel")
-    ts = read(file, [q_waterlevel])
-    # Note that it includes 4 water level structure points
-    assert ts.shape == (110, 247)
+def test_get_reach_values(test_file):
+    values = test_file.get_reach_values("9l1", 5, "WaterLevel")
+    time_series = pd.Series(values, index=test_file.time_index)
+    assert len(values) == 110
+    assert len(time_series.index) == 110
+    values_end = test_file.get_reach_end_values("9l1", "WaterLevel")
+    values_start = test_file.get_reach_start_values("9l1", "WaterLevel")
+    values_sum = test_file.get_reach_sum_values("9l1", "WaterLevel")
 
-    q_discharge = QueryData("Discharge")
-    ts = read(file, [q_discharge])
-    # Note that it includes 2 discharge structure points
-    assert ts.shape == (110, 129)
+
+def test_get_reach_value(test_file):
+    value = test_file.get_reach_value("9l1", 5, "WaterLevel", test_file.start_time)
+    assert value > 0
+
+
+def test_dotnet_methods(test_file_path):
+    res1d = Res1D(test_file_path)
+    result_specs = res1d.data.ResultSpecs
+    nodes = res1d.data.Nodes
+    values = res1d.query.GetNodeValues("1", "WaterLevel")
+    values = res1d.query.GetReachValue("9l1", 5, "WaterLevel", res1d.data.StartTime)  # must be dotnet datetime
+    values = res1d.query.GetReachValues("9l1", 5, "WaterLevel")
+    values = res1d.query.GetReachEndValues("9l1", "WaterLevel")  # avoid specifying chainage
+    values = res1d.query.GetReachStartValues("9l1", "WaterLevel")  # avoid specifying chainage
+    values = res1d.query.GetReachSumValues("9l1", "WaterLevel")  # useful for summing volume in reach (all grid points)
+    # values = res1d.query.GetCatchmentValues(catchmentId, quantityId)
