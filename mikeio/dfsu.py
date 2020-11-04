@@ -4,7 +4,7 @@ from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
-from scipy.spatial import cKDTree 
+from scipy.spatial import cKDTree
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -27,6 +27,7 @@ from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
 from .spatial import Grid2D
 from .interpolation import get_idw_interpolant, interp2d
+
 
 class UnstructuredType(IntEnum):
     """
@@ -518,28 +519,30 @@ class _UnstructuredGeometry:
             True for points inside, False otherwise
         """
         import matplotlib.path as mp
+
         try:
             domain = self._shapely_domain2d
         except:
-            warnings.warn('Could not determine if domain contains points. Failed to convert to_shapely()')
+            warnings.warn(
+                "Could not determine if domain contains points. Failed to convert to_shapely()"
+            )
             return None
-        
+
         cnts = mp.Path(domain.exterior).contains_points(points)
         for interj in domain.interiors:
-            in_hole = mp.Path(interj).contains_points(points) 
+            in_hole = mp.Path(interj).contains_points(points)
             cnts = np.logical_and(cnts, ~in_hole)
         return cnts
 
-
     def _create_tree2d(self):
-        xy = self.geometry2d.element_coordinates[:,:2]
+        xy = self.geometry2d.element_coordinates[:, :2]
         self._tree2d = cKDTree(xy)
 
-    def _find_n_nearest_2d_elements(self, x, y=None, n_points=1):        
+    def _find_n_nearest_2d_elements(self, x, y=None, n_points=1):
         if self._tree2d is None:
             self._create_tree2d()
 
-        if y is None: 
+        if y is None:
             p = x
         else:
             p = np.array((x, y))
@@ -562,16 +565,16 @@ class _UnstructuredGeometry:
         <mikeio.Grid2D>
             2d grid
         """
-        coords = self.geometry2d.node_coordinates   # node_ or element_
-        small = 1e-10        
-        x0 = coords[:,0].min() + small
-        y0 = coords[:,1].min() + small
-        x1 = coords[:,0].max() - small
-        y1 = coords[:,1].max() - small
+        coords = self.geometry2d.node_coordinates  # node_ or element_
+        small = 1e-10
+        x0 = coords[:, 0].min() + small
+        y0 = coords[:, 1].min() + small
+        x1 = coords[:, 0].max() - small
+        y1 = coords[:, 1].max() - small
         bbox = [x0, y0, x1, y1]
         return Grid2D(bbox=bbox, dxdy=dxdy, shape=shape)
-        
-    def get_2d_interpolant(self, xy, n_nearest:int=1, extrapolate=False):
+
+    def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False):
         """IDW interpolant for list of coordinates
 
         Parameters
@@ -588,36 +591,47 @@ class _UnstructuredGeometry:
         (np.array, np.array)
             element ids and weights 
         """
-        elem_ids, distances = self._find_n_nearest_2d_elements(xy, n_points=n_nearest)
+        ids, dists = self._find_n_nearest_2d_elements(xy, n_points=n_nearest)
         weights = None
 
         if n_nearest == 1:
-            weights = np.ones(distances.shape)
-            if not extrapolate: 
+            weights = np.ones(dists.shape)
+            if not extrapolate:
                 weights[~self.contains(xy)] = np.nan
         elif n_nearest > 1:
-            weights = get_idw_interpolant(distances)
-            if not extrapolate: 
-                weights[~self.contains(xy),:] = np.nan
+            weights = get_idw_interpolant(dists)
+            if not extrapolate:
+                weights[~self.contains(xy), :] = np.nan
         else:
-            ValueError('n_nearest must be at least 1')
+            ValueError("n_nearest must be at least 1")
 
-        return elem_ids, weights
+        return ids, weights
 
-    # def interp2d(self, data, elem_ids, weights):
+    def interp2d(self, data, elem_ids, weights=None):
+        """interp spatially in data (2d only)
+
+        Parameters
+        ----------
+        data : ndarray or list(ndarray)
+            dfsu data 
+        elem_ids : ndarray(int)
+            n sized array of 1 or more element ids used for interpolation
+        weights : ndarray(float), optional
+            weights with same size as elem_ids used for interpolation
+
+        Returns
+        -------
+        ndarray or list(ndarray)
+            spatially interped data
         
-    #     if len(data) == self.n_elements:
-    #         return self._interp_itemstep(data, interpolant2d)
-
-    #     idat = []
-    #     ni = len(interpolant2d[0])
-    #     for datitem in data:
-    #         nt, ne = datitem.shape
-    #         idatitem = np.empty(shape=(nt,ni)) 
-    #         for step in range(nt):
-    #             idatitem[step,:] = self._interp_itemstep(datitem[step,:], interpolant2d)
-    #         idat.append(idatitem)
-    #     return idat
+        Examples
+        --------
+        >>> ds = dfsu.read()
+        >>> g = dfs.get_overset_grid(shape=(50,40))
+        >>> elem_ids, weights = dfs.get_2d_interpolant(g.xy)
+        >>> dsi = dfs.interp2d(ds, elem_ids, weights)
+        """
+        return interp2d(data, elem_ids, weights)
 
     def _find_n_nearest_elements(self, x, y, z=None, n=1, layer=None):
         """Find n nearest elements (for each of the points given) 
@@ -826,7 +840,7 @@ class _UnstructuredGeometry:
         """The 2d geometry for a 3d object
         """
         if self._n_layers is None:
-            #print("Object has no layers: cannot return geometry2d")
+            # print("Object has no layers: cannot return geometry2d")
             return self
         if self._geom2d is None:
             self._geom2d = self.to_2d_geometry()
@@ -978,7 +992,8 @@ class _UnstructuredGeometry:
         n2d = len(self.top_elements)
         topid = self.top_elements
         botid = self.bottom_elements
-        global_layer_ids = np.arange(1, self.n_layers + 1)  # layer_ids = 1, 2, 3...
+        # layer_ids = 1, 2, 3...
+        global_layer_ids = np.arange(1, self.n_layers + 1)
         for j in range(n2d):
             col = list(range(botid[j], topid[j] + 1))
 
@@ -1322,7 +1337,8 @@ class _UnstructuredGeometry:
             elif plot_type == "contourf" or plot_type == "contour_filled":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
                 vbuf = 0.01 * (vmax - vmin) / n_levels
-                zn = np.clip(zn, vmin + vbuf, vmax - vbuf)  # avoid white outside limits
+                # avoid white outside limits
+                zn = np.clip(zn, vmin + vbuf, vmax - vbuf)
                 fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
 
                 # colorbar
@@ -1736,8 +1752,7 @@ class Dfsu(_UnstructuredFile):
         dfs.Close()
         return Dataset(data_list, time, items)
 
-
-    def extract_track(self, track, items=None, method='nearest'):
+    def extract_track(self, track, items=None, method="nearest"):
         """
         Extract track data from a dfsu file
 
@@ -1763,15 +1778,15 @@ class Dfsu(_UnstructuredFile):
         Examples
         --------
         >>> ds = dfsu.extract_track(times, xy, items=['u','v'])
-        
+
         >>> ds = dfsu.extract_track('track_file.dfs0')
-        
+
         >>> ds = dfsu.extract_track('track_file.csv', items=0)
         """
 
         dfs = DfsuFile.Open(self._filename)
         self._n_timesteps = dfs.NumberOfTimeSteps
-        
+
         items, item_numbers, time_steps = get_valid_items_and_timesteps(
             self, items, time_steps=None
         )
@@ -1780,33 +1795,33 @@ class Dfsu(_UnstructuredFile):
         deletevalue = self.deletevalue
 
         if isinstance(track, str):
-            filename = track 
+            filename = track
             if os.path.exists(filename):
                 _, ext = os.path.splitext(filename)
-                if ext == '.dfs0':
+                if ext == ".dfs0":
                     df = Dfs0(filename).to_dataframe()
-                elif ext == '.csv':
+                elif ext == ".csv":
                     df = pd.read_csv(filename, index_col=0, parse_dates=True)
                 else:
-                    raise ValueError(f'{ext} files not supported (dfs0, csv)')
+                    raise ValueError(f"{ext} files not supported (dfs0, csv)")
 
                 times = df.index
                 coords = df.iloc[:, 0:2].values
             else:
-                raise ValueError(f'{filename} does not exist')
+                raise ValueError(f"{filename} does not exist")
         elif isinstance(track, Dataset):
             times = track.time
-            coords = np.zeros(shape=(len(times),2))            
-            coords[:,0] = track.data[0]
-            coords[:,1] = track.data[1]            
+            coords = np.zeros(shape=(len(times), 2))
+            coords[:, 0] = track.data[0]
+            coords[:, 1] = track.data[1]
         else:
             assert isinstance(track, pd.DataFrame)
-            times  = track.index 
+            times = track.index
             coords = track.iloc[:, 0:2].values
 
         data_list = []
-        data_list.append(coords[:,0])   # longitude
-        data_list.append(coords[:,1])   # latitude 
+        data_list.append(coords[:, 0])  # longitude
+        data_list.append(coords[:, 1])  # latitude
         for item in range(n_items):
             # Initialize an empty data block
             data = np.empty(shape=(len(times)), dtype=self._dtype)
@@ -1815,22 +1830,24 @@ class Dfsu(_UnstructuredFile):
 
         # spatial interpolation
         n_pts = 5
-        if method == 'nearest': n_pts = 1        
+        if method == "nearest":
+            n_pts = 1
         elem_ids, weights = self.get_2d_interpolant(coords, n_nearest=n_pts)
-        
+
         # track end (relative to dfsu)
         t_rel = (times - self.end_time).total_seconds()
-        i_end = np.where(t_rel<=0)[0][-1] # largest idx for which (times - self.end_time)<=0        
+        # largest idx for which (times - self.end_time)<=0
+        i_end = np.where(t_rel <= 0)[0][-1]
 
         # track time relative to dfsu start
         t_rel = (times - self.start_time).total_seconds()
-        i_start = np.where(t_rel>=0)[0][0]  # smallest idx for which t_rel>=0
+        i_start = np.where(t_rel >= 0)[0][0]  # smallest idx for which t_rel>=0
 
-        dfsu_step = int(np.floor(t_rel[0]/self.timestep)) # first step 
+        dfsu_step = int(np.floor(t_rel[0] / self.timestep))  # first step
 
-        # initialize dfsu data arrays 
-        d1 = np.ndarray(shape=(n_items,self.n_elements), dtype=self._dtype)
-        d2 = np.ndarray(shape=(n_items,self.n_elements), dtype=self._dtype)
+        # initialize dfsu data arrays
+        d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
+        d2 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
         t1 = 0.0
         t2 = 0.0
 
@@ -1841,30 +1858,31 @@ class Dfsu(_UnstructuredFile):
             t2 = itemdata.Time - 1e-10
             d = to_numpy(itemdata.Data)
             d[d == deletevalue] = np.nan
-            d2[item,:] = d    
-        
-        is_EOF = lambda step: step >= self.n_timesteps
+            d2[item, :] = d
 
-        # loop over track points 
-        for i in range(i_start, i_end+1):
-            t_rel[i] # time of point relative to dfsu start
+        def is_EOF(step):
+            return step >= self.n_timesteps
+
+        # loop over track points
+        for i in range(i_start, i_end + 1):
+            t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
-            
+
             while (read_next == True) and (~is_EOF(dfsu_step)):
                 dfsu_step = dfsu_step + 1
 
                 # swap new to old
-                d1, d2 = d2, d1   
-                t1, t2 = t2, t1 
+                d1, d2 = d2, d1
+                t1, t2 = t2, t1
 
                 step = time_steps[dfsu_step]
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
-                    t2 = itemdata.Time 
+                    t2 = itemdata.Time
                     d = to_numpy(itemdata.Data)
                     d[d == deletevalue] = np.nan
-                    d2[item,:] = d  
+                    d2[item, :] = d
 
                 read_next = t_rel[i] > t2
 
@@ -1872,31 +1890,30 @@ class Dfsu(_UnstructuredFile):
                 # cannot read next - no more timesteps in dfsu file
                 continue
 
-            w = (t_rel[i] - t1)/self.timestep # time-weight
+            w = (t_rel[i] - t1) / self.timestep  # time-weight
             eid = elem_ids[i]
             if np.any(eid > 0):
-                dati =    (1-w)*np.dot(d1[:,eid], weights[i])
-                dati = dati + w*np.dot(d2[:,eid], weights[i])           
-            else: 
+                dati = (1 - w) * np.dot(d1[:, eid], weights[i])
+                dati = dati + w * np.dot(d2[:, eid], weights[i])
+            else:
                 dati = np.nan(shape=n_items)
-            
-            for item in range(n_items):                    
-                data_list[item+2][i] = dati[item]         
+
+            for item in range(n_items):
+                data_list[item + 2][i] = dati[item]
 
         dfs.Close()
 
         items_out = []
         if self.is_geo:
-            items_out.append(ItemInfo('Longitude'))
-            items_out.append(ItemInfo('Latitude'))
+            items_out.append(ItemInfo("Longitude"))
+            items_out.append(ItemInfo("Latitude"))
         else:
-            items_out.append(ItemInfo('x'))
-            items_out.append(ItemInfo('y'))
+            items_out.append(ItemInfo("x"))
+            items_out.append(ItemInfo("y"))
         for item in items:
             items_out.append(item)
 
         return Dataset(data_list, times, items_out)
-
 
     def write_header(
         self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
