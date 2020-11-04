@@ -6,6 +6,22 @@ from .dotnet import asnetarray_v2
 
 
 def min_horizontal_dist_meters(coords, targets, is_geo=False):
+    """smallest meter distance between two sets of coordinates
+
+    Parameters
+    ----------
+    coords : n-by-2 array
+        x, y coordinates 
+    targets : m-by-2 array
+        x, y coordinates 
+    is_geo : bool, optional
+        are coordinates geographical?, by default False
+
+    Returns
+    -------
+    array
+        smallest distances
+    """
     xe = coords[:, 0]
     ye = coords[:, 1]
     n = len(xe)
@@ -17,6 +33,22 @@ def min_horizontal_dist_meters(coords, targets, is_geo=False):
 
 
 def dist_in_meters(coords, pt, is_geo=False):
+    """get distance between array of coordinates and point
+
+    Parameters
+    ----------
+    coords : n-by-2 array
+        x, y coordinates 
+    pt : [float, float]
+        x, y coordinate of point
+    is_geo : bool, optional
+        are coordinates geographical?, by default False
+
+    Returns
+    -------
+    array
+        distances in meter
+    """
     xe = coords[:, 0]
     ye = coords[:, 1]
     xp = pt[0]
@@ -332,6 +364,17 @@ class Grid2D:
         return elem_table
 
     def to_mesh(self, outfilename, projection=None, z=None):
+        """export grid to mesh file
+
+        Parameters
+        ----------
+        outfilename : str
+            path of new mesh file
+        projection : str, optional
+            WKT projection string, by default 'LONG/LAT'
+        z : array, optional
+            array of bathymetry values for each node, by default 0
+        """
         if projection is None:
             projection = "LONG/LAT"
 
