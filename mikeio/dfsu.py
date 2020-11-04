@@ -1783,9 +1783,9 @@ class Dfsu(_UnstructuredFile):
             filename = track 
             if os.path.exists(filename):
                 _, ext = os.path.splitext(filename)
-                if ext is '.dfs0':
+                if ext == '.dfs0':
                     df = Dfs0(filename).to_dataframe()
-                elif ext is '.csv':
+                elif ext == '.csv':
                     df = pd.read_csv(filename, index_col=0, parse_dates=True)
                 else:
                     raise ValueError(f'{ext} files not supported (dfs0, csv)')
@@ -1815,7 +1815,7 @@ class Dfsu(_UnstructuredFile):
 
         # spatial interpolation
         n_pts = 5
-        if method is 'nearest': n_pts = 1        
+        if method == 'nearest': n_pts = 1        
         elem_ids, weights = self.get_2d_interpolant(coords, n_nearest=n_pts)
         
         # track end (relative to dfsu)
