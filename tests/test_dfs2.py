@@ -203,6 +203,31 @@ def test_read_some_time_step():
     assert len(res.time) == 2
 
 
+def test_interpolate_non_equidistant_data(tmpdir):
+
+    filename = r"tests/testdata/eq.dfs2"
+    dfs = Dfs2(filename)
+
+    ds = dfs.read(time_steps=[0, 2, 3, 6])  # non-equidistant dataset
+
+    assert not ds.is_equidistant
+
+    ds2 = ds.interp_time(dt=3600)
+
+    assert ds2.is_equidistant
+
+    outfilename = os.path.join(tmpdir.dirname, "interpolated_time.dfs2")
+
+    dfs.write(outfilename, ds2)
+
+    dfs2 = Dfs2(outfilename)
+    assert dfs2.timestep == 3600.0
+
+    ds3 = dfs2.read()
+
+    assert ds3.is_equidistant
+
+
 def test_write_some_time_step(tmpdir):
 
     filename = r"tests/testdata/waves.dfs2"
