@@ -97,18 +97,13 @@ class Dataset:
         self.items = items
 
     def __repr__(self):
-        n_items = len(self.items)
-
-        shape = self.data[0].shape
-        if len(self) > 1 and self.items[0].name == "Z coordinate":
-            shape = self.data[1].shape
 
         out = []
         out.append("<mikeio.DataSet>")
-        out.append(f"Dimensions: {shape}")
+        out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
-        if n_items > 10:
-            out.append(f"Number of items: {n_items}")
+        if self.aggregaten_items > 10:
+            out.append(f"Number of items: {self.n_items}")
         else:
             out.append("Items:")
             for i, item in enumerate(self.items):
@@ -537,7 +532,43 @@ class Dataset:
 
     @property
     def is_equidistant(self):
+        """Is Dataset equidistant in time?
+        """
         if len(self.time) < 3:
             return True
 
         return self.time.freq is not None
+
+    @property
+    def n_timesteps(self):
+        """Number of time steps
+        """
+        return len(self.time)
+
+    @property
+    def n_items(self):
+        """Number of items
+        """
+        return len(self.items)
+
+    @property
+    def shape(self):
+        """Shape of each item 
+        """
+        return self.data[self._first_non_z_item].shape
+
+    @property
+    def _first_non_z_item(self):
+        if len(self) > 1 and self.items[0].name == "Z coordinate":
+            return 1
+        return 0
+
+    @property
+    def n_elements(self):
+        """Number of spatial elements/points
+        """
+        n_elem = np.prod(self.shape)
+        if self.n_timesteps > 1:
+            n_elem = int(n_elem / self.n_timesteps)
+        return n_elem
+
