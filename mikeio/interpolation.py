@@ -17,6 +17,10 @@ def get_idw_interpolant(distances, p=1):
     np.array
         weights 
     """
+    is_1d = distances.ndim == 1
+    if is_1d:
+        distances = np.atleast_2d(distances)
+
     MIN_DISTANCE = 1e-8
     weights = np.zeros(distances.shape)
     p = 1  # inverse distance order
@@ -28,6 +32,8 @@ def get_idw_interpolant(distances, p=1):
     denom = weights[~match, :].sum(axis=1).reshape(-1, 1)  # *np.ones((1,n_nearest))
     weights[~match, :] = weights[~match, :] / denom
 
+    if is_1d:
+        weights = weights[0]
     return weights
 
 
