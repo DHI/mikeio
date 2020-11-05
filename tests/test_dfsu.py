@@ -233,7 +233,7 @@ def test_contains():
     filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
     dfs = Dfsu(filename)
 
-    pts = [[4, 54],[0, 50]]
+    pts = [[4, 54], [0, 50]]
     inside = dfs.contains(pts)
     assert inside[0] == True
     assert inside[1] == False
@@ -251,23 +251,24 @@ def test_get_overset_grid():
     assert g.dx == 0.2
     assert g.dy == 0.2
 
-    g = dfs.get_overset_grid(dxdy=(0.4,0.2))
+    g = dfs.get_overset_grid(dxdy=(0.4, 0.2))
     assert g.dx == 0.4
     assert g.dy == 0.2
 
-    g = dfs.get_overset_grid(shape=(5,4))
+    g = dfs.get_overset_grid(shape=(5, 4))
     assert g.nx == 5
     assert g.ny == 4
 
-    g = dfs.get_overset_grid(shape=(None,5))
+    g = dfs.get_overset_grid(shape=(None, 5))
     assert g.nx == 11
     assert g.ny == 5
+
 
 def test_find_nearest_element_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    elem_id = dfs.find_nearest_element(606200, 6905480)
+    elem_id = dfs.find_nearest_elements(606200, 6905480)
     assert elem_id == 317
 
 
@@ -276,7 +277,7 @@ def test_dfsu_to_dfs0_via_dataframe(tmpdir):
     dfs = Dfsu(filename)
     assert dfs.start_time.year == 1985
 
-    elem_id = dfs.find_nearest_element(606200, 6905480)
+    elem_id = dfs.find_nearest_elements(606200, 6905480)
 
     ds = dfs.read(elements=[elem_id])
     df = ds.to_dataframe()
@@ -297,7 +298,7 @@ def test_dfsu_to_dfs0(tmpdir):
     dfs = Dfsu(filename)
     assert dfs.start_time.year == 1985
 
-    elem_id = dfs.find_nearest_element(606200, 6905480)
+    elem_id = dfs.find_nearest_elements(606200, 6905480)
 
     ds = dfs.read(elements=[elem_id])
     dss = ds.squeeze()
@@ -319,7 +320,7 @@ def test_find_nearest_element_2d_array():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    elem_ids = dfs.find_nearest_element(x=[606200, 606200], y=[6905480, 6905480])
+    elem_ids = dfs.find_nearest_elements(x=[606200, 606200], y=[6905480, 6905480])
     assert len(elem_ids) == 2
     assert elem_ids[0] == 317
     assert elem_ids[1] == 317
@@ -329,14 +330,14 @@ def test_find_nearest_element_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
 
-    elem_id = dfs.find_nearest_element(333934, 6158101)
+    elem_id = dfs.find_nearest_elements(333934, 6158101)
     assert elem_id == 5323
     assert elem_id in dfs.top_elements
 
-    elem_id = dfs.find_nearest_element(333934, 6158101, layer=8)
+    elem_id = dfs.find_nearest_elements(333934, 6158101, layer=8)
     assert elem_id == 5322
 
-    elem_id = dfs.find_nearest_element(333934, 6158101, -7)
+    elem_id = dfs.find_nearest_elements(333934, 6158101, -7)
     assert elem_id == 5320
 
 
@@ -358,7 +359,7 @@ def test_read_and_select_single_element():
 
     assert ds.data[0].shape == (9, 884)
 
-    idx = dfs.find_nearest_element(606200, 6905480)
+    idx = dfs.find_nearest_elements(606200, 6905480)
 
     selds = ds.isel(idx=idx, axis=1)
 
