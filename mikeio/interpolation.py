@@ -38,19 +38,40 @@ def get_idw_interpolant(distances, p=1):
 
 
 def interp2d(data, elem_ids, weights=None):
+    """interp spatially in data (2d only)
 
+    Parameters
+    ----------
+    data : mikeio.Dateset, list(ndarray), or ndarray 
+        dfsu data 
+    elem_ids : ndarray(int)
+        n sized array of 1 or more element ids used for interpolation
+    weights : ndarray(float), optional
+        weights with same size as elem_ids used for interpolation
+
+    Returns
+    -------
+    ndarray or list(ndarray)
+        spatially interped data with same type and shape as input
+    
+    Examples
+    --------    
+    >>> elem_ids, weights = dfs.get_2d_interpolant(xy)
+    >>> dsi = interp2d(ds, elem_ids, weights)
+    """
     is_dataset = False
     if isinstance(data, Dataset):
         is_dataset = True
         ds = data.copy()
         data = ds.data
 
+    is_single_item = False
     if isinstance(data, np.ndarray):
         if data.ndim == 1:
             # data is single item and single time step
             return _interp_itemstep(data, elem_ids, weights)
         elif data.ndim == 2:
-            # data is single item
+            is_single_item = True
             data = [data]
 
     idat = []
@@ -65,6 +86,8 @@ def interp2d(data, elem_ids, weights=None):
     if is_dataset:
         ds.data = idat
         idat = ds
+    if is_single_item:
+        idat = idat[0]
 
     return idat
 
