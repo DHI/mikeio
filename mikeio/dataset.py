@@ -102,7 +102,7 @@ class Dataset:
         out.append("<mikeio.DataSet>")
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
-        if self.aggregaten_items > 10:
+        if self.n_items > 10:
             out.append(f"Number of items: {self.n_items}")
         else:
             out.append("Items:")
