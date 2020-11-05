@@ -4,7 +4,7 @@ from dateutil.rrule import rrule, SECONDLY, HOURLY, DAILY
 import numpy as np
 import pandas as pd
 import pytest
-from mikeio import Dataset, Dfsu
+from mikeio import Dataset, Dfsu, Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
@@ -576,3 +576,29 @@ def test_item_search():
 
     assert len(res) > 0
     assert isinstance(res[0], EUMType)
+
+
+def test_properties_dfs2():
+    filename = "tests/testdata/gebco_sound.dfs2"
+    dfs = Dfs2(filename)
+
+    ds = dfs.read()
+    assert ds.n_timesteps == 1
+    assert ds.n_items == 1
+    assert np.all(ds.shape == (1, 264, 216))
+    assert ds.n_elements == (264*216)
+    assert ds._first_non_z_item == 0
+    assert ds.is_equidistant
+
+
+def test_properties_dfsu():
+    filename = "tests/testdata/oresund_vertical_slice.dfsu"
+    dfs = Dfsu(filename)
+
+    ds = dfs.read()
+    assert ds.n_timesteps == 3
+    assert ds.n_items == 3
+    assert np.all(ds.shape == (3, 441))
+    assert ds.n_elements == 441
+    assert ds._first_non_z_item == 1
+    assert ds.is_equidistant
