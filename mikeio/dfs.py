@@ -11,7 +11,7 @@ from .dotnet import (
     to_dotnet_float_array,
 )
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
-from .custom_exceptions import DataDimensionMismatch
+from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
@@ -287,6 +287,8 @@ class _Dfs123:
         else:
             item_numbers = items
 
+        self._validate_item_numbers(item_numbers)
+
         if time_steps is None:
             time_steps = list(range(self.n_timesteps))
 
@@ -369,6 +371,13 @@ class _Dfs123:
             item = ItemInfo(name, itemtype, unit)
             items.append(item)
         return items
+
+    def _validate_item_numbers(self, item_numbers):
+        if not all(
+            isinstance(item_number, int) and 0 <= item_number < self.n_items
+            for item_number in item_numbers
+        ):
+            raise ItemNumbersError()
 
     @property
     def deletevalue(self):

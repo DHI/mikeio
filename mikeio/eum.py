@@ -12,8 +12,71 @@ Examples
 degree Kelvin
 
 """
+from DHI.Generic.MikeZero import EUMWrapper
 from enum import IntEnum
-from mikeio.dfs_util import unit_list, type_list
+
+
+def type_list(search=None):
+    """Get a dictionary of the EUM items
+
+    Notes
+    -----
+    An alternative to `type_list` is to use `mikeio.eum.Item`
+
+    Parameters
+    ----------
+    search: str, optional
+        a search string (caseinsensitive) to filter out results
+
+    Returns
+    -------
+    dict
+        names and codes for EUM items
+    """
+    items = {}
+    check = True
+    i = 1
+    while check:
+        d = EUMWrapper.eumGetItemTypeSeq(i, 0, "")
+        if d[0] is True:
+            items[d[1]] = d[2]
+            i += 1
+        else:
+            check = False
+
+    if search is not None:
+        search = search.lower()
+        items = dict(
+            [
+                [key, value]
+                for key, value in items.items()
+                if search in value.lower() or search == value.lower()
+            ]
+        )
+
+    return items
+
+
+def unit_list(type_enum):
+    """Get a dictionary of valid units
+
+    Parameters
+    ----------
+    type_enum: int
+        EUM variable type, e.g. 100006 or EUMType.Temperature
+
+    Returns
+    -------
+    dict
+        names and codes for valid units
+    """
+    items = {}
+    for i in range(EUMWrapper.eumGetItemUnitCount(type_enum)):
+        d = EUMWrapper.eumGetItemUnitSeq(type_enum, i + 1, 1, "")
+        if d[0] is True:
+            items[d[2]] = d[1]
+
+    return items
 
 
 class TimeAxisType(IntEnum):
