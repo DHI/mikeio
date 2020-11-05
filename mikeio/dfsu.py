@@ -628,6 +628,8 @@ class _UnstructuredGeometry:
 
         if y is None:
             p = x
+            if (not np.isscalar(x)) and (np.ndim(x) == 2):
+                p = x[:, 0:2]
         else:
             p = np.array((x, y)).T
         d, elem_id = self._tree2d.query(p, k=n)
@@ -648,10 +650,12 @@ class _UnstructuredGeometry:
 
         elif layer is None:
             idx = np.zeros_like(elem2d)
+            if np.isscalar(z):
+                z = z * np.ones_like(elem2d, dtype=float)
             elem3d = self.e2_e3_table[elem2d]
             for j, row in enumerate(elem3d):
                 zc = self.element_coordinates[row, 2]
-                d3d = np.abs(z - zc)
+                d3d = np.abs(z[j] - zc)
                 idx[j] = row[d3d.argsort()[0]]
 
         elif z is None:
@@ -683,8 +687,9 @@ class _UnstructuredGeometry:
         warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
         return self.find_nearest_elements(x, y, z, layer, n_nearest)
 
-    def find_nearest_elements(self, x, y=None, z=None, layer=None, \
-            n_nearest=1, return_distances=False):
+    def find_nearest_elements(
+        self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
+    ):
         """Find index of nearest elements (optionally for a list)
 
         Parameters
@@ -701,8 +706,8 @@ class _UnstructuredGeometry:
             Search in a specific layer only (3D files only)
             Either z or layer can be provided for a 3D file
         n_nearest : int, optional
-            return this many nearest points for each coordinate set
-            default=1
+            return this many (horizontally) nearest points for 
+            each coordinate set, default=1
         return_distances : bool, optional
             should the horizontal distances to each point be returned?
             default=False
@@ -717,15 +722,27 @@ class _UnstructuredGeometry:
         idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
 
         if not self.is_2d:
+            if self._use_third_col_as_z(x, z, layer):
+                z = x[:, 2]
             idx = self._find_3d_from_2d_points(idx, z=z, layer=layer)
 
         if (n_nearest == 1) and np.isscalar(x) and (not np.isscalar(idx)):
             idx = idx[0]
-        
+            d2d = d2d[0]
+
         if return_distances:
             return idx, d2d
-        
+
         return idx
+
+    def _use_third_col_as_z(self, x, z, layer):
+        return (
+            (z is None)
+            and (layer is None)
+            and (not np.isscalar(x))
+            and (np.ndim(x) == 2)
+            and (x.shape[1] >= 3)
+        )
 
     def find_nearest_profile_elements(self, x, y):
         """Find 3d elements of profile nearest to (x,y) coordinates
