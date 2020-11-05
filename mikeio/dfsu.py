@@ -549,7 +549,7 @@ class _UnstructuredGeometry:
         d, elem_id = self._tree2d.query(p, k=n_points)
         return elem_id, d
 
-    def get_overset_grid(self, dxdy=None, shape=None):
+    def get_overset_grid(self, dxdy=None, shape=None, buffer=None):
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
@@ -559,19 +559,18 @@ class _UnstructuredGeometry:
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
+        buffer : float, optional
+            positive to make the area larger, default=0
+            can be set to a small negative value to avoid NaN 
+            values all around the domain.
 
         Returns
         -------
         <mikeio.Grid2D>
             2d grid
         """
-        coords = self.geometry2d.node_coordinates  # node_ or element_
-        small = 1e-10
-        x0 = coords[:, 0].min() + small
-        y0 = coords[:, 1].min() + small
-        x1 = coords[:, 0].max() - small
-        y1 = coords[:, 1].max() - small
-        bbox = [x0, y0, x1, y1]
+        nc = self.geometry2d.node_coordinates
+        bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
         return Grid2D(bbox=bbox, dxdy=dxdy, shape=shape)
 
     def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False):
