@@ -683,28 +683,36 @@ class _UnstructuredGeometry:
         warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
         return self.find_nearest_elements(x, y, z, layer, n_nearest)
 
-    def find_nearest_elements(self, x, y=None, z=None, layer=None, n_nearest=1):
+    def find_nearest_elements(self, x, y=None, z=None, layer=None, \
+            n_nearest=1, return_distances=False):
         """Find index of nearest elements (optionally for a list)
 
         Parameters
         ----------
 
-        x: float or list(float)
+        x: float or array(float)
             X coordinate(s) (easting or longitude)
-        y: float or list(float)
+        y: float or array(float)
             Y coordinate(s) (northing or latitude)
-        z: float or list(float), optional
+        z: float or array(float), optional
             Z coordinate(s)  (vertical coordinate, positive upwards)
             If not provided for a 3d file, the surface element is returned
         layer: int, optional
             Search in a specific layer only (3D files only)
+            Either z or layer can be provided for a 3D file
         n_nearest : int, optional
             return this many nearest points for each coordinate set
+            default=1
+        return_distances : bool, optional
+            should the horizontal distances to each point be returned?
+            default=False
 
         Returns
         -------
         np.array
             element ids of nearest element(s)
+        np.array, optional
+            horizontal distances 
         """
         idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
 
@@ -713,6 +721,10 @@ class _UnstructuredGeometry:
 
         if (n_nearest == 1) and np.isscalar(x) and (not np.isscalar(idx)):
             idx = idx[0]
+        
+        if return_distances:
+            return idx, d2d
+        
         return idx
 
     def find_nearest_profile_elements(self, x, y):
