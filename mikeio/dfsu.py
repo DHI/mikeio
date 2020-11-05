@@ -1,3 +1,4 @@
+from logging import warn
 import os
 import pandas as pd
 from enum import IntEnum
@@ -534,21 +535,6 @@ class _UnstructuredGeometry:
             cnts = np.logical_and(cnts, ~in_hole)
         return cnts
 
-    def _create_tree2d(self):
-        xy = self.geometry2d.element_coordinates[:, :2]
-        self._tree2d = cKDTree(xy)
-
-    def _find_n_nearest_2d_elements(self, x, y=None, n_points=1):
-        if self._tree2d is None:
-            self._create_tree2d()
-
-        if y is None:
-            p = x
-        else:
-            p = np.array((x, y))
-        d, elem_id = self._tree2d.query(p, k=n_points)
-        return elem_id, d
-
     def get_overset_grid(self, dxdy=None, shape=None, buffer=None):
         """get a 2d grid that covers the domain by specifying spacing or shape
 
@@ -590,7 +576,7 @@ class _UnstructuredGeometry:
         (np.array, np.array)
             element ids and weights 
         """
-        ids, dists = self._find_n_nearest_2d_elements(xy, n_points=n_nearest)
+        ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
         weights = None
 
         if n_nearest == 1:
@@ -632,63 +618,73 @@ class _UnstructuredGeometry:
         """
         return interp2d(data, elem_ids, weights)
 
-    def _find_n_nearest_elements(self, x, y, z=None, n=1, layer=None):
-        """Find n nearest elements (for each of the points given) 
+    def _create_tree2d(self):
+        xy = self.geometry2d.element_coordinates[:, :2]
+        self._tree2d = cKDTree(xy)
 
-        Parameters
-        ----------
+    def _find_n_nearest_2d_elements(self, x, y=None, n=1):
+        if self._tree2d is None:
+            self._create_tree2d()
 
-        x: float or list(float)
-            X coordinate(s) (easting or longitude)
-        y: float or list(float)
-            Y coordinate(s) (northing or latitude)
-        z: float or list(float), optional
-            Z coordinate(s)  (vertical coordinate, positive upwards)
-            If not provided for a 3d file, the surface element is returned
-        layer: int, optional
-            Search in a specific layer only (3D files only)
-
-        Returns
-        -------
-        np.array
-            element ids of nearest element(s)            
-        """
-        ec = self.element_coordinates
-
-        if self.is_2d:
-            poi = np.array([x, y])
-
-            d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
-            idx = d.argsort()[0:n]
+        if y is None:
+            p = x
         else:
-            poi = np.array([x, y])
+            p = np.array((x, y)).T
+        d, elem_id = self._tree2d.query(p, k=n)
+        return elem_id, d
 
-            ec = self.geometry2d.element_coordinates
-            d2d = ((ec[:, 0:2] - poi) ** 2).sum(axis=1)
-            elem2d = d2d.argsort()[0:n]  # n nearest 2d elements
+    def _find_3d_from_2d_points(self, elem2d, z=None, layer=None):
 
-            if layer is None:
-                # TODO: loop over 2d elements, to get n lateral 3d neighbors
-                elem3d = self.e2_e3_table[elem2d[0]]
-                zc = self.element_coordinates[elem3d, 2]
+        was_scalar = np.isscalar(elem2d)
+        if was_scalar:
+            elem2d = np.array([elem2d])
+        else:
+            orig_shape = elem2d.shape
+            elem2d = np.reshape(elem2d, (elem2d.size,))
 
-                if z is None:
-                    z = 0  # should we rarther return whole column?
+        if (layer is None) and (z is None):
+            # return top element
+            idx = self.top_elements[elem2d]
+
+        elif layer is None:
+            idx = np.zeros_like(elem2d)
+            elem3d = self.e2_e3_table[elem2d]
+            for j, row in enumerate(elem3d):
+                zc = self.element_coordinates[row, 2]
                 d3d = np.abs(z - zc)
-                idx = elem3d[d3d.argsort()[0]]
-            else:
-                # 3d elements for n nearest 2d elements
-                elem3d = self.e2_e3_table[elem2d]
-                elem3d = np.concatenate(elem3d, axis=0)
-                layer_ids = self.layer_ids[elem3d]
-                idx = elem3d[layer_ids == layer]  # return at most n ids
+                idx[j] = row[d3d.argsort()[0]]
 
-        if n == 1 and (not np.isscalar(idx)):
+        elif z is None:
+            if 1 <= layer <= self.n_z_layers:
+                idx = np.zeros_like(elem2d)
+                elem3d = self.e2_e3_table[elem2d]
+                for j, row in enumerate(elem3d):
+                    try:
+                        layer_ids = self.layer_ids[elem3d]
+                        id = elem3d[layer_ids == layer]
+                        idx[j] = id
+                    except:
+                        print(f"Layer {layer} not present for 2d element {elem2d[j]}")
+            else:
+                # sigma layer
+                idx = self.get_layer_elements(layer=layer)[elem2d]
+
+        else:
+            raise ValueError("layer and z cannot both be supplied!")
+
+        if was_scalar:
             idx = idx[0]
+        else:
+            idx = np.reshape(idx, orig_shape)
+
         return idx
 
-    def find_nearest_element(self, x, y, z=None, layer=None):
-        """Find index of nearest element (optionally for a list)
+    def find_nearest_element(self, x, y, z=None, layer=None, n_nearest=1):
+        warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
+        return self.find_nearest_elements(x, y, z, layer, n_nearest)
+
+    def find_nearest_elements(self, x, y=None, z=None, layer=None, n_nearest=1):
+        """Find index of nearest elements (optionally for a list)
 
         Parameters
         ----------
@@ -702,48 +698,22 @@ class _UnstructuredGeometry:
             If not provided for a 3d file, the surface element is returned
         layer: int, optional
             Search in a specific layer only (3D files only)
+        n_nearest : int, optional
+            return this many nearest points for each coordinate set
 
         Returns
         -------
         np.array
             element ids of nearest element(s)
         """
-        if np.isscalar(x):
-            return self._find_n_nearest_elements(x, y, z, n=1, layer=layer)
-        else:
-            nx = len(x)
-            ny = len(y)
-            if nx != ny:
-                print(f"x and y must have same length")
-                raise Exception
-            idx = np.zeros(nx, dtype=int)
-            if z is None:
-                for j in range(nx):
-                    idx[j] = self._find_n_nearest_elements(
-                        x[j], y[j], z=None, n=1, layer=layer
-                    )
-            else:
-                nz = len(z)
-                if nx != nz:
-                    print(f"z must have same length as x and y")
-                for j in range(nx):
-                    idx[j] = self._find_n_nearest_elements(
-                        x[j], y[j], z[j], n=1, layer=layer
-                    )
+        idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
+
+        if not self.is_2d:
+            idx = self._find_3d_from_2d_points(idx, z=z, layer=layer)
+
+        if (n_nearest == 1) and np.isscalar(x) and (not np.isscalar(idx)):
+            idx = idx[0]
         return idx
-
-    # def _find_nearest_2d_element(self, x, y):
-    #     if self.is_2d:
-    #         return self.find_nearest_element(x, y)
-    #     else:
-    #         geom2d = self.geometry2d
-    #         return geom2d.find_nearest_element(x, y)
-
-    # def _get_profile_from_2d_element(self, elem2d):
-    #     if self.is_2d:
-    #         raise Exception("Object is 2d. Cannot get_profile_from_2d_element")
-    #     else:
-    #         return self.e2_e3_table[elem2d]
 
     def find_nearest_profile_elements(self, x, y):
         """Find 3d elements of profile nearest to (x,y) coordinates
@@ -763,7 +733,7 @@ class _UnstructuredGeometry:
         if self.is_2d:
             raise Exception("Object is 2d. Cannot get_nearest_profile")
         else:
-            elem2d = self.geometry2d.find_nearest_element(x, y)
+            elem2d, _ = self._find_n_nearest_2d_elements(x, y)
             elem3d = self.e2_e3_table[elem2d]
             return elem3d
 
