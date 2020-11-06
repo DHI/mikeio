@@ -984,3 +984,26 @@ def test_get_node_centered_data():
     nid = dfs.element_table[eid]
     assert wl_nodes[nid].mean() == 0.45935017355903907
 
+
+def test_interp2d():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+    dsi = dfs.interp2d(ds, *interpolant)
+
+    assert dsi.shape == (nt, 20 * 10)
+
+
+def test_interp2d_reshaped():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"], time_steps=[0, 1])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+    dsi = dfs.interp2d(ds, *interpolant, shape=(g.ny, g.nx))
+
+    assert dsi.shape == (nt, g.ny, g.nx)

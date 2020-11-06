@@ -162,6 +162,12 @@ class Dataset:
 
         return Dataset(data, time, items)
 
+    def flipud(self):
+        "Flip dataset updside down"
+
+        self.data = [np.flip(self[x], axis=1) for x in self.items]
+        return self
+
     def isel(self, idx, axis=1):
         """
         Select subset along an axis.

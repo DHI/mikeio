@@ -592,7 +592,7 @@ class _UnstructuredGeometry:
 
         return ids, weights
 
-    def interp2d(self, data, elem_ids, weights=None):
+    def interp2d(self, data, elem_ids, weights=None, shape=None):
         """interp spatially in data (2d only)
 
         Parameters
@@ -603,6 +603,8 @@ class _UnstructuredGeometry:
             n sized array of 1 or more element ids used for interpolation
         weights : ndarray(float), optional
             weights with same size as elem_ids used for interpolation
+        shape: tuple, optional
+            reshape output
 
         Returns
         -------
@@ -616,7 +618,7 @@ class _UnstructuredGeometry:
         >>> elem_ids, weights = dfs.get_2d_interpolant(g.xy)
         >>> dsi = dfs.interp2d(ds, elem_ids, weights)
         """
-        return interp2d(data, elem_ids, weights)
+        return interp2d(data, elem_ids, weights, shape)
 
     def _create_tree2d(self):
         xy = self.geometry2d.element_coordinates[:, :2]
