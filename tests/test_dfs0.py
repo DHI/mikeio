@@ -1,3 +1,4 @@
+from mikeio.custom_exceptions import InvalidDataType
 import os
 import numpy as np
 import pandas as pd
@@ -62,6 +63,39 @@ def test_write_float(tmpdir):
     dfs.write(filename=filename, data=data)
 
     assert os.path.exists(filename)
+
+
+def test_write_double(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple_double.dfs0")
+
+    data = []
+
+    nt = 100
+    d = np.random.random([nt])
+    data.append(d)
+
+    dfs = Dfs0()
+
+    dfs.write(filename=filename, data=data, dtype=np.float64)
+
+    assert os.path.exists(filename)
+
+
+def test_write_int_not_possible(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple_double.dfs0")
+
+    data = []
+
+    nt = 100
+    d = np.random.random([nt])
+    data.append(d)
+
+    dfs = Dfs0()
+
+    with pytest.raises(InvalidDataType):
+        dfs.write(filename=filename, data=data, dtype=np.int32)
 
 
 def test_write_2darray(tmpdir):

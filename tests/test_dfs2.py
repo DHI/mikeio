@@ -1,9 +1,14 @@
 import os
 import datetime
 import numpy as np
+import pytest
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
-import pytest
+from mikeio.custom_exceptions import (
+    DataDimensionMismatch,
+    InvalidDataType,
+    ItemNumbersError,
+)
 
 
 def test_simple_write(tmpdir):
@@ -29,6 +34,26 @@ def test_simple_write(tmpdir):
 
     assert len(ds) == 1
     assert ds.items[0].type == EUMType.Undefined
+
+
+def test_write_inconsistent_shape(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+
+    data = []
+
+    nt = 100
+    nx = 20
+    ny = 5
+    d1 = np.random.random([nt, ny, nx])
+    d2 = np.random.random([nt, ny, nx + 1])
+
+    data = [d1, d2]
+
+    dfs = Dfs2()
+
+    with pytest.raises(DataDimensionMismatch):
+        dfs.write(filename=filename, data=data)
 
 
 def test_write_single_item(tmpdir):
@@ -81,6 +106,15 @@ def test_read():
     assert data[0, 11, 0] == 0
     assert np.isnan(data[0, 10, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
+
+
+def test_read_bad_item():
+
+    filename = r"tests/testdata/random.dfs2"
+    dfs = Dfs2(filename)
+
+    with pytest.raises(ItemNumbersError):
+        dfs.read(items=100)
 
 
 def test_read_temporal_subset_slice():

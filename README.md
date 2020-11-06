@@ -115,10 +115,13 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 
 ### Read Res1D file Return Pandas DataFrame
 ```python
->>>  from mikeio.res1d import Res1D
+>>>  from mikeio.res1d import Res1D, QueryDataReach
 >>>  df = Res1D(filename).read()
+
+>>>  query = QueryDataReach("WaterLevel", "104l1", 34.4131)
+>>>  df = res1d.read(query)
 ```
-For more examples on Res1D see this [notebook](notebooks/Res1D.ipynb)
+For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
 
 ### Read Xns11 file Return Pandas DataFrame
 ```python
@@ -197,28 +200,33 @@ MIKE IO is tested extensively. **93%** total test coverage.
 
 See detailed test coverage report below:
 ```
------------ coverage: platform win32, python 3.7.4-final-0 -----------
-Name                     Stmts   Miss  Cover
---------------------------------------------
-mikeio\__init__.py          33      1    97%
-mikeio\aggregator.py       104      9    91%
-mikeio\dfs.py               75      5    93%
-mikeio\dfs0.py             186     34    82%
-mikeio\dfs1.py              75      5    93%
-mikeio\dfs2.py             118     10    92%
-mikeio\dfs3.py             160     78    51%
-mikeio\dfs_util.py          40     14    65%
-mikeio\dfsu.py             815     55    93%
-mikeio\dotnet.py            63      4    94%
-mikeio\dutil.py            117      7    94%
-mikeio\eum.py             1196      2    99%
-mikeio\generic.py          126      1    99%
-mikeio\helpers.py            6      0   100%
-mikeio\res1d.py            202      7    97%
-mikeio\spatial.py           31     11    65%
-mikeio\xns11.py            199      6    97%
---------------------------------------------
-TOTAL                     3546    249    93%
+File                           Covered  Missed  %
+-------------------------------------------------
+mikeio\__init__.py               39      1    97%
+mikeio\aggregator.py            103      9    91%
+mikeio\custom_exceptions.py      10      0   100%
+mikeio\dataset.py               159     15    91%
+mikeio\dfs.py                   237     16    93%
+mikeio\dfs0.py                  240     27    89%
+mikeio\dfs1.py                   48      2    96%
+mikeio\dfs2.py                   78      2    97%
+mikeio\dfs3.py                  161     78    52%
+mikeio\dfsu.py                 1044     74    93%
+mikeio\dotnet.py                 63      4    94%
+mikeio\dutil.py                  50      2    96%
+mikeio\eum.py                  1228      3    99%
+mikeio\generic.py               129      1    99%
+mikeio\helpers.py                 6      0   100%
+mikeio\pfs.py                   195      9    95%
+mikeio\res1d.py                 143     16    89%
+mikeio\spatial.py                31     11    65%
+mikeio\xns11.py                 210      6    97%
+mikeio\xyz.py                    12      0   100%
+-------------------------------------------------
+TOTAL                          4186    276    93%
 
-========================================== 199 passed ==================
+=================== 267 passed ==================
+
+
+
 ```
