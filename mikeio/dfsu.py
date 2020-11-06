@@ -28,6 +28,7 @@ from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
 from .spatial import Grid2D
 from .interpolation import get_idw_interpolant, interp2d
+from .custom_exceptions import InvalidGeometry
 
 
 class UnstructuredType(IntEnum):
@@ -390,8 +391,7 @@ class _UnstructuredGeometry:
             2d geometry (bottom nodes)
         """
         if self._n_layers is None:
-            print("Object has no layers: cannot export to_2d_geometry")
-            return None
+            return self
 
         # extract information for selected elements
         elem_ids = self.bottom_elements
@@ -853,7 +853,6 @@ class _UnstructuredGeometry:
         """The 2d geometry for a 3d object
         """
         if self._n_layers is None:
-            # print("Object has no layers: cannot return geometry2d")
             return self
         if self._geom2d is None:
             self._geom2d = self.to_2d_geometry()
@@ -878,8 +877,9 @@ class _UnstructuredGeometry:
         """The associated 2d element id for each 3d element
         """
         if self._n_layers is None:
-            print("Object has no layers: cannot return elem2d_ids")
-            return None
+            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
+            # or return self._2d_ids ??
+
         if self._2d_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -892,8 +892,7 @@ class _UnstructuredGeometry:
         """The layer number for each 3d element
         """
         if self._n_layers is None:
-            print("Object has no layers: cannot return layer_ids")
-            return None
+            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -983,8 +982,7 @@ class _UnstructuredGeometry:
 
         n_lay = self.n_layers
         if n_lay is None:
-            print("Object has no layers: cannot get_layer_elements")
-            return None
+            raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
 
         if layer < (-n_lay + 1) or layer > n_lay:
             raise Exception(

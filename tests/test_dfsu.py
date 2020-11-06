@@ -7,6 +7,7 @@ import pytest
 from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
 from mikeio import Dataset
+from mikeio.custom_exceptions import InvalidGeometry
 
 
 def test_repr():
@@ -916,6 +917,31 @@ def test_geometry_2d():
     geom = dfs.to_2d_geometry()
 
     assert geom.is_2d
+
+
+def test_geometry_2d_2dfile():
+
+    dfs = Dfsu("tests/testdata/HD2D.dfsu")
+
+    assert dfs.is_2d
+    geom = dfs.to_2d_geometry()  # No op
+
+    assert geom.is_2d
+
+
+def test_get_layers_2d_error():
+
+    dfs = Dfsu("tests/testdata/HD2D.dfsu")
+    assert dfs.is_2d
+
+    with pytest.raises(InvalidGeometry):
+        dfs.get_layer_elements(0)
+
+    with pytest.raises(InvalidGeometry):
+        dfs.layer_ids
+
+    with pytest.raises(InvalidGeometry):
+        dfs.elem2d_ids
 
 
 def test_to_mesh_3d(tmpdir):
