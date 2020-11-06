@@ -115,10 +115,13 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 
 ### Read Res1D file Return Pandas DataFrame
 ```python
->>>  from mikeio.res1d import Res1D
+>>>  from mikeio.res1d import Res1D, QueryDataReach
 >>>  df = Res1D(filename).read()
+
+>>>  query = QueryDataReach("WaterLevel", "104l1", 34.4131)
+>>>  df = res1d.read(query)
 ```
-For more examples on Res1D see this [notebook](notebooks/Res1D.ipynb)
+For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
 
 ### Read Xns11 file Return Pandas DataFrame
 ```python
