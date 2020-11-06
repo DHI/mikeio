@@ -188,32 +188,36 @@ class Dfs2(_Dfs123):
         self,
         filename,
         projectionstring,
-        longitude_origin,
-        latitude_origin,
         dx,
         dy,
-        nx,
-        ny,
+        longitude_origin=None,
+        latitude_origin=None,
+        nx=None,
+        ny=None,
         orientation=0.0,
         interpolate=True,
     ):
         """
-        Reproject a dfs2 file
+        Reproject and write results to a new dfs2 file
 
             Parameters
             ----------
             filename: str
-                Location to write the dfs2 file
+                location to write the reprojected dfs2 file
             projectionstring: str
                 WKT string of new projection
-            latitude_origin: float
-                latitude at origin of new grid 
-            longitude_origin: float
-                longitude at origin of new grid 
             dx: float
                 length of each grid in the x direction (projection units)
             dy: float
                 length of each grid in the y direction (projection units)
+            latitude_origin: float, optional
+                latitude at origin of new grid, default same as original 
+            longitude_origin: float, optional
+                longitude at origin of new grid, default same as original 
+            nx: int, optional
+                n grid points in x direction, default same as original
+            ny: int, optional
+                n grid points in y direction, default same as original
             orientation: float, optional
                 rotated grid, default 0.0
             interpolate: bool, optional
@@ -224,9 +228,22 @@ class Dfs2(_Dfs123):
 
             >>> dfs = Dfs2("input.dfs")
             >>> dfs.reproject("out.dfs2", projectionstring="UTM-33",
+            ...               dx=200.0, dy=200.0,
             ...               longitude_origin=12.0, latitude_origin=55.0,
-            ...               dx=200.0, dy=200.0, nx=285, ny=612)
+            ...               nx=285, ny=612)
         """
+
+        if nx is None:
+            nx = self.shape[2]
+
+        if ny is None:
+            ny = self.shape[1]
+
+        if latitude_origin is None:
+            latitude_origin = self.latitude
+
+        if longitude_origin is None:
+            longitude_origin = self.longitude
 
         dfs2File = DfsFileFactory.Dfs2FileOpen(self._filename)
 
