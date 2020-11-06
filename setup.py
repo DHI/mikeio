@@ -20,7 +20,7 @@ setuptools.setup(
             "matplotlib",
             "jupyterlab",
         ],
-        "test": ["pytest","matplotlib","shapely"],
+        "test": ["pytest", "matplotlib", "shapely"],
     },
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
