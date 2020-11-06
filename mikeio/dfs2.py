@@ -1,6 +1,8 @@
 import os
 from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import DfsFileFactory
+from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder, Dfs2Reprojector
+from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
 from DHI.Projections import Cartography
 
@@ -182,3 +184,82 @@ class Dfs2(_Dfs123):
     def shape(self):
         return (self._n_timesteps, self._ny, self._nx)
 
+    def reproject(
+        self,
+        filename,
+        projectionstring,
+        dx,
+        dy,
+        longitude_origin=None,
+        latitude_origin=None,
+        nx=None,
+        ny=None,
+        orientation=0.0,
+        interpolate=True,
+    ):
+        """
+        Reproject and write results to a new dfs2 file
+
+            Parameters
+            ----------
+            filename: str
+                location to write the reprojected dfs2 file
+            projectionstring: str
+                WKT string of new projection
+            dx: float
+                length of each grid in the x direction (projection units)
+            dy: float
+                length of each grid in the y direction (projection units)
+            latitude_origin: float, optional
+                latitude at origin of new grid, default same as original 
+            longitude_origin: float, optional
+                longitude at origin of new grid, default same as original 
+            nx: int, optional
+                n grid points in x direction, default same as original
+            ny: int, optional
+                n grid points in y direction, default same as original
+            orientation: float, optional
+                rotated grid, default 0.0
+            interpolate: bool, optional
+                interpolate to new grid, default true
+
+            Examples
+            --------
+
+            >>> dfs = Dfs2("input.dfs")
+            >>> dfs.reproject("out.dfs2", projectionstring="UTM-33",
+            ...               dx=200.0, dy=200.0,
+            ...               longitude_origin=12.0, latitude_origin=55.0,
+            ...               nx=285, ny=612)
+        """
+
+        if nx is None:
+            nx = self.shape[2]
+
+        if ny is None:
+            ny = self.shape[1]
+
+        if latitude_origin is None:
+            latitude_origin = self.latitude
+
+        if longitude_origin is None:
+            longitude_origin = self.longitude
+
+        dfs2File = DfsFileFactory.Dfs2FileOpen(self._filename)
+
+        tool = Dfs2Reprojector(dfs2File, filename)
+        tool.Interpolate = interpolate
+
+        tool.SetTarget(
+            projectionstring,
+            longitude_origin,
+            latitude_origin,
+            orientation,
+            nx,
+            0.0,
+            dx,
+            ny,
+            0.0,
+            dy,
+        )
+        tool.Process()
