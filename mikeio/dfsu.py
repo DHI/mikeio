@@ -718,6 +718,19 @@ class _UnstructuredGeometry:
             element ids of nearest element(s)
         np.array, optional
             horizontal distances 
+
+        Examples
+        --------
+        >>> id = dfs.find_nearest_elements(3, 4)
+        >>> ids = dfs.find_nearest_elements([3, 8], [4, 6])
+        >>> ids = dfs.find_nearest_elements(xy)
+        >>> ids = dfs.find_nearest_elements(3, 4, n_nearest=4)
+        >>> ids, d = dfs.find_nearest_elements(xy, return_distances=True)
+        
+        >>> ids = dfs.find_nearest_elements(3, 4, z=-3)
+        >>> ids = dfs.find_nearest_elements(3, 4, layer=4)
+        >>> ids = dfs.find_nearest_elements(xyz)
+        >>> ids = dfs.find_nearest_elements(xyz, n_nearest=3)
         """
         idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
 
