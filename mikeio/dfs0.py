@@ -47,7 +47,7 @@ class Dfs0:
             self._read_header()
 
     def __repr__(self):
-        out = ["Dfs0"]
+        out = ["<mikeio.Dfs0>"]
 
         if self._filename:
             out.append(f"Timeaxis: {str(self._timeaxistype)}")

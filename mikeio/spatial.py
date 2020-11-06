@@ -415,7 +415,7 @@ class Grid2D:
 
     def __repr__(self):
         out = []
-        out.append("2D Grid")
+        out.append("<mikeio.Grid2D>")
         out.append(
             f"x-axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
         )

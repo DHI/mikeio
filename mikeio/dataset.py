@@ -98,8 +98,7 @@ class Dataset:
 
     def __repr__(self):
 
-        out = []
-        out.append("<mikeio.DataSet>")
+        out = ["<mikeio.DataSet>"]
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if self.n_items > 10:
