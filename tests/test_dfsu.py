@@ -7,6 +7,7 @@ import pytest
 from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
 from mikeio import Dataset
+from mikeio.custom_exceptions import InvalidGeometry
 
 
 def test_repr():
@@ -229,11 +230,46 @@ def test_get_element_coords():
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
 
+def test_contains():
+    filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
+    dfs = Dfsu(filename)
+
+    pts = [[4, 54], [0, 50]]
+    inside = dfs.contains(pts)
+    assert inside[0] == True
+    assert inside[1] == False
+
+
+def test_get_overset_grid():
+    filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
+    dfs = Dfsu(filename)
+
+    g = dfs.get_overset_grid()
+    assert g.nx == 21
+    assert g.ny == 10
+
+    g = dfs.get_overset_grid(dxdy=0.2)
+    assert g.dx == 0.2
+    assert g.dy == 0.2
+
+    g = dfs.get_overset_grid(dxdy=(0.4, 0.2))
+    assert g.dx == 0.4
+    assert g.dy == 0.2
+
+    g = dfs.get_overset_grid(shape=(5, 4))
+    assert g.nx == 5
+    assert g.ny == 4
+
+    g = dfs.get_overset_grid(shape=(None, 5))
+    assert g.nx == 11
+    assert g.ny == 5
+
+
 def test_find_nearest_element_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    elem_id = dfs.find_nearest_element(606200, 6905480)
+    elem_id = dfs.find_nearest_elements(606200, 6905480)
     assert elem_id == 317
 
 
@@ -242,7 +278,7 @@ def test_dfsu_to_dfs0_via_dataframe(tmpdir):
     dfs = Dfsu(filename)
     assert dfs.start_time.year == 1985
 
-    elem_id = dfs.find_nearest_element(606200, 6905480)
+    elem_id = dfs.find_nearest_elements(606200, 6905480)
 
     ds = dfs.read(elements=[elem_id])
     df = ds.to_dataframe()
@@ -263,7 +299,7 @@ def test_dfsu_to_dfs0(tmpdir):
     dfs = Dfsu(filename)
     assert dfs.start_time.year == 1985
 
-    elem_id = dfs.find_nearest_element(606200, 6905480)
+    elem_id = dfs.find_nearest_elements(606200, 6905480)
 
     ds = dfs.read(elements=[elem_id])
     dss = ds.squeeze()
@@ -285,7 +321,7 @@ def test_find_nearest_element_2d_array():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
-    elem_ids = dfs.find_nearest_element(x=[606200, 606200], y=[6905480, 6905480])
+    elem_ids = dfs.find_nearest_elements(x=[606200, 606200], y=[6905480, 6905480])
     assert len(elem_ids) == 2
     assert elem_ids[0] == 317
     assert elem_ids[1] == 317
@@ -295,14 +331,14 @@ def test_find_nearest_element_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
 
-    elem_id = dfs.find_nearest_element(333934, 6158101)
+    elem_id = dfs.find_nearest_elements(333934, 6158101)
     assert elem_id == 5323
     assert elem_id in dfs.top_elements
 
-    elem_id = dfs.find_nearest_element(333934, 6158101, layer=8)
+    elem_id = dfs.find_nearest_elements(333934, 6158101, layer=8)
     assert elem_id == 5322
 
-    elem_id = dfs.find_nearest_element(333934, 6158101, -7)
+    elem_id = dfs.find_nearest_elements(333934, 6158101, -7)
     assert elem_id == 5320
 
 
@@ -324,7 +360,7 @@ def test_read_and_select_single_element():
 
     assert ds.data[0].shape == (9, 884)
 
-    idx = dfs.find_nearest_element(606200, 6905480)
+    idx = dfs.find_nearest_elements(606200, 6905480)
 
     selds = ds.isel(idx=idx, axis=1)
 
@@ -883,6 +919,31 @@ def test_geometry_2d():
     assert geom.is_2d
 
 
+def test_geometry_2d_2dfile():
+
+    dfs = Dfsu("tests/testdata/HD2D.dfsu")
+
+    assert dfs.is_2d
+    geom = dfs.to_2d_geometry()  # No op
+
+    assert geom.is_2d
+
+
+def test_get_layers_2d_error():
+
+    dfs = Dfsu("tests/testdata/HD2D.dfsu")
+    assert dfs.is_2d
+
+    with pytest.raises(InvalidGeometry):
+        dfs.get_layer_elements(0)
+
+    with pytest.raises(InvalidGeometry):
+        dfs.layer_ids
+
+    with pytest.raises(InvalidGeometry):
+        dfs.elem2d_ids
+
+
 def test_to_mesh_3d(tmpdir):
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
@@ -949,3 +1010,26 @@ def test_get_node_centered_data():
     nid = dfs.element_table[eid]
     assert wl_nodes[nid].mean() == 0.45935017355903907
 
+
+def test_interp2d():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+    dsi = dfs.interp2d(ds, *interpolant)
+
+    assert dsi.shape == (nt, 20 * 10)
+
+
+def test_interp2d_reshaped():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"], time_steps=[0, 1])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+    dsi = dfs.interp2d(ds, *interpolant, shape=(g.ny, g.nx))
+
+    assert dsi.shape == (nt, g.ny, g.nx)

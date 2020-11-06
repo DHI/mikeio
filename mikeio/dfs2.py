@@ -27,7 +27,7 @@ class Dfs2(_Dfs123):
             self._read_dfs2_header()
 
     def __repr__(self):
-        out = ["Dfs2"]
+        out = ["<mikeio.Dfs2>"]
 
         if self._filename:
             out.append(f"dx: {self.dx:.5f}")
