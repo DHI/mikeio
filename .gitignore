@@ -19,3 +19,4 @@ dist/
 .vs
 cov_html
 cov_annotate
+htmlcov

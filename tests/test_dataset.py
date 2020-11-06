@@ -451,6 +451,21 @@ def test_tail_small_dataset():
     assert len(dstail.time) == nt
 
 
+def test_flipud():
+
+    nt = 2
+    d = np.random.random([nt, 100, 30])
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset([d], time, items)
+
+    dsud = ds.copy()
+    dsud.flipud()
+
+    assert dsud.shape == ds.shape
+    assert dsud["Foo"][0, 0, 0] == ds["Foo"][0, -1, 0]
+
+
 def test_aggregation_workflows(tmpdir):
     filename = "tests/testdata/HD2D.dfsu"
     dfs = Dfsu(filename)
@@ -586,7 +601,7 @@ def test_properties_dfs2():
     assert ds.n_timesteps == 1
     assert ds.n_items == 1
     assert np.all(ds.shape == (1, 264, 216))
-    assert ds.n_elements == (264*216)
+    assert ds.n_elements == (264 * 216)
     assert ds._first_non_z_item == 0
     assert ds.is_equidistant
 

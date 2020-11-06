@@ -98,8 +98,7 @@ class Dataset:
 
     def __repr__(self):
 
-        out = []
-        out.append("<mikeio.DataSet>")
+        out = ["<mikeio.DataSet>"]
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if self.n_items > 10:
@@ -161,6 +160,12 @@ class Dataset:
         time = self.time.copy()
 
         return Dataset(data, time, items)
+
+    def flipud(self):
+        "Flip dataset updside down"
+
+        self.data = [np.flip(self[x], axis=1) for x in self.items]
+        return self
 
     def isel(self, idx, axis=1):
         """

@@ -37,7 +37,7 @@ def get_idw_interpolant(distances, p=1):
     return weights
 
 
-def interp2d(data, elem_ids, weights=None):
+def interp2d(data, elem_ids, weights=None, shape=None):
     """interp spatially in data (2d only)
 
     Parameters
@@ -48,6 +48,8 @@ def interp2d(data, elem_ids, weights=None):
         n sized array of 1 or more element ids used for interpolation
     weights : ndarray(float), optional
         weights with same size as elem_ids used for interpolation
+    shape: tuple, optional
+            reshape output
 
     Returns
     -------
@@ -81,6 +83,10 @@ def interp2d(data, elem_ids, weights=None):
         idatitem = np.empty(shape=(nt, ni))
         for step in range(nt):
             idatitem[step, :] = _interp_itemstep(datitem[step, :], elem_ids, weights)
+
+        if shape:
+            idatitem = idatitem.reshape((nt, *shape))
+
         idat.append(idatitem)
 
     if is_dataset:

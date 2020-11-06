@@ -7,6 +7,7 @@ import pytest
 from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
 from mikeio import Dataset
+from mikeio.custom_exceptions import InvalidGeometry
 
 
 def test_repr():
@@ -918,6 +919,31 @@ def test_geometry_2d():
     assert geom.is_2d
 
 
+def test_geometry_2d_2dfile():
+
+    dfs = Dfsu("tests/testdata/HD2D.dfsu")
+
+    assert dfs.is_2d
+    geom = dfs.to_2d_geometry()  # No op
+
+    assert geom.is_2d
+
+
+def test_get_layers_2d_error():
+
+    dfs = Dfsu("tests/testdata/HD2D.dfsu")
+    assert dfs.is_2d
+
+    with pytest.raises(InvalidGeometry):
+        dfs.get_layer_elements(0)
+
+    with pytest.raises(InvalidGeometry):
+        dfs.layer_ids
+
+    with pytest.raises(InvalidGeometry):
+        dfs.elem2d_ids
+
+
 def test_to_mesh_3d(tmpdir):
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
@@ -984,3 +1010,26 @@ def test_get_node_centered_data():
     nid = dfs.element_table[eid]
     assert wl_nodes[nid].mean() == 0.45935017355903907
 
+
+def test_interp2d():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+    dsi = dfs.interp2d(ds, *interpolant)
+
+    assert dsi.shape == (nt, 20 * 10)
+
+
+def test_interp2d_reshaped():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"], time_steps=[0, 1])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+    dsi = dfs.interp2d(ds, *interpolant, shape=(g.ny, g.nx))
+
+    assert dsi.shape == (nt, g.ny, g.nx)
