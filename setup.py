@@ -12,7 +12,6 @@ setuptools.setup(
             "pytest",
             "black",
             "sphinx",
-            "sphinx",
             "sphinx-rtd-theme",
             "shapely",
             "xarray",
