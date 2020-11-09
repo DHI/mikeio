@@ -150,7 +150,7 @@ class Dataset:
 
             return Dataset(data, self.time, items)
 
-        raise Exception("Invalid operation")
+        raise ValueError(f"indexing with a {type(x)} is not (yet) supported")
 
     def copy(self):
         "Returns a copy of this dataset."
@@ -240,9 +240,14 @@ class Dataset:
             items = deepcopy(items)
             items.pop(0)
 
-        time = self.time
+        if axis == 0:
+            time = pd.DatetimeIndex([self.time[0]])
+            keepdims = True
+        else:
+            time = self.time
+            keepdims = False
 
-        res = [func(self[item.name], axis=axis) for item in items]
+        res = [func(self[item.name], axis=axis, keepdims=keepdims) for item in items]
 
         ds = Dataset(res, time, items)
         return ds
@@ -332,7 +337,10 @@ class Dataset:
         >>> ds2 = ds.average(weights=area)
         """
 
-        def func(x, axis):
+        def func(x, axis, keepdims):
+            if keepdims:
+                raise NotImplementedError()
+
             return np.average(x, weights=weights, axis=axis)
 
         return self.aggregate(axis=axis, func=func)

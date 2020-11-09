@@ -99,6 +99,20 @@ def test_temporal_subset_fancy():
     assert selds["Foo"].shape == (49, 100, 30)
 
 
+def test_subset_with_datetime_is_not_supported():
+    nt = (24 * 31) + 1
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+    data = [d1, d2]
+
+    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    with pytest.raises(ValueError):
+        ds[datetime(2000, 1, 1)]
+
+
 def test_select_item_by_name():
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
@@ -214,6 +228,19 @@ def test_to_dataframe():
 
     assert list(df.columns) == ["Foo", "Bar"]
     assert isinstance(df.index, pd.DatetimeIndex)
+
+
+def test_multidimensional_to_dataframe_no_supported():
+
+    nt = 100
+    d1 = np.zeros([nt, 2])
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset([d1], time, items)
+
+    with pytest.raises(ValueError):
+        ds.to_dataframe()
 
 
 def test_get_data():
@@ -484,6 +511,21 @@ def test_aggregation_workflows(tmpdir):
     assert os.path.isfile(outfilename)
 
 
+def test_aggregations(tmpdir):
+    filename = "tests/testdata/gebco_sound.dfs2"
+    dfs = Dfs2(filename)
+
+    ds = dfs.read()
+
+    for axis in [0, 1, 2]:
+        ds.mean(axis=axis)
+        ds.nanmean(axis=axis)
+        ds.nanmin(axis=axis)
+        ds.nanmax(axis=axis)
+
+    assert True
+
+
 def test_weighted_average(tmpdir):
     filename = "tests/testdata/HD2D.dfsu"
     dfs = Dfsu(filename)
@@ -591,6 +633,57 @@ def test_item_search():
 
     assert len(res) > 0
     assert isinstance(res[0], EUMType)
+
+
+def test_dfsu3d_dataset():
+
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+
+    dfsu = Dfsu(filename)
+
+    ds = dfsu.read()
+
+    text = repr(ds)
+
+    assert len(ds) == 3  # Z coordinate, Salinity, Temperature
+
+    dsagg = ds.nanmean(axis=0)  # Time averaged
+
+    assert len(dsagg) == 2  # Salinity, Temperature
+
+    assert dsagg[0].shape[0] == 1
+
+    assert dsagg.time[0] == ds.time[0]  # Time-averaged data index by start time
+
+    ds_elm = dfsu.read(elements=[0])
+
+    assert len(ds_elm) == 3  # Z coordinate, Salinity, Temperature
+
+    dss = ds_elm.squeeze()
+
+    assert len(dss) == 2  # Salinity, Temperature
+
+
+def test_items_data_mismatch():
+
+    nt = 100
+    d = np.zeros([nt, 100, 30]) + 1.0
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]  # Two items is not correct!
+
+    with pytest.raises(ValueError):
+        Dataset([d], time, items)
+
+
+def test_time_data_mismatch():
+
+    nt = 100
+    d = np.zeros([nt, 100, 30]) + 1.0
+    time = _get_time(nt + 1)  # 101 timesteps is not correct!
+    items = [ItemInfo("Foo")]
+
+    with pytest.raises(ValueError):
+        Dataset([d], time, items)
 
 
 def test_properties_dfs2():

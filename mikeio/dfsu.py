@@ -741,10 +741,6 @@ class _UnstructuredGeometry:
                 z = x[:, 2]
             idx = self._find_3d_from_2d_points(idx, z=z, layer=layer)
 
-        if (n_nearest == 1) and np.isscalar(x) and (not np.isscalar(idx)):
-            idx = idx[0]
-            d2d = d2d[0]
-
         if return_distances:
             return idx, d2d
 
@@ -775,7 +771,7 @@ class _UnstructuredGeometry:
             element ids of vertical profile
         """
         if self.is_2d:
-            raise Exception("Object is 2d. Cannot get_nearest_profile")
+            raise InvalidGeometry("Object is 2d. Cannot get_nearest_profile")
         else:
             elem2d, _ = self._find_n_nearest_2d_elements(x, y)
             elem3d = self.e2_e3_table[elem2d]

@@ -274,6 +274,16 @@ def test_find_nearest_element_2d():
     assert elem_id == 317
 
 
+def test_find_nearest_element_2d_and_distance():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    (elem_id, dist) = dfs.find_nearest_elements(606200, 6905480, return_distances=True)
+    assert elem_id == 317
+
+    assert dist > 0.0
+
+
 def test_dfsu_to_dfs0_via_dataframe(tmpdir):
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -943,6 +953,9 @@ def test_get_layers_2d_error():
 
     with pytest.raises(InvalidGeometry):
         dfs.elem2d_ids
+
+    with pytest.raises(InvalidGeometry):
+        dfs.find_nearest_profile_elements(x=0, y=0)
 
 
 def test_to_mesh_3d(tmpdir):
