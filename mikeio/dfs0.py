@@ -174,30 +174,6 @@ class Dfs0:
             raise ItemNumbersError()
 
     @staticmethod
-    def _validate_and_open_dfs(filename, data):
-        if not os.path.exists(filename):
-            raise FileNotFoundError(filename)
-
-        try:
-            dfs = DfsFileFactory.DfsGenericOpenEdit(filename)
-        except IOError:
-            raise IOError(f"Cannot open {filename}.")
-
-        n_items = len(dfs.ItemInfo)
-        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
-        # Match the data to write to the existing dfs0 file
-        if n_time_steps != data[0].shape[0]:
-            raise ValueError(
-                f"Inconsistent data size. Number of time steps (row count) is {data[0].shape[0]}. Expected {n_time_steps}."
-            )
-
-        if n_items != len(data):
-            raise ValueError(f"The number of items is {len(data)}. Expected {n_items}.")
-
-        return dfs, n_items, n_time_steps
-
-    @staticmethod
     def _to_dfs_datatype(dtype):
         if dtype is None:
             return DfsSimpleType.Float
