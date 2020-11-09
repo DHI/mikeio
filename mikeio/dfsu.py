@@ -741,10 +741,6 @@ class _UnstructuredGeometry:
                 z = x[:, 2]
             idx = self._find_3d_from_2d_points(idx, z=z, layer=layer)
 
-        if (n_nearest == 1) and np.isscalar(x) and (not np.isscalar(idx)):
-            idx = idx[0]
-            d2d = d2d[0]
-
         if return_distances:
             return idx, d2d
 
