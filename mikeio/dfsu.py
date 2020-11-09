@@ -1759,6 +1759,176 @@ class Dfsu(_UnstructuredFile):
         dfs.Close()
         return Dataset(data_list, time, items)
 
+    def extract_track(self, track, items=None, method="nearest"):
+        """
+        Extract track data from a dfsu file
+
+        Parameters
+        ---------
+        track: pandas.DataFrame
+            with DatetimeIndex and (x, y) of track points as first two columns
+            x,y coordinates must be in same coordinate system as dfsu
+        track: str 
+            filename of csv or dfs0 file containing t,x,y        
+        items: list[int] or list[str], optional
+            Extract only selected items, by number (0-based), or by name
+        method: str, optional
+            Spatial interpolation method ('nearest' or 'inverse_distance')
+            default='nearest'
+
+        Returns
+        -------
+        Dataset
+            A dataset with data dimension t
+            The first two items will be x- and y- coordinates of track
+
+        Examples
+        --------
+        >>> ds = dfsu.extract_track(times, xy, items=['u','v'])
+
+        >>> ds = dfsu.extract_track('track_file.dfs0')
+
+        >>> ds = dfsu.extract_track('track_file.csv', items=0)
+        """
+
+        dfs = DfsuFile.Open(self._filename)
+        self._n_timesteps = dfs.NumberOfTimeSteps
+
+        items, item_numbers, time_steps = get_valid_items_and_timesteps(
+            self, items, time_steps=None
+        )
+        n_items = len(item_numbers)
+
+        deletevalue = self.deletevalue
+
+        if isinstance(track, str):
+            filename = track
+            if os.path.exists(filename):
+                _, ext = os.path.splitext(filename)
+                if ext == ".dfs0":
+                    df = Dfs0(filename).to_dataframe()
+                elif ext == ".csv":
+                    df = pd.read_csv(filename, index_col=0, parse_dates=True)
+                else:
+                    raise ValueError(f"{ext} files not supported (dfs0, csv)")
+
+                times = df.index
+                coords = df.iloc[:, 0:2].values
+            else:
+                raise ValueError(f"{filename} does not exist")
+        elif isinstance(track, Dataset):
+            times = track.time
+            coords = np.zeros(shape=(len(times), 2))
+            coords[:, 0] = track.data[0]
+            coords[:, 1] = track.data[1]
+        else:
+            assert isinstance(track, pd.DataFrame)
+            times = track.index
+            coords = track.iloc[:, 0:2].values
+
+        if self.is_geo:
+            lon = coords[:, 0]
+            lon[lon < -180] = lon[lon < -180] + 360
+            lon[lon >= 180] = lon[lon >= 180] - 360
+            coords[:, 0] = lon
+
+        data_list = []
+        data_list.append(coords[:, 0])  # longitude
+        data_list.append(coords[:, 1])  # latitude
+        for item in range(n_items):
+            # Initialize an empty data block
+            data = np.empty(shape=(len(times)), dtype=self._dtype)
+            data[:] = np.nan
+            data_list.append(data)
+
+        # spatial interpolation
+        n_pts = 5
+        if method == "nearest":
+            n_pts = 1
+        elem_ids, weights = self.get_2d_interpolant(coords, n_nearest=n_pts)
+
+        # track end (relative to dfsu)
+        t_rel = (times - self.end_time).total_seconds()
+        # largest idx for which (times - self.end_time)<=0
+        i_end = np.where(t_rel <= 0)[0][-1]
+
+        # track time relative to dfsu start
+        t_rel = (times - self.start_time).total_seconds()
+        i_start = np.where(t_rel >= 0)[0][0]  # smallest idx for which t_rel>=0
+
+        dfsu_step = int(np.floor(t_rel[i_start] / self.timestep))  # first step
+
+        # initialize dfsu data arrays
+        d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
+        d2 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
+        t1 = 0.0
+        t2 = 0.0
+
+        # very first dfsu time step
+        step = time_steps[dfsu_step]
+        for item in range(n_items):
+            itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
+            t2 = itemdata.Time - 1e-10
+            d = to_numpy(itemdata.Data)
+            d[d == deletevalue] = np.nan
+            d2[item, :] = d
+
+        def is_EOF(step):
+            return step >= self.n_timesteps
+
+        # loop over track points
+        for i in range(i_start, i_end + 1):
+            t_rel[i]  # time of point relative to dfsu start
+
+            read_next = t_rel[i] > t2
+
+            while (read_next == True) and (~is_EOF(dfsu_step)):
+                dfsu_step = dfsu_step + 1
+
+                # swap new to old
+                d1, d2 = d2, d1
+                t1, t2 = t2, t1
+
+                step = time_steps[dfsu_step]
+                for item in range(n_items):
+                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
+                    t2 = itemdata.Time
+                    d = to_numpy(itemdata.Data)
+                    d[d == deletevalue] = np.nan
+                    d2[item, :] = d
+
+                read_next = t_rel[i] > t2
+
+            if (read_next == True) and (is_EOF(dfsu_step)):
+                # cannot read next - no more timesteps in dfsu file
+                continue
+
+            w = (t_rel[i] - t1) / self.timestep  # time-weight
+            eid = elem_ids[i]
+            if np.any(eid > 0):
+                dati = (1 - w) * np.dot(d1[:, eid], weights[i])
+                dati = dati + w * np.dot(d2[:, eid], weights[i])
+            else:
+                dati = np.empty(shape=n_items, dtype=self._dtype)
+                dati[:] = np.nan
+
+            for item in range(n_items):
+                data_list[item + 2][i] = dati[item]
+
+        dfs.Close()
+
+        items_out = []
+        if self.is_geo:
+            items_out.append(ItemInfo("Longitude"))
+            items_out.append(ItemInfo("Latitude"))
+        else:
+            items_out.append(ItemInfo("x"))
+            items_out.append(ItemInfo("y"))
+        for item in items:
+            items_out.append(item)
+
+        return Dataset(data_list, times, items_out)
+
     def write_header(
         self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
     ):
