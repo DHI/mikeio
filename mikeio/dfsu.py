@@ -1830,6 +1830,12 @@ class Dfsu(_UnstructuredFile):
             times = track.index
             coords = track.iloc[:, 0:2].values
 
+        if self.is_geo:
+            lon = coords[:, 0]
+            lon[lon < -180] = lon[lon < -180] + 360
+            lon[lon >= 180] = lon[lon >= 180] - 360
+            coords[:, 0] = lon
+
         data_list = []
         data_list.append(coords[:, 0])  # longitude
         data_list.append(coords[:, 1])  # latitude
@@ -1854,7 +1860,7 @@ class Dfsu(_UnstructuredFile):
         t_rel = (times - self.start_time).total_seconds()
         i_start = np.where(t_rel >= 0)[0][0]  # smallest idx for which t_rel>=0
 
-        dfsu_step = int(np.floor(t_rel[0] / self.timestep))  # first step
+        dfsu_step = int(np.floor(t_rel[i_start] / self.timestep))  # first step
 
         # initialize dfsu data arrays
         d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
