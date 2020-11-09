@@ -23,7 +23,7 @@ setuptools.setup(
     },
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
-    description="A package that works with the DHI dfs libraries to facilitate creating, writing and reading dfs, res1d and mesh files.",
+    description="A package that uses the DHI dfs libraries to create, write and read dfs, res1d and mesh files.",
     platform="windows_x64",
     license="MIT",
     long_description=long_description,
