@@ -1913,7 +1913,8 @@ class Dfsu(_UnstructuredFile):
                 dati = (1 - w) * np.dot(d1[:, eid], weights[i])
                 dati = dati + w * np.dot(d2[:, eid], weights[i])
             else:
-                dati = np.nan(shape=n_items)
+                dati = np.empty(shape=n_items, dtype=self._dtype)
+                dati[:] = np.nan
 
             for item in range(n_items):
                 data_list[item + 2][i] = dati[item]
