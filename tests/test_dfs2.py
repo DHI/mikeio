@@ -362,3 +362,7 @@ def test_reproject_defaults(tmpdir):
     assert dfs.start_time == newdfs.start_time
     assert dfs.projection_string != newdfs.projection_string
 
+
+def test_extract_point():
+
+    assert False

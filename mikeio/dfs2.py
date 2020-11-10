@@ -1,3 +1,4 @@
+from mikeio.dataset import Dataset
 import os
 from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import DfsFileFactory
@@ -102,6 +103,12 @@ class Dfs2(_Dfs123):
     def _open(self):
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
+
+    def extract_point(self, xy, items=None, time_steps=None, method="nearest"):
+        data = None
+        time = None
+        items = None
+        return Dataset(data, time, items)
 
     def write(
         self,
