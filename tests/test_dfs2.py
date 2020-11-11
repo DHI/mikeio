@@ -6,7 +6,6 @@ from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 from mikeio.custom_exceptions import (
     DataDimensionMismatch,
-    InvalidDataType,
     ItemNumbersError,
 )
 
@@ -361,4 +360,40 @@ def test_reproject_defaults(tmpdir):
     assert newdfs.shape == dfs.shape
     assert dfs.start_time == newdfs.start_time
     assert dfs.projection_string != newdfs.projection_string
+
+
+def test_write_static_item(tmpdir):
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+
+    data = []
+    d = np.random.random([100, 2, 3])
+    d[10, :, :] = np.nan
+    d[11, :, :] = 0
+    d[12, :, :] = 1e-10
+    d[13, :, :] = 1e10
+
+    data.append(d)
+    # >>> from pyproj import Proj
+    # >>> utm = Proj(32633)
+    # >>> utm(12.0, 55.0)
+    east = 308124
+    north = 6098907
+    orientation = 0
+
+    dfs = Dfs2()
+
+    dfs.write(
+        filename=filename,
+        data=data,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter, data_value_type='MeanStepBackward')],
+        coordinate=["UTM-33", east, north, orientation],
+        dx=100,
+        dy=200,
+        title="test dfs2"
+    )
+
+    newdfs = Dfs2(filename)
+    assert newdfs.items[0].data_value_type == 3
 
