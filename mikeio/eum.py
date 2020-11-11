@@ -14,7 +14,6 @@ degree Kelvin
 """
 from DHI.Generic.MikeZero import EUMWrapper
 from enum import IntEnum
-from DHI.Generic.MikeZero.DFS import DataValueType
 
 from mikeio.helpers import to_datatype
 
