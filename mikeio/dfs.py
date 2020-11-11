@@ -40,7 +40,7 @@ class _Dfs123:
     def read(self, items=None, time_steps=None):
         """
         Read data from a dfs file
-        
+
         Parameters
         ---------
         items: list[int] or list[str], optional
@@ -120,7 +120,7 @@ class _Dfs123:
         dfs.Close()
 
     def _write(
-        self, filename, data, start_time, dt, items, coordinate, title,
+        self, filename, data, start_time, dt, items, coordinate, title
     ):
         self._write_handle_common_arguments(
             title, data, items, coordinate, start_time, dt
@@ -263,7 +263,7 @@ class _Dfs123:
                 item.name,
                 eumQuantity.Create(item.type, item.unit),
                 DfsSimpleType.Float,
-                DataValueType.Instantaneous,
+                item.data_value_type,
             )
 
         try:
@@ -356,7 +356,7 @@ class _Dfs123:
         ----------
         dfs : MIKE dfs object
         item_numbers : list[int]
-            
+
         Returns
         -------
         list[Iteminfo]
@@ -368,7 +368,8 @@ class _Dfs123:
             eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
             itemtype = EUMType(eumItem)
             unit = EUMUnit(eumUnit)
-            item = ItemInfo(name, itemtype, unit)
+            data_value_type = self._dfs.ItemInfo[item].get_ValueType()
+            item = ItemInfo(name, itemtype, unit, data_value_type)
             items.append(item)
         return items
 
