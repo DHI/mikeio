@@ -40,7 +40,7 @@ class _Dfs123:
     def read(self, items=None, time_steps=None):
         """
         Read data from a dfs file
-        
+
         Parameters
         ---------
         items: list[int] or list[str], optional
@@ -119,9 +119,7 @@ class _Dfs123:
 
         dfs.Close()
 
-    def _write(
-        self, filename, data, start_time, dt, items, coordinate, title,
-    ):
+    def _write(self, filename, data, start_time, dt, items, coordinate, title):
         self._write_handle_common_arguments(
             title, data, items, coordinate, start_time, dt
         )
@@ -263,7 +261,7 @@ class _Dfs123:
                 item.name,
                 eumQuantity.Create(item.type, item.unit),
                 DfsSimpleType.Float,
-                DataValueType.Instantaneous,
+                item.data_value_type,
             )
 
         try:
@@ -356,7 +354,7 @@ class _Dfs123:
         ----------
         dfs : MIKE dfs object
         item_numbers : list[int]
-            
+
         Returns
         -------
         list[Iteminfo]
@@ -368,7 +366,8 @@ class _Dfs123:
             eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
             itemtype = EUMType(eumItem)
             unit = EUMUnit(eumUnit)
-            item = ItemInfo(name, itemtype, unit)
+            data_value_type = self._dfs.ItemInfo[item].get_ValueType()
+            item = ItemInfo(name, itemtype, unit, data_value_type)
             items.append(item)
         return items
 
@@ -396,20 +395,17 @@ class _Dfs123:
 
     @property
     def start_time(self):
-        """File start time
-        """
+        """File start time"""
         return self._start_time
 
     @property
     def n_timesteps(self):
-        """Number of time steps
-        """
+        """Number of time steps"""
         return self._n_timesteps
 
     @property
     def timestep(self):
-        """Time step size in seconds
-        """
+        """Time step size in seconds"""
         return self._timestep_in_seconds
 
     @property
@@ -418,18 +414,15 @@ class _Dfs123:
 
     @property
     def longitude(self):
-        """Origin longitude
-        """
+        """Origin longitude"""
         return self._longitude
 
     @property
     def latitude(self):
-        """Origin latitude
-        """
+        """Origin latitude"""
         return self._latitude
 
     @property
     def orientation(self):
-        """North to Y orientation
-        """
+        """North to Y orientation"""
         return self._orientation

@@ -15,6 +15,8 @@ degree Kelvin
 from DHI.Generic.MikeZero import EUMWrapper
 from enum import IntEnum
 
+from mikeio.helpers import to_datatype
+
 
 def type_list(search=None):
     """Get a dictionary of the EUM items
@@ -1288,6 +1290,9 @@ class ItemInfo:
         Default EUMType.Undefined
     unit: EUMUnit or int, optional
         Default unit matching EUMType
+    data_value_type: str, optional
+        One of the following strings: 'Instantaneous', 'Accumulated', 'StepAccumulated', 'MeanStepBackward',
+        'MeanStepForward'. Default: 'Instantaneous'
 
     Examples
     --------
@@ -1298,7 +1303,7 @@ class ItemInfo:
     Wind speed <Wind speed> (meter per sec)
     """
 
-    def __init__(self, name=None, itemtype=None, unit=None):
+    def __init__(self, name=None, itemtype=None, unit=None, data_value_type='Instantaneous'):
 
         # Handle arguments in the wrong place
         if isinstance(name, EUMType):
@@ -1339,6 +1344,8 @@ class ItemInfo:
                 self.unit = EUMUnit.undefined
             else:
                 self.unit = self.type.units[0]
+
+        self.data_value_type = to_datatype(data_value_type)
 
         if not isinstance(name, str):
             raise ValueError("Invalid name, name should be a string")

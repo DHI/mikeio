@@ -6,7 +6,6 @@ from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 from mikeio.custom_exceptions import (
     DataDimensionMismatch,
-    InvalidDataType,
     ItemNumbersError,
 )
 
@@ -353,7 +352,10 @@ def test_reproject_defaults(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
 
     dfs.reproject(
-        outfilename, projectionstring="UTM-33", dx=200.0, dy=200.0,
+        outfilename,
+        projectionstring="UTM-33",
+        dx=200.0,
+        dy=200.0,
     )
 
     newdfs = Dfs2(outfilename)
@@ -362,3 +364,59 @@ def test_reproject_defaults(tmpdir):
     assert dfs.start_time == newdfs.start_time
     assert dfs.projection_string != newdfs.projection_string
 
+
+def test_write_accumulated_datatype(tmpdir):
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+
+    data = []
+    d = np.random.random([100, 2, 3])
+    data.append(d)
+
+    dfs = Dfs2()
+
+    dfs.write(
+        filename=filename,
+        data=data,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        items=[
+            ItemInfo(
+                "testing water level",
+                EUMType.Water_Level,
+                EUMUnit.meter,
+                data_value_type="MeanStepBackward",
+            )
+        ],
+        title="test dfs2",
+    )
+
+    newdfs = Dfs2(filename)
+    assert newdfs.items[0].data_value_type == 3
+
+
+def test_write_default_datatype(tmpdir):
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+
+    data = []
+    d = np.random.random([100, 2, 3])
+    data.append(d)
+
+    dfs = Dfs2()
+
+    dfs.write(
+        filename=filename,
+        data=data,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        items=[
+            ItemInfo(
+                "testing water level",
+                EUMType.Water_Level,
+                EUMUnit.meter
+            )
+        ],
+        title="test dfs2",
+    )
+
+    newdfs = Dfs2(filename)
+    assert newdfs.items[0].data_value_type == 0
