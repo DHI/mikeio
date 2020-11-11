@@ -365,23 +365,12 @@ def test_reproject_defaults(tmpdir):
     assert dfs.projection_string != newdfs.projection_string
 
 
-def test_write_static_item(tmpdir):
+def test_write_accumulated_datatype(tmpdir):
     filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
     data = []
     d = np.random.random([100, 2, 3])
-    d[10, :, :] = np.nan
-    d[11, :, :] = 0
-    d[12, :, :] = 1e-10
-    d[13, :, :] = 1e10
-
     data.append(d)
-    # >>> from pyproj import Proj
-    # >>> utm = Proj(32633)
-    # >>> utm(12.0, 55.0)
-    east = 308124
-    north = 6098907
-    orientation = 0
 
     dfs = Dfs2()
 
@@ -398,9 +387,6 @@ def test_write_static_item(tmpdir):
                 data_value_type="MeanStepBackward",
             )
         ],
-        coordinate=["UTM-33", east, north, orientation],
-        dx=100,
-        dy=200,
         title="test dfs2",
     )
 
