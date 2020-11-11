@@ -161,6 +161,19 @@ class Dataset:
 
         return Dataset(data, time, items)
 
+    def dropna(self):
+        "Remove time steps where all items are NaN"
+
+        # TODO consider all items
+        x = self[0]
+
+        # this seems overly complicated...
+        axes = tuple(range(1, x.ndim))
+        idx = np.where(~np.isnan(x).all(axis=axes))
+        idx = list(idx[0])
+
+        return self.isel(idx, axis=0)
+
     def flipud(self):
         "Flip dataset updside down"
 
