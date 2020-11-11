@@ -26,5 +26,7 @@ class InvalidGeometry(ValueError):
 
 class InvalidDataValueType(ValueError):
     def __init__(self):
-        super().__init__("Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
-                         "'MeanStepBackward', or 'MeanStepForward'")
+        super().__init__(
+            "Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
+            "'MeanStepBackward', or 'MeanStepForward'"
+        )

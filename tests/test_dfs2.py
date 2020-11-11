@@ -352,7 +352,10 @@ def test_reproject_defaults(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
 
     dfs.reproject(
-        outfilename, projectionstring="UTM-33", dx=200.0, dy=200.0,
+        outfilename,
+        projectionstring="UTM-33",
+        dx=200.0,
+        dy=200.0,
     )
 
     newdfs = Dfs2(outfilename)
@@ -387,13 +390,19 @@ def test_write_static_item(tmpdir):
         data=data,
         start_time=datetime.datetime(2012, 1, 1),
         dt=12,
-        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter, data_value_type='MeanStepBackward')],
+        items=[
+            ItemInfo(
+                "testing water level",
+                EUMType.Water_Level,
+                EUMUnit.meter,
+                data_value_type="MeanStepBackward",
+            )
+        ],
         coordinate=["UTM-33", east, north, orientation],
         dx=100,
         dy=200,
-        title="test dfs2"
+        title="test dfs2",
     )
 
     newdfs = Dfs2(filename)
     assert newdfs.items[0].data_value_type == 3
-
