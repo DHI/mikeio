@@ -1,8 +1,11 @@
+from collections import namedtuple
 import numpy as np
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 from DHI.Generic.MikeZero import eumQuantity
 from .eum import ItemInfo, EUMType, EUMUnit
 from .dotnet import asnetarray_v2
+
+BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 
 def min_horizontal_dist_meters(coords, targets, is_geo=False):
@@ -193,7 +196,11 @@ class Grid2D:
     def bbox(self):
         """bounding box [x0, y0, x1, y1]
         """
-        return [self._x0, self._y0, self._x1, self._y1]
+        left = self._x0 - self.dx / 2
+        bottom = self._y0 - self.dy / 2
+        right = self._x1 + self.dx / 2
+        top = self._y1 + self.dy / 2
+        return BoundingBox(left, bottom, right, top)
 
     def __init__(self, x=None, y=None, bbox=None, dxdy=None, shape=None):
         """create 2d grid 

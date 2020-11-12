@@ -55,7 +55,10 @@ def test_x_y():
     assert g.ny == ny
     assert g.dx == dx
     assert g.dy == dy
-    assert np.all(g.bbox == [x0, y0, x1, y1])
+
+    # BoundingBox(left, bottom, right, top)
+    # Is this test good, or just a copy of the implementation?
+    assert g.bbox == ((x0 - dx / 2), (y0 - dy / 2), (x1 + dx / 2), (y1 + dy / 2))
 
 
 def test_xx_yy():
