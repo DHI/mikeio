@@ -104,13 +104,13 @@ class Grid2D:
 
     @property
     def x0(self):
-        """left end-point
+        """center of left end-point 
         """
         return self._x0
 
     @property
     def x1(self):
-        """right end-point
+        """center of right end-point
         """
         return self._x1
 
@@ -134,13 +134,13 @@ class Grid2D:
 
     @property
     def y0(self):
-        """lower end-point
+        """center of lower end-point
         """
         return self._y0
 
     @property
     def y1(self):
-        """upper end-point
+        """center of upper end-point
         """
         return self._y1
 
@@ -152,7 +152,7 @@ class Grid2D:
 
     @property
     def ny(self):
-        """number of points in y-direction
+        """number of cells in y-direction
         """
         return self._ny
 
@@ -194,7 +194,8 @@ class Grid2D:
 
     @property
     def bbox(self):
-        """bounding box [x0, y0, x1, y1]
+        """bounding box (left, bottom, right, top)
+           Note: not the same as the cell center values (x0,y0,x1,y1)!
         """
         left = self._x0 - self.dx / 2
         bottom = self._y0 - self.dy / 2
@@ -255,12 +256,12 @@ class Grid2D:
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
         """
-        x0 = bbox[0]
-        y0 = bbox[1]
-        x1 = bbox[2]
-        y1 = bbox[3]
-        xr = x1 - x0
-        yr = y1 - y0
+        left = bbox[0]
+        bottom = bbox[1]
+        right = bbox[2]
+        top = bbox[3]
+        xr = right - left  # dx too large
+        yr = top - bottom  # dy too large
 
         if (dxdy is None) and (shape is None):
             if xr <= yr:
@@ -269,8 +270,8 @@ class Grid2D:
             else:
                 ny = 10
                 nx = int(np.ceil(ny * xr / yr))
-            dx = xr / (nx - 1)
-            dy = yr / (ny - 1)
+            dx = xr / nx
+            dy = yr / ny
         else:
             if shape is not None:
                 if len(shape) != 2:
@@ -282,27 +283,27 @@ class Grid2D:
                     nx = int(np.ceil(ny * xr / yr))
                 if ny is None:
                     ny = int(np.ceil(nx * yr / xr))
-                dx = xr / (nx - 1)
-                dy = yr / (ny - 1)
+                dx = xr / nx
+                dy = yr / ny
             elif dxdy is not None:
                 if np.isscalar(dxdy):
                     dy = dx = dxdy
                 else:
                     dx, dy = dxdy
-                nx = int(np.ceil(xr / dx)) + 1
-                ny = int(np.ceil(yr / dy)) + 1
+                nx = int(np.ceil(xr / dx))
+                ny = int(np.ceil(yr / dy))
             else:
                 raise ValueError("dxdy and shape cannot both be provided! Chose one.")
 
-        self._x0 = x0
+        self._x0 = left + dx / 2
         self._dx = dx
         self._nx = nx
-        self._create_x_axis(x0, dx, nx)
+        self._create_x_axis(self._x0, dx, nx)
 
-        self._y0 = y0
+        self._y0 = bottom + dy / 2
         self._dy = dy
         self._ny = ny
-        self._create_y_axis(y0, dy, ny)
+        self._create_y_axis(self._y0, dy, ny)
 
     def _create_from_x_and_y(self, x, y):
 
@@ -354,8 +355,8 @@ class Grid2D:
         else:
             raise ValueError("crazy")
 
-        xinside = (self.x0 <= xp) & (xp <= self.x1)
-        yinside = (self.y0 <= yp) & (yp <= self.y1)
+        xinside = (self.bbox.left <= xp) & (xp <= self.bbox.right)
+        yinside = (self.bbox.bottom <= yp) & (yp <= self.bbox.top)
         return xinside & yinside
 
     def _to_element_table(self, index_base=0):
@@ -384,6 +385,8 @@ class Grid2D:
         """
         if projection is None:
             projection = "LONG/LAT"
+
+        # get node based grid
 
         x = self.xy[:, 0]
         y = self.xy[:, 1]
@@ -414,11 +417,12 @@ class Grid2D:
         """
         if buffer is None:
             buffer = 0
-        x0 = xy[:, 0].min() - buffer
-        y0 = xy[:, 1].min() - buffer
-        x1 = xy[:, 0].max() + buffer
-        y1 = xy[:, 1].max() + buffer
-        return [x0, y0, x1, y1]
+
+        left = xy[:, 0].min() - buffer
+        bottom = xy[:, 1].min() - buffer
+        right = xy[:, 0].max() + buffer
+        top = xy[:, 1].max() + buffer
+        return BoundingBox(left, bottom, right, top)
 
     def __repr__(self):
         out = []

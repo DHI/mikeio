@@ -75,25 +75,25 @@ def test_xx_yy():
 
 def test_create_in_bbox():
     bbox = [0, 0, 1, 5]
-    shape = (3, 6)
+    shape = (2, 5)
     g = Grid2D(bbox=bbox, shape=shape)
-    assert g.x0 == 0.0
+    assert g.x0 == 0.25
 
     g = Grid2D(bbox)
     assert g.nx == 10
     assert g.ny == 50
 
-    dx = 1.0
+    dx = 0.5
     g = Grid2D(bbox, dxdy=dx)
     assert g.dx == dx
     assert g.dy == dx
-    assert g.n == 12
+    assert g.n == 20
 
     dxdy = (0.5, 2.5)
     g = Grid2D(bbox, dxdy=dxdy)
     assert g.dx == dxdy[0]
     assert g.dy == dxdy[1]
-    assert g.n == 9
+    assert g.n == 4
 
 
 def test_contains():
@@ -125,10 +125,12 @@ def test_to_mesh():
 def test_xy_to_bbox():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox)
-    bbox2 = Grid2D.xy_to_bbox(g.xy)
-    assert np.all(bbox == bbox2)
+    xy = np.array([[0, 0], [0, 1], [1, 0], [1, 1], [0, 5], [1, 5]], dtype=float)
+    bbox2 = Grid2D.xy_to_bbox(xy)
+    assert bbox[0] == bbox2[0]
+    assert bbox[-1] == bbox2[-1]
 
-    bbox2 = Grid2D.xy_to_bbox(g.xy, buffer=0.2)
+    bbox2 = Grid2D.xy_to_bbox(xy, buffer=0.2)
     assert bbox2[0] == -0.2
     assert bbox2[3] == 5.2
 
