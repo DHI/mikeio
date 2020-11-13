@@ -84,13 +84,13 @@ def test_create_in_bbox():
     assert g.ny == 50
 
     dx = 0.5
-    g = Grid2D(bbox, dxdy=dx)
+    g = Grid2D(bbox, dx=dx)
     assert g.dx == dx
     assert g.dy == dx
     assert g.n == 20
 
     dxdy = (0.5, 2.5)
-    g = Grid2D(bbox, dxdy=dxdy)
+    g = Grid2D(bbox, dx=dxdy)
     assert g.dx == dxdy[0]
     assert g.dy == dxdy[1]
     assert g.n == 4

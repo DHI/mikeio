@@ -203,26 +203,28 @@ class Grid2D:
         top = self._y1 + self.dy / 2
         return BoundingBox(left, bottom, right, top)
 
-    def __init__(self, x=None, y=None, bbox=None, dxdy=None, shape=None):
+    def __init__(self, x=None, y=None, bbox=None, dx=None, dy=None, shape=None):
         """create 2d grid 
 
         Parameters
         ----------
         x : array-like, optional
-            1d array of x-coordinates
+            1d array of x-coordinates (cell centers)
         y : array-like, optional
-            1d array of y-coordinates
+            1d array of y-coordinates (cell centers)
         bbox : array(float), optional
             [x0, y0, x1, y1]
-        dxdy : float or (float, float), optional
-            grid resolution in x- and y-direction
+        dx : float or (float, float), optional
+            grid resolution in x-direction (or in x- and y-direction)
+        dy : float, optional
+            grid resolution in y-direction            
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
 
         Examples
         --------
-        >>> g = Grid2D(bbox=[0,0,10,20], dxdy=0.25)
+        >>> g = Grid2D(bbox=[0,0,10,20], dx=0.25)
 
         >>> g = Grid2D(bbox=[0,0,10,20], shape=(5,10))
         
@@ -231,6 +233,12 @@ class Grid2D:
         >>> g = Grid2D(x, y)
         
         """
+        dxdy = dx
+        if dy is not None:
+            if not np.isscalar(dx):
+                dx = dx[0]
+            dxdy = (dx, dy)
+
         if (x is not None) and (len(x) == 4):
             # first positional argument 'x' is probably bbox
             if (y is None) or ((dxdy is not None) or (shape is not None)):

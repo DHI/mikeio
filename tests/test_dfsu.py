@@ -249,11 +249,11 @@ def test_get_overset_grid():
     assert g.nx == 21
     assert g.ny == 10
 
-    g = dfs.get_overset_grid(dxdy=0.2)
+    g = dfs.get_overset_grid(dx=0.2)
     assert g.dx == 0.2
     assert g.dy == 0.2
 
-    g = dfs.get_overset_grid(dxdy=(0.4, 0.2))
+    g = dfs.get_overset_grid(dx=(0.4, 0.2))
     assert g.dx == 0.4
     assert g.dy == 0.2
 

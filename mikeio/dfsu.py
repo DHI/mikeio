@@ -535,13 +535,15 @@ class _UnstructuredGeometry:
             cnts = np.logical_and(cnts, ~in_hole)
         return cnts
 
-    def get_overset_grid(self, dxdy=None, shape=None, buffer=None):
+    def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None):
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
         ----------
-        dxdy : float or (float, float), optional
-            grid resolution in x- and y-direction
+        dx : float or (float, float), optional
+            grid resolution in x-direction (or in x- and y-direction)
+        dy : float, optional
+            grid resolution in x- and y-direction            
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
@@ -557,7 +559,7 @@ class _UnstructuredGeometry:
         """
         nc = self.geometry2d.node_coordinates
         bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
-        return Grid2D(bbox=bbox, dxdy=dxdy, shape=shape)
+        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
 
     def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False):
         """IDW interpolant for list of coordinates
