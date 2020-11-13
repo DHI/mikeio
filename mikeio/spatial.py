@@ -369,6 +369,7 @@ class Grid2D:
 
     def find_index(self, x, y=None):
         """Find nearest index (i,j) of point(s)
+           -1 is returned if point is outside grid
 
         Parameters
         ----------

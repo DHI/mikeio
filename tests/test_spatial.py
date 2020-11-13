@@ -99,13 +99,17 @@ def test_create_in_bbox():
 def test_contains():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox)
-    xy1 = [0.5, 0.5]
+    xy1 = [0.5, 4.5]
     xy2 = [1.5, 0.5]
     assert g.contains(xy1)
     assert not g.contains(xy2)
 
-    xy = np.vstack([xy1, xy2])
+    xy = np.vstack([xy1, xy2, xy1])
     inside = g.contains(xy)
+    assert inside[0]
+    assert not inside[1]
+
+    inside = g.contains(xy[:, 0], xy[:, 1])
     assert inside[0]
     assert not inside[1]
 
