@@ -118,7 +118,7 @@ def test_to_mesh():
 
     assert os.path.exists(outfilename)
     mesh = Mesh(outfilename)
-    assert True
+    assert mesh.n_elements == g.n
     os.remove(outfilename)  # clean up
 
 

@@ -371,6 +371,28 @@ class Grid2D:
                 elem_table.append([n1, n1 + 1, n2 + 1, n2])
         return elem_table
 
+    @staticmethod
+    def _centers_to_nodes(x):
+        """Nodes will be placed mid-way between centers
+        If non-equidistant, new centers will hence not equal old centers!
+        """
+        x = np.array(x)  # if list
+        xinner = (x[1:] + x[:-1]) / 2
+        left = x[0] - (x[1] - x[0]) / 2
+        right = x[-1] + (x[-1] - x[-2]) / 2
+        return np.array([left, *xinner, right])
+
+    @staticmethod
+    def _nodes_to_centers(xn):
+        xn = np.array(xn)  # if list
+        return (xn[1:] + xn[:-1]) / 2
+
+    def get_node_coordinates(self):
+        xn = Grid2D._centers_to_nodes(self.x)
+        yn = Grid2D._centers_to_nodes(self.y)
+        gn = Grid2D(xn, yn)
+        return gn.xy
+
     def to_mesh(self, outfilename, projection=None, z=None):
         """export grid to mesh file
 
@@ -387,22 +409,33 @@ class Grid2D:
             projection = "LONG/LAT"
 
         # get node based grid
+        xn = Grid2D._centers_to_nodes(self.x)
+        yn = Grid2D._centers_to_nodes(self.y)
+        gn = Grid2D(xn, yn)
 
-        x = self.xy[:, 0]
-        y = self.xy[:, 1]
+        x = gn.xy[:, 0]
+        y = gn.xy[:, 1]
         if z is None:
-            z = np.zeros(self.n)
-        codes = np.zeros(self.n, dtype=int)
-        codes[y == self.y1] = 5  # north
-        codes[x == self.x1] = 4  # east
-        codes[y == self.y0] = 3  # south
-        codes[x == self.x0] = 2  # west
-        codes[(y == self.y1) & (x == self.x0)] = 5  # corner->north
+            z = np.zeros(gn.n)
+        else:
+            if np.isscalar(z):
+                z = z * np.ones(gn.n)
+            else:
+                if len(z) != gn.n:
+                    raise ValueError(
+                        "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
+                    )
+        codes = np.zeros(gn.n, dtype=int)
+        codes[y == gn.bbox.top] = 5  # north
+        codes[x == gn.bbox.right] = 4  # east
+        codes[y == gn.bbox.bottom] = 3  # south
+        codes[x == gn.bbox.left] = 2  # west
+        codes[(y == gn.bbox.top) & (x == gn.bbox.left)] = 5  # corner->north
 
         builder = MeshBuilder()
         builder.SetNodes(x, y, z, codes)
 
-        elem_table = self._to_element_table(index_base=1)
+        elem_table = gn._to_element_table(index_base=1)
         builder.SetElements(asnetarray_v2(elem_table))
 
         builder.SetProjection(projection)
