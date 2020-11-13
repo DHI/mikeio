@@ -367,6 +367,25 @@ class Grid2D:
         yinside = (self.bbox.bottom <= yp) & (yp <= self.bbox.top)
         return xinside & yinside
 
+    def find_index(self, x, y=None):
+        if y is None:
+            xy = x
+            xy = np.atleast_2d(xy)
+            y = xy[:, 1]
+            x = xy[:, 0]
+        else:
+            xy = np.hstack(x, y)
+        ii = (-1) * np.ones_like(x, dtype=int)
+        jj = (-1) * np.ones_like(x, dtype=int)
+
+        inside = self.contains(xy)
+        for j, xyp in enumerate(xy):
+            if inside[j]:
+                ii[j] = (np.abs(self.x - xyp[0])).argmin()
+                jj[j] = (np.abs(self.y - xyp[1])).argmin()
+
+        return ii, jj
+
     def _to_element_table(self, index_base=0):
 
         elem_table = []
