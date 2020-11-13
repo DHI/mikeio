@@ -1,7 +1,9 @@
-from mikeio.spatial import min_horizontal_dist_meters, dist_in_meters, Grid2D
-from mikeio.dfsu import Mesh
-import numpy as np
 import os
+
+import numpy as np
+import pytest
+from mikeio.dfsu import Mesh
+from mikeio.spatial import Grid2D, dist_in_meters, min_horizontal_dist_meters
 
 
 def test_dist_in_meters():
@@ -71,6 +73,14 @@ def test_xx_yy():
     assert g.xx[0, 0] == 1.0
     assert g.yy[-1, -1] == 5.0
     assert np.all(g.xy[1] == [3.0, 3.0])
+    assert np.all(g.coordinates[1] == [3.0, 3.0])
+
+    g2 = Grid2D(x, y)
+
+    # Reverse order compared to above makes no difference
+    assert g2.yy[-1, -1] == 5.0
+    assert g2.xx[0, 0] == 1.0
+    
 
 
 def test_create_in_bbox():
@@ -95,6 +105,26 @@ def test_create_in_bbox():
     assert g.dy == dxdy[1]
     assert g.n == 4
 
+    g = Grid2D(bbox, dx=dx, dy=2.5)
+    assert g.dx == dx
+    assert g.dy == 2.5
+    assert g.n == 4
+
+def test_no_parameters():
+
+    with pytest.raises(ValueError):
+        Grid2D()
+
+def test_invalid_grid_not_possible():
+    bbox = [0, 0, -1, 1] # x0 > x1
+    shape = (2, 2)
+    with pytest.raises(ValueError):
+        Grid2D(bbox=bbox, shape=shape)
+
+    bbox = [0, 0, 1, -1] # y0 > y1
+    shape = (2, 2)
+    with pytest.raises(ValueError):
+        Grid2D(bbox=bbox, shape=shape)
 
 def test_contains():
     bbox = [0, 0, 1, 5]

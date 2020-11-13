@@ -268,6 +268,13 @@ class Grid2D:
         bottom = bbox[1]
         right = bbox[2]
         top = bbox[3]
+
+        if left > right:
+            raise(ValueError(f"Invalid x axis, left: {left} must be smaller than right: {right}"))
+        
+        if bottom > top:
+            raise(ValueError(f"Invalid y axis, bottom: {bottom} must be smaller than top: {top}"))
+
         xr = right - left  # dx too large
         yr = top - bottom  # dy too large
 
@@ -319,13 +326,14 @@ class Grid2D:
         self._x1 = x[-1]
         self._nx = len(x)
         self._dx = x[1] - x[0]
-        self._x = x
+        self._x = np.array(x)
 
         self._y0 = y[0]
         self._y1 = y[-1]
         self._ny = len(y)
         self._dy = y[1] - y[0]
-        self._y = y
+        self._y = np.array(y)
+
         self._xx, self._yy = None, None
 
     def _create_x_axis(self, x0, dx, nx):
@@ -420,7 +428,6 @@ class Grid2D:
         """Nodes will be placed mid-way between centers
         If non-equidistant, new centers will hence not equal old centers!
         """
-        x = np.array(x)  # if list
         xinner = (x[1:] + x[:-1]) / 2
         left = x[0] - (x[1] - x[0]) / 2
         right = x[-1] + (x[-1] - x[-2]) / 2
@@ -428,7 +435,6 @@ class Grid2D:
 
     @staticmethod
     def _nodes_to_centers(xn):
-        xn = np.array(xn)  # if list
         return (xn[1:] + xn[:-1]) / 2
 
     def get_node_coordinates(self):
