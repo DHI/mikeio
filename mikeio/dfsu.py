@@ -561,7 +561,7 @@ class _UnstructuredGeometry:
         bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
         return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
 
-    def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False):
+    def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False, p=2):
         """IDW interpolant for list of coordinates
 
         Parameters
@@ -572,6 +572,8 @@ class _UnstructuredGeometry:
             [description], by default 1
         extrapolate : bool, optional
             allow , by default False
+        p : float, optional
+            power of inverse distance weighting, default=2
 
         Returns
         -------
@@ -586,7 +588,7 @@ class _UnstructuredGeometry:
             if not extrapolate:
                 weights[~self.contains(xy)] = np.nan
         elif n_nearest > 1:
-            weights = get_idw_interpolant(dists)
+            weights = get_idw_interpolant(dists, p=p)
             if not extrapolate:
                 weights[~self.contains(xy), :] = np.nan
         else:
