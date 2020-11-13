@@ -341,40 +341,56 @@ class Grid2D:
     def _create_meshgrid(self, x, y):
         self._xx, self._yy = np.meshgrid(x, y)
 
-    def contains(self, xy):
+    def contains(self, x, y=None):
         """test if a list of points are inside grid
 
         Parameters
         ----------
-        points : array-like n-by-2
-            x,y-coordinates of n points to be tested
+        x : array(float)
+            x-coordinate of point(s)
+            or xy-coordinate of points given as n-by-2 array 
+        y : array(float), optional
+            y-coordinate of point(s), by default None
 
         Returns
         -------
         bool array
             True for points inside, False otherwise
         """
-        if np.ndim(xy) == 2:
-            xp = xy[:, 0]
-            yp = xy[:, 1]
-        elif (np.ndim(xy) == 1) and (len(xy) == 2):
-            xp = xy[0]
-            yp = xy[1]
-        else:
-            raise ValueError("crazy")
+        if y is None:
+            xy = x
+            xy = np.atleast_2d(xy)
+            y = xy[:, 1]
+            x = xy[:, 0]
 
-        xinside = (self.bbox.left <= xp) & (xp <= self.bbox.right)
-        yinside = (self.bbox.bottom <= yp) & (yp <= self.bbox.top)
+        xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
+        yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
     def find_index(self, x, y=None):
+        """Find nearest index (i,j) of point(s)
+
+        Parameters
+        ----------
+        x : array(float)
+            x-coordinate of point(s)
+            or xy-coordinate of points given as n-by-2 array 
+        y : array(float), optional
+            y-coordinate of point(s), by default None
+
+        Returns
+        -------
+        array(int), array(int)
+            i- and j-index of nearest cell
+        """
         if y is None:
             xy = x
             xy = np.atleast_2d(xy)
             y = xy[:, 1]
             x = xy[:, 0]
         else:
-            xy = np.hstack(x, y)
+            xy = np.vstack([x, y]).T
+
         ii = (-1) * np.ones_like(x, dtype=int)
         jj = (-1) * np.ones_like(x, dtype=int)
 
@@ -415,6 +431,13 @@ class Grid2D:
         return (xn[1:] + xn[:-1]) / 2
 
     def get_node_coordinates(self):
+        """node coordinates for this grid
+
+        Returns
+        -------
+        array(float)
+            2d array with x,y-coordinates, length=(nx+1)*(ny+1)
+        """
         xn = Grid2D._centers_to_nodes(self.x)
         yn = Grid2D._centers_to_nodes(self.y)
         gn = Grid2D(xn, yn)
@@ -429,8 +452,9 @@ class Grid2D:
             path of new mesh file
         projection : str, optional
             WKT projection string, by default 'LONG/LAT'
-        z : array, optional
-            array of bathymetry values for each node, by default 0
+        z : float or array(float), optional
+            bathymetry values for each node, by default 0
+            if array: must have length=(nx+1)*(ny+1)
         """
         if projection is None:
             projection = "LONG/LAT"

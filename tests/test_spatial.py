@@ -129,6 +129,13 @@ def test_find_index():
     assert jj[0] == j1
     assert jj[1] == j2
 
+    xy = np.vstack([xy1, xy2, xy2])
+    ii, jj = g.find_index(x=xy[:, 0], y=xy[:, 1])
+    assert ii[0] == i1
+    assert jj[0] == j1
+    assert ii[2] == i2
+    assert jj[2] == j2
+
 
 def test_to_mesh():
     outfilename = "temp.mesh"

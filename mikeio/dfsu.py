@@ -543,7 +543,7 @@ class _UnstructuredGeometry:
         dx : float or (float, float), optional
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
-            grid resolution in x- and y-direction            
+            grid resolution in y-direction            
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
