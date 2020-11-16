@@ -1,13 +1,12 @@
 import numpy as np
 from datetime import datetime, timedelta
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import (
+from mikecore.eum import eumUnit, eumQuantity
+from mikecore import (
     DfsFileFactory,
     DfsFactory,
-    DfsSimpleType,
-    DataValueType,
 )
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
+from mikecore.DfsFile import DfsSimpleType, DataValueType
+from mikecore import DfsBuilder
 
 from .helpers import safe_length
 from .dutil import get_item_info

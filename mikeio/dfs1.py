@@ -1,8 +1,12 @@
 import os
 
-from DHI.Generic.MikeZero import eumUnit
-from DHI.Generic.MikeZero.DFS import DfsFileFactory
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
+#from DHI.Generic.MikeZero import eumUnit
+#from DHI.Generic.MikeZero.DFS import DfsFileFactory
+#from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
+
+from mikecore.eum import eumUnit
+from mikecore import DfsFileFactory
+from mikecore import DfsBuilder
 
 
 from .dfs import _Dfs123

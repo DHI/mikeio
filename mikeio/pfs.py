@@ -4,7 +4,7 @@ import pandas as pd
 from typing import Union
 import warnings
 
-from DHI.PFS import PFSFile, PFSSection, PFSParameter
+#from DHI.PFS import PFSFile, PFSSection, PFSParameter
 
 from types import SimpleNamespace
 
@@ -155,6 +155,7 @@ class Pfs:
 
 
 # TODO come up with a better name
+"""
 class PfsCore:
     def __init__(self, filename, target=None):
 
@@ -177,13 +178,6 @@ class PfsCore:
         return Section(pfssection)
 
     def write(self, filename):
-        """
-        Write PFS file
-
-        Parameters
-        ----------
-        filename, str
-        """
 
         self._pfs.Write(filename)
 
@@ -310,4 +304,5 @@ class Section:
 
     def __getitem__(self, key):
         return self.keyword(key)
+""" 
 

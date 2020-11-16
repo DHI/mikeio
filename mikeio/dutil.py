@@ -1,8 +1,5 @@
-import numpy as np
 import pandas as pd
-from scipy.interpolate import interp1d
-from copy import deepcopy
-from mikeio.eum import EUMType, EUMUnit, ItemInfo
+from mikeio.eum import ItemInfo
 
 
 def get_valid_items_and_timesteps(dfs, items, time_steps):
@@ -92,8 +89,8 @@ def get_item_info(dfs, item_numbers):
         name = dfs.ItemInfo[item].Name
         eumItem = dfs.ItemInfo[item].Quantity.Item
         eumUnit = dfs.ItemInfo[item].Quantity.Unit
-        itemtype = EUMType(eumItem)
-        unit = EUMUnit(eumUnit)
+        itemtype = eumItem
+        unit = eumUnit
         item = ItemInfo(name, itemtype, unit)
         items.append(item)
     return items

@@ -1,8 +1,8 @@
 import numpy as np
-from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
-from DHI.Generic.MikeZero import eumQuantity
+#from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
+from mikecore.eum import eumQuantity
 from .eum import ItemInfo, EUMType, EUMUnit
-from .dotnet import asnetarray_v2
+#from .dotnet import asnetarray_v2
 
 
 def min_horizontal_dist_meters(coords, targets, is_geo=False):
@@ -393,7 +393,7 @@ class Grid2D:
         builder.SetNodes(x, y, z, codes)
 
         elem_table = self._to_element_table(index_base=1)
-        builder.SetElements(asnetarray_v2(elem_table))
+        builder.SetElements(elem_table)
 
         builder.SetProjection(projection)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)

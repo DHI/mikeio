@@ -7,48 +7,41 @@ import numpy as np
 from datetime import datetime, timedelta
 from scipy.spatial import cKDTree
 
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
-from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
-from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
+from mikecore.eum import eumUnit, eumQuantity
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsuBuilder import DfsuBuilder
+from mikecore.DfsuFile import DfsuFile
+from mikecore.DfsuFile import DfsuFileType, DfsuUtil
+#from mikecore import MeshFile, MeshBuilder
 
 from .dutil import get_item_info, get_valid_items_and_timesteps
 from .dataset import Dataset
-from .dotnet import (
-    to_numpy,
-    to_dotnet_float_array,
-    to_dotnet_datetime,
-    from_dotnet_datetime,
-    asNumpyArray,
-    to_dotnet_array,
-    asnetarray_v2,
-)
 from .dfs0 import Dfs0
 from .eum import ItemInfo, EUMType, EUMUnit
-from .helpers import safe_length
+#from .helpers import safe_length
 from .spatial import Grid2D
 from .interpolation import get_idw_interpolant, interp2d
 from .custom_exceptions import InvalidGeometry
 
 
-class UnstructuredType(IntEnum):
-    """
-        -1: Mesh: 2D unstructured MIKE mesh
-        0: Dfsu2D: 2D area series
-        1: DfsuVerticalColumn: 1D vertical column
-        2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
-        3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
-        4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
-        5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
-        """
-
-    Mesh = -1
-    Dfsu2D = 0
-    DfsuVerticalColumn = 1
-    DfsuVerticalProfileSigma = 2
-    DfsuVerticalProfileSigmaZ = 3
-    Dfsu3DSigma = 4
-    Dfsu3DSigmaZ = 5
+#class DfsuFileType(IntEnum):
+#    """
+#        -1: Mesh: 2D unstructured MIKE mesh
+#        0: Dfsu2D: 2D area series
+#        1: DfsuVerticalColumn: 1D vertical column
+#        2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
+#        3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
+#        4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
+#        5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
+#        """
+#
+#    Mesh = -1
+#    Dfsu2D = 0
+#    DfsuVerticalColumn = 1
+#    DfsuVerticalProfileSigma = 2
+#    DfsuVerticalProfileSigmaZ = 3
+#    Dfsu3DSigma = 4
+#    Dfsu3DSigmaZ = 5
 
 
 class _UnstructuredGeometry:
@@ -181,7 +174,7 @@ class _UnstructuredGeometry:
     def is_2d(self):
         """Type is either mesh or Dfsu2D (2 horizontal dimensions)
         """
-        return self._type <= 0
+        return self._type in (DfsuFileType.Dfsu2D, None) # Todo mesh
 
     @property
     def is_tri_only(self):
@@ -222,11 +215,10 @@ class _UnstructuredGeometry:
 
     def _get_element_table_from_dotnet(self):
         # Note: this can tak 10-20 seconds for large dfsu3d!
-        elem_tbl = []
+
+        elem_tbl = self._element_table_dotnet.copy()
         for j in range(self.n_elements):
-            elem_nodes = list(self._element_table_dotnet[j])
-            elem_nodes = [nd - 1 for nd in elem_nodes]  # make 0-based
-            elem_tbl.append(elem_nodes)
+            elem_tbl[j] = self._element_table_dotnet[j] -1
         return elem_tbl
 
     def _element_table_to_dotnet(self, elem_table=None):
@@ -238,7 +230,7 @@ class _UnstructuredGeometry:
             elem_nodes = elem_table[j]
             elem_nodes = [nd + 1 for nd in elem_nodes]  # make 1-based
             new_elem_table.append(elem_nodes)
-        return asnetarray_v2(new_elem_table)
+        return new_elem_table
 
     def _set_nodes(
         self, node_coordinates, codes=None, node_ids=None, projection_string=None
@@ -265,9 +257,9 @@ class _UnstructuredGeometry:
         if geometry_type is None:
             # guess type
             if self.max_nodes_per_element < 5:
-                geometry_type = UnstructuredType.Dfsu2D
+                geometry_type = DfsuFileType.Dfsu2D
             else:
-                geometry_type = UnstructuredType.Dfsu3DSigma
+                geometry_type = DfsuFileType.Dfsu3DSigma
         self._type = geometry_type
 
     def _reindex(self):
@@ -332,12 +324,12 @@ class _UnstructuredGeometry:
             n_layers = len(unique_layer_ids)
 
             if (
-                self._type == UnstructuredType.Dfsu3DSigma
-                or self._type == UnstructuredType.Dfsu3DSigmaZ
+                self._type == DfsuFileType.Dfsu3DSigma
+                or self._type == DfsuFileType.Dfsu3DSigmaZ
             ) and n_layers == 1:
                 # If source is 3d, but output only has 1 layer
                 # then change type to 2d
-                geom._type = UnstructuredType.Dfsu2D
+                geom._type = DfsuFileType.Dfsu2D
                 geom._n_layers = None
                 if node_layers == "all":
                     print(
@@ -352,10 +344,11 @@ class _UnstructuredGeometry:
                 # If source is sigma-z but output only has sigma layers
                 # then change type accordingly
                 if (
-                    self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
-                    or self._type == UnstructuredType.Dfsu3DSigmaZ
+                    self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
+                    or self._type == DfsuFileType.Dfsu3DSigmaZ
                 ) and n_layers == geom._n_sigma:
-                    geom._type = UnstructuredType(self._type.value - 1)
+                    # TODO fix this
+                    geom._type = DfsuFileType.Dfsu3DSigma
 
                 geom._top_elems = geom._get_top_elements_from_coordinates()
 
@@ -411,7 +404,8 @@ class _UnstructuredGeometry:
         )
         geom._set_elements(elem_tbl, self.element_ids[elem_ids])
 
-        geom._type = UnstructuredType.Mesh
+        # TODO how to handle Mesh filetype
+        geom._type = None #DfsuFileType.Mesh
 
         geom._reindex()
 
@@ -1464,8 +1458,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
         if not self.is_2d:
             out.append(f"Number of sigma layers: {self.n_sigma_layers}")
         if (
-            self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
-            or self._type == UnstructuredType.Dfsu3DSigmaZ
+            self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
+            or self._type == DfsuFileType.Dfsu3DSigmaZ
         ):
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if self._n_items is not None:
@@ -1509,7 +1503,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
         self._projstr = msh.ProjectionString
-        self._type = UnstructuredType.Mesh
+        self._type = DfsuFileType.Mesh
 
         # geometry
         self._set_nodes_from_source(msh)
@@ -1522,7 +1516,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         dfs = DfsuFile.Open(filename)
         self._source = dfs
         self._projstr = dfs.Projection.WKTString
-        self._type = UnstructuredType(dfs.DfsuFileType)
+        self._type = DfsuFileType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
 
         # geometry
@@ -1534,20 +1528,20 @@ class _UnstructuredFile(_UnstructuredGeometry):
             self._n_sigma = dfs.NumberOfSigmaLayers
 
         # items
-        self._n_items = safe_length(dfs.ItemInfo)
+        self._n_items = len(dfs.ItemInfo)
         self._items = get_item_info(dfs, list(range(self._n_items)))
 
         # time
-        self._start_time = from_dotnet_datetime(dfs.StartDateTime)
+        self._start_time = dfs.StartDateTime
         self._n_timesteps = dfs.NumberOfTimeSteps
         self._timestep_in_seconds = dfs.TimeStepInSeconds
 
         dfs.Close()
 
     def _set_nodes_from_source(self, source):
-        xn = asNumpyArray(source.X)
-        yn = asNumpyArray(source.Y)
-        zn = asNumpyArray(source.Z)
+        xn = source.X
+        yn = source.Y
+        zn = source.Z
         self._nc = np.column_stack([xn, yn, zn])
         self._codes = np.array(list(source.Code))
         self._n_nodes = source.NumberOfNodes
@@ -1588,13 +1582,10 @@ class Dfsu(_UnstructuredFile):
         return self._ec
 
     def _get_element_coords_from_source(self):
-        xc = np.zeros(self.n_elements)
-        yc = np.zeros(self.n_elements)
-        zc = np.zeros(self.n_elements)
-        _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
+        xc2, yc2, zc2 = DfsuFile.CalculateElementCenterCoordinates(
+            self._source
         )
-        ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
+        ec = np.column_stack([xc2, yc2, zc2])
         return ec
 
     @property
@@ -1740,7 +1731,8 @@ class Dfsu(_UnstructuredFile):
 
                 src = itemdata.Data
 
-                d = to_numpy(src)
+                #d = to_numpy(src)
+                d = src
 
                 d[d == deletevalue] = np.nan
 
@@ -2052,14 +2044,14 @@ class Dfsu(_UnstructuredFile):
         if title is None:
             title = ""
 
-        file_start_time = to_dotnet_datetime(start_time)
+        file_start_time = start_time
 
         # spatial subset
         if elements is None:
             geometry = self
         else:
             geometry = self.elements_to_geometry(elements)
-            if (not self.is_2d) and (geometry._type == UnstructuredType.Dfsu2D):
+            if (not self.is_2d) and (geometry._type == DfsuFileType.Dfsu2D):
                 # redo extraction as 2d:
                 print("will redo extraction in 2d!")
                 geometry = self.elements_to_geometry(elements, node_layers="bottom")
@@ -2073,12 +2065,14 @@ class Dfsu(_UnstructuredFile):
                     data = new_data
 
         # Default filetype;
-        if geometry._type == UnstructuredType.Mesh:
+        # TODO
+        dfsu_filetype = DfsuFileType.Dfsu2D
+        #if geometry._type == DfsuFileType.Mesh:
             # create dfs2d from mesh
-            dfsu_filetype = DfsuFileType.Dfsu2D
-        else:
-            # TODO: if subset is slice...
-            dfsu_filetype = geometry._type.value
+        #    dfsu_filetype = DfsuFileType.Dfsu2D
+        #else:
+        #    # TODO: if subset is slice...
+        #    dfsu_filetype = geometry._type.value
 
         if dfsu_filetype != DfsuFileType.Dfsu2D:
             if items[0].name != "Z coordinate":
@@ -2088,14 +2082,16 @@ class Dfsu(_UnstructuredFile):
         yn = geometry.node_coordinates[:, 1]
 
         # zn have to be Single precision??
-        zn = to_dotnet_float_array(geometry.node_coordinates[:, 2])
+        zn = geometry.node_coordinates[:, 2]
 
-        elem_table = []
-        for j in range(geometry.n_elements):
-            elem_nodes = geometry.element_table[j]
-            elem_nodes = [nd + 1 for nd in elem_nodes]
-            elem_table.append(elem_nodes)
-        elem_table = asnetarray_v2(elem_table)
+        # TODO verify this
+        elem_table = geometry.element_table
+        #elem_table = []
+        #for j in range(geometry.n_elements):
+        #    elem_nodes = geometry.element_table[j]
+        #    elem_nodes = [nd + 1 for nd in elem_nodes]
+        #    elem_table.append(elem_nodes)
+        #elem_table = elem_table
 
         builder = DfsuBuilder.Create(dfsu_filetype)
 
@@ -2132,7 +2128,7 @@ class Dfsu(_UnstructuredFile):
                 for item in range(n_items):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
-                    darray = to_dotnet_float_array(d)
+                    darray = d
                     self._dfs.WriteItemTimeStepNext(0, darray)
             if not keep_open:
                 self._dfs.Close()
@@ -2198,7 +2194,7 @@ class Mesh(_UnstructuredFile):
         self._n_items = None
         self._n_layers = None
         self._n_sigma = None
-        self._type = UnstructuredType.Mesh
+        self._type = DfsuFileType.Mesh
 
     def set_z(self, z):
         """Change the depth by setting the z value of each node

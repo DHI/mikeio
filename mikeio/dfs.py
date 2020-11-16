@@ -12,12 +12,9 @@ from .dotnet import (
 )
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
-from DHI.Generic.MikeZero import eumQuantity
-from DHI.Generic.MikeZero.DFS import (
-    DfsSimpleType,
-    DataValueType,
-    DfsFactory,
-)
+from mikecore.eum import eumQuantity
+from mikecore.DfsFile import DfsSimpleType
+from mikecore.DfsFactory import DfsFactory
 
 
 class _Dfs123:
@@ -82,7 +79,7 @@ class _Dfs123:
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
                 src = itemdata.Data
-                d = to_numpy(src)
+                d = src
 
                 d[d == self.deletevalue] = np.nan
 
@@ -105,7 +102,7 @@ class _Dfs123:
         dfs = self._dfs
         self._n_items = len(dfs.ItemInfo)
         self._items = self._get_item_info(list(range(self._n_items)))
-        self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
@@ -257,7 +254,7 @@ class _Dfs123:
             )
 
         for item in self._items:
-            self._builder.AddDynamicItem(
+            self._builder.AddCreateDynamicItem(
                 item.name,
                 eumQuantity.Create(item.type, item.unit),
                 DfsSimpleType.Float,
@@ -366,7 +363,7 @@ class _Dfs123:
             eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
             itemtype = EUMType(eumItem)
             unit = EUMUnit(eumUnit)
-            data_value_type = self._dfs.ItemInfo[item].get_ValueType()
+            data_value_type = self._dfs.ItemInfo[item].ValueType
             item = ItemInfo(name, itemtype, unit, data_value_type)
             items.append(item)
         return items

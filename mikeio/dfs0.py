@@ -4,22 +4,19 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
-from DHI.Generic.MikeZero import eumQuantity
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-    DfsBuilder,
-    DfsSimpleType,
-    DataValueType,
-    StatType,
-)
-from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
+from mikecore.eum import eumQuantity
+from mikecore.DfsFileFactory import DfsFileFactory
 
+from mikecore.DfsFile import DfsSimpleType, DfsSimpleType, DataValueType, StatType, TimeAxisType
+
+#from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
+
+from .dfs0util import Dfs0Util
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 from .dutil import get_valid_items_and_timesteps, get_item_info
 from .dataset import Dataset
-from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
+from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .helpers import safe_length
 
 
@@ -73,13 +70,13 @@ class Dfs0:
         self._n_items = safe_length(dfs.ItemInfo)
         self._items = get_item_info(dfs, list(range(self._n_items)))
 
-        self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
+        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
 
         if self._timeaxistype in [
-            TimeAxisType.EquidistantCalendar,
-            TimeAxisType.NonEquidistantCalendar,
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
         ]:
-            self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
             self._start_time = datetime(1970, 1, 1)
 
@@ -130,7 +127,7 @@ class Dfs0:
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
 
-        matrix = self.__to_numpy_with_nans(raw_data)
+        matrix = raw_data[:, 1:]
 
         data = []
         for i in range(matrix.shape[1]):
@@ -142,14 +139,6 @@ class Dfs0:
         self._dfs.Close()
 
         return Dataset(data, time, items)
-
-    def __to_numpy_with_nans(self, raw_data):
-        data = np.fromiter(raw_data, np.float64).reshape(
-            self._n_timesteps, self._n_items + 1
-        )[:, 1::]
-        nan_indices = np.isclose(data, self._dfs.FileInfo.DeleteValueFloat, atol=1e-36)
-        data[nan_indices] = np.nan
-        return data
 
     def __get_time(self, raw_data):
         start_time = self.start_time

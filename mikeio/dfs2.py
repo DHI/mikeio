@@ -1,11 +1,7 @@
 import os
-from DHI.Generic.MikeZero import eumUnit
-from DHI.Generic.MikeZero.DFS import DfsFileFactory
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder, Dfs2Reprojector
-from DHI.Generic.MikeZero.DFS import DfsFileFactory
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
-from DHI.Projections import Cartography
-
+from mikecore.eum import eumUnit
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsFactory import DfsBuilder
 
 from .dfs import _Dfs123
 
@@ -52,7 +48,7 @@ class Dfs2(_Dfs123):
     def _read_dfs2_header(self):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
-
+        
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
@@ -142,7 +138,7 @@ class Dfs2(_Dfs123):
             title of the dfs2 file. Default is blank.
         """
 
-        self._builder = Dfs2Builder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", 0)
         if not self._dx:
             self._dx = 1
         if dx:

@@ -1,4 +1,6 @@
-from DHI.Generic.MikeZero.DFS import DataValueType
+#from DHI.Generic.MikeZero.DFS import DataValueType
+from mikecore.DfsFile import DataValueType
+
 
 from mikeio.custom_exceptions import InvalidDataValueType
 
@@ -25,7 +27,7 @@ def safe_length(input_list):
     return n
 
 
-def to_datatype(datatype_str):
+def to_datatype(datatype):
     string_datatype_mapping = {
         "Instantaneous": DataValueType.Instantaneous,
         "Accumulated": DataValueType.Accumulated,
@@ -38,7 +40,12 @@ def to_datatype(datatype_str):
         3: DataValueType.MeanStepBackward,
         4: DataValueType.MeanStepForward,
     }
-    if datatype_str not in string_datatype_mapping.keys():
-        raise InvalidDataValueType
 
-    return string_datatype_mapping[datatype_str]
+    if isinstance(datatype, str):
+        if datatype not in string_datatype_mapping.keys():
+            raise InvalidDataValueType
+
+        return string_datatype_mapping[datatype]
+
+    return datatype
+

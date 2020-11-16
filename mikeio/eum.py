@@ -12,7 +12,8 @@ Examples
 degree Kelvin
 
 """
-from DHI.Generic.MikeZero import EUMWrapper
+#from DHI.Generic.MikeZero import EUMWrapper
+from mikecore.eum import EumDLL
 from enum import IntEnum
 
 from mikeio.helpers import to_datatype
@@ -39,7 +40,7 @@ def type_list(search=None):
     check = True
     i = 1
     while check:
-        d = EUMWrapper.eumGetItemTypeSeq(i, 0, "")
+        d = EumDLL.Wrapper.eumGetItemTypeSeq(i, 0, "")
         if d[0] is True:
             items[d[1]] = d[2]
             i += 1
@@ -73,8 +74,8 @@ def unit_list(type_enum):
         names and codes for valid units
     """
     items = {}
-    for i in range(EUMWrapper.eumGetItemUnitCount(type_enum)):
-        d = EUMWrapper.eumGetItemUnitSeq(type_enum, i + 1, 1, "")
+    for i in range(EumDLL.Wrapper.eumGetItemUnitCount(type_enum)):
+        d = EumDLL.Wrapper.eumGetItemUnitSeq(type_enum, i + 1, 1, "")
         if d[0] is True:
             items[d[2]] = d[1]
 
