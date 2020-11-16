@@ -1,12 +1,11 @@
 import setuptools
-from  mikeio import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="mikeio",
-    version=__version__,
+    version='0.6.dev1',
     install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml"],
     extras_require={
         "dev": [
