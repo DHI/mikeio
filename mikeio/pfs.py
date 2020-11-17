@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+import re
 import yaml
 import pandas as pd
 from typing import Union
@@ -116,7 +117,8 @@ class Pfs:
             if s[-1] == "]":
                 s = s.replace("]", ":")
 
-        s = s.replace("//", "#").replace("|", "")  # TODO
+        s = re.sub(re.compile("//.*?\n"), "", s)
+        s = s.replace("|", "")
 
         if len(s) > 0 and s[0] != "!":
             if "=" in s:
