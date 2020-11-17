@@ -117,7 +117,7 @@ class Pfs:
             if s[-1] == "]":
                 s = s.replace("]", ":")
 
-        s = re.sub("^.*?(?=//)", "", s[::-1])[::-1]
+        s = re.sub(r"\s*//.*", "", s)
         s = s.replace("//", "").replace("|", "")
 
         if len(s) > 0 and s[0] != "!":
