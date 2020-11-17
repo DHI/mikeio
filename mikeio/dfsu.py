@@ -193,8 +193,11 @@ class _UnstructuredGeometry:
     def _shapely_domain2d(self):
         """
         """
+        
         if self._shapely_domain_obj is None:
+            # TODO get only boundary elements
             self._shapely_domain_obj = self.to_shapely().buffer(0)
+
         return self._shapely_domain_obj
 
     def get_node_coords(self, code=None):
@@ -561,24 +564,29 @@ class _UnstructuredGeometry:
         bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
         return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
 
-    def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False, p=2):
+    def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False, 
+                           p=2,
+                           radius=None):
         """IDW interpolant for list of coordinates
 
         Parameters
         ----------
-        xy : array-like 
-            x,y coordinates of new points 
+        xy : array-like
+            x,y coordinates of new points
         n_nearest : int, optional
             [description], by default 1
         extrapolate : bool, optional
             allow , by default False
         p : float, optional
             power of inverse distance weighting, default=2
+        radius: float, optional
+            an alternative to extrapolate=False,
+            only include elements within radius
 
         Returns
         -------
         (np.array, np.array)
-            element ids and weights 
+            element ids and weights
         """
         ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
         weights = None
@@ -593,6 +601,11 @@ class _UnstructuredGeometry:
                 weights[~self.contains(xy), :] = np.nan
         else:
             ValueError("n_nearest must be at least 1")
+
+        if radius is not None:
+            idx = np.where(dists > radius)[0]
+            weights[idx] = np.nan
+
 
         return ids, weights
 
