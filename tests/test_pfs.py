@@ -43,7 +43,7 @@ def test_outputs():
     pfs = Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE")
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
 
 
 def test_sw_outputs():
@@ -51,12 +51,12 @@ def test_sw_outputs():
     pfs = Pfs("tests/testdata/lake.sw")
     df = pfs.data.SW.get_outputs()
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 4
 
     df = pfs.data.SW.get_outputs(included_only=True)
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 3
 
 
@@ -65,7 +65,7 @@ def test_hd_outputs():
     pfs = Pfs("tests/testdata/lake.m21fm")
     df = pfs.data.HD.get_outputs()
 
-    assert df["file_name"][1] == "ts.dfs0"
+    assert df["file_name"][2] == "ts.dfs0"
     assert df.shape[0] == 3
 
     df = pfs.data.HD.get_outputs(included_only=True)
@@ -78,10 +78,22 @@ def test_included_outputs():
     pfs = Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 3
 
     # df.to_csv("outputs.csv")
+
+
+def test_output_by_id():
+
+    pfs = Pfs("tests/testdata/lake.sw")
+    df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=False)
+    # .loc refers to output_id irrespective of included or not
+    assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
+
+    df_inc = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
+    # .loc refers to output_id irrespective of included or not
+    assert df_inc.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
 
 
 ## PFSCore wrapping DHI.PFS.PFSFile
