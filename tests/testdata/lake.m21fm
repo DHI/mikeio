@@ -5,7 +5,7 @@
 [FemEngineHD]
    [DOMAIN]
       Touched = 1
-      discretization = 2
+      discretization = 2  	// 0: inactive, 1: active used for DA, 2: active but only for validation
       number_of_dimensions = 2
       number_of_meshes = 1
       file_name = |.\lake.mesh|
@@ -41,6 +41,8 @@
       EndSect  // BOUNDARY_NAMES
 
    EndSect  // DOMAIN
+
+// .... ----  	0: inactive, 1: active used for DA, 2: active but only for validation
 
    [TIME]
       Touched = 1
@@ -3298,7 +3300,7 @@
          number_of_outputs = 0
       EndSect  // OUTPUTS
 
-   EndSect  // PARTICLE_TRACKING_MODULE
+   EndSect  // PARTICLE_TRACKING_MODULE 
 
 EndSect  // FemEngineHD
 
