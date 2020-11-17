@@ -77,13 +77,13 @@ class Pfs:
             "time_step_frequency",
         ]
         rows = []
+        index = range(1, n+1)
         for i in range(n):
-
             output = sub[f"OUTPUT_{i+1}"]
             row = {key: output[key] for key in sel_keys}
 
             rows.append(row)
-        df = pd.DataFrame(rows)
+        df = pd.DataFrame(rows, index=index)
 
         if included_only:
             df = df[df.include == 1]
