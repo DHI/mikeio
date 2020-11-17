@@ -153,6 +153,7 @@ class _Dfs123:
             for item in range(self._n_items):
 
                 d = self._data[item][i]
+                d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 
                 if self._ndim == 1:
