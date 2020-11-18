@@ -1537,10 +1537,11 @@ class _UnstructuredGeometry:
         element_table = self.geometry2d.element_table
 
         all_faces = []
-        for el_id, el in enumerate(element_table):
+        for el in element_table:
             ele = [*el, el[0]]
             for j in range(len(el)):
                 all_faces.append(ele[j : j + 2])
+            
         all_faces = np.asarray(all_faces)
 
         all_faces_sorted = np.sort(all_faces, axis=1)
