@@ -190,22 +190,12 @@ class _UnstructuredGeometry:
         """
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
-    @property
-    def _shapely_domain2d(self):
-        """
-        """
-
-        if self._shapely_domain_obj is None:
-            # TODO get only boundary elements
-            self._shapely_domain_obj = self.to_shapely().buffer(0)
-
-        return self._shapely_domain_obj
-
     _boundary_polylines = None
 
     @property
     def boundary_polylines(self):
-
+        """Lists of closed polylines defining domain outline
+        """
         if self._boundary_polylines is None:
             self._boundary_polylines = self._get_boundary_polylines()
         return self._boundary_polylines
