@@ -403,16 +403,26 @@ class _UnstructuredGeometry:
         UnstructuredGeometry
             2d geometry (bottom nodes)
         """
-        if self._n_layers is None:
+        if self.is_2d:
             return self
 
         # extract information for selected elements
         elem_ids = self.bottom_elements
+        if self._type == UnstructuredType.Dfsu3DSigmaZ:
+            # for z-layers nodes will not match on neighboring elements!
+            elem_ids = self.top_elements
+
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
             elem_ids, node_layers="bottom"
         )
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
+
+        # Fix z-coordinate for sigma-z:
+        if self._type == UnstructuredType.Dfsu3DSigmaZ:
+            pass
+            # zn =   TODO
+            # node_coords[:,2] = zn
 
         # create new geometry
         geom = _UnstructuredGeometry()
@@ -533,6 +543,7 @@ class _UnstructuredGeometry:
             True for points inside, False otherwise
         """
         import matplotlib.path as mp
+
         points = np.atleast_2d(points)
 
         exterior = self.boundary_polylines.exteriors[0]
@@ -2292,11 +2303,12 @@ class Dfsu(_UnstructuredFile):
             path to file to be written
         """
         if self.is_2d:
-            _ = self.element_table  # make sure element table has been constructured
+            # make sure element table has been constructured
+            _ = self.element_table  
             geometry = self
         else:
-            geometry = self.to_2d_geometry()
-            # TODO: print warning if sigma-z
+            geometry = self.geometry2d
+
         Mesh._geometry_to_mesh(outfilename, geometry)
 
 
