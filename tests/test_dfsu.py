@@ -1037,6 +1037,20 @@ def test_interp2d():
     assert dsi.shape == (nt, 20 * 10)
 
 
+def test_interp2d_radius():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(g.xy, extrapolate=True, 
+                                         n_nearest=1, radius=0.1)
+    dsi = dfs.interp2d(ds, *interpolant)
+
+    assert dsi.shape == (nt, 20 * 10)
+    assert np.isnan(dsi[0][0][0])
+
+
 def test_interp2d_reshaped():
     dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"], time_steps=[0, 1])
