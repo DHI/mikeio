@@ -418,12 +418,6 @@ class _UnstructuredGeometry:
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
 
-        # Fix z-coordinate for sigma-z:
-        if self._type == UnstructuredType.Dfsu3DSigmaZ:
-            pass
-            # zn =   TODO
-            # node_coords[:,2] = zn
-
         # create new geometry
         geom = _UnstructuredGeometry()
         geom._set_nodes(
@@ -437,6 +431,16 @@ class _UnstructuredGeometry:
         geom._type = UnstructuredType.Mesh
 
         geom._reindex()
+
+        # Fix z-coordinate for sigma-z:
+        if self._type == UnstructuredType.Dfsu3DSigmaZ:
+            zn = geom.node_coordinates[:, 2].copy()
+            for j, elem_nodes in enumerate(geom.element_table):
+                elem_nodes3d = self.element_table[self.bottom_elements[j]]
+                for jn in range(len(elem_nodes)):
+                    znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
+                    zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
+            geom.node_coordinates[:, 2] = zn
 
         return geom
 
@@ -2304,7 +2308,7 @@ class Dfsu(_UnstructuredFile):
         """
         if self.is_2d:
             # make sure element table has been constructured
-            _ = self.element_table  
+            _ = self.element_table
             geometry = self
         else:
             geometry = self.geometry2d
