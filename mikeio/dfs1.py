@@ -1,13 +1,8 @@
 import os
 
-#from DHI.Generic.MikeZero import eumUnit
-#from DHI.Generic.MikeZero.DFS import DfsFileFactory
-#from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
-
 from mikecore.eum import eumUnit
-from mikecore import DfsFileFactory
-from mikecore import DfsBuilder
-
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsBuilder import DfsBuilder
 
 from .dfs import _Dfs123
 
@@ -98,7 +93,7 @@ class Dfs1(_Dfs123):
 
         """
 
-        self._builder = Dfs1Builder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", 0)
         self._dx = dx
         self._write(filename, data, start_time, dt, items, coordinate, title)
 

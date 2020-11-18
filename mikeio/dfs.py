@@ -153,14 +153,14 @@ class _Dfs123:
                 d[np.isnan(d)] = deletevalue
 
                 if self._ndim == 1:
-                    darray = to_dotnet_float_array(d)
+                    darray = d
 
                 if self._ndim == 2:
                     d = d.reshape(self.shape[1:])
                     d = np.flipud(d)
-                    darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+                    darray = d.reshape(d.size, 1)[:, 0]
 
-                dfs.WriteItemTimeStepNext(0, darray)
+                dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
 
         dfs.Close()
 
@@ -226,7 +226,7 @@ class _Dfs123:
 
     def _setup_header(self, filename):
 
-        system_start_time = to_dotnet_datetime(self._start_time)
+        system_start_time = self._start_time
 
         self._builder.SetDataType(0)
 
