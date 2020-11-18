@@ -1,5 +1,6 @@
 from logging import warn
 import os
+from collections import namedtuple
 import pandas as pd
 from enum import IntEnum
 import warnings
@@ -193,12 +194,21 @@ class _UnstructuredGeometry:
     def _shapely_domain2d(self):
         """
         """
-        
+
         if self._shapely_domain_obj is None:
             # TODO get only boundary elements
             self._shapely_domain_obj = self.to_shapely().buffer(0)
 
         return self._shapely_domain_obj
+
+    _boundary_polylines = None
+
+    @property
+    def boundary_polylines(self):
+
+        if self._boundary_polylines is None:
+            self._boundary_polylines = self._get_boundary_polylines()
+        return self._boundary_polylines
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
@@ -523,19 +533,22 @@ class _UnstructuredGeometry:
             True for points inside, False otherwise
         """
         import matplotlib.path as mp
+        points = np.atleast_2d(points)
 
-        try:
-            domain = self._shapely_domain2d
-        except:
-            warnings.warn(
-                "Could not determine if domain contains points. Failed to convert to_shapely()"
-            )
-            return None
+        exterior = self.boundary_polylines.exteriors[0]
+        cnts = mp.Path(exterior.xy).contains_points(points)
 
-        cnts = mp.Path(domain.exterior).contains_points(points)
-        for interj in domain.interiors:
-            in_hole = mp.Path(interj).contains_points(points)
+        if self.boundary_polylines.n_exteriors > 1:
+            # in case of several dis-joint outer domains
+            for exterior in self.boundary_polylines.exteriors[1:]:
+                in_domain = mp.Path(exterior.xy).contains_points(points)
+                cnts = np.logical_or(cnts, in_domain)
+
+        # subtract any holes
+        for interior in self.boundary_polylines.interiors:
+            in_hole = mp.Path(interior.xy).contains_points(points)
             cnts = np.logical_and(cnts, ~in_hole)
+
         return cnts
 
     def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None):
@@ -564,9 +577,9 @@ class _UnstructuredGeometry:
         bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
         return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
 
-    def get_2d_interpolant(self, xy, n_nearest: int = 1, extrapolate=False, 
-                           p=2,
-                           radius=None):
+    def get_2d_interpolant(
+        self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
+    ):
         """IDW interpolant for list of coordinates
 
         Parameters
@@ -605,7 +618,6 @@ class _UnstructuredGeometry:
         if radius is not None:
             idx = np.where(dists > radius)[0]
             weights[idx] = np.nan
-
 
         return ids, weights
 
@@ -1388,22 +1400,16 @@ class _UnstructuredGeometry:
                 ax.add_collection(p)
 
         if show_outline:
-            try:
-                domain = self._shapely_domain2d
-            except:
-                warnings.warn("Could not plot outline. Failed to convert to_shapely()")
-            try:
-                if domain:
-                    out_col = "0.4"
-                    ax.plot(*domain.exterior.xy, color=out_col, linewidth=1.2)
-                    xd, yd = domain.exterior.xy[0], domain.exterior.xy[1]
-                    xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
-                    ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
-                    for j in range(len(domain.interiors)):
-                        interj = domain.interiors[j]
-                        ax.plot(*interj.xy, color=out_col, linewidth=1.2)
-            except:
-                warnings.warn("Could not plot outline")
+            linwid = 1.2
+            out_col = "0.4"
+            for exterior in self.boundary_polylines.exteriors:
+                ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
+                xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
+                xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
+                ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
+
+            for interior in self.boundary_polylines.interiors:
+                ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
 
         # set plot limits
         xybuf = 6e-3 * (xmax - xmin)
@@ -1450,6 +1456,94 @@ class _UnstructuredGeometry:
                 data = np.append(data, data[el])
 
         return np.asarray(elem_table), ec, data
+
+    def _get_boundary_polylines(self):
+        boundary_faces = self._get_boundary_faces()
+        n0 = boundary_faces[:, 0]
+        n1 = boundary_faces[:, 1]
+
+        xn = self.geometry2d.node_coordinates[:, 0]
+        yn = self.geometry2d.node_coordinates[:, 1]
+
+        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
+        BoundaryPolylines = namedtuple(
+            "BoundaryPolylines",
+            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
+        )
+
+        poly_lines_int = []
+        poly_lines_ext = []
+        poly_ids = (-1) * np.ones(len(boundary_faces))
+
+        poly_id = 0
+        first_face = 0
+
+        while first_face is not None:
+            poly_ids[first_face : (first_face + 2)] = poly_id
+            poly_line = [*boundary_faces[first_face, :]]
+            node_id = poly_line[-1]
+
+            node_start = boundary_faces[first_face, 0]
+
+            area = (xn[node_start] - xn[node_id]) * (yn[node_id] + yn[node_start]) / 2
+            while node_id is not None:
+                fid0 = np.where(n0 == node_id)[0]
+                node_id = None
+                if len(fid0) > 0:
+                    # success: a face starting with node_id was found
+                    face_id = fid0[0]
+                    poly_ids[face_id] = poly_id
+
+                    node_id = n1[face_id]  # end-node on this face
+                    poly_line.append(node_id)
+                    node_start = poly_line[-2]
+                    area = (
+                        area
+                        + (xn[node_start] - xn[node_id])
+                        * (yn[node_id] + yn[node_start])
+                        / 2
+                    )
+                    if node_id == poly_line[0]:
+                        node_id = None
+
+            poly_line = np.asarray(poly_line)
+
+            n_nodes = len(poly_line)
+            xy = self.geometry2d.node_coordinates[poly_line, 0:2]
+            poly = Polyline(n_nodes, poly_line, xy, area)
+
+            if area > 0:
+                poly_lines_ext.append(poly)
+            else:
+                poly_lines_int.append(poly)
+
+            fid0 = np.where(poly_ids == -1)[0]
+            first_face = None
+            if len(fid0) > 0:
+                # more poly_lines to be found
+                first_face = fid0[0]
+                poly_id = poly_id + 1
+
+        n_ext = len(poly_lines_ext)
+        n_int = len(poly_lines_int)
+        return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
+
+    def _get_boundary_faces(self):
+        element_table = self.geometry2d.element_table
+
+        all_faces = []
+        for el_id, el in enumerate(element_table):
+            ele = [*el, el[0]]
+            for j in range(len(el)):
+                all_faces.append(ele[j : j + 2])
+        all_faces = np.asarray(all_faces)
+
+        all_faces_sorted = np.sort(all_faces, axis=1)
+        _, uf_id, face_counts = np.unique(
+            all_faces_sorted, axis=0, return_index=True, return_counts=True
+        )
+        bnd_face_id = face_counts == 1  # boundary faces are those appearing only once
+        return all_faces[uf_id[bnd_face_id]]
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
