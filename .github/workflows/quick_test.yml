@@ -23,7 +23,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install https://github.com/pythonnet/pythonnet/archive/master.zip
+        pip install https://github.com/pythonnet/pythonnet/archive/python3.9.zip
         pip install pytest flake8
         
     - name: Lint with flake8
