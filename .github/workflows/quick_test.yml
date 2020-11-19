@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: windows-2016
+    runs-on: windows-latest
     strategy:
       matrix:
         python-version: [3.8]
