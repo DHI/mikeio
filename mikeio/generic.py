@@ -140,6 +140,8 @@ def sum(infilename_a, infilename_b, outfilename):
     dfs_i_b = DfsFileFactory.DfsGenericOpen(infilename_b)
     dfs_o = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
+    deletevalue = dfs_i_a.FileInfo.DeleteValueFloat 
+
     n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = safe_length(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
@@ -149,9 +151,11 @@ def sum(infilename_a, infilename_b, outfilename):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = to_numpy(itemdata_a.Data)
+            d_a[d_a == deletevalue] = np.nan
 
             itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
             d_b = to_numpy(itemdata_b.Data)
+            d_a[d_a == deletevalue] = np.nan
             time = itemdata_a.Time
 
             outdata = d_a + d_b
@@ -184,6 +188,8 @@ def diff(infilename_a, infilename_b, outfilename):
     dfs_i_b = DfsFileFactory.DfsGenericOpen(infilename_b)
     dfs_o = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
+    deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
+
     n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = safe_length(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
@@ -193,9 +199,11 @@ def diff(infilename_a, infilename_b, outfilename):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = to_numpy(itemdata_a.Data)
+            d_a[d_a == deletevalue] = np.nan
 
             itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
             d_b = to_numpy(itemdata_b.Data)
+            d_b[d_b == deletevalue] = np.nan
             time = itemdata_a.Time
 
             outdata = d_a - d_b
