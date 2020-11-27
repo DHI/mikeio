@@ -244,7 +244,7 @@ class _UnstructuredGeometry:
         return asnetarray_v2(new_elem_table)
 
     def _set_nodes(
-        self, node_coordinates, codes=None, node_ids=None, projection_string=None
+            self, node_coordinates, codes=None, node_ids=None, projection_string=None
     ):
         self._nc = np.asarray(node_coordinates)
         if codes is None:
@@ -335,8 +335,8 @@ class _UnstructuredGeometry:
             n_layers = len(unique_layer_ids)
 
             if (
-                self._type == UnstructuredType.Dfsu3DSigma
-                or self._type == UnstructuredType.Dfsu3DSigmaZ
+                    self._type == UnstructuredType.Dfsu3DSigma
+                    or self._type == UnstructuredType.Dfsu3DSigmaZ
             ) and n_layers == 1:
                 # If source is 3d, but output only has 1 layer
                 # then change type to 2d
@@ -355,8 +355,8 @@ class _UnstructuredGeometry:
                 # If source is sigma-z but output only has sigma layers
                 # then change type accordingly
                 if (
-                    self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
-                    or self._type == UnstructuredType.Dfsu3DSigmaZ
+                        self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
+                        or self._type == UnstructuredType.Dfsu3DSigmaZ
                 ) and n_layers == geom._n_sigma:
                     geom._type = UnstructuredType(self._type.value - 1)
 
@@ -583,7 +583,7 @@ class _UnstructuredGeometry:
         return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
 
     def get_2d_interpolant(
-        self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
+            self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
     ):
         """IDW interpolant for list of coordinates
 
@@ -724,7 +724,7 @@ class _UnstructuredGeometry:
         return self.find_nearest_elements(x, y, z, layer, n_nearest)
 
     def find_nearest_elements(
-        self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
+            self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
     ):
         """Find index of nearest elements (optionally for a list)
 
@@ -782,11 +782,11 @@ class _UnstructuredGeometry:
 
     def _use_third_col_as_z(self, x, z, layer):
         return (
-            (z is None)
-            and (layer is None)
-            and (not np.isscalar(x))
-            and (np.ndim(x) == 2)
-            and (x.shape[1] >= 3)
+                (z is None)
+                and (layer is None)
+                and (not np.isscalar(x))
+                and (np.ndim(x) == 2)
+                and (x.shape[1] >= 3)
         )
 
     def find_nearest_profile_elements(self, x, y):
@@ -974,7 +974,7 @@ class _UnstructuredGeometry:
             n = len(top_elems)
             tmp = top_elems.copy()
             tmp[0] = -1
-            tmp[1:n] = top_elems[0 : (n - 1)]
+            tmp[1:n] = top_elems[0: (n - 1)]
             self._n_layers_column = top_elems - tmp
         return self._n_layers_column
 
@@ -1016,7 +1016,7 @@ class _UnstructuredGeometry:
 
         if layer < (-n_lay + 1) or layer > n_lay:
             raise Exception(
-                f"Layer {layer} not allowed; must be between -{n_lay-1} and {n_lay}"
+                f"Layer {layer} not allowed; must be between -{n_lay - 1} and {n_lay}"
             )
 
         if layer <= 0:
@@ -1120,7 +1120,7 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(elem_table.reshape(-1,))
+            for i in np.unique(elem_table.reshape(-1, ))
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1149,22 +1149,51 @@ class _UnstructuredGeometry:
 
         return node_centered_data
 
+    def _Get_2DVertical_elements(self):
+        if (self._type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
+                self._type == DfsuFileType.DfsuVerticalProfileSigma):
+            elements = [list(self._source.ElementTable[i]) for i in range(len(list(self._source.ElementTable)))]
+            return np.asarray(elements) - 1
+
+    def plot_vertical_profile(self, values, time_step, cmin, cmax, **kwargs):
+        import matplotlib
+        import matplotlib.pyplot as plt
+
+        x_coordinate = np.hypot(self.node_coordinates[:,0], self.node_coordinates[:,1])
+        y_coordinate = self.read()[0][time_step, :]
+        elements = self._Get_2DVertical_elements()
+        ax = plt.gca()
+        yz = np.c_[x_coordinate, y_coordinate]
+        verts = yz[elements]
+        pc = matplotlib.collections.PolyCollection(verts, cmap='jet')
+        pc.set_clim(cmin, cmax)
+        plt.colorbar(pc, ax=ax, orientation='vertical')
+        pc.set_array(values)
+        if 'edge_color' in kwargs:
+            edge_color = kwargs['edge_color']
+        else:
+            edge_color = None
+        pc.set_edgecolor(edge_color)
+        ax.add_collection(pc)
+        ax.autoscale()
+        plt.show()
+
     def plot(
-        self,
-        z=None,
-        elements=None,
-        plot_type="patch",
-        title=None,
-        label=None,
-        cmap=None,
-        vmin=None,
-        vmax=None,
-        levels=10,
-        n_refinements=0,
-        show_mesh=True,
-        show_outline=True,
-        figsize=None,
-        ax=None,
+            self,
+            z=None,
+            elements=None,
+            plot_type="patch",
+            title=None,
+            label=None,
+            cmap=None,
+            vmin=None,
+            vmax=None,
+            levels=10,
+            n_refinements=0,
+            show_mesh=True,
+            show_outline=True,
+            figsize=None,
+            ax=None,
     ):
         """
         Plot unstructured data and/or mesh, mesh outline  
@@ -1484,7 +1513,7 @@ class _UnstructuredGeometry:
         first_face = 0
 
         while first_face is not None:
-            poly_ids[first_face : (first_face + 2)] = poly_id
+            poly_ids[first_face: (first_face + 2)] = poly_id
             poly_line = [*boundary_faces[first_face, :]]
             node_id = poly_line[-1]
 
@@ -1503,10 +1532,10 @@ class _UnstructuredGeometry:
                     poly_line.append(node_id)
                     node_start = poly_line[-2]
                     area = (
-                        area
-                        + (xn[node_start] - xn[node_id])
-                        * (yn[node_id] + yn[node_start])
-                        / 2
+                            area
+                            + (xn[node_start] - xn[node_id])
+                            * (yn[node_id] + yn[node_start])
+                            / 2
                     )
                     if node_id == poly_line[0]:
                         node_id = None
@@ -1540,8 +1569,8 @@ class _UnstructuredGeometry:
         for el in element_table:
             ele = [*el, el[0]]
             for j in range(len(el)):
-                all_faces.append(ele[j : j + 2])
-            
+                all_faces.append(ele[j: j + 2])
+
         all_faces = np.asarray(all_faces)
 
         all_faces_sorted = np.sort(all_faces, axis=1)
@@ -1581,8 +1610,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
         if not self.is_2d:
             out.append(f"Number of sigma layers: {self.n_sigma_layers}")
         if (
-            self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
-            or self._type == UnstructuredType.Dfsu3DSigmaZ
+                self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
+                or self._type == UnstructuredType.Dfsu3DSigmaZ
         ):
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if self._n_items is not None:
@@ -2047,7 +2076,7 @@ class Dfsu(_UnstructuredFile):
         return Dataset(data_list, times, items_out)
 
     def write_header(
-        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
+            self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
     ):
         """Write the header of a new dfsu file
 
@@ -2094,15 +2123,15 @@ class Dfsu(_UnstructuredFile):
         )
 
     def write(
-        self,
-        filename,
-        data,
-        start_time=None,
-        dt=None,
-        items=None,
-        elements=None,
-        title=None,
-        keep_open=False,
+            self,
+            filename,
+            data,
+            start_time=None,
+            dt=None,
+            items=None,
+            elements=None,
+            title=None,
+            keep_open=False,
     ):
         """Write a new dfsu file
 
@@ -2164,7 +2193,7 @@ class Dfsu(_UnstructuredFile):
                 raise ValueError(
                     "Number of items unknown. Add (..., items=[ItemInfo(...)]"
                 )
-            items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+            items = [ItemInfo(f"Item {i + 1}") for i in range(n_items)]
 
         if title is None:
             title = ""
@@ -2182,7 +2211,7 @@ class Dfsu(_UnstructuredFile):
                 geometry = self.elements_to_geometry(elements, node_layers="bottom")
                 if items[0].name == "Z coordinate":
                     # get rid of z-item
-                    items = items[1 : (n_items + 1)]
+                    items = items[1: (n_items + 1)]
                     n_items = n_items - 1
                     new_data = []
                     for j in range(n_items):

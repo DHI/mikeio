@@ -119,3 +119,12 @@ def test_plot_mesh_boundary_nodes():
     msh.plot_boundary_nodes()
     msh.plot_boundary_nodes(["Land", "Sea"])
     assert True
+
+
+def test_plot_dfsu_vertical_profile():
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
+    dfs = Dfsu(filename)
+    time_step = 1
+    item_number = 1
+    dfs.plot_vertical_profile(dfs.read()[item_number][time_step, :], time_step, 0, 20)
+    assert True
