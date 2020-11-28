@@ -2,7 +2,7 @@ import os
 from shutil import copyfile
 import numpy as np
 import mikeio
-from mikeio.generic import scale
+from mikeio.generic import scale, diff, sum
 import pytest
 
 
@@ -42,7 +42,7 @@ def test_multiply_constant_single_item_number(tmpdir):
 
     infilename = "tests/testdata/wind_north_sea.dfsu"
     outfilename = os.path.join(tmpdir.dirname, "mult.dfsu")
-    scale(infilename, outfilename, factor=1.5, item_numbers=[0])
+    scale(infilename, outfilename, factor=1.5, items=[0])
 
     org = mikeio.read(infilename)
 
@@ -63,7 +63,7 @@ def test_multiply_constant_single_item_name(tmpdir):
 
     infilename = "tests/testdata/wind_north_sea.dfsu"
     outfilename = os.path.join(tmpdir.dirname, "multname.dfsu")
-    scale(infilename, outfilename, factor=1.5, item_names=["Wind speed"])
+    scale(infilename, outfilename, factor=1.5, items=["Wind speed"])
 
     org = mikeio.read(infilename)
 
@@ -80,11 +80,45 @@ def test_multiply_constant_single_item_name(tmpdir):
     assert scaledvalue_dir == pytest.approx(expected_dir)
 
 
+def test_diff_itself(tmpdir):
+
+    infilename_1 = "tests/testdata/gebco_sound.dfs2"
+    infilename_2 = "tests/testdata/gebco_sound.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "diff.dfs2")
+    
+    diff(infilename_1, infilename_2, outfilename)
+
+    org = mikeio.read(infilename_1)
+
+    assert np.isnan(org["Elevation"][0][0,-1])
+
+    diffed = mikeio.read(outfilename)
+
+    diffedvalue = diffed["Elevation"][0, 0, 0]
+    assert diffedvalue == pytest.approx(0.0)
+    assert np.isnan(diffed["Elevation"][0][0,-1])
+
+def test_sum_itself(tmpdir):
+
+    infilename_1 = "tests/testdata/gebco_sound.dfs2"
+    infilename_2 = "tests/testdata/gebco_sound.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "diff.dfs2")
+    
+    sum(infilename_1, infilename_2, outfilename)
+
+    org = mikeio.read(infilename_1)
+
+    assert np.isnan(org["Elevation"][0][0,-1])
+
+    summed = mikeio.read(outfilename)
+
+    assert np.isnan(summed["Elevation"][0][0,-1])
+
 def test_add_constant_delete_values_unchanged(tmpdir):
 
     infilename = "tests/testdata/gebco_sound.dfs2"
     outfilename = os.path.join(tmpdir.dirname, "adj.dfs2")
-    scale(infilename, outfilename, offset=-2.1, item_names=["Elevation"])
+    scale(infilename, outfilename, offset=-2.1, items=["Elevation"])
 
     org = mikeio.read(infilename)
 
@@ -108,7 +142,7 @@ def test_multiply_constant_delete_values_unchanged_2(tmpdir):
 
     item_name = "testing water level"
 
-    scale(infilename, outfilename, factor=1000.0, item_names=[item_name])
+    scale(infilename, outfilename, factor=1000.0, items=[item_name])
 
     org = mikeio.read(infilename)
 
