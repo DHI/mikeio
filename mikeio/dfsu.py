@@ -1162,7 +1162,6 @@ class _UnstructuredGeometry:
         pc.set_edgecolor(edge_color)
         ax.add_collection(pc)
         ax.autoscale()
-        plt.show()
 
     def plot(
         self,
