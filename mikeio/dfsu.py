@@ -1096,11 +1096,7 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(
-                elem_table.reshape(
-                    -1,
-                )
-            )
+            for i in np.unique(elem_table.reshape(-1,))
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1139,29 +1135,90 @@ class _UnstructuredGeometry:
             ]
             return np.asarray(elements) - 1
 
-    def plot_vertical_profile(self, values, time_step, cmin, cmax, **kwargs):
-        import matplotlib
-        import matplotlib.pyplot as plt
+    def plot_vertical_profile(
+        self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
+    ):
+        """
+        Plot unstructured vertical profile 
 
-        x_coordinate = np.hypot(
-            self.node_coordinates[:, 0], self.node_coordinates[:, 1]
-        )
-        y_coordinate = self.read()[0][time_step, :]
+        Parameters
+        ----------
+        values: np.array
+            value for each element to plot
+        timestep: int, optional
+            the timestep that fits with the data to get correct vertical 
+            positions, default: use static vertical positions
+        cmin: real, optional
+            lower bound of values to be shown on plot, default:None
+        cmax: real, optional
+            upper bound of values to be shown on plot, default:None
+        title: str, optional
+            axes title
+        label: str, optional
+            colorbar label 
+        cmap: matplotlib.cm.cmap, optional
+            colormap, default viridis
+        figsize: (float, float), optional
+            specify size of figure
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+
+        Returns
+        -------
+        <matplotlib.axes>
+        """
+        import matplotlib.pyplot as plt
+        from matplotlib.collections import PolyCollection
+
+        nc = self.node_coordinates
+        x_coordinate = np.hypot(nc[:, 0], nc[:, 1])
+        if time_step is None:
+            y_coordinate = nc[:, 2]
+        else:
+            y_coordinate = self.read()[0][time_step, :]
+
         elements = self._Get_2DVertical_elements()
-        ax = plt.gca()
+
+        # plot in existing or new axes?
+        if "ax" in kwargs:
+            ax = kwargs["ax"]
+        else:
+            figsize = None
+            if "figsize" in kwargs:
+                figsize = kwargs["figsize"]
+            _, ax = plt.subplots(figsize=figsize)
+
         yz = np.c_[x_coordinate, y_coordinate]
         verts = yz[elements]
-        pc = matplotlib.collections.PolyCollection(verts, cmap="jet")
+
+        if "cmap" in kwargs:
+            cmap = kwargs["cmap"]
+        else:
+            cmap = "jet"
+        pc = PolyCollection(verts, cmap=cmap)
+
+        if cmin is None:
+            cmin = np.nanmin(values)
+        if cmax is None:
+            cmax = np.nanmax(values)
         pc.set_clim(cmin, cmax)
-        plt.colorbar(pc, ax=ax, orientation="vertical")
+
+        plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
         pc.set_array(values)
+
         if "edge_color" in kwargs:
             edge_color = kwargs["edge_color"]
         else:
             edge_color = None
         pc.set_edgecolor(edge_color)
+
         ax.add_collection(pc)
         ax.autoscale()
+
+        if "title" in kwargs:
+            ax.set_title(kwargs["title"])
+
+        return ax
 
     def plot(
         self,
@@ -1722,10 +1779,7 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source,
-            to_dotnet_array(xc),
-            to_dotnet_array(yc),
-            to_dotnet_array(zc),
+            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
         )
         ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
@@ -2056,13 +2110,7 @@ class Dfsu(_UnstructuredFile):
         return Dataset(data_list, times, items_out)
 
     def write_header(
-        self,
-        filename,
-        start_time=None,
-        dt=None,
-        items=None,
-        elements=None,
-        title=None,
+        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
     ):
         """Write the header of a new dfsu file
 
