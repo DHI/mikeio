@@ -1,16 +1,16 @@
 import os
-from typing import List, Union
+from typing import List, Optional, Union
 import numpy as np
 from datetime import datetime, timedelta
 
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder, DfsFile
 from .dotnet import to_numpy, to_dotnet_float_array, from_dotnet_datetime
 from .helpers import safe_length
 from .dutil import find_item
 from shutil import copyfile
 
 
-def _clone(infilename: str, outfilename: str):
+def _clone(infilename: str, outfilename: str) -> DfsFile:
     """Clone a dfs file
 
     Parameters
@@ -71,22 +71,22 @@ def _clone(infilename: str, outfilename: str):
 
 def scale(
     infilename: str, outfilename: str, offset: float = 0.0,
-    factor: float = 1.0, items: Union[None, List[str], List[int]] = None,
-):
+    factor: float = 1.0, items: Union[List[str], List[int]] = None,
+) -> None:
     """Apply scaling to any dfs file
 
         Parameters
         ----------
 
-        infilename:
+        infilename: str
             full path to the input file
-        outfilename:
+        outfilename: str
             full path to the output file
-        offset:
+        offset: float, optional
             value to add to all items, default 0.0
-        factor:
+        factor: float, optional
             value to multiply to all items, default 1.0
-        items:
+        items: List[str] or List[int], optional
             Process only selected items, by number (0-based)
         """
     copyfile(infilename, outfilename)
@@ -126,16 +126,16 @@ def scale(
     dfs.Close()
 
 
-def sum(infilename_a: str, infilename_b: str, outfilename: str):
+def sum(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     """Sum two dfs files (a+b)
 
     Parameters
     ----------
-    infilename_a:
+    infilename_a: str
         full path to the first input file
-    infilename_b:
+    infilename_b: str
         full path to the second input file
-    outfilename:
+    outfilename: str
         full path to the output file
     """
     copyfile(infilename_a, outfilename)
@@ -173,16 +173,16 @@ def sum(infilename_a: str, infilename_b: str, outfilename: str):
     dfs_o.Close()
 
 
-def diff(infilename_a: str, infilename_b: str, outfilename: str):
+def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     """Calculate difference between two dfs files (a-b)
 
     Parameters
     ----------
-    infilename_a:
+    infilename_a: str
         full path to the first input file
-    infilename_b:
+    infilename_b: str 
         full path to the second input file
-    outfilename:
+    outfilename: str
         full path to the output file
     """
 
@@ -221,17 +221,17 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str):
     dfs_o.Close()
 
 
-def concat(infilenames: List[str], outfilename: str):
+def concat(infilenames: List[str], outfilename: str) -> None:
     """Concatenates files along the time axis
 
     If files are overlapping, the last one will be used.
 
     Parameters
     ----------
-    infilenames:
+    infilenames: List[str]
         filenames to concatenate
 
-    outfilename:
+    outfilename: str
         filename
 
     Notes
