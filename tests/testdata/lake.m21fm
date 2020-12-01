@@ -2,7 +2,7 @@
 // DLL         : C:\Program Files (x86)\DHI\2019\bin\x64\pfs2004.dll
 // Version     : 17.0.0.12230
 
-[FemEngineHD]
+[FemEngineHD] // FemEngine, and FemEngineHD are both correct
    [DOMAIN]
       Touched = 1
       discretization = 2  	// 0: inactive, 1: active used for DA, 2: active but only for validation

@@ -109,6 +109,7 @@ class Pfs:
 
     def _parse_line(self, line):
         s = line.strip()
+        s = re.sub(r"\s*//.*", "", s)
 
         if len(s) > 0:
             if s[0] == "[":
@@ -117,7 +118,7 @@ class Pfs:
             if s[-1] == "]":
                 s = s.replace("]", ":")
 
-        s = re.sub(r"\s*//.*", "", s)
+
         s = s.replace("//", "").replace("|", "")
 
         if len(s) > 0 and s[0] != "!":
