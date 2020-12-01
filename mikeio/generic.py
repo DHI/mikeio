@@ -1,15 +1,16 @@
 import os
+from typing import List, Optional, Union
 import numpy as np
 from datetime import datetime, timedelta
 
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder
+from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder, DfsFile
 from .dotnet import to_numpy, to_dotnet_float_array, from_dotnet_datetime
 from .helpers import safe_length
 from .dutil import find_item
 from shutil import copyfile
 
 
-def _clone(infilename, outfilename):
+def _clone(infilename: str, outfilename: str) -> DfsFile:
     """Clone a dfs file
 
     Parameters
@@ -69,8 +70,9 @@ def _clone(infilename, outfilename):
 
 
 def scale(
-    infilename, outfilename, offset=0.0, factor=1.0, item_numbers=None, item_names=None
-):
+    infilename: str, outfilename: str, offset: float = 0.0,
+    factor: float = 1.0, items: Union[List[str], List[int]] = None,
+) -> None:
     """Apply scaling to any dfs file
 
         Parameters
@@ -84,20 +86,22 @@ def scale(
             value to add to all items, default 0.0
         factor: float, optional
             value to multiply to all items, default 1.0
-        item_numbers: list[int], optional
+        items: List[str] or List[int], optional
             Process only selected items, by number (0-based)
-        item_names: list[str], optional
-            Process only selected items, by name, takes precedence over item_numbers
         """
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
-    if item_names is not None:
-        item_numbers = find_item(dfs, item_names)
+    if isinstance(items, int) or isinstance(items, str):
+        items = [items]
 
-    if item_numbers is None:
-        n_items = safe_length(dfs.ItemInfo)
-        item_numbers = list(range(n_items))
+    if items is not None and isinstance(items[0], str):
+        items = find_item(dfs, items)
+
+    if items is None:
+        item_numbers = list(range(len(dfs.ItemInfo)))
+    else:
+        item_numbers = items
 
     n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = len(item_numbers)
@@ -122,7 +126,7 @@ def scale(
     dfs.Close()
 
 
-def sum(infilename_a, infilename_b, outfilename):
+def sum(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     """Sum two dfs files (a+b)
 
     Parameters
@@ -140,6 +144,8 @@ def sum(infilename_a, infilename_b, outfilename):
     dfs_i_b = DfsFileFactory.DfsGenericOpen(infilename_b)
     dfs_o = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
+    deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
+
     n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = safe_length(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
@@ -149,9 +155,11 @@ def sum(infilename_a, infilename_b, outfilename):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = to_numpy(itemdata_a.Data)
+            d_a[d_a == deletevalue] = np.nan
 
             itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
             d_b = to_numpy(itemdata_b.Data)
+            d_a[d_a == deletevalue] = np.nan
             time = itemdata_a.Time
 
             outdata = d_a + d_b
@@ -165,16 +173,16 @@ def sum(infilename_a, infilename_b, outfilename):
     dfs_o.Close()
 
 
-def diff(infilename_a, infilename_b, outfilename):
+def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     """Calculate difference between two dfs files (a-b)
 
     Parameters
     ----------
-    infilename_a : str
+    infilename_a: str
         full path to the first input file
-    infilename_b : str
+    infilename_b: str 
         full path to the second input file
-    outfilename : str
+    outfilename: str
         full path to the output file
     """
 
@@ -183,6 +191,8 @@ def diff(infilename_a, infilename_b, outfilename):
     dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
     dfs_i_b = DfsFileFactory.DfsGenericOpen(infilename_b)
     dfs_o = DfsFileFactory.DfsGenericOpenEdit(outfilename)
+
+    deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
 
     n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = safe_length(dfs_i_a.ItemInfo)
@@ -193,9 +203,11 @@ def diff(infilename_a, infilename_b, outfilename):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = to_numpy(itemdata_a.Data)
+            d_a[d_a == deletevalue] = np.nan
 
             itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
             d_b = to_numpy(itemdata_b.Data)
+            d_b[d_b == deletevalue] = np.nan
             time = itemdata_a.Time
 
             outdata = d_a - d_b
@@ -209,14 +221,14 @@ def diff(infilename_a, infilename_b, outfilename):
     dfs_o.Close()
 
 
-def concat(infilenames, outfilename):
+def concat(infilenames: List[str], outfilename: str) -> None:
     """Concatenates files along the time axis
 
     If files are overlapping, the last one will be used.
 
     Parameters
     ----------
-    infilenames: list of str
+    infilenames: List[str]
         filenames to concatenate
 
     outfilename: str
