@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 from datetime import datetime, timedelta
 from scipy.spatial import cKDTree
+import tqdm
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -2308,7 +2309,7 @@ class Dfsu(_UnstructuredFile):
 
         try:
             # Add data for all item-timesteps, copying from source
-            for i in range(n_time_steps):
+            for i in tqdm.trange(n_time_steps):
                 for item in range(n_items):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
