@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 import warnings
 import numpy as np
 import pandas as pd
+from tqdm import tqdm, trange
 from .dataset import Dataset
 
 from .dotnet import (
@@ -76,7 +77,7 @@ class _Dfs123:
 
         t_seconds = np.zeros(len(time_steps))
 
-        for i, it in enumerate(time_steps):
+        for i, it in enumerate(tqdm(time_steps)):
             for item in range(n_items):
 
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -149,7 +150,7 @@ class _Dfs123:
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
-        for i in range(self._n_timesteps):
+        for i in trange(self._n_timesteps):
             for item in range(self._n_items):
 
                 d = self._data[item][i]
