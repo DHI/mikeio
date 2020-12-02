@@ -2336,7 +2336,7 @@ class Dfsu(_UnstructuredFile):
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
-        for i in tqdm.trange(n_time_steps):
+        for i in trange(n_time_steps):
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
