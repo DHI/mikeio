@@ -298,15 +298,33 @@ def concat(infilenames: List[str], outfilename: str) -> None:
 
 
 def extract_timesteps(infilename: str, outfilename: str, start=0, end=-1) -> None:
+    """Extract timesteps within range to a new dfs file
 
+    Parameters
+    ----------
+    infilename : str
+        path to input dfs file
+    outfilename : str
+        path to output dfs file
+    start : int, float, str or datetime, optional
+        start of extraction as either step, relative seconds
+        or datetime/str, by default 0 (start of file)
+    end : int, float, str or datetime, optional
+        end of extraction as either step, relative seconds
+        or datetime/str, by default -1 (end of file)
+
+    Examples
+    --------
+    >>> extract_timesteps('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
+    >>> extract_timesteps('f_in.dfs2', 'f_out.dfs2', end=-3)
+    >>> extract_timesteps('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)    
+    """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
     n_items = safe_length(dfs_i.ItemInfo)
-
-    # time of input file
-    # dfs_i.FileInfo.TimeAxis.TimeAxisType
-    # n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-    start_step, start_sec, end_step, end_sec = _parse_start_end(dfs_i, start, end)
+    start_step, start_sec, end_step, end_sec = _parse_start_end(
+        dfs_i, start, end
+        )
 
     dfs_o = _clone(infilename, outfilename)
 
