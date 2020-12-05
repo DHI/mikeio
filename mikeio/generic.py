@@ -322,9 +322,7 @@ def extract_timesteps(infilename: str, outfilename: str, start=0, end=-1) -> Non
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
     n_items = safe_length(dfs_i.ItemInfo)
-    start_step, start_sec, end_step, end_sec = _parse_start_end(
-        dfs_i, start, end
-        )
+    start_step, start_sec, end_step, end_sec = _parse_start_end(dfs_i, start, end)
 
     dfs_o = _clone(infilename, outfilename)
 
@@ -359,7 +357,15 @@ def _parse_start_end(dfs_i, start, end):
     file_start_sec = dfs_i.FileInfo.TimeAxis.StartTimeOffset
     start_sec = file_start_sec
 
-    file_end_sec = start_sec + dfs_i.FileInfo.TimeAxis.TimeSpan
+    timespan = 0
+    if dfs_i.FileInfo.TimeAxis.TimeAxisType == 3:
+        timespan = dfs_i.FileInfo.TimeAxis.TimeStep * (n_time_steps - 1)
+    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 4:
+        timespan = dfs_i.FileInfo.TimeAxis.TimeSpan
+    else:
+        raise ValueError("TimeAxisType not supported")
+
+    file_end_sec = start_sec + timespan
     end_sec = file_end_sec
 
     start_step = 0
