@@ -1,13 +1,15 @@
 import os
 from typing import List, Optional, Union
 import numpy as np
+import pandas as pd
 from datetime import datetime, timedelta
+import warnings
+from shutil import copyfile
 
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder, DfsFile
 from .dotnet import to_numpy, to_dotnet_float_array, from_dotnet_datetime
 from .helpers import safe_length
 from .dutil import find_item
-from shutil import copyfile
 
 
 def _clone(infilename: str, outfilename: str) -> DfsFile:
@@ -70,8 +72,11 @@ def _clone(infilename: str, outfilename: str) -> DfsFile:
 
 
 def scale(
-    infilename: str, outfilename: str, offset: float = 0.0,
-    factor: float = 1.0, items: Union[List[str], List[int]] = None,
+    infilename: str,
+    outfilename: str,
+    offset: float = 0.0,
+    factor: float = 1.0,
+    items: Union[List[str], List[int]] = None,
 ) -> None:
     """Apply scaling to any dfs file
 
@@ -290,3 +295,100 @@ def concat(infilenames: List[str], outfilename: str) -> None:
         dfs_i.Close()
 
     dfs_o.Close()
+
+
+def extract_timesteps(infilename: str, outfilename: str, start=0, end=-1) -> None:
+
+    dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
+
+    n_items = safe_length(dfs_i.ItemInfo)
+
+    # time of input file
+    # dfs_i.FileInfo.TimeAxis.TimeAxisType
+    # n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+    start_step, start_sec, end_step, end_sec = _parse_start_end(dfs_i, start, end)
+
+    dfs_o = _clone(infilename, outfilename)
+
+    timestep_out = -1
+    for timestep in range(start_step, end_step):
+        for item in range(1, n_items + 1):
+
+            itemdata = dfs_i.ReadItemTimeStep(item, timestep)
+            time_sec = itemdata.Time
+
+            if time_sec > end_sec:
+                dfs_i.Close()
+                dfs_o.Close()
+                return
+
+            if time_sec >= start_sec:
+                if item == 1:
+                    timestep_out = timestep_out + 1
+                print(timestep_out)
+                print(time_sec)
+
+                outdata = itemdata.Data
+                dfs_o.WriteItemTimeStep(item, timestep_out, time_sec, outdata)
+
+    dfs_i.Close()
+    dfs_o.Close()
+
+
+def _parse_start_end(dfs_i, start, end):
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+    file_start_datetime = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
+    file_start_sec = dfs_i.FileInfo.TimeAxis.StartTimeOffset
+    start_sec = file_start_sec
+
+    file_end_sec = start_sec + dfs_i.FileInfo.TimeAxis.TimeSpan
+    end_sec = file_end_sec
+
+    start_step = 0
+    if isinstance(start, int):
+        start_step = start
+    elif isinstance(start, float):
+        start_sec = start
+    elif isinstance(start, str):
+        parts = start.split(",")
+        start = parts[0]
+        if len(parts) == 2:
+            end = parts[1]
+        start = pd.to_datetime(start)
+
+    if isinstance(start, datetime):
+        start_sec = (start - file_start_datetime).total_seconds()
+
+    end_step = n_time_steps
+    if isinstance(end, int):
+        if end < 0:
+            end = end_step + end + 1
+        end_step = end
+    elif isinstance(end, float):
+        end_sec = end
+    elif isinstance(end, str):
+        end = pd.to_datetime(end)
+
+    if isinstance(end, datetime):
+        end_sec = (end - file_start_datetime).total_seconds()
+
+    if start_step < 0:
+        start_step = 0
+        warnings.warn("start cannot be before start of file")
+
+    if start_sec < file_start_sec:
+        start_sec = file_start_sec
+        warnings.warn("start cannot be before start of file")
+
+    if (end_sec < start_sec) or (end_step < start_step):
+        raise ValueError("end must be after start")
+
+    if end_step > n_time_steps:
+        end_step = n_time_steps
+        warnings.warn("end cannot be after end of file")
+
+    if end_sec > file_end_sec:
+        end_sec = file_end_sec
+        warnings.warn("end cannot be after end of file")
+
+    return start_step, start_sec, end_step, end_sec
