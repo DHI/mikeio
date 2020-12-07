@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 from datetime import datetime, timedelta
 from scipy.spatial import cKDTree
+from tqdm import trange
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -1912,7 +1913,7 @@ class Dfsu(_UnstructuredFile):
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        for i in range(len(time_steps)):
+        for i in trange(len(time_steps)):
             it = time_steps[i]
             for item in range(n_items):
 
@@ -2057,7 +2058,7 @@ class Dfsu(_UnstructuredFile):
             return step >= self.n_timesteps
 
         # loop over track points
-        for i in range(i_start, i_end + 1):
+        for i in trange(i_start, i_end + 1):
             t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
@@ -2308,7 +2309,7 @@ class Dfsu(_UnstructuredFile):
 
         try:
             # Add data for all item-timesteps, copying from source
-            for i in range(n_time_steps):
+            for i in trange(n_time_steps):
                 for item in range(n_items):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
@@ -2335,7 +2336,7 @@ class Dfsu(_UnstructuredFile):
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
-        for i in range(n_time_steps):
+        for i in trange(n_time_steps):
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
