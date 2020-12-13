@@ -315,8 +315,8 @@ def concat(infilenames: List[str], outfilename: str) -> None:
     dfs_o.Close()
 
 
-def extract(infilename: str, outfilename: str, start=0, end=-1) -> None:
-    """Extract timesteps within range to a new dfs file
+def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> None:
+    """Extract timesteps and/or items to a new dfs file
 
     Parameters
     ----------
@@ -330,21 +330,24 @@ def extract(infilename: str, outfilename: str, start=0, end=-1) -> None:
     end : int, float, str or datetime, optional
         end of extraction as either step, relative seconds
         or datetime/str, by default -1 (end of file)
+    items : int, list(int), str, list(str), optional
+        items to be extracted to new file
 
     Examples
     --------
-    >>> extract_timesteps('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
-    >>> extract_timesteps('f_in.dfs2', 'f_out.dfs2', end=-3)
-    >>> extract_timesteps('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)    
+    >>> extract('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
+    >>> extract('f_in.dfs2', 'f_out.dfs2', end=-3)
+    >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)    
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
-    n_items = safe_length(dfs_i.ItemInfo)
+    # n_items = safe_length(dfs_i.ItemInfo)
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
+    items = _parse_items(dfs_i, items)
 
-    dfs_o = _clone(infilename, outfilename, start_time=file_start_new)
+    dfs_o = _clone(infilename, outfilename, start_time=file_start_new, items=items)
 
     file_start_shift = 0
     if file_start_new is not None:
@@ -353,9 +356,8 @@ def extract(infilename: str, outfilename: str, start=0, end=-1) -> None:
 
     timestep_out = -1
     for timestep in range(start_step, end_step):
-        for item in range(1, n_items + 1):
-
-            itemdata = dfs_i.ReadItemTimeStep(item, timestep)
+        for item_out, item in enumerate(items):
+            itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
             time_sec = itemdata.Time
 
             if time_sec > end_sec:
@@ -364,18 +366,22 @@ def extract(infilename: str, outfilename: str, start=0, end=-1) -> None:
                 return
 
             if time_sec >= start_sec:
-                if item == 1:
+                if item == items[0]:
                     timestep_out = timestep_out + 1
                 time_sec_out = time_sec - file_start_shift
 
                 outdata = itemdata.Data
-                dfs_o.WriteItemTimeStep(item, timestep_out, time_sec_out, outdata)
+                dfs_o.WriteItemTimeStep(
+                    (item_out + 1), timestep_out, time_sec_out, outdata
+                )
 
     dfs_i.Close()
     dfs_o.Close()
 
 
 def _parse_start_end(dfs_i, start, end):
+    """Helper function for parsing start and end arguments
+    """
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
     file_start_datetime = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
     file_start_sec = dfs_i.FileInfo.TimeAxis.StartTimeOffset
@@ -451,3 +457,19 @@ def _parse_start_end(dfs_i, start, end):
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
     return file_start_new, start_step, start_sec, end_step, end_sec
+
+
+def _parse_items(dfs_i, items):
+    """"Make sure that items is a list of integers"""
+
+    if isinstance(items, int) or isinstance(items, str):
+        items = [items]
+
+    if isinstance(items[0], str):
+        items = find_item(dfs_i, items)
+
+    if items is None:
+        item_numbers = list(range(len(dfs_i.ItemInfo)))
+    else:
+        item_numbers = items
+    return item_numbers
