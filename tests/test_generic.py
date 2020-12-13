@@ -312,3 +312,17 @@ def test_extract_non_equidistant(tmpdir):
     assert extracted.n_timesteps == 7
     assert extracted.time[0].hour == 0
     assert extracted.time[-1].minute == 0
+
+
+def test_extract_items(tmpdir):
+
+    infile = "tests/testdata/oresund_vertical_slice.dfsu"
+    outfile = os.path.join(tmpdir.dirname, "extracted_vertical_slice.dfsu")
+
+    extract(infile, outfile, items="Temperature")
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 1
+
+    extract(infile, outfile, items=[0, 2])
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 2
