@@ -7,12 +7,17 @@ import warnings
 from shutil import copyfile
 
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder, DfsFile
-from .dotnet import to_numpy, to_dotnet_float_array, from_dotnet_datetime
+from .dotnet import (
+    to_numpy,
+    to_dotnet_float_array,
+    from_dotnet_datetime,
+    to_dotnet_datetime,
+)
 from .helpers import safe_length
 from .dutil import find_item
 
 
-def _clone(infilename: str, outfilename: str) -> DfsFile:
+def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> DfsFile:
     """Clone a dfs file
 
     Parameters
@@ -21,6 +26,10 @@ def _clone(infilename: str, outfilename: str) -> DfsFile:
         input filename
     outfilename : str
         output filename
+    start_time : datetime, optional
+        new start time for the new file, default
+    items : list(int), optional
+        clone only these items, default: all items
 
     Returns
     -------
@@ -37,7 +46,14 @@ def _clone(infilename: str, outfilename: str) -> DfsFile:
     # Set up the header
     builder.SetDataType(fi.DataType)
     builder.SetGeographicalProjection(fi.Projection)
-    builder.SetTemporalAxis(fi.TimeAxis)
+
+    # Copy time axis
+    time_axis = fi.TimeAxis
+    if start_time is not None:
+        dt = to_dotnet_datetime(start_time)
+        time_axis.set_StartDateTime(dt)
+    builder.SetTemporalAxis(time_axis)
+
     builder.SetItemStatisticsType(fi.StatsType)
     builder.DeleteValueByte = fi.DeleteValueByte
     builder.DeleteValueDouble = fi.DeleteValueDouble
@@ -50,8 +66,10 @@ def _clone(infilename: str, outfilename: str) -> DfsFile:
         builder.AddCustomBlock(customBlock)
 
     # Copy dynamic items
-    for itemInfo in source.ItemInfo:
-        builder.AddDynamicItem(itemInfo)
+    if items is None:
+        items = list(range(len(source.ItemInfo)))
+    for item in items:
+        builder.AddDynamicItem(source.ItemInfo[item])
 
     # Create file
     builder.CreateFile(outfilename)
@@ -297,7 +315,7 @@ def concat(infilenames: List[str], outfilename: str) -> None:
     dfs_o.Close()
 
 
-def extract_timesteps(infilename: str, outfilename: str, start=0, end=-1) -> None:
+def extract(infilename: str, outfilename: str, start=0, end=-1) -> None:
     """Extract timesteps within range to a new dfs file
 
     Parameters
@@ -322,9 +340,16 @@ def extract_timesteps(infilename: str, outfilename: str, start=0, end=-1) -> Non
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
     n_items = safe_length(dfs_i.ItemInfo)
-    start_step, start_sec, end_step, end_sec = _parse_start_end(dfs_i, start, end)
+    file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
+        dfs_i, start, end
+    )
 
-    dfs_o = _clone(infilename, outfilename)
+    dfs_o = _clone(infilename, outfilename, start_time=file_start_new)
+
+    file_start_shift = 0
+    if file_start_new is not None:
+        file_start_orig = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
+        file_start_shift = (file_start_new - file_start_orig).total_seconds()
 
     timestep_out = -1
     for timestep in range(start_step, end_step):
@@ -341,11 +366,10 @@ def extract_timesteps(infilename: str, outfilename: str, start=0, end=-1) -> Non
             if time_sec >= start_sec:
                 if item == 1:
                     timestep_out = timestep_out + 1
-                print(timestep_out)
-                print(time_sec)
+                time_sec_out = time_sec - file_start_shift
 
                 outdata = itemdata.Data
-                dfs_o.WriteItemTimeStep(item, timestep_out, time_sec, outdata)
+                dfs_o.WriteItemTimeStep(item, timestep_out, time_sec_out, outdata)
 
     dfs_i.Close()
     dfs_o.Close()
@@ -415,4 +439,15 @@ def _parse_start_end(dfs_i, start, end):
         end_sec = file_end_sec
         warnings.warn("end cannot be after end of file")
 
-    return start_step, start_sec, end_step, end_sec
+    file_start_new = None
+    if dfs_i.FileInfo.TimeAxis.TimeAxisType == 3:
+        dt = dfs_i.FileInfo.TimeAxis.TimeStep
+        if (start_sec > file_start_sec) and (start_step == 0):
+            # we can find the coresponding step
+            start_step = int((start_sec - file_start_sec) / dt)
+        file_start_new = file_start_datetime + timedelta(seconds=start_step * dt)
+    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 4:
+        if start_sec > file_start_sec:
+            file_start_new = file_start_datetime + timedelta(seconds=start_sec)
+
+    return file_start_new, start_step, start_sec, end_step, end_sec
