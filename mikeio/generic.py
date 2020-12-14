@@ -461,6 +461,8 @@ def _parse_start_end(dfs_i, start, end):
 
 def _parse_items(dfs_i, items):
     """"Make sure that items is a list of integers"""
+    if items is None:
+        return list(range(len(dfs_i.ItemInfo)))
 
     if isinstance(items, int) or isinstance(items, str):
         items = [items]
@@ -468,8 +470,4 @@ def _parse_items(dfs_i, items):
     if isinstance(items[0], str):
         items = find_item(dfs_i, items)
 
-    if items is None:
-        item_numbers = list(range(len(dfs_i.ItemInfo)))
-    else:
-        item_numbers = items
-    return item_numbers
+    return items
