@@ -326,3 +326,19 @@ def test_extract_items(tmpdir):
     extract(infile, outfile, items=[0, 2])
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 2
+
+    extract(infile, outfile, items=["Salinity", 1])
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 2
+
+    with pytest.raises(Exception):
+        # must be unique
+        extract(infile, outfile, items=["Salinity", 2])
+
+    with pytest.raises(Exception):
+        # no negative numbers
+        extract(infile, outfile, items=[0, 2, -1])
+
+    with pytest.raises(Exception):
+        extract(infile, outfile, items=[0, "not_an_item"])
+
