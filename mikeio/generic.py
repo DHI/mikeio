@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 import warnings
 from shutil import copyfile
 
+from tqdm import trange, tqdm
+
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder, DfsFile
 from .dotnet import (
     to_numpy,
@@ -131,7 +133,7 @@ def scale(
 
     deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    for timestep in range(n_time_steps):
+    for timestep in trange(n_time_steps):
         for item in range(n_items):
 
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
@@ -173,7 +175,7 @@ def sum(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     n_items = safe_length(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
 
-    for timestep in range(n_time_steps):
+    for timestep in trange(n_time_steps):
         for item in range(n_items):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
@@ -221,7 +223,7 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     n_items = safe_length(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
 
-    for timestep in range(n_time_steps):
+    for timestep in trange(n_time_steps):
         for item in range(n_items):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
@@ -272,7 +274,7 @@ def concat(infilenames: List[str], outfilename: str) -> None:
 
     current_time = datetime(1, 1, 1)  # beginning of time...
 
-    for i, infilename in enumerate(infilenames):
+    for i, infilename in enumerate(tqdm(infilenames)):
 
         dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
         t_axis = dfs_i.FileInfo.TimeAxis
