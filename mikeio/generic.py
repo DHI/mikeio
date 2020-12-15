@@ -117,16 +117,7 @@ def scale(
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
-    if isinstance(items, int) or isinstance(items, str):
-        items = [items]
-
-    if items is not None and isinstance(items[0], str):
-        items = find_item(dfs, items)
-
-    if items is None:
-        item_numbers = list(range(len(dfs.ItemInfo)))
-    else:
-        item_numbers = items
+    item_numbers = _parse_items(dfs, items)
 
     n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = len(item_numbers)
@@ -339,11 +330,13 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     --------
     >>> extract('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
     >>> extract('f_in.dfs2', 'f_out.dfs2', end=-3)
-    >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)    
+    >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)   
+    >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0]) 
+    >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity") 
+    >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity") 
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
-    # n_items = safe_length(dfs_i.ItemInfo)
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
@@ -463,13 +456,25 @@ def _parse_start_end(dfs_i, start, end):
 
 def _parse_items(dfs_i, items):
     """"Make sure that items is a list of integers"""
+    n_items_file = len(dfs_i.ItemInfo)
     if items is None:
-        return list(range(len(dfs_i.ItemInfo)))
+        return list(range(n_items_file))
 
-    if isinstance(items, int) or isinstance(items, str):
+    if np.isscalar(items):
         items = [items]
 
-    if isinstance(items[0], str):
-        items = find_item(dfs_i, items)
+    for idx, item in enumerate(items):
+        if isinstance(item, str):
+            items[idx] = find_item(dfs_i, [item])[0]
+        elif isinstance(item, int):
+            if (item < 0) or (item >= n_items_file):
+                raise ValueError(
+                    f"item numbers must be between 0 and {n_items_file - 1}"
+                )
+        else:
+            raise ValueError("items must be (a list of) either int or str")
+
+    if len(np.unique(items)) != len(items):
+        raise ValueError("items must be unique")
 
     return items
