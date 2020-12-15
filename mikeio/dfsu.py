@@ -189,6 +189,15 @@ class _UnstructuredGeometry:
             self._boundary_polylines = self._get_boundary_polylines()
         return self._boundary_polylines
 
+    _all_boundary_polylines = None
+
+    @property
+    def all_boundary_polylines(self):
+        """Lists of closed polylines defining domain outline"""
+        if self._all_boundary_polylines is None:
+            self._all_boundary_polylines = self._get_all_boundary_polylines()
+        return self._all_boundary_polylines
+
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
 
@@ -1097,7 +1106,11 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(elem_table.reshape(-1,))
+            for i in np.unique(
+                elem_table.reshape(
+                    -1,
+                )
+            )
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1140,14 +1153,14 @@ class _UnstructuredGeometry:
         self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
     ):
         """
-        Plot unstructured vertical profile 
+        Plot unstructured vertical profile
 
         Parameters
         ----------
         values: np.array
             value for each element to plot
         timestep: int, optional
-            the timestep that fits with the data to get correct vertical 
+            the timestep that fits with the data to get correct vertical
             positions, default: use static vertical positions
         cmin: real, optional
             lower bound of values to be shown on plot, default:None
@@ -1156,7 +1169,7 @@ class _UnstructuredGeometry:
         title: str, optional
             axes title
         label: str, optional
-            colorbar label 
+            colorbar label
         cmap: matplotlib.cm.cmap, optional
             colormap, default viridis
         figsize: (float, float), optional
@@ -1479,14 +1492,12 @@ class _UnstructuredGeometry:
         if show_outline:
             linwid = 1.2
             out_col = "0.4"
-            for exterior in self.boundary_polylines.exteriors:
-                ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-                xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
+            for polyline in self.all_boundary_polylines:
+                xy = self.node_coordinates[polyline, :2]
+                ax.plot(*xy.T, color=out_col, linewidth=linwid)
+                xd, yd = xy[:, 0], xy[:, 1]
                 xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
                 ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
-
-            for interior in self.boundary_polylines.interiors:
-                ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
 
         # set plot limits
         xybuf = 6e-3 * (xmax - xmin)
@@ -1532,6 +1543,31 @@ class _UnstructuredGeometry:
                 data = np.append(data, data[el])
 
         return np.asarray(elem_table), ec, data
+
+    def _get_all_boundary_polylines(self):
+        boundary_faces = self._get_boundary_faces()
+        face_remains = boundary_faces.copy()
+        polylines = []
+        while face_remains.shape[0] > 1:
+            n0 = face_remains[:, 0]
+            n1 = face_remains[:, 1]
+            polyline = [n0[0], n1[0]]
+            index_to_delete = []
+            count = 0
+            end_points = face_remains[0, 1]
+            while True:
+                next_point_index = np.where(n0 == end_points)
+                if next_point_index[0] is not None:
+                    polyline.append(face_remains[next_point_index[0][0], 1])
+                    index_to_delete.append(next_point_index[0][0])
+                    end_points = polyline[-1]
+                count += 1
+                if count > face_remains.shape[0]:
+                    break
+
+            face_remains = np.delete(face_remains, index_to_delete, axis=0)
+            polylines.append(polyline)
+        return polylines
 
     def _get_boundary_polylines(self):
         boundary_faces = self._get_boundary_faces()
@@ -1780,7 +1816,10 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
+            self._source,
+            to_dotnet_array(xc),
+            to_dotnet_array(yc),
+            to_dotnet_array(zc),
         )
         ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
@@ -2111,7 +2150,13 @@ class Dfsu(_UnstructuredFile):
         return Dataset(data_list, times, items_out)
 
     def write_header(
-        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
+        self,
+        filename,
+        start_time=None,
+        dt=None,
+        items=None,
+        elements=None,
+        title=None,
     ):
         """Write the header of a new dfsu file
 
