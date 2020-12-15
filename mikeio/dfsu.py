@@ -1557,7 +1557,7 @@ class _UnstructuredGeometry:
             end_points = face_remains[0, 1]
             while True:
                 next_point_index = np.where(n0 == end_points)
-                if next_point_index[0] is not None:
+                if next_point_index[0].size != 0:
                     polyline.append(face_remains[next_point_index[0][0], 1])
                     index_to_delete.append(next_point_index[0][0])
                     end_points = polyline[-1]
