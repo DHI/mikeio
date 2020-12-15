@@ -93,7 +93,7 @@ class Dfs0:
         ----------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: int or list[int], optional
+        time_steps: str, int or list[int], optional
             Read only selected time_steps
 
         Returns
@@ -110,6 +110,13 @@ class Dfs0:
         self._n_items = safe_length(dfs.ItemInfo)
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
+        if (self._timeaxistype == TimeAxisType.NonEquidistantCalendar 
+            and isinstance(time_steps, str)):
+            sel_time_step_str = time_steps
+            time_steps = range(self._n_timesteps)
+        else:
+            sel_time_step_str = None
+
         items, item_numbers, _ = get_valid_items_and_timesteps(self, items, time_steps)
 
         dfs.Close()
@@ -118,6 +125,17 @@ class Dfs0:
         ds = ds[item_numbers]
         if time_steps:
             ds = ds.isel(time_steps, axis=0)
+
+        if sel_time_step_str:
+            parts = sel_time_step_str.split(",")
+            if parts[0] == "":
+                sel = slice(parts[1])  # stop only
+            elif parts[1] == "":
+                sel = slice(parts[0], None)  # start only
+            else:
+                sel = slice(parts[0], parts[1])
+            ds = ds[sel]
+        
 
         return ds
 

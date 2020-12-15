@@ -1837,7 +1837,7 @@ class Dfsu(_UnstructuredFile):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: int or list[int], optional
+        time_steps: str, int or list[int], optional
             Read only selected time_steps
         elements: list[int], optional
             Read only selected element ids
