@@ -1493,7 +1493,7 @@ class _UnstructuredGeometry:
             linwid = 1.2
             out_col = "0.4"
             for polyline in self.all_boundary_polylines:
-                xy = self.node_coordinates[polyline, :2]
+                xy = self.geometry2d.node_coordinates[polyline, :2]
                 ax.plot(*xy.T, color=out_col, linewidth=linwid)
                 xd, yd = xy[:, 0], xy[:, 1]
                 xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
