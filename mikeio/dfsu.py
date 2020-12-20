@@ -1552,7 +1552,7 @@ class _UnstructuredGeometry:
             n0 = face_remains[:, 0]
             n1 = face_remains[:, 1]
             polyline = [n0[0], n1[0]]
-            index_to_delete = []
+            index_to_delete = [0]
             count = 0
             end_points = face_remains[0, 1]
             while True:
@@ -1562,7 +1562,7 @@ class _UnstructuredGeometry:
                     index_to_delete.append(next_point_index[0][0])
                     end_points = polyline[-1]
                 count += 1
-                if count > face_remains.shape[0]:
+                if count > face_remains.shape[0] or polyline[0] == end_points:
                     break
 
             face_remains = np.delete(face_remains, index_to_delete, axis=0)
