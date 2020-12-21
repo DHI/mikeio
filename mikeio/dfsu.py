@@ -32,7 +32,6 @@ from .spatial import Grid2D
 from .interpolation import get_idw_interpolant, interp2d
 from .custom_exceptions import InvalidGeometry
 
-
 class UnstructuredType(IntEnum):
     """
     -1: Mesh: 2D unstructured MIKE mesh
@@ -1644,6 +1643,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
     _n_items = None
     _items = None
     _dtype = np.float64
+    
+    hide_progress = False
 
     def __repr__(self):
         out = []
@@ -1917,7 +1918,7 @@ class Dfsu(_UnstructuredFile):
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        for i in trange(len(time_steps)):
+        for i in trange(len(time_steps), disable=self.hide_progress):
             it = time_steps[i]
             for item in range(n_items):
 
@@ -2063,7 +2064,7 @@ class Dfsu(_UnstructuredFile):
             return step >= self.n_timesteps
 
         # loop over track points
-        for i in trange(i_start, i_end + 1):
+        for i in trange(i_start, i_end + 1, disable=self.hide_progress):
             t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
@@ -2317,7 +2318,7 @@ class Dfsu(_UnstructuredFile):
 
         try:
             # Add data for all item-timesteps, copying from source
-            for i in trange(n_time_steps):
+            for i in trange(n_time_steps, disable=self.hide_progress):
                 for item in range(n_items):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
@@ -2344,7 +2345,7 @@ class Dfsu(_UnstructuredFile):
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
-        for i in trange(n_time_steps):
+        for i in trange(n_time_steps, disable=self.hide_progress):
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue

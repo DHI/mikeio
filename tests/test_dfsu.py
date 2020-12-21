@@ -167,6 +167,21 @@ def test_read_all_time_steps():
     assert len(ds.time) == 9
     assert ds.data[0].shape[0] == 9
 
+def test_read_all_time_steps_without_progressbar():
+
+    Dfsu.hide_progress = True
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    
+    dfs = Dfsu(filename)
+
+
+    ds = dfs.read(items=[0, 3])
+
+    assert len(ds.time) == 9
+    assert ds.data[0].shape[0] == 9
+
+
 
 def test_read_single_time_step():
 

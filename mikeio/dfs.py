@@ -35,6 +35,8 @@ class _Dfs123:
     _timeseries_unit = TimeStepUnit.SECOND
     _dt = None
 
+    hide_progress = False
+
     def __init__(self, filename=None):
         self._filename = filename
 
@@ -77,7 +79,7 @@ class _Dfs123:
 
         t_seconds = np.zeros(len(time_steps))
 
-        for i, it in enumerate(tqdm(time_steps)):
+        for i, it in enumerate(tqdm(time_steps, disable=self.hide_progress)):
             for item in range(n_items):
 
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -150,7 +152,7 @@ class _Dfs123:
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
-        for i in trange(self._n_timesteps):
+        for i in trange(self._n_timesteps, disable=self.hide_progress):
             for item in range(self._n_items):
 
                 d = self._data[item][i]
