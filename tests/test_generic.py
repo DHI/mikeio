@@ -2,7 +2,7 @@ import os
 from shutil import copyfile
 import numpy as np
 import mikeio
-from mikeio.generic import scale, diff, sum
+from mikeio.generic import scale, diff, sum, extract
 import pytest
 
 
@@ -85,34 +85,36 @@ def test_diff_itself(tmpdir):
     infilename_1 = "tests/testdata/gebco_sound.dfs2"
     infilename_2 = "tests/testdata/gebco_sound.dfs2"
     outfilename = os.path.join(tmpdir.dirname, "diff.dfs2")
-    
+
     diff(infilename_1, infilename_2, outfilename)
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"][0][0,-1])
+    assert np.isnan(org["Elevation"][0][0, -1])
 
     diffed = mikeio.read(outfilename)
 
     diffedvalue = diffed["Elevation"][0, 0, 0]
     assert diffedvalue == pytest.approx(0.0)
-    assert np.isnan(diffed["Elevation"][0][0,-1])
+    assert np.isnan(diffed["Elevation"][0][0, -1])
+
 
 def test_sum_itself(tmpdir):
 
     infilename_1 = "tests/testdata/gebco_sound.dfs2"
     infilename_2 = "tests/testdata/gebco_sound.dfs2"
     outfilename = os.path.join(tmpdir.dirname, "diff.dfs2")
-    
+
     sum(infilename_1, infilename_2, outfilename)
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"][0][0,-1])
+    assert np.isnan(org["Elevation"][0][0, -1])
 
     summed = mikeio.read(outfilename)
 
-    assert np.isnan(summed["Elevation"][0][0,-1])
+    assert np.isnan(summed["Elevation"][0][0, -1])
+
 
 def test_add_constant_delete_values_unchanged(tmpdir):
 
@@ -281,4 +283,62 @@ def test_concat_closes_files(tmpdir):
 
     # ds = mikeio.read(outfilename)
     # assert len(ds.time) == (5 * 48 + 1)
+
+
+def test_extract_equidistant(tmpdir):
+
+    infile = "tests/testdata/waves.dfs2"
+    outfile = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
+
+    extract(infile, outfile, start=1, end=-1)
+    orig = mikeio.read(infile)
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps == orig.n_timesteps - 1
+    assert extracted.time[0] == orig.time[1]
+
+
+def test_extract_non_equidistant(tmpdir):
+
+    infile = "tests/testdata/da_diagnostic.dfs0"
+    outfile = os.path.join(tmpdir.dirname, "diagnostic_subset.dfs0")
+
+    extract(infile, outfile, start="2017-10-27 01:58", end="2017-10-27 04:32")
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps == 16
+    assert extracted.time[0].hour == 2
+
+    extract(infile, outfile, end=3600.0)
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps == 7
+    assert extracted.time[0].hour == 0
+    assert extracted.time[-1].minute == 0
+
+
+def test_extract_items(tmpdir):
+
+    infile = "tests/testdata/oresund_vertical_slice.dfsu"
+    outfile = os.path.join(tmpdir.dirname, "extracted_vertical_slice.dfsu")
+
+    extract(infile, outfile, items="Temperature")
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 1
+
+    extract(infile, outfile, items=[0, 2])
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 2
+
+    extract(infile, outfile, items=["Salinity", 1])
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 2
+
+    with pytest.raises(Exception):
+        # must be unique
+        extract(infile, outfile, items=["Salinity", 2])
+
+    with pytest.raises(Exception):
+        # no negative numbers
+        extract(infile, outfile, items=[0, 2, -1])
+
+    with pytest.raises(Exception):
+        extract(infile, outfile, items=[0, "not_an_item"])
 
