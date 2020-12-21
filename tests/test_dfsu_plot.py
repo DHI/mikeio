@@ -132,17 +132,12 @@ def test_plot_dfsu_vertical_profile():
     time_step = 1
     item_number = 1
     data = dfs.read()[item_number][time_step, :]
-
     # defaults
     dfs.plot_vertical_profile(data)
-
     dfs.plot_vertical_profile(data, time_step, 0, 20)
-
     dfs.plot_vertical_profile(
         data, title="txt", label="txt", edge_color="0.3", cmin=0, cmax=20, cmap="plasma"
     )
-
     _, ax = plt.subplots()
     dfs.plot_vertical_profile(data, ax=ax)
-
     assert True

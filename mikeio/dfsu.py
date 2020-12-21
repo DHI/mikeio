@@ -451,7 +451,8 @@ class _UnstructuredGeometry:
         else:
             # 3D file
             if (node_layers != "bottom") and (node_layers != "top"):
-                raise Exception("node_layers must be either all, bottom or top")
+                raise Exception(
+                    "node_layers must be either all, bottom or top")
             for j in elements:
                 elem_nodes = self.element_table[j]
                 nn = len(elem_nodes)
@@ -691,7 +692,8 @@ class _UnstructuredGeometry:
                         id = elem3d[layer_ids == layer]
                         idx[j] = id
                     except:
-                        print(f"Layer {layer} not present for 2d element {elem2d[j]}")
+                        print(
+                            f"Layer {layer} not present for 2d element {elem2d[j]}")
             else:
                 # sigma layer
                 idx = self.get_layer_elements(layer=layer)[elem2d]
@@ -891,7 +893,8 @@ class _UnstructuredGeometry:
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
         if self._n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
+            raise InvalidGeometry(
+                "Object has no layers: cannot return elem2d_ids")
             # or return self._2d_ids ??
 
         if self._2d_ids is None:
@@ -905,7 +908,8 @@ class _UnstructuredGeometry:
     def layer_ids(self):
         """The layer number for each 3d element"""
         if self._n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
+            raise InvalidGeometry(
+                "Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -938,7 +942,8 @@ class _UnstructuredGeometry:
             return None
         elif (self._top_elems is None) and (self._source is not None):
             # note: if subset of elements is selected then this cannot be done!
-            self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
+            self._top_elems = np.array(
+                DfsuUtil.FindTopLayerElements(self._source))
         return self._top_elems
 
     @property
@@ -952,7 +957,7 @@ class _UnstructuredGeometry:
             n = len(top_elems)
             tmp = top_elems.copy()
             tmp[0] = -1
-            tmp[1:n] = top_elems[0 : (n - 1)]
+            tmp[1:n] = top_elems[0: (n - 1)]
             self._n_layers_column = top_elems - tmp
         return self._n_layers_column
 
@@ -989,7 +994,8 @@ class _UnstructuredGeometry:
 
         n_lay = self.n_layers
         if n_lay is None:
-            raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
+            raise InvalidGeometry(
+                "Object has no layers: cannot get_layer_elements")
 
         if layer < (-n_lay + 1) or layer > n_lay:
             raise Exception(
@@ -1115,14 +1121,16 @@ class _UnstructuredGeometry:
                     omega[np.where(omega > 2)] = 2
                     omega[np.where(omega < 0)] = 0
             if omega.sum() > 0:
-                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
+                node_centered_data[n] = np.sum(
+                    omega * data[item]) / np.sum(omega)
             else:
                 # We did not succeed using pseudo laplace procedure, use inverse distance instead
                 InvDis = [
                     1 / np.hypot(case[0], case[1])
                     for case in ec[item][:, :2] - nc[n][:2]
                 ]
-                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
+                node_centered_data[n] = np.sum(
+                    InvDis * data[item]) / np.sum(InvDis)
 
         return node_centered_data
 
@@ -1140,14 +1148,14 @@ class _UnstructuredGeometry:
         self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
     ):
         """
-        Plot unstructured vertical profile 
+        Plot unstructured vertical profile
 
         Parameters
         ----------
         values: np.array
             value for each element to plot
         timestep: int, optional
-            the timestep that fits with the data to get correct vertical 
+            the timestep that fits with the data to get correct vertical
             positions, default: use static vertical positions
         cmin: real, optional
             lower bound of values to be shown on plot, default:None
@@ -1156,7 +1164,7 @@ class _UnstructuredGeometry:
         title: str, optional
             axes title
         label: str, optional
-            colorbar label 
+            colorbar label
         cmap: matplotlib.cm.cmap, optional
             colormap, default viridis
         figsize: (float, float), optional
@@ -1309,7 +1317,8 @@ class _UnstructuredGeometry:
             if self.is_2d:
                 geometry = self.elements_to_geometry(elements)
             else:
-                geometry = self.elements_to_geometry(elements, node_layers="bottom")
+                geometry = self.elements_to_geometry(
+                    elements, node_layers="bottom")
 
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates
@@ -1396,7 +1405,8 @@ class _UnstructuredGeometry:
             fig_obj.set_clim(vmin, vmax)
             ax.add_collection(fig_obj)
 
-            cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+            cax = make_axes_locatable(ax).append_axes(
+                "right", size="5%", pad=0.05)
             plt.colorbar(fig_obj, label=label, cax=cax)
 
         else:
@@ -1435,7 +1445,8 @@ class _UnstructuredGeometry:
                     shading="gouraud",
                 )
 
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+                cax = make_axes_locatable(ax).append_axes(
+                    "right", size="5%", pad=0.05)
                 plt.colorbar(fig_obj, label=label, cax=cax)
 
             elif plot_type == "contour" or plot_type == "contour_lines":
@@ -1455,7 +1466,8 @@ class _UnstructuredGeometry:
                 fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
 
                 # colorbar
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+                cax = make_axes_locatable(ax).append_axes(
+                    "right", size="5%", pad=0.05)
                 plt.colorbar(fig_obj, label=label, cax=cax)
 
             else:
@@ -1533,85 +1545,75 @@ class _UnstructuredGeometry:
 
         return np.asarray(elem_table), ec, data
 
-    def _get_boundary_polylines(self):
+    def _get_boundary_polylines_uncategorized(self):
+        """Construct closed polylines for all boundary faces        
+        """
         boundary_faces = self._get_boundary_faces()
-        n0 = boundary_faces[:, 0]
-        n1 = boundary_faces[:, 1]
+        face_remains = boundary_faces.copy()
+        polylines = []
+        while face_remains.shape[0] > 1:
+            n0 = face_remains[:, 0]
+            n1 = face_remains[:, 1]
+            polyline = [n0[0], n1[0]]
+            index_to_delete = [0]
+            count = 0
+            end_points = face_remains[0, 1]
+            while True:
+                next_point_index = np.where(n0 == end_points)
+                if next_point_index[0].size != 0:
+                    polyline.append(face_remains[next_point_index[0][0], 1])
+                    index_to_delete.append(next_point_index[0][0])
+                    end_points = polyline[-1]
+                count += 1
+                if count > face_remains.shape[0] or polyline[0] == end_points:
+                    break
 
-        xn = self.geometry2d.node_coordinates[:, 0]
-        yn = self.geometry2d.node_coordinates[:, 1]
+            face_remains = np.delete(face_remains, index_to_delete, axis=0)
+            polylines.append(polyline)
+        return polylines
 
-        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
-        BoundaryPolylines = namedtuple(
-            "BoundaryPolylines",
-            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-        )
+    def _get_boundary_polylines(self):
+        """Get boundary polylines and categorize as inner or outer by 
+        assessing the signed area
+        """
+        polylines = self._get_boundary_polylines_uncategorized()
 
         poly_lines_int = []
         poly_lines_ext = []
-        poly_ids = (-1) * np.ones(len(boundary_faces))
+        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
 
-        poly_id = 0
-        first_face = 0
-
-        while first_face is not None:
-            poly_ids[first_face : (first_face + 2)] = poly_id
-            poly_line = [*boundary_faces[first_face, :]]
-            node_id = poly_line[-1]
-
-            node_start = boundary_faces[first_face, 0]
-
-            area = (xn[node_start] - xn[node_id]) * (yn[node_id] + yn[node_start]) / 2
-            while node_id is not None:
-                fid0 = np.where(n0 == node_id)[0]
-                node_id = None
-                if len(fid0) > 0:
-                    # success: a face starting with node_id was found
-                    face_id = fid0[0]
-                    poly_ids[face_id] = poly_id
-
-                    node_id = n1[face_id]  # end-node on this face
-                    poly_line.append(node_id)
-                    node_start = poly_line[-2]
-                    area = (
-                        area
-                        + (xn[node_start] - xn[node_id])
-                        * (yn[node_id] + yn[node_start])
-                        / 2
-                    )
-                    if node_id == poly_line[0]:
-                        node_id = None
-
-            poly_line = np.asarray(poly_line)
-
-            n_nodes = len(poly_line)
+        for polyline in polylines:
+            xy = self.geometry2d.node_coordinates[polyline, :2]
+            area = (
+                np.dot(xy[:, 1], np.roll(xy[:, 0], 1))
+                - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
+            ) * 0.5
+            poly_line = np.asarray(polyline)
             xy = self.geometry2d.node_coordinates[poly_line, 0:2]
-            poly = Polyline(n_nodes, poly_line, xy, area)
-
+            poly = Polyline(len(polyline), poly_line, xy, area)
             if area > 0:
                 poly_lines_ext.append(poly)
             else:
                 poly_lines_int.append(poly)
 
-            fid0 = np.where(poly_ids == -1)[0]
-            first_face = None
-            if len(fid0) > 0:
-                # more poly_lines to be found
-                first_face = fid0[0]
-                poly_id = poly_id + 1
-
+        BoundaryPolylines = namedtuple(
+            "BoundaryPolylines",
+            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
+        )
         n_ext = len(poly_lines_ext)
         n_int = len(poly_lines_int)
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
 
     def _get_boundary_faces(self):
+        """Construct list of faces
+        """
         element_table = self.geometry2d.element_table
 
         all_faces = []
         for el in element_table:
             ele = [*el, el[0]]
             for j in range(len(el)):
-                all_faces.append(ele[j : j + 2])
+                all_faces.append(ele[j: j + 2])
 
         all_faces = np.asarray(all_faces)
 
@@ -1619,7 +1621,9 @@ class _UnstructuredGeometry:
         _, uf_id, face_counts = np.unique(
             all_faces_sorted, axis=0, return_index=True, return_counts=True
         )
-        bnd_face_id = face_counts == 1  # boundary faces are those appearing only once
+
+        # boundary faces are those appearing only once
+        bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
 
@@ -1655,7 +1659,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
             self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
             or self._type == UnstructuredType.Dfsu3DSigmaZ
         ):
-            out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
+            out.append(
+                f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if self._n_items is not None:
             if self._n_items < 10:
                 out.append("Items:")
@@ -1665,7 +1670,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
                 out.append(f"Number of items: {self._n_items}")
         if self._n_timesteps is not None:
             if self._n_timesteps == 1:
-                out.append(f"Time: time-invariant file (1 step) at {self._start_time}")
+                out.append(
+                    f"Time: time-invariant file (1 step) at {self._start_time}")
             else:
                 out.append(
                     f"Time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s"
@@ -1761,7 +1767,8 @@ class Dfsu(_UnstructuredFile):
             default np.float64, valid options are np.float32, np.float64
         """
         if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            raise ValueError(
+                "Invalid data type. Choose np.float32 or np.float64")
 
         super().__init__()
         self._filename = filename
@@ -1780,9 +1787,11 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
+            self._source, to_dotnet_array(
+                xc), to_dotnet_array(yc), to_dotnet_array(zc),
         )
-        ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
+        ec = np.column_stack(
+            [asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
 
     @property
@@ -1814,13 +1823,6 @@ class Dfsu(_UnstructuredFile):
     def timestep(self):
         """Time step size in seconds"""
         return self._timestep_in_seconds
-
-    # @timestep.setter
-    # def timestep(self, value):
-    #     if value <= 0:
-    #         print(f'timestep must be positive scalar!')
-    #     else:
-    #         self._timestep_in_seconds = value
 
     @property
     def end_time(self):
@@ -1906,9 +1908,11 @@ class Dfsu(_UnstructuredFile):
             # Initialize an empty data block
             if item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(len(time_steps), n_nodes), dtype=self._dtype)
+                data = np.ndarray(
+                    shape=(len(time_steps), n_nodes), dtype=self._dtype)
             else:
-                data = np.ndarray(shape=(len(time_steps), n_elems), dtype=self._dtype)
+                data = np.ndarray(
+                    shape=(len(time_steps), n_elems), dtype=self._dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
@@ -1935,7 +1939,8 @@ class Dfsu(_UnstructuredFile):
 
             t_seconds[i] = itemdata.Time
 
-        time = [self.start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        time = [self.start_time + timedelta(seconds=tsec)
+                for tsec in t_seconds]
 
         dfs.Close()
         return Dataset(data_list, time, items)
@@ -2072,7 +2077,8 @@ class Dfsu(_UnstructuredFile):
 
                 step = time_steps[dfsu_step]
                 for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
+                    itemdata = dfs.ReadItemTimeStep(
+                        item_numbers[item] + 1, step)
                     t2 = itemdata.Time
                     d = to_numpy(itemdata.Data)
                     d[d == deletevalue] = np.nan
@@ -2243,10 +2249,11 @@ class Dfsu(_UnstructuredFile):
             if (not self.is_2d) and (geometry._type == UnstructuredType.Dfsu2D):
                 # redo extraction as 2d:
                 print("will redo extraction in 2d!")
-                geometry = self.elements_to_geometry(elements, node_layers="bottom")
+                geometry = self.elements_to_geometry(
+                    elements, node_layers="bottom")
                 if items[0].name == "Z coordinate":
                     # get rid of z-item
-                    items = items[1 : (n_items + 1)]
+                    items = items[1: (n_items + 1)]
                     n_items = n_items - 1
                     new_data = []
                     for j in range(n_items):
@@ -2263,7 +2270,8 @@ class Dfsu(_UnstructuredFile):
 
         if dfsu_filetype != DfsuFileType.Dfsu2D:
             if items[0].name != "Z coordinate":
-                raise Exception("First item must be z coordinates of the nodes!")
+                raise Exception(
+                    "First item must be z coordinates of the nodes!")
 
         xn = geometry.node_coordinates[:, 0]
         yn = geometry.node_coordinates[:, 1]
@@ -2404,7 +2412,8 @@ class Mesh(_UnstructuredFile):
             code of each node
         """
         if len(codes) != self.n_nodes:
-            raise Exception(f"codes must have length of nodes ({self.n_nodes})")
+            raise Exception(
+                f"codes must have length of nodes ({self.n_nodes})")
         self._codes = codes
         self._valid_codes = None
 
@@ -2453,7 +2462,8 @@ class Mesh(_UnstructuredFile):
                 raise Exception(
                     f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})"
                 )
-            user_defined_labels = dict(zip(self.boundary_codes, boundary_names))
+            user_defined_labels = dict(
+                zip(self.boundary_codes, boundary_names))
 
         fig, ax = plt.subplots()
         for code in self.boundary_codes:
