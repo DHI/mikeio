@@ -189,14 +189,6 @@ class _UnstructuredGeometry:
             self._boundary_polylines = self._get_boundary_polylines()
         return self._boundary_polylines
 
-    _all_boundary_polylines = None
-
-    @property
-    def all_boundary_polylines(self):
-        """Lists of closed polylines defining domain outline"""
-        if self._all_boundary_polylines is None:
-            self._all_boundary_polylines = self._get_all_boundary_polylines()
-        return self._all_boundary_polylines
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
@@ -1492,12 +1484,14 @@ class _UnstructuredGeometry:
         if show_outline:
             linwid = 1.2
             out_col = "0.4"
-            for polyline in self.all_boundary_polylines:
-                xy = self.geometry2d.node_coordinates[polyline, :2]
-                ax.plot(*xy.T, color=out_col, linewidth=linwid)
-                xd, yd = xy[:, 0], xy[:, 1]
+            for exterior in self.boundary_polylines.exteriors:
+                ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
+                xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
                 xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
                 ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
+
+            for interior in self.boundary_polylines.interiors:
+                ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
 
         # set plot limits
         xybuf = 6e-3 * (xmax - xmin)
@@ -1544,7 +1538,7 @@ class _UnstructuredGeometry:
 
         return np.asarray(elem_table), ec, data
 
-    def _get_all_boundary_polylines(self):
+    def _get_boundary_polylines(self):
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
         polylines = []
@@ -1567,78 +1561,28 @@ class _UnstructuredGeometry:
 
             face_remains = np.delete(face_remains, index_to_delete, axis=0)
             polylines.append(polyline)
-        return polylines
-
-    def _get_boundary_polylines(self):
-        boundary_faces = self._get_boundary_faces()
-        n0 = boundary_faces[:, 0]
-        n1 = boundary_faces[:, 1]
-
-        xn = self.geometry2d.node_coordinates[:, 0]
-        yn = self.geometry2d.node_coordinates[:, 1]
-
-        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
-        BoundaryPolylines = namedtuple(
-            "BoundaryPolylines",
-            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-        )
 
         poly_lines_int = []
         poly_lines_ext = []
-        poly_ids = (-1) * np.ones(len(boundary_faces))
-
-        poly_id = 0
-        first_face = 0
-
-        while first_face is not None:
-            poly_ids[first_face : (first_face + 2)] = poly_id
-            poly_line = [*boundary_faces[first_face, :]]
-            node_id = poly_line[-1]
-
-            node_start = boundary_faces[first_face, 0]
-
-            area = (xn[node_start] - xn[node_id]) * (yn[node_id] + yn[node_start]) / 2
-            while node_id is not None:
-                fid0 = np.where(n0 == node_id)[0]
-                node_id = None
-                if len(fid0) > 0:
-                    # success: a face starting with node_id was found
-                    face_id = fid0[0]
-                    poly_ids[face_id] = poly_id
-
-                    node_id = n1[face_id]  # end-node on this face
-                    poly_line.append(node_id)
-                    node_start = poly_line[-2]
-                    area = (
-                        area
-                        + (xn[node_start] - xn[node_id])
-                        * (yn[node_id] + yn[node_start])
-                        / 2
-                    )
-                    if node_id == poly_line[0]:
-                        node_id = None
-
-            poly_line = np.asarray(poly_line)
-
-            n_nodes = len(poly_line)
+        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
+        BoundaryPolylines = namedtuple("BoundaryPolylines",
+                                       ["n_exteriors", "exteriors", "n_interiors", "interiors"])
+        for polyline in polylines:
+            xy = self.geometry2d.node_coordinates[polyline, :2]
+            area = (np.dot(xy[:, 1], np.roll(xy[:, 0], 1)) - np.dot(xy[:, 0], np.roll(xy[:, 1], 1)))*0.5
+            n_nodes = len(polyline)
+            poly_line = np.asarray(polyline)
             xy = self.geometry2d.node_coordinates[poly_line, 0:2]
             poly = Polyline(n_nodes, poly_line, xy, area)
-
             if area > 0:
                 poly_lines_ext.append(poly)
             else:
                 poly_lines_int.append(poly)
 
-            fid0 = np.where(poly_ids == -1)[0]
-            first_face = None
-            if len(fid0) > 0:
-                # more poly_lines to be found
-                first_face = fid0[0]
-                poly_id = poly_id + 1
-
         n_ext = len(poly_lines_ext)
         n_int = len(poly_lines_int)
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
+
 
     def _get_boundary_faces(self):
         element_table = self.geometry2d.element_table
