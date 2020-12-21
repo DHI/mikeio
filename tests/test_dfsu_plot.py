@@ -141,13 +141,3 @@ def test_plot_dfsu_vertical_profile():
     _, ax = plt.subplots()
     dfs.plot_vertical_profile(data, ax=ax)
     assert True
-
-
-def test_plot_mesh_outline_only():
-    import matplotlib.pyplot as plt
-
-    filename = os.path.join("tests", "testdata", "Lake_Ontario_Test_Mesh.mesh")
-    msh = Mesh(filename)
-    _, ax = plt.subplots()
-    msh.plot(plot_type="outline_only", ax=ax)
-    assert True
