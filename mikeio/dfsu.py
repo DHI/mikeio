@@ -1030,7 +1030,7 @@ class _UnstructuredGeometry:
             for ll in local_layers:
                 layerid.append(ll)
 
-        e2_to_e3 = np.array(e2_to_e3)
+        e2_to_e3 = np.array(e2_to_e3, dtype=object)
         index2d = np.array(index2d)
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
