@@ -1570,6 +1570,7 @@ class _UnstructuredGeometry:
 
             face_remains = np.delete(face_remains, index_to_delete, axis=0)
             polylines.append(polyline)
+        return polylines
 
     def _get_boundary_polylines(self):
         """Get boundary polylines and categorize as inner or outer by 
