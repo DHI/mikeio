@@ -169,7 +169,7 @@ def test_read_all_time_steps():
 
 def test_read_all_time_steps_without_progressbar():
 
-    Dfsu.hide_progress = True
+    Dfsu.show_progress = True
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     
@@ -244,6 +244,24 @@ def test_get_element_coords():
 
     ec = dfs.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
+
+
+def test_element_coords_is_inside_nodes():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    nc = dfs.node_coordinates
+    ec = dfs.element_coordinates
+    nc_min = nc.min(axis=0)
+    nc_max = nc.max(axis=0)
+    ec_max = ec.max(axis=0)
+    ec_min = ec.min(axis=0)
+
+    assert ec_max[0] < nc_max[0]
+    assert ec_max[1] < nc_max[1]
+    assert ec_min[0] > nc_min[0]
+    assert ec_min[1] > nc_min[0]
+    
 
 
 def test_contains():

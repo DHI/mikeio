@@ -18,7 +18,7 @@ from .dotnet import (
 from .helpers import safe_length
 from .dutil import find_item
 
-hide_progress = False
+show_progress = False
 
 def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> DfsFile:
     """Clone a dfs file
@@ -125,7 +125,7 @@ def scale(
 
     deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    for timestep in trange(n_time_steps, disable=hide_progress):
+    for timestep in trange(n_time_steps, disable=not show_progress):
         for item in range(n_items):
 
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
@@ -266,7 +266,7 @@ def concat(infilenames: List[str], outfilename: str) -> None:
 
     current_time = datetime(1, 1, 1)  # beginning of time...
 
-    for i, infilename in enumerate(tqdm(infilenames, disable=hide_progress)):
+    for i, infilename in enumerate(tqdm(infilenames, disable=not show_progress)):
 
         dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
         t_axis = dfs_i.FileInfo.TimeAxis
