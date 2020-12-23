@@ -705,8 +705,55 @@ def test_properties_dfsu():
 
     ds = dfs.read()
     assert ds.n_timesteps == 3
+    assert ds.start_time == datetime(1997, 9, 15, 21, 0, 0)
+    assert ds.end_time == datetime(1997, 9, 16, 3, 0, 0)
+    assert ds.timestep == (3 * 3600)
     assert ds.n_items == 3
     assert np.all(ds.shape == (3, 441))
     assert ds.n_elements == 441
     assert ds._first_non_z_item == 1
     assert ds.is_equidistant
+
+
+def test_create_empty_data():
+    ne = 34
+    d = Dataset.create_empty_data(n_elements=ne)
+    assert len(d) == 1
+    assert d[0].shape == (1, ne)
+
+    nt = 100
+    d = Dataset.create_empty_data(n_timesteps=nt, shape=(3, 4, 6))
+    assert len(d) == 1
+    assert d[0].shape == (nt, 3, 4, 6)
+
+    ni = 4
+    d = Dataset.create_empty_data(n_items=ni, n_elements=ne)
+    assert len(d) == ni
+    assert d[-1].shape == (1, ne)
+
+
+def test_create_time():
+
+    t = Dataset.create_time("2018-1-1,2018-1-2", dt=3600)
+    assert t[-1].day == 2
+    assert len(t) == 25
+
+    t = Dataset.create_time("2018-1-1", dt=1800, n_timesteps=48)
+    assert t[-1].hour == 23
+    assert len(t) == 48
+
+    t = Dataset.create_time("2018", dt=7200, end_time="2019")
+    assert len(t) == (365 * 12 + 1)
+
+
+def test_init():
+    n_elements = 45
+    data = n_elements
+    time = "2018-01-01"
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    assert ds.n_timesteps == 1
+    assert ds.start_time == datetime(2018, 1, 1, 0, 0, 0)
+    assert ds.n_elements == n_elements
+    assert ds.items[0].name == "Foo"
