@@ -7,6 +7,7 @@ import warnings
 import numpy as np
 from datetime import datetime, timedelta
 from scipy.spatial import cKDTree
+from tqdm import trange
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -34,14 +35,14 @@ from .custom_exceptions import InvalidGeometry
 
 class UnstructuredType(IntEnum):
     """
-        -1: Mesh: 2D unstructured MIKE mesh
-        0: Dfsu2D: 2D area series
-        1: DfsuVerticalColumn: 1D vertical column
-        2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
-        3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
-        4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
-        5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
-        """
+    -1: Mesh: 2D unstructured MIKE mesh
+    0: Dfsu2D: 2D area series
+    1: DfsuVerticalColumn: 1D vertical column
+    2: DfsuVerticalProfileSigma: 2D vertical slice through a Dfsu3DSigma
+    3: DfsuVerticalProfileSigmaZ: 2D vertical slice through a Dfsu3DSigmaZ
+    4: Dfsu3DSigma: 3D file with sigma coordinates, i.e., a constant number of layers.
+    5: Dfsu3DSigmaZ: 3D file with sigma and Z coordinates, i.e. a varying number of layers.
+    """
 
     Mesh = -1
     Dfsu2D = 0
@@ -101,14 +102,12 @@ class _UnstructuredGeometry:
 
     @property
     def n_nodes(self):
-        """Number of nodes
-        """
+        """Number of nodes"""
         return self._n_nodes
 
     @property
     def node_coordinates(self):
-        """Coordinates (x,y,z) of all nodes
-        """
+        """Coordinates (x,y,z) of all nodes"""
         return self._nc
 
     @property
@@ -117,8 +116,7 @@ class _UnstructuredGeometry:
 
     @property
     def n_elements(self):
-        """Number of elements
-        """
+        """Number of elements"""
         return self._n_elements
 
     @property
@@ -127,22 +125,19 @@ class _UnstructuredGeometry:
 
     @property
     def codes(self):
-        """Node codes of all nodes
-        """
+        """Node codes of all nodes"""
         return self._codes
 
     @property
     def valid_codes(self):
-        """Unique list of node codes
-        """
+        """Unique list of node codes"""
         if self._valid_codes is None:
             self._valid_codes = list(set(self.codes))
         return self._valid_codes
 
     @property
     def boundary_codes(self):
-        """provides a unique list of boundary codes
-        """
+        """provides a unique list of boundary codes"""
         return [code for code in self.valid_codes if code > 0]
 
     @property
@@ -151,8 +146,7 @@ class _UnstructuredGeometry:
 
     @property
     def is_geo(self):
-        """Are coordinates geographical (LONG/LAT)?
-        """
+        """Are coordinates geographical (LONG/LAT)?"""
         return self._projstr == "LONG/LAT"
 
     @property
@@ -161,16 +155,14 @@ class _UnstructuredGeometry:
 
     @property
     def element_table(self):
-        """Element to node connectivity
-        """
+        """Element to node connectivity"""
         if (self._element_table is None) and (self._element_table_dotnet is not None):
             self._element_table = self._get_element_table_from_dotnet()
         return self._element_table
 
     @property
     def max_nodes_per_element(self):
-        """The maximum number of nodes for an element
-        """
+        """The maximum number of nodes for an element"""
         maxnodes = 0
         for local_nodes in self.element_table:
             n = len(local_nodes)
@@ -180,22 +172,19 @@ class _UnstructuredGeometry:
 
     @property
     def is_2d(self):
-        """Type is either mesh or Dfsu2D (2 horizontal dimensions)
-        """
+        """Type is either mesh or Dfsu2D (2 horizontal dimensions)"""
         return self._type <= 0
 
     @property
     def is_tri_only(self):
-        """Does the mesh consist of triangles only?
-        """
+        """Does the mesh consist of triangles only?"""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
     _boundary_polylines = None
 
     @property
     def boundary_polylines(self):
-        """Lists of closed polylines defining domain outline
-        """
+        """Lists of closed polylines defining domain outline"""
         if self._boundary_polylines is None:
             self._boundary_polylines = self._get_boundary_polylines()
         return self._boundary_polylines
@@ -298,7 +287,7 @@ class _UnstructuredGeometry:
         elements : list(int)
             list of element ids
         node_layers : str, optional
-            for 3d files either 'top', 'bottom' layer nodes 
+            for 3d files either 'top', 'bottom' layer nodes
             or 'all' can be selected, by default 'all'
 
         Returns
@@ -365,8 +354,7 @@ class _UnstructuredGeometry:
         return geom
 
     def _get_top_elements_from_coordinates(self, ec=None):
-        """Get list of top element ids based on element coordinates        
-        """
+        """Get list of top element ids based on element coordinates"""
         if ec is None:
             ec = self.element_coordinates
 
@@ -442,7 +430,7 @@ class _UnstructuredGeometry:
         elements : np.array(int)
             array of element ids
         node_layers : str, optional
-            for 3D files 'all', 'bottom' or 'top' nodes 
+            for 3D files 'all', 'bottom' or 'top' nodes
             of each element, by default 'all'
 
         Returns
@@ -463,7 +451,8 @@ class _UnstructuredGeometry:
         else:
             # 3D file
             if (node_layers != "bottom") and (node_layers != "top"):
-                raise Exception("node_layers must be either all, bottom or top")
+                raise Exception(
+                    "node_layers must be either all, bottom or top")
             for j in elements:
                 elem_nodes = self.element_table[j]
                 nn = len(elem_nodes)
@@ -480,8 +469,7 @@ class _UnstructuredGeometry:
 
     @property
     def element_coordinates(self):
-        """Center coordinates of each element
-        """
+        """Center coordinates of each element"""
         if self._ec is None:
             self._ec = self._get_element_coords()
         return self._ec
@@ -564,13 +552,13 @@ class _UnstructuredGeometry:
         dx : float or (float, float), optional
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
-            grid resolution in y-direction            
+            grid resolution in y-direction
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
         buffer : float, optional
             positive to make the area larger, default=0
-            can be set to a small negative value to avoid NaN 
+            can be set to a small negative value to avoid NaN
             values all around the domain.
 
         Returns
@@ -632,7 +620,7 @@ class _UnstructuredGeometry:
         Parameters
         ----------
         data : ndarray or list(ndarray)
-            dfsu data 
+            dfsu data
         elem_ids : ndarray(int)
             n sized array of 1 or more element ids used for interpolation
         weights : ndarray(float), optional
@@ -644,7 +632,7 @@ class _UnstructuredGeometry:
         -------
         ndarray or list(ndarray)
             spatially interped data
-        
+
         Examples
         --------
         >>> ds = dfsu.read()
@@ -704,7 +692,8 @@ class _UnstructuredGeometry:
                         id = elem3d[layer_ids == layer]
                         idx[j] = id
                     except:
-                        print(f"Layer {layer} not present for 2d element {elem2d[j]}")
+                        print(
+                            f"Layer {layer} not present for 2d element {elem2d[j]}")
             else:
                 # sigma layer
                 idx = self.get_layer_elements(layer=layer)[elem2d]
@@ -742,7 +731,7 @@ class _UnstructuredGeometry:
             Search in a specific layer only (3D files only)
             Either z or layer can be provided for a 3D file
         n_nearest : int, optional
-            return this many (horizontally) nearest points for 
+            return this many (horizontally) nearest points for
             each coordinate set, default=1
         return_distances : bool, optional
             should the horizontal distances to each point be returned?
@@ -753,7 +742,7 @@ class _UnstructuredGeometry:
         np.array
             element ids of nearest element(s)
         np.array, optional
-            horizontal distances 
+            horizontal distances
 
         Examples
         --------
@@ -762,7 +751,7 @@ class _UnstructuredGeometry:
         >>> ids = dfs.find_nearest_elements(xy)
         >>> ids = dfs.find_nearest_elements(3, 4, n_nearest=4)
         >>> ids, d = dfs.find_nearest_elements(xy, return_distances=True)
-        
+
         >>> ids = dfs.find_nearest_elements(3, 4, z=-3)
         >>> ids = dfs.find_nearest_elements(3, 4, layer=4)
         >>> ids = dfs.find_nearest_elements(xyz)
@@ -880,8 +869,7 @@ class _UnstructuredGeometry:
     # 3D dfsu stuff
     @property
     def geometry2d(self):
-        """The 2d geometry for a 3d object
-        """
+        """The 2d geometry for a 3d object"""
         if self._n_layers is None:
             return self
         if self._geom2d is None:
@@ -890,8 +878,7 @@ class _UnstructuredGeometry:
 
     @property
     def e2_e3_table(self):
-        """The 2d-to-3d element connectivity table for a 3d object
-        """
+        """The 2d-to-3d element connectivity table for a 3d object"""
         if self._n_layers is None:
             print("Object has no layers: cannot return e2_e3_table")
             return None
@@ -904,10 +891,10 @@ class _UnstructuredGeometry:
 
     @property
     def elem2d_ids(self):
-        """The associated 2d element id for each 3d element
-        """
+        """The associated 2d element id for each 3d element"""
         if self._n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
+            raise InvalidGeometry(
+                "Object has no layers: cannot return elem2d_ids")
             # or return self._2d_ids ??
 
         if self._2d_ids is None:
@@ -919,10 +906,10 @@ class _UnstructuredGeometry:
 
     @property
     def layer_ids(self):
-        """The layer number for each 3d element
-        """
+        """The layer number for each 3d element"""
         if self._n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
+            raise InvalidGeometry(
+                "Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -932,40 +919,36 @@ class _UnstructuredGeometry:
 
     @property
     def n_layers(self):
-        """Maximum number of layers
-        """
+        """Maximum number of layers"""
         return self._n_layers
 
     @property
     def n_sigma_layers(self):
-        """Number of sigma layers
-        """
+        """Number of sigma layers"""
         return self._n_sigma
 
     @property
     def n_z_layers(self):
-        """Maximum number of z-layers
-        """
+        """Maximum number of z-layers"""
         if self._n_layers is None:
             return None
         return self._n_layers - self._n_sigma
 
     @property
     def top_elements(self):
-        """List of 3d element ids of surface layer
-        """
+        """List of 3d element ids of surface layer"""
         if self._n_layers is None:
             print("Object has no layers: cannot find top_elements")
             return None
         elif (self._top_elems is None) and (self._source is not None):
             # note: if subset of elements is selected then this cannot be done!
-            self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
+            self._top_elems = np.array(
+                DfsuUtil.FindTopLayerElements(self._source))
         return self._top_elems
 
     @property
     def n_layers_per_column(self):
-        """List of number of layers for each column
-        """
+        """List of number of layers for each column"""
         if self._n_layers is None:
             print("Object has no layers: cannot find n_layers_per_column")
             return None
@@ -974,14 +957,13 @@ class _UnstructuredGeometry:
             n = len(top_elems)
             tmp = top_elems.copy()
             tmp[0] = -1
-            tmp[1:n] = top_elems[0 : (n - 1)]
+            tmp[1:n] = top_elems[0: (n - 1)]
             self._n_layers_column = top_elems - tmp
         return self._n_layers_column
 
     @property
     def bottom_elements(self):
-        """List of 3d element ids of bottom layer
-        """
+        """List of 3d element ids of bottom layer"""
         if self._n_layers is None:
             print("Object has no layers: cannot find bottom_elements")
             return None
@@ -995,7 +977,7 @@ class _UnstructuredGeometry:
         Parameters
         ----------
         layer : int or list(int)
-            layer between 1 (bottom) and n_layers (top) 
+            layer between 1 (bottom) and n_layers (top)
             (can also be negative counting from 0 at the top layer)
 
         Returns
@@ -1012,11 +994,12 @@ class _UnstructuredGeometry:
 
         n_lay = self.n_layers
         if n_lay is None:
-            raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
+            raise InvalidGeometry(
+                "Object has no layers: cannot get_layer_elements")
 
         if layer < (-n_lay + 1) or layer > n_lay:
             raise Exception(
-                f"Layer {layer} not allowed; must be between -{n_lay-1} and {n_lay}"
+                f"Layer {layer} not allowed; must be between -{n_lay - 1} and {n_lay}"
             )
 
         if layer <= 0:
@@ -1047,7 +1030,7 @@ class _UnstructuredGeometry:
             for ll in local_layers:
                 layerid.append(ll)
 
-        e2_to_e3 = np.array(e2_to_e3)
+        e2_to_e3 = np.array(e2_to_e3, dtype=object)
         index2d = np.array(index2d)
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
@@ -1106,14 +1089,14 @@ class _UnstructuredGeometry:
         Parameters
         ----------
         data : np.array(float)
-            cell-centered data 
+            cell-centered data
         extrapolate : bool, optional
             allow the method to extrapolate, default:True
 
         Returns
         -------
         np.array(float)
-            node-centered data 
+            node-centered data
         """
         nc = self.node_coordinates
         elem_table, ec, data = self._create_tri_only_element_table(data)
@@ -1138,16 +1121,113 @@ class _UnstructuredGeometry:
                     omega[np.where(omega > 2)] = 2
                     omega[np.where(omega < 0)] = 0
             if omega.sum() > 0:
-                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
+                node_centered_data[n] = np.sum(
+                    omega * data[item]) / np.sum(omega)
             else:
                 # We did not succeed using pseudo laplace procedure, use inverse distance instead
                 InvDis = [
                     1 / np.hypot(case[0], case[1])
                     for case in ec[item][:, :2] - nc[n][:2]
                 ]
-                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
+                node_centered_data[n] = np.sum(
+                    InvDis * data[item]) / np.sum(InvDis)
 
         return node_centered_data
+
+    def _Get_2DVertical_elements(self):
+        if (self._type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
+            self._type == DfsuFileType.DfsuVerticalProfileSigma
+        ):
+            elements = [
+                list(self._source.ElementTable[i])
+                for i in range(len(list(self._source.ElementTable)))
+            ]
+            return np.asarray(elements) - 1
+
+    def plot_vertical_profile(
+        self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
+    ):
+        """
+        Plot unstructured vertical profile
+
+        Parameters
+        ----------
+        values: np.array
+            value for each element to plot
+        timestep: int, optional
+            the timestep that fits with the data to get correct vertical
+            positions, default: use static vertical positions
+        cmin: real, optional
+            lower bound of values to be shown on plot, default:None
+        cmax: real, optional
+            upper bound of values to be shown on plot, default:None
+        title: str, optional
+            axes title
+        label: str, optional
+            colorbar label
+        cmap: matplotlib.cm.cmap, optional
+            colormap, default viridis
+        figsize: (float, float), optional
+            specify size of figure
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+
+        Returns
+        -------
+        <matplotlib.axes>
+        """
+        import matplotlib.pyplot as plt
+        from matplotlib.collections import PolyCollection
+
+        nc = self.node_coordinates
+        x_coordinate = np.hypot(nc[:, 0], nc[:, 1])
+        if time_step is None:
+            y_coordinate = nc[:, 2]
+        else:
+            y_coordinate = self.read()[0][time_step, :]
+
+        elements = self._Get_2DVertical_elements()
+
+        # plot in existing or new axes?
+        if "ax" in kwargs:
+            ax = kwargs["ax"]
+        else:
+            figsize = None
+            if "figsize" in kwargs:
+                figsize = kwargs["figsize"]
+            _, ax = plt.subplots(figsize=figsize)
+
+        yz = np.c_[x_coordinate, y_coordinate]
+        verts = yz[elements]
+
+        if "cmap" in kwargs:
+            cmap = kwargs["cmap"]
+        else:
+            cmap = "jet"
+        pc = PolyCollection(verts, cmap=cmap)
+
+        if cmin is None:
+            cmin = np.nanmin(values)
+        if cmax is None:
+            cmax = np.nanmax(values)
+        pc.set_clim(cmin, cmax)
+
+        plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
+        pc.set_array(values)
+
+        if "edge_color" in kwargs:
+            edge_color = kwargs["edge_color"]
+        else:
+            edge_color = None
+        pc.set_edgecolor(edge_color)
+
+        ax.add_collection(pc)
+        ax.autoscale()
+
+        if "title" in kwargs:
+            ax.set_title(kwargs["title"])
+
+        return ax
 
     def plot(
         self,
@@ -1167,7 +1247,7 @@ class _UnstructuredGeometry:
         ax=None,
     ):
         """
-        Plot unstructured data and/or mesh, mesh outline  
+        Plot unstructured data and/or mesh, mesh outline
 
         Parameters
         ----------
@@ -1175,19 +1255,19 @@ class _UnstructuredGeometry:
             value for each element to plot, default bathymetry
         elements: list(int), optional
             list of element ids to be plotted
-        plot_type: str, optional 
-            type of plot: 'patch' (default), 'mesh_only', 'shaded', 
-            'contour', 'contourf' or 'outline_only' 
+        plot_type: str, optional
+            type of plot: 'patch' (default), 'mesh_only', 'shaded',
+            'contour', 'contourf' or 'outline_only'
         title: str, optional
-            axes title 
+            axes title
         label: str, optional
             colorbar label (or title if contour plot)
         cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis            
-        vmin: real, optional 
-            lower bound of values to be shown on plot, default:None 
-        vmax: real, optional 
-            upper bound of values to be shown on plot, default:None 
+            colormap, default viridis
+        vmin: real, optional
+            lower bound of values to be shown on plot, default:None
+        vmax: real, optional
+            upper bound of values to be shown on plot, default:None
         levels: int, list(float), optional
             for contour plots: how many levels, default:10
             or a list of discrete levels e.g. [3.0, 4.5, 6.0]
@@ -1196,8 +1276,8 @@ class _UnstructuredGeometry:
         show_outline: bool, optional
             should domain outline be shown on the plot? default=True
         n_refinements: int, optional
-            for 'shaded' and 'contour' plots (and if show_mesh=False) 
-            do this number of mesh refinements for smoother plotting  
+            for 'shaded' and 'contour' plots (and if show_mesh=False)
+            do this number of mesh refinements for smoother plotting
         figsize: (float, float), optional
             specify size of figure
         ax: matplotlib.axes, optional
@@ -1205,7 +1285,7 @@ class _UnstructuredGeometry:
 
         Returns
         -------
-        <matplotlib.axes>          
+        <matplotlib.axes>
         """
 
         import matplotlib.cm as cm
@@ -1237,7 +1317,8 @@ class _UnstructuredGeometry:
             if self.is_2d:
                 geometry = self.elements_to_geometry(elements)
             else:
-                geometry = self.elements_to_geometry(elements, node_layers="bottom")
+                geometry = self.elements_to_geometry(
+                    elements, node_layers="bottom")
 
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates
@@ -1324,7 +1405,8 @@ class _UnstructuredGeometry:
             fig_obj.set_clim(vmin, vmax)
             ax.add_collection(fig_obj)
 
-            cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+            cax = make_axes_locatable(ax).append_axes(
+                "right", size="5%", pad=0.05)
             plt.colorbar(fig_obj, label=label, cax=cax)
 
         else:
@@ -1363,7 +1445,8 @@ class _UnstructuredGeometry:
                     shading="gouraud",
                 )
 
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+                cax = make_axes_locatable(ax).append_axes(
+                    "right", size="5%", pad=0.05)
                 plt.colorbar(fig_obj, label=label, cax=cax)
 
             elif plot_type == "contour" or plot_type == "contour_lines":
@@ -1383,7 +1466,8 @@ class _UnstructuredGeometry:
                 fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
 
                 # colorbar
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+                cax = make_axes_locatable(ax).append_axes(
+                    "right", size="5%", pad=0.05)
                 plt.colorbar(fig_obj, label=label, cax=cax)
 
             else:
@@ -1427,8 +1511,7 @@ class _UnstructuredGeometry:
         return ax
 
     def _create_tri_only_element_table(self, data=None, geometry=None):
-        """Convert quad/tri mesh to pure tri-mesh
-        """
+        """Convert quad/tri mesh to pure tri-mesh"""
         if geometry is None:
             geometry = self
 
@@ -1462,100 +1545,92 @@ class _UnstructuredGeometry:
 
         return np.asarray(elem_table), ec, data
 
-    def _get_boundary_polylines(self):
+    def _get_boundary_polylines_uncategorized(self):
+        """Construct closed polylines for all boundary faces        
+        """
         boundary_faces = self._get_boundary_faces()
-        n0 = boundary_faces[:, 0]
-        n1 = boundary_faces[:, 1]
+        face_remains = boundary_faces.copy()
+        polylines = []
+        while face_remains.shape[0] > 1:
+            n0 = face_remains[:, 0]
+            n1 = face_remains[:, 1]
+            polyline = [n0[0], n1[0]]
+            index_to_delete = [0]
+            count = 0
+            end_points = face_remains[0, 1]
+            while True:
+                next_point_index = np.where(n0 == end_points)
+                if next_point_index[0].size != 0:
+                    polyline.append(face_remains[next_point_index[0][0], 1])
+                    index_to_delete.append(next_point_index[0][0])
+                    end_points = polyline[-1]
+                count += 1
+                if count > face_remains.shape[0] or polyline[0] == end_points:
+                    break
 
-        xn = self.geometry2d.node_coordinates[:, 0]
-        yn = self.geometry2d.node_coordinates[:, 1]
+            face_remains = np.delete(face_remains, index_to_delete, axis=0)
+            polylines.append(polyline)
+        return polylines
 
-        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
-        BoundaryPolylines = namedtuple(
-            "BoundaryPolylines",
-            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-        )
+    def _get_boundary_polylines(self):
+        """Get boundary polylines and categorize as inner or outer by 
+        assessing the signed area
+        """
+        polylines = self._get_boundary_polylines_uncategorized()
 
         poly_lines_int = []
         poly_lines_ext = []
-        poly_ids = (-1) * np.ones(len(boundary_faces))
+        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
 
-        poly_id = 0
-        first_face = 0
-
-        while first_face is not None:
-            poly_ids[first_face : (first_face + 2)] = poly_id
-            poly_line = [*boundary_faces[first_face, :]]
-            node_id = poly_line[-1]
-
-            node_start = boundary_faces[first_face, 0]
-
-            area = (xn[node_start] - xn[node_id]) * (yn[node_id] + yn[node_start]) / 2
-            while node_id is not None:
-                fid0 = np.where(n0 == node_id)[0]
-                node_id = None
-                if len(fid0) > 0:
-                    # success: a face starting with node_id was found
-                    face_id = fid0[0]
-                    poly_ids[face_id] = poly_id
-
-                    node_id = n1[face_id]  # end-node on this face
-                    poly_line.append(node_id)
-                    node_start = poly_line[-2]
-                    area = (
-                        area
-                        + (xn[node_start] - xn[node_id])
-                        * (yn[node_id] + yn[node_start])
-                        / 2
-                    )
-                    if node_id == poly_line[0]:
-                        node_id = None
-
-            poly_line = np.asarray(poly_line)
-
-            n_nodes = len(poly_line)
+        for polyline in polylines:
+            xy = self.geometry2d.node_coordinates[polyline, :2]
+            area = (
+                np.dot(xy[:, 1], np.roll(xy[:, 0], 1))
+                - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
+            ) * 0.5
+            poly_line = np.asarray(polyline)
             xy = self.geometry2d.node_coordinates[poly_line, 0:2]
-            poly = Polyline(n_nodes, poly_line, xy, area)
-
+            poly = Polyline(len(polyline), poly_line, xy, area)
             if area > 0:
                 poly_lines_ext.append(poly)
             else:
                 poly_lines_int.append(poly)
 
-            fid0 = np.where(poly_ids == -1)[0]
-            first_face = None
-            if len(fid0) > 0:
-                # more poly_lines to be found
-                first_face = fid0[0]
-                poly_id = poly_id + 1
-
+        BoundaryPolylines = namedtuple(
+            "BoundaryPolylines",
+            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
+        )
         n_ext = len(poly_lines_ext)
         n_int = len(poly_lines_int)
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
 
     def _get_boundary_faces(self):
+        """Construct list of faces
+        """
         element_table = self.geometry2d.element_table
 
         all_faces = []
         for el in element_table:
             ele = [*el, el[0]]
             for j in range(len(el)):
-                all_faces.append(ele[j : j + 2])
-            
+                all_faces.append(ele[j: j + 2])
+
         all_faces = np.asarray(all_faces)
 
         all_faces_sorted = np.sort(all_faces, axis=1)
         _, uf_id, face_counts = np.unique(
             all_faces_sorted, axis=0, return_index=True, return_counts=True
         )
-        bnd_face_id = face_counts == 1  # boundary faces are those appearing only once
+
+        # boundary faces are those appearing only once
+        bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
     """
     _UnstructuredFile based on _UnstructuredGeometry and base class for Mesh and Dfsu
-    knows dotnet file, items and timesteps and reads file header 
+    knows dotnet file, items and timesteps and reads file header
     """
 
     _filename = None
@@ -1584,7 +1659,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
             self._type == UnstructuredType.DfsuVerticalProfileSigmaZ
             or self._type == UnstructuredType.Dfsu3DSigmaZ
         ):
-            out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
+            out.append(
+                f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if self._n_items is not None:
             if self._n_items < 10:
                 out.append("Items:")
@@ -1594,7 +1670,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
                 out.append(f"Number of items: {self._n_items}")
         if self._n_timesteps is not None:
             if self._n_timesteps == 1:
-                out.append(f"Time: time-invariant file (1 step) at {self._start_time}")
+                out.append(
+                    f"Time: time-invariant file (1 step) at {self._start_time}")
             else:
                 out.append(
                     f"Time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s"
@@ -1690,7 +1767,8 @@ class Dfsu(_UnstructuredFile):
             default np.float64, valid options are np.float32, np.float64
         """
         if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            raise ValueError(
+                "Invalid data type. Choose np.float32 or np.float64")
 
         super().__init__()
         self._filename = filename
@@ -1709,58 +1787,46 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
+            self._source, to_dotnet_array(
+                xc), to_dotnet_array(yc), to_dotnet_array(zc),
         )
-        ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
+        ec = np.column_stack(
+            [asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
 
     @property
     def deletevalue(self):
-        """File delete value
-        """
+        """File delete value"""
         return self._deletevalue
 
     @property
     def n_items(self):
-        """Number of items
-        """
+        """Number of items"""
         return self._n_items
 
     @property
     def items(self):
-        """List of items
-        """
+        """List of items"""
         return self._items
 
     @property
     def start_time(self):
-        """File start time
-        """
+        """File start time"""
         return self._start_time
 
     @property
     def n_timesteps(self):
-        """Number of time steps
-        """
+        """Number of time steps"""
         return self._n_timesteps
 
     @property
     def timestep(self):
-        """Time step size in seconds
-        """
+        """Time step size in seconds"""
         return self._timestep_in_seconds
-
-    # @timestep.setter
-    # def timestep(self, value):
-    #     if value <= 0:
-    #         print(f'timestep must be positive scalar!')
-    #     else:
-    #         self._timestep_in_seconds = value
 
     @property
     def end_time(self):
-        """File end time
-        """
+        """File end time"""
         return self.start_time + timedelta(
             seconds=((self.n_timesteps - 1) * self.timestep)
         )
@@ -1773,10 +1839,10 @@ class Dfsu(_UnstructuredFile):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: int or list[int], optional
+        time_steps: str, int or list[int], optional
             Read only selected time_steps
         elements: list[int], optional
-            Read only selected element ids   
+            Read only selected element ids
 
         Returns
         -------
@@ -1842,14 +1908,16 @@ class Dfsu(_UnstructuredFile):
             # Initialize an empty data block
             if item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(len(time_steps), n_nodes), dtype=self._dtype)
+                data = np.ndarray(
+                    shape=(len(time_steps), n_nodes), dtype=self._dtype)
             else:
-                data = np.ndarray(shape=(len(time_steps), n_elems), dtype=self._dtype)
+                data = np.ndarray(
+                    shape=(len(time_steps), n_elems), dtype=self._dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(len(time_steps), dtype=float)
 
-        for i in range(len(time_steps)):
+        for i in trange(len(time_steps)):
             it = time_steps[i]
             for item in range(n_items):
 
@@ -1871,7 +1939,8 @@ class Dfsu(_UnstructuredFile):
 
             t_seconds[i] = itemdata.Time
 
-        time = [self.start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        time = [self.start_time + timedelta(seconds=tsec)
+                for tsec in t_seconds]
 
         dfs.Close()
         return Dataset(data_list, time, items)
@@ -1885,8 +1954,8 @@ class Dfsu(_UnstructuredFile):
         track: pandas.DataFrame
             with DatetimeIndex and (x, y) of track points as first two columns
             x,y coordinates must be in same coordinate system as dfsu
-        track: str 
-            filename of csv or dfs0 file containing t,x,y        
+        track: str
+            filename of csv or dfs0 file containing t,x,y
         items: list[int] or list[str], optional
             Extract only selected items, by number (0-based), or by name
         method: str, optional
@@ -1994,7 +2063,7 @@ class Dfsu(_UnstructuredFile):
             return step >= self.n_timesteps
 
         # loop over track points
-        for i in range(i_start, i_end + 1):
+        for i in trange(i_start, i_end + 1):
             t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
@@ -2008,7 +2077,8 @@ class Dfsu(_UnstructuredFile):
 
                 step = time_steps[dfsu_step]
                 for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
+                    itemdata = dfs.ReadItemTimeStep(
+                        item_numbers[item] + 1, step)
                     t2 = itemdata.Time
                     d = to_numpy(itemdata.Data)
                     d[d == deletevalue] = np.nan
@@ -2051,36 +2121,36 @@ class Dfsu(_UnstructuredFile):
     ):
         """Write the header of a new dfsu file
 
-            Parameters
-            -----------
-            filename: str
-                full path to the new dfsu file
-            start_time: datetime, optional
-                start datetime, default is datetime.now()
-            dt: float, optional
-                The time step (in seconds)
-            items: list[ItemInfo], optional
-            elements: list[int], optional
-                write only these element ids to file
-            title: str
-                title of the dfsu file. Default is blank.
+        Parameters
+        -----------
+        filename: str
+            full path to the new dfsu file
+        start_time: datetime, optional
+            start datetime, default is datetime.now()
+        dt: float, optional
+            The time step (in seconds)
+        items: list[ItemInfo], optional
+        elements: list[int], optional
+            write only these element ids to file
+        title: str
+            title of the dfsu file. Default is blank.
 
-            Examples
-            --------
-            >>> msh = Mesh("foo.mesh")
-            >>> n_elements = msh.n_elements
-            >>> dfs = Dfsu(meshfilename)
-            >>> nt = 1000
-            >>> n_items = 10
-            >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-            >>> with dfs.write_header(outfilename, items=items) as f:
-            >>>     for i in range(1, nt):
-            >>>         data = []
-            >>>         for i in range(n_items):
-            >>>             d = np.random.random((1, n_elements))
-            >>>             data.append(d)
-            >>>             f.append(data)
-            """
+        Examples
+        --------
+        >>> msh = Mesh("foo.mesh")
+        >>> n_elements = msh.n_elements
+        >>> dfs = Dfsu(meshfilename)
+        >>> nt = 1000
+        >>> n_items = 10
+        >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+        >>> with dfs.write_header(outfilename, items=items) as f:
+        >>>     for i in range(1, nt):
+        >>>         data = []
+        >>>         for i in range(n_items):
+        >>>             d = np.random.random((1, n_elements))
+        >>>             data.append(d)
+        >>>             f.append(data)
+        """
 
         return self.write(
             filename=filename,
@@ -2164,7 +2234,7 @@ class Dfsu(_UnstructuredFile):
                 raise ValueError(
                     "Number of items unknown. Add (..., items=[ItemInfo(...)]"
                 )
-            items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+            items = [ItemInfo(f"Item {i + 1}") for i in range(n_items)]
 
         if title is None:
             title = ""
@@ -2179,10 +2249,11 @@ class Dfsu(_UnstructuredFile):
             if (not self.is_2d) and (geometry._type == UnstructuredType.Dfsu2D):
                 # redo extraction as 2d:
                 print("will redo extraction in 2d!")
-                geometry = self.elements_to_geometry(elements, node_layers="bottom")
+                geometry = self.elements_to_geometry(
+                    elements, node_layers="bottom")
                 if items[0].name == "Z coordinate":
                     # get rid of z-item
-                    items = items[1 : (n_items + 1)]
+                    items = items[1: (n_items + 1)]
                     n_items = n_items - 1
                     new_data = []
                     for j in range(n_items):
@@ -2199,7 +2270,8 @@ class Dfsu(_UnstructuredFile):
 
         if dfsu_filetype != DfsuFileType.Dfsu2D:
             if items[0].name != "Z coordinate":
-                raise Exception("First item must be z coordinates of the nodes!")
+                raise Exception(
+                    "First item must be z coordinates of the nodes!")
 
         xn = geometry.node_coordinates[:, 0]
         yn = geometry.node_coordinates[:, 1]
@@ -2245,7 +2317,7 @@ class Dfsu(_UnstructuredFile):
 
         try:
             # Add data for all item-timesteps, copying from source
-            for i in range(n_time_steps):
+            for i in trange(n_time_steps):
                 for item in range(n_items):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
@@ -2272,7 +2344,7 @@ class Dfsu(_UnstructuredFile):
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
         n_time_steps = np.shape(data[0])[0]
-        for i in range(n_time_steps):
+        for i in trange(n_time_steps):
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
@@ -2340,7 +2412,8 @@ class Mesh(_UnstructuredFile):
             code of each node
         """
         if len(codes) != self.n_nodes:
-            raise Exception(f"codes must have length of nodes ({self.n_nodes})")
+            raise Exception(
+                f"codes must have length of nodes ({self.n_nodes})")
         self._codes = codes
         self._valid_codes = None
 
@@ -2389,7 +2462,8 @@ class Mesh(_UnstructuredFile):
                 raise Exception(
                     f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})"
                 )
-            user_defined_labels = dict(zip(self.boundary_codes, boundary_names))
+            user_defined_labels = dict(
+                zip(self.boundary_codes, boundary_names))
 
         fig, ax = plt.subplots()
         for code in self.boundary_codes:

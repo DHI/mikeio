@@ -19,23 +19,23 @@ from platform import architecture
 # Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
-__version__ = '0.6.dev1'
+__version__ = '0.6.dev2'
+
+if "64" not in architecture()[0]:
+    raise Exception("This library has not been tested for a 32 bit system.")
 
 mike_bin_path = os.path.join(os.path.dirname(__file__), "bin")
 sys.path.append(mike_bin_path)
 
+clr.AddReference("System")
+clr.AddReference("System.Runtime")
+clr.AddReference("System.Runtime.InteropServices")
 clr.AddReference("DHI.Generic.MikeZero.DFS")
 clr.AddReference("DHI.Generic.MikeZero.EUM")
 clr.AddReference("DHI.PFS")
 clr.AddReference("DHI.Projections")
-clr.AddReference("DHI.Mike1D.ResultDataAccess")
 clr.AddReference("DHI.Mike1D.Generic")
-clr.AddReference("System")
-clr.AddReference("System.Runtime.InteropServices")
-clr.AddReference("System.Runtime")
-
-if "64" not in architecture()[0]:
-    raise Exception("This library has not been tested for a 32 bit system.")
+clr.AddReference("DHI.Mike1D.ResultDataAccess")
 
 from .dfs0 import Dfs0
 from .dfs1 import Dfs1
