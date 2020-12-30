@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from datetime import datetime, timedelta
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
@@ -26,9 +27,25 @@ from .dfs import _Dfs123
 class Dfs3(_Dfs123):
     def __init__(self, filename=None):
         super(Dfs3, self).__init__(filename)
+        if filename:
+            self._read_dfs3_header()
+
+    def _read_dfs3_header(self):
+        if not os.path.isfile(self._filename):
+            raise Exception(f"file {self._filename} does not exist!")
+
+        self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
+        self.source = self._dfs
+        self._dx = self._dfs.SpatialAxis.Dx
+        self._dy = self._dfs.SpatialAxis.Dy
+        self._dz = self._dfs.SpatialAxis.Dz
+        self._nx = self._dfs.SpatialAxis.XCount
+        self._ny = self._dfs.SpatialAxis.YCount
+        self._nz = self._dfs.SpatialAxis.XCount
+        self._read_header()
 
     def __calculate_index(self, nx, ny, nz, x, y, z):
-        """ Calculates the position in the dfs3 data array based on the
+        """Calculates the position in the dfs3 data array based on the
         number of x,y,z layers (nx,ny,nz) at the specified x,y,z position.
 
         Error checking is done here to see if the x,y,z coordinates are out of range.
@@ -43,7 +60,7 @@ class Dfs3(_Dfs123):
         return y * nx + x + z * nx * ny
 
     def grid_coordinates(self, dfs3file):
-        """ Function: Returns the Grid information
+        """Function: Returns the Grid information
         Usage:
             [X0, Y0, dx, dy, nx, ny, nz, nt] = grid_coordinates( filename )
         dfs3file
@@ -87,7 +104,7 @@ class Dfs3(_Dfs123):
         layers=None,
         conservative=True,
     ):
-        """ Function: Read data from a dfs3 file within the locations chosen
+        """Function: Read data from a dfs3 file within the locations chosen
 
 
         Usage:
@@ -182,7 +199,7 @@ class Dfs3(_Dfs123):
         return data
 
     def read(self, item_numbers=None, layers=None, coordinates=None):
-        """ Function: Read data from a dfs3 file
+        """Function: Read data from a dfs3 file
 
         Usage:
             [data,time,name] = read( filename, item_numbers, layers=None, coordinates=None)
@@ -345,7 +362,7 @@ class Dfs3(_Dfs123):
             length of each grid in the y direction (projection units)
         dz: float, optional
             length of each grid in the z direction (projection units)
-        
+
         title: str, optional
             title of the dfs2 file. Default is blank.
         """
@@ -378,7 +395,16 @@ class Dfs3(_Dfs123):
         )
         builder.SetSpatialAxis(
             factory.CreateAxisEqD3(
-                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy, number_z, 0, dz,
+                eumUnit.eumUmeter,
+                number_x,
+                x0,
+                dx,
+                number_y,
+                y0,
+                dy,
+                number_z,
+                0,
+                dz,
             )
         )
 
@@ -409,3 +435,21 @@ class Dfs3(_Dfs123):
 
         dfs.Close()
 
+    @property
+    def dx(self):
+        """Step size in x direction"""
+        return self._dx
+
+    @property
+    def dy(self):
+        """Step size in y direction"""
+        return self._dy
+
+    @property
+    def dz(self):
+        """Step size in y direction"""
+        return self._dz
+
+    @property
+    def shape(self):
+        return (self._n_timesteps, self._ny, self._nx, self._nz)
