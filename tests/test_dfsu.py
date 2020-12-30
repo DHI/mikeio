@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 import pytest
+from pytest import approx
 
 from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
@@ -167,6 +168,21 @@ def test_read_all_time_steps():
     assert len(ds.time) == 9
     assert ds.data[0].shape[0] == 9
 
+def test_read_all_time_steps_without_progressbar():
+
+    Dfsu.show_progress = True
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    
+    dfs = Dfsu(filename)
+
+
+    ds = dfs.read(items=[0, 3])
+
+    assert len(ds.time) == 9
+    assert ds.data[0].shape[0] == 9
+
+
 
 def test_read_single_time_step():
 
@@ -229,6 +245,24 @@ def test_get_element_coords():
 
     ec = dfs.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
+
+
+def test_element_coords_is_inside_nodes():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    nc = dfs.node_coordinates
+    ec = dfs.element_coordinates
+    nc_min = nc.min(axis=0)
+    nc_max = nc.max(axis=0)
+    ec_max = ec.max(axis=0)
+    ec_min = ec.min(axis=0)
+
+    assert ec_max[0] < nc_max[0]
+    assert ec_max[1] < nc_max[1]
+    assert ec_min[0] > nc_min[0]
+    assert ec_min[1] > nc_min[0]
+    
 
 
 def test_contains():
@@ -1069,13 +1103,13 @@ def test_extract_track():
     df = pd.read_csv(csv_file, index_col=0, parse_dates=True,)
     track = dfs.extract_track(df)
 
-    assert track.data[2][23] == 3.6284972794399653
+    assert track.data[2][23] == approx(3.6284972794399653)
     assert sum(np.isnan(track.data[2])) == 26
     assert np.all(track.data[1] == df.latitude.values)
 
     items = ["Sign. Wave Height", "Wind speed"]
     track2 = dfs.extract_track(csv_file, items=items)
-    assert track2.data[2][23] == 3.6284972794399653
+    assert track2.data[2][23] == approx(3.6284972794399653)
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
-    assert track3.data[2][23] == 3.6865002370663547
+    assert track3.data[2][23] == approx(3.6865002370663547)
