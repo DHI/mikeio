@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 import pytest
+from pytest import approx
 
 from mikeio import Dfsu, Mesh, Dfs0
 from mikeio.eum import ItemInfo
@@ -1102,13 +1103,13 @@ def test_extract_track():
     df = pd.read_csv(csv_file, index_col=0, parse_dates=True,)
     track = dfs.extract_track(df)
 
-    assert track.data[2][23] == 3.6284972794399653
+    assert track.data[2][23] == approx(3.6284972794399653)
     assert sum(np.isnan(track.data[2])) == 26
     assert np.all(track.data[1] == df.latitude.values)
 
     items = ["Sign. Wave Height", "Wind speed"]
     track2 = dfs.extract_track(csv_file, items=items)
-    assert track2.data[2][23] == 3.6284972794399653
+    assert track2.data[2][23] == approx(3.6284972794399653)
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
-    assert track3.data[2][23] == 3.6865002370663547
+    assert track3.data[2][23] == approx(3.6865002370663547)
