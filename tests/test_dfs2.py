@@ -420,3 +420,42 @@ def test_write_default_datatype(tmpdir):
 
     newdfs = Dfs2(filename)
     assert newdfs.items[0].data_value_type == 0
+
+
+def test_write_NonEqCalendarAxis(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+    data = []
+    d = np.random.random([6, 5, 10])
+    d[1, :, :] = np.nan
+    d[2, :, :] = 0
+    d[3, 3:, :] = 2
+    d[4, :, 4:] = 5
+    data.append(d)
+    east = 308124
+    north = 6098907
+    orientation = 0
+    dateTime = [datetime.datetime(2012, 1, 1), datetime.datetime(2012, 1, 4),
+                datetime.datetime(2012, 1, 5), datetime.datetime(2012, 1, 10),
+                datetime.datetime(2012, 1, 15), datetime.datetime(2012, 1, 28)]
+    dfs = Dfs2()
+    dfs.write(
+        filename=filename,
+        data=data,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        dateTimes=dateTime,
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+        coordinate=["UTM-33", east, north, orientation],
+        dx=100,
+        dy=200,
+        title="test dfs2",
+    )
+
+    newdfs = Dfs2(filename)
+    assert newdfs.projection_string == "UTM-33"
+    assert pytest.approx(newdfs.longitude) == 12.0
+    assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.dx == 100.0
+    assert newdfs.dy == 200.0
+    assert newdfs._is_equidistant == False

@@ -58,6 +58,8 @@ class Dfs2(_Dfs123):
         self._dy = self._dfs.SpatialAxis.Dy
         self._nx = self._dfs.SpatialAxis.XCount
         self._ny = self._dfs.SpatialAxis.YCount
+        if self._dfs.FileInfo.TimeAxis.TimeAxisType == 4:
+            self._is_equidistant = False
 
         self._read_header()
 
@@ -108,6 +110,7 @@ class Dfs2(_Dfs123):
         filename,
         data,
         start_time=None,
+        dateTimes=None,
         dt=None,
         items=None,
         dx=None,
@@ -153,7 +156,7 @@ class Dfs2(_Dfs123):
         if dy:
             self._dy = dy
 
-        self._write(filename, data, start_time, dt, items, coordinate, title)
+        self._write(filename, data, start_time, dateTimes, dt, items, coordinate, title)
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(

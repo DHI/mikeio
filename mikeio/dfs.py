@@ -122,7 +122,7 @@ class _Dfs123:
 
         dfs.Close()
 
-    def _write(self, filename, data, start_time, dt, items, coordinate, title):
+    def _write(self, filename, data, start_time, dateTimes, dt, items, coordinate, title):
         self._write_handle_common_arguments(
             title, data, items, coordinate, start_time, dt
         )
@@ -147,6 +147,8 @@ class _Dfs123:
 
             if not all(np.shape(d)[2] == self._nx for d in data):
                 raise DataDimensionMismatch()
+        if dateTimes:
+            self._is_equidistant = False
 
         dfs = self._setup_header(filename)
 
@@ -166,8 +168,13 @@ class _Dfs123:
                     d = d.reshape(self.shape[1:])
                     d = np.flipud(d)
                     darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+                if self._is_equidistant:
+                    dfs.WriteItemTimeStepNext(0, darray)
+                else:
+                    t = dateTimes[i]
+                    relt = (t - start_time).total_seconds()
+                    dfs.WriteItemTimeStepNext(relt, darray)
 
-                dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
 
