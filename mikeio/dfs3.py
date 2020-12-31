@@ -30,6 +30,21 @@ class Dfs3(_Dfs123):
         if filename:
             self._read_dfs3_header()
 
+    def get_bottom_values(self):
+        bottom2D = []
+        data = self.read()
+        bottom_data = np.nan * np.ones(shape=(self.shape[0],) + self.shape[2:])
+        for item_number in range(self.n_items):
+            b = np.nan * np.ones(self.shape[2:])
+            for ts in range(self.n_timesteps):
+                d = data.data[item_number][ts, ...]
+                for layer in range(d.shape[0]):  # going from surface to bottom
+                    y = d[layer, ...]
+                    b[~np.isnan(y)] = y[~np.isnan(y)]
+                bottom_data[ts, ...] = np.flipud(b)
+            bottom2D.append(bottom_data)
+        return  bottom2D
+
     def _read_dfs3_header(self):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
@@ -41,7 +56,7 @@ class Dfs3(_Dfs123):
         self._dz = self._dfs.SpatialAxis.Dz
         self._nx = self._dfs.SpatialAxis.XCount
         self._ny = self._dfs.SpatialAxis.YCount
-        self._nz = self._dfs.SpatialAxis.XCount
+        self._nz = self._dfs.SpatialAxis.ZCount
         self._read_header()
 
     def __calculate_index(self, nx, ny, nz, x, y, z):
@@ -452,4 +467,4 @@ class Dfs3(_Dfs123):
 
     @property
     def shape(self):
-        return (self._n_timesteps, self._ny, self._nx, self._nz)
+        return (self._n_timesteps, self._nz, self._ny, self._nx)
