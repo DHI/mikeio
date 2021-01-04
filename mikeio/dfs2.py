@@ -1,4 +1,5 @@
 import os
+import warnings
 from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder, Dfs2Reprojector
@@ -63,7 +64,11 @@ class Dfs2(_Dfs123):
 
         self._read_header()
 
-    def find_nearest_element(
+    def find_nearest_element(self, lon, lat):
+        warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
+        return self.find_nearest_elements(lon, lat)
+
+    def find_nearest_elements(
         self, lon, lat,
     ):
         """Find index of closest element
