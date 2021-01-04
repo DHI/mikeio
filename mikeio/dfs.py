@@ -149,6 +149,7 @@ class _Dfs123:
                 raise DataDimensionMismatch()
         if dateTimes:
             self._is_equidistant = False
+            start_time = dateTimes[0]
 
         dfs = self._setup_header(filename)
 
