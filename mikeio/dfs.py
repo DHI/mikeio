@@ -150,6 +150,7 @@ class _Dfs123:
         if dateTimes:
             self._is_equidistant = False
             start_time = dateTimes[0]
+            self._start_time = start_time
 
         dfs = self._setup_header(filename)
 
