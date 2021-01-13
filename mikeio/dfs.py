@@ -113,6 +113,7 @@ class _Dfs123:
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
             )  # TODO handle other timeunits
+               # TODO to get the EndTime
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._projstr = dfs.FileInfo.Projection.WKTString
         self._longitude = dfs.FileInfo.Projection.Longitude
@@ -122,7 +123,7 @@ class _Dfs123:
 
         dfs.Close()
 
-    def _write(self, filename, data, start_time, dateTimes, dt, items, coordinate, title):
+    def _write(self, filename, data, start_time, dt, datetimes, items, coordinate, title):
         self._write_handle_common_arguments(
             title, data, items, coordinate, start_time, dt
         )
@@ -147,9 +148,9 @@ class _Dfs123:
 
             if not all(np.shape(d)[2] == self._nx for d in data):
                 raise DataDimensionMismatch()
-        if dateTimes:
+        if datetimes:
             self._is_equidistant = False
-            start_time = dateTimes[0]
+            start_time = datetimes[0]
             self._start_time = start_time
 
         dfs = self._setup_header(filename)
@@ -173,7 +174,7 @@ class _Dfs123:
                 if self._is_equidistant:
                     dfs.WriteItemTimeStepNext(0, darray)
                 else:
-                    t = dateTimes[i]
+                    t = datetimes[i]
                     relt = (t - start_time).total_seconds()
                     dfs.WriteItemTimeStepNext(relt, darray)
 

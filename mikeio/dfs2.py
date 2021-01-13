@@ -115,8 +115,8 @@ class Dfs2(_Dfs123):
         filename,
         data,
         start_time=None,
-        dateTimes=None,
         dt=None,
+        datetimes=None,
         items=None,
         dx=None,
         dy=None,
@@ -137,6 +137,8 @@ class Dfs2(_Dfs123):
             start date of type datetime.
         dt: float, optional
             The time step in seconds.
+        dt: datetime
+            The list of datetimes for the case of nonEquadistant Timeaxis.
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         dx: float, optional
@@ -161,7 +163,7 @@ class Dfs2(_Dfs123):
         if dy:
             self._dy = dy
 
-        self._write(filename, data, start_time, dateTimes, dt, items, coordinate, title)
+        self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(

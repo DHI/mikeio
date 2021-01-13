@@ -444,7 +444,7 @@ def test_write_NonEqCalendarAxis(tmpdir):
         data=data,
         # start_time=datetime.datetime(2012, 1, 1),
         # dt=12,
-        dateTimes=dateTime,
+        datetimes=dateTime,
         items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
         coordinate=["UTM-33", east, north, orientation],
         dx=100,

@@ -60,8 +60,8 @@ class Dfs1(_Dfs123):
         filename,
         data,
         start_time=None,
-        dateTimes = None,
         dt=None,
+        datetimes=None,
         items=None,
         dx=1,
         x0=0,
@@ -81,6 +81,8 @@ class Dfs1(_Dfs123):
             start datetime
         dt: float
             The time step in seconds.
+        dt: datetime
+            The list of datetimes for the case of nonEquadistant Timeaxis.
         items: list[ItemInfo], optional
             List of ItemInfo (e.g. Water Level).
         coordinate:
@@ -97,7 +99,7 @@ class Dfs1(_Dfs123):
 
         self._builder = Dfs1Builder.Create(title, "mikeio", 0)
         self._dx = dx
-        self._write(filename, data, start_time, dateTimes, dt, items, coordinate, title)
+        self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(
