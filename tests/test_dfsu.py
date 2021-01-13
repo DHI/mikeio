@@ -1113,3 +1113,21 @@ def test_extract_track():
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
     assert track3.data[2][23] == approx(3.6865002370663547)
+
+
+def test_find_nearest_element_in_Zlayer():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    ids = dfs.find_nearest_elements(357000, 6200000, layer=1)
+    el2dindx = dfs.elem2d_ids[ids]
+    table = dfs.e2_e3_table[el2dindx]
+    assert ids == 3216
+    assert el2dindx == 745
+    assert len(table) == 9
+    ids = dfs.find_nearest_elements(357000, 6200000, layer=9)
+    el2dindx = dfs.elem2d_ids[ids]
+    table = dfs.e2_e3_table[el2dindx]
+    assert ids == 3224
+    assert el2dindx == 745
+    assert len(table) == 9
+
