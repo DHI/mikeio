@@ -687,8 +687,8 @@ class _UnstructuredGeometry:
                 elem3d = self.e2_e3_table[elem2d]
                 for j, row in enumerate(elem3d):
                     try:
-                        layer_ids = self.layer_ids[elem3d]
-                        id = elem3d[layer_ids == layer]
+                        layer_ids = self.layer_ids[row]
+                        id = row[list(layer_ids).index(layer)]
                         idx[j] = id
                     except:
                         print(f"Layer {layer} not present for 2d element {elem2d[j]}")
