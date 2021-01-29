@@ -177,11 +177,7 @@ class Dfs2(_Dfs123):
                 self._dy,
             )
         )
-    @property
-    def end_time(self):
-        """File end time
-        """
-        return self.read([0]).time[-1].to_pydatetime()
+    
 
     @property
     def dx(self):

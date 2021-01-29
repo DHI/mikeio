@@ -26,6 +26,7 @@ class _Dfs123:
     _filename = None
     _projstr = None
     _start_time = None
+    _end_time = None
     _is_equidistant = True
     _items = None
     _builder = None
@@ -124,6 +125,10 @@ class _Dfs123:
         dfs.Close()
 
     def _write(self, filename, data, start_time, dt, datetimes, items, coordinate, title):
+
+        if isinstance(data, Dataset) and not data.is_equidistant:
+            datetimes = data.time
+
         self._write_handle_common_arguments(
             title, data, items, coordinate, start_time, dt
         )
@@ -148,7 +153,7 @@ class _Dfs123:
 
             if not all(np.shape(d)[2] == self._nx for d in data):
                 raise DataDimensionMismatch()
-        if datetimes:
+        if datetimes is not None:
             self._is_equidistant = False
             start_time = datetimes[0]
             self._start_time = start_time
@@ -411,6 +416,15 @@ class _Dfs123:
     def start_time(self):
         """File start time"""
         return self._start_time
+
+    @property
+    def end_time(self):
+        """File end time
+        """
+        if self._end_time is None:
+            self._end_time = self.read([0]).time[-1].to_pydatetime()
+        
+        return self._end_time
 
     @property
     def n_timesteps(self):
