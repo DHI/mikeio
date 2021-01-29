@@ -167,6 +167,7 @@ def test_write_selected_item_to_new_file(tmpdir):
     assert len(ds2) == 1
     assert ds.items[0].name == "Untitled"
     assert dfs.start_time == dfs2.start_time
+    assert dfs.end_time == dfs2.end_time
     assert dfs.projection_string == dfs2.projection_string
     assert dfs.longitude == dfs2.longitude
     assert dfs.latitude == dfs2.latitude
@@ -223,6 +224,8 @@ def test_write_modified_data_to_new_file(tmpdir):
     dfsmod = Dfs2(outfilename)
 
     assert dfs._longitude == dfsmod._longitude
+
+
 
 
 def test_read_some_time_step():
@@ -420,3 +423,62 @@ def test_write_default_datatype(tmpdir):
 
     newdfs = Dfs2(filename)
     assert newdfs.items[0].data_value_type == 0
+
+
+def test_write_NonEqCalendarAxis(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+    data = []
+    d = np.random.random([6, 5, 10])
+    d[1, :, :] = np.nan
+    d[2, :, :] = 0
+    d[3, 3:, :] = 2
+    d[4, :, 4:] = 5
+    data.append(d)
+    east = 308124
+    north = 6098907
+    orientation = 0
+    dateTime = [datetime.datetime(2012, 1, 1), datetime.datetime(2012, 1, 4),
+                datetime.datetime(2012, 1, 5), datetime.datetime(2012, 1, 10),
+                datetime.datetime(2012, 1, 15), datetime.datetime(2012, 1, 28)]
+    dfs = Dfs2()
+    dfs.write(
+        filename=filename,
+        data=data,
+        # start_time=datetime.datetime(2012, 1, 1),
+        # dt=12,
+        datetimes=dateTime,
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+        coordinate=["UTM-33", east, north, orientation],
+        dx=100,
+        dy=200,
+        title="test dfs2",
+    )
+
+    newdfs = Dfs2(filename)
+    assert newdfs.projection_string == "UTM-33"
+    assert pytest.approx(newdfs.longitude) == 12.0
+    assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.dx == 100.0
+    assert newdfs.dy == 200.0
+    assert newdfs._is_equidistant == False
+
+
+def test_write_non_equidistant_data(tmpdir):
+
+    filename = r"tests/testdata/eq.dfs2"
+    dfs = Dfs2(filename)
+
+    ds = dfs.read(time_steps=[0, 2, 3, 6])  # non-equidistant dataset
+
+    assert not ds.is_equidistant
+
+    outfilename = os.path.join(tmpdir.dirname, "neq_from_dataset.dfs2")
+
+    dfs.write(outfilename, ds)
+
+    dfs2 = Dfs2(outfilename)
+    ds3 = dfs2.read()
+
+    assert not ds3.is_equidistant
+

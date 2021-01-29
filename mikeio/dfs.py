@@ -26,6 +26,7 @@ class _Dfs123:
     _filename = None
     _projstr = None
     _start_time = None
+    _end_time = None
     _is_equidistant = True
     _items = None
     _builder = None
@@ -113,6 +114,7 @@ class _Dfs123:
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
             )  # TODO handle other timeunits
+               # TODO to get the EndTime
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._projstr = dfs.FileInfo.Projection.WKTString
         self._longitude = dfs.FileInfo.Projection.Longitude
@@ -122,7 +124,11 @@ class _Dfs123:
 
         dfs.Close()
 
-    def _write(self, filename, data, start_time, dt, items, coordinate, title):
+    def _write(self, filename, data, start_time, dt, datetimes, items, coordinate, title):
+
+        if isinstance(data, Dataset) and not data.is_equidistant:
+            datetimes = data.time
+
         self._write_handle_common_arguments(
             title, data, items, coordinate, start_time, dt
         )
@@ -147,6 +153,10 @@ class _Dfs123:
 
             if not all(np.shape(d)[2] == self._nx for d in data):
                 raise DataDimensionMismatch()
+        if datetimes is not None:
+            self._is_equidistant = False
+            start_time = datetimes[0]
+            self._start_time = start_time
 
         dfs = self._setup_header(filename)
 
@@ -166,8 +176,13 @@ class _Dfs123:
                     d = d.reshape(self.shape[1:])
                     d = np.flipud(d)
                     darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+                if self._is_equidistant:
+                    dfs.WriteItemTimeStepNext(0, darray)
+                else:
+                    t = datetimes[i]
+                    relt = (t - start_time).total_seconds()
+                    dfs.WriteItemTimeStepNext(relt, darray)
 
-                dfs.WriteItemTimeStepNext(0, darray)
 
         dfs.Close()
 
@@ -401,6 +416,15 @@ class _Dfs123:
     def start_time(self):
         """File start time"""
         return self._start_time
+
+    @property
+    def end_time(self):
+        """File end time
+        """
+        if self._end_time is None:
+            self._end_time = self.read([0]).time[-1].to_pydatetime()
+        
+        return self._end_time
 
     @property
     def n_timesteps(self):

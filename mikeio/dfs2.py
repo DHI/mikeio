@@ -1,4 +1,5 @@
 import os
+import warnings
 from DHI.Generic.MikeZero import eumUnit
 from DHI.Generic.MikeZero.DFS import DfsFileFactory
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder, Dfs2Reprojector
@@ -58,10 +59,16 @@ class Dfs2(_Dfs123):
         self._dy = self._dfs.SpatialAxis.Dy
         self._nx = self._dfs.SpatialAxis.XCount
         self._ny = self._dfs.SpatialAxis.YCount
+        if self._dfs.FileInfo.TimeAxis.TimeAxisType == 4:
+            self._is_equidistant = False
 
         self._read_header()
 
-    def find_nearest_element(
+    def find_nearest_element(self, lon, lat):
+        warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
+        return self.find_nearest_elements(lon, lat)
+
+    def find_nearest_elements(
         self, lon, lat,
     ):
         """Find index of closest element
@@ -109,6 +116,7 @@ class Dfs2(_Dfs123):
         data,
         start_time=None,
         dt=None,
+        datetimes=None,
         items=None,
         dx=None,
         dy=None,
@@ -129,6 +137,8 @@ class Dfs2(_Dfs123):
             start date of type datetime.
         dt: float, optional
             The time step in seconds.
+        dt: datetime
+            The list of datetimes for the case of nonEquadistant Timeaxis.
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         dx: float, optional
@@ -153,7 +163,7 @@ class Dfs2(_Dfs123):
         if dy:
             self._dy = dy
 
-        self._write(filename, data, start_time, dt, items, coordinate, title)
+        self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(
@@ -167,6 +177,7 @@ class Dfs2(_Dfs123):
                 self._dy,
             )
         )
+    
 
     @property
     def dx(self):
