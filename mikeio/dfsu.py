@@ -2380,8 +2380,8 @@ class Dfsu(_UnstructuredFile):
         Mesh._geometry_to_mesh(outfilename, geometry)
 
     def to_dfs2(
-        x0: = None,
-        y0: = None,
+        x0: float,
+        y0: float,
         dx: float,
         dy: float,
         nx: int = 20,
