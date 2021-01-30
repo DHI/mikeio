@@ -1097,7 +1097,11 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(elem_table.reshape(-1,))
+            for i in np.unique(
+                elem_table.reshape(
+                    -1,
+                )
+            )
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1534,8 +1538,7 @@ class _UnstructuredGeometry:
         return np.asarray(elem_table), ec, data
 
     def _get_boundary_polylines_uncategorized(self):
-        """Construct closed polylines for all boundary faces        
-        """
+        """Construct closed polylines for all boundary faces"""
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
         polylines = []
@@ -1561,7 +1564,7 @@ class _UnstructuredGeometry:
         return polylines
 
     def _get_boundary_polylines(self):
-        """Get boundary polylines and categorize as inner or outer by 
+        """Get boundary polylines and categorize as inner or outer by
         assessing the signed area
         """
         polylines = self._get_boundary_polylines_uncategorized()
@@ -1593,8 +1596,7 @@ class _UnstructuredGeometry:
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
 
     def _get_boundary_faces(self):
-        """Construct list of faces
-        """
+        """Construct list of faces"""
         element_table = self.geometry2d.element_table
 
         all_faces = []
@@ -1782,7 +1784,10 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
+            self._source,
+            to_dotnet_array(xc),
+            to_dotnet_array(yc),
+            to_dotnet_array(zc),
         )
         ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
@@ -2106,7 +2111,13 @@ class Dfsu(_UnstructuredFile):
         return Dataset(data_list, times, items_out)
 
     def write_header(
-        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
+        self,
+        filename,
+        start_time=None,
+        dt=None,
+        items=None,
+        elements=None,
+        title=None,
     ):
         """Write the header of a new dfsu file
 
