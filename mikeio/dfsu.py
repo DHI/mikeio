@@ -2,12 +2,15 @@ from logging import warn
 import os
 from collections import namedtuple
 import pandas as pd
+import pathlib
 from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
 from scipy.spatial import cKDTree
+import tempfile
 from tqdm import trange
+import typing
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -2375,6 +2378,94 @@ class Dfsu(_UnstructuredFile):
             geometry = self.geometry2d
 
         Mesh._geometry_to_mesh(outfilename, geometry)
+
+    def to_dfs2(
+        x0: = None,
+        y0: = None,
+        dx: float,
+        dy: float,
+        nx: int = 20,
+        ny: int = 20,
+        rotation: float = 0,
+        epsg: typing.Optional[int] = None,
+        interpolation_method: str = "nearest",
+        filename: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+    ):
+        """Export Dfsu to Dfs2 file.
+
+        Export Dfsu file to a Dfs2 file with a regular 2D grid.
+
+        Parameters
+        ----------
+        x0 : float
+            X-coordinate of the bottom left corner of the 2D grid,
+            must be in the same coordinate system as the parent Dfsu file.
+        y0 : float
+            Y-coordinate of the bottom left corner of the 2D grid,
+            must be in the same coordinate system as the parent Dfsu file.
+        dx : float
+            Grid resolution in the X direction in the units of CRS defined by `epsg`.
+        dy : float
+            Grid resolution in the Y direction in the units of CRS defined by `epsg`.
+        nx : int, optional
+            Grid size in the X direction. By default it is 20.
+        ny : int, optional
+            Grid size in the Y direction. By default it is 20.
+        rotation : float, optional
+            Grid clockwise rotation in degrees. Be default it is 0.
+        epsg : int, optional
+            EPSG identificator of coordinate system
+            in which the Dfs2 file will be created.
+            If None (default), uses coordinate system of the parent Dfsu file.
+        interpolation_method : str, optional
+            Interpolation method, by default it is 'nearest'.
+            See https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
+        filename : str or pathlib.Path, optional
+            Path to *.dfs2 file to be created.
+            If None (default), creates a temporary dfs2 file
+            in the system temporary directory.
+
+        Returns
+        -------
+        Dfs2
+            mikeio Dfs2 object pointing to the file located at `filename`.
+
+        """
+        # Process 'filename' argument
+        if filename is None:
+            filename = tempfile.NamedTemporaryFile().name + ".dfs2"
+        else:
+            if isinstance(filename, str):
+                filename = pathlib.Path(filename)
+
+            if isinstance(filename, pathlib.Path):
+                filename = filename.resolve()
+                if not filename.suffix == ".dfs2":
+                    raise ValueError(
+                        f"'filename' must point to a dfs2 file, "
+                        f"not to '{filename.suffix}'"
+                    )
+            else:
+                raise TypeError(
+                    f"invalid type in '{type(filename)}' for the 'filename' argument, "
+                    f"must be string or pathlib.Path"
+                )
+
+        # Define 2D grid in 'epsg' projection
+        # TODO
+
+        # Determine Dfsu projection
+        # Convert X/Y points from Dfsu to 'epsg' projection
+        # TODO
+
+        # Interpolate Dfsu items to 2D grid using scipy.interpolate.griddata
+        # TODO
+
+        # Write interpolated data to 'filename'
+        # TODO - use Dfs2.write(filename)
+
+        # Return reference to the created Dfs2 file
+        # TODO - Dfs2(filename)
 
 
 class Mesh(_UnstructuredFile):
