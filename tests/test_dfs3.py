@@ -73,3 +73,8 @@ def test_dfs3_get_bottom_data():
     dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
     data_bottom = dfs.get_bottom_values()
     assert (len(data_bottom) > 0)
+
+
+def test_read_dfs3_timesteps_data():
+    dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
+    dfs.read(timesteps=[1])

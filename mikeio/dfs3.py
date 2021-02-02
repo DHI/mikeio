@@ -295,7 +295,7 @@ class Dfs3(_Dfs123):
             timesteptoread = timesteps
 
         if coordinates is None:
-            for it in timesteptoread:
+            for it_number, it in enumerate(timesteptoread):
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
@@ -307,12 +307,12 @@ class Dfs3(_Dfs123):
                     d = np.flipud(d)
                     d[d == deleteValue] = np.nan
                     if layers is None:
-                        data_list[item][it, :, :, :] = d
+                        data_list[item][it_number, :, :, :] = d
                     else:
                         for l in range(len(layers)):
-                            data_list[item][it, l, :, :] = d[layers[l], :, :]
+                            data_list[item][it_number, l, :, :] = d[layers[l], :, :]
 
-                t_seconds[it] = itemdata.Time
+                t_seconds[it_number] = itemdata.Time
         else:
             indices = [
                 self.__calculate_index(xNum, yNum, zNum, x, y, z)
