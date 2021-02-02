@@ -3,7 +3,6 @@ from shutil import copyfile
 from datetime import datetime
 import numpy as np
 from mikeio.dfs3 import Dfs3
-from mikeio import Dfsu
 from mikeio.eum import EUMType, ItemInfo
 
 
