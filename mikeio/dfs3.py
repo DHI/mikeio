@@ -213,7 +213,7 @@ class Dfs3(_Dfs123):
 
         return data
 
-    def read(self, item_numbers=None, layers=None, coordinates=None):
+    def read(self, item_numbers=None, layers=None, coordinates=None, n_timestep=None):
         """Function: Read data from a dfs3 file
 
         Usage:
@@ -249,7 +249,8 @@ class Dfs3(_Dfs123):
         yNum = axis.YCount
         xNum = axis.XCount
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
+        if n_timestep is not None:
+            nt = n_timestep
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         if item_numbers is None:
