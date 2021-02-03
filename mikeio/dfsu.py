@@ -593,6 +593,7 @@ class _UnstructuredGeometry:
         (np.array, np.array)
             element ids and weights
         """
+        xy = np.atleast_2d(xy)
         ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
         weights = None
 
