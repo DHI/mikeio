@@ -372,6 +372,7 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     assert np.isnan(ds["Average"][3])
     assert ds.time[0].year == 1958
 
+
 def test_write_from_pandas_series_monkey_patched(tmpdir):
 
     df = pd.read_csv(
@@ -396,7 +397,6 @@ def test_write_from_pandas_series_monkey_patched(tmpdir):
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"][3])
     assert ds.time[0].year == 1958
-
 
 
 def test_write_from_data_frame_different_types(tmpdir):
@@ -459,6 +459,7 @@ def test_read_dfs0_temporal_subset():
 
     assert len(ds.time) == 2
     assert ds.time[0].strftime("%H") == "05"
+
 
 def test_read_non_eq_dfs0__temporal_subset():
 
