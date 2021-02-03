@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from datetime import datetime, timedelta
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
@@ -26,9 +27,40 @@ from .dfs import _Dfs123
 class Dfs3(_Dfs123):
     def __init__(self, filename=None):
         super(Dfs3, self).__init__(filename)
+        if filename:
+            self._read_dfs3_header()
+
+    def get_bottom_values(self):
+        bottom2D = []
+        data = self.read()
+        bottom_data = np.nan * np.ones(shape=(self.shape[0],) + self.shape[2:])
+        for item_number in range(self.n_items):
+            b = np.nan * np.ones(self.shape[2:])
+            for ts in range(self.n_timesteps):
+                d = data.data[item_number][ts, ...]
+                for layer in range(d.shape[0]):  # going from surface to bottom
+                    y = d[layer, ...]
+                    b[~np.isnan(y)] = y[~np.isnan(y)]
+                bottom_data[ts, ...] = np.flipud(b)
+            bottom2D.append(bottom_data)
+        return  bottom2D
+
+    def _read_dfs3_header(self):
+        if not os.path.isfile(self._filename):
+            raise Exception(f"file {self._filename} does not exist!")
+
+        self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
+        self.source = self._dfs
+        self._dx = self._dfs.SpatialAxis.Dx
+        self._dy = self._dfs.SpatialAxis.Dy
+        self._dz = self._dfs.SpatialAxis.Dz
+        self._nx = self._dfs.SpatialAxis.XCount
+        self._ny = self._dfs.SpatialAxis.YCount
+        self._nz = self._dfs.SpatialAxis.ZCount
+        self._read_header()
 
     def __calculate_index(self, nx, ny, nz, x, y, z):
-        """ Calculates the position in the dfs3 data array based on the
+        """Calculates the position in the dfs3 data array based on the
         number of x,y,z layers (nx,ny,nz) at the specified x,y,z position.
 
         Error checking is done here to see if the x,y,z coordinates are out of range.
@@ -43,7 +75,7 @@ class Dfs3(_Dfs123):
         return y * nx + x + z * nx * ny
 
     def grid_coordinates(self, dfs3file):
-        """ Function: Returns the Grid information
+        """Function: Returns the Grid information
         Usage:
             [X0, Y0, dx, dy, nx, ny, nz, nt] = grid_coordinates( filename )
         dfs3file
@@ -87,7 +119,7 @@ class Dfs3(_Dfs123):
         layers=None,
         conservative=True,
     ):
-        """ Function: Read data from a dfs3 file within the locations chosen
+        """Function: Read data from a dfs3 file within the locations chosen
 
 
         Usage:
@@ -181,8 +213,8 @@ class Dfs3(_Dfs123):
 
         return data
 
-    def read(self, item_numbers=None, layers=None, coordinates=None):
-        """ Function: Read data from a dfs3 file
+    def read(self, item_numbers=None, layers=None, coordinates=None, timesteps=None):
+        """Function: Read data from a dfs3 file
 
         Usage:
             [data,time,name] = read( filename, item_numbers, layers=None, coordinates=None)
@@ -217,7 +249,8 @@ class Dfs3(_Dfs123):
         yNum = axis.YCount
         xNum = axis.XCount
         nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
+        if timesteps is not None:
+            nt = len(timesteps)
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         if item_numbers is None:
@@ -256,8 +289,13 @@ class Dfs3(_Dfs123):
         t_seconds = np.zeros(nt, dtype=float)
         startTime = dfs.FileInfo.TimeAxis.StartDateTime
 
+        if timesteps is None:
+            timesteptoread = np.arange(nt).tolist()
+        else:
+            timesteptoread = timesteps
+
         if coordinates is None:
-            for it in range(nt):
+            for it_number, it in enumerate(timesteptoread):
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
@@ -269,12 +307,12 @@ class Dfs3(_Dfs123):
                     d = np.flipud(d)
                     d[d == deleteValue] = np.nan
                     if layers is None:
-                        data_list[item][it, :, :, :] = d
+                        data_list[item][it_number, :, :, :] = d
                     else:
                         for l in range(len(layers)):
-                            data_list[item][it, l, :, :] = d[layers[l], :, :]
+                            data_list[item][it_number, l, :, :] = d[layers[l], :, :]
 
-                t_seconds[it] = itemdata.Time
+                t_seconds[it_number] = itemdata.Time
         else:
             indices = [
                 self.__calculate_index(xNum, yNum, zNum, x, y, z)
@@ -345,7 +383,7 @@ class Dfs3(_Dfs123):
             length of each grid in the y direction (projection units)
         dz: float, optional
             length of each grid in the z direction (projection units)
-        
+
         title: str, optional
             title of the dfs2 file. Default is blank.
         """
@@ -378,7 +416,16 @@ class Dfs3(_Dfs123):
         )
         builder.SetSpatialAxis(
             factory.CreateAxisEqD3(
-                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy, number_z, 0, dz,
+                eumUnit.eumUmeter,
+                number_x,
+                x0,
+                dx,
+                number_y,
+                y0,
+                dy,
+                number_z,
+                0,
+                dz,
             )
         )
 
@@ -409,3 +456,21 @@ class Dfs3(_Dfs123):
 
         dfs.Close()
 
+    @property
+    def dx(self):
+        """Step size in x direction"""
+        return self._dx
+
+    @property
+    def dy(self):
+        """Step size in y direction"""
+        return self._dy
+
+    @property
+    def dz(self):
+        """Step size in y direction"""
+        return self._dz
+
+    @property
+    def shape(self):
+        return (self._n_timesteps, self._nz, self._ny, self._nx)
