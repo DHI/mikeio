@@ -8,7 +8,7 @@ with open("License.txt") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version='0.6.dev2',
+    version='0.6.2',
     install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml", "tqdm"],
     extras_require={
         "dev": [
