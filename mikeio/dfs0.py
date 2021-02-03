@@ -110,8 +110,9 @@ class Dfs0:
         self._n_items = safe_length(dfs.ItemInfo)
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        if (self._timeaxistype == TimeAxisType.NonEquidistantCalendar 
-            and isinstance(time_steps, str)):
+        if self._timeaxistype == TimeAxisType.NonEquidistantCalendar and isinstance(
+            time_steps, str
+        ):
             sel_time_step_str = time_steps
             time_steps = range(self._n_timesteps)
         else:
@@ -135,7 +136,6 @@ class Dfs0:
             else:
                 sel = slice(parts[0], parts[1])
             ds = ds[sel]
-        
 
         return ds
 
@@ -231,7 +231,9 @@ class Dfs0:
             newitem = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(item.type, item.unit)
             newitem.Set(
-                item.name, quantity, dtype_dfs,
+                item.name,
+                quantity,
+                dtype_dfs,
             )
 
             if self._data_value_type is not None:
@@ -361,7 +363,7 @@ class Dfs0:
     def to_dataframe(self, unit_in_name=False, round_time="s"):
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
-        
+
         Parameters
         ----------
         unit_in_name: bool, optional
@@ -406,27 +408,38 @@ class Dfs0:
 
     @property
     def deletevalue(self):
-        """File delete value
-        """
+        """File delete value"""
         return self._deletevalue
 
     @property
     def n_items(self):
-        """Number of items
-        """
+        """Number of items"""
         return self._n_items
 
     @property
     def items(self):
-        """List of items
-        """
+        """List of items"""
         return self._items
 
     @property
     def start_time(self):
-        """File start time
-        """
+        """File start time"""
         return self._start_time
+
+
+def series_to_dfs0(
+    self,
+    filename,
+    itemtype=None,
+    unit=None,
+    items=None,
+    title=None,
+    data_value_type=None,
+    dtype=None,
+):
+
+    df = pd.DataFrame(self)
+    df.to_dfs0(filename, itemtype, unit, items, title, data_value_type, dtype)
 
 
 def dataframe_to_dfs0(
@@ -506,17 +519,20 @@ def dataframe_to_dfs0(
         )
 
 
+# Monkey patching onto Pandas classes
 pd.DataFrame.to_dfs0 = dataframe_to_dfs0
+
+pd.Series.to_dfs0 = series_to_dfs0
 
 
 def dataset_to_dfs0(self, filename):
     """Write Dataset to a Dfs0 file
-        
-        Parameters
-        ----------
-        filename: str
-            full path and file name to the dfs0 file.
-        """
+
+    Parameters
+    ----------
+    filename: str
+        full path and file name to the dfs0 file.
+    """
     self = self.squeeze()
 
     if len(self.data[0].shape) != 1:
