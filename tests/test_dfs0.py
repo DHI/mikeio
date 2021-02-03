@@ -372,6 +372,32 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     assert np.isnan(ds["Average"][3])
     assert ds.time[0].year == 1958
 
+def test_write_from_pandas_series_monkey_patched(tmpdir):
+
+    df = pd.read_csv(
+        "tests/testdata/co2-mm-mlo.csv",
+        parse_dates=True,
+        index_col="Date",
+        na_values=-99.99,
+    )
+
+    filename = os.path.join(tmpdir.dirname, "series.dfs0")
+
+    series = df["Average"]
+
+    series.to_dfs0(
+        filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
+    )
+
+    ds = mikeio.read(filename)
+
+    assert len(ds.items) == 1
+    assert ds.items[0].type == EUMType.Concentration
+    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"][3])
+    assert ds.time[0].year == 1958
+
+
 
 def test_write_from_data_frame_different_types(tmpdir):
 
