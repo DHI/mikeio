@@ -14,7 +14,7 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
-from .dutil import get_item_info, get_valid_items_and_timesteps
+from .dfsutil import get_item_info, valid_item_numbers, valid_timesteps
 from .dataset import Dataset
 from .dotnet import (
     to_numpy,
@@ -1718,7 +1718,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
         # items
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs, list(range(self._n_items)))
+        self._items = get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         # time
         self._start_time = from_dotnet_datetime(dfs.StartDateTime)
@@ -1870,20 +1870,16 @@ class Dfsu(_UnstructuredFile):
         dfs = DfsuFile.Open(self._filename)
         # time may have changes since we read the header
         # (if engine is continuously writing to this file)
-        self._n_timesteps = dfs.NumberOfTimeSteps
         # TODO: add more checks that this is actually still the same file
         # (could have been replaced in the meantime)
 
-        # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-        # n_items = self.n_items #safe_length(dfs.ItemInfo)
-
-        nt = self.n_timesteps  # .NumberOfTimeSteps
-
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(
-            self, items, time_steps
-        )
-
+        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
+        items = get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
+
+        self._n_timesteps = dfs.NumberOfTimeSteps
+        nt = self.n_timesteps
+        time_steps = valid_timesteps(dfs, time_steps)
 
         if elements is None:
             n_elems = self.n_elements
@@ -1969,12 +1965,13 @@ class Dfsu(_UnstructuredFile):
         """
 
         dfs = DfsuFile.Open(self._filename)
-        self._n_timesteps = dfs.NumberOfTimeSteps
 
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(
-            self, items, time_steps=None
-        )
+        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
+        items = get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
+
+        self._n_timesteps = dfs.NumberOfTimeSteps
+        time_steps = valid_timesteps(dfs, time_steps=None)
 
         deletevalue = self.deletevalue
 

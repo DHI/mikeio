@@ -168,20 +168,19 @@ def test_read_all_time_steps():
     assert len(ds.time) == 9
     assert ds.data[0].shape[0] == 9
 
+
 def test_read_all_time_steps_without_progressbar():
 
     Dfsu.show_progress = True
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    
-    dfs = Dfsu(filename)
 
+    dfs = Dfsu(filename)
 
     ds = dfs.read(items=[0, 3])
 
     assert len(ds.time) == 9
     assert ds.data[0].shape[0] == 9
-
 
 
 def test_read_single_time_step():
@@ -262,7 +261,6 @@ def test_element_coords_is_inside_nodes():
     assert ec_max[1] < nc_max[1]
     assert ec_min[0] > nc_min[0]
     assert ec_min[1] > nc_min[0]
-    
 
 
 def test_contains():
@@ -915,6 +913,10 @@ def test_read_temporal_subset_string():
     ds = dfs.read(time_steps=",1985-08-06 11:30")
     assert len(ds.time) == 2
 
+    # start=end
+    ds = dfs.read(time_steps="1985-08-06 12:00")
+    assert len(ds.time) == 1
+
 
 def test_write_temporal_subset(tmpdir):
 
@@ -1077,8 +1079,9 @@ def test_interp2d_radius():
     nt = ds.n_timesteps
 
     g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
-    interpolant = dfs.get_2d_interpolant(g.xy, extrapolate=True, 
-                                         n_nearest=1, radius=0.1)
+    interpolant = dfs.get_2d_interpolant(
+        g.xy, extrapolate=True, n_nearest=1, radius=0.1
+    )
     dsi = dfs.interp2d(ds, *interpolant)
 
     assert dsi.shape == (nt, 20 * 10)

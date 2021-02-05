@@ -13,6 +13,7 @@ from .dotnet import (
 )
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
+from .dfsutil import valid_item_numbers, valid_timesteps
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
@@ -58,9 +59,8 @@ class _Dfs123:
         """
         self._open()
 
-        items, item_numbers, time_steps = self._get_valid_items_and_timesteps(
-            items, time_steps
-        )
+        item_numbers = valid_item_numbers(self._dfs.ItemInfo, items)
+        time_steps = valid_timesteps(self._dfs.FileInfo, time_steps)
 
         for t in time_steps:
             if t > (self.n_timesteps - 1):
@@ -114,7 +114,7 @@ class _Dfs123:
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
             )  # TODO handle other timeunits
-               # TODO to get the EndTime
+            # TODO to get the EndTime
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._projstr = dfs.FileInfo.Projection.WKTString
         self._longitude = dfs.FileInfo.Projection.Longitude
@@ -124,7 +124,9 @@ class _Dfs123:
 
         dfs.Close()
 
-    def _write(self, filename, data, start_time, dt, datetimes, items, coordinate, title):
+    def _write(
+        self, filename, data, start_time, dt, datetimes, items, coordinate, title
+    ):
 
         if isinstance(data, Dataset) and not data.is_equidistant:
             datetimes = data.time
@@ -182,7 +184,6 @@ class _Dfs123:
                     t = datetimes[i]
                     relt = (t - start_time).total_seconds()
                     dfs.WriteItemTimeStepNext(relt, darray)
-
 
         dfs.Close()
 
@@ -291,45 +292,45 @@ class _Dfs123:
 
         return self._builder.GetFile()
 
-    def _get_valid_items_and_timesteps(self, items, time_steps):
+    # def _get_valid_items_and_timesteps(self, items, time_steps):
 
-        if isinstance(items, int) or isinstance(items, str):
-            items = [items]
+    #     if isinstance(items, int) or isinstance(items, str):
+    #         items = [items]
 
-        if items is not None and isinstance(items[0], str):
-            items = self._find_item(items)
+    #     if items is not None and isinstance(items[0], str):
+    #         items = self._find_item(items)
 
-        if items is None:
-            item_numbers = list(range(self.n_items))
-        else:
-            item_numbers = items
+    #     if items is None:
+    #         item_numbers = list(range(self.n_items))
+    #     else:
+    #         item_numbers = items
 
-        self._validate_item_numbers(item_numbers)
+    #     self._validate_item_numbers(item_numbers)
 
-        if time_steps is None:
-            time_steps = list(range(self.n_timesteps))
+    #     if time_steps is None:
+    #         time_steps = list(range(self.n_timesteps))
 
-        if isinstance(time_steps, int):
-            time_steps = [time_steps]
+    #     if isinstance(time_steps, int):
+    #         time_steps = [time_steps]
 
-        if isinstance(time_steps, str):
-            parts = time_steps.split(",")
-            if parts[0] == "":
-                time_steps = slice(parts[1])  # stop only
-            elif parts[1] == "":
-                time_steps = slice(parts[0], None)  # start only
-            else:
-                time_steps = slice(parts[0], parts[1])
+    #     if isinstance(time_steps, str):
+    #         parts = time_steps.split(",")
+    #         if parts[0] == "":
+    #             time_steps = slice(parts[1])  # stop only
+    #         elif parts[1] == "":
+    #             time_steps = slice(parts[0], None)  # start only
+    #         else:
+    #             time_steps = slice(parts[0], parts[1])
 
-        if isinstance(time_steps, slice):
-            freq = pd.tseries.offsets.DateOffset(seconds=self.timestep)
-            time = pd.date_range(self.start_time, periods=self.n_timesteps, freq=freq)
-            s = time.slice_indexer(time_steps.start, time_steps.stop)
-            time_steps = list(range(s.start, s.stop))
+    #     if isinstance(time_steps, slice):
+    #         freq = pd.tseries.offsets.DateOffset(seconds=self.timestep)
+    #         time = pd.date_range(self.start_time, periods=self.n_timesteps, freq=freq)
+    #         s = time.slice_indexer(time_steps.start, time_steps.stop)
+    #         time_steps = list(range(s.start, s.stop))
 
-        items = self._get_item_info(item_numbers)
+    #     items = self._get_item_info(item_numbers)
 
-        return items, item_numbers, time_steps
+    #     return items, item_numbers, time_steps
 
     def _open(self):
         raise NotImplementedError("Should be implemented by subclass")
@@ -395,7 +396,7 @@ class _Dfs123:
             isinstance(item_number, int) and 0 <= item_number < self.n_items
             for item_number in item_numbers
         ):
-            raise ItemNumbersError()
+            raise ItemNumbersError(self.n_items)
 
     @property
     def deletevalue(self):
@@ -423,7 +424,7 @@ class _Dfs123:
         """
         if self._end_time is None:
             self._end_time = self.read([0]).time[-1].to_pydatetime()
-        
+
         return self._end_time
 
     @property

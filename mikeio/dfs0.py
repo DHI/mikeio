@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dutil import get_valid_items_and_timesteps, get_item_info
+from .dfsutil import valid_item_numbers, get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
@@ -71,7 +71,7 @@ class Dfs0:
 
         # Read items
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs, list(range(self._n_items)))
+        self._items = get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
 
@@ -118,7 +118,8 @@ class Dfs0:
         else:
             sel_time_step_str = None
 
-        items, item_numbers, _ = get_valid_items_and_timesteps(self, items, time_steps)
+        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
+        items = get_item_info(dfs.ItemInfo, item_numbers)
 
         dfs.Close()
 
@@ -189,7 +190,7 @@ class Dfs0:
             isinstance(item_number, int) and 0 <= item_number < 1e15
             for item_number in item_numbers
         ):
-            raise ItemNumbersError()
+            raise ItemNumbersError(1e15)
 
     @staticmethod
     def _to_dfs_datatype(dtype):
@@ -231,9 +232,7 @@ class Dfs0:
             newitem = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(item.type, item.unit)
             newitem.Set(
-                item.name,
-                quantity,
-                dtype_dfs,
+                item.name, quantity, dtype_dfs,
             )
 
             if self._data_value_type is not None:

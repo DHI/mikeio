@@ -11,7 +11,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
-from .dutil import get_item_info
+from .dfsutil import get_item_info
 from .dataset import Dataset
 from .dotnet import (
     to_numpy,
@@ -43,7 +43,7 @@ class Dfs3(_Dfs123):
                     b[~np.isnan(y)] = y[~np.isnan(y)]
                 bottom_data[ts, ...] = np.flipud(b)
             bottom2D.append(bottom_data)
-        return  bottom2D
+        return bottom2D
 
     def _read_dfs3_header(self):
         if not os.path.isfile(self._filename):
@@ -330,7 +330,7 @@ class Dfs3(_Dfs123):
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
-        items = get_item_info(dfs, item_numbers)
+        items = get_item_info(dfs.ItemInfo, item_numbers)
 
         dfs.Close()
 
@@ -416,16 +416,7 @@ class Dfs3(_Dfs123):
         )
         builder.SetSpatialAxis(
             factory.CreateAxisEqD3(
-                eumUnit.eumUmeter,
-                number_x,
-                x0,
-                dx,
-                number_y,
-                y0,
-                dy,
-                number_z,
-                0,
-                dz,
+                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy, number_z, 0, dz,
             )
         )
 

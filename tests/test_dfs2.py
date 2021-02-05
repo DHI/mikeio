@@ -6,7 +6,7 @@ from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 from mikeio.custom_exceptions import (
     DataDimensionMismatch,
-    ItemNumbersError,
+    ItemsError,
 )
 
 
@@ -112,7 +112,7 @@ def test_read_bad_item():
     filename = r"tests/testdata/random.dfs2"
     dfs = Dfs2(filename)
 
-    with pytest.raises(ItemNumbersError):
+    with pytest.raises(ItemsError):
         dfs.read(items=100)
 
 
@@ -224,8 +224,6 @@ def test_write_modified_data_to_new_file(tmpdir):
     dfsmod = Dfs2(outfilename)
 
     assert dfs._longitude == dfsmod._longitude
-
-
 
 
 def test_read_some_time_step():
@@ -355,10 +353,7 @@ def test_reproject_defaults(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
 
     dfs.reproject(
-        outfilename,
-        projectionstring="UTM-33",
-        dx=200.0,
-        dy=200.0,
+        outfilename, projectionstring="UTM-33", dx=200.0, dy=200.0,
     )
 
     newdfs = Dfs2(outfilename)
@@ -411,13 +406,7 @@ def test_write_default_datatype(tmpdir):
         data=data,
         start_time=datetime.datetime(2012, 1, 1),
         dt=12,
-        items=[
-            ItemInfo(
-                "testing water level",
-                EUMType.Water_Level,
-                EUMUnit.meter
-            )
-        ],
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
         title="test dfs2",
     )
 
@@ -438,9 +427,14 @@ def test_write_NonEqCalendarAxis(tmpdir):
     east = 308124
     north = 6098907
     orientation = 0
-    dateTime = [datetime.datetime(2012, 1, 1), datetime.datetime(2012, 1, 4),
-                datetime.datetime(2012, 1, 5), datetime.datetime(2012, 1, 10),
-                datetime.datetime(2012, 1, 15), datetime.datetime(2012, 1, 28)]
+    dateTime = [
+        datetime.datetime(2012, 1, 1),
+        datetime.datetime(2012, 1, 4),
+        datetime.datetime(2012, 1, 5),
+        datetime.datetime(2012, 1, 10),
+        datetime.datetime(2012, 1, 15),
+        datetime.datetime(2012, 1, 28),
+    ]
     dfs = Dfs2()
     dfs.write(
         filename=filename,

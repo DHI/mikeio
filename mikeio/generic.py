@@ -16,9 +16,10 @@ from .dotnet import (
     to_dotnet_datetime,
 )
 from .helpers import safe_length
-from .dutil import find_item
+from .dfsutil import item_numbers_by_name
 
 show_progress = False
+
 
 def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> DfsFile:
     """Clone a dfs file
@@ -466,7 +467,7 @@ def _parse_items(dfs_i, items):
 
     for idx, item in enumerate(items):
         if isinstance(item, str):
-            items[idx] = find_item(dfs_i, [item])[0]
+            items[idx] = item_numbers_by_name(dfs_i.ItemInfo, [item])[0]
         elif isinstance(item, int):
             if (item < 0) or (item >= n_items_file):
                 raise ValueError(
