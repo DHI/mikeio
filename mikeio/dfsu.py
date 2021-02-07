@@ -29,6 +29,7 @@ from .dotnet import (
     asnetarray_v2,
 )
 from .dfs0 import Dfs0
+from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
 from .spatial import Grid2D
@@ -2380,6 +2381,7 @@ class Dfsu(_UnstructuredFile):
         Mesh._geometry_to_mesh(outfilename, geometry)
 
     def to_dfs2(
+        self,
         x0: float,
         y0: float,
         dx: float,
@@ -2452,20 +2454,75 @@ class Dfsu(_UnstructuredFile):
                 )
 
         # Define 2D grid in 'epsg' projection
-        # TODO
+        grid = Grid2D(
+            bbox=[
+                x0,
+                y0,
+                x0 + dx * nx,
+                y0 + dy * ny,
+            ],
+            shape=(nx, ny),
+        )
+        # TODO - create rotated grid
+        if rotation != 0:
+            raise NotImplementedError(
+                "'rotation' argument is currently not supported, "
+                "grid is assumed to have its y-axis pointing at True North"
+            )
 
         # Determine Dfsu projection
         # Convert X/Y points from Dfsu to 'epsg' projection
-        # TODO
+        # TODO - infer CRS and transform between Dfsu and Dfs2 coordinate sytems
+        if epsg is not None:
+            raise NotImplementedError(
+                "'epsg' argument is currently not supported, "
+                "coordinate system is taken from the parent Dfsu file"
+            )
 
         # Interpolate Dfsu items to 2D grid using scipy.interpolate.griddata
-        # TODO
+        # TODO - interpolate between Dfs2 and Dfsu grids, taking into account
+        # TODO - interpolation method, CRS, and grid rotation
+        if interpolation_method != "nearest":
+            raise NotImplementedError(
+                "'interpolation_method' argument is currently not supported, "
+                "interpolation is performed using nearest neighborhood method"
+            )
+        elem_ids, weights = self.get_2d_interpolant(
+            xy=grid.xy,
+            n_nearest=1,
+            extrapolate=False,
+            p=2,
+            radius=None,
+        )
+        dataset = self.read(items=None, time_steps=None, elements=None)
+        interpolated_dataset = self.interp2d(
+            dataset,
+            elem_ids=elem_ids,
+            weights=weights,
+            shape=(grid.ny, grid.nx),
+        )
 
         # Write interpolated data to 'filename'
-        # TODO - use Dfs2.write(filename)
+        dfs2 = Dfs2()
+        dfs2.write(
+            filename=str(filename),
+            data=interpolated_dataset,
+            start_time=dataset.time[0].to_pydatetime(),
+            dt=dataset.timestep,
+            items=self.items,
+            dx=grid.dx,
+            dy=grid.dy,
+            coordinate=[
+                self.projection_string,  # projection
+                grid.x0,  # origin_x
+                grid.y0,  # orign_y
+                0,  # grid orientation - TODO account for 'rotation' argument
+            ],
+            title=None,  # TODO - infer it from parent Dfsu
+        )
 
         # Return reference to the created Dfs2 file
-        # TODO - Dfs2(filename)
+        return Dfs2(filename=str(filename))
 
 
 class Mesh(_UnstructuredFile):
