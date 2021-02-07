@@ -1,15 +1,14 @@
 import os
-from shutil import copyfile
+import pathlib
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
 import pytest
-from pytest import approx
-
-from mikeio import Dfsu, Mesh, Dfs0
-from mikeio.eum import ItemInfo
-from mikeio import Dataset
+from mikeio import Dataset, Dfs0, Dfsu, Mesh
 from mikeio.custom_exceptions import InvalidGeometry
+from mikeio.eum import ItemInfo
+from pytest import approx
 
 
 def test_repr():
@@ -168,20 +167,19 @@ def test_read_all_time_steps():
     assert len(ds.time) == 9
     assert ds.data[0].shape[0] == 9
 
+
 def test_read_all_time_steps_without_progressbar():
 
     Dfsu.show_progress = True
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    
-    dfs = Dfsu(filename)
 
+    dfs = Dfsu(filename)
 
     ds = dfs.read(items=[0, 3])
 
     assert len(ds.time) == 9
     assert ds.data[0].shape[0] == 9
-
 
 
 def test_read_single_time_step():
@@ -262,7 +260,6 @@ def test_element_coords_is_inside_nodes():
     assert ec_max[1] < nc_max[1]
     assert ec_min[0] > nc_min[0]
     assert ec_min[1] > nc_min[0]
-    
 
 
 def test_contains():
@@ -1077,8 +1074,9 @@ def test_interp2d_radius():
     nt = ds.n_timesteps
 
     g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
-    interpolant = dfs.get_2d_interpolant(g.xy, extrapolate=True, 
-                                         n_nearest=1, radius=0.1)
+    interpolant = dfs.get_2d_interpolant(
+        g.xy, extrapolate=True, n_nearest=1, radius=0.1
+    )
     dsi = dfs.interp2d(ds, *interpolant)
 
     assert dsi.shape == (nt, 20 * 10)
@@ -1100,7 +1098,11 @@ def test_interp2d_reshaped():
 def test_extract_track():
     dfs = Dfsu("tests/testdata/track_extraction_case02_indata.dfsu")
     csv_file = "tests/testdata/track_extraction_case02_track.csv"
-    df = pd.read_csv(csv_file, index_col=0, parse_dates=True,)
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
     track = dfs.extract_track(df)
 
     assert track.data[2][23] == approx(3.6284972794399653)
@@ -1131,3 +1133,47 @@ def test_find_nearest_element_in_Zlayer():
     assert el2dindx == 745
     assert len(table) == 9
 
+
+# TODO - this is an interim test until Dfsu.to_dfs2 method is finalized
+def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
+    # Create dfs2 file
+    dx = 25
+    dy = 25
+    nx = 100
+    ny = 100
+    filename = pathlib.Path(tmpdir.dirname) / "test.dfs2"
+    dfs2 = dfsu_hd2d.to_dfs2(
+        x0=605900,
+        y0=6902400,
+        dx=dx,
+        dy=dy,
+        nx=nx,
+        ny=ny,
+        rotation=0,
+        epsg=None,
+        interpolation_method="nearest",
+        filename=filename,
+    )
+
+    # Make sure it was saved to the correct location
+    assert dfs2._filename == str(filename)
+
+    # Ensure all items are identical
+    for i, dfsu_item in enumerate(dfsu_hd2d.items):
+        assert dfsu_item.data_value_type == dfs2.items[i].data_value_type
+        assert dfsu_item.name == dfs2.items[i].name
+        assert dfsu_item.type == dfs2.items[i].type
+        assert dfsu_item.unit == dfs2.items[i].unit
+
+    # Check timesteps
+    assert dfs2.timestep == dfsu_hd2d.timestep
+    assert dfs2.start_time == dfsu_hd2d.start_time
+    assert dfs2.end_time == dfsu_hd2d.end_time
+
+    # Check grid
+    assert np.isclose(dfs2.dx, dx, atol=0.1, rtol=0)
+    assert np.isclose(dfs2.dy, dy, atol=0.1, rtol=0)
+    assert dfs2.shape == (dfsu_hd2d.n_timesteps, ny, nx)
+
+    # Make sure data was interpolated (not all values are nan's)
+    assert not np.all(np.isnan(dfs2.read().data))
