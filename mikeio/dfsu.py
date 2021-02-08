@@ -2,12 +2,15 @@ from logging import warn
 import os
 from collections import namedtuple
 import pandas as pd
+import pathlib
 from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
 from scipy.spatial import cKDTree
+import tempfile
 from tqdm import trange
+import typing
 
 from DHI.Generic.MikeZero import eumUnit, eumQuantity
 from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
@@ -26,6 +29,7 @@ from .dotnet import (
     asnetarray_v2,
 )
 from .dfs0 import Dfs0
+from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
 from .helpers import safe_length
 from .spatial import Grid2D
@@ -1098,7 +1102,11 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(elem_table.reshape(-1,))
+            for i in np.unique(
+                elem_table.reshape(
+                    -1,
+                )
+            )
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1535,8 +1543,7 @@ class _UnstructuredGeometry:
         return np.asarray(elem_table), ec, data
 
     def _get_boundary_polylines_uncategorized(self):
-        """Construct closed polylines for all boundary faces        
-        """
+        """Construct closed polylines for all boundary faces"""
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
         polylines = []
@@ -1562,7 +1569,7 @@ class _UnstructuredGeometry:
         return polylines
 
     def _get_boundary_polylines(self):
-        """Get boundary polylines and categorize as inner or outer by 
+        """Get boundary polylines and categorize as inner or outer by
         assessing the signed area
         """
         polylines = self._get_boundary_polylines_uncategorized()
@@ -1594,8 +1601,7 @@ class _UnstructuredGeometry:
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
 
     def _get_boundary_faces(self):
-        """Construct list of faces
-        """
+        """Construct list of faces"""
         element_table = self.geometry2d.element_table
 
         all_faces = []
@@ -1783,7 +1789,10 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
+            self._source,
+            to_dotnet_array(xc),
+            to_dotnet_array(yc),
+            to_dotnet_array(zc),
         )
         ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
@@ -2104,7 +2113,13 @@ class Dfsu(_UnstructuredFile):
         return Dataset(data_list, times, items_out)
 
     def write_header(
-        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
+        self,
+        filename,
+        start_time=None,
+        dt=None,
+        items=None,
+        elements=None,
+        title=None,
     ):
         """Write the header of a new dfsu file
 
@@ -2362,6 +2377,158 @@ class Dfsu(_UnstructuredFile):
             geometry = self.geometry2d
 
         Mesh._geometry_to_mesh(outfilename, geometry)
+
+    def to_dfs2(
+        self,
+        x0: float,
+        y0: float,
+        dx: float,
+        dy: float,
+        nx: int = 20,
+        ny: int = 20,
+        rotation: float = 0,
+        epsg: typing.Optional[int] = None,
+        interpolation_method: str = "nearest",
+        filename: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        **kwargs
+        
+    ):
+        """Export Dfsu to Dfs2 file.
+
+        Export Dfsu file to a Dfs2 file with a regular 2D grid.
+
+        Parameters
+        ----------
+        x0 : float
+            X-coordinate of the bottom left corner of the 2D grid,
+            must be in the same coordinate system as the parent Dfsu file.
+        y0 : float
+            Y-coordinate of the bottom left corner of the 2D grid,
+            must be in the same coordinate system as the parent Dfsu file.
+        dx : float
+            Grid resolution in the X direction in the units of CRS defined by `epsg`.
+        dy : float
+            Grid resolution in the Y direction in the units of CRS defined by `epsg`.
+        nx : int, optional
+            Grid size in the X direction. By default it is 20.
+        ny : int, optional
+            Grid size in the Y direction. By default it is 20.
+        rotation : float, optional
+            Grid clockwise rotation in degrees. Be default it is 0.
+        epsg : int, optional
+            EPSG identificator of coordinate system
+            in which the Dfs2 file will be created.
+            If None (default), uses coordinate system of the parent Dfsu file.
+        interpolation_method : str, optional
+            Interpolation method, by default it is 'nearest'.
+        filename : str or pathlib.Path, optional
+            Path to *.dfs2 file to be created.
+            If None (default), creates a temporary dfs2 file
+            in the system temporary directory.
+        kwargs: keyword arguments to get_2d_interp        
+
+        Returns
+        -------
+        Dfs2
+            mikeio Dfs2 object pointing to the file located at `filename`.
+
+        Examples
+        --------
+        >>> from  mikeio import Dfsu
+        >>> dfs = Dfsu("HD2D.dfsu")
+        >>> dfs.to_dfs2(x0=605900.0, y0=6902400.0, dx=25.0, dy=25.0, nx=100, ny=100, filename="hd2d_25m.dfs2")
+
+        """
+        # Process 'filename' argument
+        if filename is None:
+            filename = tempfile.NamedTemporaryFile().name + ".dfs2"
+        else:
+            if isinstance(filename, str):
+                filename = pathlib.Path(filename)
+
+            if isinstance(filename, pathlib.Path):
+                filename = filename.resolve()
+                if not filename.suffix == ".dfs2":
+                    raise ValueError(
+                        f"'filename' must point to a dfs2 file, "
+                        f"not to '{filename.suffix}'"
+                    )
+            else:
+                raise TypeError(
+                    f"invalid type in '{type(filename)}' for the 'filename' argument, "
+                    f"must be string or pathlib.Path"
+                )
+
+        # Define 2D grid in 'epsg' projection
+        grid = Grid2D(
+            bbox=[
+                x0,
+                y0,
+                x0 + dx * nx,
+                y0 + dy * ny,
+            ],
+            shape=(nx, ny),
+        )
+        # TODO - create rotated grid
+        if rotation != 0:
+            raise NotImplementedError(
+                "'rotation' argument is currently not supported, "
+                "grid is assumed to have its y-axis pointing at True North"
+            )
+
+        # Determine Dfsu projection
+        # Convert X/Y points from Dfsu to 'epsg' projection
+        # TODO - infer CRS and transform between Dfsu and Dfs2 coordinate sytems
+        if epsg is not None:
+            raise NotImplementedError(
+                "'epsg' argument is currently not supported, "
+                "coordinate system is taken from the parent Dfsu file"
+            )
+
+        # Interpolate Dfsu items to 2D grid using scipy.interpolate.griddata
+        # TODO - interpolate between Dfs2 and Dfsu grids, taking into account
+        # TODO - interpolation method, CRS, and grid rotation
+        if interpolation_method != "nearest":
+            raise NotImplementedError(
+                "'interpolation_method' argument is currently not supported, "
+                "interpolation is performed using nearest neighborhood method"
+            )
+        elem_ids, weights = self.get_2d_interpolant(
+            xy=grid.xy,
+            **kwargs
+        )
+        dataset = self.read(items=None, time_steps=None, elements=None)
+        interpolated_dataset = self.interp2d(
+            dataset,
+            elem_ids=elem_ids,
+            weights=weights,
+            shape=(grid.ny, grid.nx),
+        )
+
+        # TODO dataset is upside-down, which convention is correct??
+        interpolated_dataset = interpolated_dataset.flipud()
+
+        # Write interpolated data to 'filename'
+        dfs2 = Dfs2()
+        dfs2.write(
+            filename=str(filename),
+            data=interpolated_dataset,
+            start_time=dataset.time[0].to_pydatetime(),
+            dt=dataset.timestep,
+            items=self.items,
+            dx=grid.dx,
+            dy=grid.dy,
+            coordinate=[
+                self.projection_string,  # projection
+                grid.x0,  # origin_x
+                grid.y0,  # orign_y
+                0,  # grid orientation - TODO account for 'rotation' argument
+            ],
+            title=None,  # TODO - infer it from parent Dfsu
+        )
+
+        # Return reference to the created Dfs2 file
+        return Dfs2(filename=str(filename))
 
 
 class Mesh(_UnstructuredFile):
