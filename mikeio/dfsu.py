@@ -1102,11 +1102,7 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(
-                elem_table.reshape(
-                    -1,
-                )
-            )
+            for i in np.unique(elem_table.reshape(-1,))
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1789,10 +1785,7 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source,
-            to_dotnet_array(xc),
-            to_dotnet_array(yc),
-            to_dotnet_array(zc),
+            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
         )
         ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
@@ -1887,7 +1880,6 @@ class Dfsu(_UnstructuredFile):
         n_items = len(item_numbers)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        nt = self.n_timesteps
         time_steps = valid_timesteps(dfs, time_steps)
 
         if elements is None:
@@ -2113,13 +2105,7 @@ class Dfsu(_UnstructuredFile):
         return Dataset(data_list, times, items_out)
 
     def write_header(
-        self,
-        filename,
-        start_time=None,
-        dt=None,
-        items=None,
-        elements=None,
-        title=None,
+        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
     ):
         """Write the header of a new dfsu file
 
@@ -2390,8 +2376,7 @@ class Dfsu(_UnstructuredFile):
         epsg: typing.Optional[int] = None,
         interpolation_method: str = "nearest",
         filename: typing.Optional[typing.Union[str, pathlib.Path]] = None,
-        **kwargs
-        
+        **kwargs,
     ):
         """Export Dfsu to Dfs2 file.
 
@@ -2460,15 +2445,7 @@ class Dfsu(_UnstructuredFile):
                 )
 
         # Define 2D grid in 'epsg' projection
-        grid = Grid2D(
-            bbox=[
-                x0,
-                y0,
-                x0 + dx * nx,
-                y0 + dy * ny,
-            ],
-            shape=(nx, ny),
-        )
+        grid = Grid2D(bbox=[x0, y0, x0 + dx * nx, y0 + dy * ny,], shape=(nx, ny),)
         # TODO - create rotated grid
         if rotation != 0:
             raise NotImplementedError(
@@ -2493,16 +2470,10 @@ class Dfsu(_UnstructuredFile):
                 "'interpolation_method' argument is currently not supported, "
                 "interpolation is performed using nearest neighborhood method"
             )
-        elem_ids, weights = self.get_2d_interpolant(
-            xy=grid.xy,
-            **kwargs
-        )
+        elem_ids, weights = self.get_2d_interpolant(xy=grid.xy, **kwargs)
         dataset = self.read(items=None, time_steps=None, elements=None)
         interpolated_dataset = self.interp2d(
-            dataset,
-            elem_ids=elem_ids,
-            weights=weights,
-            shape=(grid.ny, grid.nx),
+            dataset, elem_ids=elem_ids, weights=weights, shape=(grid.ny, grid.nx),
         )
 
         # TODO dataset is upside-down, which convention is correct??
