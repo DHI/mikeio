@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import typing
 
 import DHI.Projections
@@ -69,7 +67,7 @@ class CRS:
 
     # TODO - this is the key method, establish proper mapping between pyproj and CRS
     @classmethod
-    def from_pyproj(cls, pyproj_crs: pyproj.CRS) -> CRS:
+    def from_pyproj(cls, pyproj_crs: pyproj.CRS):
         if pyproj_crs.is_geographic:
             projstr = "LONG/LAT"
         else:
@@ -80,6 +78,6 @@ class CRS:
         return self.to_pyproj().to_epsg(confidence=confidence)
 
     @classmethod
-    def from_epsg(cls, epsg: int) -> CRS:
+    def from_epsg(cls, epsg: int):
         pyproj_crs = pyproj.CRS.from_epsg(code=epsg)
         return cls.from_pyproj(pyproj_crs=pyproj_crs)
