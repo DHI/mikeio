@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from .eum import EUMType, EUMUnit, ItemInfo
+from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .dotnet import from_dotnet_datetime
 from .custom_exceptions import ItemsError
 
@@ -28,14 +28,8 @@ def valid_item_numbers(dfsItemInfo, items):
     return items
 
 
-def valid_items(dfsItemInfo, items):
-    item_numbers = valid_item_numbers(dfsItemInfo, items)
-    items = get_item_info(dfsItemInfo, item_numbers)
-    return items
-
-
 def valid_timesteps(dfsFileInfo, time_steps):
-    # TODO: time_steps or timesteps?
+    # TODO: naming: time_steps or timesteps?
     n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
 
     if time_steps is None:
@@ -48,6 +42,7 @@ def valid_timesteps(dfsFileInfo, time_steps):
         parts = time_steps.split(",")
         if len(parts) == 1:
             parts.append(parts[0])  # end=start
+
         if parts[0] == "":
             time_steps = slice(parts[1])  # stop only
         elif parts[1] == "":
@@ -56,8 +51,8 @@ def valid_timesteps(dfsFileInfo, time_steps):
             time_steps = slice(parts[0], parts[1])
 
     if isinstance(time_steps, slice):
-        if dfsFileInfo.TimeAxis.TimeAxisType != 3:
-            # TODO: does this work for non-equidistant calendar?
+        if dfsFileInfo.TimeAxis.TimeAxisType != TimeAxisType.EquidistantCalendar:
+            # TODO: handle non-equidistant calendar
             raise ValueError(
                 "Only equidistant calendar files are supported for this type of time_step argument"
             )
@@ -68,6 +63,15 @@ def valid_timesteps(dfsFileInfo, time_steps):
         time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
         s = time.slice_indexer(time_steps.start, time_steps.stop)
         time_steps = list(range(s.start, s.stop))
+    elif isinstance(time_steps[0], int):
+        time_steps = np.array(time_steps)
+        time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
+        time_steps = list(time_steps)
+
+        if max(time_steps) > (n_steps_file - 1):
+            raise IndexError(f"Timestep cannot be larger than {n_steps_file}")
+        if min(time_steps) < 0:
+            raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
 
     return time_steps
 
@@ -121,7 +125,8 @@ def get_item_info(dfsItemInfo, item_numbers):
         eumUnit = dfsItemInfo[item].Quantity.Unit
         itemtype = EUMType(eumItem)
         unit = EUMUnit(eumUnit)
-        item = ItemInfo(name, itemtype, unit)
+        data_value_type = dfsItemInfo[item].get_ValueType()
+        item = ItemInfo(name, itemtype, unit, data_value_type)
         items.append(item)
     return items
 
