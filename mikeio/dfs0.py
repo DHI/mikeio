@@ -107,7 +107,10 @@ class Dfs0:
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
+
         self._n_items = safe_length(dfs.ItemInfo)
+        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
+
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         if self._timeaxistype == TimeAxisType.NonEquidistantCalendar and isinstance(
@@ -118,9 +121,6 @@ class Dfs0:
         else:
             sel_time_step_str = None
 
-        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
-        items = get_item_info(dfs.ItemInfo, item_numbers)
-
         dfs.Close()
 
         ds = self.__read(self._filename)
@@ -130,6 +130,9 @@ class Dfs0:
 
         if sel_time_step_str:
             parts = sel_time_step_str.split(",")
+            if len(parts) == 1:
+                parts.append(parts[0])  # end=start
+
             if parts[0] == "":
                 sel = slice(parts[1])  # stop only
             elif parts[1] == "":
@@ -183,14 +186,6 @@ class Dfs0:
             item_type = EUMType(self._dfs.ItemInfo[i].Quantity.Item)
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
             yield ItemInfo(name, item_type, unit)
-
-    @staticmethod
-    def _validate_item_numbers(item_numbers):
-        if not all(
-            isinstance(item_number, int) and 0 <= item_number < 1e15
-            for item_number in item_numbers
-        ):
-            raise ItemNumbersError(1e15)
 
     @staticmethod
     def _to_dfs_datatype(dtype):
