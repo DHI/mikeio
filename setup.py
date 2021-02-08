@@ -8,7 +8,7 @@ with open("License.txt") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version='0.6.dev3',
+    version='0.6.2',
     install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml", "tqdm"],
     extras_require={
         "dev": [
@@ -29,8 +29,8 @@ setuptools.setup(
     description="A package that uses the DHI dfs libraries to create, write and read dfs, res1d and mesh files.",
     platform="windows_x64",
     license=license,
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    #long_description=long_description,
+    #long_description_content_type="text/markdown",
     url="https://github.com/DHI/mikeio",
     packages=setuptools.find_packages(),
     include_package_data=True,
