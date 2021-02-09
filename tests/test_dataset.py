@@ -304,6 +304,10 @@ def test_interp_time_to_other_dataset():
     assert len(dsi.time) == len(ds2.time)
     assert dsi.data[0].shape[0] == ds2.data[0].shape[0]
 
+    # Accept dataset as argument
+    dsi2 = ds1.interp_time(ds2)
+    assert dsi2.time[0] == ds2.time[0]
+
 
 def test_extrapolate():
     # Arrange
@@ -766,6 +770,22 @@ def test_create_time():
 
     t = Dataset.create_time("2018", dt=7200, end_time="2019")
     assert len(t) == (365 * 12 + 1)
+
+
+def test_create_infer_name_from_eum():
+
+    nt = 100
+    d = np.random.uniform(size=nt)
+
+    ds = Dataset(
+        data=[d],
+        time=pd.date_range("2000-01-01", freq="H", periods=nt),
+        items=[EUMType.Wind_speed],
+    )
+
+    assert isinstance(ds.items[0], ItemInfo)
+    assert ds.items[0].type == EUMType.Wind_speed
+    assert ds.items[0].name == "Wind speed"
 
 
 def test_init():
