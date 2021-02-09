@@ -22,8 +22,9 @@ Facilitates common data processing workflows for MIKE files.
 
 ## Where can I get help?
 
-* Bugs & feature request - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
-* General help, FAQ [Stackoverflow with the tag `mikeio`](https://stackoverflow.com/questions/tagged/mikeio)
+* New ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
+* Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
+* General help, FAQ - [Stackoverflow with the tag `mikeio`](https://stackoverflow.com/questions/tagged/mikeio)
 
 ## Installation
 
