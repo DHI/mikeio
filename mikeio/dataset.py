@@ -85,7 +85,7 @@ class Dataset:
     def __init__(
         self,
         data: Union[List[np.ndarray], float],
-        time: Union[pd.DatetimeIndex, str]
+        time: Union[pd.DatetimeIndex, str],
         items: Union[List[ItemInfo], List[EUMType]],
     ):
 
