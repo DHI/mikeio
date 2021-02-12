@@ -139,7 +139,6 @@ def test_sw_set_end_time(tmpdir):
     assert pfs.section("TIME")["number_of_time_steps"].value == 720
 
     pfs.write(os.path.join(tmpdir, "lake_new.sw"))
-    print("Done")
 
 
 def test_sw_modify_and_write(tmpdir):
