@@ -213,6 +213,24 @@ def test_select_subset_isel_multiple_idxs():
     assert selds["Foo"].shape == (100, 2, 30)
 
 
+def test_create_undefined():
+
+    nt = 100
+    d1 = np.zeros([nt])
+    d2 = np.zeros([nt])
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = 2
+    ds = Dataset(data, time, items)
+
+    assert len(ds.items) == 2
+    assert len(ds.data) == 2
+    assert ds.items[0].name == "Item 1"
+    assert ds.items[0].type == EUMType.Undefined
+
+
 def test_to_dataframe():
 
     nt = 100
@@ -753,10 +771,20 @@ def test_create_empty_data():
     assert len(d) == ni
     assert d[-1].shape == (1, ne)
 
+    with pytest.raises(Exception):
+        d = Dataset.create_empty_data()
+
+    with pytest.raises(Exception):
+        d = Dataset.create_empty_data(n_elements=None, shape=None)
+
 
 def test_create_time():
 
     t = Dataset.create_time("2018-1-1,2018-1-2", dt=3600)
+    assert t[-1].day == 2
+    assert len(t) == 25
+
+    t = Dataset.create_time("2018-1-1", end_time="2018-1-2", n_timesteps=25)
     assert t[-1].day == 2
     assert len(t) == 25
 
@@ -766,6 +794,22 @@ def test_create_time():
 
     t = Dataset.create_time("2018", dt=7200, end_time="2019")
     assert len(t) == (365 * 12 + 1)
+
+    t = Dataset.create_time(end_time="1970-1-2", n_timesteps=25)
+    assert len(t) == 25
+    assert t[0].hour == 0
+
+    with pytest.raises(Exception):
+        # dt cannot be negative
+        t = Dataset.create_time("2018", dt=-7200)
+
+    with pytest.raises(Exception):
+        # end must be after start
+        t = Dataset.create_time("2018-2-1,2018-1-1")
+
+    with pytest.raises(Exception):
+        # All parameters where given, but they do not match
+        t = Dataset.create_time("2018", dt=7200, end_time="2019", n_timesteps=25)
 
 
 def test_init():

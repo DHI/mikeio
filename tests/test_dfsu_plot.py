@@ -55,7 +55,7 @@ def test_plot_dfsu_contour_mixedmesh():
 def test_plot_dfsu_n_refinements():
     filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
     msh = Mesh(filename)
-    msh.plot(plot_type="contourf", levels=5, n_refinements=1)
+    msh.plot(plot_type="contourf", levels=None, n_refinements=1)
     assert True
 
 
@@ -73,12 +73,12 @@ def test_plot_dfsu():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
     data = dfs.read()
-    dfs.plot(z=data[1][0, :], figsize=(3, 3))
+    dfs.plot(z=data[1][0, :], figsize=(3, 3), plot_type="mesh_only")
     assert True
 
 
 def test_plot_dfsu_arguments():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    filename = os.path.join("tests", "testdata", "NorthSea_HD_and_windspeed.dfsu")
     dfs = Dfsu(filename)
     data = dfs.read()
     dfs.plot(title="test", label="test", vmin=-23, vmax=23)
@@ -96,6 +96,8 @@ def test_plot_mesh_outline():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
     msh.plot(plot_type="outline_only")
+    assert True
+    msh.plot(plot_type=None)
     assert True
 
 
@@ -124,6 +126,15 @@ def test_plot_mesh_boundary_nodes():
     assert True
 
 
+def test_plot_invalid():
+    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
+    mesh = Mesh(filename)
+    with pytest.raises(Exception):
+        mesh.plot(plot_type="invalid")
+    with pytest.raises(Exception):
+        mesh.plot(plot_type="invalid")
+
+
 def test_plot_dfsu_vertical_profile():
     import matplotlib.pyplot as plt
 
@@ -136,7 +147,14 @@ def test_plot_dfsu_vertical_profile():
     dfs.plot_vertical_profile(data)
     dfs.plot_vertical_profile(data, time_step, 0, 20)
     dfs.plot_vertical_profile(
-        data, title="txt", label="txt", edge_color="0.3", cmin=0, cmax=20, cmap="plasma"
+        data,
+        title="txt",
+        label="txt",
+        edge_color="0.3",
+        cmin=0,
+        cmax=20,
+        cmap="plasma",
+        figsize=(2, 2),
     )
     _, ax = plt.subplots()
     dfs.plot_vertical_profile(data, ax=ax)

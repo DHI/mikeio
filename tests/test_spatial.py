@@ -10,7 +10,7 @@ def test_dist_in_meters():
 
     np.random.seed = 42
     n = 100
-    lon = np.random.uniform(low=-179, high=179, size=n)
+    lon = np.random.uniform(low=-181, high=181, size=n)
     lat = np.random.uniform(low=-89, high=89, size=n)
     coords = np.vstack([lon, lat]).T
     poi = [0.0, 0.0]
@@ -18,6 +18,9 @@ def test_dist_in_meters():
     print(dist.max)
     assert dist.shape == (n,)
     assert dist.max() < 20040000
+
+    dist = dist_in_meters(coords, poi, is_geo=False)
+    assert dist.shape == (n,)
 
 
 def test_min_horizontal_dist_meters():
@@ -62,6 +65,9 @@ def test_x_y():
     # Is this test good, or just a copy of the implementation?
     assert g.bbox == ((x0 - dx / 2), (y0 - dy / 2), (x1 + dx / 2), (y1 + dy / 2))
 
+    text = repr(g)
+    assert "<mikeio.Grid2D>" in text
+
 
 def test_xx_yy():
     nx = 4
@@ -80,13 +86,15 @@ def test_xx_yy():
     # Reverse order compared to above makes no difference
     assert g2.yy[-1, -1] == 5.0
     assert g2.xx[0, 0] == 1.0
-    
 
 
 def test_create_in_bbox():
     bbox = [0, 0, 1, 5]
     shape = (2, 5)
     g = Grid2D(bbox=bbox, shape=shape)
+    assert g.x0 == 0.25
+
+    g = Grid2D(bbox=bbox, shape=(2, None))
     assert g.x0 == 0.25
 
     g = Grid2D(bbox)
@@ -110,21 +118,30 @@ def test_create_in_bbox():
     assert g.dy == 2.5
     assert g.n == 4
 
+    with pytest.raises(ValueError):
+        Grid2D(bbox, shape=(12, 2, 2))
+
+    with pytest.raises(ValueError):
+        Grid2D(bbox, shape=(None, None))
+
+
 def test_no_parameters():
 
     with pytest.raises(ValueError):
         Grid2D()
 
+
 def test_invalid_grid_not_possible():
-    bbox = [0, 0, -1, 1] # x0 > x1
+    bbox = [0, 0, -1, 1]  # x0 > x1
     shape = (2, 2)
     with pytest.raises(ValueError):
         Grid2D(bbox=bbox, shape=shape)
 
-    bbox = [0, 0, 1, -1] # y0 > y1
+    bbox = [0, 0, 1, -1]  # y0 > y1
     shape = (2, 2)
     with pytest.raises(ValueError):
         Grid2D(bbox=bbox, shape=shape)
+
 
 def test_contains():
     bbox = [0, 0, 1, 5]
@@ -180,6 +197,23 @@ def test_to_mesh():
     assert os.path.exists(outfilename)
     mesh = Mesh(outfilename)
     assert mesh.n_elements == g.n
+    os.remove(outfilename)  # clean up
+
+    nc = g.get_node_coordinates()
+    new_z = nc[:, 1] - 10
+    g.to_mesh(outfilename, z=new_z)
+
+    assert os.path.exists(outfilename)
+    mesh = Mesh(outfilename)
+    assert mesh.node_coordinates[0, 2] == new_z[2]
+    os.remove(outfilename)  # clean up
+
+    new_z = -10
+    g.to_mesh(outfilename, z=new_z)
+
+    assert os.path.exists(outfilename)
+    mesh = Mesh(outfilename)
+    assert mesh.node_coordinates[0, 2] == -10
     os.remove(outfilename)  # clean up
 
 

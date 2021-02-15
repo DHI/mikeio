@@ -16,8 +16,12 @@ def test_repr():
     dfs = Dfsu(filename)
 
     text = repr(dfs)
-
     assert "Dfsu2D" in text
+
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    text = repr(dfs)
+    assert "number of z layers" in text
 
 
 def test_read_all_items_returns_all_items_and_names():
@@ -235,6 +239,9 @@ def test_get_node_coords():
 
     nc = dfs.node_coordinates
     assert nc[0, 0] == 607031.4886285994
+
+    nc = dfs.get_node_coords(code=1)
+    assert len(nc) > 0
 
 
 def test_get_element_coords():
@@ -608,6 +615,12 @@ def test_is_geo_LONGLAT():
     assert dfs.is_geo is True
 
 
+def test_is_local_coordinates():
+    filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.is_local_coordinates is False
+
+
 def test_get_element_area_UTM():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -628,6 +641,14 @@ def test_get_element_area_LONGLAT():
 
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
+
+
+def test_get_element_area_tri_quad():
+    filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
+    dfs = Dfsu(filename)
+
+    areas = dfs.get_element_area()
+    assert areas[0] == 0.0006875642143608321
 
 
 def test_write(tmpdir):
@@ -1034,8 +1055,15 @@ def test_elements_to_geometry():
     text = repr(geom)
 
     assert geom.n_layers == 5
-
     assert "nodes" in text
+
+    elements = dfs.get_layer_elements(layer=-2)
+    geom = dfs.elements_to_geometry(elements, node_layers="top")
+    assert geom.n_layers is None
+    assert geom.n_elements == len(elements)
+
+    with pytest.raises(Exception):
+        geom = dfs.elements_to_geometry(elements, node_layers="center")
 
 
 def test_element_table():
@@ -1071,6 +1099,9 @@ def test_interp2d():
 
     assert dsi.shape == (nt, 20 * 10)
 
+    with pytest.raises(Exception):
+        dfs.get_2d_interpolant(g.xy, n_nearest=0)
+
 
 def test_interp2d_radius():
     dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
@@ -1102,11 +1133,7 @@ def test_interp2d_reshaped():
 def test_extract_track():
     dfs = Dfsu("tests/testdata/track_extraction_case02_indata.dfsu")
     csv_file = "tests/testdata/track_extraction_case02_track.csv"
-    df = pd.read_csv(
-        csv_file,
-        index_col=0,
-        parse_dates=True,
-    )
+    df = pd.read_csv(csv_file, index_col=0, parse_dates=True,)
     track = dfs.extract_track(df)
 
     assert track.data[2][23] == approx(3.6284972794399653)
@@ -1124,6 +1151,8 @@ def test_extract_track():
 def test_find_nearest_element_in_Zlayer():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
+    el2dindx = dfs.elem2d_ids[12]
+    assert el2dindx == 2
     ids = dfs.find_nearest_elements(357000, 6200000, layer=1)
     el2dindx = dfs.elem2d_ids[ids]
     table = dfs.e2_e3_table[el2dindx]
@@ -1136,6 +1165,16 @@ def test_find_nearest_element_in_Zlayer():
     assert ids == 3224
     assert el2dindx == 745
     assert len(table) == 9
+
+    with pytest.raises(Exception):
+        # z and layer cannot both be given
+        dfs.find_nearest_elements(357000, 6200000, z=-3, layer=9)
+
+
+def test_e2_e3_table_2d_file():
+    filename = os.path.join("tests", "testdata", "NorthSea_HD_and_windspeed.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.e2_e3_table is None
 
 
 # TODO - this is an interim test until Dfsu.to_dfs2 method is finalized

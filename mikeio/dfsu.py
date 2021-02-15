@@ -2516,7 +2516,7 @@ class Mesh(_UnstructuredFile):
             new z value at each node
         """
         if len(z) != self.n_nodes:
-            raise Exception(f"z must have length of nodes ({self.n_nodes})")
+            raise ValueError(f"z must have length of nodes ({self.n_nodes})")
         self._nc[:, 2] = z
         self._ec = None
 
@@ -2529,7 +2529,7 @@ class Mesh(_UnstructuredFile):
             code of each node
         """
         if len(codes) != self.n_nodes:
-            raise Exception(f"codes must have length of nodes ({self.n_nodes})")
+            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
         self._codes = codes
         self._valid_codes = None
 
