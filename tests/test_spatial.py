@@ -9,15 +9,15 @@ from mikeio.spatial import Grid2D, dist_in_meters, min_horizontal_dist_meters
 def test_dist_in_meters():
 
     np.random.seed = 42
-    n = 100
-    lon = np.random.uniform(low=-181, high=181, size=n)
+    n = 1000
+    lon = np.random.uniform(low=-195, high=400, size=n)
     lat = np.random.uniform(low=-89, high=89, size=n)
     coords = np.vstack([lon, lat]).T
     poi = [0.0, 0.0]
     dist = dist_in_meters(coords, poi, is_geo=True)
     print(dist.max)
     assert dist.shape == (n,)
-    assert dist.max() < 20046000
+    assert dist.max() < 20015100
 
     dist = dist_in_meters(coords, poi, is_geo=False)
     assert dist.shape == (n,)
