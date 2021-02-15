@@ -77,7 +77,7 @@ class Pfs:
             "time_step_frequency",
         ]
         rows = []
-        index = range(1, n+1)
+        index = range(1, n + 1)
         for i in range(n):
             output = sub[f"OUTPUT_{i+1}"]
             row = {key: output[key] for key in sel_keys}
@@ -117,7 +117,6 @@ class Pfs:
 
             if s[-1] == "]":
                 s = s.replace("]", ":")
-
 
         s = s.replace("//", "").replace("|", "")
 
@@ -276,20 +275,32 @@ class Parameter:
         else:
             return par.ToString()
 
-    def modify(self, value: Union[int, float, str]):
+    def modify(self, value: Union[int, float, str], valuetype=None):
 
         par = self._parameter
 
+        if valuetype is int:
+            par.ModifyIntParameter(value)
+            return
+        elif valuetype is float:
+            par.ModifyDoubleParameter(value)
+            return
+
         if par.IsInt():
             par.ModifyIntParameter(value)
-        elif par.IsDouble():
+            return
+        if par.IsDouble():
             par.ModifyDoubleParameter(value)
+            return
         elif par.IsFilename():
             par.ModifyFileNameParameter(value)
+            return
         elif par.IsClob():
-            return par.ModifyClobParameter(value)
+            par.ModifyClobParameter(value)
+            return
         else:
-            return par.ModifyStringParameter(value)
+            par.ModifyStringParameter(value)
+            return
 
 
 class Section:
@@ -313,4 +324,3 @@ class Section:
 
     def __getitem__(self, key):
         return self.keyword(key)
-

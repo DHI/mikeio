@@ -1,10 +1,11 @@
 import warnings
+from typing import Union, List
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 from scipy.interpolate import interp1d
 from copy import deepcopy
-from mikeio.eum import ItemInfo
+from mikeio.eum import EUMType, ItemInfo
 
 
 class Dataset:
@@ -72,7 +73,7 @@ class Dataset:
       0:  Surface elevation <Surface Elevation> (meter)
       1:  Current speed <Current Speed> (meter per sec)
     >>>  ds5 = ds[[1,0]] # item selection by position
-    >>>  ds5 
+    >>>  ds5
     <mikeio.DataSet>
     Dimensions: (1000,)
     Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
@@ -81,7 +82,12 @@ class Dataset:
       1:  VarFun01 <Water Level> (meter)
     """
 
-    def __init__(self, data, time, items):
+    def __init__(
+        self,
+        data: Union[List[np.ndarray], float],
+        time: Union[pd.DatetimeIndex, str],
+        items: Union[List[ItemInfo], List[EUMType]],
+    ):
 
         if isinstance(time, str):
             # default single-step time
@@ -116,6 +122,11 @@ class Dataset:
             )
         self.data = data
         self.time = pd.DatetimeIndex(time, freq="infer")
+
+        for i, item in enumerate(items):
+            if isinstance(item, EUMType):
+                items[i] = ItemInfo(item)
+
         self.items = items
 
     def __repr__(self):
@@ -254,7 +265,7 @@ class Dataset:
 
     def aggregate(self, axis=1, func=np.nanmean):
         """Aggregate along an axis
-        
+
 
         Parameters
         ----------
@@ -262,7 +273,7 @@ class Dataset:
             default 1= first spatial axis
         func: function, optional
             default np.nanmean
-        
+
         Returns
         -------
         Dataset
@@ -289,7 +300,7 @@ class Dataset:
 
     def max(self, axis=1):
         """Max value along an axis
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -308,7 +319,7 @@ class Dataset:
 
     def min(self, axis=1):
         """Min value along an axis
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -327,7 +338,7 @@ class Dataset:
 
     def mean(self, axis=1):
         """Mean value along an axis
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -337,7 +348,7 @@ class Dataset:
         -------
         Dataset
             dataset with mean value
-        
+
         See Also
         --------
             nanmean : Mean values with NaN values removed
@@ -348,7 +359,7 @@ class Dataset:
     def average(self, weights, axis=1):
         """
         Compute the weighted average along the specified axis.
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -358,7 +369,7 @@ class Dataset:
         -------
         Dataset
             dataset with weighted average value
-        
+
         See Also
         --------
             nanmean : Mean values with NaN values removed
@@ -382,7 +393,7 @@ class Dataset:
 
     def nanmax(self, axis=1):
         """Max value along an axis (NaN removed)
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -397,7 +408,7 @@ class Dataset:
 
     def nanmin(self, axis=1):
         """Min value along an axis (NaN removed)
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -412,7 +423,7 @@ class Dataset:
 
     def nanmean(self, axis=1):
         """Mean value along an axis (NaN removed)
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -468,7 +479,11 @@ class Dataset:
         return ds
 
     def interp_time(
-        self, dt, method="linear", extrapolate=True, fill_value=np.nan,
+        self,
+        dt: Union[float, pd.DatetimeIndex, "Dataset"],
+        method="linear",
+        extrapolate=True,
+        fill_value=np.nan,
     ):
         """Temporal interpolation
 
@@ -476,7 +491,7 @@ class Dataset:
 
         Parameters
         ----------
-        dt: float or pd.DatetimeIndex
+        dt: float or pd.DatetimeIndex or Dataset
             output timestep in seconds
         method: str or int, optional
             Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.
@@ -515,6 +530,8 @@ class Dataset:
 
         if isinstance(dt, pd.DatetimeIndex):
             t_out_index = dt
+        elif isinstance(dt, Dataset):
+            t_out_index = dt.time
         else:
             offset = pd.tseries.offsets.DateOffset(seconds=dt)
             t_out_index = pd.date_range(
@@ -546,12 +563,12 @@ class Dataset:
 
     def to_dataframe(self, unit_in_name=False):
         """Convert Dataset to a Pandas DataFrame
-        
+
         Parameters
         ----------
         unit_in_name: bool, optional
             include unit in column name, default False
-        
+
         Returns
         -------
         pd.DataFrame
@@ -669,8 +686,7 @@ class Dataset:
 
     @property
     def is_equidistant(self):
-        """Is Dataset equidistant in time?
-        """
+        """Is Dataset equidistant in time?"""
         if len(self.time) < 3:
             return True
 
@@ -678,19 +694,17 @@ class Dataset:
 
     @property
     def start_time(self):
-        """First time instance (as datetime)
-        """
+        """First time instance (as datetime)"""
         return self.time[0].to_pydatetime()
 
     @property
     def end_time(self):
-        """Last time instance (as datetime)
-        """
+        """Last time instance (as datetime)"""
         return self.time[-1].to_pydatetime()
 
     @property
     def timestep(self):
-        """Time step in seconds if equidistant (and at 
+        """Time step in seconds if equidistant (and at
         least two time instances); otherwise None
         """
         dt = None
@@ -701,20 +715,17 @@ class Dataset:
 
     @property
     def n_timesteps(self):
-        """Number of time steps
-        """
+        """Number of time steps"""
         return len(self.time)
 
     @property
     def n_items(self):
-        """Number of items
-        """
+        """Number of items"""
         return len(self.items)
 
     @property
     def shape(self):
-        """Shape of each item 
-        """
+        """Shape of each item"""
         return self.data[self._first_non_z_item].shape
 
     @property
@@ -725,10 +736,8 @@ class Dataset:
 
     @property
     def n_elements(self):
-        """Number of spatial elements/points
-        """
+        """Number of spatial elements/points"""
         n_elem = np.prod(self.shape)
         if self.n_timesteps > 1:
             n_elem = int(n_elem / self.n_timesteps)
         return n_elem
-
