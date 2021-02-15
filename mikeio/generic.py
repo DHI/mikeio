@@ -454,28 +454,3 @@ def _parse_start_end(dfs_i, start, end):
 
     return file_start_new, start_step, start_sec, end_step, end_sec
 
-
-# def _parse_items(dfs_i, items):
-#     """"Make sure that items is a list of integers"""
-#     n_items_file = len(dfs_i.ItemInfo)
-#     if items is None:
-#         return list(range(n_items_file))
-
-#     if np.isscalar(items):
-#         items = [items]
-
-#     for idx, item in enumerate(items):
-#         if isinstance(item, str):
-#             items[idx] = item_numbers_by_name(dfs_i.ItemInfo, [item])[0]
-#         elif isinstance(item, int):
-#             if (item < 0) or (item >= n_items_file):
-#                 raise ValueError(
-#                     f"item numbers must be between 0 and {n_items_file - 1}"
-#                 )
-#         else:
-#             raise ValueError("items must be (a list of) either int or str")
-
-#     if len(np.unique(items)) != len(items):
-#         raise ValueError("items must be unique")
-
-#     return items
