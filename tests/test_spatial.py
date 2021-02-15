@@ -17,7 +17,7 @@ def test_dist_in_meters():
     dist = dist_in_meters(coords, poi, is_geo=True)
     print(dist.max)
     assert dist.shape == (n,)
-    assert dist.max() < 20040000
+    assert dist.max() < 20046000
 
     dist = dist_in_meters(coords, poi, is_geo=False)
     assert dist.shape == (n,)
