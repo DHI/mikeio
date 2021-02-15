@@ -138,6 +138,8 @@ def test_sw_set_end_time(tmpdir):
     assert pfs.end_time == new_end_time
     assert pfs.section("TIME")["number_of_time_steps"].value == 720
 
+    pfs.write(os.path.join(tmpdir, "lake_new.sw"))
+
 
 def test_sw_modify_and_write(tmpdir):
 
@@ -150,6 +152,11 @@ def test_sw_modify_and_write(tmpdir):
 
     # modify parameter without needing to specify that the float is a float...
     wind_section["Charnock_parameter"] = 0.02
+
+    wind_section["Charnock_parameter"] = 1.0
+
+    # Force parameter to be interpreted as float to avoid interpreting 1.0 as integer
+    wind_section["Charnock_parameter"].modify(0.1, float)
 
     # modify a filename
     pfs.section("DOMAIN")["file_name"] = "tests\\testdata\\odense_rough.mesh"
@@ -167,4 +174,3 @@ def test_sw_modify_and_write(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "lake_mod.sw")
 
     pfs.write(outfilename)
-
