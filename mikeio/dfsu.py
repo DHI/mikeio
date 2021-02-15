@@ -2376,7 +2376,6 @@ class Dfsu(_UnstructuredFile):
         epsg: typing.Optional[int] = None,
         interpolation_method: str = "nearest",
         filename: typing.Optional[typing.Union[str, pathlib.Path]] = None,
-        **kwargs,
     ):
         """Export Dfsu to Dfs2 file.
 
@@ -2406,22 +2405,16 @@ class Dfsu(_UnstructuredFile):
             If None (default), uses coordinate system of the parent Dfsu file.
         interpolation_method : str, optional
             Interpolation method, by default it is 'nearest'.
+            See https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
         filename : str or pathlib.Path, optional
             Path to *.dfs2 file to be created.
             If None (default), creates a temporary dfs2 file
             in the system temporary directory.
-        kwargs: keyword arguments to get_2d_interp        
 
         Returns
         -------
         Dfs2
             mikeio Dfs2 object pointing to the file located at `filename`.
-
-        Examples
-        --------
-        >>> from  mikeio import Dfsu
-        >>> dfs = Dfsu("HD2D.dfsu")
-        >>> dfs.to_dfs2(x0=605900.0, y0=6902400.0, dx=25.0, dy=25.0, nx=100, ny=100, filename="hd2d_25m.dfs2")
 
         """
         # Process 'filename' argument
@@ -2470,13 +2463,14 @@ class Dfsu(_UnstructuredFile):
                 "'interpolation_method' argument is currently not supported, "
                 "interpolation is performed using nearest neighborhood method"
             )
-        elem_ids, weights = self.get_2d_interpolant(xy=grid.xy, **kwargs)
+        elem_ids, weights = self.get_2d_interpolant(
+            xy=grid.xy, n_nearest=1, extrapolate=False, p=2, radius=None,
+        )
         dataset = self.read(items=None, time_steps=None, elements=None)
         interpolated_dataset = self.interp2d(
             dataset, elem_ids=elem_ids, weights=weights, shape=(grid.ny, grid.nx),
         )
 
-        # TODO dataset is upside-down, which convention is correct??
         interpolated_dataset = interpolated_dataset.flipud()
 
         # Write interpolated data to 'filename'

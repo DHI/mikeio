@@ -1157,7 +1157,6 @@ def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
         epsg=None,
         interpolation_method="nearest",
         filename=filename,
-        n_nearest=3
     )
 
     # Make sure it was saved to the correct location
