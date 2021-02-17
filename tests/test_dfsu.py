@@ -1148,6 +1148,17 @@ def test_extract_track():
     assert track3.data[2][23] == approx(3.6865002370663547)
 
 
+def test_extract_surface_elevation_from_3d():
+    dfs = Dfsu('tests/testdata/oresund_sigma_z.dfsu')
+    outputfile = 'tests/testdata/oresund_surface_elev_extracted.dfsu'
+    n_top1 = len(dfs.top_elements)
+
+    dfs.extract_surface_elevation_from_3d(outputfile, time_steps=-1)
+
+    dfs2 = Dfsu(outputfile)
+    assert dfs2.n_elements == n_top1
+    os.remove(outputfile) # clean up
+
 def test_find_nearest_element_in_Zlayer():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
