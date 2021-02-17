@@ -63,11 +63,6 @@ class _Dfs123:
         n_items = len(item_numbers)
 
         time_steps = valid_timesteps(self._dfs.FileInfo, time_steps)
-
-        for t in time_steps:
-            if t > (self.n_timesteps - 1):
-                raise IndexError(f"Timestep {t} is > {self.n_timesteps-1}")
-
         nt = len(time_steps)
 
         if self._ndim == 1:
