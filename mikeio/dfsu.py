@@ -2104,9 +2104,10 @@ class Dfsu(_UnstructuredFile):
 
         return Dataset(data_list, times, items_out)
 
-    def extract_surface_from_3d(self, filename=None, time_steps=None, n_nearest=4):
+    def extract_surface_elevation_from_3d(self, filename=None, time_steps=None, n_nearest=4):
         """
-        Extract surface from a 3d dfsu file (based on zn) to a new 2d dfsu file
+        Extract surface elevation from a 3d dfsu file (based on zn) 
+        to a new 2d dfsu file with a surface elevation item.
 
         Parameters
         ---------
@@ -2119,7 +2120,7 @@ class Dfsu(_UnstructuredFile):
 
         Examples
         --------
-        >>> dfsu.extract_surface_from_3d('ex_surf.dfsu', time_steps='2018-1-1,2018-2-1')
+        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time_steps='2018-1-1,2018-2-1')
         """
         assert (
             self._type == UnstructuredType.Dfsu3DSigma
