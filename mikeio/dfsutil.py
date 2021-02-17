@@ -106,7 +106,7 @@ def item_numbers_by_name(dfsItemInfo, item_names):
     return item_numbers
 
 
-def get_item_info(dfsItemInfo, item_numbers):
+def get_item_info(dfsItemInfo, item_numbers=None):
     """Read DFS ItemInfo for specific item numbers
 
     Parameters
@@ -118,6 +118,9 @@ def get_item_info(dfsItemInfo, item_numbers):
     -------
     list[ItemInfo]
     """
+    if item_numbers is None:
+        item_numbers = list(range(len(dfsItemInfo)))
+
     items = []
     for item in item_numbers:
         name = dfsItemInfo[item].Name
