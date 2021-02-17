@@ -16,7 +16,7 @@ from .dotnet import (
     to_dotnet_datetime,
 )
 from .helpers import safe_length
-from .dfsutil import valid_item_numbers, item_numbers_by_name
+from .dfsutil import _valid_item_numbers, _item_numbers_by_name
 
 show_progress = False
 
@@ -70,7 +70,7 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
         builder.AddCustomBlock(customBlock)
 
     # Copy dynamic items
-    item_numbers = valid_item_numbers(source.ItemInfo, items)
+    item_numbers = _valid_item_numbers(source.ItemInfo, items)
     for item in item_numbers:
         builder.AddDynamicItem(source.ItemInfo[item])
 
@@ -118,7 +118,7 @@ def scale(
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
-    item_numbers = valid_item_numbers(dfs.ItemInfo, items)
+    item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
     n_items = len(item_numbers)
 
     n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -341,7 +341,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
-    items = valid_item_numbers(dfs_i.ItemInfo, items)
+    items = _valid_item_numbers(dfs_i.ItemInfo, items)
 
     dfs_o = _clone(infilename, outfilename, start_time=file_start_new, items=items)
 

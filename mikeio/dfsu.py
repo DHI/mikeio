@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
-from .dfsutil import get_item_info, valid_item_numbers, valid_timesteps
+from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset
 from .dotnet import (
     to_numpy,
@@ -1720,7 +1720,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
         # items
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs.ItemInfo, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         # time
         self._start_time = from_dotnet_datetime(dfs.StartDateTime)
@@ -1875,12 +1875,12 @@ class Dfsu(_UnstructuredFile):
         # TODO: add more checks that this is actually still the same file
         # (could have been replaced in the meantime)
 
-        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
-        items = get_item_info(dfs.ItemInfo, item_numbers)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        time_steps = valid_timesteps(dfs, time_steps)
+        time_steps = _valid_timesteps(dfs, time_steps)
 
         if elements is None:
             n_elems = self.n_elements
@@ -1967,12 +1967,12 @@ class Dfsu(_UnstructuredFile):
 
         dfs = DfsuFile.Open(self._filename)
 
-        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
-        items = get_item_info(dfs.ItemInfo, item_numbers)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        time_steps = valid_timesteps(dfs, time_steps=None)
+        time_steps = _valid_timesteps(dfs, time_steps=None)
 
         deletevalue = self.deletevalue
 

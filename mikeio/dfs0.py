@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dfsutil import valid_item_numbers, get_item_info
+from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
@@ -71,7 +71,7 @@ class Dfs0:
 
         # Read items
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs.ItemInfo, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
 
@@ -109,7 +109,7 @@ class Dfs0:
         self._source = dfs
 
         self._n_items = safe_length(dfs.ItemInfo)
-        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
 
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 

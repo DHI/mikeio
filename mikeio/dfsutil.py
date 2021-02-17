@@ -5,7 +5,7 @@ from .dotnet import from_dotnet_datetime
 from .custom_exceptions import ItemsError
 
 
-def valid_item_numbers(dfsItemInfo, items):
+def _valid_item_numbers(dfsItemInfo, items):
     n_items_file = len(dfsItemInfo)
     if items is None:
         return list(range(n_items_file))
@@ -15,7 +15,7 @@ def valid_item_numbers(dfsItemInfo, items):
 
     for idx, item in enumerate(items):
         if isinstance(item, str):
-            items[idx] = item_numbers_by_name(dfsItemInfo, [item])[0]
+            items[idx] = _item_numbers_by_name(dfsItemInfo, [item])[0]
         elif isinstance(item, int):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
@@ -28,7 +28,7 @@ def valid_item_numbers(dfsItemInfo, items):
     return items
 
 
-def valid_timesteps(dfsFileInfo, time_steps):
+def _valid_timesteps(dfsFileInfo, time_steps):
     # TODO: naming: time_steps or timesteps?
     n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
 
@@ -76,7 +76,7 @@ def valid_timesteps(dfsFileInfo, time_steps):
     return time_steps
 
 
-def item_numbers_by_name(dfsItemInfo, item_names):
+def _item_numbers_by_name(dfsItemInfo, item_names):
     """Utility function to find item numbers
 
     Parameters
@@ -106,7 +106,7 @@ def item_numbers_by_name(dfsItemInfo, item_names):
     return item_numbers
 
 
-def get_item_info(dfsItemInfo, item_numbers=None):
+def _get_item_info(dfsItemInfo, item_numbers=None):
     """Read DFS ItemInfo for specific item numbers
 
     Parameters

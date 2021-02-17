@@ -11,7 +11,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
-from .dfsutil import valid_item_numbers, valid_timesteps, get_item_info
+from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .dotnet import (
     to_numpy,
@@ -243,10 +243,10 @@ class Dfs3(_Dfs123):
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
 
-        item_numbers = valid_item_numbers(dfs.ItemInfo, items)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        time_steps = valid_timesteps(dfs.FileInfo, time_steps)
+        time_steps = _valid_timesteps(dfs.FileInfo, time_steps)
         nt = len(time_steps)
 
         # Determine the size of the grid
@@ -323,7 +323,7 @@ class Dfs3(_Dfs123):
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
-        items = get_item_info(dfs.ItemInfo, item_numbers)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
 
         dfs.Close()
 

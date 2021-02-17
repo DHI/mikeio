@@ -13,7 +13,7 @@ from .dotnet import (
 )
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
-from .dfsutil import valid_item_numbers, valid_timesteps, get_item_info
+from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
@@ -59,10 +59,10 @@ class _Dfs123:
         """
         self._open()
 
-        item_numbers = valid_item_numbers(self._dfs.ItemInfo, items)
+        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        time_steps = valid_timesteps(self._dfs.FileInfo, time_steps)
+        time_steps = _valid_timesteps(self._dfs.FileInfo, time_steps)
         nt = len(time_steps)
 
         if self._ndim == 1:
@@ -96,7 +96,7 @@ class _Dfs123:
 
         time = [self.start_time + timedelta(seconds=t) for t in t_seconds]
 
-        items = get_item_info(self._dfs.ItemInfo, item_numbers)
+        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
         return Dataset(data_list, time, items)
@@ -104,7 +104,7 @@ class _Dfs123:
     def _read_header(self):
         dfs = self._dfs
         self._n_items = len(dfs.ItemInfo)
-        self._items = get_item_info(dfs.ItemInfo, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
