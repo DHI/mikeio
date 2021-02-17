@@ -336,7 +336,7 @@ class _UnstructuredGeometry:
                 geom._type = UnstructuredType.Dfsu2D
                 geom._n_layers = None
                 if node_layers == "all":
-                    print(
+                    warnings.warn(
                         "Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
                     )
             else:
@@ -2279,10 +2279,12 @@ class Dfsu(_UnstructuredFile):
         if elements is None:
             geometry = self
         else:
-            geometry = self.elements_to_geometry(elements)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                geometry = self.elements_to_geometry(elements)
             if (not self.is_2d) and (geometry._type == UnstructuredType.Dfsu2D):
                 # redo extraction as 2d:
-                print("will redo extraction in 2d!")
+                # print("will redo extraction in 2d!")
                 geometry = self.elements_to_geometry(elements, node_layers="bottom")
                 if items[0].name == "Z coordinate":
                     # get rid of z-item
