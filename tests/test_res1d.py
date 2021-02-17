@@ -1,15 +1,17 @@
+import os
 import pytest
+import numpy as np
+import pandas as pd
 
 from mikeio.custom_exceptions import NoDataForQuery, InvalidQuantity
 from mikeio.res1d import Res1D, mike1d_quantities, QueryDataReach
 from mikeio.dotnet import to_numpy
-import numpy as np
-import pandas as pd
 
 
 @pytest.fixture
 def test_file_path():
-    return "tests/testdata/Exam6Base.res1d"
+    test_folder_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(test_folder_path, "testdata", "Exam6Base.res1d")
 
 
 @pytest.fixture
