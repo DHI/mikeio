@@ -3,6 +3,7 @@ import clr
 import pandas as pd
 import numpy as np
 
+from mikeio.custom_exceptions import NoDataForQuery, InvalidQuantity
 from mikeio.dotnet import from_dotnet_datetime, to_numpy, to_dotnet_datetime
 
 from System import Enum, DateTime
@@ -37,7 +38,7 @@ class QueryData:
             raise TypeError("Quantity must be a string.")
 
         if self.quantity not in mike1d_quantities():
-            raise ValueError(
+            raise InvalidQuantity(
                 f"Undefined quantity {self.quantity}. "
                 f"Allowed quantities are: {', '.join(mike1d_quantities())}."
             )
@@ -94,6 +95,8 @@ class QueryDataReach(QueryData):
 
     def get_values(self, res1d):
         values = res1d.query.GetReachValues(self._name, self._chainage, self._quantity)
+        if values is None:
+            raise NoDataForQuery(str(self))
         return self.from_dotnet_to_python(values)
 
     @property

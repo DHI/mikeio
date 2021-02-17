@@ -30,3 +30,13 @@ class InvalidDataValueType(ValueError):
             "Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
             "'MeanStepBackward', or 'MeanStepForward'"
         )
+
+
+class NoDataForQuery(ValueError):
+    def __init__(self, query_string):
+        super().__init__(f"Invalid query {query_string}")
+
+
+class InvalidQuantity(ValueError):
+    def __init__(self, message="Invalid quantity."):
+        super().__init__(message)
