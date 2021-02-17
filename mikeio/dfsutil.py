@@ -33,7 +33,7 @@ def valid_timesteps(dfsFileInfo, time_steps):
     n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
 
     if time_steps is None:
-        time_steps = list(range(n_steps_file))
+        return list(range(n_steps_file))
 
     if isinstance(time_steps, int):
         time_steps = [time_steps]
