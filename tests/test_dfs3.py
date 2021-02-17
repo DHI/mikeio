@@ -61,20 +61,21 @@ def test_read_write(tmpdir):
         title=title,
     )
 
+
 def test_dfs3_projection():
     dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
-    assert (dfs.projection_string == 'LONG/LAT')
-    assert (dfs.dx == 0.25)
-    assert (dfs.dy == 0.25)
-    assert (dfs.dz == 1.0)
+    assert dfs.projection_string == "LONG/LAT"
+    assert dfs.dx == 0.25
+    assert dfs.dy == 0.25
+    assert dfs.dz == 1.0
 
 
 def test_dfs3_get_bottom_data():
     dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
     data_bottom = dfs.get_bottom_values()
-    assert (len(data_bottom) > 0)
+    assert len(data_bottom) > 0
 
 
 def test_read_dfs3_timesteps_data():
     dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
-    dfs.read(timesteps=[1])
+    dfs.read(time_steps=[1])
