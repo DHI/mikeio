@@ -2104,7 +2104,9 @@ class Dfsu(_UnstructuredFile):
 
         return Dataset(data_list, times, items_out)
 
-    def extract_surface_elevation_from_3d(self, filename=None, time_steps=None, n_nearest=4):
+    def extract_surface_elevation_from_3d(
+        self, filename=None, time_steps=None, n_nearest=4
+    ):
         """
         Extract surface elevation from a 3d dfsu file (based on zn) 
         to a new 2d dfsu file with a surface elevation item.
@@ -2127,6 +2129,8 @@ class Dfsu(_UnstructuredFile):
             or self._type == UnstructuredType.Dfsu3DSigmaZ
         )
         time_steps = _valid_timesteps(self._source, time_steps)
+
+        # make 2d nodes-to-elements interpolator
         top_el = self.top_elements
         geom = self.elements_to_geometry(top_el, node_layers="top")
         xye = geom.element_coordinates[:, 0:2]
