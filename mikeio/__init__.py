@@ -19,7 +19,7 @@ from platform import architecture
 # Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
-__version__ = '0.6.2'
+__version__ = "0.6.2"
 
 if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
@@ -51,7 +51,7 @@ def read(filename, items=None, time_steps=None):
     """Read data from a dfs file
 
     Usage:
-        read(filename, item_numbers=None, item_names=None)
+        read(filename, items=None, time_steps=None)
     filename
         full path and file name to the dfs file.
     items: list[int] or list[str], optional

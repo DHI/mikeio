@@ -13,6 +13,7 @@ from .dotnet import (
 )
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
+from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from DHI.Generic.MikeZero import eumQuantity
 from DHI.Generic.MikeZero.DFS import (
     DfsSimpleType,
@@ -58,15 +59,10 @@ class _Dfs123:
         """
         self._open()
 
-        items, item_numbers, time_steps = self._get_valid_items_and_timesteps(
-            items, time_steps
-        )
-
-        for t in time_steps:
-            if t > (self.n_timesteps - 1):
-                raise IndexError(f"Timestep {t} is > {self.n_timesteps-1}")
-
+        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
+
+        time_steps = _valid_timesteps(self._dfs.FileInfo, time_steps)
         nt = len(time_steps)
 
         if self._ndim == 1:
@@ -100,7 +96,7 @@ class _Dfs123:
 
         time = [self.start_time + timedelta(seconds=t) for t in t_seconds]
 
-        items = self._get_item_info(item_numbers)
+        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
         return Dataset(data_list, time, items)
@@ -108,13 +104,13 @@ class _Dfs123:
     def _read_header(self):
         dfs = self._dfs
         self._n_items = len(dfs.ItemInfo)
-        self._items = self._get_item_info(list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
         self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
             )  # TODO handle other timeunits
-               # TODO to get the EndTime
+            # TODO to get the EndTime
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._projstr = dfs.FileInfo.Projection.WKTString
         self._longitude = dfs.FileInfo.Projection.Longitude
@@ -124,7 +120,9 @@ class _Dfs123:
 
         dfs.Close()
 
-    def _write(self, filename, data, start_time, dt, datetimes, items, coordinate, title):
+    def _write(
+        self, filename, data, start_time, dt, datetimes, items, coordinate, title
+    ):
 
         if isinstance(data, Dataset) and not data.is_equidistant:
             datetimes = data.time
@@ -182,7 +180,6 @@ class _Dfs123:
                     t = datetimes[i]
                     relt = (t - start_time).total_seconds()
                     dfs.WriteItemTimeStepNext(relt, darray)
-
 
         dfs.Close()
 
@@ -291,111 +288,11 @@ class _Dfs123:
 
         return self._builder.GetFile()
 
-    def _get_valid_items_and_timesteps(self, items, time_steps):
-
-        if isinstance(items, int) or isinstance(items, str):
-            items = [items]
-
-        if items is not None and isinstance(items[0], str):
-            items = self._find_item(items)
-
-        if items is None:
-            item_numbers = list(range(self.n_items))
-        else:
-            item_numbers = items
-
-        self._validate_item_numbers(item_numbers)
-
-        if time_steps is None:
-            time_steps = list(range(self.n_timesteps))
-
-        if isinstance(time_steps, int):
-            time_steps = [time_steps]
-
-        if isinstance(time_steps, str):
-            parts = time_steps.split(",")
-            if parts[0] == "":
-                time_steps = slice(parts[1])  # stop only
-            elif parts[1] == "":
-                time_steps = slice(parts[0], None)  # start only
-            else:
-                time_steps = slice(parts[0], parts[1])
-
-        if isinstance(time_steps, slice):
-            freq = pd.tseries.offsets.DateOffset(seconds=self.timestep)
-            time = pd.date_range(self.start_time, periods=self.n_timesteps, freq=freq)
-            s = time.slice_indexer(time_steps.start, time_steps.stop)
-            time_steps = list(range(s.start, s.stop))
-
-        items = self._get_item_info(item_numbers)
-
-        return items, item_numbers, time_steps
-
     def _open(self):
         raise NotImplementedError("Should be implemented by subclass")
 
     def _set_spatial_axis(self):
         raise NotImplementedError("Should be implemented by subclass")
-
-    def _find_item(self, item_names):
-        """Utility function to find item numbers
-
-        Parameters
-        ----------
-        dfs : DfsFile
-
-        item_names : list[str]
-            Names of items to be found
-
-        Returns
-        -------
-        list[int]
-            item numbers (0-based)
-
-        Raises
-        ------
-        KeyError
-            In case item is not found in the dfs file
-        """
-        names = [x.Name for x in self._dfs.ItemInfo]
-        item_lookup = {name: i for i, name in enumerate(names)}
-        try:
-            item_numbers = [item_lookup[x] for x in item_names]
-        except KeyError:
-            raise KeyError(f"Selected item name not found. Valid names are {names}")
-
-        return item_numbers
-
-    def _get_item_info(self, item_numbers):
-        """Read DFS ItemInfo
-
-        Parameters
-        ----------
-        dfs : MIKE dfs object
-        item_numbers : list[int]
-
-        Returns
-        -------
-        list[Iteminfo]
-        """
-        items = []
-        for item in item_numbers:
-            name = self._dfs.ItemInfo[item].Name
-            eumItem = self._dfs.ItemInfo[item].Quantity.Item
-            eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
-            itemtype = EUMType(eumItem)
-            unit = EUMUnit(eumUnit)
-            data_value_type = self._dfs.ItemInfo[item].get_ValueType()
-            item = ItemInfo(name, itemtype, unit, data_value_type)
-            items.append(item)
-        return items
-
-    def _validate_item_numbers(self, item_numbers):
-        if not all(
-            isinstance(item_number, int) and 0 <= item_number < self.n_items
-            for item_number in item_numbers
-        ):
-            raise ItemNumbersError()
 
     @property
     def deletevalue(self):
@@ -423,7 +320,7 @@ class _Dfs123:
         """
         if self._end_time is None:
             self._end_time = self.read([0]).time[-1].to_pydatetime()
-        
+
         return self._end_time
 
     @property

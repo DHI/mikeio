@@ -56,6 +56,10 @@ def test_set_z():
     zn = msh.node_coordinates[:, 2]
     assert zn.min() == -3
 
+    with pytest.raises(ValueError):
+        # not same length
+        msh.set_z(zn[0:4])
+
 
 def test_set_codes():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
@@ -66,6 +70,9 @@ def test_set_codes():
     msh.set_codes(codes)
     assert msh.codes[2] == 7
 
+    with pytest.raises(ValueError):
+        # not same length
+        msh.set_codes(codes[0:4])
 
 def test_write(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple.mesh")
