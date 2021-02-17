@@ -336,7 +336,7 @@ class _UnstructuredGeometry:
                 geom._type = UnstructuredType.Dfsu2D
                 geom._n_layers = None
                 if node_layers == "all":
-                    print(
+                    warnings.warn(
                         "Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
                     )
             else:
@@ -2104,6 +2104,57 @@ class Dfsu(_UnstructuredFile):
 
         return Dataset(data_list, times, items_out)
 
+    def extract_surface_elevation_from_3d(
+        self, filename=None, time_steps=None, n_nearest=4
+    ):
+        """
+        Extract surface elevation from a 3d dfsu file (based on zn) 
+        to a new 2d dfsu file with a surface elevation item.
+
+        Parameters
+        ---------
+        filename: str
+            Output file name
+        time_steps: str, int or list[int], optional
+            Extract only selected time_steps
+        n_nearest: int, optional
+            number of points for spatial interpolation (inverse_distance), default=4
+
+        Examples
+        --------
+        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time_steps='2018-1-1,2018-2-1')
+        """
+        assert (
+            self._type == UnstructuredType.Dfsu3DSigma
+            or self._type == UnstructuredType.Dfsu3DSigmaZ
+        )
+        time_steps = _valid_timesteps(self._source, time_steps)
+
+        # make 2d nodes-to-elements interpolator
+        top_el = self.top_elements
+        geom = self.elements_to_geometry(top_el, node_layers="top")
+        xye = geom.element_coordinates[:, 0:2]
+        xyn = geom.node_coordinates[:, 0:2]
+        tree2d = cKDTree(xyn)
+        dist, node_ids = tree2d.query(xye, k=n_nearest)
+        weights = get_idw_interpolant(dist)
+
+        node_ids_surf, _ = self._get_nodes_and_table_for_elements(
+            top_el, node_layers="top"
+        )
+
+        # read zn, interpolate and create output
+        ds = self.read(items=0, time_steps=time_steps)  # read only zn
+        zn_surf = ds.data[0][:, node_ids_surf]
+        surf2d = interp2d(zn_surf, node_ids, weights)
+        items = [ItemInfo(EUMType.Surface_Elevation)]
+        ds2 = Dataset([surf2d], ds.time, items)
+        title = "Surface extracted from 3D file"
+        if filename is None:
+            return ds2
+        else:
+            self.write(filename, ds2, elements=top_el, title=title)
+
     def write_header(
         self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
     ):
@@ -2233,10 +2284,12 @@ class Dfsu(_UnstructuredFile):
         if elements is None:
             geometry = self
         else:
-            geometry = self.elements_to_geometry(elements)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                geometry = self.elements_to_geometry(elements)
             if (not self.is_2d) and (geometry._type == UnstructuredType.Dfsu2D):
                 # redo extraction as 2d:
-                print("will redo extraction in 2d!")
+                # print("will redo extraction in 2d!")
                 geometry = self.elements_to_geometry(elements, node_layers="bottom")
                 if items[0].name == "Z coordinate":
                     # get rid of z-item
