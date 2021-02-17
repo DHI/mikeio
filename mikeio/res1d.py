@@ -131,7 +131,7 @@ class QueryDataNode(QueryData):
 
 
 class Res1D:
-    def __init__(self, file_path=None, put_chainage_in_col_name=False):
+    def __init__(self, file_path=None, put_chainage_in_col_name=True):
         self.file_path = file_path
         self._time_index = None
         self._start_time = None
