@@ -2124,10 +2124,12 @@ class Dfsu(_UnstructuredFile):
         --------
         >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time_steps='2018-1-1,2018-2-1')
         """
+        # validate input
         assert (
             self._type == UnstructuredType.Dfsu3DSigma
             or self._type == UnstructuredType.Dfsu3DSigmaZ
         )
+        assert n_nearest > 0
         time_steps = _valid_timesteps(self._source, time_steps)
 
         # make 2d nodes-to-elements interpolator
@@ -2137,22 +2139,26 @@ class Dfsu(_UnstructuredFile):
         xyn = geom.node_coordinates[:, 0:2]
         tree2d = cKDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
-        weights = get_idw_interpolant(dist)
+        if n_nearest == 1:
+            weights = None
+        else:
+            weights = get_idw_interpolant(dist)
 
+        # read zn from 3d file and interpolate to element centers
+        ds = self.read(items=0, time_steps=time_steps)  # read only zn
         node_ids_surf, _ = self._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
-
-        # read zn, interpolate and create output
-        ds = self.read(items=0, time_steps=time_steps)  # read only zn
-        zn_surf = ds.data[0][:, node_ids_surf]
+        zn_surf = ds.data[0][:, node_ids_surf]  # surface
         surf2d = interp2d(zn_surf, node_ids, weights)
+
+        # create output
         items = [ItemInfo(EUMType.Surface_Elevation)]
         ds2 = Dataset([surf2d], ds.time, items)
-        title = "Surface extracted from 3D file"
         if filename is None:
             return ds2
         else:
+            title = "Surface extracted from 3D file"
             self.write(filename, ds2, elements=top_el, title=title)
 
     def write_header(
