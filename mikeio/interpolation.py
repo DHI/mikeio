@@ -25,7 +25,6 @@ def get_idw_interpolant(distances, p=2):
 
     MIN_DISTANCE = 1e-8
     weights = np.zeros(distances.shape)
-    p = 1  # inverse distance order
 
     match = distances[:, 0] < MIN_DISTANCE
     weights[match, 0] = 1
