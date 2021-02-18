@@ -1,14 +1,11 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
-
-with open("License.txt") as fh:
-    license = fh.read()
 
 setuptools.setup(
     name="mikeio",
-    version='0.6.2',
+    version="0.6.dev3",
     install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml", "tqdm"],
     extras_require={
         "dev": [
@@ -28,9 +25,9 @@ setuptools.setup(
     author_email="jan@dhigroup.com",
     description="A package that uses the DHI dfs libraries to create, write and read dfs, res1d and mesh files.",
     platform="windows_x64",
-    license=license,
-    #long_description=long_description,
-    #long_description_content_type="text/markdown",
+    license="BSD-3",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/DHI/mikeio",
     packages=setuptools.find_packages(),
     include_package_data=True,
