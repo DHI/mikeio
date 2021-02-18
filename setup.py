@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.6.dev3",
+    version="0.6.3",
     install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml", "tqdm"],
     extras_require={
         "dev": [
