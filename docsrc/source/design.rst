@@ -23,9 +23,11 @@ Easy to install
 ---------------
 
 From PyPI::
-    pip install mikeio)
+
+    pip install mikeio
 
 For Anaconda::
+
     conda install -c conda-forge mikeio
 
 Easy to get started
@@ -48,7 +50,7 @@ Contributions are welcome, more details can be found in our `contribution guidel
 Easy to collaborate​
 --------------------
 
-By developing MIKE IO on GitHub along with a open discussion, we believe that the collaboration between developers and end-users results in a useful library.
+By developing MIKE IO on GitHub along with a completely open discussion, we believe that the collaboration between developers and end-users results in a useful library.
 
 Reproducible
 ------------
@@ -56,6 +58,7 @@ Reproducible
 By providing the historical versions of MIKE IO on PyPI it is possible to reproduce the behaviour of an older existing system, based on an older version.
 
 Install specific version::
+
     pip install mikeio==0.4.3
 
 Easy access to new features
@@ -65,4 +68,5 @@ Features are being added all the time, by developers at DHI in offices all aroun
 These new features are always available from the master branch on GitHub and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.
 
 Install development version::
+
     pip install https://github.com/DHI/mikeio/archive/master.zip

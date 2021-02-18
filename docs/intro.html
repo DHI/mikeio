@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>MIKE IO: input/output of MIKE files in Python &mdash; mikeio  documentation</title>
+  <title>Requirements &mdash; mikeio  documentation</title>
   
 
   
@@ -36,7 +36,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Design philosophy" href="design.html" /> 
+    <link rel="next" title="Design philosophy" href="design.html" />
+    <link rel="prev" title="MIKE IO: input/output of MIKE files in Python" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,7 +51,7 @@
           
 
           
-            <a href="#" class="icon icon-home" alt="Documentation Home"> mikeio
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> mikeio
           
 
           
@@ -82,7 +83,12 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#installation">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#getting-started">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#notebooks">Notebooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#where-can-i-get-help">Where can I get help?</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API Documentation</a></li>
 </ul>
@@ -100,7 +106,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">mikeio</a>
+          <a href="index.html">mikeio</a>
         
       </nav>
 
@@ -129,15 +135,15 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>MIKE IO: input/output of MIKE files in Python</li>
+      <li>Requirements</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/intro.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -150,11 +156,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <img alt="https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg" src="https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg" /><div class="section" id="mike-io-input-output-of-mike-files-in-python">
-<h1>MIKE IO: input/output of MIKE files in Python<a class="headerlink" href="#mike-io-input-output-of-mike-files-in-python" title="Permalink to this headline">¶</a></h1>
-<p>Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.</p>
-<div class="section" id="requirements">
-<span id="intro"></span><h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="requirements">
+<span id="intro"></span><h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>Windows operating system</p></li>
 <li><p>Python x64 3.6, 3.7 or 3.8</p></li>
@@ -162,7 +165,7 @@
 </ul>
 </div>
 <div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>From PyPI:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mikeio</span>
 </pre></div>
@@ -177,7 +180,7 @@
 </div>
 </div>
 <div class="section" id="getting-started">
-<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs0</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
@@ -185,7 +188,7 @@
 </div>
 </div>
 <div class="section" id="notebooks">
-<h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline">¶</a></h2>
+<h1>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfs0%20-%20Timeseries.ipynb">Dfs0</a></p></li>
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfsu%20-%20Read.ipynb">Dfsu basic</a></p></li>
@@ -194,14 +197,11 @@
 </ul>
 </div>
 <div class="section" id="where-can-i-get-help">
-<h2>Where can I get help?<a class="headerlink" href="#where-can-i-get-help" title="Permalink to this headline">¶</a></h2>
+<h1>Where can I get help?<a class="headerlink" href="#where-can-i-get-help" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>New ideas and feature requests - <a class="reference external" href="http://github.com/DHI/mikeio/discussions">GitHub Discussions</a></p></li>
 <li><p>Bugs - <a class="reference external" href="http://github.com/DHI/mikeio/issues">GitHub Issues</a></p></li>
 </ul>
-<div class="toctree-wrapper compound">
-</div>
-</div>
 </div>
 
 
@@ -214,6 +214,8 @@
       
         <a href="design.html" class="btn btn-neutral float-right" title="Design philosophy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="MIKE IO: input/output of MIKE files in Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
