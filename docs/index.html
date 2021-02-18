@@ -155,14 +155,24 @@
 <div class="section" id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><p>Python x64 &gt;=3.6</p></li>
-<li><p>MIKE &gt;= 2019 or MIKE SDK &gt;= 2017</p></li>
+<li><p>Windows operating system</p></li>
+<li><p>Python x64 3.6, 3.7 or 3.8</p></li>
+<li><p><a class="reference external" href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads">VC++ redistributables</a> (already installed if you have MIKE)</p></li>
 </ul>
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>From PyPI:</p>
 <blockquote>
 <div><p>pip install mikeio</p>
+</div></blockquote>
+<p>For Anaconda:</p>
+<blockquote>
+<div><p>conda install -c conda-forge mikeio</p>
+</div></blockquote>
+<p>Or development version:</p>
+<blockquote>
+<div><p>pip install <a class="reference external" href="https://github.com/DHI/mikeio/archive/master.zip">https://github.com/DHI/mikeio/archive/master.zip</a></p>
 </div></blockquote>
 </div>
 <div class="section" id="getting-started">
@@ -170,13 +180,24 @@
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs0</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
-<span class="go">                     VarFun01    NotFun</span>
-<span class="go">2017-01-01 00:00:00  0.843547  0.640486</span>
-<span class="go">2017-01-01 05:00:00  0.093729  0.653257</span>
-<span class="go">2017-01-01 10:00:00       NaN       NaN</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="notebooks">
+<h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfs0%20-%20Timeseries.ipynb">Dfs0</a></p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfsu%20-%20Read.ipynb">Dfsu basic</a></p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfs2%20-%20Bathymetry.ipynb">Create Dfs2 from netCDF</a></p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/tree/master/notebooks/">Complete list of all notebooks</a></p></li>
+</ul>
+</div>
+<div class="section" id="where-can-i-get-help">
+<h2>Where can I get help?<a class="headerlink" href="#where-can-i-get-help" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>New ideas and feature requests - <a class="reference external" href="http://github.com/DHI/mikeio/discussions">GitHub Discussions</a></p></li>
+<li><p>Bugs - <a class="reference external" href="http://github.com/DHI/mikeio/issues">GitHub Issues</a></p></li>
+</ul>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
@@ -222,7 +243,7 @@
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2020, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard
+        &copy; Copyright 2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard
 
     </p>
   </div>
