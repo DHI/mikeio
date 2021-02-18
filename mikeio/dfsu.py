@@ -2464,9 +2464,8 @@ class Dfsu(_UnstructuredFile):
             If None (default), uses coordinate system of the parent Dfsu file.
         interpolation_method : str, optional
             Interpolation method, by default it is 'nearest'.
-            See https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
         filename : str or pathlib.Path, optional
-            Path to *.dfs2 file to be created.
+            Path to dfs2 file to be created.
             If None (default), creates a temporary dfs2 file
             in the system temporary directory.
 
