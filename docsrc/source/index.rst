@@ -19,15 +19,15 @@ Requirements
 
 Installation
 ------------
-From PyPI: 
+From PyPI::
 
     pip install mikeio
 
-For Anaconda:
+For Anaconda::
 
     conda install -c conda-forge mikeio
 
-Or development version:
+Or development version::
 
     pip install https://github.com/DHI/mikeio/archive/master.zip
 
@@ -54,6 +54,7 @@ Where can I get help?
 
 
 .. toctree::
+   design
    api
    :maxdepth: 2
    :caption: Contents:
