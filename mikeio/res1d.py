@@ -175,7 +175,8 @@ class Res1D:
                     data_set, data_item, NAME_DELIMITER, self._put_chainage_in_col_name
                 ):
                     df[col_name] = values
-        return df
+
+        return df.reindex(sorted(df.columns), axis=1)
 
     @staticmethod
     def get_values(
