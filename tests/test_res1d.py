@@ -48,7 +48,8 @@ def test_valid_reach_data_queries(test_file_path, query, expected):
     res1d = Res1D(test_file_path)
 
     with pytest.raises(InvalidQuantity):
-        assert QueryDataReach("InvalidQuantity", "104l1", 34.4131)
+        invalid_query = QueryDataReach("InvalidQuantity", "104l1", 34.4131)
+        assert res1d.read(invalid_query)
 
     if expected:
         res1d.read(query)
