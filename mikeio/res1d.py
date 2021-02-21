@@ -37,11 +37,6 @@ class QueryData:
         if not isinstance(self.quantity, str):
             raise TypeError("Quantity must be a string.")
 
-        if self.quantity not in mike1d_quantities():
-            raise InvalidQuantity(
-                f"Undefined quantity {self.quantity}. "
-                f"Allowed quantities are: {', '.join(mike1d_quantities())}."
-            )
         if self.name is not None and not isinstance(self.name, str):
             raise TypeError("Argument 'name' must be either None or a string.")
 
@@ -94,6 +89,9 @@ class QueryDataReach(QueryData):
             raise ValueError("Argument 'chainage' cannot be set if name is None.")
 
     def get_values(self, res1d):
+        if self._quantity not in res1d.quantities:
+            raise InvalidQuantity(f"Undefined quantity {self._quantity}. "
+                                  f"Allowed quantities are: {', '.join(res1d.quantities)}.")
         values = res1d.query.GetReachValues(self._name, self._chainage, self._quantity)
         if values is None:
             raise NoDataForQuery(str(self))
