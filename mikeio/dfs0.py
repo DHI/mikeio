@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dutil import get_valid_items_and_timesteps, get_item_info
+from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
@@ -71,7 +71,7 @@ class Dfs0:
 
         # Read items
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
 
@@ -107,7 +107,10 @@ class Dfs0:
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
+
         self._n_items = safe_length(dfs.ItemInfo)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         if self._timeaxistype == TimeAxisType.NonEquidistantCalendar and isinstance(
@@ -118,8 +121,6 @@ class Dfs0:
         else:
             sel_time_step_str = None
 
-        items, item_numbers, _ = get_valid_items_and_timesteps(self, items, time_steps)
-
         dfs.Close()
 
         ds = self.__read(self._filename)
@@ -129,6 +130,9 @@ class Dfs0:
 
         if sel_time_step_str:
             parts = sel_time_step_str.split(",")
+            if len(parts) == 1:
+                parts.append(parts[0])  # end=start
+
             if parts[0] == "":
                 sel = slice(parts[1])  # stop only
             elif parts[1] == "":
@@ -184,14 +188,6 @@ class Dfs0:
             yield ItemInfo(name, item_type, unit)
 
     @staticmethod
-    def _validate_item_numbers(item_numbers):
-        if not all(
-            isinstance(item_number, int) and 0 <= item_number < 1e15
-            for item_number in item_numbers
-        ):
-            raise ItemNumbersError()
-
-    @staticmethod
     def _to_dfs_datatype(dtype):
         if dtype is None:
             return DfsSimpleType.Float
@@ -231,9 +227,7 @@ class Dfs0:
             newitem = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(item.type, item.unit)
             newitem.Set(
-                item.name,
-                quantity,
-                dtype_dfs,
+                item.name, quantity, dtype_dfs,
             )
 
             if self._data_value_type is not None:

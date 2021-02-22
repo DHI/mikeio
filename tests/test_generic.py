@@ -296,6 +296,19 @@ def test_extract_equidistant(tmpdir):
     assert extracted.n_timesteps == orig.n_timesteps - 1
     assert extracted.time[0] == orig.time[1]
 
+    extract(infile, outfile, start=-23, end=1000)
+    orig = mikeio.read(infile)
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps == orig.n_timesteps
+
+    extract(infile, outfile, start=-23.5)
+    orig = mikeio.read(infile)
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps == orig.n_timesteps
+
+    with pytest.raises(Exception):
+        extract(infile, outfile, start=1000)
+
 
 def test_extract_non_equidistant(tmpdir):
 
@@ -312,6 +325,26 @@ def test_extract_non_equidistant(tmpdir):
     assert extracted.n_timesteps == 7
     assert extracted.time[0].hour == 0
     assert extracted.time[-1].minute == 0
+
+    extract(infile, outfile, start=1800.0, end=237981231.232)
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps > 0
+
+    extract(infile, outfile, "2017-10-27,2017-10-28")
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps > 0
+
+    with pytest.raises(Exception):
+        extract(infile, outfile, start=7200.0, end=1800.0)
+
+
+def test_extract_relative_time_axis(tmpdir):
+
+    infile = "tests/testdata/eq_relative.dfs0"
+    outfile = os.path.join(tmpdir.dirname, "eq_relative_extract.dfs0")
+
+    with pytest.raises(Exception):
+        extract(infile, outfile, start=0, end=4)
 
 
 def test_extract_items(tmpdir):

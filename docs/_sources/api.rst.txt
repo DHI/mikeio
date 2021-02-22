@@ -30,10 +30,10 @@ Mesh
 
 Misc
 -------
-.. autoclass:: mikeio.dutil.Dataset
+.. autoclass:: mikeio.Dataset
 	:members:
 
-.. autoclass:: mikeio.dutil.ItemInfo 
+.. autoclass:: mikeio.eum.ItemInfo 
 	:members:
 
 Generic

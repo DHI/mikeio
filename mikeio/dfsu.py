@@ -17,7 +17,7 @@ from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsFactory
 from DHI.Generic.MikeZero.DFS.dfsu import DfsuFile, DfsuFileType, DfsuBuilder, DfsuUtil
 from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 
-from .dutil import get_item_info, get_valid_items_and_timesteps
+from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset
 from .dotnet import (
     to_numpy,
@@ -336,7 +336,7 @@ class _UnstructuredGeometry:
                 geom._type = UnstructuredType.Dfsu2D
                 geom._n_layers = None
                 if node_layers == "all":
-                    print(
+                    warnings.warn(
                         "Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
                     )
             else:
@@ -1102,11 +1102,7 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(
-                elem_table.reshape(
-                    -1,
-                )
-            )
+            for i in np.unique(elem_table.reshape(-1,))
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1724,7 +1720,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
         # items
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         # time
         self._start_time = from_dotnet_datetime(dfs.StartDateTime)
@@ -1789,10 +1785,7 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source,
-            to_dotnet_array(xc),
-            to_dotnet_array(yc),
-            to_dotnet_array(zc),
+            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
         )
         ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
@@ -1879,20 +1872,15 @@ class Dfsu(_UnstructuredFile):
         dfs = DfsuFile.Open(self._filename)
         # time may have changes since we read the header
         # (if engine is continuously writing to this file)
-        self._n_timesteps = dfs.NumberOfTimeSteps
         # TODO: add more checks that this is actually still the same file
         # (could have been replaced in the meantime)
 
-        # NOTE. Item numbers are base 0 (everything else in the dfs is base 0)
-        # n_items = self.n_items #safe_length(dfs.ItemInfo)
-
-        nt = self.n_timesteps  # .NumberOfTimeSteps
-
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(
-            self, items, time_steps
-        )
-
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
+
+        self._n_timesteps = dfs.NumberOfTimeSteps
+        time_steps = _valid_timesteps(dfs, time_steps)
 
         if elements is None:
             n_elems = self.n_elements
@@ -1978,12 +1966,13 @@ class Dfsu(_UnstructuredFile):
         """
 
         dfs = DfsuFile.Open(self._filename)
-        self._n_timesteps = dfs.NumberOfTimeSteps
 
-        items, item_numbers, time_steps = get_valid_items_and_timesteps(
-            self, items, time_steps=None
-        )
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
+
+        self._n_timesteps = dfs.NumberOfTimeSteps
+        time_steps = _valid_timesteps(dfs, time_steps=None)
 
         deletevalue = self.deletevalue
 
@@ -2115,14 +2104,65 @@ class Dfsu(_UnstructuredFile):
 
         return Dataset(data_list, times, items_out)
 
+    def extract_surface_elevation_from_3d(
+        self, filename=None, time_steps=None, n_nearest=4
+    ):
+        """
+        Extract surface elevation from a 3d dfsu file (based on zn) 
+        to a new 2d dfsu file with a surface elevation item.
+
+        Parameters
+        ---------
+        filename: str
+            Output file name
+        time_steps: str, int or list[int], optional
+            Extract only selected time_steps
+        n_nearest: int, optional
+            number of points for spatial interpolation (inverse_distance), default=4
+
+        Examples
+        --------
+        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time_steps='2018-1-1,2018-2-1')
+        """
+        # validate input
+        assert (
+            self._type == UnstructuredType.Dfsu3DSigma
+            or self._type == UnstructuredType.Dfsu3DSigmaZ
+        )
+        assert n_nearest > 0
+        time_steps = _valid_timesteps(self._source, time_steps)
+
+        # make 2d nodes-to-elements interpolator
+        top_el = self.top_elements
+        geom = self.elements_to_geometry(top_el, node_layers="top")
+        xye = geom.element_coordinates[:, 0:2]
+        xyn = geom.node_coordinates[:, 0:2]
+        tree2d = cKDTree(xyn)
+        dist, node_ids = tree2d.query(xye, k=n_nearest)
+        if n_nearest == 1:
+            weights = None
+        else:
+            weights = get_idw_interpolant(dist)
+
+        # read zn from 3d file and interpolate to element centers
+        ds = self.read(items=0, time_steps=time_steps)  # read only zn
+        node_ids_surf, _ = self._get_nodes_and_table_for_elements(
+            top_el, node_layers="top"
+        )
+        zn_surf = ds.data[0][:, node_ids_surf]  # surface
+        surf2d = interp2d(zn_surf, node_ids, weights)
+
+        # create output
+        items = [ItemInfo(EUMType.Surface_Elevation)]
+        ds2 = Dataset([surf2d], ds.time, items)
+        if filename is None:
+            return ds2
+        else:
+            title = "Surface extracted from 3D file"
+            self.write(filename, ds2, elements=top_el, title=title)
+
     def write_header(
-        self,
-        filename,
-        start_time=None,
-        dt=None,
-        items=None,
-        elements=None,
-        title=None,
+        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
     ):
         """Write the header of a new dfsu file
 
@@ -2250,10 +2290,12 @@ class Dfsu(_UnstructuredFile):
         if elements is None:
             geometry = self
         else:
-            geometry = self.elements_to_geometry(elements)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                geometry = self.elements_to_geometry(elements)
             if (not self.is_2d) and (geometry._type == UnstructuredType.Dfsu2D):
                 # redo extraction as 2d:
-                print("will redo extraction in 2d!")
+                # print("will redo extraction in 2d!")
                 geometry = self.elements_to_geometry(elements, node_layers="bottom")
                 if items[0].name == "Z coordinate":
                     # get rid of z-item
@@ -2422,9 +2464,8 @@ class Dfsu(_UnstructuredFile):
             If None (default), uses coordinate system of the parent Dfsu file.
         interpolation_method : str, optional
             Interpolation method, by default it is 'nearest'.
-            See https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.griddata.html
         filename : str or pathlib.Path, optional
-            Path to *.dfs2 file to be created.
+            Path to dfs2 file to be created.
             If None (default), creates a temporary dfs2 file
             in the system temporary directory.
 
@@ -2455,15 +2496,7 @@ class Dfsu(_UnstructuredFile):
                 )
 
         # Define 2D grid in 'epsg' projection
-        grid = Grid2D(
-            bbox=[
-                x0,
-                y0,
-                x0 + dx * nx,
-                y0 + dy * ny,
-            ],
-            shape=(nx, ny),
-        )
+        grid = Grid2D(bbox=[x0, y0, x0 + dx * nx, y0 + dy * ny,], shape=(nx, ny),)
         # TODO - create rotated grid
         if rotation != 0:
             raise NotImplementedError(
@@ -2489,18 +2522,11 @@ class Dfsu(_UnstructuredFile):
                 "interpolation is performed using nearest neighborhood method"
             )
         elem_ids, weights = self.get_2d_interpolant(
-            xy=grid.xy,
-            n_nearest=1,
-            extrapolate=False,
-            p=2,
-            radius=None,
+            xy=grid.xy, n_nearest=1, extrapolate=False, p=2, radius=None,
         )
         dataset = self.read(items=None, time_steps=None, elements=None)
         interpolated_dataset = self.interp2d(
-            dataset,
-            elem_ids=elem_ids,
-            weights=weights,
-            shape=(grid.ny, grid.nx),
+            dataset, elem_ids=elem_ids, weights=weights, shape=(grid.ny, grid.nx),
         )
 
         interpolated_dataset = interpolated_dataset.flipud()
@@ -2548,7 +2574,7 @@ class Mesh(_UnstructuredFile):
             new z value at each node
         """
         if len(z) != self.n_nodes:
-            raise Exception(f"z must have length of nodes ({self.n_nodes})")
+            raise ValueError(f"z must have length of nodes ({self.n_nodes})")
         self._nc[:, 2] = z
         self._ec = None
 
@@ -2561,7 +2587,7 @@ class Mesh(_UnstructuredFile):
             code of each node
         """
         if len(codes) != self.n_nodes:
-            raise Exception(f"codes must have length of nodes ({self.n_nodes})")
+            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
         self._codes = codes
         self._valid_codes = None
 

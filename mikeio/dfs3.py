@@ -11,7 +11,7 @@ from DHI.Generic.MikeZero.DFS import (
 from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
 
 from .helpers import safe_length
-from .dutil import get_item_info
+from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .dotnet import (
     to_numpy,
@@ -43,7 +43,7 @@ class Dfs3(_Dfs123):
                     b[~np.isnan(y)] = y[~np.isnan(y)]
                 bottom_data[ts, ...] = np.flipud(b)
             bottom2D.append(bottom_data)
-        return  bottom2D
+        return bottom2D
 
     def _read_dfs3_header(self):
         if not os.path.isfile(self._filename):
@@ -113,9 +113,9 @@ class Dfs3(_Dfs123):
     def read_slice(
         self,
         dfs3file,
-        item_numbers,
         lower_left_xy,
         upper_right_xy,
+        items=None,
         layers=None,
         conservative=True,
     ):
@@ -123,15 +123,15 @@ class Dfs3(_Dfs123):
 
 
         Usage:
-            [data,time,name] = read( filename, item_numbers, lower_left_xy, upper_right_xy, conservative)
+            [data,time,name] = read( filename, lower_left_xy, upper_right_xy, items, conservative)
         dfs3file
-            a full path and filename to the dfs3 file
-        item_numbers
-            list of indices (base 0) to read from
+            a full path and filename to the dfs3 file        
         lower_left_xy
             list or array of size two with the X and the Y coordinate (same projection as the dfs3)
         upper_right_xy
             list or array of size two with the X and the Y coordinate (same projection as the dfs3)
+        items
+            list of indices (base 0) to read from            
         layers
             list of layers to read
         conservative
@@ -150,7 +150,7 @@ class Dfs3(_Dfs123):
             3) layer counts from the bottom
         """
 
-        data = self.read(dfs3file, item_numbers, layers=layers)
+        data = self.read(dfs3file, items=items, layers=layers)
 
         dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
 
@@ -213,13 +213,13 @@ class Dfs3(_Dfs123):
 
         return data
 
-    def read(self, item_numbers=None, layers=None, coordinates=None, timesteps=None):
+    def read(self, items=None, layers=None, coordinates=None, time_steps=None):
         """Function: Read data from a dfs3 file
 
         Usage:
-            [data,time,name] = read( filename, item_numbers, layers=None, coordinates=None)
+            [data,time,name] = read( filename, items, layers=None, coordinates=None)
 
-        item_numbers
+        items
             list of indices (base 0) to read from. If None then all the items.
         layers
             list of layer indices (base 0) to read
@@ -243,21 +243,19 @@ class Dfs3(_Dfs123):
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
 
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        n_items = len(item_numbers)
+
+        time_steps = _valid_timesteps(dfs.FileInfo, time_steps)
+        nt = len(time_steps)
+
         # Determine the size of the grid
         axis = dfs.ItemInfo[0].SpatialAxis
         zNum = axis.ZCount
         yNum = axis.YCount
         xNum = axis.XCount
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        if timesteps is not None:
-            nt = len(timesteps)
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
-        if item_numbers is None:
-            n_items = safe_length(dfs.ItemInfo)
-            item_numbers = list(range(n_items))
-
-        n_items = len(item_numbers)
         data_list = []
 
         if coordinates is None:
@@ -289,13 +287,8 @@ class Dfs3(_Dfs123):
         t_seconds = np.zeros(nt, dtype=float)
         startTime = dfs.FileInfo.TimeAxis.StartDateTime
 
-        if timesteps is None:
-            timesteptoread = np.arange(nt).tolist()
-        else:
-            timesteptoread = timesteps
-
         if coordinates is None:
-            for it_number, it in enumerate(timesteptoread):
+            for it_number, it in enumerate(time_steps):
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
@@ -330,7 +323,7 @@ class Dfs3(_Dfs123):
         start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
-        items = get_item_info(dfs, item_numbers)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
 
         dfs.Close()
 
@@ -416,16 +409,7 @@ class Dfs3(_Dfs123):
         )
         builder.SetSpatialAxis(
             factory.CreateAxisEqD3(
-                eumUnit.eumUmeter,
-                number_x,
-                x0,
-                dx,
-                number_y,
-                y0,
-                dy,
-                number_z,
-                0,
-                dz,
+                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy, number_z, 0, dz,
             )
         )
 

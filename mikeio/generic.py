@@ -16,9 +16,10 @@ from .dotnet import (
     to_dotnet_datetime,
 )
 from .helpers import safe_length
-from .dutil import find_item
+from .dfsutil import _valid_item_numbers, _item_numbers_by_name
 
 show_progress = False
+
 
 def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> DfsFile:
     """Clone a dfs file
@@ -69,9 +70,8 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
         builder.AddCustomBlock(customBlock)
 
     # Copy dynamic items
-    if items is None:
-        items = list(range(len(source.ItemInfo)))
-    for item in items:
+    item_numbers = _valid_item_numbers(source.ItemInfo, items)
+    for item in item_numbers:
         builder.AddDynamicItem(source.ItemInfo[item])
 
     # Create file
@@ -118,10 +118,10 @@ def scale(
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
-    item_numbers = _parse_items(dfs, items)
+    item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+    n_items = len(item_numbers)
 
     n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-    n_items = len(item_numbers)
 
     deletevalue = dfs.FileInfo.DeleteValueFloat
 
@@ -341,7 +341,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
-    items = _parse_items(dfs_i, items)
+    items = _valid_item_numbers(dfs_i.ItemInfo, items)
 
     dfs_o = _clone(infilename, outfilename, start_time=file_start_new, items=items)
 
@@ -454,28 +454,3 @@ def _parse_start_end(dfs_i, start, end):
 
     return file_start_new, start_step, start_sec, end_step, end_sec
 
-
-def _parse_items(dfs_i, items):
-    """"Make sure that items is a list of integers"""
-    n_items_file = len(dfs_i.ItemInfo)
-    if items is None:
-        return list(range(n_items_file))
-
-    if np.isscalar(items):
-        items = [items]
-
-    for idx, item in enumerate(items):
-        if isinstance(item, str):
-            items[idx] = find_item(dfs_i, [item])[0]
-        elif isinstance(item, int):
-            if (item < 0) or (item >= n_items_file):
-                raise ValueError(
-                    f"item numbers must be between 0 and {n_items_file - 1}"
-                )
-        else:
-            raise ValueError("items must be (a list of) either int or str")
-
-    if len(np.unique(items)) != len(items):
-        raise ValueError("items must be unique")
-
-    return items

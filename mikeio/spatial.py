@@ -67,10 +67,8 @@ def _get_dist_geo(lon, lat, lon1, lat1):
     # assuming input in degrees!
     R = 6371e3  # Earth radius in metres
     dlon = np.deg2rad(lon1 - lon)
-    if np.any(dlon > np.pi):
-        dlon = dlon - 2 * np.pi
-    if np.any(dlon < -np.pi):
-        dlon = dlon + 2 * np.pi
+    dlon[dlon > np.pi] = dlon[dlon > np.pi] - 2 * np.pi
+    dlon[dlon < -np.pi] = dlon[dlon < -np.pi] + 2 * np.pi
     dlat = np.deg2rad(lat1 - lat)
     x = dlon * np.cos(np.deg2rad((lat + lat1) / 2))
     y = dlat
@@ -270,10 +268,18 @@ class Grid2D:
         top = bbox[3]
 
         if left > right:
-            raise(ValueError(f"Invalid x axis, left: {left} must be smaller than right: {right}"))
-        
+            raise (
+                ValueError(
+                    f"Invalid x axis, left: {left} must be smaller than right: {right}"
+                )
+            )
+
         if bottom > top:
-            raise(ValueError(f"Invalid y axis, bottom: {bottom} must be smaller than top: {top}"))
+            raise (
+                ValueError(
+                    f"Invalid y axis, bottom: {bottom} must be smaller than top: {top}"
+                )
+            )
 
         xr = right - left  # dx too large
         yr = top - bottom  # dy too large
