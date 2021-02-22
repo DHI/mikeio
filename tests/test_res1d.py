@@ -1,14 +1,17 @@
+import os
 import pytest
-
-from mikeio.res1d import Res1D, mike1d_quantities, QueryDataReach
-from mikeio.dotnet import to_numpy
 import numpy as np
 import pandas as pd
+
+from mikeio.custom_exceptions import NoDataForQuery, InvalidQuantity
+from mikeio.res1d import Res1D, mike1d_quantities, QueryDataReach
+from mikeio.dotnet import to_numpy
 
 
 @pytest.fixture
 def test_file_path():
-    return "tests/testdata/Exam6Base.res1d"
+    test_folder_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(test_folder_path, "testdata", "Exam6Base.res1d")
 
 
 @pytest.fixture
@@ -34,6 +37,25 @@ def test_mike1d_quantities():
 def test_quantities(test_file):
     quantities = test_file.quantities
     assert len(quantities) == 2
+
+
+@pytest.mark.parametrize("query,expected", [
+    (QueryDataReach("WaterLevel", "104l1", 34.4131), True),
+    (QueryDataReach("WaterLevel", "104l1", 42424242), False),
+    (QueryDataReach("WaterLevel", "wrong_reach_name", 34.4131), False)
+])
+def test_valid_reach_data_queries(test_file_path, query, expected):
+    res1d = Res1D(test_file_path)
+
+    with pytest.raises(InvalidQuantity):
+        invalid_query = QueryDataReach("InvalidQuantity", "104l1", 34.4131)
+        assert res1d.read(invalid_query)
+
+    if expected:
+        res1d.read(query)
+    else:
+        with pytest.raises(NoDataForQuery):
+            assert res1d.read(query)
 
 
 @pytest.mark.parametrize("query,expected_max", [
