@@ -538,3 +538,55 @@ def test_read_relative_time_axis():
 
     ds = dfs0.read()
     assert len(ds) == 5
+
+
+def test_write_accumulated_datatype(tmpdir):
+    filename = os.path.join(tmpdir.dirname, "simple.dfs0")
+
+    data = []
+    d = np.random.random([100, 2, 3])
+    data.append(d)
+
+    dfs = Dfs0()
+
+    dfs.write(
+        filename=filename,
+        data=data,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        items=[
+            ItemInfo(
+                "testing water level",
+                EUMType.Water_Level,
+                EUMUnit.meter,
+                data_value_type="MeanStepBackward",
+            )
+        ],
+        title="test dfs0",
+    )
+
+    newdfs = Dfs0(filename)
+    assert newdfs.items[0].data_value_type == 3
+
+
+def test_write_default_datatype(tmpdir):
+    filename = os.path.join(tmpdir.dirname, "simple.dfs0")
+
+    data = []
+    d = np.random.random([100, 2, 3])
+    data.append(d)
+
+    dfs = Dfs0()
+
+    dfs.write(
+        filename=filename,
+        data=data,
+        start_time=datetime.datetime(2012, 1, 1),
+        dt=12,
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+        title="test dfs0",
+    )
+
+    newdfs = Dfs0(filename)
+    assert newdfs.items[0].data_value_type == 0
+
