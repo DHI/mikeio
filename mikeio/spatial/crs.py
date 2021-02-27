@@ -5,10 +5,14 @@ import pyproj
 
 
 class CRSConversionWarning(Warning):
+    """Used when an ad hoc conversion is performed."""
+
     pass
 
 
 class CRSConversionError(Exception):
+    """Raised when conversion cannot be performed."""
+
     pass
 
 
