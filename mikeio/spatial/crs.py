@@ -49,17 +49,17 @@ class CRS:
         return "\n".join(summary)
 
     @property
-    def map_projection(self) -> DHI.Project:
+    def map_projection(self) -> DHI.Projections.MapProjection:
         # https://manuals.mikepoweredbydhi.help/2021/General/Class_Library/DHI_Projections/html/T_DHI_Projections_MapProjection.htm
         return self.__cartography.get_Projection()
 
     @property
     def name(self) -> str:
-        return self.map_projection.get_ProjectionName()
+        return self.__cartography.get_ProjectionName()
 
     @property
     def projection_string(self) -> str:
-        return self.map_projection.get_ProjectionString()
+        return self.__cartography.get_ProjectionString()
 
     @property
     def is_geographical(self) -> bool:
