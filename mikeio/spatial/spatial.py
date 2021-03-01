@@ -1,9 +1,10 @@
 from collections import namedtuple
+
 import numpy as np
-from DHI.Generic.MikeZero.DFS.mesh import MeshFile, MeshBuilder
 from DHI.Generic.MikeZero import eumQuantity
-from .eum import ItemInfo, EUMType, EUMUnit
-from .dotnet import asnetarray_v2
+from DHI.Generic.MikeZero.DFS.mesh import MeshBuilder
+from mikeio.dotnet import asnetarray_v2
+from mikeio.eum import EUMType, EUMUnit
 
 BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
@@ -14,9 +15,9 @@ def min_horizontal_dist_meters(coords, targets, is_geo=False):
     Parameters
     ----------
     coords : n-by-2 array
-        x, y coordinates 
+        x, y coordinates
     targets : m-by-2 array
-        x, y coordinates 
+        x, y coordinates
     is_geo : bool, optional
         are coordinates geographical?, by default False
 
@@ -41,7 +42,7 @@ def dist_in_meters(coords, pt, is_geo=False):
     Parameters
     ----------
     coords : n-by-2 array
-        x, y coordinates 
+        x, y coordinates
     pt : [float, float]
         x, y coordinate of point
     is_geo : bool, optional
@@ -77,8 +78,7 @@ def _get_dist_geo(lon, lat, lon1, lat1):
 
 
 class Grid2D:
-    """2D grid
-    """
+    """2D grid"""
 
     _x = None
     _x0 = None
@@ -96,104 +96,89 @@ class Grid2D:
 
     @property
     def x(self):
-        """array of x-coordinates (single row)
-        """
+        """array of x-coordinates (single row)"""
         return self._x
 
     @property
     def x0(self):
-        """center of left end-point 
-        """
+        """center of left end-point"""
         return self._x0
 
     @property
     def x1(self):
-        """center of right end-point
-        """
+        """center of right end-point"""
         return self._x1
 
     @property
     def dx(self):
-        """x-spacing
-        """
+        """x-spacing"""
         return self._dx
 
     @property
     def nx(self):
-        """number of points in x-direction
-        """
+        """number of points in x-direction"""
         return self._nx
 
     @property
     def y(self):
-        """array of y-coordinates (single column)
-        """
+        """array of y-coordinates (single column)"""
         return self._y
 
     @property
     def y0(self):
-        """center of lower end-point
-        """
+        """center of lower end-point"""
         return self._y0
 
     @property
     def y1(self):
-        """center of upper end-point
-        """
+        """center of upper end-point"""
         return self._y1
 
     @property
     def dy(self):
-        """y-spacing
-        """
+        """y-spacing"""
         return self._dy
 
     @property
     def ny(self):
-        """number of cells in y-direction
-        """
+        """number of cells in y-direction"""
         return self._ny
 
     @property
     def n(self):
-        """total number of grid points
-        """
+        """total number of grid points"""
         return self._nx * self._ny
 
     @property
     def xx(self):
-        """2d array of all x-coordinates 
-        """
+        """2d array of all x-coordinates"""
         if self._xx is None:
             self._create_meshgrid(self.x, self.y)
         return self._xx
 
     @property
     def yy(self):
-        """2d array of all y-coordinates 
-        """
+        """2d array of all y-coordinates"""
         if self._yy is None:
             self._create_meshgrid(self.x, self.y)
         return self._yy
 
     @property
     def xy(self):
-        """ n-by-2 array of x- and y-coordinates 
-        """
+        """n-by-2 array of x- and y-coordinates"""
         xcol = self.xx.reshape(-1, 1)
         ycol = self.yy.reshape(-1, 1)
         return np.column_stack([xcol, ycol])
 
     @property
     def coordinates(self):
-        """ n-by-2 array of x- and y-coordinates 
-        """
+        """n-by-2 array of x- and y-coordinates"""
         return self.xy
 
     @property
     def bbox(self):
         """bounding box (left, bottom, right, top)
-           Note: not the same as the cell center values (x0,y0,x1,y1)!
+        Note: not the same as the cell center values (x0,y0,x1,y1)!
         """
         left = self._x0 - self.dx / 2
         bottom = self._y0 - self.dy / 2
@@ -202,7 +187,7 @@ class Grid2D:
         return BoundingBox(left, bottom, right, top)
 
     def __init__(self, x=None, y=None, bbox=None, dx=None, dy=None, shape=None):
-        """create 2d grid 
+        """create 2d grid
 
         Parameters
         ----------
@@ -215,7 +200,7 @@ class Grid2D:
         dx : float or (float, float), optional
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
-            grid resolution in y-direction            
+            grid resolution in y-direction
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
@@ -225,11 +210,11 @@ class Grid2D:
         >>> g = Grid2D(bbox=[0,0,10,20], dx=0.25)
 
         >>> g = Grid2D(bbox=[0,0,10,20], shape=(5,10))
-        
+
         >>> x = np.linspace(0.0, 1000.0, 201)
         >>> y = [0, 2.0]
         >>> g = Grid2D(x, y)
-        
+
         """
         dxdy = dx
         if dy is not None:
@@ -362,7 +347,7 @@ class Grid2D:
         ----------
         x : array(float)
             x-coordinate of point(s)
-            or xy-coordinate of points given as n-by-2 array 
+            or xy-coordinate of points given as n-by-2 array
         y : array(float), optional
             y-coordinate of point(s), by default None
 
@@ -389,7 +374,7 @@ class Grid2D:
         ----------
         x : array(float)
             x-coordinate of point(s)
-            or xy-coordinate of points given as n-by-2 array 
+            or xy-coordinate of points given as n-by-2 array
         y : array(float), optional
             y-coordinate of point(s), by default None
 
@@ -510,8 +495,7 @@ class Grid2D:
 
     @staticmethod
     def xy_to_bbox(xy, buffer=None):
-        """return bounding box for list of coordinates
-        """
+        """return bounding box for list of coordinates"""
         if buffer is None:
             buffer = 0
 
@@ -532,4 +516,3 @@ class Grid2D:
         )
         out.append(f"Number of grid points: {self.n}")
         return str.join("\n", out)
-
