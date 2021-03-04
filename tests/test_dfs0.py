@@ -10,6 +10,9 @@ from datetime import timedelta
 
 import pytest
 
+from DHI.Generic.MikeZero.DFS import (
+    DataValueType
+)
 
 def test_repr():
     filename = os.path.join("tests", "testdata", "da_diagnostic.dfs0")
@@ -211,9 +214,8 @@ def test_write_equidistant_calendar(tmpdir):
     start_time = datetime.datetime(2017, 1, 1)
     timeseries_unit = 1402
     title = "Hello Test"
-    items = [ItemInfo("VarFun01", 100000, 1000), ItemInfo("NotFun", 100000, 1000)]
+    items = [ItemInfo("VarFun01", 100000, 1000, data_value_type=0), ItemInfo("NotFun", 100000, 1000, data_value_type=1)]
 
-    data_value_type = [0, 1]  # TODO add data_value_type to ItemInfo
     dt = 5
     dfs = Dfs0()
     dfs.write(
@@ -224,7 +226,6 @@ def test_write_equidistant_calendar(tmpdir):
         dt=dt,
         items=items,
         title=title,
-        data_value_type=data_value_type,
     )
 
 
@@ -240,8 +241,7 @@ def test_write_non_equidistant_calendar(tmpdir):
     for i in range(1000):
         time_vector.append(start_time + datetime.timedelta(hours=i * 0.1))
     title = "Hello Test"
-    items = [ItemInfo("VarFun01", 100000, 1000), ItemInfo("NotFun", 100000, 1000)]
-    data_value_type = [0, 1]
+    items = [ItemInfo("VarFun01", 100000, 1000, 0), ItemInfo("NotFun", 100000, 1000, 1)]
 
     dfs = Dfs0()
     dfs.write(
@@ -250,7 +250,6 @@ def test_write_non_equidistant_calendar(tmpdir):
         datetimes=time_vector,
         items=items,
         title=title,
-        data_value_type=data_value_type,
     )
 
     assert os.path.exists(dfs0file)
@@ -347,6 +346,7 @@ def test_write_from_data_frame(tmpdir):
     assert len(ds.items) == 5
     assert ds.items[0].type == EUMType.Concentration
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert ds.items[0].data_value_type == 0
 
 
 def test_write_from_data_frame_monkey_patched(tmpdir):
@@ -544,7 +544,7 @@ def test_write_accumulated_datatype(tmpdir):
     filename = os.path.join(tmpdir.dirname, "simple.dfs0")
 
     data = []
-    d = np.random.random([100, 2, 3])
+    d = np.random.random(100)
     data.append(d)
 
     dfs = Dfs0()
@@ -553,16 +553,15 @@ def test_write_accumulated_datatype(tmpdir):
         filename=filename,
         data=data,
         start_time=datetime.datetime(2012, 1, 1),
-        dt=12,
         items=[
             ItemInfo(
                 "testing water level",
                 EUMType.Water_Level,
                 EUMUnit.meter,
-                data_value_type="MeanStepBackward",
+                data_value_type="MeanStepBackward"
             )
         ],
-        title="test dfs0",
+        title="test dfs0"
     )
 
     newdfs = Dfs0(filename)
@@ -573,7 +572,7 @@ def test_write_default_datatype(tmpdir):
     filename = os.path.join(tmpdir.dirname, "simple.dfs0")
 
     data = []
-    d = np.random.random([100, 2, 3])
+    d = np.random.random(100)
     data.append(d)
 
     dfs = Dfs0()
@@ -589,4 +588,3 @@ def test_write_default_datatype(tmpdir):
 
     newdfs = Dfs0(filename)
     assert newdfs.items[0].data_value_type == 0
-
