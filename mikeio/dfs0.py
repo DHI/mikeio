@@ -30,7 +30,6 @@ class Dfs0:
     _dt = None
     _is_equidistant = None
     _title = None
-    _data_value_type = None
     _items = None
 
     def __init__(self, filename=None):
@@ -185,7 +184,8 @@ class Dfs0:
             name = self._dfs.ItemInfo[i].Name
             item_type = EUMType(self._dfs.ItemInfo[i].Quantity.Item)
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
-            yield ItemInfo(name, item_type, unit)
+            value_type = self._dfs.ItemInfo[i].ValueType
+            yield ItemInfo(name, item_type, unit, data_value_type=value_type)
 
     @staticmethod
     def _to_dfs_datatype(dtype):
