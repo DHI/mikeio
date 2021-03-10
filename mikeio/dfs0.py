@@ -30,7 +30,6 @@ class Dfs0:
     _dt = None
     _is_equidistant = None
     _title = None
-    _data_value_type = None
     _items = None
 
     def __init__(self, filename=None):
@@ -185,7 +184,8 @@ class Dfs0:
             name = self._dfs.ItemInfo[i].Name
             item_type = EUMType(self._dfs.ItemInfo[i].Quantity.Item)
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
-            yield ItemInfo(name, item_type, unit)
+            value_type = self._dfs.ItemInfo[i].ValueType
+            yield ItemInfo(name, item_type, unit, data_value_type=value_type)
 
     @staticmethod
     def _to_dfs_datatype(dtype):
@@ -230,8 +230,8 @@ class Dfs0:
                 item.name, quantity, dtype_dfs,
             )
 
-            if self._data_value_type is not None:
-                newitem.SetValueType(self._data_value_type[i])
+            if item.data_value_type is not None:
+                newitem.SetValueType(item.data_value_type)
             else:
                 newitem.SetValueType(DataValueType.Instantaneous)
 
@@ -255,7 +255,6 @@ class Dfs0:
         datetimes=None,
         items=None,
         title="",
-        data_value_type=None,
         dtype=None,
     ):
         """
@@ -279,8 +278,6 @@ class Dfs0:
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         title: str, optional
             title, default blank
-        data_value_type: list[DataValueType], optional
-            DataValueType default DataValueType.INSTANTANEOUS
         dtype : np.dtype, optional
             default np.float32
 
@@ -289,7 +286,6 @@ class Dfs0:
         self._title = title
         self._timeseries_unit = timeseries_unit
         self._dtype = dtype
-        self._data_value_type = data_value_type
 
         if isinstance(data, Dataset):
             self._items = data.items
@@ -428,12 +424,11 @@ def series_to_dfs0(
     unit=None,
     items=None,
     title=None,
-    data_value_type=None,
     dtype=None,
 ):
 
     df = pd.DataFrame(self)
-    df.to_dfs0(filename, itemtype, unit, items, title, data_value_type, dtype)
+    df.to_dfs0(filename, itemtype, unit, items, title, dtype)
 
 
 def dataframe_to_dfs0(
@@ -443,7 +438,6 @@ def dataframe_to_dfs0(
     unit=None,
     items=None,
     title=None,
-    data_value_type=None,
     dtype=None,
 ):
     """
@@ -461,8 +455,6 @@ def dataframe_to_dfs0(
         Different types, units for each items, similar to `create`
     title: str, optional
         Title of dfs0 file
-    data_value_type: list[DataValueType], optional
-            DataValueType default DataValueType.INSTANTANEOUS
     dtype : np.dtype, optional
             default np.float32
     """
@@ -495,7 +487,6 @@ def dataframe_to_dfs0(
             datetimes=self.index,
             items=items,
             title=title,
-            data_value_type=data_value_type,
             dtype=dtype,
         )
     else:  # equidistant
@@ -508,7 +499,6 @@ def dataframe_to_dfs0(
             dt=dt,
             items=items,
             title=title,
-            data_value_type=data_value_type,
             dtype=dtype,
         )
 
