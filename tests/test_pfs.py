@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import numpy as np
 
 from mikeio import Pfs
 from mikeio.pfs import PfsCore
@@ -148,7 +149,7 @@ def test_sw_modify_and_write(tmpdir):
 
     wind_section = pfs.section("SPECTRAL_WAVE_MODULE").section("WIND")
 
-    assert type(wind_section["Charnock_parameter"].value) == float
+    assert isinstance(wind_section["Charnock_parameter"].value, float)
 
     # modify parameter without needing to specify that the float is a float...
     wind_section["Charnock_parameter"] = 0.02
@@ -156,7 +157,20 @@ def test_sw_modify_and_write(tmpdir):
     wind_section["Charnock_parameter"] = 1.0
 
     # Force parameter to be interpreted as float to avoid interpreting 1.0 as integer
-    wind_section["Charnock_parameter"].modify(0.1, float)
+    wind_section["Charnock_parameter"] = 0.1
+
+    assert wind_section["Charnock_parameter"].value == 0.1
+
+    spectral_section = pfs.section("SPECTRAL_WAVE_MODULE").section("SPECTRAL")
+
+    assert spectral_section["separation_of_wind_sea_and_swell"].value == 0
+    spectral_section["separation_of_wind_sea_and_swell"] = 1
+
+    assert spectral_section["separation_of_wind_sea_and_swell"].value == 1
+
+    # Check that numpy types works as well
+    for i in np.arange(2, 25):
+        spectral_section["number_of_frequencies"] = i
 
     # modify a filename
     pfs.section("DOMAIN")["file_name"] = "tests\\testdata\\odense_rough.mesh"

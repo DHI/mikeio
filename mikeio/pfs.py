@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 import re
 import yaml
 import pandas as pd
+import numpy as np
 from typing import Union
 import warnings
 
@@ -223,7 +224,6 @@ class PfsCore:
     @end_time.setter
     def end_time(self, value: datetime):
 
-        print("FOO")
         start_time = self.start_time
         dt = self.section("TIME")["time_step_interval"].value
 
@@ -238,7 +238,7 @@ class PfsCore:
 
         for line in lines:
             if "//" in line:
-                text, comment = line.split("//")
+                text, _ = line.split("//")
             else:
                 text = line
 
@@ -275,32 +275,20 @@ class Parameter:
         else:
             return par.ToString()
 
-    def modify(self, value: Union[int, float, str], valuetype=None):
+    def modify(self, value: Union[int, float, str]):
 
         par = self._parameter
 
-        if valuetype is int:
+        if isinstance(value, (int, np.integer)):
             par.ModifyIntParameter(value)
-            return
-        elif valuetype is float:
+        elif isinstance(value, float):
             par.ModifyDoubleParameter(value)
-            return
-
-        if par.IsInt():
-            par.ModifyIntParameter(value)
-            return
-        if par.IsDouble():
-            par.ModifyDoubleParameter(value)
-            return
         elif par.IsFilename():
             par.ModifyFileNameParameter(value)
-            return
         elif par.IsClob():
             par.ModifyClobParameter(value)
-            return
         else:
             par.ModifyStringParameter(value)
-            return
 
 
 class Section:
