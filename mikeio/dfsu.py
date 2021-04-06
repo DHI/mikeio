@@ -35,6 +35,7 @@ from .helpers import safe_length
 from .spatial import Grid2D
 from .interpolation import get_idw_interpolant, interp2d
 from .custom_exceptions import InvalidGeometry
+from .base import EquidistantTimeSeries
 
 
 class UnstructuredType(IntEnum):
@@ -1102,7 +1103,11 @@ class _UnstructuredGeometry:
 
         node_cellID = [
             list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(elem_table.reshape(-1,))
+            for i in np.unique(
+                elem_table.reshape(
+                    -1,
+                )
+            )
         ]
         node_centered_data = np.zeros(shape=nc.shape[0])
         for n, item in enumerate(node_cellID):
@@ -1745,7 +1750,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._element_ids = np.array(list(source.ElementIds)) - 1
 
 
-class Dfsu(_UnstructuredFile):
+class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
     def __init__(self, filename, dtype=np.float64):
         """
         Create a Dfsu object
@@ -1785,7 +1790,10 @@ class Dfsu(_UnstructuredFile):
         yc = np.zeros(self.n_elements)
         zc = np.zeros(self.n_elements)
         _, xc2, yc2, zc2 = DfsuUtil.CalculateElementCenterCoordinates(
-            self._source, to_dotnet_array(xc), to_dotnet_array(yc), to_dotnet_array(zc),
+            self._source,
+            to_dotnet_array(xc),
+            to_dotnet_array(yc),
+            to_dotnet_array(zc),
         )
         ec = np.column_stack([asNumpyArray(xc2), asNumpyArray(yc2), asNumpyArray(zc2)])
         return ec
@@ -2108,7 +2116,7 @@ class Dfsu(_UnstructuredFile):
         self, filename=None, time_steps=None, n_nearest=4
     ):
         """
-        Extract surface elevation from a 3d dfsu file (based on zn) 
+        Extract surface elevation from a 3d dfsu file (based on zn)
         to a new 2d dfsu file with a surface elevation item.
 
         Parameters
@@ -2162,7 +2170,13 @@ class Dfsu(_UnstructuredFile):
             self.write(filename, ds2, elements=top_el, title=title)
 
     def write_header(
-        self, filename, start_time=None, dt=None, items=None, elements=None, title=None,
+        self,
+        filename,
+        start_time=None,
+        dt=None,
+        items=None,
+        elements=None,
+        title=None,
     ):
         """Write the header of a new dfsu file
 
@@ -2496,7 +2510,15 @@ class Dfsu(_UnstructuredFile):
                 )
 
         # Define 2D grid in 'epsg' projection
-        grid = Grid2D(bbox=[x0, y0, x0 + dx * nx, y0 + dy * ny,], shape=(nx, ny),)
+        grid = Grid2D(
+            bbox=[
+                x0,
+                y0,
+                x0 + dx * nx,
+                y0 + dy * ny,
+            ],
+            shape=(nx, ny),
+        )
         # TODO - create rotated grid
         if rotation != 0:
             raise NotImplementedError(
@@ -2522,11 +2544,18 @@ class Dfsu(_UnstructuredFile):
                 "interpolation is performed using nearest neighborhood method"
             )
         elem_ids, weights = self.get_2d_interpolant(
-            xy=grid.xy, n_nearest=1, extrapolate=False, p=2, radius=None,
+            xy=grid.xy,
+            n_nearest=1,
+            extrapolate=False,
+            p=2,
+            radius=None,
         )
         dataset = self.read(items=None, time_steps=None, elements=None)
         interpolated_dataset = self.interp2d(
-            dataset, elem_ids=elem_ids, weights=weights, shape=(grid.ny, grid.nx),
+            dataset,
+            elem_ids=elem_ids,
+            weights=weights,
+            shape=(grid.ny, grid.nx),
         )
 
         interpolated_dataset = interpolated_dataset.flipud()

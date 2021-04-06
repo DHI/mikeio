@@ -21,9 +21,10 @@ from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .helpers import safe_length
+from .base import TimeSeries
 
 
-class Dfs0:
+class Dfs0(TimeSeries):
 
     _start_time = None
     _n_items = None
@@ -227,7 +228,9 @@ class Dfs0:
             newitem = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(item.type, item.unit)
             newitem.Set(
-                item.name, quantity, dtype_dfs,
+                item.name,
+                quantity,
+                dtype_dfs,
             )
 
             if item.data_value_type is not None:
@@ -415,6 +418,15 @@ class Dfs0:
     def start_time(self):
         """File start time"""
         return self._start_time
+
+    @property
+    def end_time(self):
+        return self._end_time
+
+    @property
+    def n_timesteps(self):
+        """Number of time steps"""
+        return self._n_timesteps
 
 
 def series_to_dfs0(

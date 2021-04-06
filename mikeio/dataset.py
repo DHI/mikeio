@@ -7,8 +7,13 @@ from scipy.interpolate import interp1d
 from copy import deepcopy
 from mikeio.eum import EUMType, ItemInfo
 
+from .base import TimeSeries
 
-class Dataset:
+
+class Dataset(TimeSeries):
+
+    deletevalue = 1.0e-35
+
     """Dataset
 
     Attributes
@@ -89,6 +94,8 @@ class Dataset:
         items: Union[List[ItemInfo], List[EUMType]],
     ):
 
+        self._deletevalue = Dataset.deletevalue
+
         if isinstance(time, str):
             # default single-step time
             time = self.create_time(time)
@@ -127,7 +134,7 @@ class Dataset:
             if isinstance(item, EUMType):
                 items[i] = ItemInfo(item)
 
-        self.items = items
+        self._items = items
 
     def __repr__(self):
 
@@ -724,6 +731,10 @@ class Dataset:
         return len(self.items)
 
     @property
+    def items(self):
+        return self._items
+
+    @property
     def shape(self):
         """Shape of each item"""
         return self.data[self._first_non_z_item].shape
@@ -741,3 +752,8 @@ class Dataset:
         if self.n_timesteps > 1:
             n_elem = int(n_elem / self.n_timesteps)
         return n_elem
+
+    @property
+    def deletevalue(self):
+        """File delete value"""
+        return self._deletevalue
