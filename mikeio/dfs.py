@@ -1,9 +1,12 @@
 from datetime import datetime, timedelta
+from abc import abstractmethod
+
 import warnings
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
 from .dataset import Dataset
+from .base import TimeSeries
 
 from .dotnet import (
     to_dotnet_datetime,
@@ -22,7 +25,7 @@ from DHI.Generic.MikeZero.DFS import (
 )
 
 
-class _Dfs123:
+class _Dfs123(TimeSeries):
 
     _filename = None
     _projstr = None
@@ -316,8 +319,7 @@ class _Dfs123:
 
     @property
     def end_time(self):
-        """File end time
-        """
+        """File end time"""
         if self._end_time is None:
             self._end_time = self.read([0]).time[-1].to_pydatetime()
 
@@ -351,3 +353,9 @@ class _Dfs123:
     def orientation(self):
         """North to Y orientation"""
         return self._orientation
+
+    @property
+    @abstractmethod
+    def dx(self):
+        """Step size in x direction"""
+        pass
