@@ -1370,6 +1370,7 @@ class _UnstructuredGeometry:
                 cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
         if ("contour" in plot_type) and (levels is None):
             levels = 10
+            n_levels = 10
 
         cbar_extend = self._cbar_extend(z, vmin, vmax)
 
@@ -1569,8 +1570,8 @@ class _UnstructuredGeometry:
     def _cbar_extend(self, calc_data, vmin, vmax):
         if calc_data is None:
             return "neither"
-        extend_min = calc_data.min() < vmin
-        extend_max = calc_data.max() > vmax
+        extend_min = calc_data.min() < vmin if vmin is not None else False
+        extend_max = calc_data.max() > vmax if vmax is not None else False
         if extend_min and extend_max:
             extend = "both"
         elif extend_min:
