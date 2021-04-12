@@ -1,4 +1,3 @@
-import clr
 import sys
 import os
 from platform import architecture
@@ -19,23 +18,8 @@ from platform import architecture
 # Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
-__version__ = '0.6.dev1'
+__version__ = "0.6.dev1"
 
-mike_bin_path = os.path.join(os.path.dirname(__file__), "bin")
-sys.path.append(mike_bin_path)
-
-clr.AddReference("DHI.Generic.MikeZero.DFS")
-clr.AddReference("DHI.Generic.MikeZero.EUM")
-clr.AddReference("DHI.PFS")
-clr.AddReference("DHI.Projections")
-clr.AddReference("DHI.Mike1D.ResultDataAccess")
-clr.AddReference("DHI.Mike1D.Generic")
-clr.AddReference("System")
-clr.AddReference("System.Runtime.InteropServices")
-clr.AddReference("System.Runtime")
-
-if "64" not in architecture()[0]:
-    raise Exception("This library has not been tested for a 32 bit system.")
 
 from .dfs0 import Dfs0
 from .dfs1 import Dfs1
@@ -58,7 +42,7 @@ def read(filename, items=None, time_steps=None):
             Read only selected items, by number (0-based), or by name
     time_steps: int or list[int], optional
             Read only selected time_steps
-            
+
     Return:
         Dataset(data, time, names)
     """

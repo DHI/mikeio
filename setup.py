@@ -1,5 +1,5 @@
 import setuptools
-from  mikeio import __version__
+from mikeio import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="mikeio",
     version=__version__,
-    install_requires=["pythonnet", "numpy", "pandas", "scipy", "pyyaml"],
+    install_requires=["numpy", "pandas", "scipy", "pyyaml"],
     extras_require={
         "dev": [
             "pytest",
