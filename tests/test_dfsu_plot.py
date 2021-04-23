@@ -1,7 +1,9 @@
 import os
 import numpy as np
 import pytest
+import matplotlib as mpl
 
+mpl.use("Agg")
 from mikeio import Dfsu, Mesh
 
 ##################################################

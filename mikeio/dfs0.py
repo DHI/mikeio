@@ -67,6 +67,7 @@ class Dfs0(TimeSeries):
             raise FileNotFoundError(self._filename)
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        self._source = dfs
         self._deletevalue = dfs.FileInfo.DeleteValueFloat
 
         # Read items
