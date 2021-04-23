@@ -1,4 +1,7 @@
 
+# `master` is no longer the default branch, please go to [`main`](https://github.com/DHI/mikeio/) instead
+
+
 ![logo](https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
 # MIKE IO: input/output of MIKE files in python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
