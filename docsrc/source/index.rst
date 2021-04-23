@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-.. image:: https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg
+.. image:: https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg
 
 MIKE IO: input/output of MIKE files in Python
 =============================================
