@@ -36,7 +36,7 @@ For Anaconda:
 
 `conda install -c conda-forge mikeio`
 
-Or development version:
+Or development version (*`main` is the default branch since 2021-04-23*):
 
 `pip install https://github.com/DHI/mikeio/archive/main.zip`
 
