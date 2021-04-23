@@ -580,7 +580,8 @@ class Dataset(TimeSeries):
         -------
         pd.DataFrame
         """
-        self = self.squeeze()
+        if len(self.data[0].shape) != 1:
+            self = self.squeeze()
 
         if len(self.data[0].shape) != 1:
             raise ValueError(

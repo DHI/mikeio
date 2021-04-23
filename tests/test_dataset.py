@@ -231,6 +231,23 @@ def test_create_undefined():
     assert ds.items[0].type == EUMType.Undefined
 
 
+def test_to_dataframe_single_timestep():
+
+    nt = 1
+    d1 = np.zeros([nt])
+    d2 = np.zeros([nt])
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+    df = ds.to_dataframe()
+
+    assert list(df.columns) == ["Foo", "Bar"]
+    assert isinstance(df.index, pd.DatetimeIndex)
+
+
 def test_to_dataframe():
 
     nt = 100

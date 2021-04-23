@@ -1,5 +1,5 @@
 
-![logo](https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
+![logo](https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
 # MIKE IO: input/output of MIKE files in python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
 ![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
@@ -11,7 +11,7 @@ Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. Read res
 
 Facilitates common data processing workflows for MIKE files.
 
-[![Blue cafe](https://raw.githubusercontent.com/DHI/mikeio/master/images/bluecafe.png)](https://www.youtube.com/watch?v=7WJpeydHMYQ)
+[![Blue cafe](https://raw.githubusercontent.com/DHI/mikeio/main/images/bluecafe.png)](https://www.youtube.com/watch?v=7WJpeydHMYQ)
 
 ## Requirements
 * Windows operating system
@@ -36,9 +36,9 @@ For Anaconda:
 
 `conda install -c conda-forge mikeio`
 
-Or development version:
+Or development version (*`main` is the default branch since 2021-04-23*):
 
-`pip install https://github.com/DHI/mikeio/archive/master.zip`
+`pip install https://github.com/DHI/mikeio/archive/main.zip`
 
 
 ## Examples
@@ -147,7 +147,7 @@ For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
 >>>  plt.xlabel('Horizontal [meter]')
 >>>  plt.ylabel('Elevation [meter]')
 ```
-![Geometry](https://raw.githubusercontent.com/DHI/mikeio/master/images/xns11_geometry.png)
+![Geometry](https://raw.githubusercontent.com/DHI/mikeio/main/images/xns11_geometry.png)
 
 ### Read dfsu files
 ```python
@@ -158,14 +158,14 @@ For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
 >>>  idx = dfs.find_nearest_element(x=608000, y=6907000)
 >>>  plt.plot(ds.time, ds.data[0][:,idx])
 ```
-![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/master/images/dfsu_ts.png)
+![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/main/images/dfsu_ts.png)
 
 ```python
 >>>  from mikeio import Mesh
 >>>  msh = Mesh("FakeLake.dfsu")
 >>>  msh.plot()
 ```
-![Mesh](https://raw.githubusercontent.com/DHI/mikeio/master/images/FakeLake.png)
+![Mesh](https://raw.githubusercontent.com/DHI/mikeio/main/images/FakeLake.png)
 
 
 For more examples on working with dfsu and mesh see these notebooks:

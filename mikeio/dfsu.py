@@ -1241,7 +1241,7 @@ class _UnstructuredGeometry:
         cmap=None,
         vmin=None,
         vmax=None,
-        levels=10,
+        levels=None,
         n_refinements=0,
         show_mesh=True,
         show_outline=True,
@@ -1291,6 +1291,7 @@ class _UnstructuredGeometry:
         """
 
         import matplotlib.cm as cm
+        import matplotlib.colors as mplc
         import matplotlib.pyplot as plt
         from matplotlib.patches import Polygon
         from matplotlib.collections import PatchCollection
@@ -1348,9 +1349,9 @@ class _UnstructuredGeometry:
             vmax = np.nanmax(z)
 
         # set levels
-        if "contour" in plot_type:
-            if levels is None:
-                levels = 10
+        cmap_norm = None
+        cmap_ScMappable = None
+        if ("only" not in plot_type) and (levels is not None):
             if np.isscalar(levels):
                 n_levels = levels
                 levels = np.linspace(vmin, vmax, n_levels)
@@ -1358,6 +1359,20 @@ class _UnstructuredGeometry:
                 n_levels = len(levels)
                 vmin = min(levels)
                 vmax = max(levels)
+
+            levels = np.array(levels)
+            levels_equidistant = all(np.diff(levels) == np.diff(levels)[0])
+            # if not levels_equidistant:  # (isinstance(cmap, mplc.ListedColormap)) or (
+            if (not isinstance(cmap, str)) and (not levels_equidistant):
+                print("ScalarMappable")
+                # cmap = mplc.Colormap(cmap)
+                cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
+                cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
+        if ("contour" in plot_type) and (levels is None):
+            levels = 10
+            n_levels = 10
+
+        cbar_extend = self._cbar_extend(z, vmin, vmax)
 
         # plot in existing or new axes?
         if ax is None:
@@ -1395,11 +1410,20 @@ class _UnstructuredGeometry:
             # with (constant) element center values
             if show_mesh:
                 fig_obj = PatchCollection(
-                    patches, cmap=cmap, edgecolor=mesh_col, linewidths=0.4
+                    patches,
+                    cmap=cmap,
+                    norm=cmap_norm,
+                    edgecolor=mesh_col,
+                    linewidths=0.4,
                 )
             else:
                 fig_obj = PatchCollection(
-                    patches, cmap=cmap, edgecolor="face", alpha=None, linewidths=None
+                    patches,
+                    cmap=cmap,
+                    norm=cmap_norm,
+                    edgecolor="face",
+                    alpha=None,
+                    linewidths=None,
                 )
 
             fig_obj.set_array(z)
@@ -1407,7 +1431,8 @@ class _UnstructuredGeometry:
             ax.add_collection(fig_obj)
 
             cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-            plt.colorbar(fig_obj, label=label, cax=cax)
+            cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
+            plt.colorbar(cmap_sm, label=label, cax=cax, extend=cbar_extend)
 
         else:
             # do node-based triangular plot
@@ -1434,24 +1459,43 @@ class _UnstructuredGeometry:
 
             if plot_type == "shaded" or plot_type == "smooth":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-                fig_obj = ax.tripcolor(
-                    triang,
-                    zn,
-                    edgecolors="face",
-                    vmin=vmin,
-                    vmax=vmax,
-                    cmap=cmap,
-                    linewidths=0.3,
-                    shading="gouraud",
-                )
+                if cmap_norm is None:
+                    fig_obj = ax.tripcolor(
+                        triang,
+                        zn,
+                        edgecolors="face",
+                        vmin=vmin,
+                        vmax=vmax,
+                        cmap=cmap,
+                        linewidths=0.3,
+                        shading="gouraud",
+                    )
+                else:
+                    fig_obj = ax.tripcolor(
+                        triang,
+                        zn,
+                        edgecolors="face",
+                        cmap=cmap,
+                        norm=cmap_norm,
+                        linewidths=0.3,
+                        shading="gouraud",
+                    )
 
                 cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                plt.colorbar(fig_obj, label=label, cax=cax)
+                cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
+                plt.colorbar(
+                    cmap_sm, label=label, cax=cax, boundaries=levels, extend=cbar_extend
+                )
 
             elif plot_type == "contour" or plot_type == "contour_lines":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
                 fig_obj = ax.tricontour(
-                    triang, zn, levels=levels, linewidths=[1.2], cmap=cmap
+                    triang,
+                    zn,
+                    levels=levels,
+                    linewidths=[1.2],
+                    cmap=cmap,
+                    norm=cmap_norm,
                 )
                 ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
                 if len(label) > 0:
@@ -1462,11 +1506,26 @@ class _UnstructuredGeometry:
                 vbuf = 0.01 * (vmax - vmin) / n_levels
                 # avoid white outside limits
                 zn = np.clip(zn, vmin + vbuf, vmax - vbuf)
-                fig_obj = ax.tricontourf(triang, zn, levels=levels, cmap=cmap)
+                fig_obj = ax.tricontourf(
+                    triang,
+                    zn,
+                    levels=levels,
+                    cmap=cmap,
+                    norm=cmap_norm,
+                    extend=cbar_extend,
+                )
 
                 # colorbar
                 cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                plt.colorbar(fig_obj, label=label, cax=cax)
+                if cmap_ScMappable is None:
+                    plt.colorbar(fig_obj, label=label, cax=cax)
+                else:
+                    plt.colorbar(
+                        cmap_ScMappable,
+                        label=label,
+                        cax=cax,
+                        ticks=levels,
+                    )
 
             else:
                 if (plot_type is not None) and plot_type != "outline_only":
@@ -1507,6 +1566,21 @@ class _UnstructuredGeometry:
             ax.set_title(title)
 
         return ax
+
+    def _cbar_extend(self, calc_data, vmin, vmax):
+        if calc_data is None:
+            return "neither"
+        extend_min = calc_data.min() < vmin if vmin is not None else False
+        extend_max = calc_data.max() > vmax if vmax is not None else False
+        if extend_min and extend_max:
+            extend = "both"
+        elif extend_min:
+            extend = "min"
+        elif extend_max:
+            extend = "max"
+        else:
+            extend = "neither"
+        return extend
 
     def _create_tri_only_element_table(self, data=None, geometry=None):
         """Convert quad/tri mesh to pure tri-mesh"""
