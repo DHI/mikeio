@@ -19,7 +19,7 @@ For Anaconda::
 
 Or development version::
 
-    pip install https://github.com/DHI/mikeio/archive/master.zip
+    pip install https://github.com/DHI/mikeio/archive/main.zip
 
 Getting started
 ---------------
@@ -31,10 +31,10 @@ Getting started
 Notebooks
 ---------
 
-* `Dfs0 <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfs0%20-%20Timeseries.ipynb>`_
-* `Dfsu basic <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfsu%20-%20Read.ipynb>`_
-* `Create Dfs2 from netCDF <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/master/notebooks/Dfs2%20-%20Bathymetry.ipynb>`_
-* `Complete list of all notebooks <https://nbviewer.jupyter.org/github/DHI/mikeio/tree/master/notebooks/>`_
+* `Dfs0 <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb>`_
+* `Dfsu basic <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb>`_
+* `Create Dfs2 from netCDF <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb>`_
+* `Complete list of all notebooks <https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/>`_
 
 Where can I get help?
 ---------------------

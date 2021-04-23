@@ -36,16 +36,16 @@ By providing many examples to cut/paste from.
 
 Examples are available in two forms:
 
-* `Unit tests <https://github.com/DHI/mikeio/tree/master/tests>`_
-* `Jupyter notebooks <https://nbviewer.jupyter.org/github/DHI/mikeio/tree/master/notebooks/>`_
+* `Unit tests <https://github.com/DHI/mikeio/tree/main/tests>`_
+* `Jupyter notebooks <https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/>`_
 
 Open Source​
 ------------
 
-MIKE IO is an open source project licensed under the `BSD-3 license <https://github.com/DHI/mikeio/blob/master/License.txt>`_.
+MIKE IO is an open source project licensed under the `BSD-3 license <https://github.com/DHI/mikeio/blob/main/License.txt>`_.
 The software is provided free of charge with the source code available for inspection and modification.
 
-Contributions are welcome, more details can be found in our `contribution guidelines <https://github.com/DHI/mikeio/blob/master/CONTRIBUTING.md>`_.
+Contributions are welcome, more details can be found in our `contribution guidelines <https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md>`_.
 
 Easy to collaborate​
 --------------------
@@ -65,8 +65,8 @@ Easy access to new features
 ---------------------------
 
 Features are being added all the time, by developers at DHI in offices all around the globe as well as external contributors using MIKE IO in their work.
-These new features are always available from the master branch on GitHub and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.
+These new features are always available from the main branch on GitHub and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.
 
 Install development version::
 
-    pip install https://github.com/DHI/mikeio/archive/master.zip
+    pip install https://github.com/DHI/mikeio/archive/main.zip
