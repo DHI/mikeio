@@ -8,12 +8,7 @@ from tqdm import tqdm, trange
 from .dataset import Dataset
 from .base import TimeSeries
 
-from .dotnet import (
-    to_dotnet_datetime,
-    from_dotnet_datetime,
-    to_numpy,
-    to_dotnet_float_array,
-)
+from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
 from mikecore.eum import eumQuantity

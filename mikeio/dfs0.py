@@ -6,19 +6,26 @@ from datetime import datetime, timedelta
 
 from mikecore.eum import eumQuantity
 from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsFactory import DfsFactory, DfsBuilder
 
-from mikecore.DfsFile import DfsSimpleType, DfsSimpleType, DataValueType, StatType, TimeAxisType
+from mikecore.DfsFile import (
+    DfsSimpleType,
+    DfsSimpleType,
+    DataValueType,
+    StatType,
+    TimeAxisType,
+)
 
-#from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
+# from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
 
 from .dfs0util import Dfs0Util
 from .custom_exceptions import ItemNumbersError, InvalidDataType
-from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .helpers import safe_length
 from .base import TimeSeries
+from .dfsutil import _get_item_info
 
 
 class Dfs0(TimeSeries):
@@ -111,7 +118,7 @@ class Dfs0(TimeSeries):
 
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        if self._timeaxistype == TimeAxisType.NonEquidistantCalendar and isinstance(
+        if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
             time_steps, str
         ):
             sel_time_step_str = time_steps
@@ -197,7 +204,7 @@ class Dfs0(TimeSeries):
         builder.SetDataType(1)
         builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
-        system_start_time = to_dotnet_datetime(self._start_time)
+        system_start_time = self._start_time
 
         if self._is_equidistant:
             temporal_axis = factory.CreateTemporalEqCalendarAxis(
@@ -337,7 +344,7 @@ class Dfs0(TimeSeries):
 
         data = np.array(data).astype(np.float64)
         data[np.isnan(data)] = delete_value
-        data_to_write = to_dotnet_array(data.T)
+        data_to_write = data.T
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
         Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
 

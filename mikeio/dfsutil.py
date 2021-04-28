@@ -113,7 +113,7 @@ def _get_item_info(dfsItemInfo, item_numbers=None):
     ----------
     dfsItemInfo : MIKE dfs ItemInfo object
     item_numbers : list[int]
-        
+
     Returns
     -------
     list[ItemInfo]
@@ -128,8 +128,7 @@ def _get_item_info(dfsItemInfo, item_numbers=None):
         eumUnit = dfsItemInfo[item].Quantity.Unit
         itemtype = EUMType(eumItem)
         unit = EUMUnit(eumUnit)
-        data_value_type = dfsItemInfo[item].get_ValueType()
+        data_value_type = dfsItemInfo[item].ValueType
         item = ItemInfo(name, itemtype, unit, data_value_type)
         items.append(item)
     return items
-

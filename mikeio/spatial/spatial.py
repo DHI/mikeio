@@ -2,7 +2,9 @@ from collections import namedtuple
 
 import numpy as np
 from mikecore.eum import eumQuantity
-from .eum import ItemInfo, EUMType, EUMUnit
+from mikeio.eum import ItemInfo, EUMType, EUMUnit
+
+BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 
 def min_horizontal_dist_meters(coords, targets, is_geo=False):

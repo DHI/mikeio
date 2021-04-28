@@ -1,25 +1,17 @@
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-import clr
 
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-    DfsSimpleType,
-    DataValueType,
-    DfsBuilder,
-)
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs1Builder
+from mikecore.eum import eumQuantity, eumUnit
+from mikecore.DfsFactory import DfsFactory, DfsBuilder
+from mikecore.DfsFileFactory import DfsFileFactory, DfsSimpleType, DataValueType
 
-from .dotnet import to_numpy, to_dotnet_float_array
 from .helpers import safe_length
 
 
 def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
     """Aggregate file over an axis
-    
+
     Parameters
     ----------
     dfs2file : str
@@ -47,7 +39,7 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
 
     # Create an empty dfs1 file object
     factory = DfsFactory()
-    builder = Dfs1Builder.Create(
+    builder = DfsBuilder.Create(
         fileInfo.FileTitle, fileInfo.ApplicationTitle, fileInfo.ApplicationVersion
     )
 
@@ -90,7 +82,7 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
     n_items = safe_length(dfs_in.ItemInfo)
     for item in range(n_items):
         ii = dfs_in.ItemInfo[item]
-        builder.AddDynamicItem(
+        builder.AddCreateDynamicItem(
             ii.Name, ii.Quantity, DfsSimpleType.Float, DataValueType.Instantaneous
         )
 
@@ -107,7 +99,8 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
         for item in range(n_items):
             itemdata = dfs_in.ReadItemTimeStep(item + 1, it)
 
-            d = to_numpy(itemdata.Data)
+            # d = to_numpy(itemdata.Data)
+            d = itemdata.Data
             d[d == deleteValue] = np.nan
             d2 = d.reshape(ax.YCount, ax.XCount)
             d2 = np.flipud(d2)
@@ -115,7 +108,8 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
             d1 = func(d2, axis=axis - 1)
             d1[np.isnan(d1)] = deleteValue
 
-            darray = to_dotnet_float_array(d1)
+            # darray = to_dotnet_float_array(d1)
+            darray = d1
             dfs_out.WriteItemTimeStepNext(itemdata.Time, darray)
 
     dfs_in.Close()
@@ -123,7 +117,7 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
 
 
 def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
-    """ Function: take average (or other statistics) over dfs and output dfs0
+    """Function: take average (or other statistics) over dfs and output dfs0
 
     Usage:
         dfstodfs0(dfsfile, dfs0file)
@@ -179,7 +173,8 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
         for item in range(n_items):
             itemdata = dfs_in.ReadItemTimeStep(item + 1, it)
 
-            d = to_numpy(itemdata.Data)
+            # d = to_numpy(itemdata.Data)
+            d = itemdata.Data
             d[d == deleteValue] = np.nan
 
             d0 = func(d)
@@ -187,7 +182,8 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
             d[0] = d0
             d[np.isnan(d)] = deleteValue
 
-            darray = to_dotnet_float_array(d)
+            # darray = to_dotnet_float_array(d)
+            darray = d.astype(np.float32)
             dfs_out.WriteItemTimeStepNext(itemdata.Time, darray)
 
     dfs_in.Close()

@@ -1,6 +1,6 @@
 import warnings
 
-import DHI.Projections
+from mikecore.Projections import Cartography, MapProjection
 import pyproj
 
 
@@ -33,7 +33,7 @@ class CRS:
 
         """
         # https://manuals.mikepoweredbydhi.help/2021/General/Class_Library/DHI_Projections/html/T_DHI_Projections_Cartography.htm
-        self.__cartography = DHI.Projections.Cartography(projection_string, True)
+        self.__cartography = Cartography(projection_string, True)
 
     def __repr__(self) -> str:
         summary = [
@@ -49,7 +49,7 @@ class CRS:
         return "\n".join(summary)
 
     @property
-    def map_projection(self) -> DHI.Projections.MapProjection:
+    def map_projection(self) -> MapProjection:
         # https://manuals.mikepoweredbydhi.help/2021/General/Class_Library/DHI_Projections/html/T_DHI_Projections_MapProjection.htm
         return self.__cartography.get_Projection()
 
@@ -63,7 +63,7 @@ class CRS:
 
     @property
     def is_geographical(self) -> bool:
-        return DHI.Projections.MapProjection.IsGeographical(self.projection_string)
+        return MapProjection.IsGeographical(self.projection_string)
 
     @property
     def is_projected(self) -> bool:

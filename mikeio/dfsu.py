@@ -920,7 +920,9 @@ class _UnstructuredGeometry:
             return None
         elif (self._top_elems is None) and (self._source is not None):
             # note: if subset of elements is selected then this cannot be done!
-            self._top_elems = np.array(DfsuUtil.FindTopLayerElements(self._source))
+            self._top_elems = np.array(
+                DfsuUtil.FindTopLayerElements(self._source.ElementTable)
+            )
         return self._top_elems
 
     @property
@@ -1775,7 +1777,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
         # items
         self._n_items = len(dfs.ItemInfo)
-        self._items = get_item_info(dfs, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         # time
         self._start_time = dfs.StartDateTime
@@ -1821,12 +1823,12 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         self._dtype = dtype
 
         # show progress bar for large files
-        if self._type == UnstructuredType.Mesh:
-            tot_size = self.n_elements
-        else:
-            tot_size = self.n_elements * self.n_timesteps * self.n_items
-        if tot_size > 1e6:
-            self.show_progress = True
+        # if self._type == UnstructuredType.Mesh:
+        #    tot_size = self.n_elements
+        # else:
+        #    tot_size = self.n_elements * self.n_timesteps * self.n_items
+        # if tot_size > 1e6:
+        #    self.show_progress = True
 
     @property
     def element_coordinates(self):
@@ -2095,7 +2097,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         for item in range(n_items):
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
             t2 = itemdata.Time - 1e-10
-            d = to_numpy(itemdata.Data)
+            # d = to_numpy(itemdata.Data)
+            d = itemdata.Data
             d[d == deletevalue] = np.nan
             d2[item, :] = d
 
@@ -2119,7 +2122,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
                     t2 = itemdata.Time
-                    d = to_numpy(itemdata.Data)
+                    # d = to_numpy(itemdata.Data)
+                    d = itemdata.Data
                     d[d == deletevalue] = np.nan
                     d2[item, :] = d
 
