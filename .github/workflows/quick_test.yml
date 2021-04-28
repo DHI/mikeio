@@ -25,10 +25,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest flake8
         
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+    #- name: Lint with flake8
+    #  run: |
+    #    # stop the build if there are Python syntax errors or undefined names
+    #    flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
     - name: Install mikecore (temporary solution)
       run: pip install https://enginetest.blob.core.windows.net/test/mikecore-0.0.1.zip?sv=2020-04-08&st=2021-04-28T17%3A25%3A14Z&se=2021-04-30T22%3A25%3A00Z&sr=b&sp=r&sig=KasXQ%2BKbATiOVcT602g18QYx6ZWALDP%2Fdtn7Qo6wXnA%3D
     - name: Install mikeio
