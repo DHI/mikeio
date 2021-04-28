@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import numpy as np
 
 from mikeio import Pfs
 from mikeio.pfs import PfsCore
@@ -43,7 +44,7 @@ def test_outputs():
     pfs = Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE")
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
 
 
 def test_sw_outputs():
@@ -51,12 +52,12 @@ def test_sw_outputs():
     pfs = Pfs("tests/testdata/lake.sw")
     df = pfs.data.SW.get_outputs()
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 4
 
     df = pfs.data.SW.get_outputs(included_only=True)
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 3
 
 
@@ -65,7 +66,7 @@ def test_hd_outputs():
     pfs = Pfs("tests/testdata/lake.m21fm")
     df = pfs.data.HD.get_outputs()
 
-    assert df["file_name"][1] == "ts.dfs0"
+    assert df["file_name"][2] == "ts.dfs0"
     assert df.shape[0] == 3
 
     df = pfs.data.HD.get_outputs(included_only=True)
@@ -78,10 +79,22 @@ def test_included_outputs():
     pfs = Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
 
-    assert df["file_name"][0] == "Wave_parameters.dfsu"
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 3
 
     # df.to_csv("outputs.csv")
+
+
+def test_output_by_id():
+
+    pfs = Pfs("tests/testdata/lake.sw")
+    df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=False)
+    # .loc refers to output_id irrespective of included or not
+    assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
+
+    df_inc = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
+    # .loc refers to output_id irrespective of included or not
+    assert df_inc.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
 
 
 ## PFSCore wrapping DHI.PFS.PFSFile
@@ -126,6 +139,8 @@ def test_sw_set_end_time(tmpdir):
     assert pfs.end_time == new_end_time
     assert pfs.section("TIME")["number_of_time_steps"].value == 720
 
+    pfs.write(os.path.join(tmpdir, "lake_new.sw"))
+
 
 def test_sw_modify_and_write(tmpdir):
 
@@ -134,10 +149,28 @@ def test_sw_modify_and_write(tmpdir):
 
     wind_section = pfs.section("SPECTRAL_WAVE_MODULE").section("WIND")
 
-    assert type(wind_section["Charnock_parameter"].value) == float
+    assert isinstance(wind_section["Charnock_parameter"].value, float)
 
     # modify parameter without needing to specify that the float is a float...
     wind_section["Charnock_parameter"] = 0.02
+
+    wind_section["Charnock_parameter"] = 1.0
+
+    # Force parameter to be interpreted as float to avoid interpreting 1.0 as integer
+    wind_section["Charnock_parameter"] = 0.1
+
+    assert wind_section["Charnock_parameter"].value == 0.1
+
+    spectral_section = pfs.section("SPECTRAL_WAVE_MODULE").section("SPECTRAL")
+
+    assert spectral_section["separation_of_wind_sea_and_swell"].value == 0
+    spectral_section["separation_of_wind_sea_and_swell"] = 1
+
+    assert spectral_section["separation_of_wind_sea_and_swell"].value == 1
+
+    # Check that numpy types works as well
+    for i in np.arange(2, 25):
+        spectral_section["number_of_frequencies"] = i
 
     # modify a filename
     pfs.section("DOMAIN")["file_name"] = "tests\\testdata\\odense_rough.mesh"
@@ -155,4 +188,3 @@ def test_sw_modify_and_write(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "lake_mod.sw")
 
     pfs.write(outfilename)
-

@@ -1,8 +1,12 @@
 from datetime import datetime, timedelta
+from abc import abstractmethod
+
 import warnings
 import numpy as np
 import pandas as pd
+from tqdm import tqdm, trange
 from .dataset import Dataset
+from .base import TimeSeries
 
 from .dotnet import (
     to_dotnet_datetime,
@@ -17,11 +21,12 @@ from mikecore.DfsFile import DfsSimpleType
 from mikecore.DfsFactory import DfsFactory
 
 
-class _Dfs123:
+class _Dfs123(TimeSeries):
 
     _filename = None
     _projstr = None
     _start_time = None
+    _end_time = None
     _is_equidistant = True
     _items = None
     _builder = None
@@ -30,6 +35,8 @@ class _Dfs123:
     _override_coordinates = False
     _timeseries_unit = TimeStepUnit.SECOND
     _dt = None
+
+    show_progress = False
 
     def __init__(self, filename=None):
         self._filename = filename
@@ -42,7 +49,7 @@ class _Dfs123:
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: int or list[int], optional
+        time_steps: str, int or list[int], optional
             Read only selected time_steps
 
         Returns
@@ -51,15 +58,10 @@ class _Dfs123:
         """
         self._open()
 
-        items, item_numbers, time_steps = self._get_valid_items_and_timesteps(
-            items, time_steps
-        )
-
-        for t in time_steps:
-            if t > (self.n_timesteps - 1):
-                raise IndexError(f"Timestep {t} is > {self.n_timesteps-1}")
-
+        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
+
+        time_steps = _valid_timesteps(self._dfs.FileInfo, time_steps)
         nt = len(time_steps)
 
         if self._ndim == 1:
@@ -73,7 +75,7 @@ class _Dfs123:
 
         t_seconds = np.zeros(len(time_steps))
 
-        for i, it in enumerate(time_steps):
+        for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
             for item in range(n_items):
 
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
@@ -93,7 +95,7 @@ class _Dfs123:
 
         time = [self.start_time + timedelta(seconds=t) for t in t_seconds]
 
-        items = self._get_item_info(item_numbers)
+        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
         return Dataset(data_list, time, items)
@@ -107,6 +109,7 @@ class _Dfs123:
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
             )  # TODO handle other timeunits
+            # TODO to get the EndTime
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         self._projstr = dfs.FileInfo.Projection.WKTString
         self._longitude = dfs.FileInfo.Projection.Longitude
@@ -116,7 +119,13 @@ class _Dfs123:
 
         dfs.Close()
 
-    def _write(self, filename, data, start_time, dt, items, coordinate, title):
+    def _write(
+        self, filename, data, start_time, dt, datetimes, items, coordinate, title
+    ):
+
+        if isinstance(data, Dataset) and not data.is_equidistant:
+            datetimes = data.time
+
         self._write_handle_common_arguments(
             title, data, items, coordinate, start_time, dt
         )
@@ -141,15 +150,20 @@ class _Dfs123:
 
             if not all(np.shape(d)[2] == self._nx for d in data):
                 raise DataDimensionMismatch()
+        if datetimes is not None:
+            self._is_equidistant = False
+            start_time = datetimes[0]
+            self._start_time = start_time
 
         dfs = self._setup_header(filename)
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
-        for i in range(self._n_timesteps):
+        for i in trange(self._n_timesteps, disable=not self.show_progress):
             for item in range(self._n_items):
 
                 d = self._data[item][i]
+                d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 
                 if self._ndim == 1:
@@ -269,46 +283,6 @@ class _Dfs123:
 
         return self._builder.GetFile()
 
-    def _get_valid_items_and_timesteps(self, items, time_steps):
-
-        if isinstance(items, int) or isinstance(items, str):
-            items = [items]
-
-        if items is not None and isinstance(items[0], str):
-            items = self._find_item(items)
-
-        if items is None:
-            item_numbers = list(range(self.n_items))
-        else:
-            item_numbers = items
-
-        self._validate_item_numbers(item_numbers)
-
-        if time_steps is None:
-            time_steps = list(range(self.n_timesteps))
-
-        if isinstance(time_steps, int):
-            time_steps = [time_steps]
-
-        if isinstance(time_steps, str):
-            parts = time_steps.split(",")
-            if parts[0] == "":
-                time_steps = slice(parts[1])  # stop only
-            elif parts[1] == "":
-                time_steps = slice(parts[0], None)  # start only
-            else:
-                time_steps = slice(parts[0], parts[1])
-
-        if isinstance(time_steps, slice):
-            freq = pd.tseries.offsets.DateOffset(seconds=self.timestep)
-            time = pd.date_range(self.start_time, periods=self.n_timesteps, freq=freq)
-            s = time.slice_indexer(time_steps.start, time_steps.stop)
-            time_steps = list(range(s.start, s.stop))
-
-        items = self._get_item_info(item_numbers)
-
-        return items, item_numbers, time_steps
-
     def _open(self):
         raise NotImplementedError("Should be implemented by subclass")
 
@@ -396,6 +370,14 @@ class _Dfs123:
         return self._start_time
 
     @property
+    def end_time(self):
+        """File end time"""
+        if self._end_time is None:
+            self._end_time = self.read([0]).time[-1].to_pydatetime()
+
+        return self._end_time
+
+    @property
     def n_timesteps(self):
         """Number of time steps"""
         return self._n_timesteps
@@ -423,3 +405,9 @@ class _Dfs123:
     def orientation(self):
         """North to Y orientation"""
         return self._orientation
+
+    @property
+    @abstractmethod
+    def dx(self):
+        """Step size in x direction"""
+        pass

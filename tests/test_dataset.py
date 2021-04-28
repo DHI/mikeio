@@ -213,6 +213,41 @@ def test_select_subset_isel_multiple_idxs():
     assert selds["Foo"].shape == (100, 2, 30)
 
 
+def test_create_undefined():
+
+    nt = 100
+    d1 = np.zeros([nt])
+    d2 = np.zeros([nt])
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = 2
+    ds = Dataset(data, time, items)
+
+    assert len(ds.items) == 2
+    assert len(ds.data) == 2
+    assert ds.items[0].name == "Item 1"
+    assert ds.items[0].type == EUMType.Undefined
+
+
+def test_to_dataframe_single_timestep():
+
+    nt = 1
+    d1 = np.zeros([nt])
+    d2 = np.zeros([nt])
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+    df = ds.to_dataframe()
+
+    assert list(df.columns) == ["Foo", "Bar"]
+    assert isinstance(df.index, pd.DatetimeIndex)
+
+
 def test_to_dataframe():
 
     nt = 100
@@ -303,6 +338,10 @@ def test_interp_time_to_other_dataset():
     assert dsi.time[-1] == ds2.time[-1]
     assert len(dsi.time) == len(ds2.time)
     assert dsi.data[0].shape[0] == ds2.data[0].shape[0]
+
+    # Accept dataset as argument
+    dsi2 = ds1.interp_time(ds2)
+    assert dsi2.time[0] == ds2.time[0]
 
 
 def test_extrapolate():
@@ -563,6 +602,28 @@ def test_copy():
     assert ds.items[0].name == "Foo"
 
 
+def test_dropna():
+    nt = 10
+    d1 = np.zeros([nt, 100, 30])
+    d2 = np.zeros([nt, 100, 30])
+
+    d1[8:] = np.nan
+    d2[8:] = np.nan
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = Dataset(data, time, items)
+
+    assert len(ds.items) == 2
+    assert len(ds.data) == 2
+
+    ds2 = ds.dropna()
+
+    assert ds2.n_timesteps == 8
+
+
 def test_default_type():
 
     item = ItemInfo("Foo")
@@ -705,8 +766,97 @@ def test_properties_dfsu():
 
     ds = dfs.read()
     assert ds.n_timesteps == 3
+    assert ds.start_time == datetime(1997, 9, 15, 21, 0, 0)
+    assert ds.end_time == datetime(1997, 9, 16, 3, 0, 0)
+    assert ds.timestep == (3 * 3600)
     assert ds.n_items == 3
     assert np.all(ds.shape == (3, 441))
     assert ds.n_elements == 441
     assert ds._first_non_z_item == 1
     assert ds.is_equidistant
+
+
+def test_create_empty_data():
+    ne = 34
+    d = Dataset.create_empty_data(n_elements=ne)
+    assert len(d) == 1
+    assert d[0].shape == (1, ne)
+
+    nt = 100
+    d = Dataset.create_empty_data(n_timesteps=nt, shape=(3, 4, 6))
+    assert len(d) == 1
+    assert d[0].shape == (nt, 3, 4, 6)
+
+    ni = 4
+    d = Dataset.create_empty_data(n_items=ni, n_elements=ne)
+    assert len(d) == ni
+    assert d[-1].shape == (1, ne)
+
+    with pytest.raises(Exception):
+        d = Dataset.create_empty_data()
+
+    with pytest.raises(Exception):
+        d = Dataset.create_empty_data(n_elements=None, shape=None)
+
+
+def test_create_time():
+
+    t = Dataset.create_time("2018-1-1,2018-1-2", dt=3600)
+    assert t[-1].day == 2
+    assert len(t) == 25
+
+    t = Dataset.create_time("2018-1-1", end_time="2018-1-2", n_timesteps=25)
+    assert t[-1].day == 2
+    assert len(t) == 25
+
+    t = Dataset.create_time("2018-1-1", dt=1800, n_timesteps=48)
+    assert t[-1].hour == 23
+    assert len(t) == 48
+
+    t = Dataset.create_time("2018", dt=7200, end_time="2019")
+    assert len(t) == (365 * 12 + 1)
+
+    t = Dataset.create_time(end_time="1970-1-2", n_timesteps=25)
+    assert len(t) == 25
+    assert t[0].hour == 0
+
+    with pytest.raises(Exception):
+        # dt cannot be negative
+        t = Dataset.create_time("2018", dt=-7200)
+
+    with pytest.raises(Exception):
+        # end must be after start
+        t = Dataset.create_time("2018-2-1,2018-1-1")
+
+    with pytest.raises(Exception):
+        # All parameters where given, but they do not match
+        t = Dataset.create_time("2018", dt=7200, end_time="2019", n_timesteps=25)
+
+
+def test_create_infer_name_from_eum():
+
+    nt = 100
+    d = np.random.uniform(size=nt)
+
+    ds = Dataset(
+        data=[d],
+        time=pd.date_range("2000-01-01", freq="H", periods=nt),
+        items=[EUMType.Wind_speed],
+    )
+
+    assert isinstance(ds.items[0], ItemInfo)
+    assert ds.items[0].type == EUMType.Wind_speed
+    assert ds.items[0].name == "Wind speed"
+
+
+def test_init():
+    n_elements = 45
+    data = n_elements
+    time = "2018-01-01"
+    items = [ItemInfo("Foo")]
+    ds = Dataset(data, time, items)
+
+    assert ds.n_timesteps == 1
+    assert ds.start_time == datetime(2018, 1, 1, 0, 0, 0)
+    assert ds.n_elements == n_elements
+    assert ds.items[0].name == "Foo"

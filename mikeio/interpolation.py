@@ -2,20 +2,22 @@ import numpy as np
 from .dataset import Dataset
 
 # class Interpolation2D:
-def get_idw_interpolant(distances, p=1):
+def get_idw_interpolant(distances, p=2):
     """IDW interpolant for 2d array of distances
 
+    https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
+    
     Parameters
     ----------
     distances : array-like 
         distances between interpolation point and grid point
-    p : int, optional
-        order of inverse distance weighting, default=1
-
+    p : float, optional
+        power of inverse distance weighting, default=2
+    
     Returns
     -------
     np.array
-        weights 
+        weights
     """
     is_1d = distances.ndim == 1
     if is_1d:
@@ -23,7 +25,6 @@ def get_idw_interpolant(distances, p=1):
 
     MIN_DISTANCE = 1e-8
     weights = np.zeros(distances.shape)
-    p = 1  # inverse distance order
 
     match = distances[:, 0] < MIN_DISTANCE
     weights[match, 0] = 1

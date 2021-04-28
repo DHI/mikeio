@@ -14,20 +14,20 @@ from mikecore.DfsFile import DfsSimpleType, DfsSimpleType, DataValueType, StatTy
 from .dfs0util import Dfs0Util
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
-from .dutil import get_valid_items_and_timesteps, get_item_info
+from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .helpers import safe_length
+from .base import TimeSeries
 
 
-class Dfs0:
+class Dfs0(TimeSeries):
 
     _start_time = None
     _n_items = None
     _dt = None
     _is_equidistant = None
     _title = None
-    _data_value_type = None
     _items = None
 
     def __init__(self, filename=None):
@@ -64,11 +64,12 @@ class Dfs0:
             raise FileNotFoundError(self._filename)
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        self._source = dfs
         self._deletevalue = dfs.FileInfo.DeleteValueFloat
 
         # Read items
         self._n_items = safe_length(dfs.ItemInfo)
-        self._items = get_item_info(dfs, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
 
@@ -90,7 +91,7 @@ class Dfs0:
         ----------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: int or list[int], optional
+        time_steps: str, int or list[int], optional
             Read only selected time_steps
 
         Returns
@@ -104,10 +105,19 @@ class Dfs0:
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
+
         self._n_items = safe_length(dfs.ItemInfo)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        items, item_numbers, _ = get_valid_items_and_timesteps(self, items, time_steps)
+        if self._timeaxistype == TimeAxisType.NonEquidistantCalendar and isinstance(
+            time_steps, str
+        ):
+            sel_time_step_str = time_steps
+            time_steps = range(self._n_timesteps)
+        else:
+            sel_time_step_str = None
 
         dfs.Close()
 
@@ -115,6 +125,19 @@ class Dfs0:
         ds = ds[item_numbers]
         if time_steps:
             ds = ds.isel(time_steps, axis=0)
+
+        if sel_time_step_str:
+            parts = sel_time_step_str.split(",")
+            if len(parts) == 1:
+                parts.append(parts[0])  # end=start
+
+            if parts[0] == "":
+                sel = slice(parts[1])  # stop only
+            elif parts[1] == "":
+                sel = slice(parts[0], None)  # start only
+            else:
+                sel = slice(parts[0], parts[1])
+            ds = ds[sel]
 
         return ds
 
@@ -152,15 +175,8 @@ class Dfs0:
             name = self._dfs.ItemInfo[i].Name
             item_type = EUMType(self._dfs.ItemInfo[i].Quantity.Item)
             unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
-            yield ItemInfo(name, item_type, unit)
-
-    @staticmethod
-    def _validate_item_numbers(item_numbers):
-        if not all(
-            isinstance(item_number, int) and 0 <= item_number < 1e15
-            for item_number in item_numbers
-        ):
-            raise ItemNumbersError()
+            value_type = self._dfs.ItemInfo[i].ValueType
+            yield ItemInfo(name, item_type, unit, data_value_type=value_type)
 
     @staticmethod
     def _to_dfs_datatype(dtype):
@@ -202,11 +218,13 @@ class Dfs0:
             newitem = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(item.type, item.unit)
             newitem.Set(
-                item.name, quantity, dtype_dfs,
+                item.name,
+                quantity,
+                dtype_dfs,
             )
 
-            if self._data_value_type is not None:
-                newitem.SetValueType(self._data_value_type[i])
+            if item.data_value_type is not None:
+                newitem.SetValueType(item.data_value_type)
             else:
                 newitem.SetValueType(DataValueType.Instantaneous)
 
@@ -230,7 +248,6 @@ class Dfs0:
         datetimes=None,
         items=None,
         title="",
-        data_value_type=None,
         dtype=None,
     ):
         """
@@ -254,8 +271,6 @@ class Dfs0:
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         title: str, optional
             title, default blank
-        data_value_type: list[DataValueType], optional
-            DataValueType default DataValueType.INSTANTANEOUS
         dtype : np.dtype, optional
             default np.float32
 
@@ -264,7 +279,6 @@ class Dfs0:
         self._title = title
         self._timeseries_unit = timeseries_unit
         self._dtype = dtype
-        self._data_value_type = data_value_type
 
         if isinstance(data, Dataset):
             self._items = data.items
@@ -332,7 +346,7 @@ class Dfs0:
     def to_dataframe(self, unit_in_name=False, round_time="s"):
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
-        
+
         Parameters
         ----------
         unit_in_name: bool, optional
@@ -377,27 +391,46 @@ class Dfs0:
 
     @property
     def deletevalue(self):
-        """File delete value
-        """
+        """File delete value"""
         return self._deletevalue
 
     @property
     def n_items(self):
-        """Number of items
-        """
+        """Number of items"""
         return self._n_items
 
     @property
     def items(self):
-        """List of items
-        """
+        """List of items"""
         return self._items
 
     @property
     def start_time(self):
-        """File start time
-        """
+        """File start time"""
         return self._start_time
+
+    @property
+    def end_time(self):
+        return self._end_time
+
+    @property
+    def n_timesteps(self):
+        """Number of time steps"""
+        return self._n_timesteps
+
+
+def series_to_dfs0(
+    self,
+    filename,
+    itemtype=None,
+    unit=None,
+    items=None,
+    title=None,
+    dtype=None,
+):
+
+    df = pd.DataFrame(self)
+    df.to_dfs0(filename, itemtype, unit, items, title, dtype)
 
 
 def dataframe_to_dfs0(
@@ -407,7 +440,6 @@ def dataframe_to_dfs0(
     unit=None,
     items=None,
     title=None,
-    data_value_type=None,
     dtype=None,
 ):
     """
@@ -425,8 +457,6 @@ def dataframe_to_dfs0(
         Different types, units for each items, similar to `create`
     title: str, optional
         Title of dfs0 file
-    data_value_type: list[DataValueType], optional
-            DataValueType default DataValueType.INSTANTANEOUS
     dtype : np.dtype, optional
             default np.float32
     """
@@ -459,7 +489,6 @@ def dataframe_to_dfs0(
             datetimes=self.index,
             items=items,
             title=title,
-            data_value_type=data_value_type,
             dtype=dtype,
         )
     else:  # equidistant
@@ -472,22 +501,24 @@ def dataframe_to_dfs0(
             dt=dt,
             items=items,
             title=title,
-            data_value_type=data_value_type,
             dtype=dtype,
         )
 
 
+# Monkey patching onto Pandas classes
 pd.DataFrame.to_dfs0 = dataframe_to_dfs0
+
+pd.Series.to_dfs0 = series_to_dfs0
 
 
 def dataset_to_dfs0(self, filename):
     """Write Dataset to a Dfs0 file
-        
-        Parameters
-        ----------
-        filename: str
-            full path and file name to the dfs0 file.
-        """
+
+    Parameters
+    ----------
+    filename: str
+        full path and file name to the dfs0 file.
+    """
     self = self.squeeze()
 
     if len(self.data[0].shape) != 1:

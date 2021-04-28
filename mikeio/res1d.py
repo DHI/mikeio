@@ -3,6 +3,7 @@ import clr
 import pandas as pd
 import numpy as np
 
+from mikeio.custom_exceptions import NoDataForQuery, InvalidQuantity
 from mikeio.dotnet import from_dotnet_datetime, to_numpy, to_dotnet_datetime
 
 from System import Enum, DateTime
@@ -36,11 +37,6 @@ class QueryData:
         if not isinstance(self.quantity, str):
             raise TypeError("Quantity must be a string.")
 
-        if self.quantity not in mike1d_quantities():
-            raise ValueError(
-                f"Undefined quantity {self.quantity}. "
-                f"Allowed quantities are: {', '.join(mike1d_quantities())}."
-            )
         if self.name is not None and not isinstance(self.name, str):
             raise TypeError("Argument 'name' must be either None or a string.")
 
@@ -93,7 +89,12 @@ class QueryDataReach(QueryData):
             raise ValueError("Argument 'chainage' cannot be set if name is None.")
 
     def get_values(self, res1d):
+        if self._quantity not in res1d.quantities:
+            raise InvalidQuantity(f"Undefined quantity {self._quantity}. "
+                                  f"Allowed quantities are: {', '.join(res1d.quantities)}.")
         values = res1d.query.GetReachValues(self._name, self._chainage, self._quantity)
+        if values is None:
+            raise NoDataForQuery(str(self))
         return self.from_dotnet_to_python(values)
 
     @property
@@ -128,7 +129,7 @@ class QueryDataNode(QueryData):
 
 
 class Res1D:
-    def __init__(self, file_path=None, put_chainage_in_col_name=False):
+    def __init__(self, file_path=None, put_chainage_in_col_name=True):
         self.file_path = file_path
         self._time_index = None
         self._start_time = None
@@ -174,7 +175,8 @@ class Res1D:
                     data_set, data_item, NAME_DELIMITER, self._put_chainage_in_col_name
                 ):
                     df[col_name] = values
-        return df
+
+        return df.reindex(sorted(df.columns), axis=1)
 
     @staticmethod
     def get_values(
@@ -182,7 +184,7 @@ class Res1D:
     ):
         """ Get all time series values in given data_item. """
         name = data_set.Name if hasattr(data_set, "Name") else data_set.Id
-        if data_item.IndexList is None or data_item.NumberOfElements == 1:
+        if data_item.IndexList is None:
             col_name = col_name_delimiter.join([data_item.Quantity.Id, name])
             yield data_item.CreateTimeSeriesData(0), col_name
         else:

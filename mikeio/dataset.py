@@ -1,11 +1,19 @@
+import warnings
+from typing import Union, List
 import numpy as np
 import pandas as pd
+from datetime import datetime, timedelta
 from scipy.interpolate import interp1d
 from copy import deepcopy
-from mikeio.eum import ItemInfo
+from mikeio.eum import EUMType, ItemInfo
+
+from .base import TimeSeries
 
 
-class Dataset:
+class Dataset(TimeSeries):
+
+    deletevalue = 1.0e-35
+
     """Dataset
 
     Attributes
@@ -70,7 +78,7 @@ class Dataset:
       0:  Surface elevation <Surface Elevation> (meter)
       1:  Current speed <Current Speed> (meter per sec)
     >>>  ds5 = ds[[1,0]] # item selection by position
-    >>>  ds5 
+    >>>  ds5
     <mikeio.DataSet>
     Dimensions: (1000,)
     Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
@@ -79,7 +87,34 @@ class Dataset:
       1:  VarFun01 <Water Level> (meter)
     """
 
-    def __init__(self, data, time, items):
+    def __init__(
+        self,
+        data: Union[List[np.ndarray], float],
+        time: Union[pd.DatetimeIndex, str],
+        items: Union[List[ItemInfo], List[EUMType]],
+    ):
+
+        self._deletevalue = Dataset.deletevalue
+
+        if isinstance(time, str):
+            # default single-step time
+            time = self.create_time(time)
+
+        if isinstance(items, int):
+            # default Undefined items
+            n_items = items
+            items = []
+            for j in range(n_items):
+                items.append(ItemInfo(f"Item {j+1}"))
+
+        if np.isscalar(data):
+            # create empty dataset
+            n_elements = data
+            n_items = len(items)
+            n_timesteps = len(time)
+            data = self.create_empty_data(
+                n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
+            )
 
         n_items = len(data)
         n_timesteps = data[0].shape[0]
@@ -94,7 +129,12 @@ class Dataset:
             )
         self.data = data
         self.time = pd.DatetimeIndex(time, freq="infer")
-        self.items = items
+
+        for i, item in enumerate(items):
+            if isinstance(item, EUMType):
+                items[i] = ItemInfo(item)
+
+        self._items = items
 
     def __repr__(self):
 
@@ -161,6 +201,19 @@ class Dataset:
 
         return Dataset(data, time, items)
 
+    def dropna(self):
+        "Remove time steps where all items are NaN"
+
+        # TODO consider all items
+        x = self[0]
+
+        # this seems overly complicated...
+        axes = tuple(range(1, x.ndim))
+        idx = np.where(~np.isnan(x).all(axis=axes))
+        idx = list(idx[0])
+
+        return self.isel(idx, axis=0)
+
     def flipud(self):
         "Flip dataset updside down"
 
@@ -219,7 +272,7 @@ class Dataset:
 
     def aggregate(self, axis=1, func=np.nanmean):
         """Aggregate along an axis
-        
+
 
         Parameters
         ----------
@@ -227,7 +280,7 @@ class Dataset:
             default 1= first spatial axis
         func: function, optional
             default np.nanmean
-        
+
         Returns
         -------
         Dataset
@@ -254,7 +307,7 @@ class Dataset:
 
     def max(self, axis=1):
         """Max value along an axis
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -273,7 +326,7 @@ class Dataset:
 
     def min(self, axis=1):
         """Min value along an axis
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -292,7 +345,7 @@ class Dataset:
 
     def mean(self, axis=1):
         """Mean value along an axis
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -302,7 +355,7 @@ class Dataset:
         -------
         Dataset
             dataset with mean value
-        
+
         See Also
         --------
             nanmean : Mean values with NaN values removed
@@ -313,7 +366,7 @@ class Dataset:
     def average(self, weights, axis=1):
         """
         Compute the weighted average along the specified axis.
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -323,7 +376,7 @@ class Dataset:
         -------
         Dataset
             dataset with weighted average value
-        
+
         See Also
         --------
             nanmean : Mean values with NaN values removed
@@ -347,7 +400,7 @@ class Dataset:
 
     def nanmax(self, axis=1):
         """Max value along an axis (NaN removed)
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -362,7 +415,7 @@ class Dataset:
 
     def nanmin(self, axis=1):
         """Min value along an axis (NaN removed)
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -377,7 +430,7 @@ class Dataset:
 
     def nanmean(self, axis=1):
         """Mean value along an axis (NaN removed)
-        
+
         Parameters
         ----------
         axis: int, optional
@@ -433,7 +486,11 @@ class Dataset:
         return ds
 
     def interp_time(
-        self, dt, method="linear", extrapolate=True, fill_value=np.nan,
+        self,
+        dt: Union[float, pd.DatetimeIndex, "Dataset"],
+        method="linear",
+        extrapolate=True,
+        fill_value=np.nan,
     ):
         """Temporal interpolation
 
@@ -441,7 +498,7 @@ class Dataset:
 
         Parameters
         ----------
-        dt: float or pd.DatetimeIndex
+        dt: float or pd.DatetimeIndex or Dataset
             output timestep in seconds
         method: str or int, optional
             Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.
@@ -480,6 +537,8 @@ class Dataset:
 
         if isinstance(dt, pd.DatetimeIndex):
             t_out_index = dt
+        elif isinstance(dt, Dataset):
+            t_out_index = dt.time
         else:
             offset = pd.tseries.offsets.DateOffset(seconds=dt)
             t_out_index = pd.date_range(
@@ -511,17 +570,18 @@ class Dataset:
 
     def to_dataframe(self, unit_in_name=False):
         """Convert Dataset to a Pandas DataFrame
-        
+
         Parameters
         ----------
         unit_in_name: bool, optional
             include unit in column name, default False
-        
+
         Returns
         -------
         pd.DataFrame
         """
-        self = self.squeeze()
+        if len(self.data[0].shape) != 1:
+            self = self.squeeze()
 
         if len(self.data[0].shape) != 1:
             raise ValueError(
@@ -543,31 +603,141 @@ class Dataset:
     def _ipython_key_completions_(self):
         return [x.name for x in self.items]
 
+    @staticmethod
+    def create_empty_data(n_items=1, n_timesteps=1, n_elements=None, shape=None):
+        data = []
+        if shape is None:
+            if n_elements is None:
+                raise ValueError("n_elements and shape cannot both be None")
+            else:
+                shape = n_elements
+        if np.isscalar(shape):
+            shape = [shape]
+        dati = np.empty(shape=(n_timesteps, *shape))
+        dati[:] = np.nan
+        for _ in range(n_items):
+            data.append(dati)
+        return data
+
+    @staticmethod
+    def create_time(start_time=None, dt=None, n_timesteps=None, end_time=None):
+        """create a equidistant time axis (calendar axis)
+
+        Parameters
+        ----------
+        start_time : datetime or str, optional
+            start_time, by default None (1970-1-1 00:00:00)
+            can optionally contain end_time e.g. '2018-01-01, 2018-02-01'
+        dt : float, optional
+            time step in seconds, by default None
+        n_timesteps : int, optional
+            number of timesteps, by default 1
+        end_time : datetime or str, optional
+            end_time, by default 3600s or deduced from other parameters
+
+        Returns
+        -------
+        pandas.DatetimeIndex
+            time axis which can be used to create new Dataset
+
+        Examples
+        ------
+        >>> t = Dateset.create_time('2018-1-1,2018-2-1', dt=1800)
+        >>> t = Dateset.create_time('2018-1-1', dt=1800, n_timesteps=48)
+        >>> t = Dateset.create_time('2018', dt=7200, end_time='2019')
+        """
+        if isinstance(start_time, str):
+            parts = start_time.split(",")
+            if len(parts) == 2:
+                end_time = parts[1]
+            start_time = pd.to_datetime(parts[0])
+        if isinstance(end_time, str):
+            end_time = pd.to_datetime(end_time)
+
+        if start_time is None:
+            # start_time = datetime.now()
+            start_time = datetime(1970, 1, 1, 0, 0, 0)
+
+        if dt is None:
+            if (end_time is not None) and (n_timesteps is not None):
+                dur = (end_time - start_time).total_seconds()
+                dt = 0.0
+                if (dur > 0) and (n_timesteps > 1):
+                    dt = dur / (n_timesteps - 1)
+            else:
+                warnings.warn("Too little information. Assuming dt=3600s.")
+                dt = 3600
+
+        if (end_time is None) and (n_timesteps is None):
+            warnings.warn("Too little information. Assuming n_timesteps=1.")
+            n_timesteps = 1
+
+        # find end time
+        if end_time is None:
+            tot_seconds = (n_timesteps - 1) * dt
+            end_time = start_time + timedelta(seconds=tot_seconds)
+        elif (end_time is not None) and (n_timesteps is not None):
+            # both are given, do they match?
+            tot_seconds = (n_timesteps - 1) * dt
+            end_time_2 = start_time + timedelta(seconds=tot_seconds)
+            if end_time != end_time_2:
+                raise ValueError("All parameters where given, but they do not match")
+
+        if dt < 0:
+            raise ValueError("dt cannot be negative")
+
+        if (end_time - start_time).total_seconds() < 0:
+            raise ValueError("end_time must be greater than start_time")
+
+        offset = pd.tseries.offsets.DateOffset(seconds=dt)
+        return pd.date_range(start=start_time, end=end_time, freq=offset)
+
     @property
     def is_equidistant(self):
-        """Is Dataset equidistant in time?
-        """
+        """Is Dataset equidistant in time?"""
         if len(self.time) < 3:
             return True
 
         return self.time.freq is not None
 
     @property
-    def n_timesteps(self):
-        """Number of time steps
+    def start_time(self):
+        """First time instance (as datetime)"""
+        return self.time[0].to_pydatetime()
+
+    @property
+    def end_time(self):
+        """Last time instance (as datetime)"""
+        return self.time[-1].to_pydatetime()
+
+    @property
+    def timestep(self):
+        """Time step in seconds if equidistant (and at
+        least two time instances); otherwise None
         """
+        dt = None
+        if len(self.time) > 1:
+            if self.is_equidistant:
+                dt = (self.time[1] - self.time[0]).total_seconds()
+        return dt
+
+    @property
+    def n_timesteps(self):
+        """Number of time steps"""
         return len(self.time)
 
     @property
     def n_items(self):
-        """Number of items
-        """
+        """Number of items"""
         return len(self.items)
 
     @property
+    def items(self):
+        return self._items
+
+    @property
     def shape(self):
-        """Shape of each item 
-        """
+        """Shape of each item"""
         return self.data[self._first_non_z_item].shape
 
     @property
@@ -578,10 +748,13 @@ class Dataset:
 
     @property
     def n_elements(self):
-        """Number of spatial elements/points
-        """
+        """Number of spatial elements/points"""
         n_elem = np.prod(self.shape)
         if self.n_timesteps > 1:
             n_elem = int(n_elem / self.n_timesteps)
         return n_elem
 
+    @property
+    def deletevalue(self):
+        """File delete value"""
+        return self._deletevalue

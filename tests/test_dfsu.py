@@ -1,14 +1,14 @@
 import os
-from shutil import copyfile
+import pathlib
+from datetime import datetime
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
 import pytest
-
-from mikeio import Dfsu, Mesh, Dfs0
-from mikeio.eum import ItemInfo
-from mikeio import Dataset
+from mikeio import Dataset, Dfs0, Dfsu, Mesh
 from mikeio.custom_exceptions import InvalidGeometry
+from mikeio.eum import ItemInfo
+from pytest import approx
 
 
 def test_repr():
@@ -16,8 +16,12 @@ def test_repr():
     dfs = Dfsu(filename)
 
     text = repr(dfs)
-
     assert "Dfsu2D" in text
+
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    text = repr(dfs)
+    assert "number of z layers" in text
 
 
 def test_read_all_items_returns_all_items_and_names():
@@ -168,6 +172,20 @@ def test_read_all_time_steps():
     assert ds.data[0].shape[0] == 9
 
 
+def test_read_all_time_steps_without_progressbar():
+
+    Dfsu.show_progress = True
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(items=[0, 3])
+
+    assert len(ds.time) == 9
+    assert ds.data[0].shape[0] == 9
+
+
 def test_read_single_time_step():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
@@ -222,6 +240,9 @@ def test_get_node_coords():
     nc = dfs.node_coordinates
     assert nc[0, 0] == 607031.4886285994
 
+    nc = dfs.get_node_coords(code=1)
+    assert len(nc) > 0
+
 
 def test_get_element_coords():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
@@ -229,6 +250,23 @@ def test_get_element_coords():
 
     ec = dfs.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
+
+
+def test_element_coords_is_inside_nodes():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    nc = dfs.node_coordinates
+    ec = dfs.element_coordinates
+    nc_min = nc.min(axis=0)
+    nc_max = nc.max(axis=0)
+    ec_max = ec.max(axis=0)
+    ec_min = ec.min(axis=0)
+
+    assert ec_max[0] < nc_max[0]
+    assert ec_max[1] < nc_max[1]
+    assert ec_min[0] > nc_min[0]
+    assert ec_min[1] > nc_min[0]
 
 
 def test_contains():
@@ -249,11 +287,11 @@ def test_get_overset_grid():
     assert g.nx == 21
     assert g.ny == 10
 
-    g = dfs.get_overset_grid(dxdy=0.2)
+    g = dfs.get_overset_grid(dx=0.2)
     assert g.dx == 0.2
     assert g.dy == 0.2
 
-    g = dfs.get_overset_grid(dxdy=(0.4, 0.2))
+    g = dfs.get_overset_grid(dx=(0.4, 0.2))
     assert g.dx == 0.4
     assert g.dy == 0.2
 
@@ -577,6 +615,12 @@ def test_is_geo_LONGLAT():
     assert dfs.is_geo is True
 
 
+def test_is_local_coordinates():
+    filename = os.path.join("tests", "testdata", "wind_north_sea.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.is_local_coordinates is False
+
+
 def test_get_element_area_UTM():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
@@ -597,6 +641,14 @@ def test_get_element_area_LONGLAT():
 
     areas = dfs.get_element_area()
     assert areas[0] == 139524218.81411952
+
+
+def test_get_element_area_tri_quad():
+    filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
+    dfs = Dfsu(filename)
+
+    areas = dfs.get_element_area()
+    assert areas[0] == 0.0006875642143608321
 
 
 def test_write(tmpdir):
@@ -881,6 +933,10 @@ def test_read_temporal_subset_string():
     ds = dfs.read(time_steps=",1985-08-06 11:30")
     assert len(ds.time) == 2
 
+    # start=end
+    ds = dfs.read(time_steps="1985-08-06 12:00")
+    assert len(ds.time) == 1
+
 
 def test_write_temporal_subset(tmpdir):
 
@@ -999,8 +1055,15 @@ def test_elements_to_geometry():
     text = repr(geom)
 
     assert geom.n_layers == 5
-
     assert "nodes" in text
+
+    elements = dfs.get_layer_elements(layer=-2)
+    geom = dfs.elements_to_geometry(elements, node_layers="top")
+    assert geom.n_layers is None
+    assert geom.n_elements == len(elements)
+
+    with pytest.raises(Exception):
+        geom = dfs.elements_to_geometry(elements, node_layers="center")
 
 
 def test_element_table():
@@ -1036,6 +1099,24 @@ def test_interp2d():
 
     assert dsi.shape == (nt, 20 * 10)
 
+    with pytest.raises(Exception):
+        dfs.get_2d_interpolant(g.xy, n_nearest=0)
+
+
+def test_interp2d_radius():
+    dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"])
+    nt = ds.n_timesteps
+
+    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    interpolant = dfs.get_2d_interpolant(
+        g.xy, extrapolate=True, n_nearest=1, radius=0.1
+    )
+    dsi = dfs.interp2d(ds, *interpolant)
+
+    assert dsi.shape == (nt, 20 * 10)
+    assert np.isnan(dsi[0][0][0])
+
 
 def test_interp2d_reshaped():
     dfs = Dfsu("tests/testdata/wind_north_sea.dfsu")
@@ -1055,13 +1136,97 @@ def test_extract_track():
     df = pd.read_csv(csv_file, index_col=0, parse_dates=True,)
     track = dfs.extract_track(df)
 
-    assert track.data[2][23] == 3.6284972794399653
+    assert track.data[2][23] == approx(3.6284972794399653)
     assert sum(np.isnan(track.data[2])) == 26
     assert np.all(track.data[1] == df.latitude.values)
 
     items = ["Sign. Wave Height", "Wind speed"]
     track2 = dfs.extract_track(csv_file, items=items)
-    assert track2.data[2][23] == 3.6284972794399653
+    assert track2.data[2][23] == approx(3.6284972794399653)
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
-    assert track3.data[2][23] == 3.6865002370663547
+    assert track3.data[2][23] == approx(3.6469911492412463)
+
+
+def test_extract_surface_elevation_from_3d():
+    dfs = Dfsu("tests/testdata/oresund_sigma_z.dfsu")
+    outputfile = "tests/testdata/oresund_surface_elev_extracted.dfsu"
+    n_top1 = len(dfs.top_elements)
+
+    dfs.extract_surface_elevation_from_3d(outputfile, time_steps=-1)
+
+    dfs2 = Dfsu(outputfile)
+    assert dfs2.n_elements == n_top1
+    os.remove(outputfile)  # clean up
+
+
+def test_find_nearest_element_in_Zlayer():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    el2dindx = dfs.elem2d_ids[12]
+    assert el2dindx == 2
+    ids = dfs.find_nearest_elements(357000, 6200000, layer=1)
+    el2dindx = dfs.elem2d_ids[ids]
+    table = dfs.e2_e3_table[el2dindx]
+    assert ids == 3216
+    assert el2dindx == 745
+    assert len(table) == 9
+    ids = dfs.find_nearest_elements(357000, 6200000, layer=9)
+    el2dindx = dfs.elem2d_ids[ids]
+    table = dfs.e2_e3_table[el2dindx]
+    assert ids == 3224
+    assert el2dindx == 745
+    assert len(table) == 9
+
+    with pytest.raises(Exception):
+        # z and layer cannot both be given
+        dfs.find_nearest_elements(357000, 6200000, z=-3, layer=9)
+
+
+def test_e2_e3_table_2d_file():
+    filename = os.path.join("tests", "testdata", "NorthSea_HD_and_windspeed.dfsu")
+    dfs = Dfsu(filename)
+    assert dfs.e2_e3_table is None
+
+
+# TODO - this is an interim test until Dfsu.to_dfs2 method is finalized
+def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
+    # Create dfs2 file
+    dx = 25
+    dy = 25
+    nx = 100
+    ny = 100
+    filename = pathlib.Path(tmpdir.dirname) / "test.dfs2"
+    dfs2 = dfsu_hd2d.to_dfs2(
+        x0=605900,
+        y0=6902400,
+        dx=dx,
+        dy=dy,
+        nx=nx,
+        ny=ny,
+        rotation=0,
+        epsg=None,
+        interpolation_method="nearest",
+        filename=filename,
+    )
+
+    # Make sure it was saved to the correct location
+    assert dfs2._filename == str(filename)
+
+    # Ensure all items are identical
+    for i, dfsu_item in enumerate(dfsu_hd2d.items):
+        for parameter in ["data_value_type", "name", "type", "unit"]:
+            assert getattr(dfsu_item, parameter) == getattr(dfs2.items[i], parameter)
+
+    # Check timesteps
+    assert dfs2.timestep == dfsu_hd2d.timestep
+    assert dfs2.start_time == dfsu_hd2d.start_time
+    assert dfs2.end_time == dfsu_hd2d.end_time
+
+    # Check grid
+    assert np.isclose(dfs2.dx, dx, atol=0.1, rtol=0)
+    assert np.isclose(dfs2.dy, dy, atol=0.1, rtol=0)
+    assert dfs2.shape == (dfsu_hd2d.n_timesteps, ny, nx)
+
+    # Make sure data was interpolated (not all values are nan's)
+    assert not np.all(np.isnan(dfs2.read().data))

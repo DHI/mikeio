@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "mikeio"
-copyright = "2020, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard"
+copyright = "2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard"
 author = "Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard"
 
 

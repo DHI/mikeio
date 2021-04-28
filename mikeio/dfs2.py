@@ -48,17 +48,26 @@ class Dfs2(_Dfs123):
     def _read_dfs2_header(self):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
-        
+
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
+        self._source = self._dfs
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._nx = self._dfs.SpatialAxis.XCount
         self._ny = self._dfs.SpatialAxis.YCount
+        if self._dfs.FileInfo.TimeAxis.TimeAxisType == 4:
+            self._is_equidistant = False
 
         self._read_header()
 
-    def find_nearest_element(
-        self, lon, lat,
+    def find_nearest_element(self, lon, lat):
+        warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
+        return self.find_nearest_elements(lon, lat)
+
+    def find_nearest_elements(
+        self,
+        lon,
+        lat,
     ):
         """Find index of closest element
 
@@ -73,7 +82,7 @@ class Dfs2(_Dfs123):
         Returns
         -------
 
-        (int,int): indexes in y, x 
+        (int,int): indexes in y, x
         """
         projection = self._dfs.FileInfo.Projection
         axis = self._dfs.SpatialAxis
@@ -105,6 +114,7 @@ class Dfs2(_Dfs123):
         data,
         start_time=None,
         dt=None,
+        datetimes=None,
         items=None,
         dx=None,
         dy=None,
@@ -125,6 +135,8 @@ class Dfs2(_Dfs123):
             start date of type datetime.
         dt: float, optional
             The time step in seconds.
+        dt: datetime
+            The list of datetimes for the case of nonEquadistant Timeaxis.
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         dx: float, optional
@@ -149,7 +161,7 @@ class Dfs2(_Dfs123):
         if dy:
             self._dy = dy
 
-        self._write(filename, data, start_time, dt, items, coordinate, title)
+        self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(
@@ -166,14 +178,12 @@ class Dfs2(_Dfs123):
 
     @property
     def dx(self):
-        """Step size in x direction
-        """
+        """Step size in x direction"""
         return self._dx
 
     @property
     def dy(self):
-        """Step size in y direction
-        """
+        """Step size in y direction"""
         return self._dy
 
     @property
@@ -207,9 +217,9 @@ class Dfs2(_Dfs123):
             dy: float
                 length of each grid in the y direction (projection units)
             latitude_origin: float, optional
-                latitude at origin of new grid, default same as original 
+                latitude at origin of new grid, default same as original
             longitude_origin: float, optional
-                longitude at origin of new grid, default same as original 
+                longitude at origin of new grid, default same as original
             nx: int, optional
                 n grid points in x direction, default same as original
             ny: int, optional

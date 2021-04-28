@@ -1,13 +1,19 @@
 import setuptools
-from mikeio import __version__
 
-with open("README.md", "r") as fh:
+with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="mikeio",
-    version=__version__,
-    install_requires=["numpy", "pandas", "scipy", "pyyaml"],
+    version="0.7.dev1",
+    install_requires=[
+        "numpy",
+        "pandas",
+        "scipy",
+        "pyyaml",
+        "tqdm",
+        "pyproj",
+    ],
     extras_require={
         "dev": [
             "pytest",
@@ -26,7 +32,7 @@ setuptools.setup(
     author_email="jan@dhigroup.com",
     description="A package that uses the DHI dfs libraries to create, write and read dfs, res1d and mesh files.",
     platform="windows_x64",
-    license="MIT",
+    license="BSD-3",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/DHI/mikeio",

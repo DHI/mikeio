@@ -1,8 +1,9 @@
 
-![logo](https://raw.githubusercontent.com/DHI/mikeio/master/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
+![logo](https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
 # MIKE IO: input/output of MIKE files in python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
 ![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+![Conda Version](https://img.shields.io/conda/vn/conda-forge/mikeio.svg)
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
@@ -10,7 +11,7 @@ Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. Read res
 
 Facilitates common data processing workflows for MIKE files.
 
-[![Blue cafe](https://raw.githubusercontent.com/DHI/mikeio/master/images/bluecafe.png)](https://www.youtube.com/watch?v=7WJpeydHMYQ)
+[![Blue cafe](https://raw.githubusercontent.com/DHI/mikeio/main/images/bluecafe.png)](https://www.youtube.com/watch?v=7WJpeydHMYQ)
 
 ## Requirements
 * Windows operating system
@@ -21,19 +22,23 @@ Facilitates common data processing workflows for MIKE files.
 
 ## Where can I get help?
 
-* Bugs & feature request - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
-* General help, FAQ [Stackoverflow with the tag `mikeio`](https://stackoverflow.com/questions/tagged/mikeio)
+* New ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
+* Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
+* General help, FAQ - [Stackoverflow with the tag `mikeio`](https://stackoverflow.com/questions/tagged/mikeio)
 
 ## Installation
 
 From PyPI: 
 
-
 `pip install mikeio`
 
-Or development version:
+For Anaconda:
 
-`pip install https://github.com/DHI/mikeio/archive/master.zip`
+`conda install -c conda-forge mikeio`
+
+Or development version (*`main` is the default branch since 2021-04-23*):
+
+`pip install https://github.com/DHI/mikeio/archive/main.zip`
 
 
 ## Examples
@@ -142,7 +147,7 @@ For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
 >>>  plt.xlabel('Horizontal [meter]')
 >>>  plt.ylabel('Elevation [meter]')
 ```
-![Geometry](https://raw.githubusercontent.com/DHI/mikeio/master/images/xns11_geometry.png)
+![Geometry](https://raw.githubusercontent.com/DHI/mikeio/main/images/xns11_geometry.png)
 
 ### Read dfsu files
 ```python
@@ -153,14 +158,14 @@ For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
 >>>  idx = dfs.find_nearest_element(x=608000, y=6907000)
 >>>  plt.plot(ds.time, ds.data[0][:,idx])
 ```
-![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/master/images/dfsu_ts.png)
+![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/main/images/dfsu_ts.png)
 
 ```python
 >>>  from mikeio import Mesh
 >>>  msh = Mesh("FakeLake.dfsu")
 >>>  msh.plot()
 ```
-![Mesh](https://raw.githubusercontent.com/DHI/mikeio/master/images/FakeLake.png)
+![Mesh](https://raw.githubusercontent.com/DHI/mikeio/main/images/FakeLake.png)
 
 
 For more examples on working with dfsu and mesh see these notebooks:
@@ -196,36 +201,38 @@ degree Kelvin
 
 ## Tested
 
-MIKE IO is tested extensively. **93%** total test coverage.
+MIKE IO is tested extensively. **95%** total test coverage.
 
 See detailed test coverage report below:
 ```
 File                           Covered  Missed  %
 -------------------------------------------------
-mikeio\__init__.py               39      1    97%
+mikeio\__init__.py               40      1    98%
 mikeio\aggregator.py            103      9    91%
-mikeio\custom_exceptions.py      10      0   100%
-mikeio\dataset.py               159     15    91%
-mikeio\dfs.py                   237     16    93%
-mikeio\dfs0.py                  240     27    89%
+mikeio\bin\__init__.py            0      0   100%
+mikeio\custom_exceptions.py      19      1    95%
+mikeio\dataset.py               272      3    99%
+mikeio\dfs.py                   206      7    97%
+mikeio\dfs0.py                  239     15    94%
 mikeio\dfs1.py                   48      2    96%
-mikeio\dfs2.py                   78      2    97%
-mikeio\dfs3.py                  161     78    52%
-mikeio\dfsu.py                 1044     74    93%
+mikeio\dfs2.py                  100      2    98%
+mikeio\dfs3.py                  201     79    61%
+mikeio\dfsu.py                 1337     57    96%
+mikeio\dfsutil.py                76      4    95%
 mikeio\dotnet.py                 63      4    94%
-mikeio\dutil.py                  50      2    96%
-mikeio\eum.py                  1228      3    99%
-mikeio\generic.py               129      1    99%
-mikeio\helpers.py                 6      0   100%
-mikeio\pfs.py                   195      9    95%
+mikeio\eum.py                  1230      3    99%
+mikeio\generic.py               228      2    99%
+mikeio\helpers.py                13      0   100%
+mikeio\interpolation.py          54      1    98%
+mikeio\pfs.py                   209     13    94%
 mikeio\res1d.py                 143     16    89%
-mikeio\spatial.py                31     11    65%
+mikeio\spatial.py               279      4    99%
 mikeio\xns11.py                 210      6    97%
 mikeio\xyz.py                    12      0   100%
 -------------------------------------------------
-TOTAL                          4186    276    93%
+TOTAL                          5082    229    95%
 
-=================== 267 passed ==================
+=================== 335 passed ==================
 
 
 

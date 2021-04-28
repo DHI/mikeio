@@ -20,3 +20,6 @@ dist/
 cov_html
 cov_annotate
 htmlcov
+
+docsrc/source
+docsrc/_sources

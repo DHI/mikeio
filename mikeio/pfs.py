@@ -1,10 +1,12 @@
 from datetime import date, datetime, timedelta
+import re
 import yaml
 import pandas as pd
+import numpy as np
 from typing import Union
 import warnings
 
-#from DHI.PFS import PFSFile, PFSSection, PFSParameter
+# from DHI.PFS import PFSFile, PFSSection, PFSParameter
 
 from types import SimpleNamespace
 
@@ -76,13 +78,13 @@ class Pfs:
             "time_step_frequency",
         ]
         rows = []
+        index = range(1, n + 1)
         for i in range(n):
-
             output = sub[f"OUTPUT_{i+1}"]
             row = {key: output[key] for key in sel_keys}
 
             rows.append(row)
-        df = pd.DataFrame(rows)
+        df = pd.DataFrame(rows, index=index)
 
         if included_only:
             df = df[df.include == 1]
@@ -108,6 +110,7 @@ class Pfs:
 
     def _parse_line(self, line):
         s = line.strip()
+        s = re.sub(r"\s*//.*", "", s)
 
         if len(s) > 0:
             if s[0] == "[":
@@ -116,7 +119,7 @@ class Pfs:
             if s[-1] == "]":
                 s = s.replace("]", ":")
 
-        s = s.replace("//", "#").replace("|", "")  # TODO
+        s = s.replace("//", "").replace("|", "")
 
         if len(s) > 0 and s[0] != "!":
             if "=" in s:
@@ -215,7 +218,6 @@ class PfsCore:
     @end_time.setter
     def end_time(self, value: datetime):
 
-        print("FOO")
         start_time = self.start_time
         dt = self.section("TIME")["time_step_interval"].value
 
@@ -230,7 +232,7 @@ class PfsCore:
 
         for line in lines:
             if "//" in line:
-                text, comment = line.split("//")
+                text, _ = line.split("//")
             else:
                 text = line
 
@@ -271,16 +273,16 @@ class Parameter:
 
         par = self._parameter
 
-        if par.IsInt():
+        if isinstance(value, (int, np.integer)):
             par.ModifyIntParameter(value)
-        elif par.IsDouble():
+        elif isinstance(value, float):
             par.ModifyDoubleParameter(value)
         elif par.IsFilename():
             par.ModifyFileNameParameter(value)
         elif par.IsClob():
-            return par.ModifyClobParameter(value)
+            par.ModifyClobParameter(value)
         else:
-            return par.ModifyStringParameter(value)
+            par.ModifyStringParameter(value)
 
 
 class Section:
@@ -304,5 +306,5 @@ class Section:
 
     def __getitem__(self, key):
         return self.keyword(key)
-""" 
 
+"""

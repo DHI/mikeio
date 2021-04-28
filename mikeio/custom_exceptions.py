@@ -8,9 +8,16 @@ class DataDimensionMismatch(ValueError):
 
 
 class ItemNumbersError(ValueError):
-    def __init__(self):
+    def __init__(self, n_items_file):
         super().__init__(
-            "'item_numbers' must be a list or array of values between 0 and 1e15."
+            f"item numbers must be (a list of) integers between 0 and {n_items_file-1}."
+        )
+
+
+class ItemsError(ValueError):
+    def __init__(self, n_items_file):
+        super().__init__(
+            f"'items' must be (a list of) integers between 0 and {n_items_file-1} or str."
         )
 
 
@@ -30,3 +37,13 @@ class InvalidDataValueType(ValueError):
             "Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
             "'MeanStepBackward', or 'MeanStepForward'"
         )
+
+
+class NoDataForQuery(ValueError):
+    def __init__(self, query_string):
+        super().__init__(f"Invalid query {query_string}")
+
+
+class InvalidQuantity(ValueError):
+    def __init__(self, message="Invalid quantity."):
+        super().__init__(message)
