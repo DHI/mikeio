@@ -31,7 +31,8 @@ jobs:
     #    flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
     - name: Install mikecore (temporary solution)
       shell: cmd
-      run: pip install "https://enginetest.blob.core.windows.net/test/mikecore-0.0.1.zip?sv=2020-04-08&st=2021-04-28T17%3A25%3A14Z&se=2021-04-30T22%3A25%3A00Z&sr=b&sp=r&sig=KasXQ%2BKbATiOVcT602g18QYx6ZWALDP%2Fdtn7Qo6wXnA%3D"
+      run: pip install "https://enginetest.blob.core.windows.net/test/mikecore-0.0.1.zip?sv=2020-04-08&st=2021-04-28T17%3A41%3A29Z&se=2021-05-29T17%3A41%3A00Z&sr=b&sp=r&sig=%2Bpe6HgAWz9Jy%2F6EJXvw70q9%2BVFYyWojXVUhwxttS5P8%3D"
+      
     - name: Install mikeio
       run: |
         pip install .[test]
