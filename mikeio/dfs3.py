@@ -283,7 +283,8 @@ class Dfs3(_Dfs123):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
 
                     src = itemdata.Data
-                    d = to_numpy(src)
+                    # d = to_numpy(src)
+                    d = src
 
                     # DO a direct copy instead of eleement by elment
                     d = d.reshape(zNum, yNum, xNum)  # .swapaxes(0, 2).swapaxes(0, 1)
@@ -433,7 +434,8 @@ class Dfs3(_Dfs123):
                 d = data[item][i]
                 d[np.isnan(d)] = deletevalue
                 d = np.flipud(d)
-                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+                # darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+                darray = d.reshape(d.size, 1)[:, 0].astype(np.float32)
 
                 dfs.WriteItemTimeStepNext(0, darray)
 

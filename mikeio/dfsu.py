@@ -2456,7 +2456,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             for item in range(n_items):
                 d = data[item][i, :]
                 d[np.isnan(d)] = deletevalue
-                darray = to_dotnet_float_array(d)
+                # darray = to_dotnet_float_array(d)
+                darray = d.astype(np.float32)
                 self._dfs.WriteItemTimeStepNext(0, darray)
 
     def close(self):
