@@ -283,7 +283,13 @@ class Dfs0(TimeSeries):
         """
         self._filename = filename
         self._title = title
-        self._timeseries_unit = timeseries_unit
+
+        if timeseries_unit == TimeStepUnit.SECOND:
+            self._timeseries_unit = timeseries_unit
+        else:
+            raise ValueError(
+                "Timestep units other than TimeStepUnit.SECOND are deprecated"
+            )
         self._dtype = dtype
 
         if isinstance(data, Dataset):
