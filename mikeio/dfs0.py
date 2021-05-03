@@ -16,9 +16,8 @@ from mikecore.DfsFile import (
     TimeAxisType,
 )
 
-# from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
+from mikecore.Dfs0Util import Dfs0Util
 
-from .dfs0util import Dfs0Util
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
@@ -156,7 +155,7 @@ class Dfs0(TimeSeries):
 
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
-
+        raw_data[raw_data == self._deletevalue] = np.nan  # TODO check
         matrix = raw_data[:, 1:]
 
         data = []
