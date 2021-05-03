@@ -10,9 +10,6 @@ from datetime import timedelta
 
 import pytest
 
-from DHI.Generic.MikeZero.DFS import (
-    DataValueType
-)
 
 def test_repr():
     filename = os.path.join("tests", "testdata", "da_diagnostic.dfs0")
@@ -212,9 +209,12 @@ def test_write_equidistant_calendar(tmpdir):
     data.append(d1)
     data.append(d2)
     start_time = datetime.datetime(2017, 1, 1)
-    timeseries_unit = 1402
+    # timeseries_unit = 1402
     title = "Hello Test"
-    items = [ItemInfo("VarFun01", 100000, 1000, data_value_type=0), ItemInfo("NotFun", 100000, 1000, data_value_type=1)]
+    items = [
+        ItemInfo("VarFun01", 100000, 1000, data_value_type=0),
+        ItemInfo("NotFun", 100000, 1000, data_value_type=1),
+    ]
 
     dt = 5
     dfs = Dfs0()
@@ -222,7 +222,7 @@ def test_write_equidistant_calendar(tmpdir):
         filename=dfs0file,
         data=data,
         start_time=start_time,
-        timeseries_unit=timeseries_unit,
+        # timeseries_unit=timeseries_unit,
         dt=dt,
         items=items,
         title=title,
@@ -558,10 +558,10 @@ def test_write_accumulated_datatype(tmpdir):
                 "testing water level",
                 EUMType.Water_Level,
                 EUMUnit.meter,
-                data_value_type="MeanStepBackward"
+                data_value_type="MeanStepBackward",
             )
         ],
-        title="test dfs0"
+        title="test dfs0",
     )
 
     newdfs = Dfs0(filename)
@@ -605,8 +605,14 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
 
     series.to_dfs0(
         filename,
-        items=[ItemInfo("Average", EUMType.Concentration, EUMUnit.gram_per_meter_pow_3,
-                        data_value_type="MeanStepBackward")]
+        items=[
+            ItemInfo(
+                "Average",
+                EUMType.Concentration,
+                EUMUnit.gram_per_meter_pow_3,
+                data_value_type="MeanStepBackward",
+            )
+        ],
     )
 
     ds = mikeio.read(filename)
@@ -632,13 +638,16 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
 
     items = []
     for col in df.columns:
-        items.append(ItemInfo(col, EUMType.Concentration, EUMUnit.gram_per_meter_pow_3,
-                              data_value_type="MeanStepBackward"))
+        items.append(
+            ItemInfo(
+                col,
+                EUMType.Concentration,
+                EUMUnit.gram_per_meter_pow_3,
+                data_value_type="MeanStepBackward",
+            )
+        )
 
-    df.to_dfs0(
-        filename,
-        items=items
-    )
+    df.to_dfs0(filename, items=items)
 
     ds = mikeio.read(filename)
 

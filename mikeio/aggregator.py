@@ -3,8 +3,8 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 from mikecore.eum import eumQuantity, eumUnit
-from mikecore.DfsFactory import DfsFactory, DfsBuilder
-from mikecore.DfsFileFactory import DfsFileFactory, DfsSimpleType, DataValueType
+from mikecore.DfsFactory import DfsFactory, DfsBuilder, DfsSimpleType, DataValueType
+from mikecore.DfsFileFactory import DfsFileFactory
 
 from .helpers import safe_length
 
