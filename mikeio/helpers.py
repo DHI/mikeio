@@ -1,33 +1,9 @@
-#from DHI.Generic.MikeZero.DFS import DataValueType
+from typing import Union
 from mikecore.DfsFile import DataValueType
-
-
 from mikeio.custom_exceptions import InvalidDataValueType
 
 
-def safe_length(input_list):
-    """
-    Get the length of a Python or C# list.
-
-    Usage:
-       safe_length(input_list)
-
-    input_list : Python or C# list
-
-    Return:
-        int
-           Integer giving the length of the input list.
-    """
-
-    try:
-        n = input_list.Count
-    except:
-        n = len(input_list)
-
-    return n
-
-
-def to_datatype(datatype):
+def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
     string_datatype_mapping = {
         "Instantaneous": DataValueType.Instantaneous,
         "Accumulated": DataValueType.Accumulated,
@@ -47,5 +23,13 @@ def to_datatype(datatype):
 
         return string_datatype_mapping[datatype]
 
-    return datatype
+    if isinstance(datatype, int):
+        if datatype not in string_datatype_mapping.keys():
+            raise InvalidDataValueType
 
+        return string_datatype_mapping[datatype]
+
+    if not isinstance(DataValueType):
+        raise ValueError("Data value type not supported")
+
+    return datatype

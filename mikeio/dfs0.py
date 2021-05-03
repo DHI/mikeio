@@ -22,7 +22,6 @@ from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
-from .helpers import safe_length
 from .base import TimeSeries
 from .dfsutil import _get_item_info
 
@@ -74,7 +73,7 @@ class Dfs0(TimeSeries):
         self._deletevalue = dfs.FileInfo.DeleteValueFloat
 
         # Read items
-        self._n_items = safe_length(dfs.ItemInfo)
+        self._n_items = len(dfs.ItemInfo)
         self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
         self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
@@ -112,7 +111,7 @@ class Dfs0(TimeSeries):
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
 
-        self._n_items = safe_length(dfs.ItemInfo)
+        self._n_items = len(dfs.ItemInfo)
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
 
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps

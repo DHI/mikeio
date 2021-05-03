@@ -26,7 +26,6 @@ from .dfs0 import Dfs0
 from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
 
-# from .helpers import safe_length
 from .spatial import Grid2D
 from .interpolation import get_idw_interpolant, interp2d
 from .custom_exceptions import InvalidGeometry

@@ -15,7 +15,6 @@ from .dotnet import (
     from_dotnet_datetime,
     to_dotnet_datetime,
 )
-from .helpers import safe_length
 from .dfsutil import _valid_item_numbers, _item_numbers_by_name
 
 show_progress = False
@@ -101,20 +100,20 @@ def scale(
 ) -> None:
     """Apply scaling to any dfs file
 
-        Parameters
-        ----------
+    Parameters
+    ----------
 
-        infilename: str
-            full path to the input file
-        outfilename: str
-            full path to the output file
-        offset: float, optional
-            value to add to all items, default 0.0
-        factor: float, optional
-            value to multiply to all items, default 1.0
-        items: List[str] or List[int], optional
-            Process only selected items, by number (0-based)
-        """
+    infilename: str
+        full path to the input file
+    outfilename: str
+        full path to the output file
+    offset: float, optional
+        value to add to all items, default 0.0
+    factor: float, optional
+        value to multiply to all items, default 1.0
+    items: List[str] or List[int], optional
+        Process only selected items, by number (0-based)
+    """
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
@@ -197,7 +196,7 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     ----------
     infilename_a: str
         full path to the first input file
-    infilename_b: str 
+    infilename_b: str
         full path to the second input file
     outfilename: str
         full path to the output file
@@ -331,10 +330,10 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     --------
     >>> extract('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
     >>> extract('f_in.dfs2', 'f_out.dfs2', end=-3)
-    >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)   
-    >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0]) 
-    >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity") 
-    >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity") 
+    >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)
+    >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0])
+    >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity")
+    >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
@@ -376,8 +375,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
 
 
 def _parse_start_end(dfs_i, start, end):
-    """Helper function for parsing start and end arguments
-    """
+    """Helper function for parsing start and end arguments"""
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
     file_start_datetime = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
     file_start_sec = dfs_i.FileInfo.TimeAxis.StartTimeOffset
@@ -453,4 +451,3 @@ def _parse_start_end(dfs_i, start, end):
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
     return file_start_new, start_step, start_sec, end_step, end_sec
-

@@ -1,12 +1,7 @@
 import numpy as np
-import pandas as pd
-from datetime import datetime, timedelta
 
-from mikecore.eum import eumQuantity, eumUnit
 from mikecore.DfsFactory import DfsFactory, DfsBuilder, DfsSimpleType, DataValueType
 from mikecore.DfsFileFactory import DfsFileFactory
-
-from .helpers import safe_length
 
 
 def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
@@ -79,7 +74,7 @@ def dfs2todfs1(dfs2file, dfs1file, axis=1, func=np.nanmean):
         builder.AddStaticItem(static_item)
 
     # dynamic items
-    n_items = safe_length(dfs_in.ItemInfo)
+    n_items = len(dfs_in.ItemInfo)
     for item in range(n_items):
         ii = dfs_in.ItemInfo[item]
         builder.AddCreateDynamicItem(
@@ -150,7 +145,7 @@ def dfstodfs0(dfsfile, dfs0file, func=np.nanmean):
     builder.DeleteValueUnsignedInt = fileInfo.DeleteValueUnsignedInt
 
     # dynamic items
-    n_items = safe_length(dfs_in.ItemInfo)
+    n_items = len(dfs_in.ItemInfo)
     for item in range(n_items):
         ii = dfs_in.ItemInfo[item]
         itemj = builder.CreateDynamicItemBuilder()
