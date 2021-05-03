@@ -73,7 +73,7 @@ class _Dfs123(TimeSeries):
         for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
             for item in range(n_items):
 
-                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
                 src = itemdata.Data
                 d = src
