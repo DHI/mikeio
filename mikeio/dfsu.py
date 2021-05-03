@@ -18,7 +18,7 @@ from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile
 from mikecore.DfsuFile import DfsuFileType, DfsuUtil
 
-# from mikecore import MeshFile, MeshBuilder
+from mikecore.MeshFile import MeshFile
 
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset

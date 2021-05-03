@@ -3,7 +3,8 @@ from datetime import datetime
 import numpy as np
 
 from mikeio import Pfs
-from mikeio.pfs import PfsCore
+
+# from mikeio.pfs import PfsCore
 
 
 def test_basic():
