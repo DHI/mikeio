@@ -38,9 +38,10 @@ class Dfs3(_Dfs123):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
 
-        self._dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
 
         self.source = self._dfs
+        self._dfs
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._dz = self._dfs.SpatialAxis.Dz
@@ -280,7 +281,7 @@ class Dfs3(_Dfs123):
         if coordinates is None:
             for it_number, it in enumerate(time_steps):
                 for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
                     src = itemdata.Data
                     # d = to_numpy(src)
