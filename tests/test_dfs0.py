@@ -163,7 +163,7 @@ def test_multiple_write(tmpdir):
     assert os.path.exists(filename)
 
 
-def test_write_timestep_7days(tmpdir):
+def test_write_timestep_7days_deprecated(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "random.dfs0")
 
@@ -179,25 +179,15 @@ def test_write_timestep_7days(tmpdir):
 
     dfs = Dfs0()
 
-    dfs.write(
-        filename=filename,
-        data=data,
-        items=items,
-        title="Zeros and ones",
-        timeseries_unit=TimeStepUnit.DAY,
-        dt=7,
-    )
-
-    assert os.path.exists(filename)
-
-    newdfs = Dfs0(filename)
-    res = newdfs.read()
-
-    dt = res.time[1] - res.time[0]
-
-    assert dt == timedelta(days=7)
-    assert res["Zeros"][-1] == 0.0
-    assert res["Ones"][-1] == 1.0
+    with pytest.raises(ValueError):
+        dfs.write(
+            filename=filename,
+            data=data,
+            items=items,
+            title="Zeros and ones",
+            timeseries_unit=TimeStepUnit.DAY,
+            dt=7,
+        )
 
 
 def test_write_equidistant_calendar(tmpdir):
