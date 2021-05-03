@@ -95,8 +95,7 @@ class Dfs2(_Dfs123):
             projection.Orientation,
         )
 
-        # C# out parameters must be handled in special way
-        (_, xx, yy) = cart.Geo2Xy(lon, lat, 0.0, 0.0)
+        xx, yy = cart.Geo2Xy(lon, lat)
 
         j = int(xx / axis.Dx + 0.5)
         k = axis.YCount - int(yy / axis.Dy + 0.5) - 1

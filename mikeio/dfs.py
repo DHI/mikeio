@@ -239,13 +239,7 @@ class _Dfs123(TimeSeries):
 
         self._builder.SetDataType(0)
 
-        if self._coordinate[0] == "LONG/LAT":
-            proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
-        else:
-            if self._override_coordinates:
-                proj = self._factory.CreateProjectionProjOrigin(*self._coordinate)
-            else:
-                proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
+        proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
 
         self._builder.SetGeographicalProjection(proj)
 

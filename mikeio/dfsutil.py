@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
-from .dotnet import from_dotnet_datetime
 from .custom_exceptions import ItemsError
 
 
@@ -56,7 +55,7 @@ def _valid_timesteps(dfsFileInfo, time_steps):
             raise ValueError(
                 "Only equidistant calendar files are supported for this type of time_step argument"
             )
-        start_time_file = from_dotnet_datetime(dfsFileInfo.TimeAxis.StartDateTime)
+        start_time_file = dfsFileInfo.TimeAxis.StartDateTime
         time_step_file = dfsFileInfo.TimeAxis.TimeStep
 
         freq = pd.tseries.offsets.DateOffset(seconds=time_step_file)

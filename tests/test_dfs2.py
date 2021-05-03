@@ -70,9 +70,8 @@ def test_write_single_item(tmpdir):
     # >>> from pyproj import Proj
     # >>> utm = Proj(32633)
     # >>> utm(12.0, 55.0)
-    east = 308124
-    north = 6098907
-    orientation = 0
+    # east = 308124
+    # north = 6098907
 
     dfs = Dfs2()
 
@@ -82,7 +81,7 @@ def test_write_single_item(tmpdir):
         start_time=datetime.datetime(2012, 1, 1),
         dt=12,
         items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-        coordinate=["UTM-33", east, north, orientation],
+        coordinate=["UTM-33", 12.0, 55.0, 0.0],
         dx=100,
         dy=200,
         title="test dfs2",
@@ -293,7 +292,7 @@ def test_find_index_from_coordinate():
     # TODO it should not be necessary to read the data to get coordinates
     ds = dfs.read()
 
-    i, j = dfs.find_nearest_element(lon=12.74792, lat=55.865)
+    i, j = dfs.find_nearest_elements(lon=12.74792, lat=55.865)
 
     assert i == 104
     assert j == 131
@@ -353,7 +352,10 @@ def test_reproject_defaults(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
 
     dfs.reproject(
-        outfilename, projectionstring="UTM-33", dx=200.0, dy=200.0,
+        outfilename,
+        projectionstring="UTM-33",
+        dx=200.0,
+        dy=200.0,
     )
 
     newdfs = Dfs2(outfilename)
@@ -424,8 +426,8 @@ def test_write_NonEqCalendarAxis(tmpdir):
     d[3, 3:, :] = 2
     d[4, :, 4:] = 5
     data.append(d)
-    east = 308124
-    north = 6098907
+    # east = 308124 # Not supported, supply lat/lon of origin also for projected coords
+    # north = 6098907
     orientation = 0
     dateTime = [
         datetime.datetime(2012, 1, 1),
@@ -443,7 +445,7 @@ def test_write_NonEqCalendarAxis(tmpdir):
         # dt=12,
         datetimes=dateTime,
         items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-        coordinate=["UTM-33", east, north, orientation],
+        coordinate=["UTM-33", 12.0, 55.0, orientation],
         dx=100,
         dy=200,
         title="test dfs2",
@@ -475,4 +477,3 @@ def test_write_non_equidistant_data(tmpdir):
     ds3 = dfs2.read()
 
     assert not ds3.is_equidistant
-
