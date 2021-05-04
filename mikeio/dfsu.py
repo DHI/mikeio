@@ -47,7 +47,7 @@ class _UnstructuredGeometry:
     _element_ids = None
     _node_ids = None
     _element_table = None
-    _element_table_dotnet = None
+    _element_table_mikecore = None
 
     _top_elems = None
     _n_layers_column = None
@@ -136,8 +136,8 @@ class _UnstructuredGeometry:
     @property
     def element_table(self):
         """Element to node connectivity"""
-        if (self._element_table is None) and (self._element_table_dotnet is not None):
-            self._element_table = self._get_element_table_from_dotnet()
+        if (self._element_table is None) and (self._element_table_mikecore is not None):
+            self._element_table = self._get_element_table_from_mikecore()
         return self._element_table
 
     @property
@@ -192,15 +192,15 @@ class _UnstructuredGeometry:
             return nc[self.codes == code]
         return nc
 
-    def _get_element_table_from_dotnet(self):
+    def _get_element_table_from_mikecore(self):
         # Note: this can tak 10-20 seconds for large dfsu3d!
 
-        elem_tbl = self._element_table_dotnet.copy()
+        elem_tbl = self._element_table_mikecore.copy()
         for j in range(self.n_elements):
-            elem_tbl[j] = self._element_table_dotnet[j] - 1
+            elem_tbl[j] = self._element_table_mikecore[j] - 1
         return elem_tbl
 
-    def _element_table_to_dotnet(self, elem_table=None):
+    def _element_table_to_mikecore(self, elem_table=None):
         if elem_table is None:
             elem_table = self._element_table
         new_elem_table = []
@@ -208,7 +208,7 @@ class _UnstructuredGeometry:
         for j in range(n_elements):
             elem_nodes = elem_table[j]
             elem_nodes = [nd + 1 for nd in elem_nodes]  # make 1-based
-            new_elem_table.append(elem_nodes)
+            new_elem_table.append(np.array(elem_nodes))
         return new_elem_table
 
     def _set_nodes(
@@ -1797,8 +1797,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
     def _set_elements_from_source(self, source):
         self._n_elements = source.NumberOfElements
-        self._element_table_dotnet = source.ElementTable
-        self._element_table = self._element_table_dotnet
+        self._element_table_mikecore = source.ElementTable
+        self._element_table = None  # self._element_table_dotnet
         self._element_ids = source.ElementIds - 1
 
 
@@ -2365,15 +2365,13 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                         new_data.append(data[j + 1])
                     data = new_data
 
-        # Default filetype;
-        # TODO
-        dfsu_filetype = DfsuFileType.Dfsu2D
-        # if geometry._type == DfsuFileType.Mesh:
-        # create dfs2d from mesh
-        #    dfsu_filetype = DfsuFileType.Dfsu2D
-        # else:
-        #    # TODO: if subset is slice...
-        #    dfsu_filetype = geometry._type.value
+        # Default filetype;                
+        if geometry._type is None: #== DfsuFileType.Mesh:
+            # create dfs2d from mesh
+            dfsu_filetype = DfsuFileType.Dfsu2D
+        else:
+            #    # TODO: if subset is slice...
+            dfsu_filetype = geometry._type.value
 
         if dfsu_filetype != DfsuFileType.Dfsu2D:
             if items[0].name != "Z coordinate":
@@ -2386,13 +2384,13 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         zn = geometry.node_coordinates[:, 2]
 
         # TODO verify this
-        elem_table = geometry.element_table
-        # elem_table = []
-        # for j in range(geometry.n_elements):
-        #    elem_nodes = geometry.element_table[j]
-        #    elem_nodes = [nd + 1 for nd in elem_nodes]
-        #    elem_table.append(elem_nodes)
-        # elem_table = elem_table
+        #elem_table = geometry.element_table
+        elem_table = []
+        for j in range(geometry.n_elements):
+           elem_nodes = geometry.element_table[j]
+           elem_nodes = [nd + 1 for nd in elem_nodes]
+           elem_table.append(elem_nodes)
+        elem_table = elem_table
 
         builder = DfsuBuilder.Create(dfsu_filetype)
 
@@ -2689,7 +2687,7 @@ class Mesh(_UnstructuredFile):
         else:
             geometry = self.elements_to_geometry(elements)
             quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-            elem_table = geometry._element_table_to_dotnet()
+            elem_table = geometry._element_table_to_mikecore()
 
         nc = geometry.node_coordinates
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geometry.codes)
@@ -2741,7 +2739,7 @@ class Mesh(_UnstructuredFile):
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geometry.codes)
         # builder.SetNodeIds(geometry.node_ids+1)
         # builder.SetElementIds(geometry.elements+1)
-        builder.SetElements(geometry._element_table_to_dotnet())
+        builder.SetElements(geometry._element_table_to_mikecore())
         builder.SetProjection(geometry.projection_string)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
         builder.SetEumQuantity(quantity)
