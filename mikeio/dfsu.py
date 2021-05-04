@@ -1797,7 +1797,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
     def _set_elements_from_source(self, source):
         self._n_elements = source.GetNumberOfElements()
-        self._element_table_dotnet = source.GetElementTable()
+        self._element_table_dotnet = source.ElementTable
         self._element_table = self._element_table_dotnet
         self._element_ids = source.ElementIds - 1
 
@@ -2685,7 +2685,7 @@ class Mesh(_UnstructuredFile):
         if elements is None:
             geometry = self
             quantity = self._source.EumQuantity
-            elem_table = self._source.GetElementTable()
+            elem_table = self._source.ElementTable
         else:
             geometry = self.elements_to_geometry(elements)
             quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
