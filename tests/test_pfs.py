@@ -1,10 +1,8 @@
-import os
-from datetime import datetime
-import numpy as np
+import pytest
 
 from mikeio import Pfs
 
-# from mikeio.pfs import PfsCore
+from mikeio.pfs import PfsCore
 
 
 def test_basic():
@@ -99,93 +97,7 @@ def test_output_by_id():
 
 
 ## PFSCore wrapping DHI.PFS.PFSFile
-
-
 def test_sw_new_start_time_write(tmpdir):
 
-    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
-
-    new_start = datetime(2020, 6, 10, 12)
-
-    assert pfs.start_time.year == 2002
-    pfs.start_time = new_start
-
-    assert pfs.start_time.year == 2020
-
-    outfilename = os.path.join(tmpdir.dirname, "lake_mod.sw")
-
-    pfs.write(outfilename)
-
-
-def test_sw_get_end_time(tmpdir):
-
-    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
-
-    assert pfs.start_time.year == 2002
-    assert pfs.end_time.year == 2002
-    assert pfs.end_time.month == 1
-    assert pfs.end_time.day == 1
-    assert pfs.end_time.hour == 15
-
-
-def test_sw_set_end_time(tmpdir):
-
-    pfs = PfsCore("tests/testdata/lake.sw", "FemEngineSW")
-
-    assert pfs.start_time.year == 2002
-    assert pfs.section("TIME")["number_of_time_steps"].value == 450
-    new_end_time = datetime(2002, 1, 2, 0)
-    pfs.end_time = new_end_time
-
-    assert pfs.end_time == new_end_time
-    assert pfs.section("TIME")["number_of_time_steps"].value == 720
-
-    pfs.write(os.path.join(tmpdir, "lake_new.sw"))
-
-
-def test_sw_modify_and_write(tmpdir):
-
-    # [SPECTRAL_WAVE_MODULE][WIND]Charnock_parameter
-    pfs = PfsCore("tests/testdata/lake.sw")
-
-    wind_section = pfs.section("SPECTRAL_WAVE_MODULE").section("WIND")
-
-    assert isinstance(wind_section["Charnock_parameter"].value, float)
-
-    # modify parameter without needing to specify that the float is a float...
-    wind_section["Charnock_parameter"] = 0.02
-
-    wind_section["Charnock_parameter"] = 1.0
-
-    # Force parameter to be interpreted as float to avoid interpreting 1.0 as integer
-    wind_section["Charnock_parameter"] = 0.1
-
-    assert wind_section["Charnock_parameter"].value == 0.1
-
-    spectral_section = pfs.section("SPECTRAL_WAVE_MODULE").section("SPECTRAL")
-
-    assert spectral_section["separation_of_wind_sea_and_swell"].value == 0
-    spectral_section["separation_of_wind_sea_and_swell"] = 1
-
-    assert spectral_section["separation_of_wind_sea_and_swell"].value == 1
-
-    # Check that numpy types works as well
-    for i in np.arange(2, 25):
-        spectral_section["number_of_frequencies"] = i
-
-    # modify a filename
-    pfs.section("DOMAIN")["file_name"] = "tests\\testdata\\odense_rough.mesh"
-
-    # attribute access
-    out_file_1 = (
-        pfs.section("SPECTRAL_WAVE_MODULE")
-        .section("OUTPUTS")
-        .section("OUTPUT_1")
-        .file_name
-    )
-
-    assert out_file_1.value == "Wave_parameters.dfsu"
-
-    outfilename = os.path.join(tmpdir.dirname, "lake_mod.sw")
-
-    pfs.write(outfilename)
+    with pytest.raises(NotImplementedError):
+        PfsCore("tests/testdata/lake.sw", "FemEngineSW")
