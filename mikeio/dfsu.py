@@ -1567,7 +1567,7 @@ class _UnstructuredGeometry:
 
         ec = geometry.element_coordinates
         if geometry.is_tri_only:
-            return np.asarray(geometry.element_table), ec, data
+            return np.vstack(geometry.element_table), ec, data
 
         if data is None:
             data = []
@@ -2389,7 +2389,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         for j in range(geometry.n_elements):
            elem_nodes = geometry.element_table[j]
            elem_nodes = [nd + 1 for nd in elem_nodes]
-           elem_table.append(elem_nodes)
+           elem_table.append(np.array(elem_nodes))
         elem_table = elem_table
 
         builder = DfsuBuilder.Create(dfsu_filetype)
@@ -2428,7 +2428,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     d = data[item][i, :]
                     d[np.isnan(d)] = deletevalue
                     darray = d
-                    self._dfs.WriteItemTimeStepNext(0, darray)
+                    self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
             if not keep_open:
                 self._dfs.Close()
             else:
@@ -2456,7 +2456,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 d[np.isnan(d)] = deletevalue
                 # darray = to_dotnet_float_array(d)
                 darray = d.astype(np.float32)
-                self._dfs.WriteItemTimeStepNext(0, darray)
+                self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
 
     def close(self):
         "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"
