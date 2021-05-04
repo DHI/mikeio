@@ -1792,11 +1792,11 @@ class _UnstructuredFile(_UnstructuredGeometry):
         zn = source.Z
         self._nc = np.column_stack([xn, yn, zn])
         self._codes = np.array(list(source.Code))
-        self._n_nodes = len(xn)
+        self._n_nodes = source.NumberOfNodes
         self._node_ids = source.NodeIds - 1
 
     def _set_elements_from_source(self, source):
-        self._n_elements = source.GetNumberOfElements()
+        self._n_elements = source.NumberOfElements
         self._element_table_dotnet = source.ElementTable
         self._element_table = self._element_table_dotnet
         self._element_ids = source.ElementIds - 1
