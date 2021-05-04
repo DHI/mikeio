@@ -483,7 +483,7 @@ class Grid2D:
         builder = MeshBuilder()
         builder.SetNodes(x, y, z, codes)
 
-        elem_table = self._to_element_table(index_base=1)
+        elem_table = gn._to_element_table(index_base=1)
         builder.SetElements(elem_table)
 
         builder.SetProjection(projection)
