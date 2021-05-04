@@ -323,23 +323,25 @@ def test_reproject(tmpdir):
     longitude_origin = dfs.longitude
     latitude_origin = dfs.latitude
 
-    dfs.reproject(
-        outfilename,
-        projectionstring="UTM-33",
-        longitude_origin=longitude_origin,
-        latitude_origin=latitude_origin,
-        dx=200.0,
-        dy=200.0,
-        nx=285,
-        ny=612,
-        interpolate=False,
-    )
+    # Reprojection is only available in mikeio==0.6.3
+    with pytest.raises(NotImplementedError):
+        dfs.reproject(
+            outfilename,
+            projectionstring="UTM-33",
+            longitude_origin=longitude_origin,
+            latitude_origin=latitude_origin,
+            dx=200.0,
+            dy=200.0,
+            nx=285,
+            ny=612,
+            interpolate=False,
+        )
 
-    newdfs = Dfs2(outfilename)
-    assert "UTM-33" in newdfs.projection_string
-    assert newdfs.shape == (1, 612, 285)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.projection_string != newdfs.projection_string
+    # newdfs = Dfs2(outfilename)
+    # assert "UTM-33" in newdfs.projection_string
+    # assert newdfs.shape == (1, 612, 285)
+    # assert dfs.start_time == newdfs.start_time
+    # assert dfs.projection_string != newdfs.projection_string
 
 
 def test_reproject_defaults(tmpdir):
@@ -351,18 +353,20 @@ def test_reproject_defaults(tmpdir):
     assert dfs.projection_string == "LONG/LAT"
     outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
 
-    dfs.reproject(
-        outfilename,
-        projectionstring="UTM-33",
-        dx=200.0,
-        dy=200.0,
-    )
+    # Reprojection is only available in mikeio==0.6.3
+    with pytest.raises(NotImplementedError):
+        dfs.reproject(
+            outfilename,
+            projectionstring="UTM-33",
+            dx=200.0,
+            dy=200.0,
+        )
 
-    newdfs = Dfs2(outfilename)
-    assert "UTM-33" in newdfs.projection_string
-    assert newdfs.shape == dfs.shape
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.projection_string != newdfs.projection_string
+    # newdfs = Dfs2(outfilename)
+    # assert "UTM-33" in newdfs.projection_string
+    # assert newdfs.shape == dfs.shape
+    # assert dfs.start_time == newdfs.start_time
+    # assert dfs.projection_string != newdfs.projection_string
 
 
 def test_write_accumulated_datatype(tmpdir):
