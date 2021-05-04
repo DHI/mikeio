@@ -3,6 +3,7 @@ from collections import namedtuple
 import numpy as np
 from mikecore.eum import eumQuantity
 from mikeio.eum import ItemInfo, EUMType, EUMUnit
+from mikecore.MeshBuilder import MeshBuilder
 
 BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 

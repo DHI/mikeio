@@ -19,6 +19,7 @@ from mikecore.DfsuFile import DfsuFile
 from mikecore.DfsuFile import DfsuFileType, DfsuUtil
 
 from mikecore.MeshFile import MeshFile
+from mikecore.MeshBuilder import MeshBuilder
 
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset
@@ -477,7 +478,7 @@ class _UnstructuredGeometry:
             nnodes = len(nodes)
             nnodes_per_elem[j] = nnodes
             for i in range(nnodes):
-                idx[i] = nodes[i]  # - 1
+                idx[i] = nodes[i] - 1
 
             xcoords[:nnodes, j] = self._nc[idx[:nnodes], 0]
             ycoords[:nnodes, j] = self._nc[idx[:nnodes], 1]
@@ -1750,7 +1751,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
         self._projstr = msh.ProjectionString
-        self._type = DfsuFileType.Mesh
+        self._type = 0  # DfsuFileType.Mesh
 
         # geometry
         self._set_nodes_from_source(msh)
@@ -1791,14 +1792,14 @@ class _UnstructuredFile(_UnstructuredGeometry):
         zn = source.Z
         self._nc = np.column_stack([xn, yn, zn])
         self._codes = np.array(list(source.Code))
-        self._n_nodes = source.NumberOfNodes
-        self._node_ids = np.array(list(source.NodeIds)) - 1
+        self._n_nodes = len(xn)
+        self._node_ids = source.NodeIds - 1
 
     def _set_elements_from_source(self, source):
-        self._n_elements = source.NumberOfElements
-        self._element_table_dotnet = source.ElementTable
-        self._element_table = None  # do later if needed
-        self._element_ids = np.array(list(source.ElementIds)) - 1
+        self._n_elements = source.GetNumberOfElements()
+        self._element_table_dotnet = source.GetElementTable()
+        self._element_table = self._element_table_dotnet
+        self._element_ids = source.ElementIds - 1
 
 
 class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
@@ -2641,7 +2642,7 @@ class Mesh(_UnstructuredFile):
         self._n_items = None
         self._n_layers = None
         self._n_sigma = None
-        self._type = DfsuFileType.Mesh
+        self._type = 0  # DfsuFileType.Mesh
 
     def set_z(self, z):
         """Change the depth by setting the z value of each node
