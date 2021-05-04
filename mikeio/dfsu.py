@@ -478,7 +478,7 @@ class _UnstructuredGeometry:
             nnodes = len(nodes)
             nnodes_per_elem[j] = nnodes
             for i in range(nnodes):
-                idx[i] = nodes[i] - 1
+                idx[i] = nodes[i]  # - 1
 
             xcoords[:nnodes, j] = self._nc[idx[:nnodes], 0]
             ycoords[:nnodes, j] = self._nc[idx[:nnodes], 1]
@@ -2365,8 +2365,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                         new_data.append(data[j + 1])
                     data = new_data
 
-        # Default filetype;                
-        if geometry._type is None: #== DfsuFileType.Mesh:
+        # Default filetype;
+        if geometry._type is None:  # == DfsuFileType.Mesh:
             # create dfs2d from mesh
             dfsu_filetype = DfsuFileType.Dfsu2D
         else:
@@ -2384,12 +2384,12 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         zn = geometry.node_coordinates[:, 2]
 
         # TODO verify this
-        #elem_table = geometry.element_table
+        # elem_table = geometry.element_table
         elem_table = []
         for j in range(geometry.n_elements):
-           elem_nodes = geometry.element_table[j]
-           elem_nodes = [nd + 1 for nd in elem_nodes]
-           elem_table.append(np.array(elem_nodes))
+            elem_nodes = geometry.element_table[j]
+            elem_nodes = [nd + 1 for nd in elem_nodes]
+            elem_table.append(np.array(elem_nodes))
         elem_table = elem_table
 
         builder = DfsuBuilder.Create(dfsu_filetype)
