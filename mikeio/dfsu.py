@@ -2685,7 +2685,7 @@ class Mesh(_UnstructuredFile):
         if elements is None:
             geometry = self
             quantity = self._source.EumQuantity
-            elem_table = self._source.ElementTable
+            elem_table = self._source.GetElementTable()
         else:
             geometry = self.elements_to_geometry(elements)
             quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
