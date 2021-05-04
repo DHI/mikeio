@@ -366,7 +366,7 @@ class _UnstructuredGeometry:
 
         # extract information for selected elements
         elem_ids = self.bottom_elements
-        if self._type == UnstructuredType.Dfsu3DSigmaZ:
+        if self._type == DfsuFileType.Dfsu3DSigmaZ:
             # for z-layers nodes will not match on neighboring elements!
             elem_ids = self.top_elements
 
@@ -392,7 +392,7 @@ class _UnstructuredGeometry:
         geom._reindex()
 
         # Fix z-coordinate for sigma-z:
-        if self._type == UnstructuredType.Dfsu3DSigmaZ:
+        if self._type == DfsuFileType.Dfsu3DSigmaZ:
             zn = geom.node_coordinates[:, 2].copy()
             for j, elem_nodes in enumerate(geom.element_table):
                 elem_nodes3d = self.element_table[self.bottom_elements[j]]
@@ -1751,7 +1751,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
         self._projstr = msh.ProjectionString
-        self._type = 0  # DfsuFileType.Mesh
+        self._type = None  # DfsuFileType.Mesh
 
         # geometry
         self._set_nodes_from_source(msh)
@@ -2181,8 +2181,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         """
         # validate input
         assert (
-            self._type == UnstructuredType.Dfsu3DSigma
-            or self._type == UnstructuredType.Dfsu3DSigmaZ
+            self._type == DfsuFileType.Dfsu3DSigma
+            or self._type == DfsuFileType.Dfsu3DSigmaZ
         )
         assert n_nearest > 0
         time_steps = _valid_timesteps(self._source, time_steps)
@@ -2642,7 +2642,7 @@ class Mesh(_UnstructuredFile):
         self._n_items = None
         self._n_layers = None
         self._n_sigma = None
-        self._type = 0  # DfsuFileType.Mesh
+        self._type = None  # DfsuFileType.Mesh
 
     def set_z(self, z):
         """Change the depth by setting the z value of each node
