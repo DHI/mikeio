@@ -4,24 +4,26 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
-from DHI.Generic.MikeZero import eumQuantity
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-    DfsBuilder,
+from mikecore.eum import eumQuantity
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsFactory import DfsFactory, DfsBuilder
+
+from mikecore.DfsFile import (
+    DfsSimpleType,
     DfsSimpleType,
     DataValueType,
     StatType,
+    TimeAxisType,
 )
-from DHI.Generic.MikeZero.DFS.dfs0 import Dfs0Util
+
+from mikecore.Dfs0Util import Dfs0Util
 
 from .custom_exceptions import ItemNumbersError, InvalidDataType
-from .dotnet import to_dotnet_array, to_dotnet_datetime, from_dotnet_datetime
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
-from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo, TimeAxisType
-from .helpers import safe_length
+from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries
+from .dfsutil import _get_item_info
 
 
 class Dfs0(TimeSeries):
@@ -71,16 +73,16 @@ class Dfs0(TimeSeries):
         self._deletevalue = dfs.FileInfo.DeleteValueFloat
 
         # Read items
-        self._n_items = safe_length(dfs.ItemInfo)
+        self._n_items = len(dfs.ItemInfo)
         self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
 
-        self._timeaxistype = TimeAxisType(dfs.FileInfo.TimeAxis.TimeAxisType)
+        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
 
         if self._timeaxistype in [
-            TimeAxisType.EquidistantCalendar,
-            TimeAxisType.NonEquidistantCalendar,
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
         ]:
-            self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
             self._start_time = datetime(1970, 1, 1)
 
@@ -109,12 +111,12 @@ class Dfs0(TimeSeries):
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
 
-        self._n_items = safe_length(dfs.ItemInfo)
+        self._n_items = len(dfs.ItemInfo)
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
 
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        if self._timeaxistype == TimeAxisType.NonEquidistantCalendar and isinstance(
+        if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
             time_steps, str
         ):
             sel_time_step_str = time_steps
@@ -152,8 +154,8 @@ class Dfs0(TimeSeries):
 
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
-
-        matrix = self.__to_numpy_with_nans(raw_data)
+        raw_data[raw_data == self._deletevalue] = np.nan  # TODO check
+        matrix = raw_data[:, 1:]
 
         data = []
         for i in range(matrix.shape[1]):
@@ -165,14 +167,6 @@ class Dfs0(TimeSeries):
         self._dfs.Close()
 
         return Dataset(data, time, items)
-
-    def __to_numpy_with_nans(self, raw_data):
-        data = np.fromiter(raw_data, np.float64).reshape(
-            self._n_timesteps, self._n_items + 1
-        )[:, 1::]
-        nan_indices = np.isclose(data, self._dfs.FileInfo.DeleteValueFloat, atol=1e-36)
-        data[nan_indices] = np.nan
-        return data
 
     def __get_time(self, raw_data):
         start_time = self.start_time
@@ -208,7 +202,7 @@ class Dfs0(TimeSeries):
         builder.SetDataType(1)
         builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
-        system_start_time = to_dotnet_datetime(self._start_time)
+        system_start_time = self._start_time
 
         if self._is_equidistant:
             temporal_axis = factory.CreateTemporalEqCalendarAxis(
@@ -288,7 +282,13 @@ class Dfs0(TimeSeries):
         """
         self._filename = filename
         self._title = title
-        self._timeseries_unit = timeseries_unit
+
+        if timeseries_unit == TimeStepUnit.SECOND:
+            self._timeseries_unit = timeseries_unit
+        else:
+            raise ValueError(
+                "Timestep units other than TimeStepUnit.SECOND are deprecated"
+            )
         self._dtype = dtype
 
         if isinstance(data, Dataset):
@@ -348,7 +348,7 @@ class Dfs0(TimeSeries):
 
         data = np.array(data).astype(np.float64)
         data[np.isnan(data)] = delete_value
-        data_to_write = to_dotnet_array(data.T)
+        data_to_write = data.T
         t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
         Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
 

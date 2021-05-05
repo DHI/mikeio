@@ -10,9 +10,6 @@ from datetime import timedelta
 
 import pytest
 
-from DHI.Generic.MikeZero.DFS import (
-    DataValueType
-)
 
 def test_repr():
     filename = os.path.join("tests", "testdata", "da_diagnostic.dfs0")
@@ -166,7 +163,7 @@ def test_multiple_write(tmpdir):
     assert os.path.exists(filename)
 
 
-def test_write_timestep_7days(tmpdir):
+def test_write_timestep_7days_deprecated(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "random.dfs0")
 
@@ -182,25 +179,15 @@ def test_write_timestep_7days(tmpdir):
 
     dfs = Dfs0()
 
-    dfs.write(
-        filename=filename,
-        data=data,
-        items=items,
-        title="Zeros and ones",
-        timeseries_unit=TimeStepUnit.DAY,
-        dt=7,
-    )
-
-    assert os.path.exists(filename)
-
-    newdfs = Dfs0(filename)
-    res = newdfs.read()
-
-    dt = res.time[1] - res.time[0]
-
-    assert dt == timedelta(days=7)
-    assert res["Zeros"][-1] == 0.0
-    assert res["Ones"][-1] == 1.0
+    with pytest.raises(ValueError):
+        dfs.write(
+            filename=filename,
+            data=data,
+            items=items,
+            title="Zeros and ones",
+            timeseries_unit=TimeStepUnit.DAY,
+            dt=7,
+        )
 
 
 def test_write_equidistant_calendar(tmpdir):
@@ -212,9 +199,12 @@ def test_write_equidistant_calendar(tmpdir):
     data.append(d1)
     data.append(d2)
     start_time = datetime.datetime(2017, 1, 1)
-    timeseries_unit = 1402
+    # timeseries_unit = 1402
     title = "Hello Test"
-    items = [ItemInfo("VarFun01", 100000, 1000, data_value_type=0), ItemInfo("NotFun", 100000, 1000, data_value_type=1)]
+    items = [
+        ItemInfo("VarFun01", 100000, 1000, data_value_type=0),
+        ItemInfo("NotFun", 100000, 1000, data_value_type=1),
+    ]
 
     dt = 5
     dfs = Dfs0()
@@ -222,7 +212,7 @@ def test_write_equidistant_calendar(tmpdir):
         filename=dfs0file,
         data=data,
         start_time=start_time,
-        timeseries_unit=timeseries_unit,
+        # timeseries_unit=timeseries_unit,
         dt=dt,
         items=items,
         title=title,
@@ -558,10 +548,10 @@ def test_write_accumulated_datatype(tmpdir):
                 "testing water level",
                 EUMType.Water_Level,
                 EUMUnit.meter,
-                data_value_type="MeanStepBackward"
+                data_value_type="MeanStepBackward",
             )
         ],
-        title="test dfs0"
+        title="test dfs0",
     )
 
     newdfs = Dfs0(filename)
@@ -605,8 +595,14 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
 
     series.to_dfs0(
         filename,
-        items=[ItemInfo("Average", EUMType.Concentration, EUMUnit.gram_per_meter_pow_3,
-                        data_value_type="MeanStepBackward")]
+        items=[
+            ItemInfo(
+                "Average",
+                EUMType.Concentration,
+                EUMUnit.gram_per_meter_pow_3,
+                data_value_type="MeanStepBackward",
+            )
+        ],
     )
 
     ds = mikeio.read(filename)
@@ -632,13 +628,16 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
 
     items = []
     for col in df.columns:
-        items.append(ItemInfo(col, EUMType.Concentration, EUMUnit.gram_per_meter_pow_3,
-                              data_value_type="MeanStepBackward"))
+        items.append(
+            ItemInfo(
+                col,
+                EUMType.Concentration,
+                EUMUnit.gram_per_meter_pow_3,
+                data_value_type="MeanStepBackward",
+            )
+        )
 
-    df.to_dfs0(
-        filename,
-        items=items
-    )
+    df.to_dfs0(filename, items=items)
 
     ds = mikeio.read(filename)
 

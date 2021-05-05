@@ -12,7 +12,8 @@ Examples
 degree Kelvin
 
 """
-from DHI.Generic.MikeZero import EUMWrapper
+# from DHI.Generic.MikeZero import EUMWrapper
+from mikecore.eum import eumDLL, eumWrapper
 from enum import IntEnum
 
 from mikeio.helpers import to_datatype
@@ -39,7 +40,7 @@ def type_list(search=None):
     check = True
     i = 1
     while check:
-        d = EUMWrapper.eumGetItemTypeSeq(i, 0, "")
+        d = eumWrapper.eumGetItemTypeSeq(i)
         if d[0] is True:
             items[d[1]] = d[2]
             i += 1
@@ -73,8 +74,9 @@ def unit_list(type_enum):
         names and codes for valid units
     """
     items = {}
-    for i in range(EUMWrapper.eumGetItemUnitCount(type_enum)):
-        d = EUMWrapper.eumGetItemUnitSeq(type_enum, i + 1, 1, "")
+    # units = GetItemAllowedUnits(type_enum)
+    for i in range(eumWrapper.eumGetItemUnitCount(type_enum)):
+        d = eumWrapper.eumGetItemUnitSeq(type_enum, i + 1)
         if d[0] is True:
             items[d[2]] = d[1]
 
@@ -1303,7 +1305,9 @@ class ItemInfo:
     Wind speed <Wind speed> (meter per sec)
     """
 
-    def __init__(self, name=None, itemtype=None, unit=None, data_value_type='Instantaneous'):
+    def __init__(
+        self, name=None, itemtype=None, unit=None, data_value_type="Instantaneous"
+    ):
 
         # Handle arguments in the wrong place
         if isinstance(name, EUMType):

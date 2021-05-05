@@ -7,7 +7,6 @@ setuptools.setup(
     name="mikeio",
     version="0.7.dev1",
     install_requires=[
-        "pythonnet",
         "numpy",
         "pandas",
         "scipy",

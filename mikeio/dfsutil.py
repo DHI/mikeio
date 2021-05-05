@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
-from .dotnet import from_dotnet_datetime
 from .custom_exceptions import ItemsError
 
 
@@ -56,7 +55,7 @@ def _valid_timesteps(dfsFileInfo, time_steps):
             raise ValueError(
                 "Only equidistant calendar files are supported for this type of time_step argument"
             )
-        start_time_file = from_dotnet_datetime(dfsFileInfo.TimeAxis.StartDateTime)
+        start_time_file = dfsFileInfo.TimeAxis.StartDateTime
         time_step_file = dfsFileInfo.TimeAxis.TimeStep
 
         freq = pd.tseries.offsets.DateOffset(seconds=time_step_file)
@@ -113,7 +112,7 @@ def _get_item_info(dfsItemInfo, item_numbers=None):
     ----------
     dfsItemInfo : MIKE dfs ItemInfo object
     item_numbers : list[int]
-        
+
     Returns
     -------
     list[ItemInfo]
@@ -128,8 +127,7 @@ def _get_item_info(dfsItemInfo, item_numbers=None):
         eumUnit = dfsItemInfo[item].Quantity.Unit
         itemtype = EUMType(eumItem)
         unit = EUMUnit(eumUnit)
-        data_value_type = dfsItemInfo[item].get_ValueType()
+        data_value_type = dfsItemInfo[item].ValueType
         item = ItemInfo(name, itemtype, unit, data_value_type)
         items.append(item)
     return items
-

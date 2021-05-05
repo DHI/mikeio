@@ -14,9 +14,9 @@ Facilitates common data processing workflows for MIKE files.
 [![Blue cafe](https://raw.githubusercontent.com/DHI/mikeio/main/images/bluecafe.png)](https://www.youtube.com/watch?v=7WJpeydHMYQ)
 
 ## Requirements
-* Windows operating system
-* Python x64 3.6, 3.7 or 3.8 
-* [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
+* Windows or Linux operating system
+* Python x64 3.6, 3.7,3.8 or 3.9 
+* (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 [More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
 
@@ -117,38 +117,6 @@ For a complete example of conversion from netcdf to dfs2 see this [notebook](not
 
 Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of downloading meteorological forecast from the Global Forecasting System and converting it to a dfs2 ready to be used by a MIKE 21 model.
 
-
-### Read Res1D file Return Pandas DataFrame
-```python
->>>  from mikeio.res1d import Res1D, QueryDataReach
->>>  df = Res1D(filename).read()
-
->>>  query = QueryDataReach("WaterLevel", "104l1", 34.4131)
->>>  df = res1d.read(query)
-```
-For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
-
-### Read Xns11 file Return Pandas DataFrame
-```python
->>>  import matplotlib.pyplot as plt
->>>  from mikeio import xns11
->>>  # Query the geometry of chainage 58.68 of topoid1 at reach1
->>>  q1 = xns11.QueryData('topoid1', 'reach1', 58.68)
->>>  # Query the geometry of all chainages of topoid1 at reach2
->>>  q2 = xns11.QueryData('topoid1', 'reach2')
->>>  # Query the geometry of all chainages of topoid2
->>>  q3 = xns11.QueryData('topoid2')
->>>  # Combine the queries in a list
->>>  queries = [q1, q2, q3]
->>>  # The returned geometry object is a pandas DataFrame
->>>  geometry = xns11.read('xsections.xns11', queries)
->>>  # Plot geometry of chainage 58.68 of topoid1 at reach1
->>>  plt.plot(geometry['x topoid1 reach1 58.68'],geometry['z topoid1 reach1 58.68'])
->>>  plt.xlabel('Horizontal [meter]')
->>>  plt.ylabel('Elevation [meter]')
-```
-![Geometry](https://raw.githubusercontent.com/DHI/mikeio/main/images/xns11_geometry.png)
-
 ### Read dfsu files
 ```python
 >>>  import matplotlib.pyplot as plt
@@ -166,7 +134,6 @@ For more Res1D examples see this [notebook](notebooks/Res1D.ipynb)
 >>>  msh.plot()
 ```
 ![Mesh](https://raw.githubusercontent.com/DHI/mikeio/main/images/FakeLake.png)
-
 
 For more examples on working with dfsu and mesh see these notebooks:
 * [Basic dfsu](notebooks/Dfsu%20-%20Read.ipynb)
@@ -224,10 +191,7 @@ mikeio\eum.py                  1230      3    99%
 mikeio\generic.py               228      2    99%
 mikeio\helpers.py                13      0   100%
 mikeio\interpolation.py          54      1    98%
-mikeio\pfs.py                   209     13    94%
-mikeio\res1d.py                 143     16    89%
 mikeio\spatial.py               279      4    99%
-mikeio\xns11.py                 210      6    97%
 mikeio\xyz.py                    12      0   100%
 -------------------------------------------------
 TOTAL                          5082    229    95%

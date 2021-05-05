@@ -1071,7 +1071,9 @@ def test_element_table():
     dfs = Dfsu(filename)
     eid = 31
     nid = dfs.element_table[eid]
-    assert nid == [32, 28, 23]
+    assert nid[0] == 32
+    assert nid[1] == 28
+    assert nid[2] == 23
 
 
 def test_get_node_centered_data():
@@ -1133,7 +1135,11 @@ def test_interp2d_reshaped():
 def test_extract_track():
     dfs = Dfsu("tests/testdata/track_extraction_case02_indata.dfsu")
     csv_file = "tests/testdata/track_extraction_case02_track.csv"
-    df = pd.read_csv(csv_file, index_col=0, parse_dates=True,)
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
     track = dfs.extract_track(df)
 
     assert track.data[2][23] == approx(3.6284972794399653)

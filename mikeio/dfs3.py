@@ -1,25 +1,14 @@
 import os
 import numpy as np
 from datetime import datetime, timedelta
-from DHI.Generic.MikeZero import eumUnit, eumQuantity
-from DHI.Generic.MikeZero.DFS import (
-    DfsFileFactory,
-    DfsFactory,
-    DfsSimpleType,
-    DataValueType,
-)
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs3Builder
+from mikecore.eum import eumUnit, eumQuantity
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsFile import DfsSimpleType, DataValueType
+from mikecore.DfsBuilder import DfsBuilder
 
-from .helpers import safe_length
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
-from .dotnet import (
-    to_numpy,
-    to_dotnet_array,
-    to_dotnet_float_array,
-    to_dotnet_datetime,
-    from_dotnet_datetime,
-)
 from .eum import TimeStepUnit
 from .dfs import _Dfs123
 
@@ -50,7 +39,9 @@ class Dfs3(_Dfs123):
             raise Exception(f"file {self._filename} does not exist!")
 
         self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
+
         self.source = self._dfs
+        self._dfs
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._dz = self._dfs.SpatialAxis.Dz
@@ -125,13 +116,13 @@ class Dfs3(_Dfs123):
         Usage:
             [data,time,name] = read( filename, lower_left_xy, upper_right_xy, items, conservative)
         dfs3file
-            a full path and filename to the dfs3 file        
+            a full path and filename to the dfs3 file
         lower_left_xy
             list or array of size two with the X and the Y coordinate (same projection as the dfs3)
         upper_right_xy
             list or array of size two with the X and the Y coordinate (same projection as the dfs3)
         items
-            list of indices (base 0) to read from            
+            list of indices (base 0) to read from
         layers
             list of layers to read
         conservative
@@ -290,10 +281,11 @@ class Dfs3(_Dfs123):
         if coordinates is None:
             for it_number, it in enumerate(time_steps):
                 for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
                     src = itemdata.Data
-                    d = to_numpy(src)
+                    # d = to_numpy(src)
+                    d = src
 
                     # DO a direct copy instead of eleement by elment
                     d = d.reshape(zNum, yNum, xNum)  # .swapaxes(0, 2).swapaxes(0, 1)
@@ -320,7 +312,7 @@ class Dfs3(_Dfs123):
 
                 t_seconds[it] = itemdata.Time
 
-        start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        start_time = dfs.FileInfo.TimeAxis.StartDateTime
         time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
 
         items = _get_item_info(dfs.ItemInfo, item_numbers)
@@ -391,11 +383,11 @@ class Dfs3(_Dfs123):
 
         n_items = len(data)
 
-        system_start_time = to_dotnet_datetime(start_time)
+        system_start_time = start_time
 
         # Create an empty dfs3 file object
         factory = DfsFactory()
-        builder = Dfs3Builder.Create(title, "mikeio", 0)
+        builder = DfsBuilder(title, "mikeio", 0)
 
         # Set up the header
         builder.SetDataType(1)
@@ -409,12 +401,21 @@ class Dfs3(_Dfs123):
         )
         builder.SetSpatialAxis(
             factory.CreateAxisEqD3(
-                eumUnit.eumUmeter, number_x, x0, dx, number_y, y0, dy, number_z, 0, dz,
+                eumUnit.eumUmeter,
+                number_x,
+                x0,
+                dx,
+                number_y,
+                y0,
+                dy,
+                number_z,
+                0,
+                dz,
             )
         )
 
         for i in range(n_items):
-            builder.AddDynamicItem(
+            builder.AddCreateDynamicItem(
                 items[i].name,
                 eumQuantity.Create(items[i].type, items[i].unit),
                 DfsSimpleType.Float,
@@ -434,7 +435,8 @@ class Dfs3(_Dfs123):
                 d = data[item][i]
                 d[np.isnan(d)] = deletevalue
                 d = np.flipud(d)
-                darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+                # darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
+                darray = d.reshape(d.size, 1)[:, 0].astype(np.float32)
 
                 dfs.WriteItemTimeStepNext(0, darray)
 
