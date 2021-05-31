@@ -161,19 +161,12 @@ class Dfs0(TimeSeries):
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
 
-        time = list(self.__get_time(raw_data))
+        time = pd.to_datetime(raw_data[:, 0], unit="s", origin=self.start_time)
         items = list(self.__get_items())
 
         self._dfs.Close()
 
         return Dataset(data, time, items)
-
-    def __get_time(self, raw_data):
-        start_time = self.start_time
-
-        for t in range(self._n_timesteps):
-            t_sec = raw_data[t, self._time_column_index]
-            yield start_time + timedelta(seconds=t_sec)
 
     def __get_items(self):
         for i in range(self._n_items):
