@@ -128,12 +128,7 @@ class Dataset(TimeSeries):
                 f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
             )
         self.data = data
-
-        self.time = (
-            time
-            if isinstance(time, pd.DatetimeIndex)
-            else pd.DatetimeIndex(time, freq="infer")
-        )
+        self.time = pd.DatetimeIndex(time, freq="infer")
 
         for i, item in enumerate(items):
             if isinstance(item, EUMType):
