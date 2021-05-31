@@ -88,7 +88,7 @@ class _Dfs123(TimeSeries):
 
             t_seconds[i] = itemdata.Time
 
-        time = [self.start_time + timedelta(seconds=t) for t in t_seconds]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 

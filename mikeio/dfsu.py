@@ -1981,7 +1981,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
             t_seconds[i] = itemdata.Time
 
-        time = [self.start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dfs.Close()
         return Dataset(data_list, time, items)
