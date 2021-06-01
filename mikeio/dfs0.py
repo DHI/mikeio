@@ -152,14 +152,14 @@ class Dfs0(TimeSeries):
 
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
+        all_data = self.__to_numpy(raw_data)
 
-        matrix = self.__to_numpy_with_nans(raw_data)
-
+        matrix = self.__delete_to_nan(all_data[:, 1:])
         data = []
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
 
-        t_seconds = raw_data[:, 0]
+        t_seconds = all_data[:, 0]
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = time.round(freq="ms")  # accept nothing finer than milliseconds
 
@@ -169,10 +169,12 @@ class Dfs0(TimeSeries):
 
         return Dataset(data, time, items)
 
-    def __to_numpy_with_nans(self, raw_data):
-        data = np.fromiter(raw_data, np.float64).reshape(
+    def __to_numpy(self, raw_data):
+        return np.fromiter(raw_data, np.float64).reshape(
             self._n_timesteps, self._n_items + 1
-        )[:, 1::]
+        )
+
+    def __delete_to_nan(self, data):
         nan_indices = np.isclose(data, self._dfs.FileInfo.DeleteValueFloat, atol=1e-36)
         data[nan_indices] = np.nan
         return data
