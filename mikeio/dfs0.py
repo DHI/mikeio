@@ -159,7 +159,10 @@ class Dfs0(TimeSeries):
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
 
-        time = list(self.__get_time(raw_data))
+        t_seconds = raw_data[:, 0]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = time.round(freq="ms")  # accept nothing finer than milliseconds
+
         items = list(self.__get_items())
 
         self._dfs.Close()
@@ -173,13 +176,6 @@ class Dfs0(TimeSeries):
         nan_indices = np.isclose(data, self._dfs.FileInfo.DeleteValueFloat, atol=1e-36)
         data[nan_indices] = np.nan
         return data
-
-    def __get_time(self, raw_data):
-        start_time = self.start_time
-
-        for t in range(self._n_timesteps):
-            t_sec = raw_data[t, self._time_column_index]
-            yield start_time + timedelta(seconds=t_sec)
 
     def __get_items(self):
         for i in range(self._n_items):
@@ -354,7 +350,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def to_dataframe(self, unit_in_name=False, round_time="s"):
+    def to_dataframe(self, unit_in_name=False, round_time="ms"):
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
 
