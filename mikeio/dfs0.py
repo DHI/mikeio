@@ -154,17 +154,19 @@ class Dfs0(TimeSeries):
 
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
-        raw_data[raw_data == self._deletevalue] = np.nan  # TODO check
-        matrix = raw_data[:, 1:]
+        self._dfs.Close()
 
+        matrix = raw_data[:, 1:]
+        matrix[matrix == self._deletevalue] = np.nan
         data = []
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
 
-        time = pd.to_datetime(raw_data[:, 0], unit="s", origin=self.start_time)
-        items = list(self.__get_items())
+        t_seconds = raw_data[:, 0]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = time.round(freq="ms")  # accept nothing finer than milliseconds
 
-        self._dfs.Close()
+        items = list(self.__get_items())
 
         return Dataset(data, time, items)
 
@@ -347,7 +349,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def to_dataframe(self, unit_in_name=False, round_time="s"):
+    def to_dataframe(self, unit_in_name=False, round_time="ms"):
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
 
