@@ -5,9 +5,9 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.6.4",
+    version="0.7.dev1",
     install_requires=[
-        "mikecore==0.1.1b1", # TODO remove version
+        "mikecore==0.1.1b1",  # TODO remove version
         "numpy",
         "pandas",
         "scipy",
