@@ -1,5 +1,5 @@
 import warnings
-from typing import Union, List
+from typing import Sequence, Union, List
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -91,8 +91,10 @@ class Dataset(TimeSeries):
         self,
         data: Union[List[np.ndarray], float],
         time: Union[pd.DatetimeIndex, str],
-        items: Union[List[ItemInfo], List[EUMType]],
+        items: Union[List[ItemInfo], List[EUMType], List[str]] = None,
     ):
+
+        item_infos: List[ItemInfo] = []
 
         self._deletevalue = Dataset.deletevalue
 
@@ -100,14 +102,7 @@ class Dataset(TimeSeries):
             # default single-step time
             time = self.create_time(time)
 
-        if isinstance(items, int):
-            # default Undefined items
-            n_items = items
-            items = []
-            for j in range(n_items):
-                items.append(ItemInfo(f"Item {j+1}"))
-
-        if np.isscalar(data):
+        if np.isscalar(data) and isinstance(items, Sequence):
             # create empty dataset
             n_elements = data
             n_items = len(items)
@@ -116,25 +111,37 @@ class Dataset(TimeSeries):
                 n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
             )
 
-        n_items = len(data)
-        n_timesteps = data[0].shape[0]
+        if isinstance(data, Sequence):
+            n_items = len(data)
+            n_timesteps = data[0].shape[0]
+
+        if items is None:
+            # default Undefined items
+            for j in range(n_items):
+                item_infos.append(ItemInfo(f"Item {j+1}"))
+        else:
+            for item in items:
+                if isinstance(item, EUMType) or isinstance(item, str):
+                    item_infos.append(ItemInfo(item))
+                elif isinstance(item, ItemInfo):
+                    item_infos.append(item)
+                else:
+                    raise ValueError(f"items of type: {type(item)} is not supported")
+
+            if len(items) != n_items:
+                raise ValueError(
+                    f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
+                )
 
         if len(time) != n_timesteps:
             raise ValueError(
                 f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
             )
-        if len(items) != n_items:
-            raise ValueError(
-                f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
-            )
+
         self.data = data
         self.time = pd.DatetimeIndex(time, freq="infer")
 
-        for i, item in enumerate(items):
-            if isinstance(item, EUMType):
-                items[i] = ItemInfo(item)
-
-        self._items = items
+        self._items = item_infos
 
     def __repr__(self):
 

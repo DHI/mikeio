@@ -222,13 +222,30 @@ def test_create_undefined():
     data = [d1, d2]
 
     time = _get_time(nt)
-    items = 2
-    ds = Dataset(data, time, items)
+    # items = 2
+    ds = Dataset(data, time)
 
     assert len(ds.items) == 2
     assert len(ds.data) == 2
     assert ds.items[0].name == "Item 1"
     assert ds.items[0].type == EUMType.Undefined
+
+
+def test_create_named_undefined():
+
+    nt = 100
+    d1 = np.zeros([nt])
+    d2 = np.zeros([nt])
+
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    ds = Dataset(data=data, time=time, items=["Foo", "Bar"])
+
+    assert len(ds.items) == 2
+    assert len(ds.data) == 2
+    assert ds.items[1].name == "Bar"
+    assert ds.items[1].type == EUMType.Undefined
 
 
 def test_to_dataframe_single_timestep():
