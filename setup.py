@@ -7,7 +7,7 @@ setuptools.setup(
     name="mikeio",
     version="0.6.4",
     install_requires=[
-        "pythonnet",
+        "mikecore==0.1.1b1", # TODO remove version
         "numpy",
         "pandas",
         "scipy",
@@ -31,8 +31,7 @@ setuptools.setup(
     },
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
-    description="A package that uses the DHI dfs libraries to create, write and read dfs, res1d and mesh files.",
-    platform="windows_x64",
+    description="A package that uses the DHI dfs libraries to create, write and read dfs and mesh files.",
     license="BSD-3",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -48,7 +47,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
-        "Operating System :: Microsoft :: Windows",
         "Topic :: Scientific/Engineering",
     ],
 )

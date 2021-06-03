@@ -1,12 +1,9 @@
 import os
 import warnings
-from DHI.Generic.MikeZero import eumUnit
-from DHI.Generic.MikeZero.DFS import DfsFileFactory
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder, Dfs2Reprojector
-from DHI.Generic.MikeZero.DFS import DfsFileFactory
-from DHI.Generic.MikeZero.DFS.dfs123 import Dfs2Builder
-from DHI.Projections import Cartography
-
+from mikecore.eum import eumUnit
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsFactory import DfsBuilder
+from mikecore.Projections import Cartography
 
 from .dfs import _Dfs123
 
@@ -98,8 +95,7 @@ class Dfs2(_Dfs123):
             projection.Orientation,
         )
 
-        # C# out parameters must be handled in special way
-        (_, xx, yy) = cart.Geo2Xy(lon, lat, 0.0, 0.0)
+        xx, yy = cart.Geo2Xy(lon, lat)
 
         j = int(xx / axis.Dx + 0.5)
         k = axis.YCount - int(yy / axis.Dy + 0.5) - 1
@@ -155,7 +151,7 @@ class Dfs2(_Dfs123):
             title of the dfs2 file. Default is blank.
         """
 
-        self._builder = Dfs2Builder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", 0)
         if not self._dx:
             self._dx = 1
         if dx:
@@ -209,68 +205,7 @@ class Dfs2(_Dfs123):
         interpolate=True,
     ):
         """
-        Reproject and write results to a new dfs2 file
-
-            Parameters
-            ----------
-            filename: str
-                location to write the reprojected dfs2 file
-            projectionstring: str
-                WKT string of new projection
-            dx: float
-                length of each grid in the x direction (projection units)
-            dy: float
-                length of each grid in the y direction (projection units)
-            latitude_origin: float, optional
-                latitude at origin of new grid, default same as original
-            longitude_origin: float, optional
-                longitude at origin of new grid, default same as original
-            nx: int, optional
-                n grid points in x direction, default same as original
-            ny: int, optional
-                n grid points in y direction, default same as original
-            orientation: float, optional
-                rotated grid, default 0.0
-            interpolate: bool, optional
-                interpolate to new grid, default true
-
-            Examples
-            --------
-
-            >>> dfs = Dfs2("input.dfs")
-            >>> dfs.reproject("out.dfs2", projectionstring="UTM-33",
-            ...               dx=200.0, dy=200.0,
-            ...               longitude_origin=12.0, latitude_origin=55.0,
-            ...               nx=285, ny=612)
+        Reprojection is only available in mikeio==0.6.3
         """
 
-        if nx is None:
-            nx = self.shape[2]
-
-        if ny is None:
-            ny = self.shape[1]
-
-        if latitude_origin is None:
-            latitude_origin = self.latitude
-
-        if longitude_origin is None:
-            longitude_origin = self.longitude
-
-        dfs2File = DfsFileFactory.Dfs2FileOpen(self._filename)
-
-        tool = Dfs2Reprojector(dfs2File, filename)
-        tool.Interpolate = interpolate
-
-        tool.SetTarget(
-            projectionstring,
-            longitude_origin,
-            latitude_origin,
-            orientation,
-            nx,
-            0.0,
-            dx,
-            ny,
-            0.0,
-            dy,
-        )
-        tool.Process()
+        raise NotImplementedError("Reprojection is no longer available in mikeio")

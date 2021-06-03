@@ -8,21 +8,12 @@ from tqdm import tqdm, trange
 from .dataset import Dataset
 from .base import TimeSeries
 
-from .dotnet import (
-    to_dotnet_datetime,
-    from_dotnet_datetime,
-    to_numpy,
-    to_dotnet_float_array,
-)
+from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
-from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
-from DHI.Generic.MikeZero import eumQuantity
-from DHI.Generic.MikeZero.DFS import (
-    DfsSimpleType,
-    DataValueType,
-    DfsFactory,
-)
+from mikecore.eum import eumQuantity
+from mikecore.DfsFile import DfsSimpleType
+from mikecore.DfsFactory import DfsFactory
 
 
 class _Dfs123(TimeSeries):
@@ -82,10 +73,10 @@ class _Dfs123(TimeSeries):
         for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
             for item in range(n_items):
 
-                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
                 src = itemdata.Data
-                d = to_numpy(src)
+                d = src
 
                 d[d == self.deletevalue] = np.nan
 
@@ -107,8 +98,8 @@ class _Dfs123(TimeSeries):
     def _read_header(self):
         dfs = self._dfs
         self._n_items = len(dfs.ItemInfo)
-        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
-        self._start_time = from_dotnet_datetime(dfs.FileInfo.TimeAxis.StartDateTime)
+        self._items = self._get_item_info(list(range(self._n_items)))
+        self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
@@ -171,18 +162,14 @@ class _Dfs123(TimeSeries):
                 d[np.isnan(d)] = deletevalue
 
                 if self._ndim == 1:
-                    darray = to_dotnet_float_array(d)
+                    darray = d
 
                 if self._ndim == 2:
                     d = d.reshape(self.shape[1:])
                     d = np.flipud(d)
-                    darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
-                if self._is_equidistant:
-                    dfs.WriteItemTimeStepNext(0, darray)
-                else:
-                    t = datetimes[i]
-                    relt = (t - start_time).total_seconds()
-                    dfs.WriteItemTimeStepNext(relt, darray)
+                    darray = d.reshape(d.size, 1)[:, 0]
+
+                dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
 
         dfs.Close()
 
@@ -248,17 +235,11 @@ class _Dfs123(TimeSeries):
 
     def _setup_header(self, filename):
 
-        system_start_time = to_dotnet_datetime(self._start_time)
+        system_start_time = self._start_time
 
         self._builder.SetDataType(0)
 
-        if self._coordinate[0] == "LONG/LAT":
-            proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
-        else:
-            if self._override_coordinates:
-                proj = self._factory.CreateProjectionProjOrigin(*self._coordinate)
-            else:
-                proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
+        proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
 
         self._builder.SetGeographicalProjection(proj)
 
@@ -276,7 +257,7 @@ class _Dfs123(TimeSeries):
             )
 
         for item in self._items:
-            self._builder.AddDynamicItem(
+            self._builder.AddCreateDynamicItem(
                 item.name,
                 eumQuantity.Create(item.type, item.unit),
                 DfsSimpleType.Float,
@@ -296,6 +277,66 @@ class _Dfs123(TimeSeries):
 
     def _set_spatial_axis(self):
         raise NotImplementedError("Should be implemented by subclass")
+
+    def _find_item(self, item_names):
+        """Utility function to find item numbers
+
+        Parameters
+        ----------
+        dfs : DfsFile
+
+        item_names : list[str]
+            Names of items to be found
+
+        Returns
+        -------
+        list[int]
+            item numbers (0-based)
+
+        Raises
+        ------
+        KeyError
+            In case item is not found in the dfs file
+        """
+        names = [x.Name for x in self._dfs.ItemInfo]
+        item_lookup = {name: i for i, name in enumerate(names)}
+        try:
+            item_numbers = [item_lookup[x] for x in item_names]
+        except KeyError:
+            raise KeyError(f"Selected item name not found. Valid names are {names}")
+
+        return item_numbers
+
+    def _get_item_info(self, item_numbers):
+        """Read DFS ItemInfo
+
+        Parameters
+        ----------
+        dfs : MIKE dfs object
+        item_numbers : list[int]
+
+        Returns
+        -------
+        list[Iteminfo]
+        """
+        items = []
+        for item in item_numbers:
+            name = self._dfs.ItemInfo[item].Name
+            eumItem = self._dfs.ItemInfo[item].Quantity.Item
+            eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
+            itemtype = EUMType(eumItem)
+            unit = EUMUnit(eumUnit)
+            data_value_type = self._dfs.ItemInfo[item].ValueType
+            item = ItemInfo(name, itemtype, unit, data_value_type)
+            items.append(item)
+        return items
+
+    def _validate_item_numbers(self, item_numbers):
+        if not all(
+            isinstance(item_number, int) and 0 <= item_number < self.n_items
+            for item_number in item_numbers
+        ):
+            raise ItemNumbersError()
 
     @property
     def deletevalue(self):

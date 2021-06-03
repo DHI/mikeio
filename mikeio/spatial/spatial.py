@@ -1,10 +1,9 @@
 from collections import namedtuple
 
 import numpy as np
-from DHI.Generic.MikeZero import eumQuantity
-from DHI.Generic.MikeZero.DFS.mesh import MeshBuilder
-from mikeio.dotnet import asnetarray_v2
-from mikeio.eum import EUMType, EUMUnit
+from mikecore.eum import eumQuantity
+from mikeio.eum import ItemInfo, EUMType, EUMUnit
+from mikecore.MeshBuilder import MeshBuilder
 
 BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
@@ -485,7 +484,7 @@ class Grid2D:
         builder.SetNodes(x, y, z, codes)
 
         elem_table = gn._to_element_table(index_base=1)
-        builder.SetElements(asnetarray_v2(elem_table))
+        builder.SetElements(elem_table)
 
         builder.SetProjection(projection)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)

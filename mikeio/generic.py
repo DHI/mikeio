@@ -8,14 +8,9 @@ from shutil import copyfile
 
 from tqdm import trange, tqdm
 
-from DHI.Generic.MikeZero.DFS import DfsFileFactory, DfsBuilder, DfsFile
-from .dotnet import (
-    to_numpy,
-    to_dotnet_float_array,
-    from_dotnet_datetime,
-    to_dotnet_datetime,
-)
-from .helpers import safe_length
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsBuilder import DfsBuilder
+from mikecore.DfsFile import DfsFile
 from .dfsutil import _valid_item_numbers, _item_numbers_by_name
 
 show_progress = False
@@ -54,8 +49,7 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
     # Copy time axis
     time_axis = fi.TimeAxis
     if start_time is not None:
-        dt = to_dotnet_datetime(start_time)
-        time_axis.set_StartDateTime(dt)
+        time_axis.StartDateTime = start_time
     builder.SetTemporalAxis(time_axis)
 
     builder.SetItemStatisticsType(fi.StatsType)
@@ -101,20 +95,20 @@ def scale(
 ) -> None:
     """Apply scaling to any dfs file
 
-        Parameters
-        ----------
+    Parameters
+    ----------
 
-        infilename: str
-            full path to the input file
-        outfilename: str
-            full path to the output file
-        offset: float, optional
-            value to add to all items, default 0.0
-        factor: float, optional
-            value to multiply to all items, default 1.0
-        items: List[str] or List[int], optional
-            Process only selected items, by number (0-based)
-        """
+    infilename: str
+        full path to the input file
+    outfilename: str
+        full path to the output file
+    offset: float, optional
+        value to add to all items, default 0.0
+    factor: float, optional
+        value to multiply to all items, default 1.0
+    items: List[str] or List[int], optional
+        Process only selected items, by number (0-based)
+    """
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
@@ -130,13 +124,13 @@ def scale(
 
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             time = itemdata.Time
-            d = to_numpy(itemdata.Data)
+            d = itemdata.Data
             d[d == deletevalue] = np.nan
 
             outdata = d * factor + offset
 
             outdata[np.isnan(outdata)] = deletevalue
-            darray = to_dotnet_float_array(outdata)
+            darray = outdata.astype(np.float32)
 
             dfs.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
 
@@ -164,24 +158,24 @@ def sum(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
 
     n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
-    n_items = safe_length(dfs_i_a.ItemInfo)
+    n_items = len(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
 
     for timestep in trange(n_time_steps):
         for item in range(n_items):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
-            d_a = to_numpy(itemdata_a.Data)
+            d_a = itemdata_a.Data
             d_a[d_a == deletevalue] = np.nan
 
             itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
-            d_b = to_numpy(itemdata_b.Data)
+            d_b = itemdata_b.Data
             d_a[d_a == deletevalue] = np.nan
             time = itemdata_a.Time
 
             outdata = d_a + d_b
 
-            darray = to_dotnet_float_array(outdata)
+            darray = outdata.astype(np.float32)
 
             dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
 
@@ -197,7 +191,7 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     ----------
     infilename_a: str
         full path to the first input file
-    infilename_b: str 
+    infilename_b: str
         full path to the second input file
     outfilename: str
         full path to the output file
@@ -212,24 +206,24 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
 
     n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
-    n_items = safe_length(dfs_i_a.ItemInfo)
+    n_items = len(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
 
     for timestep in trange(n_time_steps):
         for item in range(n_items):
 
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
-            d_a = to_numpy(itemdata_a.Data)
+            d_a = itemdata_a.Data
             d_a[d_a == deletevalue] = np.nan
 
             itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
-            d_b = to_numpy(itemdata_b.Data)
+            d_b = itemdata_b.Data
             d_b[d_b == deletevalue] = np.nan
             time = itemdata_a.Time
 
             outdata = d_a - d_b
 
-            darray = to_dotnet_float_array(outdata)
+            darray = outdata.astype(np.float32)
 
             dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
 
@@ -261,7 +255,7 @@ def concat(infilenames: List[str], outfilename: str) -> None:
 
     dfs_o = _clone(infilenames[0], outfilename)
 
-    n_items = safe_length(dfs_i_a.ItemInfo)
+    n_items = len(dfs_i_a.ItemInfo)
     dfs_i_a.Close()
 
     current_time = datetime(1, 1, 1)  # beginning of time...
@@ -272,7 +266,7 @@ def concat(infilenames: List[str], outfilename: str) -> None:
         t_axis = dfs_i.FileInfo.TimeAxis
         n_time_steps = t_axis.NumberOfTimeSteps
         dt = t_axis.TimeStep
-        start_time = from_dotnet_datetime(t_axis.StartDateTime)
+        start_time = t_axis.StartDateTime
 
         if i > 0 and start_time > current_time + timedelta(seconds=dt):
             dfs_o.Close()
@@ -285,7 +279,7 @@ def concat(infilenames: List[str], outfilename: str) -> None:
             dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
             nf = dfs_n.FileInfo.TimeAxis.StartDateTime
             next_start_time = datetime(
-                nf.Year, nf.Month, nf.Day, nf.Hour, nf.Minute, nf.Second
+                nf.year, nf.month, nf.day, nf.hour, nf.minute, nf.second
             )
             dfs_n.Close()
 
@@ -299,9 +293,9 @@ def concat(infilenames: List[str], outfilename: str) -> None:
             for item in range(n_items):
 
                 itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
-                d = to_numpy(itemdata.Data)
+                d = itemdata.Data
 
-                darray = to_dotnet_float_array(d)
+                darray = d.astype(np.float32)
 
                 dfs_o.WriteItemTimeStepNext(0, darray)
         dfs_i.Close()
@@ -331,10 +325,10 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     --------
     >>> extract('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
     >>> extract('f_in.dfs2', 'f_out.dfs2', end=-3)
-    >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)   
-    >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0]) 
-    >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity") 
-    >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity") 
+    >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)
+    >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0])
+    >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity")
+    >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
@@ -347,7 +341,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
 
     file_start_shift = 0
     if file_start_new is not None:
-        file_start_orig = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
+        file_start_orig = dfs_i.FileInfo.TimeAxis.StartDateTime
         file_start_shift = (file_start_new - file_start_orig).total_seconds()
 
     timestep_out = -1
@@ -376,10 +370,9 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
 
 
 def _parse_start_end(dfs_i, start, end):
-    """Helper function for parsing start and end arguments
-    """
+    """Helper function for parsing start and end arguments"""
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-    file_start_datetime = from_dotnet_datetime(dfs_i.FileInfo.TimeAxis.StartDateTime)
+    file_start_datetime = dfs_i.FileInfo.TimeAxis.StartDateTime
     file_start_sec = dfs_i.FileInfo.TimeAxis.StartTimeOffset
     start_sec = file_start_sec
 
@@ -453,4 +446,3 @@ def _parse_start_end(dfs_i, start, end):
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
     return file_start_new, start_step, start_sec, end_step, end_sec
-

@@ -70,9 +70,8 @@ def test_write_single_item(tmpdir):
     # >>> from pyproj import Proj
     # >>> utm = Proj(32633)
     # >>> utm(12.0, 55.0)
-    east = 308124
-    north = 6098907
-    orientation = 0
+    # east = 308124
+    # north = 6098907
 
     dfs = Dfs2()
 
@@ -82,7 +81,7 @@ def test_write_single_item(tmpdir):
         start_time=datetime.datetime(2012, 1, 1),
         dt=12,
         items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-        coordinate=["UTM-33", east, north, orientation],
+        coordinate=["UTM-33", 12.0, 55.0, 0.0],
         dx=100,
         dy=200,
         title="test dfs2",
@@ -293,7 +292,7 @@ def test_find_index_from_coordinate():
     # TODO it should not be necessary to read the data to get coordinates
     ds = dfs.read()
 
-    i, j = dfs.find_nearest_element(lon=12.74792, lat=55.865)
+    i, j = dfs.find_nearest_elements(lon=12.74792, lat=55.865)
 
     assert i == 104
     assert j == 131
@@ -324,23 +323,25 @@ def test_reproject(tmpdir):
     longitude_origin = dfs.longitude
     latitude_origin = dfs.latitude
 
-    dfs.reproject(
-        outfilename,
-        projectionstring="UTM-33",
-        longitude_origin=longitude_origin,
-        latitude_origin=latitude_origin,
-        dx=200.0,
-        dy=200.0,
-        nx=285,
-        ny=612,
-        interpolate=False,
-    )
+    # Reprojection is only available in mikeio==0.6.3
+    with pytest.raises(NotImplementedError):
+        dfs.reproject(
+            outfilename,
+            projectionstring="UTM-33",
+            longitude_origin=longitude_origin,
+            latitude_origin=latitude_origin,
+            dx=200.0,
+            dy=200.0,
+            nx=285,
+            ny=612,
+            interpolate=False,
+        )
 
-    newdfs = Dfs2(outfilename)
-    assert "UTM-33" in newdfs.projection_string
-    assert newdfs.shape == (1, 612, 285)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.projection_string != newdfs.projection_string
+    # newdfs = Dfs2(outfilename)
+    # assert "UTM-33" in newdfs.projection_string
+    # assert newdfs.shape == (1, 612, 285)
+    # assert dfs.start_time == newdfs.start_time
+    # assert dfs.projection_string != newdfs.projection_string
 
 
 def test_reproject_defaults(tmpdir):
@@ -352,15 +353,20 @@ def test_reproject_defaults(tmpdir):
     assert dfs.projection_string == "LONG/LAT"
     outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
 
-    dfs.reproject(
-        outfilename, projectionstring="UTM-33", dx=200.0, dy=200.0,
-    )
+    # Reprojection is only available in mikeio==0.6.3
+    with pytest.raises(NotImplementedError):
+        dfs.reproject(
+            outfilename,
+            projectionstring="UTM-33",
+            dx=200.0,
+            dy=200.0,
+        )
 
-    newdfs = Dfs2(outfilename)
-    assert "UTM-33" in newdfs.projection_string
-    assert newdfs.shape == dfs.shape
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.projection_string != newdfs.projection_string
+    # newdfs = Dfs2(outfilename)
+    # assert "UTM-33" in newdfs.projection_string
+    # assert newdfs.shape == dfs.shape
+    # assert dfs.start_time == newdfs.start_time
+    # assert dfs.projection_string != newdfs.projection_string
 
 
 def test_write_accumulated_datatype(tmpdir):
@@ -424,8 +430,8 @@ def test_write_NonEqCalendarAxis(tmpdir):
     d[3, 3:, :] = 2
     d[4, :, 4:] = 5
     data.append(d)
-    east = 308124
-    north = 6098907
+    # east = 308124 # Not supported, supply lat/lon of origin also for projected coords
+    # north = 6098907
     orientation = 0
     dateTime = [
         datetime.datetime(2012, 1, 1),
@@ -443,7 +449,7 @@ def test_write_NonEqCalendarAxis(tmpdir):
         # dt=12,
         datetimes=dateTime,
         items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-        coordinate=["UTM-33", east, north, orientation],
+        coordinate=["UTM-33", 12.0, 55.0, orientation],
         dx=100,
         dy=200,
         title="test dfs2",
@@ -475,4 +481,3 @@ def test_write_non_equidistant_data(tmpdir):
     ds3 = dfs2.read()
 
     assert not ds3.is_equidistant
-

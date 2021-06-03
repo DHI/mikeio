@@ -1,4 +1,3 @@
-import clr
 import sys
 import os
 from platform import architecture
@@ -27,15 +26,6 @@ if "64" not in architecture()[0]:
 mike_bin_path = os.path.join(os.path.dirname(__file__), "bin")
 sys.path.append(mike_bin_path)
 
-clr.AddReference("System")
-clr.AddReference("System.Runtime")
-clr.AddReference("System.Runtime.InteropServices")
-clr.AddReference("DHI.Generic.MikeZero.DFS")
-clr.AddReference("DHI.Generic.MikeZero.EUM")
-clr.AddReference("DHI.PFS")
-clr.AddReference("DHI.Projections")
-clr.AddReference("DHI.Mike1D.Generic")
-clr.AddReference("DHI.Mike1D.ResultDataAccess")
 
 from .dfs0 import Dfs0
 from .dfs1 import Dfs1
