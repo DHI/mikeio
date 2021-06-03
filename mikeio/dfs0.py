@@ -154,6 +154,7 @@ class Dfs0(TimeSeries):
 
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
+
         self._dfs.Close()
 
         matrix = raw_data[:, 1:]
@@ -162,6 +163,7 @@ class Dfs0(TimeSeries):
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
 
+
         t_seconds = raw_data[:, 0]
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = time.round(freq="ms")  # accept nothing finer than milliseconds
@@ -169,6 +171,7 @@ class Dfs0(TimeSeries):
         items = list(self.__get_items())
 
         return Dataset(data, time, items)
+
 
     def __get_items(self):
         for i in range(self._n_items):
