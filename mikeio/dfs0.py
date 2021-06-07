@@ -70,7 +70,7 @@ class Dfs0(TimeSeries):
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
-        self._deletevalue = dfs.FileInfo.DeleteValueFloat
+        self._deletevalue = dfs.FileInfo.DeleteValueDouble  # NOTE: changed in cutil
 
         # Read items
         self._n_items = len(dfs.ItemInfo)
@@ -296,6 +296,8 @@ class Dfs0(TimeSeries):
             else:
                 datetimes = data.time
             data = data.data
+        elif datetimes is not None:
+            datetimes = pd.DatetimeIndex(datetimes, freq="infer")
 
         if dt:
             self._dt = dt
@@ -322,6 +324,7 @@ class Dfs0(TimeSeries):
         if datetimes is not None:
             self._start_time = datetimes[0]
             self._is_equidistant = False
+            t_seconds = (datetimes - datetimes[0]).seconds.values
         else:
             self._is_equidistant = True
             if self._start_time is None:
@@ -331,12 +334,7 @@ class Dfs0(TimeSeries):
                 )
 
             self._dt = np.float(self._dt)
-            datetimes = np.array(
-                [
-                    self._start_time + timedelta(seconds=(step * self._dt))
-                    for step in np.arange(self._n_timesteps)
-                ]
-            )
+            t_seconds = self._dt * np.arange(float(self._n_timesteps))
 
         dfs = self._setup_header()
 
@@ -345,7 +343,6 @@ class Dfs0(TimeSeries):
         data = np.array(data).astype(np.float64)
         data[np.isnan(data)] = delete_value
         data_to_write = data.T
-        t_seconds = (datetimes - datetimes[0]).seconds.values
         Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
 
         dfs.Close()
