@@ -163,7 +163,6 @@ class Dfs0(TimeSeries):
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
 
-
         t_seconds = raw_data[:, 0]
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = time.round(freq="ms")  # accept nothing finer than milliseconds
@@ -171,7 +170,6 @@ class Dfs0(TimeSeries):
         items = list(self.__get_items())
 
         return Dataset(data, time, items)
-
 
     def __get_items(self):
         for i in range(self._n_items):
@@ -347,7 +345,7 @@ class Dfs0(TimeSeries):
         data = np.array(data).astype(np.float64)
         data[np.isnan(data)] = delete_value
         data_to_write = data.T
-        t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
+        t_seconds = (datetimes - datetimes[0]).seconds.values
         Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
 
         dfs.Close()
