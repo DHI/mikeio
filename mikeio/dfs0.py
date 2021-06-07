@@ -343,7 +343,9 @@ class Dfs0(TimeSeries):
         data = np.array(data).astype(np.float64)
         data[np.isnan(data)] = delete_value
         data_to_write = data.T
-        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
+        rc = Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
+        if rc:
+            warnings.warn(f"mikecore WriteDfs0DataDouble returned {rc}! Writing file probably failed.")
 
         dfs.Close()
 
