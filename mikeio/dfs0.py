@@ -324,7 +324,7 @@ class Dfs0(TimeSeries):
         if datetimes is not None:
             self._start_time = datetimes[0]
             self._is_equidistant = False
-            t_seconds = (datetimes - datetimes[0]).seconds.values
+            t_seconds = (datetimes - datetimes[0]).total_seconds().values
         else:
             self._is_equidistant = True
             if self._start_time is None:
@@ -345,7 +345,9 @@ class Dfs0(TimeSeries):
         data_to_write = data.T
         rc = Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
         if rc:
-            warnings.warn(f"mikecore WriteDfs0DataDouble returned {rc}! Writing file probably failed.")
+            warnings.warn(
+                f"mikecore WriteDfs0DataDouble returned {rc}! Writing file probably failed."
+            )
 
         dfs.Close()
 
