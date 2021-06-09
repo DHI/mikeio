@@ -159,6 +159,8 @@ class Dfs0(TimeSeries):
 
         matrix = raw_data[:, 1:]
         matrix[matrix == self._deletevalue] = np.nan
+        # matrix[matrix == self._dfs.FileInfo.DeleteValueDouble] = np.nan
+        # matrix[matrix == self._dfs.FileInfo.DeleteValueFloat] = np.nan
         data = []
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
@@ -333,17 +335,17 @@ class Dfs0(TimeSeries):
                     f"No start time supplied. Using current time: {self._start_time} as start time."
                 )
 
-            self._dt = np.float(self._dt)
+            self._dt = float(self._dt)
             t_seconds = self._dt * np.arange(float(self._n_timesteps))
 
         dfs = self._setup_header()
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
-        data = np.array(data).astype(np.float64)
+        data = np.array(data, order="F").astype(np.float64)
         data[np.isnan(data)] = delete_value
-        data_to_write = data.T
-        rc = Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
+        data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data.T], axis=1)
+        rc = dfs.WriteDfs0DataDouble(data_to_write)
         if rc:
             warnings.warn(
                 f"mikecore WriteDfs0DataDouble returned {rc}! Writing file probably failed."
