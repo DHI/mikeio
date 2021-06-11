@@ -153,14 +153,14 @@ class Dfs0(TimeSeries):
         self._time_column_index = 0  # First column is time (the rest is data)
 
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
-        raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
+        raw_data = self._dfs.ReadDfs0DataDouble()  # Bulk read the data
 
         self._dfs.Close()
 
         matrix = raw_data[:, 1:]
-        matrix[matrix == self._deletevalue] = np.nan
-        # matrix[matrix == self._dfs.FileInfo.DeleteValueDouble] = np.nan
-        # matrix[matrix == self._dfs.FileInfo.DeleteValueFloat] = np.nan
+        # matrix[matrix == self._deletevalue] = np.nan
+        matrix[matrix == self._dfs.FileInfo.DeleteValueDouble] = np.nan  # cutil
+        matrix[matrix == self._dfs.FileInfo.DeleteValueFloat] = np.nan  # linux
         data = []
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
@@ -342,9 +342,9 @@ class Dfs0(TimeSeries):
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
-        data = np.array(data, order="F").astype(np.float64)
+        data = np.array(data, order="F").astype(np.float64).T
         data[np.isnan(data)] = delete_value
-        data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data.T], axis=1)
+        data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
         rc = dfs.WriteDfs0DataDouble(data_to_write)
         if rc:
             warnings.warn(
