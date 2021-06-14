@@ -16,8 +16,6 @@ from mikecore.DfsFile import (
     TimeAxisType,
 )
 
-from mikecore.Dfs0Util import Dfs0Util
-
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
