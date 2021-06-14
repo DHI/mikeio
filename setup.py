@@ -7,6 +7,7 @@ setuptools.setup(
     name="mikeio",
     version="0.7.dev1",
     install_requires=[
+
         "mikecore==0.1.2b2",  # TODO remove version
         "numpy",
         "pandas",
