@@ -94,7 +94,7 @@ def test_write_int_not_possible(tmpdir):
 
     dfs = Dfs0()
 
-    with pytest.raises(InvalidDataType):
+    with pytest.raises(TypeError):
         dfs.write(filename=filename, data=data, dtype=np.int32)
 
 

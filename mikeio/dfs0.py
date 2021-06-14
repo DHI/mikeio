@@ -1,8 +1,9 @@
 import os
 import warnings
+from datetime import datetime
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
+
 
 from mikecore.eum import eumQuantity
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -10,29 +11,18 @@ from mikecore.DfsFactory import DfsFactory, DfsBuilder
 
 from mikecore.DfsFile import (
     DfsSimpleType,
-    DfsSimpleType,
     DataValueType,
     StatType,
     TimeAxisType,
 )
 
-from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries
-from .dfsutil import _get_item_info
 
 
 class Dfs0(TimeSeries):
-
-    _start_time = None
-    _n_items = None
-    _dt = None
-    _is_equidistant = None
-    _title = None
-    _items = None
-
     def __init__(self, filename=None):
         """Create a Dfs0 object for reading, writing
 
@@ -41,6 +31,18 @@ class Dfs0(TimeSeries):
         filename: str, optional
             File name including full path to the dfs0 file.
         """
+
+        self._source = None
+        self._dfs = None
+        self._start_time = None
+        self._n_items = None
+        self._dt = None
+        self._is_equidistant = None
+        self._title = None
+        self._items = None
+        self._n_timesteps = None
+        self._dtype = None
+
         self._filename = filename
 
         if filename:
@@ -76,10 +78,10 @@ class Dfs0(TimeSeries):
 
         self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
 
-        if self._timeaxistype in [
+        if self._timeaxistype in {
             TimeAxisType.CalendarEquidistant,
             TimeAxisType.CalendarNonEquidistant,
-        ]:
+        }:
             self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
             self._start_time = datetime(1970, 1, 1)
@@ -108,6 +110,7 @@ class Dfs0(TimeSeries):
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
+        self._dfs = dfs
 
         self._n_items = len(dfs.ItemInfo)
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
@@ -148,8 +151,6 @@ class Dfs0(TimeSeries):
         """
         Read all data from a dfs0 file.
         """
-        self._time_column_index = 0  # First column is time (the rest is data)
-
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = self._dfs.ReadDfs0DataDouble()  # Bulk read the data
 
@@ -167,30 +168,30 @@ class Dfs0(TimeSeries):
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = time.round(freq="ms")  # accept nothing finer than milliseconds
 
-        items = list(self.__get_items())
+        items = [
+            ItemInfo(
+                item.Name,
+                EUMType(item.Quantity.Item),
+                EUMUnit(item.Quantity.Unit),
+                data_value_type=item.ValueType,
+            )
+            for item in self._dfs.ItemInfo
+        ]
 
         return Dataset(data, time, items)
-
-    def __get_items(self):
-        for i in range(self._n_items):
-            name = self._dfs.ItemInfo[i].Name
-            item_type = EUMType(self._dfs.ItemInfo[i].Quantity.Item)
-            unit = EUMUnit(self._dfs.ItemInfo[i].Quantity.Unit)
-            value_type = self._dfs.ItemInfo[i].ValueType
-            yield ItemInfo(name, item_type, unit, data_value_type=value_type)
 
     @staticmethod
     def _to_dfs_datatype(dtype):
         if dtype is None:
             return DfsSimpleType.Float
 
-        if dtype in (np.float64, DfsSimpleType.Double, "double"):
+        if dtype in {np.float64, DfsSimpleType.Double, "double"}:
             return DfsSimpleType.Double
 
-        if dtype in (np.float32, DfsSimpleType.Float, "float", "single"):
+        if dtype in {np.float32, DfsSimpleType.Float, "float", "single"}:
             return DfsSimpleType.Float
 
-        raise InvalidDataType()
+        raise TypeError("Dfs files only support float or double")
 
     def _setup_header(self):
         factory = DfsFactory()
@@ -202,11 +203,11 @@ class Dfs0(TimeSeries):
 
         if self._is_equidistant:
             temporal_axis = factory.CreateTemporalEqCalendarAxis(
-                self._timeseries_unit, system_start_time, 0, self._dt
+                TimeStepUnit.SECOND, system_start_time, 0, self._dt
             )
         else:
             temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
-                self._timeseries_unit, system_start_time
+                TimeStepUnit.SECOND, system_start_time
             )
 
         builder.SetTemporalAxis(temporal_axis)
@@ -279,9 +280,7 @@ class Dfs0(TimeSeries):
         self._filename = filename
         self._title = title
 
-        if timeseries_unit == TimeStepUnit.SECOND:
-            self._timeseries_unit = timeseries_unit
-        else:
+        if timeseries_unit != TimeStepUnit.SECOND:
             raise ValueError(
                 "Timestep units other than TimeStepUnit.SECOND are deprecated"
             )
@@ -366,13 +365,7 @@ class Dfs0(TimeSeries):
         pd.DataFrame
         """
         ds = self.read()
-        df = ds.to_dataframe(unit_in_name)
-
-        if round_time:
-            rounded_idx = pd.DatetimeIndex(ds.time).round(round_time)
-            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
-        else:
-            df.index = pd.DatetimeIndex(ds.time, freq="infer")
+        df = ds.to_dataframe(unit_in_name=unit_in_name, round_time=round_time)
 
         return df
 

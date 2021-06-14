@@ -575,7 +575,7 @@ class Dataset(TimeSeries):
         )
         return interpolator(outtime)
 
-    def to_dataframe(self, unit_in_name=False):
+    def to_dataframe(self, unit_in_name=False, round_time="ms"):
         """Convert Dataset to a Pandas DataFrame
 
         Parameters
@@ -603,7 +603,11 @@ class Dataset(TimeSeries):
         data = np.asarray(self.data).T
         df = pd.DataFrame(data, columns=names)
 
-        df.index = pd.DatetimeIndex(self.time, freq="infer")
+        if round_time:
+            rounded_idx = pd.DatetimeIndex(self.time).round(round_time)
+            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
+        else:
+            df.index = pd.DatetimeIndex(self.time, freq="infer")
 
         return df
 
