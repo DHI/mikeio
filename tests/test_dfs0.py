@@ -481,9 +481,9 @@ def test_read_dfs0_to_dataframe():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
-    pd = dfs.to_dataframe()
+    df = dfs.to_dataframe()
 
-    assert np.isnan(pd[pd.columns[0]][2])
+    assert np.isnan(df[df.columns[0]][2])
 
 
 def test_read_dfs0_to_matrix():

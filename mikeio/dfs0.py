@@ -16,8 +16,6 @@ from mikecore.DfsFile import (
     TimeAxisType,
 )
 
-from mikecore.Dfs0Util import Dfs0Util
-
 from .custom_exceptions import ItemNumbersError, InvalidDataType
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
@@ -70,7 +68,7 @@ class Dfs0(TimeSeries):
 
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._source = dfs
-        self._deletevalue = dfs.FileInfo.DeleteValueFloat
+        self._deletevalue = dfs.FileInfo.DeleteValueDouble  # NOTE: changed in cutil
 
         # Read items
         self._n_items = len(dfs.ItemInfo)
@@ -153,16 +151,17 @@ class Dfs0(TimeSeries):
         self._time_column_index = 0  # First column is time (the rest is data)
 
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
-        raw_data = Dfs0Util.ReadDfs0DataDouble(self._dfs)  # Bulk read the data
+        raw_data = self._dfs.ReadDfs0DataDouble()  # Bulk read the data
 
         self._dfs.Close()
 
         matrix = raw_data[:, 1:]
-        matrix[matrix == self._deletevalue] = np.nan
+        # matrix[matrix == self._deletevalue] = np.nan
+        matrix[matrix == self._dfs.FileInfo.DeleteValueDouble] = np.nan  # cutil
+        matrix[matrix == self._dfs.FileInfo.DeleteValueFloat] = np.nan  # linux
         data = []
         for i in range(matrix.shape[1]):
             data.append(matrix[:, i])
-
 
         t_seconds = raw_data[:, 0]
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
@@ -171,7 +170,6 @@ class Dfs0(TimeSeries):
         items = list(self.__get_items())
 
         return Dataset(data, time, items)
-
 
     def __get_items(self):
         for i in range(self._n_items):
@@ -298,6 +296,8 @@ class Dfs0(TimeSeries):
             else:
                 datetimes = data.time
             data = data.data
+        elif datetimes is not None:
+            datetimes = pd.DatetimeIndex(datetimes, freq="infer")
 
         if dt:
             self._dt = dt
@@ -324,6 +324,7 @@ class Dfs0(TimeSeries):
         if datetimes is not None:
             self._start_time = datetimes[0]
             self._is_equidistant = False
+            t_seconds = (datetimes - datetimes[0]).total_seconds().values
         else:
             self._is_equidistant = True
             if self._start_time is None:
@@ -332,23 +333,21 @@ class Dfs0(TimeSeries):
                     f"No start time supplied. Using current time: {self._start_time} as start time."
                 )
 
-            self._dt = np.float(self._dt)
-            datetimes = np.array(
-                [
-                    self._start_time + timedelta(seconds=(step * self._dt))
-                    for step in np.arange(self._n_timesteps)
-                ]
-            )
+            self._dt = float(self._dt)
+            t_seconds = self._dt * np.arange(float(self._n_timesteps))
 
         dfs = self._setup_header()
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
-        data = np.array(data).astype(np.float64)
+        data = np.array(data, order="F").astype(np.float64).T
         data[np.isnan(data)] = delete_value
-        data_to_write = data.T
-        t_seconds = [(t - datetimes[0]).total_seconds() for t in datetimes]
-        Dfs0Util.WriteDfs0DataDouble(dfs, t_seconds, data_to_write)
+        data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
+        rc = dfs.WriteDfs0DataDouble(data_to_write)
+        if rc:
+            warnings.warn(
+                f"mikecore WriteDfs0DataDouble returned {rc}! Writing file probably failed."
+            )
 
         dfs.Close()
 
