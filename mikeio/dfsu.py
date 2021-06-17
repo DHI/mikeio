@@ -2088,7 +2088,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         # spatial interpolation
         n_pts = 1 if method == "nearest" else 5
-        elem_ids, weights = self.get_2d_interpolant(coords, n_nearest=n_pts)
+        elem_ids, weights = self.get_2d_interpolant(coords[i_start : (i_end + 1)], n_nearest=n_pts)
 
         # initialize dfsu data arrays
         d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
@@ -2110,7 +2110,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             return step >= self.n_timesteps
 
         # loop over track points
-        for i in trange(i_start, i_end + 1, disable=not self.show_progress):
+        for i_interp, i in enumerate(trange(i_start, i_end + 1, disable=not self.show_progress)):
             t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
@@ -2138,10 +2138,10 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 continue
 
             w = (t_rel[i] - t1) / self.timestep  # time-weight
-            eid = elem_ids[i]
+            eid = elem_ids[i_interp]
             if np.any(eid > 0):
-                dati = (1 - w) * np.dot(d1[:, eid], weights[i])
-                dati = dati + w * np.dot(d2[:, eid], weights[i])
+                dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
+                dati = dati + w * np.dot(d2[:, eid], weights[i_interp])
             else:
                 dati = np.empty(shape=n_items, dtype=self._dtype)
                 dati[:] = np.nan
