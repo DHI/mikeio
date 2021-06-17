@@ -2115,12 +2115,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
             read_next = t_rel[i] > t2
 
-            while read_next == True:
+            while (read_next == True) and (not is_EOF(dfsu_step + 1)):
                 dfsu_step = dfsu_step + 1
-
-                if is_EOF(dfsu_step):
-                    # cannot read next - no more timesteps in dfsu file
-                    continue
 
                 # swap new to old
                 d1, d2 = d2, d1
