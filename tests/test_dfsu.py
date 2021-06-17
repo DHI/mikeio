@@ -62,7 +62,7 @@ def test_read_single_precision():
 def test_read_int_not_accepted():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     with pytest.raises(Exception):
-        dfs = Dfsu(filename, dtype=np.int)
+        dfs = Dfsu(filename, dtype=np.int32)
 
 
 def test_read_timestep_1():

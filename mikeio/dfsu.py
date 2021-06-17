@@ -467,7 +467,7 @@ class _UnstructuredGeometry:
 
         # pre-allocate for speed
         maxnodes = self.max_nodes_per_element
-        idx = np.zeros(maxnodes, dtype=np.int)
+        idx = np.zeros(maxnodes, dtype=int)
         xcoords = np.zeros([maxnodes, n_elements])
         ycoords = np.zeros([maxnodes, n_elements])
         zcoords = np.zeros([maxnodes, n_elements])
