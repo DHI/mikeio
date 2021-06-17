@@ -2041,24 +2041,18 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     raise ValueError(f"{ext} files not supported (dfs0, csv)")
 
                 times = df.index
-                coords = df.iloc[:, 0:2].values
+                coords = df.iloc[:, 0:2].to_numpy(copy=True)
             else:
                 raise ValueError(f"{filename} does not exist")
         elif isinstance(track, Dataset):
             times = track.time
             coords = np.zeros(shape=(len(times), 2))
-            coords[:, 0] = track.data[0]
-            coords[:, 1] = track.data[1]
+            coords[:, 0] = track.data[0].copy()
+            coords[:, 1] = track.data[1].copy()
         else:
             assert isinstance(track, pd.DataFrame)
             times = track.index
-            coords = track.iloc[:, 0:2].values
-
-        if self.is_geo:
-            lon = coords[:, 0]
-            lon[lon < -180] = lon[lon < -180] + 360
-            lon[lon >= 180] = lon[lon >= 180] - 360
-            coords[:, 0] = lon
+            coords = track.iloc[:, 0:2].to_numpy(copy=True)
 
         data_list = []
         data_list.append(coords[:, 0])  # longitude
@@ -2068,6 +2062,12 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.empty(shape=(len(times)), dtype=self._dtype)
             data[:] = np.nan
             data_list.append(data)
+
+        if self.is_geo:
+            lon = coords[:, 0]
+            lon[lon < -180] = lon[lon < -180] + 360
+            lon[lon >= 180] = lon[lon >= 180] - 360
+            coords[:, 0] = lon
 
         # track end (relative to dfsu)
         t_rel = (times - self.end_time).total_seconds()
