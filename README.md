@@ -7,9 +7,11 @@
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
-Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. Read res1d and xns11 files.
+Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
 Facilitates common data processing workflows for MIKE files.
+
+*For res1d and xns11 files use the related package [MIKE IO 1D](https://github.com/DHI/mikeio1d)*
 
 [![Blue cafe](https://raw.githubusercontent.com/DHI/mikeio/main/images/bluecafe.png)](https://www.youtube.com/watch?v=7WJpeydHMYQ)
 
