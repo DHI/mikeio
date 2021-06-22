@@ -2053,6 +2053,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             assert isinstance(track, pd.DataFrame)
             times = track.index
             coords = track.iloc[:, 0:2].to_numpy(copy=True)
+        
+        assert isinstance(times, pd.DatetimeIndex)
+        assert times.is_monotonic_increasing
 
         data_list = []
         data_list.append(coords[:, 0])  # longitude
