@@ -2054,8 +2054,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             times = track.index
             coords = track.iloc[:, 0:2].to_numpy(copy=True)
         
-        assert isinstance(times, pd.DatetimeIndex)
-        assert times.is_monotonic_increasing
+        assert isinstance(times, pd.DatetimeIndex), "The index must be a pandas.DatetimeIndex"
+        assert times.is_monotonic_increasing, "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
 
         data_list = []
         data_list.append(coords[:, 0])  # longitude
