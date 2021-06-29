@@ -1154,6 +1154,19 @@ def test_extract_track():
     assert track3.data[2][23] == approx(3.6469911492412463)
 
 
+def test_extract_bad_track():
+    dfs = Dfsu("tests/testdata/track_extraction_case02_indata.dfsu")
+    csv_file = "tests/testdata/track_extraction_case02_track.csv"
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
+    df = df.sort_values('longitude')
+    with pytest.raises(AssertionError):
+        dfs.extract_track(df)
+
+
 def test_extract_surface_elevation_from_3d():
     dfs = Dfsu("tests/testdata/oresund_sigma_z.dfsu")
     outputfile = "tests/testdata/oresund_surface_elev_extracted.dfsu"
