@@ -200,6 +200,11 @@ TOTAL                          5082    229    95%
 
 =================== 335 passed ==================
 
-
-
 ```
+
+## Cloud enabled
+
+From MIKE IO v.0.7 it is now possible to run MIKE IO on Linux-based Cloud computing, e.g. [Google Colab](https://colab.research.google.com/).
+
+![Colab](images/colab.png)
+
