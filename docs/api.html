@@ -3,9 +3,10 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>API Documentation &mdash; mikeio  documentation</title>
   
@@ -13,10 +14,15 @@
   
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
 
   
   
+
   
+  
+
   
 
   
@@ -26,17 +32,17 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
-        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="MIKE IO: input/output of MIKE files in Python" href="index.html" /> 
+    <link rel="prev" title="Design philosophy" href="design.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,7 +56,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> mikeio
+            <a href="index.html" class="icon icon-home"> mikeio
           
 
           
@@ -83,6 +89,7 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#dfs0">Dfs0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dfs1">Dfs1</a></li>
@@ -134,6 +141,8 @@
 
 
 
+
+
 <div role="navigation" aria-label="breadcrumbs navigation">
 
   <ul class="wy-breadcrumbs">
@@ -145,7 +154,7 @@
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -159,22 +168,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="api-documentation">
+  <section id="api-documentation">
 <span id="api"></span><h1>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="dfs0">
+<section id="dfs0">
 <h2>Dfs0<a class="headerlink" href="#dfs0" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="mikeio.Dfs0">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="mikeio.Dfs0.deletevalue">
-<em class="property">property </em><code class="sig-name descname">deletevalue</code><a class="headerlink" href="#mikeio.Dfs0.deletevalue" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs0">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs0.deletevalue">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs0.deletevalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>File delete value</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfs0.from_dataframe">
-<em class="property">static </em><code class="sig-name descname">from_dataframe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">itemtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.from_dataframe" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs0.from_dataframe">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itemtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.from_dataframe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a dfs0 from a pandas Dataframe</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -189,21 +198,27 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfs0.items">
-<em class="property">property </em><code class="sig-name descname">items</code><a class="headerlink" href="#mikeio.Dfs0.items" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs0.items">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs0.items" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of items</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfs0.n_items">
-<em class="property">property </em><code class="sig-name descname">n_items</code><a class="headerlink" href="#mikeio.Dfs0.n_items" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs0.n_items">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfs0.n_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of items</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs0.n_timesteps">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfs0.n_timesteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of time steps</p>
+</dd></dl>
+
 <dl class="py method">
-<dt id="mikeio.Dfs0.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">time_steps</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.read" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs0.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data from a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -221,15 +236,15 @@
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfs0.start_time">
-<em class="property">property </em><code class="sig-name descname">start_time</code><a class="headerlink" href="#mikeio.Dfs0.start_time" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs0.start_time">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfs0.start_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>File start time</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfs0.to_dataframe">
-<code class="sig-name descname">to_dataframe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit_in_name</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">round_time</span><span class="o">=</span><span class="default_value">'s'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.to_dataframe" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs0.to_dataframe">
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.to_dataframe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data from the dfs0 file and return a Pandas DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -248,8 +263,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfs0.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">data</em>, <em class="sig-param">start_time=None</em>, <em class="sig-param">timeseries_unit=&lt;TimeStepUnit.SECOND: 1400&gt;</em>, <em class="sig-param">dt=None</em>, <em class="sig-param">datetimes=None</em>, <em class="sig-param">items=None</em>, <em class="sig-param">title=''</em>, <em class="sig-param">data_value_type=None</em>, <em class="sig-param">dtype=None</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs0.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">filename</span></em>, <em class="sig-param"><span class="pre">data</span></em>, <em class="sig-param"><span class="pre">start_time=None</span></em>, <em class="sig-param"><span class="pre">timeseries_unit=&lt;TimeStepUnit.SECOND:</span> <span class="pre">1400&gt;</span></em>, <em class="sig-param"><span class="pre">dt=None</span></em>, <em class="sig-param"><span class="pre">datetimes=None</span></em>, <em class="sig-param"><span class="pre">items=None</span></em>, <em class="sig-param"><span class="pre">title=''</span></em>, <em class="sig-param"><span class="pre">dtype=None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,7 +278,6 @@ means 5 mins and 30 seconds. default to 1.0</p></li>
 <li><p><strong>datetimes</strong> (<em>list</em><em>[</em><em>datetime</em><em>]</em>) – </p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title, default blank</p></li>
-<li><p><strong>data_value_type</strong> (<em>list</em><em>[</em><em>DataValueType</em><em>]</em><em>, </em><em>optional</em>) – DataValueType default DataValueType.INSTANTANEOUS</p></li>
 <li><p><strong>dtype</strong> (<em>np.dtype</em><em>, </em><em>optional</em>) – default np.float32</p></li>
 </ul>
 </dd>
@@ -272,21 +286,21 @@ means 5 mins and 30 seconds. default to 1.0</p></li>
 
 </dd></dl>
 
-</div>
-<div class="section" id="dfs1">
+</section>
+<section id="dfs1">
 <h2>Dfs1<a class="headerlink" href="#dfs1" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="mikeio.Dfs1">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs1</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="mikeio.Dfs1.dx">
-<em class="property">property </em><code class="sig-name descname">dx</code><a class="headerlink" href="#mikeio.Dfs1.dx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs1">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs1.dx">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#mikeio.Dfs1.dx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Step size in x direction</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfs1.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">start_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">datetimes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">x0</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">coordinate</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1.write" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs1.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a dfs1 file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -309,27 +323,27 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 
 </dd></dl>
 
-</div>
-<div class="section" id="dfs2">
+</section>
+<section id="dfs2">
 <h2>Dfs2<a class="headerlink" href="#dfs2" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="mikeio.Dfs2">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfs2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="mikeio.Dfs2.dx">
-<em class="property">property </em><code class="sig-name descname">dx</code><a class="headerlink" href="#mikeio.Dfs2.dx" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs2">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.dx">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#mikeio.Dfs2.dx" title="Permalink to this definition">¶</a></dt>
 <dd><p>Step size in x direction</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfs2.dy">
-<em class="property">property </em><code class="sig-name descname">dy</code><a class="headerlink" href="#mikeio.Dfs2.dy" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.dy">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#mikeio.Dfs2.dy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Step size in y direction</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfs2.find_nearest_elements">
-<code class="sig-name descname">find_nearest_elements</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">lon</span></em>, <em class="sig-param"><span class="n">lat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.find_nearest_elements" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs2.find_nearest_elements">
+<span class="sig-name descname"><span class="pre">find_nearest_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.find_nearest_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find index of closest element</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -348,45 +362,14 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfs2.reproject">
-<code class="sig-name descname">reproject</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">projectionstring</span></em>, <em class="sig-param"><span class="n">dx</span></em>, <em class="sig-param"><span class="n">dy</span></em>, <em class="sig-param"><span class="n">longitude_origin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">latitude_origin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ny</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">orientation</span><span class="o">=</span><span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">interpolate</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.reproject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reproject and write results to a new dfs2 file</p>
-<blockquote>
-<div><dl class="simple">
-<dt>filename: str</dt><dd><p>location to write the reprojected dfs2 file</p>
-</dd>
-<dt>projectionstring: str</dt><dd><p>WKT string of new projection</p>
-</dd>
-<dt>dx: float</dt><dd><p>length of each grid in the x direction (projection units)</p>
-</dd>
-<dt>dy: float</dt><dd><p>length of each grid in the y direction (projection units)</p>
-</dd>
-<dt>latitude_origin: float, optional</dt><dd><p>latitude at origin of new grid, default same as original</p>
-</dd>
-<dt>longitude_origin: float, optional</dt><dd><p>longitude at origin of new grid, default same as original</p>
-</dd>
-<dt>nx: int, optional</dt><dd><p>n grid points in x direction, default same as original</p>
-</dd>
-<dt>ny: int, optional</dt><dd><p>n grid points in y direction, default same as original</p>
-</dd>
-<dt>orientation: float, optional</dt><dd><p>rotated grid, default 0.0</p>
-</dd>
-<dt>interpolate: bool, optional</dt><dd><p>interpolate to new grid, default true</p>
-</dd>
-</dl>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs2</span><span class="p">(</span><span class="s2">&quot;input.dfs&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">reproject</span><span class="p">(</span><span class="s2">&quot;out.dfs2&quot;</span><span class="p">,</span> <span class="n">projectionstring</span><span class="o">=</span><span class="s2">&quot;UTM-33&quot;</span><span class="p">,</span>
-<span class="gp">... </span>              <span class="n">dx</span><span class="o">=</span><span class="mf">200.0</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mf">200.0</span><span class="p">,</span>
-<span class="gp">... </span>              <span class="n">longitude_origin</span><span class="o">=</span><span class="mf">12.0</span><span class="p">,</span> <span class="n">latitude_origin</span><span class="o">=</span><span class="mf">55.0</span><span class="p">,</span>
-<span class="gp">... </span>              <span class="n">nx</span><span class="o">=</span><span class="mi">285</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="mi">612</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></blockquote>
+<dt class="sig sig-object py" id="mikeio.Dfs2.reproject">
+<span class="sig-name descname"><span class="pre">reproject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projectionstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.reproject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reprojection is only available in mikeio==0.6.3</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfs2.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">start_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">datetimes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dx</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dy</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">coordinate</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.write" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfs2.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a dfs2 file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -409,15 +392,15 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 
 </dd></dl>
 
-</div>
-<div class="section" id="dfsu">
+</section>
+<section id="dfsu">
 <h2>Dfsu<a class="headerlink" href="#dfsu" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="mikeio.Dfsu">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dfsu</code><span class="sig-paren">(</span><em class="sig-param">filename</em>, <em class="sig-param">dtype=&lt;class 'numpy.float64'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfsu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">filename</span></em>, <em class="sig-param"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
-<dt id="mikeio.Dfsu.append">
-<code class="sig-name descname">append</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.append" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append to a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -427,32 +410,32 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.close">
-<code class="sig-name descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.close" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.close" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finalize write for a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.deletevalue">
-<em class="property">property </em><code class="sig-name descname">deletevalue</code><a class="headerlink" href="#mikeio.Dfsu.deletevalue" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.deletevalue">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfsu.deletevalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>File delete value</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.element_coordinates">
-<em class="property">property </em><code class="sig-name descname">element_coordinates</code><a class="headerlink" href="#mikeio.Dfsu.element_coordinates" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.element_coordinates">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.Dfsu.element_coordinates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Center coordinates of each element</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.end_time">
-<em class="property">property </em><code class="sig-name descname">end_time</code><a class="headerlink" href="#mikeio.Dfsu.end_time" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.end_time">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.Dfsu.end_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>File end time</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.extract_surface_elevation_from_3d">
-<code class="sig-name descname">extract_surface_elevation_from_3d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">time_steps</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">n_nearest</span><span class="o">=</span><span class="default_value">4</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.extract_surface_elevation_from_3d" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.extract_surface_elevation_from_3d">
+<span class="sig-name descname"><span class="pre">extract_surface_elevation_from_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.extract_surface_elevation_from_3d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract surface elevation from a 3d dfsu file (based on zn)
 to a new 2d dfsu file with a surface elevation item.</p>
 <dl class="field-list simple">
@@ -471,8 +454,8 @@ to a new 2d dfsu file with a surface elevation item.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.extract_track">
-<code class="sig-name descname">extract_track</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">track</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'nearest'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.extract_track" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.extract_track">
+<span class="sig-name descname"><span class="pre">extract_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.extract_track" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract track data from a dfsu file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -505,27 +488,27 @@ The first two items will be x- and y- coordinates of track</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.items">
-<em class="property">property </em><code class="sig-name descname">items</code><a class="headerlink" href="#mikeio.Dfsu.items" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.items">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfsu.items" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of items</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.n_items">
-<em class="property">property </em><code class="sig-name descname">n_items</code><a class="headerlink" href="#mikeio.Dfsu.n_items" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.n_items">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfsu.n_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of items</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.n_timesteps">
-<em class="property">property </em><code class="sig-name descname">n_timesteps</code><a class="headerlink" href="#mikeio.Dfsu.n_timesteps" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.n_timesteps">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfsu.n_timesteps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of time steps</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">time_steps</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elements</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.read" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data from a dfsu file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -565,21 +548,21 @@ The first two items will be x- and y- coordinates of track</p>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.start_time">
-<em class="property">property </em><code class="sig-name descname">start_time</code><a class="headerlink" href="#mikeio.Dfsu.start_time" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.start_time">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfsu.start_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>File start time</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dfsu.timestep">
-<em class="property">property </em><code class="sig-name descname">timestep</code><a class="headerlink" href="#mikeio.Dfsu.timestep" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.timestep">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfsu.timestep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time step size in seconds</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.to_dfs2">
-<code class="sig-name descname">to_dfs2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x0</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">y0</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">dx</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">dy</span><span class="p">:</span> <span class="n">float</span></em>, <em class="sig-param"><span class="n">nx</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">20</span></em>, <em class="sig-param"><span class="n">ny</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">20</span></em>, <em class="sig-param"><span class="n">rotation</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0</span></em>, <em class="sig-param"><span class="n">epsg</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>int<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">interpolation_method</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'nearest'</span></em>, <em class="sig-param"><span class="n">filename</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Union<span class="p">[</span>str<span class="p">, </span>pathlib.Path<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_dfs2" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.to_dfs2">
+<span class="sig-name descname"><span class="pre">to_dfs2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_method</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_dfs2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Export Dfsu to Dfs2 file.</p>
 <p>Export Dfsu file to a Dfs2 file with a regular 2D grid.</p>
 <dl class="field-list simple">
@@ -613,8 +596,8 @@ in the system temporary directory.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.to_mesh">
-<code class="sig-name descname">to_mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">outfilename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_mesh" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.to_mesh">
+<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_mesh" title="Permalink to this definition">¶</a></dt>
 <dd><p>write object to mesh file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -624,8 +607,8 @@ in the system temporary directory.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">start_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elements</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">keep_open</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write a new dfsu file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -644,8 +627,8 @@ in the system temporary directory.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dfsu.write_header">
-<code class="sig-name descname">write_header</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em>, <em class="sig-param"><span class="n">start_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">elements</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">title</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write_header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dfsu.write_header">
+<span class="sig-name descname"><span class="pre">write_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write the header of a new dfsu file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -679,21 +662,21 @@ in the system temporary directory.</p></li>
 
 </dd></dl>
 
-</div>
-<div class="section" id="mesh">
+</section>
+<section id="mesh">
 <h2>Mesh<a class="headerlink" href="#mesh" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="mikeio.Mesh">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Mesh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Mesh">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
-<dt id="mikeio.Mesh.plot_boundary_nodes">
-<code class="sig-name descname">plot_boundary_nodes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">boundary_names</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_boundary_nodes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Mesh.plot_boundary_nodes">
+<span class="sig-name descname"><span class="pre">plot_boundary_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundary_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_boundary_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot mesh boundary nodes and their codes</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Mesh.set_codes">
-<code class="sig-name descname">set_codes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">codes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_codes" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Mesh.set_codes">
+<span class="sig-name descname"><span class="pre">set_codes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">codes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_codes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the code values of the nodes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -703,8 +686,8 @@ in the system temporary directory.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Mesh.set_z">
-<code class="sig-name descname">set_z</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">z</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_z" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Mesh.set_z">
+<span class="sig-name descname"><span class="pre">set_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_z" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the depth by setting the z value of each node</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -714,8 +697,8 @@ in the system temporary directory.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Mesh.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">outfilename</span></em>, <em class="sig-param"><span class="n">elements</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.write" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Mesh.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>write mesh to file (will overwrite if file exists)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -729,15 +712,107 @@ in the system temporary directory.</p></li>
 
 </dd></dl>
 
-</div>
-<div class="section" id="misc">
+</section>
+<section id="misc">
 <h2>Misc<a class="headerlink" href="#misc" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="mikeio.Dataset">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.</code><code class="sig-name descname">Dataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>numpy.ndarray<span class="p">]</span><span class="p">, </span>float<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">time</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>pandas.core.indexes.datetimes.DatetimeIndex<span class="p">, </span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span><a class="reference internal" href="#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo">mikeio.eum.ItemInfo</a><span class="p">]</span><span class="p">, </span>List<span class="p">[</span>mikeio.eum.EUMType<span class="p">]</span><span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py attribute">
-<dt id="mikeio.Dataset.data">
-<code class="sig-name descname">data</code><a class="headerlink" href="#mikeio.Dataset.data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="pre">mikeio.eum.ItemInfo</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">mikeio.eum.EUMType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.aggregate">
+<span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">axis=1</span></em>, <em class="sig-param"><span class="pre">func=&lt;function</span> <span class="pre">nanmean&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregate along an axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p></li>
+<li><p><strong>func</strong> (<em>function</em><em>, </em><em>optional</em>) – default np.nanmean</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataset with aggregated values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.average">
+<span class="sig-name descname"><span class="pre">average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.average" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the weighted average along the specified axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataset with weighted average value</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.Dataset.nanmean" title="mikeio.Dataset.nanmean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmean</span></code></a></dt><dd><p>Mean values with NaN values removed</p>
+</dd>
+<dt><a class="reference internal" href="#mikeio.Dataset.aggregate" title="mikeio.Dataset.aggregate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aggregate</span></code></a></dt><dd><p>Weighted average</p>
+</dd>
+</dl>
+</div>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">([</span><span class="s2">&quot;Current speed&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">area</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_element_area</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of this dataset.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.create_time">
+<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">create_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timesteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.create_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a equidistant time axis (calendar axis)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_time</strong> (<em>datetime</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – start_time, by default None (1970-1-1 00:00:00)
+can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – time step in seconds, by default None</p></li>
+<li><p><strong>n_timesteps</strong> (<em>int</em><em>, </em><em>optional</em>) – number of timesteps, by default 1</p></li>
+<li><p><strong>end_time</strong> (<em>datetime</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – end_time, by default 3600s or deduced from other parameters</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>time axis which can be used to create new Dataset</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DatetimeIndex</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018-1-1,2018-2-1&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1800</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018-1-1&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">7200</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s1">&#39;2019&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.deletevalue">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dataset.deletevalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dataset</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="mikeio.Dataset.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#mikeio.Dataset.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data, potentially multivariate and multiple spatial dimensions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -747,8 +822,8 @@ in the system temporary directory.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mikeio.Dataset.time">
-<code class="sig-name descname">time</code><a class="headerlink" href="#mikeio.Dataset.time" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.time">
+<span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#mikeio.Dataset.time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Datetime of each timestep</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -758,8 +833,8 @@ in the system temporary directory.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="mikeio.Dataset.items">
-<code class="sig-name descname">items</code><a class="headerlink" href="#mikeio.Dataset.items" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.items">
+<span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dataset.items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Names, type and unit of each item in the data list</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -826,121 +901,35 @@ similar to a dictionary.</p>
 <span class="go">  1:  VarFun01 &lt;Water Level&gt; (meter)</span>
 </pre></div>
 </div>
-<dl class="py method">
-<dt id="mikeio.Dataset.aggregate">
-<code class="sig-name descname">aggregate</code><span class="sig-paren">(</span><em class="sig-param">axis=1</em>, <em class="sig-param">func=&lt;function nanmean&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.aggregate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Aggregate along an axis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p></li>
-<li><p><strong>func</strong> (<em>function</em><em>, </em><em>optional</em>) – default np.nanmean</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>dataset with aggregated values</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.average">
-<code class="sig-name descname">average</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.average" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the weighted average along the specified axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>dataset with weighted average value</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<dl class="simple">
-<dt><a class="reference internal" href="#mikeio.Dataset.nanmean" title="mikeio.Dataset.nanmean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmean</span></code></a></dt><dd><p>Mean values with NaN values removed</p>
-</dd>
-<dt><a class="reference internal" href="#mikeio.Dataset.aggregate" title="mikeio.Dataset.aggregate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">aggregate</span></code></a></dt><dd><p>Weighted average</p>
-</dd>
-</dl>
-</div>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">([</span><span class="s2">&quot;Current speed&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">area</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_element_area</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mikeio.Dataset.copy">
-<code class="sig-name descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns a copy of this dataset.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mikeio.Dataset.create_time">
-<em class="property">static </em><code class="sig-name descname">create_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_time</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">n_timesteps</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">end_time</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.create_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>create a equidistant time axis (calendar axis)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>start_time</strong> (<em>datetime</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – start_time, by default None (1970-1-1 00:00:00)
-can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – time step in seconds, by default None</p></li>
-<li><p><strong>n_timesteps</strong> (<em>int</em><em>, </em><em>optional</em>) – number of timesteps, by default 1</p></li>
-<li><p><strong>end_time</strong> (<em>datetime</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – end_time, by default 3600s or deduced from other parameters</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>time axis which can be used to create new Dataset</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pandas.DatetimeIndex</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018-1-1,2018-2-1&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1800</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018-1-1&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">7200</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s1">&#39;2019&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt id="mikeio.Dataset.dropna">
-<code class="sig-name descname">dropna</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.dropna" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.dropna">
+<span class="sig-name descname"><span class="pre">dropna</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.dropna" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove time steps where all items are NaN</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.end_time">
-<em class="property">property </em><code class="sig-name descname">end_time</code><a class="headerlink" href="#mikeio.Dataset.end_time" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.end_time">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.Dataset.end_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last time instance (as datetime)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.flipud">
-<code class="sig-name descname">flipud</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.flipud" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.flipud">
+<span class="sig-name descname"><span class="pre">flipud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.flipud" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flip dataset updside down</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.head">
-<code class="sig-name descname">head</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">5</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.head" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.head">
+<span class="sig-name descname"><span class="pre">head</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.head" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the first n timesteps</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.interp_time">
-<code class="sig-name descname">interp_time</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dt</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>float<span class="p">, </span>pandas.core.indexes.datetimes.DatetimeIndex<span class="p">, </span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'linear'</span></em>, <em class="sig-param"><span class="n">extrapolate</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">fill_value</span><span class="o">=</span><span class="default_value">nan</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.interp_time" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.interp_time">
+<span class="sig-name descname"><span class="pre">interp_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.interp_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Temporal interpolation</p>
 <p>Wrapper of <cite>scipy.interpolate.interp</cite></p>
 <dl class="field-list simple">
@@ -984,15 +973,15 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.is_equidistant">
-<em class="property">property </em><code class="sig-name descname">is_equidistant</code><a class="headerlink" href="#mikeio.Dataset.is_equidistant" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.is_equidistant">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">is_equidistant</span></span><a class="headerlink" href="#mikeio.Dataset.is_equidistant" title="Permalink to this definition">¶</a></dt>
 <dd><p>Is Dataset equidistant in time?</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.isel">
-<code class="sig-name descname">isel</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">idx</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.isel" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.isel">
+<span class="sig-name descname"><span class="pre">isel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.isel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select subset along an axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1027,8 +1016,8 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.max">
-<code class="sig-name descname">max</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.max" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.max">
+<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.max" title="Permalink to this definition">¶</a></dt>
 <dd><p>Max value along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1051,8 +1040,8 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.mean">
-<code class="sig-name descname">mean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.mean" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.mean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean value along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1077,8 +1066,8 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.min">
-<code class="sig-name descname">min</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.min" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.min">
+<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Min value along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1100,27 +1089,27 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.n_elements">
-<em class="property">property </em><code class="sig-name descname">n_elements</code><a class="headerlink" href="#mikeio.Dataset.n_elements" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.n_elements">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.Dataset.n_elements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of spatial elements/points</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.n_items">
-<em class="property">property </em><code class="sig-name descname">n_items</code><a class="headerlink" href="#mikeio.Dataset.n_items" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.n_items">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dataset.n_items" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of items</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.n_timesteps">
-<em class="property">property </em><code class="sig-name descname">n_timesteps</code><a class="headerlink" href="#mikeio.Dataset.n_timesteps" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.n_timesteps">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dataset.n_timesteps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of time steps</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.nanmax">
-<code class="sig-name descname">nanmax</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmax" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.nanmax">
+<span class="sig-name descname"><span class="pre">nanmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Max value along an axis (NaN removed)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1136,8 +1125,8 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.nanmean">
-<code class="sig-name descname">nanmean</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmean" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.nanmean">
+<span class="sig-name descname"><span class="pre">nanmean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean value along an axis (NaN removed)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1153,8 +1142,8 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.nanmin">
-<code class="sig-name descname">nanmin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmin" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.nanmin">
+<span class="sig-name descname"><span class="pre">nanmin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Min value along an axis (NaN removed)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1169,15 +1158,15 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.shape">
-<em class="property">property </em><code class="sig-name descname">shape</code><a class="headerlink" href="#mikeio.Dataset.shape" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.shape">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#mikeio.Dataset.shape" title="Permalink to this definition">¶</a></dt>
 <dd><p>Shape of each item</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.squeeze">
-<code class="sig-name descname">squeeze</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.squeeze" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.squeeze">
+<span class="sig-name descname"><span class="pre">squeeze</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.squeeze" title="Permalink to this definition">¶</a></dt>
 <dd><p>Remove axes of length 1</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -1189,34 +1178,34 @@ can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.start_time">
-<em class="property">property </em><code class="sig-name descname">start_time</code><a class="headerlink" href="#mikeio.Dataset.start_time" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.start_time">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dataset.start_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>First time instance (as datetime)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.tail">
-<code class="sig-name descname">tail</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span><span class="o">=</span><span class="default_value">5</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.tail" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.tail">
+<span class="sig-name descname"><span class="pre">tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.tail" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the last n timesteps</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.thin">
-<code class="sig-name descname">thin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">step</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.thin" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.thin">
+<span class="sig-name descname"><span class="pre">thin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.thin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return every n:th timesteps</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="mikeio.Dataset.timestep">
-<em class="property">property </em><code class="sig-name descname">timestep</code><a class="headerlink" href="#mikeio.Dataset.timestep" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.timestep">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dataset.timestep" title="Permalink to this definition">¶</a></dt>
 <dd><p>Time step in seconds if equidistant (and at
 least two time instances); otherwise None</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.to_dataframe">
-<code class="sig-name descname">to_dataframe</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">unit_in_name</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_dataframe" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.to_dataframe">
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_dataframe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert Dataset to a Pandas DataFrame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1232,8 +1221,8 @@ least two time instances); otherwise None</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mikeio.Dataset.to_dfs0">
-<code class="sig-name descname">to_dfs0</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_dfs0" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.Dataset.to_dfs0">
+<span class="sig-name descname"><span class="pre">to_dfs0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_dfs0" title="Permalink to this definition">¶</a></dt>
 <dd><p>Write Dataset to a Dfs0 file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1245,8 +1234,8 @@ least two time instances); otherwise None</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="mikeio.eum.ItemInfo">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.eum.</code><code class="sig-name descname">ItemInfo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">itemtype</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">unit</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">data_value_type</span><span class="o">=</span><span class="default_value">'Instantaneous'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.eum.ItemInfo" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.eum.ItemInfo">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.eum.</span></span><span class="sig-name descname"><span class="pre">ItemInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itemtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_value_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Instantaneous'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.eum.ItemInfo" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1268,12 +1257,12 @@ least two time instances); otherwise None</p>
 </div>
 </dd></dl>
 
-</div>
-<div class="section" id="module-mikeio.generic">
+</section>
+<section id="module-mikeio.generic">
 <span id="generic"></span><h2>Generic<a class="headerlink" href="#module-mikeio.generic" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
-<dt id="mikeio.generic.concat">
-<code class="sig-prename descclassname">mikeio.generic.</code><code class="sig-name descname">concat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infilenames</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">outfilename</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#mikeio.generic.concat" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.generic.concat">
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilenames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#mikeio.generic.concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenates files along the time axis</p>
 <p>If files are overlapping, the last one will be used.</p>
 <dl class="field-list simple">
@@ -1289,8 +1278,8 @@ least two time instances); otherwise None</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mikeio.generic.diff">
-<code class="sig-prename descclassname">mikeio.generic.</code><code class="sig-name descname">diff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infilename_a</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">infilename_b</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">outfilename</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#mikeio.generic.diff" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.generic.diff">
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename_a</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infilename_b</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#mikeio.generic.diff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate difference between two dfs files (a-b)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1304,8 +1293,8 @@ least two time instances); otherwise None</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mikeio.generic.extract">
-<code class="sig-prename descclassname">mikeio.generic.</code><code class="sig-name descname">extract</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infilename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">outfilename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">start</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">end</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">items</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#mikeio.generic.extract" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.generic.extract">
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#mikeio.generic.extract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract timesteps and/or items to a new dfs file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1332,8 +1321,8 @@ or datetime/str, by default -1 (end of file)</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mikeio.generic.scale">
-<code class="sig-prename descclassname">mikeio.generic.</code><code class="sig-name descname">scale</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infilename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">outfilename</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">offset</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.0</span></em>, <em class="sig-param"><span class="n">factor</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">1.0</span></em>, <em class="sig-param"><span class="n">items</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>List<span class="p">[</span>str<span class="p">]</span><span class="p">, </span>List<span class="p">[</span>int<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#mikeio.generic.scale" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.generic.scale">
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#mikeio.generic.scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply scaling to any dfs file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1349,8 +1338,8 @@ or datetime/str, by default -1 (end of file)</p></li>
 </dd></dl>
 
 <dl class="py function">
-<dt id="mikeio.generic.sum">
-<code class="sig-prename descclassname">mikeio.generic.</code><code class="sig-name descname">sum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infilename_a</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">infilename_b</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">outfilename</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="headerlink" href="#mikeio.generic.sum" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="mikeio.generic.sum">
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename_a</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infilename_b</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#mikeio.generic.sum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sum two dfs files (a+b)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1363,183 +1352,53 @@ or datetime/str, by default -1 (end of file)</p></li>
 </dl>
 </dd></dl>
 
-</div>
-<div class="section" id="module-mikeio.res1d">
+</section>
+<section id="module-mikeio.res1d">
 <span id="mike-1d"></span><h2>Mike 1D<a class="headerlink" href="#module-mikeio.res1d" title="Permalink to this headline">¶</a></h2>
+<p>Res1d has moved to a new repo: <a class="reference external" href="https://github.com/DHI/mikeio1d/">https://github.com/DHI/mikeio1d/</a></p>
 <dl class="py class">
-<dt id="mikeio.res1d.QueryData">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">QueryData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">validate</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.QueryData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base query class that declares what data to extract from a .res1d file.</p>
-<dl class="py method">
-<dt id="mikeio.res1d.QueryData.from_dotnet_to_python">
-<em class="property">static </em><code class="sig-name descname">from_dotnet_to_python</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.QueryData.from_dotnet_to_python" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert .NET array to numpy.</p>
+<dt class="sig sig-object py" id="mikeio.res1d.Res1d">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.res1d.</span></span><span class="sig-name descname"><span class="pre">Res1d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">put_chainage_in_col_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.Res1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Res1d has moved to a new repo: <a class="reference external" href="https://github.com/DHI/mikeio1d/">https://github.com/DHI/mikeio1d/</a></p>
 </dd></dl>
 
-</dd></dl>
-
+<span class="target" id="module-mikeio.xns11"></span><p>Xns11 has moved to a new repo: <a class="reference external" href="https://github.com/DHI/mikeio1d/">https://github.com/DHI/mikeio1d/</a></p>
 <dl class="py class">
-<dt id="mikeio.res1d.QueryDataNode">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">QueryDataNode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">validate</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.QueryDataNode" title="Permalink to this definition">¶</a></dt>
-<dd><p>A query object that declares what node data to extract from a .res1d file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>quantity</strong> (<em>str</em>) – e.g. ‘WaterLevel’ or ‘Discharge’. Call mike1d_quantities() to get all quantities.</p></li>
-<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Nodename</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<p><cite>QueryDataNode(‘WaterLevel’, ‘reach1’)</cite> is a valid query.</p>
+<dt class="sig sig-object py" id="mikeio.xns11.Xns11">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.xns11.</span></span><span class="sig-name descname"><span class="pre">Xns11</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.xns11.Xns11" title="Permalink to this definition">¶</a></dt>
+<dd><p>Xns11 has moved to a new repo: <a class="reference external" href="https://github.com/DHI/mikeio1d/">https://github.com/DHI/mikeio1d/</a></p>
 </dd></dl>
 
-<dl class="py class">
-<dt id="mikeio.res1d.QueryDataReach">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">QueryDataReach</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">quantity</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chainage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">validate</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.QueryDataReach" title="Permalink to this definition">¶</a></dt>
-<dd><p>A query object that declares what reach data to extract from a .res1d file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>quantity</strong> (<em>str</em>) – e.g. ‘WaterLevel’ or ‘Discharge’. Call mike1d_quantities() to get all quantities.</p></li>
-<li><p><strong>name</strong> (<em>str</em><em>, </em><em>optional</em>) – Reachname</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<p><cite>QueryDataReach(‘WaterLevel’, ‘reach1’, 10)</cite> is a valid query.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="mikeio.res1d.mike1d_quantities">
-<code class="sig-prename descclassname">mikeio.res1d.</code><code class="sig-name descname">mike1d_quantities</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.res1d.mike1d_quantities" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns all predefined Mike1D quantities.
-Useful for knowing what quantity string to query.</p>
-</dd></dl>
-
-<span class="target" id="module-mikeio.xns11"></span><dl class="py exception">
-<dt id="mikeio.xns11.BaseXns11Error">
-<em class="property">exception </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">BaseXns11Error</code><a class="headerlink" href="#mikeio.xns11.BaseXns11Error" title="Permalink to this definition">¶</a></dt>
-<dd><p>Base class for Xns11 errors.</p>
-</dd></dl>
-
-<dl class="py exception">
-<dt id="mikeio.xns11.DataNotFoundInFile">
-<em class="property">exception </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">DataNotFoundInFile</code><a class="headerlink" href="#mikeio.xns11.DataNotFoundInFile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data not found in file.</p>
-</dd></dl>
-
-<dl class="py exception">
-<dt id="mikeio.xns11.FileNotOpenedError">
-<em class="property">exception </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">FileNotOpenedError</code><a class="headerlink" href="#mikeio.xns11.FileNotOpenedError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Accessing data from a file that is not opened.</p>
-</dd></dl>
-
-<dl class="py class">
-<dt id="mikeio.xns11.QueryData">
-<em class="property">class </em><code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">QueryData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">topoid_name</span></em>, <em class="sig-param"><span class="n">reach_name</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">chainage</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.xns11.QueryData" title="Permalink to this definition">¶</a></dt>
-<dd><p>A query object that declares what data should be
-extracted from a .xns11 file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>topoid_name</strong> (<em>str</em>) – Topo ID, must be passed</p></li>
-<li><p><strong>reach_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Reach name, consider all the reaches if None</p></li>
-<li><p><strong>chainage</strong> (<em>float</em><em>, </em><em>optional</em>) – chainage, considers all the chainages if None</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<p><cite>QueryData(‘topoid1’, ‘reach1’, 10)</cite> is a valid query.
-<cite>QueryData(‘topoid1’, ‘reach1’)</cite> requests all the points
-for <cite>topoid1</cite> of <cite>reach1</cite>.
-<cite>QueryData(‘topoid1’)</cite> requests all the points for <cite>topid1</cite>
-of the file.</p>
-</dd></dl>
-
-<dl class="py function">
-<dt id="mikeio.xns11.open">
-<code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">open</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.xns11.open" title="Permalink to this definition">¶</a></dt>
-<dd><p>Open a xns11 file as a Xns11 object that has convenient methods
-to extract specific data from the file. It is recommended to use it
-as a context manager.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>file_path</strong> (<em>str</em>) – full path and file name to the xns11 file.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Xns11</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;file.xns11&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">x11</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="nb">print</span><span class="p">(</span><span class="n">x11</span><span class="o">.</span><span class="n">topoid_names</span><span class="p">)</span>
-<span class="go">[&#39;topoid1&#39;, &#39;topoid2&#39;]</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt id="mikeio.xns11.read">
-<code class="sig-prename descclassname">mikeio.xns11.</code><code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_path</span></em>, <em class="sig-param"><span class="n">queries</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.xns11.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read the requested data from the xns11 file and
-return a Pandas DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> (<em>str</em>) – full path and file name to the xns11 file.</p></li>
-<li><p><strong>queries</strong> (<em>a single query</em><em> or </em><em>a list of queries</em>) – <cite>QueryData</cite> objects that define the requested data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
            
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="MIKE IO: input/output of MIKE files in Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="design.html" class="btn btn-neutral float-left" title="Design philosophy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        
-        &copy; Copyright 2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard
+        &#169; Copyright 2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard.
 
     </p>
   </div>
     
     
     
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
     
     provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
