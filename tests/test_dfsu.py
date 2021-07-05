@@ -62,7 +62,7 @@ def test_read_single_precision():
 def test_read_int_not_accepted():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     with pytest.raises(Exception):
-        dfs = Dfsu(filename, dtype=np.int)
+        dfs = Dfsu(filename, dtype=np.int32)
 
 
 def test_read_timestep_1():
@@ -1152,6 +1152,19 @@ def test_extract_track():
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
     assert track3.data[2][23] == approx(3.6469911492412463)
+
+
+def test_extract_bad_track():
+    dfs = Dfsu("tests/testdata/track_extraction_case02_indata.dfsu")
+    csv_file = "tests/testdata/track_extraction_case02_track.csv"
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
+    df = df.sort_values('longitude')
+    with pytest.raises(AssertionError):
+        dfs.extract_track(df)
 
 
 def test_extract_surface_elevation_from_3d():

@@ -467,7 +467,7 @@ class _UnstructuredGeometry:
 
         # pre-allocate for speed
         maxnodes = self.max_nodes_per_element
-        idx = np.zeros(maxnodes, dtype=np.int)
+        idx = np.zeros(maxnodes, dtype=int)
         xcoords = np.zeros([maxnodes, n_elements])
         ycoords = np.zeros([maxnodes, n_elements])
         zcoords = np.zeros([maxnodes, n_elements])
@@ -2041,24 +2041,21 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     raise ValueError(f"{ext} files not supported (dfs0, csv)")
 
                 times = df.index
-                coords = df.iloc[:, 0:2].values
+                coords = df.iloc[:, 0:2].to_numpy(copy=True)
             else:
                 raise ValueError(f"{filename} does not exist")
         elif isinstance(track, Dataset):
             times = track.time
             coords = np.zeros(shape=(len(times), 2))
-            coords[:, 0] = track.data[0]
-            coords[:, 1] = track.data[1]
+            coords[:, 0] = track.data[0].copy()
+            coords[:, 1] = track.data[1].copy()
         else:
             assert isinstance(track, pd.DataFrame)
             times = track.index
-            coords = track.iloc[:, 0:2].values
-
-        if self.is_geo:
-            lon = coords[:, 0]
-            lon[lon < -180] = lon[lon < -180] + 360
-            lon[lon >= 180] = lon[lon >= 180] - 360
-            coords[:, 0] = lon
+            coords = track.iloc[:, 0:2].to_numpy(copy=True)
+        
+        assert isinstance(times, pd.DatetimeIndex), "The index must be a pandas.DatetimeIndex"
+        assert times.is_monotonic_increasing, "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
 
         data_list = []
         data_list.append(coords[:, 0])  # longitude
@@ -2069,22 +2066,32 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data[:] = np.nan
             data_list.append(data)
 
-        # spatial interpolation
-        n_pts = 5
-        if method == "nearest":
-            n_pts = 1
-        elem_ids, weights = self.get_2d_interpolant(coords, n_nearest=n_pts)
+        if self.is_geo:
+            lon = coords[:, 0]
+            lon[lon < -180] = lon[lon < -180] + 360
+            lon[lon >= 180] = lon[lon >= 180] - 360
+            coords[:, 0] = lon
 
         # track end (relative to dfsu)
         t_rel = (times - self.end_time).total_seconds()
         # largest idx for which (times - self.end_time)<=0
-        i_end = np.where(t_rel <= 0)[0][-1]
+        tmp = np.where(t_rel <= 0)[0]
+        if len(tmp) == 0:
+            raise ValueError("No time overlap! Track ends before dfsu starts!")
+        i_end = tmp[-1]
 
         # track time relative to dfsu start
         t_rel = (times - self.start_time).total_seconds()
-        i_start = np.where(t_rel >= 0)[0][0]  # smallest idx for which t_rel>=0
+        tmp = np.where(t_rel >= 0)[0]
+        if len(tmp) == 0:
+            raise ValueError("No time overlap! Track starts after dfsu ends!")
+        i_start = tmp[0]  # smallest idx for which t_rel>=0
 
         dfsu_step = int(np.floor(t_rel[i_start] / self.timestep))  # first step
+
+        # spatial interpolation
+        n_pts = 1 if method == "nearest" else 5
+        elem_ids, weights = self.get_2d_interpolant(coords[i_start : (i_end + 1)], n_nearest=n_pts)
 
         # initialize dfsu data arrays
         d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
@@ -2106,12 +2113,12 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             return step >= self.n_timesteps
 
         # loop over track points
-        for i in trange(i_start, i_end + 1, disable=not self.show_progress):
+        for i_interp, i in enumerate(trange(i_start, i_end + 1, disable=not self.show_progress)):
             t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
 
-            while (read_next == True) and (~is_EOF(dfsu_step)):
+            while (read_next == True) and (not is_EOF(dfsu_step + 1)):
                 dfsu_step = dfsu_step + 1
 
                 # swap new to old
@@ -2134,10 +2141,10 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 continue
 
             w = (t_rel[i] - t1) / self.timestep  # time-weight
-            eid = elem_ids[i]
+            eid = elem_ids[i_interp]
             if np.any(eid > 0):
-                dati = (1 - w) * np.dot(d1[:, eid], weights[i])
-                dati = dati + w * np.dot(d2[:, eid], weights[i])
+                dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
+                dati = dati + w * np.dot(d2[:, eid], weights[i_interp])
             else:
                 dati = np.empty(shape=n_items, dtype=self._dtype)
                 dati[:] = np.nan
