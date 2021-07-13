@@ -3,7 +3,7 @@
 # MIKE IO: input/output of MIKE files in python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
 ![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
-![Conda Version](https://img.shields.io/conda/vn/conda-forge/mikeio.svg)
+
 
 [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
@@ -33,10 +33,6 @@ Facilitates common data processing workflows for MIKE files.
 From PyPI: 
 
 `pip install mikeio`
-
-For Anaconda:
-
-`conda install -c conda-forge mikeio`
 
 Or development version (*`main` is the default branch since 2021-04-23*):
 
