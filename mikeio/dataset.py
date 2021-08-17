@@ -24,6 +24,8 @@ class Dataset(TimeSeries):
         Datetime of each timestep
     items: list[ItemInfo]
         Names, type and unit of each item in the data list
+    equidistant: Union[str, bool], default='infer'
+        Infer if data is equidistant, set this to False to explicitly use non-equidistant
 
     Notes
     -----
@@ -92,6 +94,7 @@ class Dataset(TimeSeries):
         data: Union[List[np.ndarray], float],
         time: Union[pd.DatetimeIndex, str],
         items: Union[List[ItemInfo], List[EUMType], List[str]] = None,
+        equidistant: Union[str, bool] = "infer",
     ):
 
         item_infos: List[ItemInfo] = []
@@ -139,7 +142,10 @@ class Dataset(TimeSeries):
             )
 
         self.data = data
-        self.time = pd.DatetimeIndex(time, freq="infer")
+        if equidistant == "infer":
+            self.time = pd.DatetimeIndex(time, freq="infer")
+        else:
+            self.time = pd.DatetimeIndex(time)
 
         self._items = item_infos
 
