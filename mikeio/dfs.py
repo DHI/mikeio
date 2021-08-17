@@ -169,7 +169,12 @@ class _Dfs123(TimeSeries):
                     d = np.flipud(d)
                     darray = d.reshape(d.size, 1)[:, 0]
 
-                dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                if self._is_equidistant:
+                    dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                else:
+                    t = datetimes[i]
+                    relt = (t - self._start_time).total_seconds()
+                    dfs.WriteItemTimeStepNext(relt, darray.astype(np.float32))
 
         dfs.Close()
 

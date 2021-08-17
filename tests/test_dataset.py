@@ -891,8 +891,6 @@ def test_non_equidistant():
             datetime(2002, 1, 1),
             datetime(2003, 1, 1),
         ],
-        equidistant=False,
     )
 
     assert not ds.is_equidistant
-    assert ds.time.freq is None

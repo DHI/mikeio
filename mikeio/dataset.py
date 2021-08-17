@@ -24,8 +24,6 @@ class Dataset(TimeSeries):
         Datetime of each timestep
     items: list[ItemInfo]
         Names, type and unit of each item in the data list
-    equidistant: Union[str, bool], default='infer'
-        Infer if data is equidistant, set this to False to explicitly use non-equidistant
 
     Notes
     -----
@@ -94,7 +92,6 @@ class Dataset(TimeSeries):
         data: Union[List[np.ndarray], float],
         time: Union[pd.DatetimeIndex, str],
         items: Union[List[ItemInfo], List[EUMType], List[str]] = None,
-        equidistant: Union[str, bool] = "infer",
     ):
 
         item_infos: List[ItemInfo] = []
@@ -142,10 +139,7 @@ class Dataset(TimeSeries):
             )
 
         self.data = data
-        if equidistant == "infer":
-            self.time = pd.DatetimeIndex(time, freq="infer")
-        else:
-            self.time = pd.DatetimeIndex(time)
+        self.time = pd.DatetimeIndex(time)
 
         self._items = item_infos
 
@@ -154,6 +148,8 @@ class Dataset(TimeSeries):
         out = ["<mikeio.DataSet>"]
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+        if not self.is_equidistant:
+            out.append("-- Non-equidistant time axis --")
         if self.n_items > 10:
             out.append(f"Number of items: {self.n_items}")
         else:
@@ -710,8 +706,8 @@ class Dataset(TimeSeries):
         """Is Dataset equidistant in time?"""
         if len(self.time) < 3:
             return True
-
-        return self.time.freq is not None
+        return len(self.time.to_series().diff().dropna().unique()) == 1
+        # return self.time.freq is not None
 
     @property
     def start_time(self):
