@@ -121,6 +121,7 @@ class Dfs2(_Dfs123):
         dy=None,
         coordinate=None,
         title=None,
+        keep_open=False,
     ):
         """
         Create a dfs2 file
@@ -149,6 +150,8 @@ class Dfs2(_Dfs123):
             e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         title: str, optional
             title of the dfs2 file. Default is blank.
+        keep_open: bool, optional
+            Keep file open for appending
         """
 
         self._builder = DfsBuilder.Create(title, "mikeio", 0)
@@ -162,7 +165,20 @@ class Dfs2(_Dfs123):
         if dy:
             self._dy = dy
 
-        self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
+        self._write(
+            filename,
+            data,
+            start_time,
+            dt,
+            datetimes,
+            items,
+            coordinate,
+            title,
+            keep_open,
+        )
+
+        if keep_open:
+            return self
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(

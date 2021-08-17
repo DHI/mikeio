@@ -693,6 +693,7 @@ def test_write_from_dfsu(tmpdir):
 
 
 def test_incremental_write_from_dfsu(tmpdir):
+    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
 
     sourcefilename = os.path.join("tests", "testdata", "HD2D.dfsu")
     outfilename = os.path.join(tmpdir.dirname, "simple.dfsu")
