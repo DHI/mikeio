@@ -218,12 +218,7 @@ class Dataset(TimeSeries):
             return self._multiply_value(other)
 
     def _add_dataset(self, other, sign=1.0):        
-        if self.n_items != other.n_items:
-            raise ValueError("number of items must match")
-        if self.n_timesteps != other.n_timesteps:
-            raise ValueError("number of timesteps must match")
-        if self.shape != other.shape:
-            raise ValueError("shape must match")            
+        self._check_datasets_match(other)
         try:
             data = [self[x] + sign*other[y] for x, y in zip(self.items, other.items)]
         except:
@@ -231,6 +226,19 @@ class Dataset(TimeSeries):
         time = self.time.copy()
         items = deepcopy(self.items)
         return Dataset(data, time, items) 
+
+    def _check_datasets_match(self, other):
+        if self.n_items != other.n_items:
+            raise ValueError(f"Number of items must match ({self.n_items} and {other.n_items})")
+        for j in range(self.n_items):
+            if self.items[j].type != self.items[j].type:
+                raise ValueError(f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}")
+            if self.items[j].unit != self.items[j].unit:
+                raise ValueError(f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}")            
+        if not np.all(self.time == other.time):
+            raise ValueError("All timesteps must match")
+        if self.shape != other.shape:
+            raise ValueError("shape must match")    
 
     def _add_value(self, value):
         try:
@@ -331,7 +339,6 @@ class Dataset(TimeSeries):
 
     def aggregate(self, axis=1, func=np.nanmean):
         """Aggregate along an axis
-
 
         Parameters
         ----------
