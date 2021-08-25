@@ -5,21 +5,18 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: [3.8]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.9
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flake8 pytest pytest-cov
         
     - name: Install mikeio
       run: |
@@ -27,12 +24,11 @@ jobs:
     
     - name: Sphinx Build
       run: |
-        cd docsrc
+        cd docs
         make html
 
-    - name: Upload html
-      uses: actions/upload-artifact@v1
+    - name: Publish to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3.6.1
       with:
-        name: DocumentationHTML
-        path: docs/
-
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: docs/_build/html

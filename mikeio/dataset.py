@@ -149,7 +149,7 @@ class Dataset(TimeSeries):
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if not self.is_equidistant:
-            out.append("-- Non-equidistant time axis --")
+            out.append("-- Non-equidistant calendar axis --")
         if self.n_items > 10:
             out.append(f"Number of items: {self.n_items}")
         else:
