@@ -3,8 +3,6 @@
 Getting started
 ###############
 
-After installing MIKE IO 
-
 Resources
 *********
 
@@ -40,9 +38,13 @@ share these properties:
 
 All Dfs classes have these methods:
 
-* read()
-* write()
+* read(items, time_steps, ...)
+* write(filename, data, ...)
 
+
+Items, ItemInfo and EUM
+***********************
+The dfs items in MIKE IO are described using the ItemInfo class. 
 
 
 Dfs0
@@ -62,8 +64,23 @@ The MIKE IO `Dfs2 class <api.html#mikeio.Dfs2>`_ provide functionality for worki
 
 .. code-block:: python
 
-   from mikeio import Dfs2
-   
+    >>> from mikeio import Dfs2
+    >>> dfs = Dfs2("testdata/gebco_sound.dfs2")
+    <mikeio.Dfs2>
+    dx: 0.00417
+    dy: 0.00417
+    Items:
+    0:  Elevation <Total Water Depth> (meter)
+    Time: time-invariant file (1 step)   
+
+Example notebooks
+-----------------
+* `Dfs2-Bathymetry <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb>`_ - GEBCO NetCDF/xarray to dfs2 
+* `Dfs2-Boundary <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb>`_ - Vertical transect dfs2, interpolation in time 
+* `Dfs2-Export-to-netCDF <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb>`_ Export dfs2 to NetCDF
+* `Dfs2-GFS <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb>`_ - GFS NetCDF/xarray to dfs2
+* `Dfs2-SST <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb>`_ - DMI NetCDF/xarray to dfs2 
+
 
 Generic dfs
 ***********
