@@ -199,6 +199,58 @@ class Dataset(TimeSeries):
 
         raise ValueError(f"indexing with a {type(x)} is not (yet) supported")
 
+    def __add__(self, other):
+        if isinstance(other, type(self)):
+            return self._add_dataset(other)
+        else:
+            return self._add_value(other)
+
+    def __sub__(self, other):
+        if isinstance(other, type(self)):
+            return self._add_dataset(other, sign=-1.0)
+        else:
+            return self._add_value(-other)
+
+    def __mul__(self, other):
+        if isinstance(other, type(self)):
+            raise NotImplemented("Multiplication is not implemented for two Datasets")
+        else:
+            return self._multiply_value(other)
+
+    def _add_dataset(self, other, sign=1.0):        
+        if self.n_items != other.n_items:
+            raise ValueError("number of items must match")
+        if self.n_timesteps != other.n_timesteps:
+            raise ValueError("number of timesteps must match")
+        if self.shape != other.shape:
+            raise ValueError("shape must match")            
+        try:
+            data = [self[x] + sign*other[y] for x, y in zip(self.items, other.items)]
+        except:
+            raise ValueError("Could not add data in Dataset")
+        time = self.time.copy()
+        items = deepcopy(self.items)
+        return Dataset(data, time, items) 
+
+    def _add_value(self, value):
+        try:
+            data = [value + self[x] for x in self.items]
+        except:
+            raise ValueError(f"{value} could not be added to Dataset")        
+        items = deepcopy(self.items)
+        time = self.time.copy()
+        return Dataset(data, time, items)
+
+
+    def _multiply_value(self, value):
+        try:
+            data = [value * self[x] for x in self.items]
+        except:
+            raise ValueError(f"{value} could not be multiplied to Dataset")        
+        items = deepcopy(self.items)
+        time = self.time.copy()
+        return Dataset(data, time, items)
+
     def copy(self):
         """Returns a copy of this dataset."""
 
