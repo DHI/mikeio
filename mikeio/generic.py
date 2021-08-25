@@ -446,3 +446,47 @@ def _parse_start_end(dfs_i, start, end):
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
     return file_start_new, start_step, start_sec, end_step, end_sec
+
+
+def avg_time(infilename: str, outfilename: str):
+    """Create a temporally averaged dfs file
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+    """
+
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+    dfs_o = _clone(infilename, outfilename)
+
+    n_items = len(dfs_i.ItemInfo)
+    item_numbers = list(range(n_items))
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    deletevalue = dfs_i.FileInfo.DeleteValueFloat
+
+    outdatalist = []
+
+    for item in item_numbers:
+        indatatime = dfs_i.ReadItemTimeStep(item + 1, 0.0)
+        indata = indatatime.Data.astype(np.float64)
+        outdatalist.append(indata)
+
+    for timestep in trange(1, n_time_steps, disable=not show_progress):
+        for item in range(n_items):
+
+            itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+            d = itemdata.Data
+            # d[d == deletevalue] = np.nan
+
+            outdatalist[item] = outdatalist[item] + d
+
+    for item in range(n_items):
+        darray = outdatalist[item].astype(np.float32) / float(n_time_steps)
+        dfs_o.WriteItemTimeStepNext(0.0, darray)
+    dfs_o.Close()

@@ -2,7 +2,7 @@ import os
 from shutil import copyfile
 import numpy as np
 import mikeio
-from mikeio.generic import scale, diff, sum, extract
+from mikeio.generic import scale, diff, sum, extract, avg_time
 import pytest
 
 
@@ -375,3 +375,19 @@ def test_extract_items(tmpdir):
     with pytest.raises(Exception):
         extract(infile, outfile, items=[0, "not_an_item"])
 
+
+def test_time_average(tmpdir):
+
+    infilename = "tests/testdata/NorthSea_HD_and_windspeed.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "NorthSea_HD_and_windspeed_avg.dfsu")
+    avg_time(infilename, outfilename)
+
+    org = mikeio.read(infilename)
+
+    averaged = mikeio.read(outfilename)
+
+    assert all([a == b for a, b in zip(org.items, averaged.items)])
+    assert org.time[0] == averaged.time[0]
+    assert org.shape[1] == averaged.shape[1]
+    assert averaged.shape[0] == 1
+    assert np.allclose(org.mean(axis=0)[0], averaged[0])

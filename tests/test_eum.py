@@ -46,3 +46,11 @@ def test_create_info_with_type_only_positional():
 
     assert item.name == "Water Level"
     assert item.type == EUMType.Water_Level
+
+
+def test_equality():
+
+    item1 = ItemInfo("Foo", EUMType.Water_Level)
+    item2 = ItemInfo("Foo", EUMType.Water_Level)
+
+    assert item1 == item2
