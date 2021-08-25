@@ -293,7 +293,24 @@ means 5 mins and 30 seconds. default to 1.0</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Dfs1">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py property">
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs1.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append to a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs1.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs1.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finalize write for a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs1.deletevalue">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs1.deletevalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>File delete value</p>
@@ -410,7 +427,24 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Dfs2">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py property">
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs2.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append to a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs2.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finalize write for a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs2.deletevalue">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs2.deletevalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>File delete value</p>
@@ -530,7 +564,7 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dfs2.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.write" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.write" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a dfs2 file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -546,6 +580,7 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 <li><p><strong>coordinate</strong> – list of [projection, origin_x, origin_y, orientation]
 e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title of the dfs2 file. Default is blank.</p></li>
+<li><p><strong>keep_open</strong> (<em>bool</em><em>, </em><em>optional</em>) – Keep file open for appending</p></li>
 </ul>
 </dd>
 </dl>
