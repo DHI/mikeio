@@ -16,14 +16,14 @@ Resources
 
 Dataset
 *******
-The MIKE IO `Dataset <api.html#mikeio.Dataset>`_ is a common data structure for data read from dfs files. 
+The `Dataset <api.html#mikeio.Dataset>`_ is the common MIKE IO data structure for data read from dfs files. 
 All `read()` methods in MIKE IO returns a Dataset with the three main properties:
 
 * items - a list of `ItemInfo <api.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
 * time - a pandas.DateTimeIndex with the time instances of the data
 * data - a list of NumPy arrays---one for each item
 
-Read more on the `Dataset page <dataset.html>`_.
+Read more on the `Understanding Dataset page <understanding_dataset.html>`_.
 
 
 Dfs0
@@ -50,7 +50,7 @@ Generic dfs
 ***********
 MIKE IO has `generic dfs <api.html#module-mikeio.generic>`_ functionality that works for all dfs files: 
 
-* `read() <api.html#mikeio.generic.extract>`_ - Read all data to a Dataset
+* `read() <api.html#mikeio.read>`_ - Read all data to a Dataset
 * `concat() <api.html#mikeio.generic.extract>`_ - Concatenates files along the time axis
 * `extract() <api.html#mikeio.generic.extract>`_ - Extract timesteps and/or items to a new dfs file
 * `diff() <api.html#mikeio.generic.diff>`_ - Calculate difference between two dfs files
@@ -64,4 +64,3 @@ All methods except read() create a new dfs file.
 
    from mikeio import generic
    generic.concat()
-   
