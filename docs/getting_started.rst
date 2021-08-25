@@ -26,6 +26,25 @@ All `read()` methods in MIKE IO returns a Dataset with the three main properties
 Read more on the `Understanding Dataset page <understanding_dataset.html>`_.
 
 
+Common dfs functionality
+************************
+All Dfs classes and the Dataset class are representations of timeseries and 
+share these properties: 
+
+* items - a list of `ItemInfo <api.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
+* n_items - Number of items
+* n_timesteps - Number of timesteps
+* start_time - First time instance (as datetime)
+* end_time - Last time instance (as datetime)
+* deletevalue - File delete value (NaN value)
+
+All Dfs classes have these methods:
+
+* read()
+* write()
+
+
+
 Dfs0
 ****
 A dfs0 file is also called a time series file. The MIKE IO `Dfs0 class <api.html#mikeio.Dfs0>`_ provide functionality for working with dfs0 files.  
