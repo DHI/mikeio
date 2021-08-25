@@ -114,7 +114,7 @@ including different ways of *selecting* data:
 
 Other methods that also return a Dataset:
 
-* `interp_time() <api.html#mikeio.Dataset.interp_time>`_ - Temporal interpolation
+* `interp_time() <api.html#mikeio.Dataset.interp_time>`_ - Temporal interpolation (`Time interpolation notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb>`_)
 * `dropna() <api.html#mikeio.Dataset.dropna>`_ - Remove time steps where all items are NaN
 * `squeeze() <api.html#mikeio.Dataset.squeeze>`_ - Remove axes of length 1
 
