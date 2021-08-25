@@ -142,6 +142,17 @@ def test_read_units_write_new(tmpdir):
     assert ds2.items[0].unit == ds.items[0].unit
 
 
+def test_read_start_end_time():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+
+    dfs = Dfs0(dfs0file)
+    ds = dfs.read()
+
+    assert dfs.start_time == ds.start_time
+    assert dfs.end_time == ds.end_time
+
+
 def test_multiple_write(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "random.dfs0")

@@ -35,6 +35,7 @@ class Dfs0(TimeSeries):
         self._source = None
         self._dfs = None
         self._start_time = None
+        self._end_time = None
         self._n_items = None
         self._dt = None
         self._is_equidistant = None
@@ -412,6 +413,9 @@ class Dfs0(TimeSeries):
 
     @property
     def end_time(self):
+        if self._end_time is None:
+            self._end_time = self.read([0]).time[-1].to_pydatetime()
+
         return self._end_time
 
     @property
