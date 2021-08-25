@@ -112,6 +112,15 @@ including different ways of *selecting* data:
 * `average() <api.html#mikeio.Dataset.average>`_ - Compute the weighted average along the specified axis.
 * `aggregate() <api.html#mikeio.Dataset.aggregate>`_ - Aggregate along an axis
 
+*Mathematical operations* +, - and * with numerical values:
+* ds + value
+* ds - value
+* ds * value
+
+and + and - between two Datasets (if number of items and shapes conform):
+* ds1 + ds2
+* ds1 - ds2
+
 Other methods that also return a Dataset:
 
 * `interp_time() <api.html#mikeio.Dataset.interp_time>`_ - Temporal interpolation (`Time interpolation notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb>`_)
