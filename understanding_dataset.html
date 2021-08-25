@@ -91,9 +91,10 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Understanding Dataset</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#dataset-selecting-and-subsetting">Dataset selecting and subsetting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataset-properties">Dataset properties</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataset-methods">Dataset methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-items">Selecting items</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#selecting-timesteps-or-elements">Selecting timesteps or elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#properties">Properties</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
@@ -167,27 +168,120 @@
             
   <div class="section" id="understanding-dataset">
 <span id="id1"></span><h1>Understanding Dataset<a class="headerlink" href="#understanding-dataset" title="Permalink to this headline">¶</a></h1>
-<p>The MIKE IO <a class="reference external" href="api.html#mikeio.Dataset">Dataset</a> is a common data structure for data read from dfs files.
-All <cite>read()</cite> methods in MIKE IO returns a Dataset with three main properties:</p>
+<p>The <a class="reference external" href="api.html#mikeio.Dataset">Dataset</a> is the common MIKE IO data structure
+for data from dfs files.
+All <cite>read()</cite> methods in MIKE IO return a Dataset with three main properties:</p>
 <ul class="simple">
-<li><p>items - a list of <a class="reference external" href="api.html#mikeio.eum.ItemInfo">ItemInfo</a> with name, type and unit of each item</p></li>
-<li><p>time - a pandas.DateTimeIndex with the time instances of the data</p></li>
-<li><p>data - a list of NumPy arrays—one for each item</p></li>
+<li><p><strong>items</strong> - a list of <a class="reference external" href="api.html#mikeio.eum.ItemInfo">ItemInfo</a> with name, type and unit of each item</p></li>
+<li><p><strong>time</strong> - a pandas.DateTimeIndex with the time instances of the data</p></li>
+<li><p><strong>data</strong> - a list of NumPy arrays—one for each item</p></li>
 </ul>
-<div class="section" id="dataset-selecting-and-subsetting">
-<h2>Dataset selecting and subsetting<a class="headerlink" href="#dataset-selecting-and-subsetting" title="Permalink to this headline">¶</a></h2>
-<p>TODO</p>
+<p>The j’th array data[j] in data corresponds to the j’th item
+and it’s first axis is the time axis.
+The number of consecutive axes depend on the data type.</p>
+<p>Use Dataset’s string representation to get an overview of the Dataset</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;testdata/HD2D.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">Dimensions: (9, 884)</span>
+<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
+<span class="go">Items:</span>
+<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
+<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
+<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
+<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
+</pre></div>
 </div>
-<div class="section" id="dataset-properties">
-<h2>Dataset properties<a class="headerlink" href="#dataset-properties" title="Permalink to this headline">¶</a></h2>
-<p>The Dataset has several convenience properties including:</p>
+<div class="section" id="selecting-items">
+<h2>Selecting items<a class="headerlink" href="#selecting-items" title="Permalink to this headline">¶</a></h2>
+<p>Selecting a specific item “itemA” (at position 0) from a Dataset ds can be
+done with:</p>
 <ul class="simple">
-<li><p>is_equidistant</p></li>
+<li><p>ds[[“itemA”]] - returns a new Dataset with “itemA”</p></li>
+<li><p>ds[“itemA”] - returns the data of “itemA”</p></li>
+<li><p>ds[[0]] - returns a new Dataset with “itemA”</p></li>
+<li><p>ds[0] - returns the data of “itemA”</p></li>
+</ul>
+<p>Negative index e.g. ds[-1] can also be used to select from the end.
+Several items (“itemA” at 0 and “itemC” at 2) can be selected with the notation:</p>
+<ul class="simple">
+<li><p>ds[[“itemA”, “itemC”]]</p></li>
+<li><p>ds[[0, 2]]</p></li>
+</ul>
+<p>Note that this behavior is similar to pandas and xarray.</p>
+</div>
+<div class="section" id="selecting-timesteps-or-elements">
+<h2>Selecting timesteps or elements<a class="headerlink" href="#selecting-timesteps-or-elements" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="api.html#mikeio.Dataset.isel">isel()</a> method can be used for selecting specific timesteps or elements across a Dataset.</p>
+<ul class="simple">
+<li><p>ds.isel([0, 1], axis=0) - selects timestep 0 and 1</p></li>
+<li><p>ds.isel([3,78], axis=1) - selects element 3 and 78</p></li>
+</ul>
+<p>A date range can also be selected using the slice notation (similar to pandas DataFrame):</p>
+<ul class="simple">
+<li><p>ds[start_time:end_time] - selects all time steps between start and end (either can be empty)</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;1985-8-7&quot;</span><span class="p">:]</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">Dimensions: (2, 884)</span>
+<span class="go">Time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00</span>
+<span class="go">Items:</span>
+<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
+<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
+<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
+<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="properties">
+<h2>Properties<a class="headerlink" href="#properties" title="Permalink to this headline">¶</a></h2>
+<p>The Dataset has several convenience properties
+(besides the main properties items, time and data):</p>
+<ul class="simple">
+<li><p>n_items - Number of items</p></li>
+<li><p>n_timesteps - Number of timesteps</p></li>
+<li><p>n_elements - Number of elements</p></li>
+<li><p>start_time - First time instance (as datetime)</p></li>
+<li><p>end_time - Last time instance (as datetime)</p></li>
+<li><p>is_equidistant - Is the time series equidistant in time</p></li>
+<li><p>timestep - Time step in seconds (if is_equidistant)</p></li>
+<li><p>shape - Shape of each item</p></li>
+<li><p>deletevalue - File delete value (NaN value)</p></li>
 </ul>
 </div>
-<div class="section" id="dataset-methods">
-<h2>Dataset methods<a class="headerlink" href="#dataset-methods" title="Permalink to this headline">¶</a></h2>
-<p>TODO</p>
+<div class="section" id="methods">
+<h2>Methods<a class="headerlink" href="#methods" title="Permalink to this headline">¶</a></h2>
+<p>Dataset has several useful methods for working with data,
+including different ways of <em>selecting</em> data:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.head">head()</a> - Return the first n timesteps</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.tail">tail()</a> - Return the last n timesteps</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.thin">thin()</a> - Return every n:th timesteps</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.isel">isel()</a> - Select subset along an axis</p></li>
+</ul>
+<p><em>Aggregations</em> along an axis:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.mean">mean()</a> - Mean value along an axis</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.nanmean">nanmean()</a> - Mean value along an axis (NaN removed)</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.max">max()</a> - Max value along an axis</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.nanmax">nanmax()</a> - Max value along an axis (NaN removed)</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.min">min()</a> - Min value along an axis</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.nanmin">nanmin()</a> - Min value along an axis (NaN removed)</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.average">average()</a> - Compute the weighted average along the specified axis.</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.aggregate">aggregate()</a> - Aggregate along an axis</p></li>
+</ul>
+<p>Other methods that also return a Dataset:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.interp_time">interp_time()</a> - Temporal interpolation (<a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb">Time interpolation notebook</a>)</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.dropna">dropna()</a> - Remove time steps where all items are NaN</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.squeeze">squeeze()</a> - Remove axes of length 1</p></li>
+</ul>
+<p><em>Conversion</em> methods:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.to_dataframe">to_dataframe()</a> - Convert Dataset to a Pandas DataFrame</p></li>
+<li><p><a class="reference external" href="api.html#mikeio.Dataset.to_dfs0">to_dfs0()</a> - Write Dataset to a Dfs0 file</p></li>
+</ul>
 </div>
 </div>
 
