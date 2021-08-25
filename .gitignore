@@ -9,6 +9,9 @@
 # Python virtual environment folder
 \env
 
+# Sphinx documentation
+docs/_build/
+
 # PyCharm project folder
 .idea/
 
