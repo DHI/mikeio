@@ -82,4 +82,9 @@ All methods except read() create a new dfs file.
 .. code-block:: python
 
    from mikeio import generic
-   generic.concat()
+   generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
+
+.. code-block:: python
+
+   import mikeio 
+   ds = mikeio.read("new_file.dfs2")
