@@ -877,3 +877,20 @@ def test_init():
     assert ds.start_time == datetime(2018, 1, 1, 0, 0, 0)
     assert ds.n_elements == n_elements
     assert ds.items[0].name == "Foo"
+
+
+def test_non_equidistant():
+    nt = 4
+    d = np.random.uniform(size=nt)
+
+    ds = Dataset(
+        data=[d],
+        time=[
+            datetime(2000, 1, 1),
+            datetime(2001, 1, 1),
+            datetime(2002, 1, 1),
+            datetime(2003, 1, 1),
+        ],
+    )
+
+    assert not ds.is_equidistant

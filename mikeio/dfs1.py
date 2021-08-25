@@ -109,6 +109,5 @@ class Dfs1(_Dfs123):
 
     @property
     def dx(self):
-        """Step size in x direction
-        """
+        """Step size in x direction"""
         return self._dx

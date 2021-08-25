@@ -783,7 +783,8 @@ class _UnstructuredGeometry:
     def get_element_area(self):
         """Calculate the horizontal area of each element.
 
-        Returns:
+        Returns
+        -------
         np.array(float)
             areas in m2
         """
@@ -1895,7 +1896,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         Returns
         -------
         Dataset
-            A dataset with data dimensions [t,elements]
+            A Dataset with data dimensions [t,elements]
 
         Examples
         --------

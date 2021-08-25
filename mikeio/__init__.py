@@ -40,17 +40,19 @@ from .dataset import Dataset
 def read(filename, items=None, time_steps=None):
     """Read data from a dfs file
 
-    Usage:
-        read(filename, items=None, time_steps=None)
+    Parameters
+    ----------
     filename
         full path and file name to the dfs file.
     items: list[int] or list[str], optional
-            Read only selected items, by number (0-based), or by name
+        Read only selected items, by number (0-based), or by name
     time_steps: int or list[int], optional
-            Read only selected time_steps
+        Read only selected time_steps
 
-    Return:
-        Dataset(data, time, names)
+    Returns
+    -------
+    Dataset
+        A Dataset with data dimensions according to the file type
     """
 
     _, ext = os.path.splitext(filename)
