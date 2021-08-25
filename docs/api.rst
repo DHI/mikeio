@@ -33,14 +33,17 @@ Mesh
 	:members:
 	:inherited-members:
 
-Misc
+Dataset
 -------
 .. autoclass:: mikeio.Dataset
 	:members:
 	:inherited-members:
 
-.. autoclass:: mikeio.eum.ItemInfo 
+EUM
+---
+.. automodule:: mikeio.eum
 	:members:
+
 
 Generic
 -------
