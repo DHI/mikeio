@@ -100,7 +100,7 @@ class Dfs0(TimeSeries):
         Returns
         -------
         Dataset
-            A dataset with data dimensions [t]
+            A Dataset with data dimensions [t]
         """
 
         if not os.path.exists(self._filename):

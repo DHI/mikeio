@@ -106,7 +106,16 @@ class TimeStepUnit(IntEnum):
 
 
 class EUMType(IntEnum):
+    """EUM type
 
+    Examples
+    --------
+    >>> from mikeio.eum import EUMType
+    >>> EUMType.Temperature
+    <EUMType.Temperature: 100006>
+    >>> EUMType.Temperature.units
+    [degree Celsius, degree Fahrenheit, degree Kelvin]
+    """
     Water_Level = 100000
     Discharge = 100001
     Wind_Velocity = 100002
@@ -690,6 +699,7 @@ class EUMType(IntEnum):
 
     @property
     def display_name(self):
+        """Display friendly name"""
         name = self.name
         name = name.replace("_", " ")
         return name
@@ -700,6 +710,7 @@ class EUMType(IntEnum):
 
     @property
     def units(self):
+        """List valid units for this EUM type"""
         temp = unit_list(self.code).items()
         return [EUMUnit(value) for key, value in temp]
 
@@ -710,6 +721,14 @@ class EUMType(IntEnum):
 
 
 class EUMUnit(IntEnum):
+    """EUM unit
+
+    Examples
+    --------
+    >>> from mikeio.eum import EUMUnit
+    >>> EUMUnit.degree_Kelvin
+    degree Kelvin
+    """
     meter = 1000
     kilometer = 1001
     centimeter = 1007
@@ -1273,6 +1292,7 @@ class EUMUnit(IntEnum):
 
     @property
     def display_name(self):
+        """Display friendly name"""
         name = self.name
         name = name.replace("_", " ")
         return name
