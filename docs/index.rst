@@ -8,7 +8,9 @@
 MIKE IO: input/output of MIKE files in Python
 =============================================
 
-Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mesh files. Reading Res1D data.
+Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. 
+
+See our sister library `MIKE IO 1D <https://github.com/DHI/mikeio1d>`_ for .res1d and .xns11 files.
 
 .. include:: intro.rst
 
@@ -18,6 +20,8 @@ Facilitate creating, reading and writing dfs0, dfs2, dfs1 and dfs3, dfsu and mes
    :caption: Contents:
    :hidden:
 
+   getting_started
+   understanding_dataset
    design
    api
    
