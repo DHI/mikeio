@@ -36,7 +36,7 @@ class Dataset(TimeSeries):
     --------
     >>> ds = mikeio.read("tests/testdata/random.dfs0")
     >>> ds
-    <mikeio.DataSet>
+    <mikeio.Dataset>
     Dimensions: (1000,)
     Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
     Items:
@@ -45,7 +45,7 @@ class Dataset(TimeSeries):
     >>> ds['NotFun'][0:5]
     array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
     >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
-    <mikeio.DataSet>
+    <mikeio.Dataset>
     Dimensions: (9, 884)
     Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
     Items:
@@ -55,7 +55,7 @@ class Dataset(TimeSeries):
       3:  Current speed <Current Speed> (meter per sec)
     >>> ds2 = ds[['Surface elevation','Current speed']] # item selection by name
     >>> ds2
-    <mikeio.DataSet>
+    <mikeio.Dataset>
     Dimensions: (9, 884)
     Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
     Items:
@@ -63,7 +63,7 @@ class Dataset(TimeSeries):
       1:  Current speed <Current Speed> (meter per sec)
     >>> ds3 = ds2.isel([0,1,2], axis=0) # temporal selection
     >>> ds3
-    <mikeio.DataSet>
+    <mikeio.Dataset>
     Dimensions: (3, 884)
     Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
     Items:
@@ -71,7 +71,7 @@ class Dataset(TimeSeries):
       1:  Current speed <Current Speed> (meter per sec)
     >>> ds4 = ds3.isel([100,200], axis=1) # element selection
     >>> ds4
-    <mikeio.DataSet>
+    <mikeio.Dataset>
     Dimensions: (3, 2)
     Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
     Items:
@@ -79,7 +79,7 @@ class Dataset(TimeSeries):
       1:  Current speed <Current Speed> (meter per sec)
     >>>  ds5 = ds[[1,0]] # item selection by position
     >>>  ds5
-    <mikeio.DataSet>
+    <mikeio.Dataset>
     Dimensions: (1000,)
     Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
     Items:
@@ -145,7 +145,7 @@ class Dataset(TimeSeries):
 
     def __repr__(self):
 
-        out = ["<mikeio.DataSet>"]
+        out = ["<mikeio.Dataset>"]
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if self.n_items > 10:
@@ -522,7 +522,7 @@ class Dataset(TimeSeries):
         --------
         >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
         >>> ds
-        <mikeio.DataSet>
+        <mikeio.Dataset>
         Dimensions: (9, 884)
         Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
         Items:
@@ -532,7 +532,7 @@ class Dataset(TimeSeries):
         3:  Current speed <Current Speed> (meter per sec)
         >>> dsi = ds.interp_time(dt=1800)
         >>> dsi
-        <mikeio.DataSet>
+        <mikeio.Dataset>
         Dimensions: (41, 884)
         Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
         Items:

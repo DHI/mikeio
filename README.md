@@ -49,7 +49,7 @@ Generic `read` method to read values, if you need additional features such as co
 >>> import mikeio
 >>> ds = mikeio.read("random.dfs0")
 >>> ds
-<mikeio.DataSet>
+<mikeio.Dataset>
 Dimensions: (1000,)
 Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
 Items:
@@ -57,7 +57,7 @@ Items:
   1:  NotFun <Water Level> (meter)
 >>> ds = mikeio.read("random.dfs1")
 >>> ds
-<mikeio.DataSet>
+<mikeio.Dataset>
 Dimensions: (100, 3)
 Time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48
 Items:
@@ -103,7 +103,7 @@ For more examples on timeseries data see this [notebook](notebooks/Dfs0%20-%20Ti
 >>> dfs = Dfs2("random.dfs2")
 >>> ds = dfs.read()
 >>> ds
-<mikeio.DataSet>
+<mikeio.Dataset>
 Dimensions: (3, 100, 2)
 Time: 2012-01-01 00:00:00 - 2012-01-01 00:00:24
 Items:

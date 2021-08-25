@@ -1900,7 +1900,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         Examples
         --------
         >>> dfsu.read()
-        <mikeio.DataSet>
+        <mikeio.Dataset>
         Dimensions: (9, 884)
         Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
         Items:
@@ -1909,7 +1909,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         >>> dfsu.read(time_steps="1985-08-06 12:00,1985-08-07 00:00")
-        <mikeio.DataSet>
+        <mikeio.Dataset>
         Dimensions: (5, 884)
         Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
         Items:
