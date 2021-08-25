@@ -200,7 +200,7 @@ class Dataset(TimeSeries):
         raise ValueError(f"indexing with a {type(x)} is not (yet) supported")
 
     def copy(self):
-        "Returns a copy of this dataset."
+        """Returns a copy of this dataset."""
 
         items = deepcopy(self.items)
         data = [self[x].copy() for x in self.items]
@@ -209,7 +209,7 @@ class Dataset(TimeSeries):
         return Dataset(data, time, items)
 
     def dropna(self):
-        "Remove time steps where all items are NaN"
+        """Remove time steps where all items are NaN"""
 
         # TODO consider all items
         x = self[0]
@@ -222,7 +222,7 @@ class Dataset(TimeSeries):
         return self.isel(idx, axis=0)
 
     def flipud(self):
-        "Flip dataset updside down"
+        """Flip dataset updside down"""
 
         self.data = [np.flip(self[x], axis=1) for x in self.items]
         return self
@@ -451,21 +451,21 @@ class Dataset(TimeSeries):
         return self.aggregate(axis=axis, func=np.nanmean)
 
     def head(self, n=5):
-        "Return the first n timesteps"
+        """Return the first n timesteps"""
         nt = len(self.time)
         n = min(n, nt)
         time_steps = range(n)
         return self.isel(time_steps, axis=0)
 
     def tail(self, n=5):
-        "Return the last n timesteps"
+        """Return the last n timesteps"""
         nt = len(self.time)
         start = max(0, nt - n)
         time_steps = range(start, nt)
         return self.isel(time_steps, axis=0)
 
     def thin(self, step):
-        "Return every n:th timesteps"
+        """Return every n:th timesteps"""
         nt = len(self.time)
         time_steps = range(0, nt, step)
         return self.isel(time_steps, axis=0)
