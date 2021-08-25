@@ -64,3 +64,4 @@ All methods except read() create a new dfs file.
 
    from mikeio import generic
    generic.concat()
+   
