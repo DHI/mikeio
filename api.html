@@ -88,6 +88,8 @@
             
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="understanding_dataset.html">Understanding Dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#dfs0">Dfs0</a></li>
@@ -525,7 +527,7 @@ The first two items will be x- and y- coordinates of track</p>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (9, 884)</span>
 <span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
 <span class="go">Items:</span>
@@ -534,7 +536,7 @@ The first two items will be x- and y- coordinates of track</p>
 <span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
 <span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">time_steps</span><span class="o">=</span><span class="s2">&quot;1985-08-06 12:00,1985-08-07 00:00&quot;</span><span class="p">)</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (5, 884)</span>
 <span class="go">Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00</span>
 <span class="go">Items:</span>
@@ -848,7 +850,7 @@ similar to a dictionary.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/random.dfs0&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (1000,)</span>
 <span class="go">Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00</span>
 <span class="go">Items:</span>
@@ -857,7 +859,7 @@ similar to a dictionary.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;NotFun&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
 <span class="go">array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/HD2D.dfsu&quot;</span><span class="p">)</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (9, 884)</span>
 <span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
 <span class="go">Items:</span>
@@ -867,7 +869,7 @@ similar to a dictionary.</p>
 <span class="go">  3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[[</span><span class="s1">&#39;Surface elevation&#39;</span><span class="p">,</span><span class="s1">&#39;Current speed&#39;</span><span class="p">]]</span> <span class="c1"># item selection by name</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (9, 884)</span>
 <span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
 <span class="go">Items:</span>
@@ -875,7 +877,7 @@ similar to a dictionary.</p>
 <span class="go">  1:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds3</span> <span class="o">=</span> <span class="n">ds2</span><span class="o">.</span><span class="n">isel</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># temporal selection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds3</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (3, 884)</span>
 <span class="go">Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00</span>
 <span class="go">Items:</span>
@@ -883,7 +885,7 @@ similar to a dictionary.</p>
 <span class="go">  1:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds4</span> <span class="o">=</span> <span class="n">ds3</span><span class="o">.</span><span class="n">isel</span><span class="p">([</span><span class="mi">100</span><span class="p">,</span><span class="mi">200</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># element selection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds4</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (3, 2)</span>
 <span class="go">Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00</span>
 <span class="go">Items:</span>
@@ -891,7 +893,7 @@ similar to a dictionary.</p>
 <span class="go">  1:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">ds5</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]]</span> <span class="c1"># item selection by position</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">ds5</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (1000,)</span>
 <span class="go">Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00</span>
 <span class="go">Items:</span>
@@ -949,7 +951,7 @@ similar to a dictionary.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/HD2D.dfsu&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (9, 884)</span>
 <span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
 <span class="go">Items:</span>
@@ -959,7 +961,7 @@ similar to a dictionary.</p>
 <span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dsi</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">interp_time</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="mi">1800</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dsi</span>
-<span class="go">&lt;mikeio.DataSet&gt;</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
 <span class="go">Dimensions: (41, 884)</span>
 <span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
 <span class="go">Items:</span>
