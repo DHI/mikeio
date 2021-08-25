@@ -44,7 +44,7 @@ All Dfs classes have these methods:
 
 Items, ItemInfo and EUM
 ***********************
-The dfs items in MIKE IO are represented by the `ItemInfo class<api.html#mikeio.eum.ItemInfo>`_. 
+The dfs items in MIKE IO are represented by the `ItemInfo class <api.html#mikeio.eum.ItemInfo>`_. 
 An ItemInfo consists of:
 
 * name - a user-defined string 
@@ -60,6 +60,8 @@ An ItemInfo consists of:
     >>> ItemInfo(EUMType.Wind_speed)
     Wind speed <Wind speed> (meter per sec)
 
+See the `Units notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Units.ipynb>`_ for more examples.
+
 
 Dfs0
 ****
@@ -70,6 +72,12 @@ A dfs0 file is also called a time series file. The MIKE IO `Dfs0 class <api.html
    from mikeio import Dfs0
    
 
+
+
+Example notebooks
+-----------------
+* `Dfs0 <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb>`_ - read, write, to_dataframe, non-equidistant, accumulated timestep, extrapolation
+* `Dfs0-Relative-time <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Relative%20time.ipynb>`_ - read file with relative time axis
 
 Dfs2
 ****
@@ -119,3 +127,5 @@ All methods except read() create a new dfs file.
 
    import mikeio 
    ds = mikeio.read("new_file.dfs2")
+
+See the `Generic notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb>`_ for more examples.
