@@ -83,7 +83,6 @@ Read Dfs0 to Dataset
     >>> ds = dfs.read()   
    
 
-
 From Dfs0 to pandas DataFrame
 -----------------------------
 
@@ -101,14 +100,11 @@ From pandas DataFrame to Dfs0
     >>> df.to_dfs0("mauna_loa_co2.dfs0")
 
 
-
-
-
 Example notebooks
 -----------------
 * `Dfs0 <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb>`_ - read, write, to_dataframe, non-equidistant, accumulated timestep, extrapolation
 * `Dfs0-Relative-time <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Relative%20time.ipynb>`_ - read file with relative time axis
-
+* `Dfs0 | getting-started-with-mikeio <https://dhi.github.io/getting-started-with-mikeio/dfs0.html>`_
 
 Dfs2
 ****
@@ -133,6 +129,7 @@ Example notebooks
 * `Dfs2-Export-to-netCDF <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb>`_ Export dfs2 to NetCDF
 * `Dfs2-GFS <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb>`_ - GFS NetCDF/xarray to dfs2
 * `Dfs2-SST <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb>`_ - DMI NetCDF/xarray to dfs2 
+* `Dfs2 | getting-started-with-mikeio <https://dhi.github.io/getting-started-with-mikeio/dfs2.html>`_
 
 
 Generic dfs
