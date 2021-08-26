@@ -139,7 +139,7 @@ class Dataset(TimeSeries):
             )
 
         self.data = data
-        self.time = pd.DatetimeIndex(time, freq="infer")
+        self.time = pd.DatetimeIndex(time)
 
         self._items = item_infos
 
@@ -148,6 +148,8 @@ class Dataset(TimeSeries):
         out = ["<mikeio.Dataset>"]
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+        if not self.is_equidistant:
+            out.append("-- Non-equidistant calendar axis --")
         if self.n_items > 10:
             out.append(f"Number of items: {self.n_items}")
         else:
@@ -634,7 +636,7 @@ class Dataset(TimeSeries):
         )
         return interpolator(outtime)
 
-    def to_dataframe(self, unit_in_name=False):
+    def to_dataframe(self, unit_in_name=False, round_time="ms"):
         """Convert Dataset to a Pandas DataFrame
 
         Parameters
@@ -662,7 +664,11 @@ class Dataset(TimeSeries):
         data = np.asarray(self.data).T
         df = pd.DataFrame(data, columns=names)
 
-        df.index = pd.DatetimeIndex(self.time, freq="infer")
+        if round_time:
+            rounded_idx = pd.DatetimeIndex(self.time).round(round_time)
+            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
+        else:
+            df.index = pd.DatetimeIndex(self.time, freq="infer")
 
         return df
 
@@ -763,8 +769,8 @@ class Dataset(TimeSeries):
         """Is Dataset equidistant in time?"""
         if len(self.time) < 3:
             return True
-
-        return self.time.freq is not None
+        return len(self.time.to_series().diff().dropna().unique()) == 1
+        # return self.time.freq is not None
 
     @property
     def start_time(self):

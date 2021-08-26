@@ -928,3 +928,19 @@ def test_sub_dataset(ds1, ds2):
     ds3 = ds2 - ds1
     assert np.all(ds3[0] == 0.9)
     assert np.all(ds3[1] == 1.8)
+
+def test_non_equidistant():
+    nt = 4
+    d = np.random.uniform(size=nt)
+
+    ds = Dataset(
+        data=[d],
+        time=[
+            datetime(2000, 1, 1),
+            datetime(2001, 1, 1),
+            datetime(2002, 1, 1),
+            datetime(2003, 1, 1),
+        ],
+    )
+
+    assert not ds.is_equidistant
