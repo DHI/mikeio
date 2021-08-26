@@ -201,20 +201,30 @@ class Dataset(TimeSeries):
 
         raise ValueError(f"indexing with a {type(x)} is not (yet) supported")
 
+    def __radd__(self, other):
+        return self.__add__(other)
+
     def __add__(self, other):
-        if isinstance(other, type(self)):
+        if isinstance(other, self.__class__):
             return self._add_dataset(other)
         else:
             return self._add_value(other)
 
+    def __rsub__(self, other):
+        ds = self.__mul__(-1.0)
+        return other + ds
+
     def __sub__(self, other):
-        if isinstance(other, type(self)):
+        if isinstance(other, self.__class__):
             return self._add_dataset(other, sign=-1.0)
         else:
             return self._add_value(-other)
 
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
     def __mul__(self, other):
-        if isinstance(other, type(self)):
+        if isinstance(other, self.__class__):
             raise NotImplemented("Multiplication is not implemented for two Datasets")
         else:
             return self._multiply_value(other)
@@ -233,9 +243,9 @@ class Dataset(TimeSeries):
         if self.n_items != other.n_items:
             raise ValueError(f"Number of items must match ({self.n_items} and {other.n_items})")
         for j in range(self.n_items):
-            if self.items[j].type != self.items[j].type:
+            if self.items[j].type != other.items[j].type:
                 raise ValueError(f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}")
-            if self.items[j].unit != self.items[j].unit:
+            if self.items[j].unit != other.items[j].unit:
                 raise ValueError(f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}")            
         if not np.all(self.time == other.time):
             raise ValueError("All timesteps must match")
