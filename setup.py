@@ -28,7 +28,7 @@ setuptools.setup(
             "jupyterlab",
         ],
         "test": ["pytest", "matplotlib", "shapely"],
-        "notebooks": ["nbformat", "nbconvert", "jupyter", "xarray", "netcdf4"],
+        "notebooks": ["ipykernel", "nbformat", "nbconvert", "jupyter", "xarray", "netcdf4"],
     },
     author="Henrik Andersson",
     author_email="jan@dhigroup.com",
