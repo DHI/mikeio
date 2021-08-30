@@ -7,7 +7,7 @@ from nbconvert.preprocessors import CellExecutionError
 
 _TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.join(_TEST_DIR, '../..')
-SKIP_LIST = ["Dfs2 - Global Forecasting System", "Dfs3 - Temperature"]
+SKIP_LIST = ["Dfs2 - Boundary.ipynb"] #["Dfs2 - Global Forecasting System", "Dfs3 - Temperature"]
 
 def _process_notebook(notebook_filename, notebook_path = 'notebooks'):
     '''Checks if an IPython notebook runs without error from start to finish. If so, writes the notebook to HTML (with outputs) and overwrites the .ipynb file (without outputs).
