@@ -15,7 +15,7 @@ def _process_notebook(notebook_filename, notebook_path = 'notebooks'):
     with open(notebook_filename) as f:
         nb = nbformat.read(f, as_version=4)
     
-    ep = ExecutePreprocessor(timeout=600) #, kernel_name='python3') # , allow_errors=True
+    ep = ExecutePreprocessor(timeout=600, kernel_name='python3') # , allow_errors=True
 
     try:
         # Check that the notebook runs
