@@ -20,7 +20,7 @@ setuptools.setup(
             "pytest",
             "black",
             "sphinx",
-            "sphinx-rtd-theme",
+            "sphinx-book-theme",
             "shapely",
             "xarray",
             "netcdf4",
