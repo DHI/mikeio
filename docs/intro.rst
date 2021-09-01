@@ -1,3 +1,5 @@
+.. _intro:
+
 Requirements
 ------------
 
@@ -21,8 +23,6 @@ Getting started
     >>>  from mikeio import Dfs0
     >>>  dfs = Dfs0('simple.dfs0')
     >>>  df = dfs.to_dataframe()
-
-See more on the `Getting Started page <getting_started.html>`_.
 
 Notebooks
 ---------
