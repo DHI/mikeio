@@ -1,3 +1,4 @@
+import sys
 import pytest
 
 from mikeio import Pfs
@@ -97,7 +98,17 @@ def test_output_by_id():
 
 
 ## PFSCore wrapping DHI.PFS.PFSFile
-def test_sw_new_start_time_write(tmpdir):
+def test_sw_new_start_time_write():
 
     with pytest.raises(NotImplementedError):
         PfsCore("tests/testdata/lake.sw", "FemEngineSW")
+
+
+def test_encoding():    
+    Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
+def test_encoding_linux():
+    with pytest.raises(ValueError):
+        Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm", encoding=None)
