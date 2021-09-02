@@ -1,9 +1,7 @@
-from datetime import date, datetime, timedelta
+from datetime import datetime
 import re
 import yaml
 import pandas as pd
-import numpy as np
-from typing import Union
 import warnings
 
 # from DHI.PFS import PFSFile, PFSSection, PFSParameter
@@ -22,18 +20,14 @@ class NestedNamespace(SimpleNamespace):
 
 
 class Pfs:
-    def __init__(self, filename):
+    def __init__(self, filename, encoding="cp1252"):
 
         warnings.warn(
             "Support for PFS files in mikeio is experimental. The API is likely to change!"
         )
-        print(
-            "Support for PFS files in mikeio is experimental. The API is likely to change!"
-        )
-
         try:
             self._filename = filename
-            self._pfs2yaml()
+            self._pfs2yaml(encoding=encoding)
             self._data = yaml.load(self._yaml, Loader=yaml.CLoader)
             targets = list(self._data.keys())
             if len(targets) == 1:
@@ -90,9 +84,9 @@ class Pfs:
             df = df[df.include == 1]
         return df
 
-    def _pfs2yaml(self):
+    def _pfs2yaml(self, encoding=None):
 
-        with (open(self._filename)) as f:
+        with (open(self._filename, encoding=encoding)) as f:
             pfsstring = f.read()
 
         lines = pfsstring.split("\n")
