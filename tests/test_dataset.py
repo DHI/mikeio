@@ -11,6 +11,31 @@ from mikeio.eum import EUMType, ItemInfo, EUMUnit
 def _get_time(nt):
     return list(rrule(freq=SECONDLY, count=nt, dtstart=datetime(2000, 1, 1)))
 
+@pytest.fixture
+def ds1():
+    nt = 10
+    ne = 7
+
+    d1 = np.zeros([nt, ne]) + 0.1
+    d2 = np.zeros([nt, ne]) + 0.2
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    return Dataset(data, time, items)
+
+@pytest.fixture
+def ds2():
+    nt = 10
+    ne = 7
+
+    d1 = np.zeros([nt, ne]) + 1.0
+    d2 = np.zeros([nt, ne]) + 2.0
+    data = [d1, d2]
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    return Dataset(data, time, items)
 
 def test_get_names():
 
@@ -878,6 +903,58 @@ def test_init():
     assert ds.n_elements == n_elements
     assert ds.items[0].name == "Foo"
 
+def test_add_scalar(ds1):
+    ds2 = ds1 + 10.0
+    assert np.all(ds2[0] - ds1[0] == 10.0)
+
+    ds3 = 10.0 + ds1
+    assert np.all(ds3[0] == ds2[0])
+    assert np.all(ds3[1] == ds2[1])       
+    
+def test_sub_scalar(ds1):
+    ds2 = ds1 - 10.0
+    assert np.all(ds1[0] - ds2[0] == 10.0)
+
+    ds3 = 10.0 - ds1
+    assert np.all(ds3[0] == 9.9)
+    assert np.all(ds3[1] == 9.8) 
+
+def test_mul_scalar(ds1):
+    ds2 = ds1 * 2.0
+    assert np.all(ds2[0]*0.5 == ds1[0]) 
+
+    ds3 = 2.0 * ds1
+    assert np.all(ds3[0] == ds2[0])
+    assert np.all(ds3[1] == ds2[1])    
+
+
+def test_add_dataset(ds1, ds2):
+    ds3 = ds1 + ds2
+    assert np.all(ds3[0] == 1.1)
+    assert np.all(ds3[1] == 2.2)
+
+    ds4 = ds2 + ds1
+    assert np.all(ds3[0] == ds4[0])
+    assert np.all(ds3[1] == ds4[1])    
+
+    ds2b = ds2.copy()
+    ds2b.items[0] = ItemInfo(EUMType.Wind_Velocity)
+    with pytest.raises(ValueError):
+        # item type does not match
+        ds1 + ds2b
+
+    ds2c = ds2.copy()
+    tt = ds2c.time.to_numpy()
+    tt[-1] = tt[-1] + np.timedelta64(1, 's')
+    ds2c.time = pd.DatetimeIndex(tt)
+    with pytest.raises(ValueError):
+        # time does not match
+        ds1 + ds2c
+
+def test_sub_dataset(ds1, ds2):
+    ds3 = ds2 - ds1
+    assert np.all(ds3[0] == 0.9)
+    assert np.all(ds3[1] == 1.8)
 
 def test_non_equidistant():
     nt = 4
