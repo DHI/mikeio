@@ -309,13 +309,13 @@ class Dataset(TimeSeries):
             raise ValueError("Shape of the datasets must match")
         ds = self.copy() if copy else self 
 
-        s1 = pd.Series(np.arange(len(ds)), index=ds.time, name="idx1")
-        s2 = pd.Series(np.arange(len(other)), index=other.time, name="idx2")
+        s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
+        s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
         df12 = pd.concat([s1, s2], axis=1)
 
         newtime = df12.index
         newdata = self.create_empty_data(
-                n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape
+                n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
             )
         for j in range(ds.n_items):
             idx1 = np.where(~df12["idx1"].isna())
