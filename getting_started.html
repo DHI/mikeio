@@ -186,6 +186,21 @@
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#read-dfs0-to-dataset">
+     Read Dfs0 to Dataset
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#from-dfs0-to-pandas-dataframe">
+     From Dfs0 to pandas DataFrame
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#from-pandas-dataframe-to-dfs0">
+     From pandas DataFrame to Dfs0
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#id4">
      Example notebooks
     </a>
@@ -282,14 +297,39 @@ An ItemInfo consists of:</p>
 <div class="section" id="dfs0">
 <h2>Dfs0<a class="headerlink" href="#dfs0" title="Permalink to this headline">¶</a></h2>
 <p>A dfs0 file is also called a time series file. The MIKE IO <a class="reference external" href="api.html#mikeio.Dfs0">Dfs0 class</a> provide functionality for working with dfs0 files.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs0</span>
+<p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
+<ul class="simple">
+<li><p>mikeio.Dataset - keeps EUM information (convenient if you save data to new dfs0 file)</p></li>
+<li><p>pandas.DataFrame - utilize all the powerful methods of pandas</p></li>
+</ul>
+<div class="section" id="read-dfs0-to-dataset">
+<h3>Read Dfs0 to Dataset<a class="headerlink" href="#read-dfs0-to-dataset" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">(</span><span class="s2">&quot;testdata/da_diagnostic.dfs0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
+<div class="section" id="from-dfs0-to-pandas-dataframe">
+<h3>From Dfs0 to pandas DataFrame<a class="headerlink" href="#from-dfs0-to-pandas-dataframe" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">(</span><span class="s2">&quot;testdata/da_diagnostic.dfs0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="from-pandas-dataframe-to-dfs0">
+<h3>From pandas DataFrame to Dfs0<a class="headerlink" href="#from-pandas-dataframe-to-dfs0" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;co2-mm-mlo.csv&quot;</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=-</span><span class="mf">99.99</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">to_dfs0</span><span class="p">(</span><span class="s2">&quot;mauna_loa_co2.dfs0&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="id4">
 <h3>Example notebooks<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb">Dfs0</a> - read, write, to_dataframe, non-equidistant, accumulated timestep, extrapolation</p></li>
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Relative%20time.ipynb">Dfs0-Relative-time</a> - read file with relative time axis</p></li>
+<li><p><a class="reference external" href="https://dhi.github.io/getting-started-with-mikeio/dfs0.html">Dfs0 | getting-started-with-mikeio</a></p></li>
 </ul>
 </div>
 </div>
@@ -315,6 +355,7 @@ The MIKE IO <a class="reference external" href="api.html#mikeio.Dfs2">Dfs2 class
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb">Dfs2-Export-to-netCDF</a> Export dfs2 to NetCDF</p></li>
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb">Dfs2-GFS</a> - GFS NetCDF/xarray to dfs2</p></li>
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb">Dfs2-SST</a> - DMI NetCDF/xarray to dfs2</p></li>
+<li><p><a class="reference external" href="https://dhi.github.io/getting-started-with-mikeio/dfs2.html">Dfs2 | getting-started-with-mikeio</a></p></li>
 </ul>
 </div>
 </div>
