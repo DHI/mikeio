@@ -1,6 +1,6 @@
 import os
 import warnings
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
@@ -35,6 +35,7 @@ class Dfs0(TimeSeries):
         self._source = None
         self._dfs = None
         self._start_time = None
+        self._end_time = None
         self._n_items = None
         self._dt = None
         self._is_equidistant = None
@@ -412,6 +413,16 @@ class Dfs0(TimeSeries):
 
     @property
     def end_time(self):
+        if self._end_time is None:
+            if self._source.FileInfo.TimeAxis.IsEquidistant():
+                dt = self._source.FileInfo.TimeAxis.TimeStep
+                n_steps = self._source.FileInfo.TimeAxis.NumberOfTimeSteps
+                timespan = dt * (n_steps - 1)
+            else:
+                timespan = self._source.FileInfo.TimeAxis.TimeSpan
+
+            self._end_time = self.start_time + timedelta(seconds=timespan)
+
         return self._end_time
 
     @property
