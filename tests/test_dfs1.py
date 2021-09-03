@@ -154,3 +154,25 @@ def test_read_names_access():
     assert res.items[0].name == "testing water level"
     assert res.items[0].type == EUMType.Water_Level
     assert res.items[0].unit == EUMUnit.meter
+
+
+def test_read_start_end_time():
+
+    dfs0file = r"tests/testdata/random.dfs1"
+
+    dfs = Dfs1(dfs0file)
+    ds = dfs.read()
+
+    assert dfs.start_time == ds.start_time
+    assert dfs.end_time == ds.end_time
+
+
+def test_read_start_end_time_relative_time():
+
+    dfs0file = r"tests/testdata/physical_basin_wave_maker_signal.dfs1"
+
+    dfs = Dfs1(dfs0file)
+    ds = dfs.read()
+
+    assert dfs.start_time == ds.start_time
+    assert dfs.end_time == ds.end_time

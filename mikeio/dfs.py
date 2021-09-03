@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from abc import abstractmethod
 
 import warnings
@@ -12,7 +12,7 @@ from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
 from mikecore.eum import eumQuantity
-from mikecore.DfsFile import DfsSimpleType
+from mikecore.DfsFile import DfsSimpleType, TimeAxisType
 from mikecore.DfsFactory import DfsFactory
 
 
@@ -99,7 +99,14 @@ class _Dfs123(TimeSeries):
         dfs = self._dfs
         self._n_items = len(dfs.ItemInfo)
         self._items = self._get_item_info(list(range(self._n_items)))
-        self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
+        if self._timeaxistype in {
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
+        }:
+            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+        else:  # relative time axis
+            self._start_time = datetime(1970, 1, 1)
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
