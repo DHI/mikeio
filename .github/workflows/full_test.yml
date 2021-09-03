@@ -40,4 +40,4 @@ jobs:
         pip install .[test]
     - name: Test with pytest
       run: |
-        pytest --cov=mikeio tests --ignore tests/performance/
+        pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/
