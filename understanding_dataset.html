@@ -296,6 +296,13 @@ including different ways of <em>selecting</em> data:</p>
 <li><p><a class="reference external" href="api.html#mikeio.Dataset.average">average()</a> - Compute the weighted average along the specified axis.</p></li>
 <li><p><a class="reference external" href="api.html#mikeio.Dataset.aggregate">aggregate()</a> - Aggregate along an axis</p></li>
 </ul>
+<p><em>Mathematical operations</em> +, - and * with numerical values:
+* ds + value
+* ds - value
+* ds * value</p>
+<p>and + and - between two Datasets (if number of items and shapes conform):
+* ds1 + ds2
+* ds1 - ds2</p>
 <p>Other methods that also return a Dataset:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="api.html#mikeio.Dataset.interp_time">interp_time()</a> - Temporal interpolation (<a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb">Time interpolation notebook</a>)</p></li>
