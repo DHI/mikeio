@@ -280,18 +280,32 @@ class Dataset(TimeSeries):
 
         return Dataset(data, time, items)
 
+    def to_numpy(self):
+        """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)"""
+        return np.stack(self.data)
+
     @classmethod
     def combine(cls, datasets):
+        """Combine n Datasets either along items or time axis"""
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
-            ds._combine(dsj, copy=False)
+            ds = ds._combine(dsj, copy=False)
+        return ds
 
     def _combine(self, other, copy=True):
         try:
-            self._concat_time(other, copy=copy)
+            ds = self._concat_time(other, copy=copy)
         except ValueError:
-            self._append_items(other, copy=copy)
-            
+            ds = self._append_items(other, copy=copy)
+        return ds
+
+    def append_items(self, other, inplace=True):
+        """Append items from other Dataset to this Dataset"""        
+        if inplace:
+            self._append_items(other, copy=False)
+        else:
+            return self._append_items(other, copy=True)
+
     def _append_items(self, other, copy=True):
         if not np.all(self.time == other.time):
             # if not: create common time? 
@@ -302,6 +316,15 @@ class Dataset(TimeSeries):
             ds.items.append(other.items[j])
             ds.data.append(other.data[j])
         return ds
+
+    def concat(self, other, inplace=True):
+        """Concatenate this Dataset with data from other Dataset"""
+        if inplace:
+            ds = self._concat_time(other, copy=False)
+            self.data = ds.data
+            self.time = ds.time
+        else:
+            return self._concat_time(other, copy=True)
 
     def _concat_time(self, other, copy=True):
         self._check_all_items_match(other)
