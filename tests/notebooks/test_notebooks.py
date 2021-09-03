@@ -7,7 +7,7 @@ from nbconvert.preprocessors import CellExecutionError
 
 _TEST_DIR = os.path.dirname(os.path.abspath(__file__))
 PARENT_DIR = os.path.join(_TEST_DIR, '../..')
-SKIP_LIST = ["Dfs2 - Boundary.ipynb"] #["Dfs2 - Global Forecasting System", "Dfs3 - Temperature"]
+SKIP_LIST = []
 
 def _process_notebook(notebook_filename, notebook_path = 'notebooks'):
     '''Checks if an IPython notebook runs without error from start to finish. If so, writes the notebook to HTML (with outputs) and overwrites the .ipynb file (without outputs).
@@ -15,7 +15,7 @@ def _process_notebook(notebook_filename, notebook_path = 'notebooks'):
     with open(notebook_filename) as f:
         nb = nbformat.read(f, as_version=4)
     
-    ep = ExecutePreprocessor(timeout=600, kernel_name='python3') # , allow_errors=True
+    ep = ExecutePreprocessor(timeout=600, kernel_name='python3') 
 
     try:
         # Check that the notebook runs
