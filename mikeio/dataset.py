@@ -160,7 +160,7 @@ class Dataset(TimeSeries):
         return str.join("\n", out)
 
     def describe(self, **kwargs):
-        """Generate descriptive statistics"""
+        """Generate descriptive statistics by wrapping pandas descibe()"""
         all_df = [pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(**kwargs) for j in range(self.n_items)]
         return pd.concat(all_df, axis=1)
 
