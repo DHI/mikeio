@@ -46,3 +46,10 @@ def test_create_info_with_type_only_positional():
 
     assert item.name == "Water Level"
     assert item.type == EUMType.Water_Level
+
+
+def test_eum_type_search():
+
+    types = EUMType.search("velocity")
+
+    assert len(types) > 0
