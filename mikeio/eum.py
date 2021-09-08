@@ -216,7 +216,7 @@ class EUMType(IntEnum):
     Accumulated_transport_per_meter = 100096
     Significant_wave_height = 100097
     Critical_Shields_parameter = 100098
-    # Phib_angle_og_bed_velocity = 100099
+    AngleBedVelocity = 100099
     Profile_number = 100100
     Climate_number = 100101
     Spectral_description = 100102
