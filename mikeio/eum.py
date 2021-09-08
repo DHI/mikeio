@@ -12,8 +12,8 @@ Examples
 degree Kelvin
 
 """
-# from DHI.Generic.MikeZero import EUMWrapper
-from mikecore.eum import eumDLL, eumWrapper
+from typing import List
+from mikecore.eum import eumWrapper
 from enum import IntEnum
 
 from mikeio.helpers import to_datatype
@@ -116,6 +116,7 @@ class EUMType(IntEnum):
     >>> EUMType.Temperature.units
     [degree Celsius, degree Fahrenheit, degree Kelvin]
     """
+
     Water_Level = 100000
     Discharge = 100001
     Wind_Velocity = 100002
@@ -712,12 +713,12 @@ class EUMType(IntEnum):
     def units(self):
         """List valid units for this EUM type"""
         temp = unit_list(self.code).items()
-        return [EUMUnit(value) for key, value in temp]
+        return [EUMUnit(value) for _, value in temp]
 
     @staticmethod
-    def search(pattern):
+    def search(pattern) -> List["EUMType"]:
         temp = type_list(pattern).items()
-        return [EUMType(key) for key, value in temp]
+        return [EUMType(key) for key, _ in temp]
 
 
 class EUMUnit(IntEnum):
@@ -729,6 +730,7 @@ class EUMUnit(IntEnum):
     >>> EUMUnit.degree_Kelvin
     degree Kelvin
     """
+
     meter = 1000
     kilometer = 1001
     centimeter = 1007
