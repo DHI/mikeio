@@ -271,6 +271,11 @@ class Dataset(TimeSeries):
         time = self.time.copy()
         return Dataset(data, time, items)
 
+    def describe(self, **kwargs):
+        """Generate descriptive statistics by wrapping pandas describe()"""
+        all_df = [pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(**kwargs) for j in range(self.n_items)]
+        return pd.concat(all_df, axis=1)
+
     def copy(self):
         """Returns a copy of this dataset."""
 
