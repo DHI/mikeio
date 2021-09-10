@@ -391,3 +391,21 @@ def test_time_average(tmpdir):
     assert org.shape[1] == averaged.shape[1]
     assert averaged.shape[0] == 1
     assert np.allclose(org.mean(axis=0)[0], averaged[0])
+
+
+def test_time_average_deletevalues(tmpdir):
+
+    infilename = "tests/testdata/gebco_sound.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "gebco_sound_avg.dfs2")
+    avg_time(infilename, outfilename)
+
+    org = mikeio.read(infilename)
+    averaged = mikeio.read(outfilename)
+
+    assert all([a == b for a, b in zip(org.items, averaged.items)])
+    assert org.time[0] == averaged.time[0]
+    assert org.shape[1] == averaged.shape[1]
+    nan1 = np.isnan(org[0])
+    nan2 = np.isnan(averaged[0])
+    assert np.all(nan1 == nan2)
+    assert np.allclose(org[0][~nan1], averaged[0][~nan2])

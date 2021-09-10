@@ -448,7 +448,7 @@ def _parse_start_end(dfs_i, start, end):
     return file_start_new, start_step, start_sec, end_step, end_sec
 
 
-def avg_time(infilename: str, outfilename: str):
+def avg_time(infilename: str, outfilename: str, skipna=True):
     """Create a temporally averaged dfs file
 
     Parameters
@@ -457,6 +457,8 @@ def avg_time(infilename: str, outfilename: str):
         input filename
     outfilename : str
         output filename
+    skipna : bool
+        exclude NaN/delete values when computing the result, default True
     """
 
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
@@ -471,22 +473,38 @@ def avg_time(infilename: str, outfilename: str):
     deletevalue = dfs_i.FileInfo.DeleteValueFloat
 
     outdatalist = []
+    steps_list = []
 
+    # step 0
     for item in item_numbers:
         indatatime = dfs_i.ReadItemTimeStep(item + 1, 0.0)
-        indata = indatatime.Data.astype(np.float64)
-        outdatalist.append(indata)
+        indata = indatatime.Data
+        has_value = indata != deletevalue
+        indata[~has_value] = np.nan
+        outdatalist.append(indata.astype(np.float64))
+        step0 = np.zeros_like(indata, dtype=np.int32)
+        step0[has_value] = 1
+        steps_list.append(step0)
 
     for timestep in trange(1, n_time_steps, disable=not show_progress):
         for item in range(n_items):
 
             itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             d = itemdata.Data
-            # d[d == deletevalue] = np.nan
+            has_value = d != deletevalue
 
-            outdatalist[item] = outdatalist[item] + d
+            outdatalist[item][has_value] += d[has_value]
+            steps_list[item][has_value] += 1
 
     for item in range(n_items):
-        darray = outdatalist[item].astype(np.float32) / float(n_time_steps)
+        darray = np.zeros_like(outdatalist[item], dtype=np.float32)
+        if skipna:
+            has_value = steps_list[item] == n_time_steps
+        else:
+            has_value = steps_list[item] > 0
+        darray[has_value] = outdatalist[item][has_value].astype(
+            np.float32
+        ) / steps_list[item][has_value].astype(np.float32)
+        darray[~has_value] = deletevalue
         dfs_o.WriteItemTimeStepNext(0.0, darray)
     dfs_o.Close()
