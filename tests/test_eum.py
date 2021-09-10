@@ -54,3 +54,10 @@ def test_equality():
     item2 = ItemInfo("Foo", EUMType.Water_Level)
 
     assert item1 == item2
+
+    
+def test_eum_type_search():
+
+    types = EUMType.search("velocity")
+
+    assert len(types) > 0

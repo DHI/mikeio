@@ -12,9 +12,9 @@ Examples
 degree Kelvin
 
 """
-# from DHI.Generic.MikeZero import EUMWrapper
+from typing import List
 from mikecore.DfsFile import DataValueType
-from mikecore.eum import eumDLL, eumWrapper
+from mikecore.eum import eumWrapper
 from enum import IntEnum
 
 from mikeio.helpers import to_datatype
@@ -107,6 +107,16 @@ class TimeStepUnit(IntEnum):
 
 
 class EUMType(IntEnum):
+    """EUM type
+
+    Examples
+    --------
+    >>> from mikeio.eum import EUMType
+    >>> EUMType.Temperature
+    <EUMType.Temperature: 100006>
+    >>> EUMType.Temperature.units
+    [degree Celsius, degree Fahrenheit, degree Kelvin]
+    """
 
     Water_Level = 100000
     Discharge = 100001
@@ -207,7 +217,7 @@ class EUMType(IntEnum):
     Accumulated_transport_per_meter = 100096
     Significant_wave_height = 100097
     Critical_Shields_parameter = 100098
-    # Phib_angle_og_bed_velocity = 100099
+    AngleBedVelocity = 100099
     Profile_number = 100100
     Climate_number = 100101
     Spectral_description = 100102
@@ -691,6 +701,7 @@ class EUMType(IntEnum):
 
     @property
     def display_name(self):
+        """Display friendly name"""
         name = self.name
         name = name.replace("_", " ")
         return name
@@ -701,16 +712,26 @@ class EUMType(IntEnum):
 
     @property
     def units(self):
+        """List valid units for this EUM type"""
         temp = unit_list(self.code).items()
-        return [EUMUnit(value) for key, value in temp]
+        return [EUMUnit(value) for _, value in temp]
 
     @staticmethod
-    def search(pattern):
+    def search(pattern) -> List["EUMType"]:
         temp = type_list(pattern).items()
-        return [EUMType(key) for key, value in temp]
+        return [EUMType(key) for key, _ in temp]
 
 
 class EUMUnit(IntEnum):
+    """EUM unit
+
+    Examples
+    --------
+    >>> from mikeio.eum import EUMUnit
+    >>> EUMUnit.degree_Kelvin
+    degree Kelvin
+    """
+
     meter = 1000
     kilometer = 1001
     centimeter = 1007
@@ -1274,6 +1295,7 @@ class EUMUnit(IntEnum):
 
     @property
     def display_name(self):
+        """Display friendly name"""
         name = self.name
         name = name.replace("_", " ")
         return name
@@ -1374,3 +1396,4 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
+            

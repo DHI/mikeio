@@ -481,3 +481,55 @@ def test_write_non_equidistant_data(tmpdir):
     ds3 = dfs2.read()
 
     assert not ds3.is_equidistant
+
+
+def test_incremental_write_from_dfs2(tmpdir):
+    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
+
+    sourcefilename = "tests/testdata/eq.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "appended.dfs2")
+    dfs = Dfs2(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read(time_steps=[0])
+
+    dfs_to_write = Dfs2()
+    dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True)
+
+    for i in range(1, nt):
+        ds = dfs.read(time_steps=[i])
+        dfs_to_write.append(ds)
+
+    dfs_to_write.close()
+
+    newdfs = Dfs2(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time
+
+
+def test_incremental_write_from_dfs2_context_manager(tmpdir):
+    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
+
+    sourcefilename = "tests/testdata/eq.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "appended.dfs2")
+    dfs = Dfs2(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read(time_steps=[0])
+
+    dfs_to_write = Dfs2()
+    with dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True) as f:
+
+        for i in range(1, nt):
+            ds = dfs.read(time_steps=[i])
+            f.append(ds)
+
+        # dfs_to_write.close() # called automagically by context manager
+
+    newdfs = Dfs2(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time

@@ -139,7 +139,7 @@ class Dataset(TimeSeries):
             )
 
         self.data = data
-        self.time = pd.DatetimeIndex(time, freq="infer")
+        self.time = pd.DatetimeIndex(time)
 
         self._items = item_infos
 
@@ -148,6 +148,8 @@ class Dataset(TimeSeries):
         out = ["<mikeio.Dataset>"]
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+        if not self.is_equidistant:
+            out.append("-- Non-equidistant calendar axis --")
         if self.n_items > 10:
             out.append(f"Number of items: {self.n_items}")
         else:
@@ -199,8 +201,83 @@ class Dataset(TimeSeries):
 
         raise ValueError(f"indexing with a {type(x)} is not (yet) supported")
 
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __add__(self, other):
+        if isinstance(other, self.__class__):
+            return self._add_dataset(other)
+        else:
+            return self._add_value(other)
+
+    def __rsub__(self, other):
+        ds = self.__mul__(-1.0)
+        return other + ds
+
+    def __sub__(self, other):
+        if isinstance(other, self.__class__):
+            return self._add_dataset(other, sign=-1.0)
+        else:
+            return self._add_value(-other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __mul__(self, other):
+        if isinstance(other, self.__class__):
+            raise NotImplemented("Multiplication is not implemented for two Datasets")
+        else:
+            return self._multiply_value(other)
+
+    def _add_dataset(self, other, sign=1.0):        
+        self._check_datasets_match(other)
+        try:
+            data = [self[x] + sign*other[y] for x, y in zip(self.items, other.items)]
+        except:
+            raise ValueError("Could not add data in Dataset")
+        time = self.time.copy()
+        items = deepcopy(self.items)
+        return Dataset(data, time, items) 
+
+    def _check_datasets_match(self, other):
+        if self.n_items != other.n_items:
+            raise ValueError(f"Number of items must match ({self.n_items} and {other.n_items})")
+        for j in range(self.n_items):
+            if self.items[j].type != other.items[j].type:
+                raise ValueError(f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}")
+            if self.items[j].unit != other.items[j].unit:
+                raise ValueError(f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}")            
+        if not np.all(self.time == other.time):
+            raise ValueError("All timesteps must match")
+        if self.shape != other.shape:
+            raise ValueError("shape must match")    
+
+    def _add_value(self, value):
+        try:
+            data = [value + self[x] for x in self.items]
+        except:
+            raise ValueError(f"{value} could not be added to Dataset")        
+        items = deepcopy(self.items)
+        time = self.time.copy()
+        return Dataset(data, time, items)
+
+
+    def _multiply_value(self, value):
+        try:
+            data = [value * self[x] for x in self.items]
+        except:
+            raise ValueError(f"{value} could not be multiplied to Dataset")        
+        items = deepcopy(self.items)
+        time = self.time.copy()
+        return Dataset(data, time, items)
+
+    def describe(self, **kwargs):
+        """Generate descriptive statistics by wrapping pandas describe()"""
+        all_df = [pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(**kwargs) for j in range(self.n_items)]
+        return pd.concat(all_df, axis=1)
+
     def copy(self):
-        "Returns a copy of this dataset."
+        """Returns a copy of this dataset."""
 
         items = deepcopy(self.items)
         data = [self[x].copy() for x in self.items]
@@ -209,7 +286,7 @@ class Dataset(TimeSeries):
         return Dataset(data, time, items)
 
     def dropna(self):
-        "Remove time steps where all items are NaN"
+        """Remove time steps where all items are NaN"""
 
         # TODO consider all items
         x = self[0]
@@ -222,7 +299,7 @@ class Dataset(TimeSeries):
         return self.isel(idx, axis=0)
 
     def flipud(self):
-        "Flip dataset updside down"
+        """Flip dataset updside down"""
 
         self.data = [np.flip(self[x], axis=1) for x in self.items]
         return self
@@ -279,7 +356,6 @@ class Dataset(TimeSeries):
 
     def aggregate(self, axis=1, func=np.nanmean):
         """Aggregate along an axis
-
 
         Parameters
         ----------
@@ -451,21 +527,21 @@ class Dataset(TimeSeries):
         return self.aggregate(axis=axis, func=np.nanmean)
 
     def head(self, n=5):
-        "Return the first n timesteps"
+        """Return the first n timesteps"""
         nt = len(self.time)
         n = min(n, nt)
         time_steps = range(n)
         return self.isel(time_steps, axis=0)
 
     def tail(self, n=5):
-        "Return the last n timesteps"
+        """Return the last n timesteps"""
         nt = len(self.time)
         start = max(0, nt - n)
         time_steps = range(start, nt)
         return self.isel(time_steps, axis=0)
 
     def thin(self, step):
-        "Return every n:th timesteps"
+        """Return every n:th timesteps"""
         nt = len(self.time)
         time_steps = range(0, nt, step)
         return self.isel(time_steps, axis=0)
@@ -575,7 +651,7 @@ class Dataset(TimeSeries):
         )
         return interpolator(outtime)
 
-    def to_dataframe(self, unit_in_name=False):
+    def to_dataframe(self, unit_in_name=False, round_time="ms"):
         """Convert Dataset to a Pandas DataFrame
 
         Parameters
@@ -603,7 +679,11 @@ class Dataset(TimeSeries):
         data = np.asarray(self.data).T
         df = pd.DataFrame(data, columns=names)
 
-        df.index = pd.DatetimeIndex(self.time, freq="infer")
+        if round_time:
+            rounded_idx = pd.DatetimeIndex(self.time).round(round_time)
+            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
+        else:
+            df.index = pd.DatetimeIndex(self.time, freq="infer")
 
         return df
 
@@ -704,8 +784,8 @@ class Dataset(TimeSeries):
         """Is Dataset equidistant in time?"""
         if len(self.time) < 3:
             return True
-
-        return self.time.freq is not None
+        return len(self.time.to_series().diff().dropna().unique()) == 1
+        # return self.time.freq is not None
 
     @property
     def start_time(self):

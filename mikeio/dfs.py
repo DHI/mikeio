@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from abc import abstractmethod
 
 import warnings
@@ -12,7 +12,7 @@ from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
 from mikecore.eum import eumQuantity
-from mikecore.DfsFile import DfsSimpleType
+from mikecore.DfsFile import DfsSimpleType, TimeAxisType
 from mikecore.DfsFactory import DfsFactory
 
 
@@ -99,7 +99,14 @@ class _Dfs123(TimeSeries):
         dfs = self._dfs
         self._n_items = len(dfs.ItemInfo)
         self._items = self._get_item_info(list(range(self._n_items)))
-        self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
+        if self._timeaxistype in {
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
+        }:
+            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+        else:  # relative time axis
+            self._start_time = datetime(1970, 1, 1)
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
@@ -115,7 +122,16 @@ class _Dfs123(TimeSeries):
         dfs.Close()
 
     def _write(
-        self, filename, data, start_time, dt, datetimes, items, coordinate, title
+        self,
+        filename,
+        data,
+        start_time,
+        dt,
+        datetimes,
+        items,
+        coordinate,
+        title,
+        keep_open=False,
     ):
 
         if isinstance(data, Dataset) and not data.is_equidistant:
@@ -151,6 +167,7 @@ class _Dfs123(TimeSeries):
             self._start_time = start_time
 
         dfs = self._setup_header(filename)
+        self._dfs = dfs
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
@@ -169,9 +186,59 @@ class _Dfs123(TimeSeries):
                     d = np.flipud(d)
                     darray = d.reshape(d.size, 1)[:, 0]
 
-                dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                if self._is_equidistant:
+                    dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                else:
+                    t = datetimes[i]
+                    relt = (t - self._start_time).total_seconds()
+                    dfs.WriteItemTimeStepNext(relt, darray.astype(np.float32))
 
-        dfs.Close()
+        if not keep_open:
+            dfs.Close()
+        else:
+            return self
+
+    def append(self, data):
+        """Append to a dfs file opened with `write(...,keep_open=True)`
+
+        Parameters
+        -----------
+        data: list[np.array]
+        """
+
+        deletevalue = self._dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
+
+        for i in trange(self._n_timesteps, disable=not self.show_progress):
+            for item in range(self._n_items):
+
+                d = data[item][i]
+                d = d.copy()  # to avoid modifying the input
+                d[np.isnan(d)] = deletevalue
+
+                if self._ndim == 1:
+                    darray = d
+
+                if self._ndim == 2:
+                    d = d.reshape(self.shape[1:])
+                    d = np.flipud(d)
+                    darray = d.reshape(d.size, 1)[:, 0]
+
+                if self._is_equidistant:
+                    self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                else:
+                    raise NotImplementedError(
+                        "Append is not yet available for non-equidistant files"
+                    )
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self._dfs.Close()
+
+    def close(self):
+        "Finalize write for a dfs file opened with `write(...,keep_open=True)`"
+        self._dfs.Close()
 
     def _write_handle_common_arguments(
         self, title, data, items, coordinate, start_time, dt
