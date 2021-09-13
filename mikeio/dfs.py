@@ -34,7 +34,7 @@ class _Dfs123(TimeSeries):
     show_progress = False
 
     def __init__(self, filename=None):
-        self._filename = filename
+        self._filename = str(filename)
 
     def read(self, items=None, time_steps=None):
         """

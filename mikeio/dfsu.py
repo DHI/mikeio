@@ -1819,8 +1819,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
         super().__init__()
-        self._filename = filename
-        self._read_header(filename)
+        self._filename = str(filename)
+        self._read_header(self._filename)
         self._dtype = dtype
 
         # show progress bar for large files
@@ -2054,9 +2054,13 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             assert isinstance(track, pd.DataFrame)
             times = track.index
             coords = track.iloc[:, 0:2].to_numpy(copy=True)
-        
-        assert isinstance(times, pd.DatetimeIndex), "The index must be a pandas.DatetimeIndex"
-        assert times.is_monotonic_increasing, "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
+
+        assert isinstance(
+            times, pd.DatetimeIndex
+        ), "The index must be a pandas.DatetimeIndex"
+        assert (
+            times.is_monotonic_increasing
+        ), "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
 
         data_list = []
         data_list.append(coords[:, 0])  # longitude
@@ -2092,7 +2096,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         # spatial interpolation
         n_pts = 1 if method == "nearest" else 5
-        elem_ids, weights = self.get_2d_interpolant(coords[i_start : (i_end + 1)], n_nearest=n_pts)
+        elem_ids, weights = self.get_2d_interpolant(
+            coords[i_start : (i_end + 1)], n_nearest=n_pts
+        )
 
         # initialize dfsu data arrays
         d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
@@ -2114,7 +2120,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             return step >= self.n_timesteps
 
         # loop over track points
-        for i_interp, i in enumerate(trange(i_start, i_end + 1, disable=not self.show_progress)):
+        for i_interp, i in enumerate(
+            trange(i_start, i_end + 1, disable=not self.show_progress)
+        ):
             t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
@@ -2308,6 +2316,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         keep_open: bool, optional
             Keep file open for appending
         """
+        filename = str(filename)
 
         if isinstance(data, Dataset):
             items = data.items
