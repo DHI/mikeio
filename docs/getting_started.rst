@@ -14,10 +14,10 @@ Resources
 
 Dataset
 *******
-The `Dataset <api.html#mikeio.Dataset>`_ is the common MIKE IO data structure for data read from dfs files. 
+The `Dataset <dataset.html#mikeio.Dataset>`_ is the common MIKE IO data structure for data read from dfs files. 
 All `read()` methods in MIKE IO returns a Dataset with the three main properties:
 
-* items - a list of `ItemInfo <api.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
+* items - a list of `ItemInfo <eum.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
 * time - a pandas.DateTimeIndex with the time instances of the data
 * data - a list of NumPy arrays---one for each item
 
@@ -29,7 +29,7 @@ Common dfs functionality
 All Dfs classes and the Dataset class are representations of timeseries and 
 share these properties: 
 
-* items - a list of `ItemInfo <api.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
+* items - a list of `ItemInfo <eum.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
 * n_items - Number of items
 * n_timesteps - Number of timesteps
 * start_time - First time instance (as datetime)
@@ -44,12 +44,12 @@ All Dfs classes have these methods:
 
 Items, ItemInfo and EUM
 ***********************
-The dfs items in MIKE IO are represented by the `ItemInfo class <api.html#mikeio.eum.ItemInfo>`_. 
+The dfs items in MIKE IO are represented by the `ItemInfo class <eum.html#mikeio.eum.ItemInfo>`_. 
 An ItemInfo consists of:
 
 * name - a user-defined string 
-* type - an `EUMType <api.html#mikeio.eum.EUMType>`_ 
-* unit - an `EUMUnit <api.html#mikeio.eum.EUMUnit>`_
+* type - an `EUMType <eum.html#mikeio.eum.EUMType>`_ 
+* unit - an `EUMUnit <eum.html#mikeio.eum.EUMUnit>`_
 
 .. code-block:: python
 
@@ -65,7 +65,7 @@ See the `Units notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/mai
 
 Dfs0
 ****
-A dfs0 file is also called a time series file. The MIKE IO `Dfs0 class <api.html#mikeio.Dfs0>`_ provide functionality for working with dfs0 files.  
+A dfs0 file is also called a time series file. The MIKE IO `Dfs0 class <dfs0.html#mikeio.Dfs0>`_ provide functionality for working with dfs0 files.  
 
 Working with data from dfs0 files are conveniently done in one of two ways:
 
@@ -109,7 +109,7 @@ Example notebooks
 Dfs2
 ****
 A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell. 
-The MIKE IO `Dfs2 class <api.html#mikeio.Dfs2>`_ provide functionality for working with dfs2 files.  
+The MIKE IO `Dfs2 class <dfs123.html#mikeio.Dfs2>`_ provide functionality for working with dfs2 files.  
 
 .. code-block:: python
 
@@ -134,17 +134,16 @@ Example notebooks
 
 Generic dfs
 ***********
-MIKE IO has `generic dfs <api.html#module-mikeio.generic>`_ functionality that works for all dfs files: 
+MIKE IO has `generic dfs <generic.html#module-mikeio.generic>`_ functionality that works for all dfs files: 
 
-* `read() <api.html#mikeio.read>`_ - Read all data to a Dataset
-* `concat() <api.html#mikeio.generic.extract>`_ - Concatenates files along the time axis
-* `extract() <api.html#mikeio.generic.extract>`_ - Extract timesteps and/or items to a new dfs file
-* `diff() <api.html#mikeio.generic.diff>`_ - Calculate difference between two dfs files
-* `sum() <api.html#mikeio.generic.extract>`_ - Calculate the sum of two dfs files
-* `scale() <api.html#mikeio.generic.extract>`_ - Apply scaling to any dfs file
+* `read() <generic.html#mikeio.read>`_ - Read all data to a Dataset
+* `concat() <generic.html#mikeio.generic.extract>`_ - Concatenates files along the time axis
+* `extract() <generic.html#mikeio.generic.extract>`_ - Extract timesteps and/or items to a new dfs file
+* `diff() <generic.html#mikeio.generic.diff>`_ - Calculate difference between two dfs files
+* `sum() <generic.html#mikeio.generic.extract>`_ - Calculate the sum of two dfs files
+* `scale() <generic.html#mikeio.generic.extract>`_ - Apply scaling to any dfs file
 
 All methods except read() create a new dfs file.
-
 
 .. code-block:: python
 
