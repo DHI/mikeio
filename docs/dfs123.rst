@@ -3,8 +3,50 @@
 Dfs1, Dfs2 and Dfs3
 *******************
 
+MIKE IO has a similar API for the three gridded dfs file types: Dfs1, Dfs2 and Dfs2. 
+
+All Dfs classes (and the Dataset) class are representations of timeseries and 
+share these properties: 
+
+* items - a list of `ItemInfo <eum.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
+* n_items - Number of items
+* n_timesteps - Number of timesteps
+* start_time - First time instance (as datetime)
+* end_time - Last time instance (as datetime)
+* deletevalue - File delete value (NaN value)
+
+All Dfs classes have these methods:
+
+* read(items, time_steps, ...)
+* write(filename, data, ...)
 
 
+Dfs2
+----
+
+A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell. 
+The MIKE IO `Dfs2 class <#mikeio.Dfs2>`_ provide functionality for working with dfs2 files.  
+
+.. code-block:: python
+
+    >>> from mikeio import Dfs2
+    >>> dfs = Dfs2("testdata/gebco_sound.dfs2")
+    <mikeio.Dfs2>
+    dx: 0.00417
+    dy: 0.00417
+    Items:
+    0:  Elevation <Total Water Depth> (meter)
+    Time: time-invariant file (1 step)   
+
+
+Dfs2 Example notebooks
+----------------------
+* `Dfs2-Bathymetry <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb>`_ - GEBCO NetCDF/xarray to dfs2 
+* `Dfs2-Boundary <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb>`_ - Vertical transect dfs2, interpolation in time 
+* `Dfs2-Export-to-netCDF <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb>`_ Export dfs2 to NetCDF
+* `Dfs2-GFS <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb>`_ - GFS NetCDF/xarray to dfs2
+* `Dfs2-SST <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb>`_ - DMI NetCDF/xarray to dfs2 
+* `Dfs2 | getting-started-with-mikeio <https://dhi.github.io/getting-started-with-mikeio/dfs2.html>`_
 
 
 Dfs1 API
