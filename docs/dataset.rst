@@ -1,7 +1,7 @@
-.. _understanding_dataset:
+.. _dataset:
 
-Understanding Dataset
-*********************
+Dataset
+*******
 The `Dataset <api.html#mikeio.Dataset>`_ is the common MIKE IO data structure 
 for data from dfs files. 
 All `read()` methods in MIKE IO return a Dataset with three main properties:
@@ -133,3 +133,11 @@ Other methods that also return a Dataset:
 
 * `to_dataframe() <api.html#mikeio.Dataset.to_dataframe>`_ - Convert Dataset to a Pandas DataFrame
 * `to_dfs0() <api.html#mikeio.Dataset.to_dfs0>`_ - Write Dataset to a Dfs0 file
+
+
+
+Dataset API
+-----------
+.. autoclass:: mikeio.Dataset
+	:members:
+	:inherited-members:

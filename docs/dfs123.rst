@@ -1,0 +1,20 @@
+.. _dfs123:
+
+Dfs1, Dfs2 and Dfs3
+*******************
+
+
+
+
+
+Dfs1 API
+--------
+.. autoclass:: mikeio.Dfs1
+	:members:
+	:inherited-members:
+
+Dfs2 API
+--------
+.. autoclass:: mikeio.Dfs2
+	:members:
+	:inherited-members:
