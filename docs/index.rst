@@ -25,7 +25,7 @@ See our sister library `MIKE IO 1D <https://github.com/DHI/mikeio1d>`_ for .res1
    dataset
    dfs0
    dfs123
-   dfsu
-   generic
+   dfsu   
    eum
+   generic
    
