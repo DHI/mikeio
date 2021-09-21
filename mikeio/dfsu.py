@@ -628,6 +628,11 @@ class _UnstructuredGeometry:
         self._tree2d = cKDTree(xy)
 
     def _find_n_nearest_2d_elements(self, x, y=None, n=1):
+        if n > self.geometry2d.n_elements:
+            raise ValueError(
+                f"Cannot find {n} nearest! Number of 2D elements: {self.geometry2d.n_elements}"
+            )
+
         if self._tree2d is None:
             self._create_tree2d()
 
