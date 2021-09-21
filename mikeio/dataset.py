@@ -1,5 +1,5 @@
 import warnings
-from typing import Sequence, Union, List
+from typing import Iterable, Sequence, Union, List
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -313,8 +313,13 @@ class Dataset(TimeSeries):
         return np.stack(self.data)
 
     @classmethod
-    def combine(cls, datasets):
+    def combine(cls, *datasets):
         """Combine n Datasets either along items or time axis"""
+
+        if isinstance(datasets[0], Iterable):
+            if isinstance(datasets[0][0], Dataset):
+                datasets = datasets[0]
+
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
             ds = ds._combine(dsj, copy=False)
@@ -327,7 +332,7 @@ class Dataset(TimeSeries):
             ds = self._append_items(other, copy=copy)
         return ds
 
-    def append_items(self, other, inplace=True):
+    def append_items(self, other, inplace=False):
         """Append items from other Dataset to this Dataset"""
         if inplace:
             self._append_items(other, copy=False)
@@ -345,7 +350,7 @@ class Dataset(TimeSeries):
             ds.data.append(other.data[j])
         return ds
 
-    def concat(self, other, inplace=True):
+    def concat(self, other, inplace=False):
         """Concatenate this Dataset with data from other Dataset"""
         if inplace:
             ds = self._concat_time(other, copy=False)
