@@ -1,4 +1,6 @@
-from mikeio.eum import EUMType, ItemInfo
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
+from mikecore.eum import eumItem, eumUnit
 
 
 def test_item_is_equivalent_to_int():
@@ -53,3 +55,15 @@ def test_eum_type_search():
     types = EUMType.search("velocity")
 
     assert len(types) > 0
+
+
+def test_eum_conversion():
+    """Verify that all EUM types and units in mikecore have equivalents in MIKE IO"""
+
+    for code in eumItem:
+        EUMType(code)
+
+    for code in eumUnit:
+        EUMUnit(code)
+
+    assert True
