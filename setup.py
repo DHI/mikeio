@@ -5,9 +5,9 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.7.dev1",
+    version="0.7.dev3",
     install_requires=[
-        "mikecore",
+        "mikecore>=0.1.2",
         "numpy",
         "pandas",
         "scipy",
@@ -59,4 +59,5 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Topic :: Scientific/Engineering",
     ],
+    python_requires=">=3.6",
 )

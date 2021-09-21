@@ -162,31 +162,44 @@ class Dataset(TimeSeries):
     def __len__(self):
         return len(self.items)
 
-    def __getitem__(self, x):
+    def __setitem__(self, key, value):
 
-        if isinstance(x, slice):
-            s = self.time.slice_indexer(x.start, x.stop)
+        if isinstance(key, int):
+            self.data[key] = value
+
+        elif isinstance(key, str):
+            item_lookup = {item.name: i for i, item in enumerate(self.items)}
+            key = item_lookup[key]
+            self.data[key] = value
+        else:
+
+            raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
+
+    def __getitem__(self, key):
+
+        if isinstance(key, slice):
+            s = self.time.slice_indexer(key.start, key.stop)
             time_steps = list(range(s.start, s.stop))
             return self.isel(time_steps, axis=0)
 
-        if isinstance(x, int):
-            return self.data[x]
+        if isinstance(key, int):
+            return self.data[key]
 
-        if isinstance(x, str):
+        if isinstance(key, str):
             item_lookup = {item.name: i for i, item in enumerate(self.items)}
-            x = item_lookup[x]
-            return self.data[x]
+            key = item_lookup[key]
+            return self.data[key]
 
-        if isinstance(x, ItemInfo):
-            return self.__getitem__(x.name)
+        if isinstance(key, ItemInfo):
+            return self.__getitem__(key.name)
 
-        if isinstance(x, list):
+        if isinstance(key, list):
             data = []
             items = []
 
             item_lookup = {item.name: i for i, item in enumerate(self.items)}
 
-            for v in x:
+            for v in key:
                 data_item = self.__getitem__(v)
                 if isinstance(v, str):
                     i = item_lookup[v]
@@ -199,7 +212,7 @@ class Dataset(TimeSeries):
 
             return Dataset(data, self.time, items)
 
-        raise ValueError(f"indexing with a {type(x)} is not (yet) supported")
+        raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -229,47 +242,62 @@ class Dataset(TimeSeries):
         else:
             return self._multiply_value(other)
 
-    def _add_dataset(self, other, sign=1.0):        
+    def _add_dataset(self, other, sign=1.0):
         self._check_datasets_match(other)
         try:
-            data = [self[x] + sign*other[y] for x, y in zip(self.items, other.items)]
+            data = [self[x] + sign * other[y] for x, y in zip(self.items, other.items)]
         except:
             raise ValueError("Could not add data in Dataset")
         time = self.time.copy()
         items = deepcopy(self.items)
-        return Dataset(data, time, items) 
+        return Dataset(data, time, items)
 
     def _check_datasets_match(self, other):
         if self.n_items != other.n_items:
-            raise ValueError(f"Number of items must match ({self.n_items} and {other.n_items})")
+            raise ValueError(
+                f"Number of items must match ({self.n_items} and {other.n_items})"
+            )
         for j in range(self.n_items):
             if self.items[j].type != other.items[j].type:
-                raise ValueError(f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}")
+                raise ValueError(
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                )
             if self.items[j].unit != other.items[j].unit:
-                raise ValueError(f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}")
+                raise ValueError(
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                )
         if not np.all(self.time == other.time):
             raise ValueError("All timesteps must match")
         if self.shape != other.shape:
-            raise ValueError("shape must match")    
+            raise ValueError("shape must match")
 
     def _add_value(self, value):
         try:
             data = [value + self[x] for x in self.items]
         except:
-            raise ValueError(f"{value} could not be added to Dataset")        
+            raise ValueError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(data, time, items)
-
 
     def _multiply_value(self, value):
         try:
             data = [value * self[x] for x in self.items]
         except:
-            raise ValueError(f"{value} could not be multiplied to Dataset")        
+            raise ValueError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(data, time, items)
+
+    def describe(self, **kwargs):
+        """Generate descriptive statistics by wrapping pandas describe()"""
+        all_df = [
+            pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(
+                **kwargs
+            )
+            for j in range(self.n_items)
+        ]
+        return pd.concat(all_df, axis=1)
 
     def copy(self):
         """Returns a copy of this dataset."""
@@ -300,7 +328,7 @@ class Dataset(TimeSeries):
         return ds
 
     def append_items(self, other, inplace=True):
-        """Append items from other Dataset to this Dataset"""        
+        """Append items from other Dataset to this Dataset"""
         if inplace:
             self._append_items(other, copy=False)
         else:
@@ -308,10 +336,10 @@ class Dataset(TimeSeries):
 
     def _append_items(self, other, copy=True):
         if not np.all(self.time == other.time):
-            # if not: create common time? 
+            # if not: create common time?
             raise ValueError("All timesteps must match")
         ds = self.copy() if copy else self
-        
+
         for j in range(other.n_items):
             ds.items.append(other.items[j])
             ds.data.append(other.data[j])
@@ -330,7 +358,7 @@ class Dataset(TimeSeries):
         self._check_all_items_match(other)
         if not np.all(self.shape == other.shape):
             raise ValueError("Shape of the datasets must match")
-        ds = self.copy() if copy else self 
+        ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
         s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
@@ -338,29 +366,36 @@ class Dataset(TimeSeries):
 
         newtime = df12.index
         newdata = self.create_empty_data(
-                n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
-            )
+            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
+        )
         for j in range(ds.n_items):
             idx1 = np.where(~df12["idx1"].isna())
-            newdata[j][idx1,:] = ds.data[j]
+            newdata[j][idx1, :] = ds.data[j]
             # if there is an overlap "other" data will be used!
             idx2 = np.where(~df12["idx2"].isna())
-            newdata[j][idx2,:] = other.data[j]
+            newdata[j][idx2, :] = other.data[j]
 
         return Dataset(newdata, newtime, ds.items)
 
-
     def _check_all_items_match(self, other):
         if self.n_items != other.n_items:
-            raise ValueError(f"Number of items must match ({self.n_items} and {other.n_items})")        
+            raise ValueError(
+                f"Number of items must match ({self.n_items} and {other.n_items})"
+            )
         for j in range(self.n_items):
             if self.items[j].name != other.items[j].name:
-                raise ValueError(f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}")
+                raise ValueError(
+                    f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}"
+                )
             if self.items[j].type != other.items[j].type:
-                raise ValueError(f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}")
+                raise ValueError(
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                )
             if self.items[j].unit != other.items[j].unit:
-                raise ValueError(f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}")
-        
+                raise ValueError(
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                )
+
     def dropna(self):
         """Remove time steps where all items are NaN"""
 

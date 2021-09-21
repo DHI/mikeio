@@ -113,11 +113,13 @@ including different ways of *selecting* data:
 * `aggregate() <api.html#mikeio.Dataset.aggregate>`_ - Aggregate along an axis
 
 *Mathematical operations* +, - and * with numerical values:
+
 * ds + value
 * ds - value
 * ds * value
 
 and + and - between two Datasets (if number of items and shapes conform):
+
 * ds1 + ds2
 * ds1 - ds2
 

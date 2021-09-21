@@ -12,8 +12,8 @@ Examples
 degree Kelvin
 
 """
-# from DHI.Generic.MikeZero import EUMWrapper
-from mikecore.eum import eumDLL, eumWrapper
+from typing import List
+from mikecore.eum import eumWrapper
 from enum import IntEnum
 
 from mikeio.helpers import to_datatype
@@ -116,6 +116,7 @@ class EUMType(IntEnum):
     >>> EUMType.Temperature.units
     [degree Celsius, degree Fahrenheit, degree Kelvin]
     """
+
     Water_Level = 100000
     Discharge = 100001
     Wind_Velocity = 100002
@@ -215,7 +216,7 @@ class EUMType(IntEnum):
     Accumulated_transport_per_meter = 100096
     Significant_wave_height = 100097
     Critical_Shields_parameter = 100098
-    # Phib_angle_og_bed_velocity = 100099
+    AngleBedVelocity = 100099
     Profile_number = 100100
     Climate_number = 100101
     Spectral_description = 100102
@@ -346,7 +347,7 @@ class EUMType(IntEnum):
     Ground_Water_Abstraction_Flux = 100238
     Fraction = 100239
     Yield_Factor = 100240
-    Specific_Solute_Flux_Per_Area = 100241
+    Specific_Solute_Flux_per_Area = 100241
     Current_Speed = 100242
     Current_Direction = 100243
     Current_Magnitude = 100244
@@ -620,6 +621,7 @@ class EUMType(IntEnum):
     Heat_Flux_Resistance = 110200
     Absolute_Humidity = 110210
     Length = 110220
+    Area = 110225
     Volume = 110230
     Element_Volume = 110231
     Wave_Power = 110232
@@ -693,6 +695,13 @@ class EUMType(IntEnum):
     Molal_Concentration = 110300
     Suspended_sediment_load_per_area = 110301
     Bollard_Force = 110302
+    Discharge_per_Pressure = 110303
+    RotationalSpeed = 110304
+    Infiltration_per_Area = 110305
+    Mass_per_Length_per_Time = 110306
+    NearBedLoad_per_Length = 110307
+    Substance_per_UnitArea = 110308
+    AccNearBedLoad_per_Length = 110309
 
     def __init__(self, code):
         self.code = code
@@ -712,12 +721,12 @@ class EUMType(IntEnum):
     def units(self):
         """List valid units for this EUM type"""
         temp = unit_list(self.code).items()
-        return [EUMUnit(value) for key, value in temp]
+        return [EUMUnit(value) for _, value in temp]
 
     @staticmethod
-    def search(pattern):
+    def search(pattern) -> List["EUMType"]:
         temp = type_list(pattern).items()
-        return [EUMType(key) for key, value in temp]
+        return [EUMType(key) for key, _ in temp]
 
 
 class EUMUnit(IntEnum):
@@ -729,6 +738,7 @@ class EUMUnit(IntEnum):
     >>> EUMUnit.degree_Kelvin
     degree Kelvin
     """
+
     meter = 1000
     kilometer = 1001
     centimeter = 1007
@@ -830,6 +840,17 @@ class EUMUnit(IntEnum):
     pound = 1207
     kiloton = 1205
     megaton = 1206
+    ounce = 1209
+    per_kg = 1250
+    per_gram = 1251
+    per_mg = 1252
+    per_mu_g = 1253
+    per_ton = 1254
+    per_kiloton = 1255
+    per_megaton = 1256
+    per_pound = 1257
+    per_ton_US = 1258
+    per_ounce = 1259
     kg_per_sec = 4200
     gram_per_sec = 4203
     mg_per_sec = 4202
@@ -913,6 +934,8 @@ class EUMUnit(IntEnum):
     pound_per_feet_per_sec_pow_2 = 5402
     newton_per_meter_pow_3 = 5500
     kN_per_meter_pow_3 = 5501
+    kilogram_M2 = 5550
+    poundSqrFeet = 5551
     gram_per_meter_pow_3_per_day = 4601
     _mg_per_l__pow__1_per_2__per_day = 5300
     _mg_per_l__pow__1_per_2__per_hour = 5301
@@ -1060,11 +1083,15 @@ class EUMUnit(IntEnum):
     meter_pow_3_per_hour_per_meter = 7503
     meter_pow_3_per_day_per_meter = 7504
     feet_pow_3_per_hour_per_feet = 4719
+    m3_per_hour_per_M = 4730
+    m3_per_day_per_M = 4731
     feet_pow_3_per_day_per_feet = 4732
     galUK_per_day_per_feet = 4712
     gallon_per_day_per_feet = 4713
     gallon_per_min_per_feet = 4714
     liter_per_day_per_meter = 4715
+    liter_per_minute_per_meter = 4716
+    liter_per_second_per_meter = 4717
     liter_per_min_per_meter = 7501
     liter_per_sec_per_meter = 7500
     gram_per_min = 4208
@@ -1085,15 +1112,6 @@ class EUMUnit(IntEnum):
     meter_pow_3_per_mu_g = 6903
     ton_per_day = 4219
     millimeterD50 = 1012
-    per_kg = 1250
-    per_gram = 1251
-    per_mg = 1252
-    per_mu_g = 1253
-    per_ton = 1254
-    per_kiloton = 1255
-    per_megaton = 1256
-    per_pound = 1257
-    per_ton_US = 1258
     millisecond = 1406
     feet_US_pow_2 = 3208
     yard_US_pow_2 = 3209
@@ -1110,6 +1128,7 @@ class EUMUnit(IntEnum):
     galUK_per_sec = 1826
     galUK_per_year = 1827
     galUK_per_PE_per_day = 1828
+    ydUS3_per_sec = 1829
     acre_feet_per_day_per_acre = 2022
     Mgal_per_day_per_acre = 2032
     MgalUK_per_day_per_acre = 2033
@@ -1119,8 +1138,25 @@ class EUMUnit(IntEnum):
     meter_per_sec_pow_2 = 2100
     feet_per_sec_pow_2 = 2101
     pound_per_feet_US_pow_2 = 2215
+    ounce_per_cubic_feet = 2216
+    ounce_per_cubic_feet_US = 2217
+    ounce_per_Yard3 = 2218
+    ounce_per_yard_US3 = 2219
+    ounce_per_square_feet = 2220
+    ounce_per_square_feet_US = 2221
     kg_per_meter_per_sec = 2300
     Pascal_second = 2301
+    kilogram_per_meter_per_day = 2302
+    gram_per_Meter_per_Day = 2303
+    gram_per_Km_per_Day = 2304
+    pound_per_Feet_per_Day = 2305
+    pound_per_FeetUS_per_Day = 2306
+    ounce_per_Feet_per_Day = 2307
+    ounce_per_FeetUS_per_Day = 2308
+    kilogram_per_Yard_per_Second = 2309
+    kilogram_per_Feet_per_Second = 2310
+    pound_per_Yard_per_Second = 2311
+    pound_per_Feet_per_Second = 2312
     degree50 = 2402
     degree_pow_2 = 2403
     degree_per_meter = 2500
@@ -1132,6 +1168,8 @@ class EUMUnit(IntEnum):
     rev_per_min = 2610
     percent_per_hour = 2611
     percent_per_sec = 2613
+    revolution_per_second = 2614
+    revolution_per_hour = 2615
     _per_degree_C = 2850
     _per_degree_F = 2851
     per_meter_pow_3 = 3003
@@ -1159,6 +1197,16 @@ class EUMUnit(IntEnum):
     mg_per_mile_pow_2 = 4428
     pound_per_meter = 4429
     ton_per_meter = 4430
+    pound_per_Feet = 4431
+    pound_per_Yard = 4432
+    pound_per_FeetUS = 4433
+    pound_per_YardUS = 4434
+    ounce_per_Feet = 4435
+    ounce_per_Yard = 4436
+    ounce_per_FeetUS = 4437
+    ounce_per_YardUS = 4438
+    kilogram_per_Yard = 4439
+    kilogram_per_Feet = 4440
     mg_per_liter_per_day = 4603
     yard_pow_3_per_year_per_yard = 4728
     yard_US_pow_3_per_year_per_yard_US = 4729
@@ -1220,6 +1268,7 @@ class EUMUnit(IntEnum):
     Mgal_per_day_per_psi = 7507
     MgalUK_per_day_per_psi = 7508
     acre_feet_per_day_per_psi = 7509
+    m3_per_hour_per_bar = 7510
     _per_meter_per_sec = 9200
     meter_per_sec_per_ha = 9201
     feet_per_sec_per_acre = 9202
@@ -1227,6 +1276,7 @@ class EUMUnit(IntEnum):
     per_acre = 9301
     per_hectare = 9302
     per_km_pow_2 = 9303
+    per_cubic_meter = 9350
     currency_per_meter_pow_3 = 9351
     currency_per_feet_pow_3 = 9352
     per_watt = 9600
@@ -1251,6 +1301,10 @@ class EUMUnit(IntEnum):
     mmol_per_kg = 12041
     mu_mol_per_kg = 12042
     nmol_per_kg = 12043
+    mole_per_m2 = 12060
+    millimole_per_m2 = 12061
+    micromole_per_m2 = 12062
+    nanomole_per_m2 = 12063
     meter_per_meter = 99014
     per_minute = 99015
     percent_per_min = 2612
