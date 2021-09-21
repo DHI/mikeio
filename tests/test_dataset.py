@@ -11,6 +11,7 @@ from mikeio.eum import EUMType, ItemInfo, EUMUnit
 def _get_time(nt):
     return list(rrule(freq=SECONDLY, count=nt, dtstart=datetime(2000, 1, 1)))
 
+
 @pytest.fixture
 def ds1():
     nt = 10
@@ -24,6 +25,7 @@ def ds1():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     return Dataset(data, time, items)
 
+
 @pytest.fixture
 def ds2():
     nt = 10
@@ -36,6 +38,7 @@ def ds2():
     time = _get_time(nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     return Dataset(data, time, items)
+
 
 def test_get_names():
 
@@ -241,8 +244,9 @@ def test_select_subset_isel_multiple_idxs():
 def test_decribe(ds1):
     df = ds1.describe()
     assert df.columns[0] == "Foo"
-    assert df.loc['mean'][1] == pytest.approx(0.2)
-    assert df.loc['max'][0] == pytest.approx(0.1)
+    assert df.loc["mean"][1] == pytest.approx(0.2)
+    assert df.loc["max"][0] == pytest.approx(0.1)
+
 
 def test_create_undefined():
 
@@ -466,6 +470,21 @@ def test_get_data_name():
     ds = Dataset(data, time, items)
 
     assert ds["Foo"].shape == (100, 100, 30)
+
+
+def test_set_data_name():
+
+    nt = 100
+
+    time = _get_time(nt)
+    items = [ItemInfo("Foo")]
+    ds = Dataset([np.zeros((nt, 10))], time, items)
+
+    assert ds["Foo"][0, 0] == 0.0
+
+    ds["Foo"] = np.zeros((nt, 10)) + 1.0
+
+    assert ds["Foo"][0, 0] == 1.0
 
 
 def test_get_bad_name():
@@ -909,29 +928,32 @@ def test_init():
     assert ds.n_elements == n_elements
     assert ds.items[0].name == "Foo"
 
+
 def test_add_scalar(ds1):
     ds2 = ds1 + 10.0
     assert np.all(ds2[0] - ds1[0] == 10.0)
 
     ds3 = 10.0 + ds1
     assert np.all(ds3[0] == ds2[0])
-    assert np.all(ds3[1] == ds2[1])       
-    
+    assert np.all(ds3[1] == ds2[1])
+
+
 def test_sub_scalar(ds1):
     ds2 = ds1 - 10.0
     assert np.all(ds1[0] - ds2[0] == 10.0)
 
     ds3 = 10.0 - ds1
     assert np.all(ds3[0] == 9.9)
-    assert np.all(ds3[1] == 9.8) 
+    assert np.all(ds3[1] == 9.8)
+
 
 def test_mul_scalar(ds1):
     ds2 = ds1 * 2.0
-    assert np.all(ds2[0]*0.5 == ds1[0]) 
+    assert np.all(ds2[0] * 0.5 == ds1[0])
 
     ds3 = 2.0 * ds1
     assert np.all(ds3[0] == ds2[0])
-    assert np.all(ds3[1] == ds2[1])    
+    assert np.all(ds3[1] == ds2[1])
 
 
 def test_add_dataset(ds1, ds2):
@@ -941,7 +963,7 @@ def test_add_dataset(ds1, ds2):
 
     ds4 = ds2 + ds1
     assert np.all(ds3[0] == ds4[0])
-    assert np.all(ds3[1] == ds4[1])    
+    assert np.all(ds3[1] == ds4[1])
 
     ds2b = ds2.copy()
     ds2b.items[0] = ItemInfo(EUMType.Wind_Velocity)
@@ -951,16 +973,18 @@ def test_add_dataset(ds1, ds2):
 
     ds2c = ds2.copy()
     tt = ds2c.time.to_numpy()
-    tt[-1] = tt[-1] + np.timedelta64(1, 's')
+    tt[-1] = tt[-1] + np.timedelta64(1, "s")
     ds2c.time = pd.DatetimeIndex(tt)
     with pytest.raises(ValueError):
         # time does not match
         ds1 + ds2c
 
+
 def test_sub_dataset(ds1, ds2):
     ds3 = ds2 - ds1
     assert np.all(ds3[0] == 0.9)
     assert np.all(ds3[1] == 1.8)
+
 
 def test_non_equidistant():
     nt = 4
