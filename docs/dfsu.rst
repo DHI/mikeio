@@ -95,13 +95,14 @@ The Mesh class is initialized with a mesh or a dfsu file.
 
 
 Apart from the common flexible file functionality, 
-the Mesh object has the following *methods*:
+the Mesh object has the following methods and properties:
 
 .. autosummary::
     :nosignatures:
 
     mikeio.Mesh.write
     mikeio.Mesh.plot_boundary_nodes
+    mikeio.zn
 
 See the `Mesh API specification <#mikeio.Mesh>`_ below for a detailed description. 
 See the `Mesh Example notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Mesh.ipynb>`_ for more Mesh operations (including shapely examples).
