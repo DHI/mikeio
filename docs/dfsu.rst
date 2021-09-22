@@ -29,7 +29,7 @@ Each element has:
 * Element table; specifies for each element the nodes that defines the element. 
 
 .. warning::
-    In MIKE, node ids and element ids are 1-based. 
+    In MIKE Zero, node ids and element ids are 1-based. 
     In MIKE IO, all ids are **0-based** following standard Python indexing. 
     That means, as an example, that when finding the element closest to a 
     point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.
