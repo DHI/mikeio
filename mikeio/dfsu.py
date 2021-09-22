@@ -78,7 +78,8 @@ class _UnstructuredGeometry:
 
     @property
     def type_name(self):
-        return self._type.name
+        """Type name, e.g. Mesh, Dfsu2D"""
+        return self._type.name if self._type else "Mesh"
 
     @property
     def n_nodes(self):
@@ -105,7 +106,7 @@ class _UnstructuredGeometry:
 
     @property
     def codes(self):
-        """Node codes of all nodes"""
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
         return self._codes
 
     @property
@@ -117,11 +118,12 @@ class _UnstructuredGeometry:
 
     @property
     def boundary_codes(self):
-        """provides a unique list of boundary codes"""
+        """Unique list of boundary codes"""
         return [code for code in self.valid_codes if code > 0]
 
     @property
     def projection_string(self):
+        """The projection string"""
         return self._projstr
 
     @property
@@ -131,6 +133,7 @@ class _UnstructuredGeometry:
 
     @property
     def is_local_coordinates(self):
+        """Are coordinates relative (NON-UTM)?"""
         return self._projstr == "NON-UTM"
 
     @property
@@ -259,7 +262,7 @@ class _UnstructuredGeometry:
         return [self.element_table[j] for j in elements]
 
     def elements_to_geometry(self, elements, node_layers="all"):
-        """export elements to new geometry
+        """export elements to new flexible file geometry
 
         Parameters
         ----------
@@ -2246,7 +2249,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         elements=None,
         title=None,
     ):
-        """Write the header of a new dfsu file
+        """Write the header of a new dfsu file (for writing huge files)
 
         Parameters
         -----------
