@@ -2725,7 +2725,10 @@ class Mesh(_UnstructuredFile):
 
         if elements is None:
             geometry = self
-            quantity = self._source.EumQuantity
+            if hasattr(self._source, "EumQuantity"):
+                quantity = self._source.EumQuantity
+            else:
+                quantity = eumQuantity.Create(EUMType.Bathymetry, self._source.ZUnit)
             elem_table = self._source.ElementTable
         else:
             geometry = self.elements_to_geometry(elements)
