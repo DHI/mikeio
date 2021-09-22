@@ -78,7 +78,8 @@ class _UnstructuredGeometry:
 
     @property
     def type_name(self):
-        return self._type.name
+        """Type name, e.g. Mesh, Dfsu2D"""
+        return self._type.name if self._type else "Mesh"
 
     @property
     def n_nodes(self):
@@ -105,8 +106,15 @@ class _UnstructuredGeometry:
 
     @property
     def codes(self):
-        """Node codes of all nodes"""
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
         return self._codes
+
+    @codes.setter
+    def codes(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
+        self._codes = np.array(v, dtype=np.int32)
+        self._valid_codes = None
 
     @property
     def valid_codes(self):
@@ -117,11 +125,12 @@ class _UnstructuredGeometry:
 
     @property
     def boundary_codes(self):
-        """provides a unique list of boundary codes"""
+        """Unique list of boundary codes"""
         return [code for code in self.valid_codes if code > 0]
 
     @property
     def projection_string(self):
+        """The projection string"""
         return self._projstr
 
     @property
@@ -131,6 +140,7 @@ class _UnstructuredGeometry:
 
     @property
     def is_local_coordinates(self):
+        """Are coordinates relative (NON-UTM)?"""
         return self._projstr == "NON-UTM"
 
     @property
@@ -259,7 +269,7 @@ class _UnstructuredGeometry:
         return [self.element_table[j] for j in elements]
 
     def elements_to_geometry(self, elements, node_layers="all"):
-        """export elements to new geometry
+        """export elements to new flexible file geometry
 
         Parameters
         ----------
@@ -628,6 +638,11 @@ class _UnstructuredGeometry:
         self._tree2d = cKDTree(xy)
 
     def _find_n_nearest_2d_elements(self, x, y=None, n=1):
+        if n > self.geometry2d.n_elements:
+            raise ValueError(
+                f"Cannot find {n} nearest! Number of 2D elements: {self.geometry2d.n_elements}"
+            )
+
         if self._tree2d is None:
             self._create_tree2d()
 
@@ -2241,7 +2256,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         elements=None,
         title=None,
     ):
-        """Write the header of a new dfsu file
+        """Write the header of a new dfsu file (for writing huge files)
 
         Parameters
         -----------
@@ -2648,6 +2663,25 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
 
 class Mesh(_UnstructuredFile):
+    """
+    The Mesh class is initialized with a mesh or a dfsu file.
+
+    Parameters
+    ---------
+    filename: str
+        dfsu or mesh filename
+
+    Examples
+    --------
+
+    >>> msh = Mesh("../tests/testdata/odense_rough.mesh")
+    >>> msh
+    Number of elements: 654
+    Number of nodes: 399
+    Projection: UTM-33
+
+    """
+
     def __init__(self, filename):
         super().__init__()
         self._filename = filename
@@ -2658,31 +2692,49 @@ class Mesh(_UnstructuredFile):
         self._n_sigma = None
         self._type = None  # DfsuFileType.Mesh
 
+    @property
+    def zn(self):
+        """Static bathymetry values (depth) at nodes"""
+        return self.node_coordinates[:, 2]
+
+    @zn.setter
+    def zn(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
+        self._nc[:, 2] = v
+        self._ec = None
+
     def set_z(self, z):
-        """Change the depth by setting the z value of each node
+        """Deprecated: use msh.zn = values instead
+
+        Change the depth by setting the z value of each node
 
         Parameters
         ----------
         z : np.array(float)
             new z value at each node
         """
-        if len(z) != self.n_nodes:
-            raise ValueError(f"z must have length of nodes ({self.n_nodes})")
-        self._nc[:, 2] = z
-        self._ec = None
+        warnings.warn(
+            "Mesh.set_z is deprecated, please use msh.zn = values instead.",
+            FutureWarning,
+        )
+        self.zn = z
 
     def set_codes(self, codes):
-        """Change the code values of the nodes
+        """Deprecated: use msh.codes = values instead
+
+        Change the code values of the nodes
 
         Parameters
         ----------
         codes : list(int)
             code of each node
         """
-        if len(codes) != self.n_nodes:
-            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
-        self._codes = codes
-        self._valid_codes = None
+        warnings.warn(
+            "Mesh.set_codes is deprecated, please use msh.codes = values instead.",
+            FutureWarning,
+        )
+        self.codes = codes
 
     def write(self, outfilename, elements=None):
         """write mesh to file (will overwrite if file exists)
