@@ -2692,8 +2692,20 @@ class Mesh(_UnstructuredFile):
         self._n_sigma = None
         self._type = None  # DfsuFileType.Mesh
 
+    @property
+    def zn(self):
+        """Static bathymetry values (depth) at nodes"""
+        return self.node_coordinates[:, 2]
+
+    @zn.setter
+    def zn(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
+        self._nc[:, 2] = v
+        self._ec = None
+
     def set_z(self, z):
-        """Deprecated: use msh.node_cordinates[:, 2] = values instead
+        """Deprecated: use msh.zn = values instead
 
         Change the depth by setting the z value of each node
 
@@ -2703,13 +2715,10 @@ class Mesh(_UnstructuredFile):
             new z value at each node
         """
         warnings.warn(
-            "Mesh.set_z is deprecated, please use msh.node_cordinates[:, 2] = values instead.",
+            "Mesh.set_z is deprecated, please use msh.zn = values instead.",
             FutureWarning,
         )
-        if len(z) != self.n_nodes:
-            raise ValueError(f"z must have length of nodes ({self.n_nodes})")
-        self._nc[:, 2] = z
-        self._ec = None
+        self.zn = z
 
     def set_codes(self, codes):
         """Deprecated: use msh.codes = values instead
