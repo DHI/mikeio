@@ -109,6 +109,13 @@ class _UnstructuredGeometry:
         """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
         return self._codes
 
+    @codes.setter
+    def codes(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
+        self._codes = np.array(v, dtype=np.int32)
+        self._valid_codes = None
+
     @property
     def valid_codes(self):
         """Unique list of node codes"""
@@ -2686,30 +2693,39 @@ class Mesh(_UnstructuredFile):
         self._type = None  # DfsuFileType.Mesh
 
     def set_z(self, z):
-        """Change the depth by setting the z value of each node
+        """Deprecated: use msh.node_cordinates[:, 2] = values instead
+
+        Change the depth by setting the z value of each node
 
         Parameters
         ----------
         z : np.array(float)
             new z value at each node
         """
+        warnings.warn(
+            "Mesh.set_z is deprecated, please use msh.node_cordinates[:, 2] = values instead.",
+            FutureWarning,
+        )
         if len(z) != self.n_nodes:
             raise ValueError(f"z must have length of nodes ({self.n_nodes})")
         self._nc[:, 2] = z
         self._ec = None
 
     def set_codes(self, codes):
-        """Change the code values of the nodes
+        """Deprecated: use msh.codes = values instead
+
+        Change the code values of the nodes
 
         Parameters
         ----------
         codes : list(int)
             code of each node
         """
-        if len(codes) != self.n_nodes:
-            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
-        self._codes = codes
-        self._valid_codes = None
+        warnings.warn(
+            "Mesh.set_codes is deprecated, please use msh.codes = values instead.",
+            FutureWarning,
+        )
+        self.codes = codes
 
     def write(self, outfilename, elements=None):
         """write mesh to file (will overwrite if file exists)
