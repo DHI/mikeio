@@ -757,8 +757,9 @@ class Dataset(TimeSeries):
         >>> t = Dateset.create_time('2018', dt=7200, end_time='2019')
         """
 
-        DeprecationWarning(
-            "Dataset.create_time is deprecated, please use `pandas.date_range` instead."
+        warnings.warn(
+            "Dataset.create_time is deprecated, please use `pandas.date_range` instead.",
+            FutureWarning,
         )
 
         if isinstance(start_time, str):
