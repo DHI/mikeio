@@ -1,15 +1,10 @@
 import os
 from datetime import datetime
-from dateutil.rrule import rrule, SECONDLY, HOURLY, DAILY
 import numpy as np
 import pandas as pd
 import pytest
 from mikeio import Dataset, Dfsu, Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
-
-
-def _get_time(nt):
-    return list(rrule(freq=SECONDLY, count=nt, dtstart=datetime(2000, 1, 1)))
 
 
 @pytest.fixture
@@ -21,7 +16,7 @@ def ds1():
     d2 = np.zeros([nt, ne]) + 0.2
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     return Dataset(data, time, items)
 
@@ -35,7 +30,7 @@ def ds2():
     d2 = np.zeros([nt, ne]) + 2.0
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     return Dataset(data, time, items)
 
@@ -46,7 +41,8 @@ def test_get_names():
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -65,7 +61,7 @@ def test_select_subset_isel():
     d2[0, 10, :] = 3.0
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -88,7 +84,7 @@ def test_select_temporal_subset_by_idx():
     d2[0, 10, :] = 3.0
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -105,7 +101,7 @@ def test_temporal_subset_fancy():
     d2 = np.zeros([nt, 100, 30]) + 2.0
     data = [d1, d2]
 
-    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    time = pd.date_range("2000-1-1", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -133,7 +129,7 @@ def test_subset_with_datetime_is_not_supported():
     d2 = np.zeros([nt, 100, 30]) + 2.0
     data = [d1, d2]
 
-    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -150,7 +146,7 @@ def test_select_item_by_name():
     d2[0, 10, :] = 3.0
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -166,7 +162,7 @@ def test_select_multiple_items_by_name():
 
     data = [d1, d2, d3]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     # items = [ItemInfo("Foo"), ItemInfo("Bar"), ItemInfo("Baz")]
     items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
     ds = Dataset(data, time, items)
@@ -189,7 +185,7 @@ def test_select_multiple_items_by_index():
 
     data = [d1, d2, d3]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
     ds = Dataset(data, time, items)
 
@@ -212,7 +208,7 @@ def test_select_item_by_iteminfo():
     d2[0, 10, :] = 3.0
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -230,7 +226,7 @@ def test_select_subset_isel_multiple_idxs():
 
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -256,7 +252,7 @@ def test_create_undefined():
 
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     # items = 2
     ds = Dataset(data, time)
 
@@ -274,7 +270,7 @@ def test_create_named_undefined():
 
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     ds = Dataset(data=data, time=time, items=["Foo", "Bar"])
 
     assert len(ds.items) == 2
@@ -291,7 +287,7 @@ def test_to_dataframe_single_timestep():
 
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
     df = ds.to_dataframe()
@@ -308,7 +304,7 @@ def test_to_dataframe():
 
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
     df = ds.to_dataframe()
@@ -322,7 +318,7 @@ def test_multidimensional_to_dataframe_no_supported():
     nt = 100
     d1 = np.zeros([nt, 2])
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset([d1], time, items)
 
@@ -336,7 +332,7 @@ def test_get_data():
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -345,13 +341,12 @@ def test_get_data():
 
 def test_interp_time():
 
-    data = []
     nt = 4
     d = np.zeros([nt, 10, 3])
     d[1] = 2.0
     d[3] = 4.0
-    data.append(d)
-    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    data = [d]
+    time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -369,7 +364,7 @@ def test_interp_time_to_other_dataset():
     ## Dataset 1
     nt = 4
     data = [np.zeros([nt, 10, 3])]
-    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds1 = Dataset(data, time, items)
     assert ds1.data[0].shape == (nt, 10, 3)
@@ -377,7 +372,7 @@ def test_interp_time_to_other_dataset():
     ## Dataset 2
     nt = 12
     data = [np.ones([nt, 10, 3])]
-    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 1)))
+    time = pd.date_range("2000-1-1", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds2 = Dataset(data, time, items)
 
@@ -401,7 +396,7 @@ def test_extrapolate():
     ## Dataset 1
     nt = 2
     data = [np.zeros([nt, 10, 3])]
-    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds1 = Dataset(data, time, items)
     assert ds1.data[0].shape == (nt, 10, 3)
@@ -409,7 +404,7 @@ def test_extrapolate():
     ## Dataset 2 partly overlapping with Dataset 1
     nt = 3
     data = [np.ones([nt, 10, 3])]
-    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 2)))
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds2 = Dataset(data, time, items)
 
@@ -430,7 +425,7 @@ def test_extrapolate_not_allowed():
     ## Dataset 1
     nt = 2
     data = [np.zeros([nt, 10, 3])]
-    time = list(rrule(freq=DAILY, count=nt, dtstart=datetime(2000, 1, 1)))
+    time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds1 = Dataset(data, time, items)
     assert ds1.data[0].shape == (nt, 10, 3)
@@ -438,7 +433,7 @@ def test_extrapolate_not_allowed():
     ## Dataset 2 partly overlapping with Dataset 1
     nt = 3
     data = [np.ones([nt, 10, 3])]
-    time = list(rrule(freq=HOURLY, count=nt, dtstart=datetime(2000, 1, 2)))
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds2 = Dataset(data, time, items)
 
@@ -452,7 +447,7 @@ def test_get_data_2():
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -465,7 +460,7 @@ def test_get_data_name():
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -476,7 +471,7 @@ def test_set_data_name():
 
     nt = 100
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset([np.zeros((nt, 10))], time, items)
 
@@ -492,7 +487,7 @@ def test_get_bad_name():
     data = []
     d = np.zeros([100, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -506,7 +501,7 @@ def test_head():
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -526,7 +521,7 @@ def test_head_small_dataset():
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -541,7 +536,7 @@ def test_tail():
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -561,7 +556,7 @@ def test_thin():
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -575,7 +570,7 @@ def test_tail_small_dataset():
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
@@ -588,7 +583,7 @@ def test_flipud():
 
     nt = 2
     d = np.random.random([nt, 100, 30])
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
     ds = Dataset([d], time, items)
 
@@ -653,7 +648,7 @@ def test_copy():
 
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -679,7 +674,7 @@ def test_dropna():
 
     data = [d1, d2]
 
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
@@ -796,7 +791,7 @@ def test_items_data_mismatch():
 
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
-    time = _get_time(nt)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]  # Two items is not correct!
 
     with pytest.raises(ValueError):
@@ -807,7 +802,9 @@ def test_time_data_mismatch():
 
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
-    time = _get_time(nt + 1)  # 101 timesteps is not correct!
+    time = pd.date_range(
+        "2000-1-2", freq="H", periods=nt + 1
+    )  # 101 timesteps is not correct!
     items = [ItemInfo("Foo")]
 
     with pytest.raises(ValueError):
@@ -864,40 +861,6 @@ def test_create_empty_data():
 
     with pytest.raises(Exception):
         d = Dataset.create_empty_data(n_elements=None, shape=None)
-
-
-def test_create_time():
-
-    t = Dataset.create_time("2018-1-1,2018-1-2", dt=3600)
-    assert t[-1].day == 2
-    assert len(t) == 25
-
-    t = Dataset.create_time("2018-1-1", end_time="2018-1-2", n_timesteps=25)
-    assert t[-1].day == 2
-    assert len(t) == 25
-
-    t = Dataset.create_time("2018-1-1", dt=1800, n_timesteps=48)
-    assert t[-1].hour == 23
-    assert len(t) == 48
-
-    t = Dataset.create_time("2018", dt=7200, end_time="2019")
-    assert len(t) == (365 * 12 + 1)
-
-    t = Dataset.create_time(end_time="1970-1-2", n_timesteps=25)
-    assert len(t) == 25
-    assert t[0].hour == 0
-
-    with pytest.raises(Exception):
-        # dt cannot be negative
-        t = Dataset.create_time("2018", dt=-7200)
-
-    with pytest.raises(Exception):
-        # end must be after start
-        t = Dataset.create_time("2018-2-1,2018-1-1")
-
-    with pytest.raises(Exception):
-        # All parameters where given, but they do not match
-        t = Dataset.create_time("2018", dt=7200, end_time="2019", n_timesteps=25)
 
 
 def test_create_infer_name_from_eum():
