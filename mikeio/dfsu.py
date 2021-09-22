@@ -2054,9 +2054,13 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             assert isinstance(track, pd.DataFrame)
             times = track.index
             coords = track.iloc[:, 0:2].to_numpy(copy=True)
-        
-        assert isinstance(times, pd.DatetimeIndex), "The index must be a pandas.DatetimeIndex"
-        assert times.is_monotonic_increasing, "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
+
+        assert isinstance(
+            times, pd.DatetimeIndex
+        ), "The index must be a pandas.DatetimeIndex"
+        assert (
+            times.is_monotonic_increasing
+        ), "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
 
         data_list = []
         data_list.append(coords[:, 0])  # longitude
@@ -2092,7 +2096,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         # spatial interpolation
         n_pts = 1 if method == "nearest" else 5
-        elem_ids, weights = self.get_2d_interpolant(coords[i_start : (i_end + 1)], n_nearest=n_pts)
+        elem_ids, weights = self.get_2d_interpolant(
+            coords[i_start : (i_end + 1)], n_nearest=n_pts
+        )
 
         # initialize dfsu data arrays
         d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
@@ -2114,7 +2120,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             return step >= self.n_timesteps
 
         # loop over track points
-        for i_interp, i in enumerate(trange(i_start, i_end + 1, disable=not self.show_progress)):
+        for i_interp, i in enumerate(
+            trange(i_start, i_end + 1, disable=not self.show_progress)
+        ):
             t_rel[i]  # time of point relative to dfsu start
 
             read_next = t_rel[i] > t2
@@ -2693,7 +2701,7 @@ class Mesh(_UnstructuredFile):
             if hasattr(self._source, "EumQuantity"):
                 quantity = self._source.EumQuantity
             else:
-                quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
+                quantity = eumQuantity.Create(EUMType.Bathymetry, self._source.ZUnit)
             elem_table = self._source.ElementTable
         else:
             geometry = self.elements_to_geometry(elements)
