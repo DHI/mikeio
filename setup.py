@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.8.0",
+    version="0.8.dev1",
     install_requires=[
         "mikecore>=0.1.2",
         "numpy>1.0",
