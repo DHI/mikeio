@@ -32,7 +32,7 @@ Each element has:
     In MIKE, node ids and element ids are 1-based. 
     In MIKE IO, all ids are **0-based** following standard Python indexing. 
     That means, as an example, that when finding the element closest to a 
-    point its id will 1 lower in MIKE IO compared to opening the file in MIKE Zero.
+    point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.
 
 
 
