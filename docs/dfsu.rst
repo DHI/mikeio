@@ -49,8 +49,6 @@ same base class and have the same core functionality.
     mikeio.Mesh.n_nodes
     mikeio.Mesh.node_coordinates
     mikeio.Mesh.codes
-    mikeio.Mesh.valid_codes
-    mikeio.Mesh.boundary_codes
     mikeio.Mesh.boundary_polylines
     mikeio.Mesh.n_elements
     mikeio.Mesh.element_coordinates
@@ -102,8 +100,6 @@ the Mesh object has the following *methods*:
 .. autosummary::
     :nosignatures:
 
-    mikeio.Mesh.set_z
-    mikeio.Mesh.set_codes
     mikeio.Mesh.write
     mikeio.Mesh.plot_boundary_nodes
 
