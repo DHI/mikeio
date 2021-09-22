@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Getting started &#8212; mikeio  documentation</title>
+    <title>Getting started &#8212; MIKE IO  documentation</title>
     
   <link href="_static/css/theme.css" rel="stylesheet" />
   <link href="_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
@@ -34,7 +34,7 @@
     <script src="_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Understanding Dataset" href="understanding_dataset.html" />
+    <link rel="next" title="Design philosophy" href="design.html" />
     <link rel="prev" title="MIKE IO: input/output of MIKE files in Python" href="index.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en" />
@@ -54,9 +54,14 @@
         <div class="navbar-brand-box">
     <a class="navbar-brand text-wrap" href="index.html">
       
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
       
       
-      <h1 class="site-logo" id="site-title">mikeio  documentation</h1>
+      <img src="_static/MIKE-IO-Logo-Pos-RGB.svg" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">MIKE IO  documentation</h1>
       
     </a>
 </div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
@@ -76,18 +81,38 @@
   </a>
  </li>
  <li class="toctree-l1">
-  <a class="reference internal" href="understanding_dataset.html">
-   Understanding Dataset
-  </a>
- </li>
- <li class="toctree-l1">
   <a class="reference internal" href="design.html">
    Design philosophy
   </a>
  </li>
  <li class="toctree-l1">
-  <a class="reference internal" href="api.html">
-   API Documentation
+  <a class="reference internal" href="dataset.html">
+   Dataset
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dfs0.html">
+   Dfs0
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dfs123.html">
+   Dfs1, Dfs2 and Dfs3
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="dfsu.html">
+   Dfsu and Mesh
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="eum.html">
+   EUM and items
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="generic.html">
+   Generic
   </a>
  </li>
 </ul>
@@ -249,10 +274,10 @@
 </div>
 <div class="section" id="dataset">
 <h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference external" href="api.html#mikeio.Dataset">Dataset</a> is the common MIKE IO data structure for data read from dfs files.
+<p>The <a class="reference external" href="dataset.html#mikeio.Dataset">Dataset</a> is the common MIKE IO data structure for data read from dfs files.
 All <cite>read()</cite> methods in MIKE IO returns a Dataset with the three main properties:</p>
 <ul class="simple">
-<li><p>items - a list of <a class="reference external" href="api.html#mikeio.eum.ItemInfo">ItemInfo</a> with name, type and unit of each item</p></li>
+<li><p>items - a list of <a class="reference external" href="eum.html#mikeio.eum.ItemInfo">ItemInfo</a> with name, type and unit of each item</p></li>
 <li><p>time - a pandas.DateTimeIndex with the time instances of the data</p></li>
 <li><p>data - a list of NumPy arrays—one for each item</p></li>
 </ul>
@@ -263,7 +288,7 @@ All <cite>read()</cite> methods in MIKE IO returns a Dataset with the three main
 <p>All Dfs classes and the Dataset class are representations of timeseries and
 share these properties:</p>
 <ul class="simple">
-<li><p>items - a list of <a class="reference external" href="api.html#mikeio.eum.ItemInfo">ItemInfo</a> with name, type and unit of each item</p></li>
+<li><p>items - a list of <a class="reference external" href="eum.html#mikeio.eum.ItemInfo">ItemInfo</a> with name, type and unit of each item</p></li>
 <li><p>n_items - Number of items</p></li>
 <li><p>n_timesteps - Number of timesteps</p></li>
 <li><p>start_time - First time instance (as datetime)</p></li>
@@ -278,12 +303,12 @@ share these properties:</p>
 </div>
 <div class="section" id="items-iteminfo-and-eum">
 <h2>Items, ItemInfo and EUM<a class="headerlink" href="#items-iteminfo-and-eum" title="Permalink to this headline">¶</a></h2>
-<p>The dfs items in MIKE IO are represented by the <a class="reference external" href="api.html#mikeio.eum.ItemInfo">ItemInfo class</a>.
+<p>The dfs items in MIKE IO are represented by the <a class="reference external" href="eum.html#mikeio.eum.ItemInfo">ItemInfo class</a>.
 An ItemInfo consists of:</p>
 <ul class="simple">
 <li><p>name - a user-defined string</p></li>
-<li><p>type - an <a class="reference external" href="api.html#mikeio.eum.EUMType">EUMType</a></p></li>
-<li><p>unit - an <a class="reference external" href="api.html#mikeio.eum.EUMUnit">EUMUnit</a></p></li>
+<li><p>type - an <a class="reference external" href="eum.html#mikeio.eum.EUMType">EUMType</a></p></li>
+<li><p>unit - an <a class="reference external" href="eum.html#mikeio.eum.EUMUnit">EUMUnit</a></p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio.eum</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Viken&quot;</span><span class="p">,</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Water_Level</span><span class="p">)</span>
@@ -297,7 +322,7 @@ An ItemInfo consists of:</p>
 </div>
 <div class="section" id="dfs0">
 <h2>Dfs0<a class="headerlink" href="#dfs0" title="Permalink to this headline">¶</a></h2>
-<p>A dfs0 file is also called a time series file. The MIKE IO <a class="reference external" href="api.html#mikeio.Dfs0">Dfs0 class</a> provide functionality for working with dfs0 files.</p>
+<p>A dfs0 file is also called a time series file. The MIKE IO <a class="reference external" href="dfs0.html#mikeio.Dfs0">Dfs0 class</a> provide functionality for working with dfs0 files.</p>
 <p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
 <ul class="simple">
 <li><p>mikeio.Dataset - keeps EUM information (convenient if you save data to new dfs0 file)</p></li>
@@ -337,7 +362,7 @@ An ItemInfo consists of:</p>
 <div class="section" id="dfs2">
 <h2>Dfs2<a class="headerlink" href="#dfs2" title="Permalink to this headline">¶</a></h2>
 <p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell.
-The MIKE IO <a class="reference external" href="api.html#mikeio.Dfs2">Dfs2 class</a> provide functionality for working with dfs2 files.</p>
+The MIKE IO <a class="reference external" href="dfs123.html#mikeio.Dfs2">Dfs2 class</a> provide functionality for working with dfs2 files.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs2</span><span class="p">(</span><span class="s2">&quot;testdata/gebco_sound.dfs2&quot;</span><span class="p">)</span>
 <span class="go">&lt;mikeio.Dfs2&gt;</span>
@@ -362,14 +387,14 @@ The MIKE IO <a class="reference external" href="api.html#mikeio.Dfs2">Dfs2 class
 </div>
 <div class="section" id="generic-dfs">
 <h2>Generic dfs<a class="headerlink" href="#generic-dfs" title="Permalink to this headline">¶</a></h2>
-<p>MIKE IO has <a class="reference external" href="api.html#module-mikeio.generic">generic dfs</a> functionality that works for all dfs files:</p>
+<p>MIKE IO has <a class="reference external" href="generic.html#module-mikeio.generic">generic dfs</a> functionality that works for all dfs files:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="api.html#mikeio.read">read()</a> - Read all data to a Dataset</p></li>
-<li><p><a class="reference external" href="api.html#mikeio.generic.extract">concat()</a> - Concatenates files along the time axis</p></li>
-<li><p><a class="reference external" href="api.html#mikeio.generic.extract">extract()</a> - Extract timesteps and/or items to a new dfs file</p></li>
-<li><p><a class="reference external" href="api.html#mikeio.generic.diff">diff()</a> - Calculate difference between two dfs files</p></li>
-<li><p><a class="reference external" href="api.html#mikeio.generic.extract">sum()</a> - Calculate the sum of two dfs files</p></li>
-<li><p><a class="reference external" href="api.html#mikeio.generic.extract">scale()</a> - Apply scaling to any dfs file</p></li>
+<li><p><a class="reference external" href="generic.html#mikeio.read">read()</a> - Read all data to a Dataset</p></li>
+<li><p><a class="reference external" href="generic.html#mikeio.generic.extract">concat()</a> - Concatenates files along the time axis</p></li>
+<li><p><a class="reference external" href="generic.html#mikeio.generic.extract">extract()</a> - Extract timesteps and/or items to a new dfs file</p></li>
+<li><p><a class="reference external" href="generic.html#mikeio.generic.diff">diff()</a> - Calculate difference between two dfs files</p></li>
+<li><p><a class="reference external" href="generic.html#mikeio.generic.extract">sum()</a> - Calculate the sum of two dfs files</p></li>
+<li><p><a class="reference external" href="generic.html#mikeio.generic.extract">scale()</a> - Apply scaling to any dfs file</p></li>
 </ul>
 <p>All methods except read() create a new dfs file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">generic</span>
@@ -404,10 +429,10 @@ The MIKE IO <a class="reference external" href="api.html#mikeio.Dfs2">Dfs2 class
         </a>
     </div>
      <div id="next">
-        <a class="right-next" href="understanding_dataset.html" title="next page">
+        <a class="right-next" href="design.html" title="next page">
             <div class="prevnext-info">
                 <p class="prevnext-label">next</p>
-                <p class="prevnext-title">Understanding Dataset</p>
+                <p class="prevnext-title">Design philosophy</p>
             </div>
             <i class="prevnext-label fas fa-angle-right"></i>
         </a>
