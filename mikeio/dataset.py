@@ -100,7 +100,7 @@ class Dataset(TimeSeries):
 
         if isinstance(time, str):
             # default single-step time
-            time = self.create_time(time)
+            time = pd.date_range(time, periods=1)
 
         if np.isscalar(data) and isinstance(items, Sequence):
             # create empty dataset
@@ -731,7 +731,7 @@ class Dataset(TimeSeries):
 
     @staticmethod
     def create_time(start_time=None, dt=None, n_timesteps=None, end_time=None):
-        """create a equidistant time axis (calendar axis)
+        """Deprecated: use `pandas.date_range` instead
 
         Parameters
         ----------
@@ -756,6 +756,11 @@ class Dataset(TimeSeries):
         >>> t = Dateset.create_time('2018-1-1', dt=1800, n_timesteps=48)
         >>> t = Dateset.create_time('2018', dt=7200, end_time='2019')
         """
+
+        DeprecationWarning(
+            "Dataset.create_time is deprecated, please use `pandas.date_range` instead."
+        )
+
         if isinstance(start_time, str):
             parts = start_time.split(",")
             if len(parts) == 2:
