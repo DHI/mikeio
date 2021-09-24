@@ -3,7 +3,6 @@ from typing import Sequence, Union, List
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-from scipy.interpolate import interp1d
 from copy import deepcopy
 from mikeio.eum import EUMType, ItemInfo
 
@@ -640,7 +639,6 @@ class Dataset(TimeSeries):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
-
         if isinstance(dt, pd.DatetimeIndex):
             t_out_index = dt
         elif isinstance(dt, Dataset):
@@ -663,6 +661,7 @@ class Dataset(TimeSeries):
 
     @staticmethod
     def _interpolate_item(intime, outtime, dataitem, method, extrapolate, fill_value):
+        from scipy.interpolate import interp1d
 
         interpolator = interp1d(
             intime,
