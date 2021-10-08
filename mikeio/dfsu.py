@@ -461,22 +461,46 @@ class _UnstructuredGeometry:
     def element_coordinates(self):
         """Center coordinates of each element"""
         if self._ec is None:
-            self._ec = self._get_element_coords()
+            self._ec = self.get_element_coordinates()
         return self._ec
 
-    def _get_element_coords(self):
+    def get_element_coordinates(self, elements=None, zn=None):
         """Calculates the coordinates of the center of each element.
+
+        Only necessary for dynamic vertical coordinates,
+        otherwise use the property *element_coordinates* instead
+
+        Parameters
+        ----------
+        elements : np.array(int), optional
+            element ids of selected elements
+        zn : np.array(float), optional
+            only the z-coodinates of the nodes
+
         Returns
         -------
         np.array
             x,y,z of each element
         """
-        n_elements = self.n_elements
+        node_coordinates = self._nc
 
+        element_table = self._element_table
+        if elements is not None:
+            element_table = element_table[elements]
+        if zn is not None:
+            node_coordinates = node_coordinates.copy()
+            if len(zn) == len(node_coordinates[:, 2]):
+                node_coordinates[:, 2] = zn
+            else:
+                # assume that user wants to find coords on a subset of points
+                idx = np.unique(np.hstack(element_table))
+                node_coordinates[idx, 2] = zn
+
+        n_elements = len(element_table)
         ec = np.empty([n_elements, 3])
 
         # pre-allocate for speed
-        maxnodes = self.max_nodes_per_element
+        maxnodes = 4 if self.is_2d else 8
         idx = np.zeros(maxnodes, dtype=int)
         xcoords = np.zeros([maxnodes, n_elements])
         ycoords = np.zeros([maxnodes, n_elements])
@@ -484,21 +508,20 @@ class _UnstructuredGeometry:
         nnodes_per_elem = np.zeros(n_elements)
 
         for j in range(n_elements):
-            nodes = self._element_table[j]
+            nodes = element_table[j]
             nnodes = len(nodes)
             nnodes_per_elem[j] = nnodes
             for i in range(nnodes):
                 idx[i] = nodes[i]  # - 1
 
-            xcoords[:nnodes, j] = self._nc[idx[:nnodes], 0]
-            ycoords[:nnodes, j] = self._nc[idx[:nnodes], 1]
-            zcoords[:nnodes, j] = self._nc[idx[:nnodes], 2]
+            xcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 0]
+            ycoords[:nnodes, j] = node_coordinates[idx[:nnodes], 1]
+            zcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 2]
 
         ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
         ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
         ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
 
-        self._ec = ec
         return ec
 
     def contains(self, points):
