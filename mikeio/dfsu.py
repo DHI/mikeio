@@ -484,7 +484,7 @@ class _UnstructuredGeometry:
         """
         node_coordinates = self._nc
 
-        element_table = self._element_table
+        element_table = self.element_table
         if elements is not None:
             element_table = element_table[elements]
         if zn is not None:
