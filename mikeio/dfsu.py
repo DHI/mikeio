@@ -477,6 +477,13 @@ class _UnstructuredGeometry:
         zn : np.array(float), optional
             only the z-coodinates of the nodes
 
+        Examples
+        --------
+        >>> elem_ids = dfs.find_nearest_profile_elements(x0, y0)
+        >>> ds = dfs.read(items=['Z coordinate','Temperature'], elements=elem_ids)
+        >>> ec_dyn = dfs.get_element_coordinates(elements=elem_ids, zn=ds['Z coordinate'][0,:])
+        >>> plt.plot(ds['Temperature'][0, :], ec_dyn[:,2])
+
         Returns
         -------
         np.array
