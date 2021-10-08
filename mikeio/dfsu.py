@@ -3,7 +3,6 @@ import os
 from collections import namedtuple
 import pandas as pd
 import pathlib
-from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
@@ -35,33 +34,35 @@ from .base import EquidistantTimeSeries
 
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
-    _type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-    _projstr = None
 
-    _n_nodes = None
-    _n_elements = None
-    _nc = None
-    _ec = None
-    _codes = None
-    _valid_codes = None
-    _element_ids = None
-    _node_ids = None
-    _element_table = None
-    _element_table_mikecore = None
+    def __init__(self) -> None:
+        self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
+        self._projstr = None
 
-    _top_elems = None
-    _n_layers_column = None
-    _bot_elems = None
-    _n_layers = None
-    _n_sigma = None
+        self._n_nodes = None
+        self._n_elements = None
+        self._nc = None
+        self._ec = None
+        self._codes = None
+        self._valid_codes = None
+        self._element_ids = None
+        self._node_ids = None
+        self._element_table = None
+        self._element_table_mikecore = None
 
-    _geom2d = None
-    _e2_e3_table = None
-    _2d_ids = None
-    _layer_ids = None
+        self._top_elems = None
+        self._n_layers_column = None
+        self._bot_elems = None
+        self._n_layers = None
+        self._n_sigma = None
 
-    _shapely_domain_obj = None
-    _tree2d = None
+        self._geom2d = None
+        self._e2_e3_table = None
+        self._2d_ids = None
+        self._layer_ids = None
+
+        self._shapely_domain_obj = None
+        self._tree2d = None
 
     def __repr__(self):
         out = []
@@ -1727,18 +1728,6 @@ class _UnstructuredFile(_UnstructuredGeometry):
     knows dotnet file, items and timesteps and reads file header
     """
 
-    _filename = None
-    _source = None
-    _deletevalue = None
-
-    _n_timesteps = None
-    _start_time = None
-    _timestep_in_seconds = None
-
-    _n_items = None
-    _items = None
-    _dtype = np.float64
-
     show_progress = False
 
     def __repr__(self):
@@ -1775,6 +1764,17 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
     def __init__(self):
         super().__init__()
+        self._filename = None
+        self._source = None
+        self._deletevalue = None
+
+        self._n_timesteps = None
+        self._start_time = None
+        self._timestep_in_seconds = None
+
+        self._n_items = None
+        self._items = None
+        self._dtype = np.float64
 
     def _read_header(self, filename):
         if not os.path.isfile(filename):
