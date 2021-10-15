@@ -1877,18 +1877,6 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         #    self.show_progress = True
 
     @property
-    def element_coordinates(self):
-        # faster way of getting element coordinates than base class implementation
-        if self._ec is None:
-            self._ec = self._get_element_coords_from_source()
-        return self._ec
-
-    def _get_element_coords_from_source(self):
-        xc2, yc2, zc2 = DfsuFile.CalculateElementCenterCoordinates(self._source)
-        ec = np.column_stack([xc2, yc2, zc2])
-        return ec
-
-    @property
     def deletevalue(self):
         """File delete value"""
         return self._deletevalue
