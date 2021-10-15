@@ -1098,9 +1098,9 @@ def test_get_node_centered_data():
     wl_nodes = dfs.get_node_centered_data(wl_cc)
 
     eid = 31
-    assert wl_cc[eid] == 0.4593418836593628
+    assert wl_cc[eid] == pytest.approx(0.4593418836)
     nid = dfs.element_table[eid]
-    assert wl_nodes[nid].mean() == 0.45935017355903907
+    assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
 
 
 def test_interp2d():
