@@ -244,12 +244,24 @@ def test_get_node_coords():
     assert len(nc) > 0
 
 
-def test_get_element_coords():
+def test_element_coordinates():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
     ec = dfs.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
+
+
+def test_get_element_coordinates_3d():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+
+    # extract dynamic z values for profile
+    elem_ids = dfs.find_nearest_profile_elements(333934.1, 6158101.5)
+    ds = dfs.read(items=["Z coordinate"], elements=elem_ids, time_steps=0)
+    ec = dfs.get_element_coordinates(elements=elem_ids, zn=ds["Z coordinate"][0, :])
+
+    assert ec[0, 2] == pytest.approx(-6.981768845)
 
 
 def test_element_coords_is_inside_nodes():
@@ -1163,7 +1175,7 @@ def test_extract_bad_track():
         index_col=0,
         parse_dates=True,
     )
-    df = df.sort_values('longitude')
+    df = df.sort_values("longitude")
     with pytest.raises(AssertionError):
         dfs.extract_track(df)
 
