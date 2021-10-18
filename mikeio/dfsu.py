@@ -462,10 +462,10 @@ class _UnstructuredGeometry:
     def element_coordinates(self):
         """Center coordinates of each element"""
         if self._ec is None:
-            self._ec = self.get_element_coordinates()
+            self._ec = self.calc_element_coordinates()
         return self._ec
 
-    def get_element_coordinates(self, elements=None, zn=None):
+    def calc_element_coordinates(self, elements=None, zn=None):
         """Calculates the coordinates of the center of each element.
 
         Only necessary for dynamic vertical coordinates,
@@ -482,7 +482,7 @@ class _UnstructuredGeometry:
         --------
         >>> elem_ids = dfs.find_nearest_profile_elements(x0, y0)
         >>> ds = dfs.read(items=['Z coordinate','Temperature'], elements=elem_ids)
-        >>> ec_dyn = dfs.get_element_coordinates(elements=elem_ids, zn=ds['Z coordinate'][0,:])
+        >>> ec_dyn = dfs.calc_element_coordinates(elements=elem_ids, zn=ds['Z coordinate'][0,:])
         >>> plt.plot(ds['Temperature'][0, :], ec_dyn[:,2])
 
         Returns

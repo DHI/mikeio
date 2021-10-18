@@ -10,7 +10,7 @@ def test_get_number_of_elements():
     assert msh.n_elements == 654
 
 
-def test_get_element_coordinates():
+def test_element_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 
@@ -21,7 +21,7 @@ def test_get_element_coordinates():
     assert ec[0, 1] > 6153000.0
 
 
-def test_get_node_coordinates():
+def test_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 

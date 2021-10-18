@@ -218,7 +218,7 @@ def test_read_single_time_step_outside_bounds_fails():
         dfs.read(items=[0, 3], time_steps=[100])
 
 
-def test_get_number_of_time_steps():
+def test_number_of_time_steps():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
@@ -252,14 +252,14 @@ def test_element_coordinates():
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
 
-def test_get_element_coordinates_3d():
+def test_calc_element_coordinates_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
 
     # extract dynamic z values for profile
     elem_ids = dfs.find_nearest_profile_elements(333934.1, 6158101.5)
     ds = dfs.read(items=["Z coordinate"], elements=elem_ids, time_steps=0)
-    ec = dfs.get_element_coordinates(elements=elem_ids, zn=ds["Z coordinate"][0, :])
+    ec = dfs.calc_element_coordinates(elements=elem_ids, zn=ds["Z coordinate"][0, :])
 
     assert ec[0, 2] == pytest.approx(-6.981768845)
 
@@ -378,7 +378,7 @@ def test_dfsu_to_dfs0(tmpdir):
     assert ds.time[-1] == newds.time[-1]
 
 
-def test_find_nearest_element_2d_array():
+def test_find_nearest_elements_2d_array():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
@@ -388,7 +388,7 @@ def test_find_nearest_element_2d_array():
     assert elem_ids[1] == 317
 
 
-def test_find_nearest_element_3d():
+def test_find_nearest_elements_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
 
