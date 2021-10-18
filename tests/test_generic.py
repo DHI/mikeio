@@ -2,6 +2,7 @@ import os
 from shutil import copyfile
 import numpy as np
 import mikeio
+from mikeio import Dfsu
 from mikeio.generic import scale, diff, sum, extract, avg_time
 import pytest
 
@@ -391,6 +392,19 @@ def test_time_average(tmpdir):
     assert org.shape[1] == averaged.shape[1]
     assert averaged.shape[0] == 1
     assert np.allclose(org.mean(axis=0)[0], averaged[0])
+
+
+def test_time_average_dfsu_3d(tmpdir):
+    infilename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = os.path.join(tmpdir, "oresund_sigma_z_avg.dfsu")
+    avg_time(infilename, outfilename)
+
+    org = Dfsu(infilename)
+    averaged = Dfsu(outfilename)
+
+    assert averaged.n_timesteps == 1
+    assert org.start_time == averaged.start_time
+    assert org.n_items == averaged.n_items
 
 
 def test_time_average_deletevalues(tmpdir):
