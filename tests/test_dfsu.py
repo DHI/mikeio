@@ -218,7 +218,7 @@ def test_read_single_time_step_outside_bounds_fails():
         dfs.read(items=[0, 3], time_steps=[100])
 
 
-def test_get_number_of_time_steps():
+def test_number_of_time_steps():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
@@ -244,12 +244,24 @@ def test_get_node_coords():
     assert len(nc) > 0
 
 
-def test_get_element_coords():
+def test_element_coordinates():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
     ec = dfs.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
+
+
+def test_calc_element_coordinates_3d():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+
+    # extract dynamic z values for profile
+    elem_ids = dfs.find_nearest_profile_elements(333934.1, 6158101.5)
+    ds = dfs.read(items=["Z coordinate"], elements=elem_ids, time_steps=0)
+    ec = dfs.calc_element_coordinates(elements=elem_ids, zn=ds["Z coordinate"][0, :])
+
+    assert ec[0, 2] == pytest.approx(-6.981768845)
 
 
 def test_element_coords_is_inside_nodes():
@@ -366,7 +378,7 @@ def test_dfsu_to_dfs0(tmpdir):
     assert ds.time[-1] == newds.time[-1]
 
 
-def test_find_nearest_element_2d_array():
+def test_find_nearest_elements_2d_array():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
 
@@ -376,7 +388,7 @@ def test_find_nearest_element_2d_array():
     assert elem_ids[1] == 317
 
 
-def test_find_nearest_element_3d():
+def test_find_nearest_elements_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
 
@@ -1086,9 +1098,9 @@ def test_get_node_centered_data():
     wl_nodes = dfs.get_node_centered_data(wl_cc)
 
     eid = 31
-    assert wl_cc[eid] == 0.4593418836593628
+    assert wl_cc[eid] == pytest.approx(0.4593418836)
     nid = dfs.element_table[eid]
-    assert wl_nodes[nid].mean() == 0.45935017355903907
+    assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
 
 
 def test_interp2d():
@@ -1163,7 +1175,7 @@ def test_extract_bad_track():
         index_col=0,
         parse_dates=True,
     )
-    df = df.sort_values('longitude')
+    df = df.sort_values("longitude")
     with pytest.raises(AssertionError):
         dfs.extract_track(df)
 

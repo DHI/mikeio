@@ -1,12 +1,12 @@
-.. _understanding_dataset:
+.. _dataset:
 
-Understanding Dataset
-*********************
-The `Dataset <api.html#mikeio.Dataset>`_ is the common MIKE IO data structure 
+Dataset
+*******
+The `Dataset <#mikeio.Dataset>`_ is the common MIKE IO data structure 
 for data from dfs files. 
 All `read()` methods in MIKE IO return a Dataset with three main properties:
 
-* **items** - a list of `ItemInfo <api.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
+* **items** - a list of `ItemInfo <eum.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
 * **time** - a pandas.DateTimeIndex with the time instances of the data
 * **data** - a list of NumPy arrays---one for each item
 
@@ -52,7 +52,7 @@ Note that this behavior is similar to pandas and xarray.
 
 Selecting timesteps or elements
 -------------------------------
-The `isel() <api.html#mikeio.Dataset.isel>`_ method can be used for selecting specific timesteps or elements across a Dataset. 
+The `isel() <#mikeio.Dataset.isel>`_ method can be used for selecting specific timesteps or elements across a Dataset. 
 
 * ds.isel([0, 1], axis=0) - selects timestep 0 and 1
 * ds.isel([3,78], axis=1) - selects element 3 and 78
@@ -96,21 +96,21 @@ Methods
 Dataset has several useful methods for working with data, 
 including different ways of *selecting* data:
 
-* `head() <api.html#mikeio.Dataset.head>`_ - Return the first n timesteps
-* `tail() <api.html#mikeio.Dataset.tail>`_ - Return the last n timesteps
-* `thin() <api.html#mikeio.Dataset.thin>`_ - Return every n:th timesteps
-* `isel() <api.html#mikeio.Dataset.isel>`_ - Select subset along an axis
+* `head() <#mikeio.Dataset.head>`_ - Return the first n timesteps
+* `tail() <#mikeio.Dataset.tail>`_ - Return the last n timesteps
+* `thin() <#mikeio.Dataset.thin>`_ - Return every n:th timesteps
+* `isel() <#mikeio.Dataset.isel>`_ - Select subset along an axis
 
 *Aggregations* along an axis:
 
-* `mean() <api.html#mikeio.Dataset.mean>`_ - Mean value along an axis
-* `nanmean() <api.html#mikeio.Dataset.nanmean>`_ - Mean value along an axis (NaN removed)
-* `max() <api.html#mikeio.Dataset.max>`_ - Max value along an axis
-* `nanmax() <api.html#mikeio.Dataset.nanmax>`_ - Max value along an axis (NaN removed)
-* `min() <api.html#mikeio.Dataset.min>`_ - Min value along an axis
-* `nanmin() <api.html#mikeio.Dataset.nanmin>`_ - Min value along an axis (NaN removed)
-* `average() <api.html#mikeio.Dataset.average>`_ - Compute the weighted average along the specified axis.
-* `aggregate() <api.html#mikeio.Dataset.aggregate>`_ - Aggregate along an axis
+* `mean() <#mikeio.Dataset.mean>`_ - Mean value along an axis
+* `nanmean() <#mikeio.Dataset.nanmean>`_ - Mean value along an axis (NaN removed)
+* `max() <#mikeio.Dataset.max>`_ - Max value along an axis
+* `nanmax() <#mikeio.Dataset.nanmax>`_ - Max value along an axis (NaN removed)
+* `min() <#mikeio.Dataset.min>`_ - Min value along an axis
+* `nanmin() <#mikeio.Dataset.nanmin>`_ - Min value along an axis (NaN removed)
+* `average() <#mikeio.Dataset.average>`_ - Compute the weighted average along the specified axis.
+* `aggregate() <#mikeio.Dataset.aggregate>`_ - Aggregate along an axis
 
 *Mathematical operations* +, - and * with numerical values:
 
@@ -125,11 +125,19 @@ and + and - between two Datasets (if number of items and shapes conform):
 
 Other methods that also return a Dataset:
 
-* `interp_time() <api.html#mikeio.Dataset.interp_time>`_ - Temporal interpolation (see `Time interpolation notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb>`_)
-* `dropna() <api.html#mikeio.Dataset.dropna>`_ - Remove time steps where all items are NaN
-* `squeeze() <api.html#mikeio.Dataset.squeeze>`_ - Remove axes of length 1
+* `interp_time() <#mikeio.Dataset.interp_time>`_ - Temporal interpolation (see `Time interpolation notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb>`_)
+* `dropna() <#mikeio.Dataset.dropna>`_ - Remove time steps where all items are NaN
+* `squeeze() <#mikeio.Dataset.squeeze>`_ - Remove axes of length 1
 
 *Conversion* methods:
 
-* `to_dataframe() <api.html#mikeio.Dataset.to_dataframe>`_ - Convert Dataset to a Pandas DataFrame
-* `to_dfs0() <api.html#mikeio.Dataset.to_dfs0>`_ - Write Dataset to a Dfs0 file
+* `to_dataframe() <#mikeio.Dataset.to_dataframe>`_ - Convert Dataset to a Pandas DataFrame
+* `to_dfs0() <#mikeio.Dataset.to_dfs0>`_ - Write Dataset to a Dfs0 file
+
+
+
+Dataset API
+-----------
+.. autoclass:: mikeio.Dataset
+	:members:
+	:inherited-members:
