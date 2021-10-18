@@ -13,7 +13,6 @@ setuptools.setup(
         "scipy>1.0",
         "pyyaml",
         "tqdm",
-        "pyproj",
     ],
     extras_require={
         "dev": [
@@ -26,6 +25,7 @@ setuptools.setup(
             "netcdf4",
             "matplotlib",
             "jupyterlab",
+            "pyproj",
         ],
         "test": ["pytest", "matplotlib"],
         "notebooks": [
