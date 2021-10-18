@@ -104,7 +104,7 @@ def test_sw_new_start_time_write():
         PfsCore("tests/testdata/lake.sw", "FemEngineSW")
 
 
-def test_encoding():    
+def test_encoding():
     Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm")
 
 
