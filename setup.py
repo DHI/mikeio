@@ -27,7 +27,7 @@ setuptools.setup(
             "matplotlib",
             "jupyterlab",
         ],
-        "test": ["pytest", "matplotlib", "shapely"],
+        "test": ["pytest", "matplotlib"],
         "notebooks": [
             "nbformat",
             "nbconvert",
