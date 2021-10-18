@@ -1,12 +1,6 @@
+import pyproj
 import pytest
 from mikeio.spatial.crs import CRS, CRSConversionError, CRSConversionWarning
-
-##################################################
-# these tests will not run if shapely is not installed
-##################################################
-pytest.importorskip("pyproj")
-
-import pyproj
 
 
 class TestCRS:
