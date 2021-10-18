@@ -40,14 +40,13 @@ def test_read_dfsu_generic_read():
     assert len(ds) == 4
 
 
-#def test_read_dfsu_generic_read_single_item_number():
+# def test_read_dfsu_generic_read_single_item_number():
 
 #   filename = "tests/testdata/HD2D.dfsu"
 
 #    ds = mikeio.read(filename, [1])
 
 #    assert len(ds) == 1
-    
 
 
 def test_read_generic_read_unsupported_format():
@@ -56,4 +55,3 @@ def test_read_generic_read_unsupported_format():
 
     with pytest.raises(Exception):
         res = mikeio.read(filename)
-

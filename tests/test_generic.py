@@ -374,4 +374,3 @@ def test_extract_items(tmpdir):
 
     with pytest.raises(Exception):
         extract(infile, outfile, items=[0, "not_an_item"])
-
