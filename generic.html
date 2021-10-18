@@ -206,11 +206,12 @@
 <p>MIKE IO has <a class="reference external" href="#module-mikeio.generic">generic dfs</a> functionality that works for all dfs files:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="#mikeio.read">read()</a> - Read all data to a Dataset</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.extract">concat()</a> - Concatenates files along the time axis</p></li>
+<li><p><a class="reference external" href="#mikeio.generic.concat">concat()</a> - Concatenates files along the time axis</p></li>
 <li><p><a class="reference external" href="#mikeio.generic.extract">extract()</a> - Extract timesteps and/or items to a new dfs file</p></li>
 <li><p><a class="reference external" href="#mikeio.generic.diff">diff()</a> - Calculate difference between two dfs files</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.extract">sum()</a> - Calculate the sum of two dfs files</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.extract">scale()</a> - Apply scaling to any dfs file</p></li>
+<li><p><a class="reference external" href="#mikeio.generic.sum">sum()</a> - Calculate the sum of two dfs files</p></li>
+<li><p><a class="reference external" href="#mikeio.generic.scale">scale()</a> - Apply scaling to any dfs file</p></li>
+<li><p><a class="reference external" href="#mikeio.generic.avg_time">avg_time()</a> - Create a temporally averaged dfs file</p></li>
 </ul>
 <p>All methods except read() create a new dfs file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">generic</span>
@@ -246,6 +247,21 @@
 </dd></dl>
 
 <span class="target" id="module-mikeio.generic"></span><dl class="py function">
+<dt class="sig sig-object py" id="mikeio.generic.avg_time">
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">avg_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.generic.avg_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a temporally averaged dfs file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>infilename</strong> (<em>str</em>) – input filename</p></li>
+<li><p><strong>outfilename</strong> (<em>str</em>) – output filename</p></li>
+<li><p><strong>skipna</strong> (<em>bool</em>) – exclude NaN/delete values when computing the result, default True</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.concat">
 <span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilenames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenates files along the time axis</p>
