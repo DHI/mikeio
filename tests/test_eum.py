@@ -57,7 +57,7 @@ def test_equality():
 
     assert item1 == item2
 
-    
+
 def test_eum_type_search():
 
     types = EUMType.search("velocity")

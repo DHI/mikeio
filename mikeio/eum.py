@@ -1448,4 +1448,3 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
-            
