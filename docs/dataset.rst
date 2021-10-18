@@ -111,6 +111,7 @@ including different ways of *selecting* data:
 * `nanmin() <#mikeio.Dataset.nanmin>`_ - Min value along an axis (NaN removed)
 * `average() <#mikeio.Dataset.average>`_ - Compute the weighted average along the specified axis.
 * `aggregate() <#mikeio.Dataset.aggregate>`_ - Aggregate along an axis
+* `quantile() <#mikeio.Dataset.quantile>`_ - Quantiles along an axis
 
 *Mathematical operations* +, - and * with numerical values:
 
