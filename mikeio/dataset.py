@@ -376,7 +376,7 @@ class Dataset(TimeSeries):
         ds = Dataset(res, time, items)
         return ds
 
-    def aggregate(self, axis=1, func=np.nanmean):
+    def aggregate(self, axis=1, func=np.nanmean, **kwargs):
         """Aggregate along an axis
 
         Parameters
@@ -405,9 +405,65 @@ class Dataset(TimeSeries):
             time = self.time
             keepdims = False
 
-        res = [func(self[item.name], axis=axis, keepdims=keepdims) for item in items]
+        res = [
+            func(self[item.name], axis=axis, keepdims=keepdims, **kwargs)
+            for item in items
+        ]
 
         ds = Dataset(res, time, items)
+        return ds
+
+    def quantile(self, q, *, axis=1, **kwargs):
+        """Compute the q-th quantile of the data along the specified axis.
+
+        Wrapping np.quantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute, 
+            which must be between 0 and 1 inclusive.
+        axis: int, optional
+            default 1= first spatial axis
+        
+        Returns
+        -------
+        Dataset
+            dataset with quantile values
+        """
+
+        items = self.items
+
+        if items[0].name == "Z coordinate":
+            items = deepcopy(items)
+            items.pop(0)
+
+        if axis == 0:
+            time = pd.DatetimeIndex([self.time[0]])
+            keepdims = True
+        else:
+            time = self.time
+            keepdims = False
+
+        qvec = [q] if np.isscalar(q) else q
+
+        res = []
+        itemsq = []
+        for q in qvec:
+            res.extend(
+                [
+                    np.quantile(
+                        self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs
+                    )
+                    for item in items
+                ]
+            )
+            itms = deepcopy(items)
+            for it in itms:
+                it.name = f"Quantile {q}, {it.name}"
+            itemsq.extend(itms)
+
+        ds = Dataset(res, time, itemsq)
         return ds
 
     def max(self, axis=1):
