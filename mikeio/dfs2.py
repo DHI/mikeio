@@ -11,15 +11,16 @@ from .dfs import _Dfs123
 class Dfs2(_Dfs123):
 
     _ndim = 2
-    _dx = None
-    _dy = None
-    _nx = None
-    _ny = None
-    _x0 = 0
-    _y0 = 0
 
     def __init__(self, filename=None):
         super(Dfs2, self).__init__(filename)
+
+        self._dx = None
+        self._dy = None
+        self._nx = None
+        self._ny = None
+        self._x0 = 0
+        self._y0 = 0
 
         if filename:
             self._read_dfs2_header()

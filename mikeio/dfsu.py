@@ -3,7 +3,6 @@ import os
 from collections import namedtuple
 import pandas as pd
 import pathlib
-from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
@@ -35,33 +34,35 @@ from .base import EquidistantTimeSeries
 
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
-    _type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-    _projstr = None
 
-    _n_nodes = None
-    _n_elements = None
-    _nc = None
-    _ec = None
-    _codes = None
-    _valid_codes = None
-    _element_ids = None
-    _node_ids = None
-    _element_table = None
-    _element_table_mikecore = None
+    def __init__(self) -> None:
+        self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
+        self._projstr = None
 
-    _top_elems = None
-    _n_layers_column = None
-    _bot_elems = None
-    _n_layers = None
-    _n_sigma = None
+        self._n_nodes = None
+        self._n_elements = None
+        self._nc = None
+        self._ec = None
+        self._codes = None
+        self._valid_codes = None
+        self._element_ids = None
+        self._node_ids = None
+        self._element_table = None
+        self._element_table_mikecore = None
 
-    _geom2d = None
-    _e2_e3_table = None
-    _2d_ids = None
-    _layer_ids = None
+        self._top_elems = None
+        self._n_layers_column = None
+        self._bot_elems = None
+        self._n_layers = None
+        self._n_sigma = None
 
-    _shapely_domain_obj = None
-    _tree2d = None
+        self._geom2d = None
+        self._e2_e3_table = None
+        self._2d_ids = None
+        self._layer_ids = None
+
+        self._shapely_domain_obj = None
+        self._tree2d = None
 
     def __repr__(self):
         out = []
@@ -461,22 +462,53 @@ class _UnstructuredGeometry:
     def element_coordinates(self):
         """Center coordinates of each element"""
         if self._ec is None:
-            self._ec = self._get_element_coords()
+            self._ec = self.calc_element_coordinates()
         return self._ec
 
-    def _get_element_coords(self):
+    def calc_element_coordinates(self, elements=None, zn=None):
         """Calculates the coordinates of the center of each element.
+
+        Only necessary for dynamic vertical coordinates,
+        otherwise use the property *element_coordinates* instead
+
+        Parameters
+        ----------
+        elements : np.array(int), optional
+            element ids of selected elements
+        zn : np.array(float), optional
+            only the z-coodinates of the nodes
+
+        Examples
+        --------
+        >>> elem_ids = dfs.find_nearest_profile_elements(x0, y0)
+        >>> ds = dfs.read(items=['Z coordinate','Temperature'], elements=elem_ids)
+        >>> ec_dyn = dfs.calc_element_coordinates(elements=elem_ids, zn=ds['Z coordinate'][0,:])
+        >>> plt.plot(ds['Temperature'][0, :], ec_dyn[:,2])
+
         Returns
         -------
         np.array
             x,y,z of each element
         """
-        n_elements = self.n_elements
+        node_coordinates = self._nc
 
+        element_table = self.element_table
+        if elements is not None:
+            element_table = element_table[elements]
+        if zn is not None:
+            node_coordinates = node_coordinates.copy()
+            if len(zn) == len(node_coordinates[:, 2]):
+                node_coordinates[:, 2] = zn
+            else:
+                # assume that user wants to find coords on a subset of points
+                idx = np.unique(np.hstack(element_table))
+                node_coordinates[idx, 2] = zn
+
+        n_elements = len(element_table)
         ec = np.empty([n_elements, 3])
 
         # pre-allocate for speed
-        maxnodes = self.max_nodes_per_element
+        maxnodes = 4 if self.is_2d else 8
         idx = np.zeros(maxnodes, dtype=int)
         xcoords = np.zeros([maxnodes, n_elements])
         ycoords = np.zeros([maxnodes, n_elements])
@@ -484,21 +516,20 @@ class _UnstructuredGeometry:
         nnodes_per_elem = np.zeros(n_elements)
 
         for j in range(n_elements):
-            nodes = self._element_table[j]
+            nodes = element_table[j]
             nnodes = len(nodes)
             nnodes_per_elem[j] = nnodes
             for i in range(nnodes):
                 idx[i] = nodes[i]  # - 1
 
-            xcoords[:nnodes, j] = self._nc[idx[:nnodes], 0]
-            ycoords[:nnodes, j] = self._nc[idx[:nnodes], 1]
-            zcoords[:nnodes, j] = self._nc[idx[:nnodes], 2]
+            xcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 0]
+            ycoords[:nnodes, j] = node_coordinates[idx[:nnodes], 1]
+            zcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 2]
 
         ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
         ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
         ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
 
-        self._ec = ec
         return ec
 
     def contains(self, points):
@@ -1697,18 +1728,6 @@ class _UnstructuredFile(_UnstructuredGeometry):
     knows dotnet file, items and timesteps and reads file header
     """
 
-    _filename = None
-    _source = None
-    _deletevalue = None
-
-    _n_timesteps = None
-    _start_time = None
-    _timestep_in_seconds = None
-
-    _n_items = None
-    _items = None
-    _dtype = np.float64
-
     show_progress = False
 
     def __repr__(self):
@@ -1745,6 +1764,17 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
     def __init__(self):
         super().__init__()
+        self._filename = None
+        self._source = None
+        self._deletevalue = None
+
+        self._n_timesteps = None
+        self._start_time = None
+        self._timestep_in_seconds = None
+
+        self._n_items = None
+        self._items = None
+        self._dtype = np.float64
 
     def _read_header(self, filename):
         if not os.path.isfile(filename):
@@ -1845,18 +1875,6 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         #    tot_size = self.n_elements * self.n_timesteps * self.n_items
         # if tot_size > 1e6:
         #    self.show_progress = True
-
-    @property
-    def element_coordinates(self):
-        # faster way of getting element coordinates than base class implementation
-        if self._ec is None:
-            self._ec = self._get_element_coords_from_source()
-        return self._ec
-
-    def _get_element_coords_from_source(self):
-        xc2, yc2, zc2 = DfsuFile.CalculateElementCenterCoordinates(self._source)
-        ec = np.column_stack([xc2, yc2, zc2])
-        return ec
 
     @property
     def deletevalue(self):
