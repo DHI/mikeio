@@ -3,6 +3,7 @@ from shutil import copyfile
 import numpy as np
 import mikeio
 from mikeio import Dfsu
+from mikeio import generic
 from mikeio.generic import scale, diff, sum, extract, avg_time
 import pytest
 
@@ -423,3 +424,40 @@ def test_time_average_deletevalues(tmpdir):
     nan2 = np.isnan(averaged[0])
     assert np.all(nan1 == nan2)
     assert np.allclose(org[0][~nan1], averaged[0][~nan2])
+
+
+def test_quantile_dfsu(tmpdir):
+
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "oresund_q10.dfsu")
+    generic.quantile(infilename, outfilename, q=0.1)
+
+    org = mikeio.read(infilename).quantile(q=0.1, axis=0)
+    q10 = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], q10[0])
+
+
+def test_quantile_dfs2(tmpdir):
+
+    infilename = "tests/testdata/eq.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "eq_q90.dfs2")
+    generic.quantile(infilename, outfilename, q=0.9)
+
+    org = mikeio.read(infilename).quantile(q=0.9, axis=0)
+    q90 = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], q90[0])
+
+
+def test_quantile_dfs0(tmpdir):
+
+    infilename = "tests/testdata/da_diagnostic.dfs0"
+    outfilename = os.path.join(tmpdir.dirname, "da_q001_q05.dfs0")
+    generic.quantile(infilename, outfilename, q=[0.01, 0.5])
+
+    org = mikeio.read(infilename).quantile(q=[0.01, 0.5], axis=0)
+    qnt = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], qnt[0])
+    # assert np.allclose(org[5], qnt[5])
