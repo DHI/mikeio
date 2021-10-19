@@ -421,11 +421,11 @@ class Dataset(TimeSeries):
         Parameters
         ----------
         q: array_like of float
-            Quantile or sequence of quantiles to compute, 
+            Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: int, optional
             default 1= first spatial axis
-        
+
         Returns
         -------
         Dataset
