@@ -5,13 +5,16 @@ import pandas as pd
 from datetime import datetime, timedelta
 import warnings
 from shutil import copyfile
+from copy import deepcopy
 
 from tqdm import trange, tqdm
 
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFile import DfsFile
-from .dfsutil import _valid_item_numbers, _item_numbers_by_name
+from mikecore.DfsFile import DfsFile  # , DfsDynamicItemInfo
+from mikecore.eum import eumQuantity
+from .dfsutil import _valid_item_numbers, _item_numbers_by_name, _get_item_info
+from .eum import ItemInfo
 
 show_progress = False
 
@@ -27,8 +30,10 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
         output filename
     start_time : datetime, optional
         new start time for the new file, default
-    items : list(int), optional
-        clone only these items, default: all items
+    items : list(int,str,eum.ItemInfo), optional
+        list of items for new file, either as a list of
+        ItemInfo or a list of str/int referring to original file,
+        default: all items from original file
 
     Returns
     -------
@@ -64,9 +69,24 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
         builder.AddCustomBlock(customBlock)
 
     # Copy dynamic items
-    item_numbers = _valid_item_numbers(source.ItemInfo, items)
-    for item in item_numbers:
-        builder.AddDynamicItem(source.ItemInfo[item])
+    if isinstance(items, (list, tuple)) and (isinstance(items[0], ItemInfo)):
+        for item in items:
+            builder.AddCreateDynamicItem(
+                item.name,
+                eumQuantity.Create(item.type, item.unit),
+                spatialAxis=source.ItemInfo[-1].SpatialAxis,
+            )
+    else:
+        # must be str/int refering to original file (or None)
+        item_numbers = _valid_item_numbers(source.ItemInfo, items)
+        items = [source.ItemInfo[item] for item in item_numbers]
+        for item in items:
+            builder.AddDynamicItem(item)
+
+    # Copy dynamic items
+    # item_numbers = _valid_item_numbers(source.ItemInfo, items)
+    # for item in item_numbers:
+    #     builder.AddDynamicItem(source.ItemInfo[item])
 
     # Create file
     builder.CreateFile(outfilename)
@@ -469,7 +489,6 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
     item_numbers = list(range(n_items))
 
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-
     deletevalue = dfs_i.FileInfo.DeleteValueFloat
 
     outdatalist = []
@@ -507,4 +526,109 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
         ) / steps_list[item][has_value].astype(np.float32)
         darray[~has_value] = deletevalue
         dfs_o.WriteItemTimeStepNext(0.0, darray)
+
     dfs_o.Close()
+
+
+def quantile(infilename: str, outfilename: str, q, buffer_size=1.0e9):
+    """Create temporal quantiles of all items in dfs file
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+    q: array_like of float
+        Quantile or sequence of quantiles to compute,
+        which must be between 0 and 1 inclusive.
+    buffer_size: float, optional
+        for huge files the quantiles need to be calculated for chunks of
+        elements. buffer_size gives the maximum amount of memory available
+        for the computation in bytes, by default 1e9 (=1GB)
+
+    Examples
+    --------
+    >>> quantile("in.dfsu", "IQR.dfsu", q=[0.25,0.75])
+    """
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+    n_items = len(dfs_i.ItemInfo)
+    item_numbers = list(range(n_items))
+
+    n_data = 0
+    for item in item_numbers:
+        # TODO: better handling of different item sizes (zn...)
+        n_data += dfs_i.ItemInfo[item].ElementCount
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+    deletevalue = dfs_i.FileInfo.DeleteValueFloat
+
+    mem_need = 8 * n_time_steps * n_data  # n_items *
+    n_chunks = int(np.ceil(mem_need / buffer_size))
+    n_data = int(n_data / n_items)
+    chunk_size = int(np.ceil(n_data / n_chunks))
+
+    qvec = [q] if np.isscalar(q) else q
+    qtxt = [f"Quantile {q}" for q in qvec]
+    items = _get_repeated_items(dfs_i.ItemInfo, None, qtxt)
+    dfs_o = _clone(infilename, outfilename, items=items)
+    n_items_out = len(items)
+
+    datalist = []
+    outdatalist = []
+
+    # TODO: skip zn if dfsu3d !
+
+    for item in item_numbers:
+        indatatime = dfs_i.ReadItemTimeStep(item + 1, 0.0)
+        indata = indatatime.Data
+        has_value = indata != deletevalue
+        indata[~has_value] = np.nan
+        indata.astype(np.float64)
+        for _ in qvec:
+            outdatalist.append(np.zeros_like(indata))
+        datalist.append(np.zeros((n_time_steps, chunk_size)))
+
+    e1 = 0
+    for _ in range(n_chunks):
+        e2 = min(e1 + chunk_size, n_data)
+        # the last chunk may be smaller than the rest:
+        chunk_end = chunk_size - ((e1 + chunk_size) - e2)
+
+        # read all data for this chunk
+        for timestep in range(n_time_steps):
+            for item in range(n_items):
+                itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+                d = itemdata.Data[e1:e2]
+                d[d == deletevalue] = np.nan
+                datalist[item][timestep, 0:chunk_end] = d
+
+        # calculate quantiles (for this chunk)
+        item_out = 0
+        for item in range(n_items):
+            qdat = np.zeros((len(qvec), (e2 - e1)))
+            qdat[:, :] = np.quantile(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
+            for j in range(len(qvec)):
+                outdatalist[item_out][e1:e2] = qdat[j, :]
+                item_out += 1
+
+        e1 = e2
+
+    for item in range(n_items_out):
+        darray = outdatalist[item].astype(np.float32)
+        dfs_o.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_o.Close()
+
+
+def _get_repeated_items(items_in, items, repeat_texts):
+    item_numbers = _valid_item_numbers(items_in, items)
+    items_in = _get_item_info(items_in)
+    new_items = []
+    for item_num in item_numbers:
+        for txt in repeat_texts:
+            item = deepcopy(items_in[item_num])
+            item.name = f"{txt}, {item.name}"
+            new_items.append(item)
+
+    return new_items
