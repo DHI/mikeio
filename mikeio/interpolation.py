@@ -6,14 +6,14 @@ def get_idw_interpolant(distances, p=2):
     """IDW interpolant for 2d array of distances
 
     https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
-    
+
     Parameters
     ----------
-    distances : array-like 
+    distances : array-like
         distances between interpolation point and grid point
     p : float, optional
         power of inverse distance weighting, default=2
-    
+
     Returns
     -------
     np.array
@@ -43,8 +43,8 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
     Parameters
     ----------
-    data : mikeio.Dateset, list(ndarray), or ndarray 
-        dfsu data 
+    data : mikeio.Dateset, list(ndarray), or ndarray
+        dfsu data
     elem_ids : ndarray(int)
         n sized array of 1 or more element ids used for interpolation
     weights : ndarray(float), optional
@@ -56,9 +56,9 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     -------
     ndarray or list(ndarray)
         spatially interped data with same type and shape as input
-    
+
     Examples
-    --------    
+    --------
     >>> elem_ids, weights = dfs.get_2d_interpolant(xy)
     >>> dsi = interp2d(ds, elem_ids, weights)
     """
@@ -108,4 +108,3 @@ def _interp_itemstep(data, elem_ids, weights=None):
     for j in range(ni):
         idat[j] = np.dot(data[elem_ids[j]], weights[j])
     return idat
-

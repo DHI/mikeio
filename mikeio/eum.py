@@ -13,6 +13,7 @@ degree Kelvin
 
 """
 from typing import List
+from mikecore.DfsFile import DataValueType
 from mikecore.eum import eumWrapper
 from enum import IntEnum
 
@@ -1429,6 +1430,21 @@ class ItemInfo:
             raise ValueError("Invalid name, name should be a string")
         self.name = name
 
+    def __eq__(self, other):
+        if not isinstance(other, ItemInfo):
+            return NotImplemented
+
+        # an alternative approach to this long expression is to use dataclasses (Python>=3.7)
+        return (
+            self.name == other.name
+            and self.type == other.type
+            and self.unit == other.unit
+            and self.data_value_type == other.data_value_type
+        )
+
     def __repr__(self):
 
-        return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
+        if self.data_value_type == DataValueType.Instantaneous:
+            return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
+        else:
+            return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
