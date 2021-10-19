@@ -11,9 +11,9 @@ from tqdm import trange, tqdm
 
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFile import DfsFile  # , DfsDynamicItemInfo
+from mikecore.DfsFile import DfsFile
 from mikecore.eum import eumQuantity
-from .dfsutil import _valid_item_numbers, _item_numbers_by_name, _get_item_info
+from .dfsutil import _valid_item_numbers, _get_item_info
 from .eum import ItemInfo
 
 show_progress = False
