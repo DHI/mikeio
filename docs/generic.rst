@@ -12,6 +12,7 @@ MIKE IO has `generic dfs <#module-mikeio.generic>`_ functionality that works for
 * `sum() <#mikeio.generic.sum>`_ - Calculate the sum of two dfs files
 * `scale() <#mikeio.generic.scale>`_ - Apply scaling to any dfs file
 * `avg_time() <#mikeio.generic.avg_time>`_ - Create a temporally averaged dfs file
+* `quantile() <#mikeio.generic.quantile>`_ - Create a dfs file with temporal quantiles
 
 All methods except read() create a new dfs file.
 
