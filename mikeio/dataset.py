@@ -431,7 +431,29 @@ class Dataset(TimeSeries):
         Dataset
             dataset with quantile values
         """
+        return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
+    def nanquantile(self, q, *, axis=1, **kwargs):
+        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
+
+        Wrapping np.nanquantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: int, optional
+            default 1= first spatial axis
+
+        Returns
+        -------
+        Dataset
+            dataset with quantile values
+        """
+        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
+
+    def _quantile(self, q, *, axis=1, func=np.quantile, **kwargs):
         items = self.items
 
         if items[0].name == "Z coordinate":
@@ -452,9 +474,7 @@ class Dataset(TimeSeries):
         for q in qvec:
             res.extend(
                 [
-                    np.quantile(
-                        self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs
-                    )
+                    func(self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs)
                     for item in items
                 ]
             )
