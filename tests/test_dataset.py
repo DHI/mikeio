@@ -642,7 +642,7 @@ def test_weighted_average(tmpdir):
 
 
 def test_quantile_axis1(ds1):
-    dsq = ds1.quantile(q=0.345)
+    dsq = ds1.quantile(q=0.345, axis=1)
     assert dsq[0][0] == 0.1
     assert dsq[1][0] == 0.2
 
@@ -656,7 +656,7 @@ def test_quantile_axis1(ds1):
 
 
 def test_quantile_axis0(ds1):
-    dsq = ds1.quantile(q=0.345, axis=0)
+    dsq = ds1.quantile(q=0.345)  # axis=0 is default
     assert dsq[0][0, 0] == 0.1
     assert dsq[1][0, 0] == 0.2
 
