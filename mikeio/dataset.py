@@ -56,12 +56,17 @@ def _reshape_data_by_axis(data, orig_shape, axis):
     if isinstance(axis, int):
         return data
     if len(orig_shape) == len(axis):
-        data = [
-            d.reshape(
-                1,
-            )
-            for d in data
-        ]
+        shape = (1,)
+        data = [d.reshape(shape) for d in data]
+    if len(orig_shape) - len(axis) == 1:
+        # e.g. (0,2) for for dfs2
+        shape = [1] if (0 in axis) else [orig_shape[0]]
+        ndims = len(orig_shape)
+        for j in range(1, ndims):
+            if j not in axis:
+                shape.append(orig_shape[j])
+        data = [d.reshape(shape) for d in data]
+
     return data
 
 
