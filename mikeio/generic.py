@@ -525,7 +525,7 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
 
 
 def quantile(
-    infilename: str, outfilename: str, q, items=None, skipna=True, buffer_size=1.0e9
+    infilename: str, outfilename: str, q, *, items=None, skipna=True, buffer_size=1.0e9
 ):
     """Create temporal quantiles of all items in dfs file
 
