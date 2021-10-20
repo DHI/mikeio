@@ -624,10 +624,10 @@ def test_aggregations(tmpdir):
         ds.nanmin(axis=axis)
         ds.nanmax(axis=axis)
 
-    ds2 = ds.mean(axis=(1, 2))
-    ds.mean(axis=None)
-
-    assert True
+    assert ds.mean(axis=None).shape == (1,)
+    assert ds.mean(axis=(1, 2)).shape == (1,)
+    assert ds.mean(axis=(0, 1)).shape == (1, 216)
+    assert ds.mean(axis=(0, 2)).shape == (1, 264)
 
 
 def test_weighted_average(tmpdir):
