@@ -1,6 +1,5 @@
 import os
 from typing import List, Optional, Sized, Tuple, Union
-from dataclasses import dataclass
 import math
 import numpy as np
 import pandas as pd
@@ -21,12 +20,13 @@ from .eum import ItemInfo
 show_progress = False
 
 
-@dataclass
 class _ChunkInfo:
     """Class for keeping track of an chunked processing"""
 
-    n_data: int
-    n_chunks: int
+    def __init__(self, n_data: int, n_chunks: np.int32):
+
+        self.n_data = n_data
+        self.n_chunks = n_chunks
 
     @property
     def chunk_size(self):
