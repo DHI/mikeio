@@ -1,12 +1,14 @@
-from typing import List, Optional, Union
+from typing import List, Union
 import numpy as np
 import pandas as pd
 from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .custom_exceptions import ItemsError
 
+from mikecore.DfsFile import DfsDynamicItemInfo
+
 
 def _valid_item_numbers(
-    dfsItemInfo: ItemInfo, items: Union[None, int, List[int], List[str]]
+    dfsItemInfo: List[DfsDynamicItemInfo], items: Union[None, int, List[int], List[str]]
 ) -> List[int]:
     n_items_file = len(dfsItemInfo)
     if items is None:
@@ -109,14 +111,14 @@ def _item_numbers_by_name(dfsItemInfo, item_names):
 
 
 def _get_item_info(
-    dfsItemInfo: ItemInfo, item_numbers=Optional[List[int]]
+    dfsItemInfo: List[DfsDynamicItemInfo], item_numbers: List[int] = None
 ) -> List[ItemInfo]:
     """Read DFS ItemInfo for specific item numbers
 
     Parameters
     ----------
-    dfsItemInfo : MIKE dfs ItemInfo object
-    item_numbers : list[int]
+    dfsItemInfo : List[DfsDynamicItemInfo]
+    item_numbers : list[int], optional
 
     Returns
     -------
