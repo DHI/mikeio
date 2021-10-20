@@ -36,7 +36,7 @@ class _ChunkInfo:
         return min(start + self.chunk_size, self.n_data)
 
     def chunk_end(self, start):
-        e2 = self.end(start)
+        e2 = self.stop(start)
         return self.chunk_size - ((start + self.chunk_size) - e2)
 
     @staticmethod
