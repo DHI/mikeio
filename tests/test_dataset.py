@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from mikeio import Dataset, Dfsu, Dfs2
+from mikeio import Dataset, Dfsu, Dfs2, Dfs0
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
@@ -674,6 +674,24 @@ def test_quantile_axis0(ds1):
     assert dsq.n_items == 2 * ds1.n_items
     assert "Quantile 0.25, " in dsq.items[1].name
     assert "Quantile 0.75, " in dsq.items[2].name
+
+
+def test_nanquantile():
+    q = 0.99
+    fn = "tests/testdata/random.dfs0"  # has delete value
+    ds = Dfs0(fn).read()
+
+    dsq1 = ds.quantile(q=q)
+    dsq2 = ds.nanquantile(q=q)
+
+    assert np.isnan(dsq1[0])
+    assert not np.isnan(dsq2[0])
+
+    qnt = np.quantile(ds[0], q=q)
+    nqnt = np.nanquantile(ds[0], q=q)
+
+    assert np.isnan(qnt)
+    assert dsq2[0] == nqnt
 
 
 def test_copy():
