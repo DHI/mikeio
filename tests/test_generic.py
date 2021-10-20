@@ -461,3 +461,12 @@ def test_quantile_dfs0(tmpdir):
 
     assert np.allclose(org[0], qnt[0])
     # assert np.allclose(org[5], qnt[5])
+
+
+def test_quantile_dfsu_3d(tmpdir):
+    infilename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = os.path.join(tmpdir, "oresund_sigma_z_avg.dfsu")
+    generic.quantile(infilename, outfilename, q=[0.1, 0.9])
+
+    qd = Dfsu(outfilename)
+    assert qd.n_timesteps == 1
