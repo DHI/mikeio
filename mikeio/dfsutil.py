@@ -1,10 +1,13 @@
+from typing import List, Optional, Union
 import numpy as np
 import pandas as pd
 from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .custom_exceptions import ItemsError
 
 
-def _valid_item_numbers(dfsItemInfo, items):
+def _valid_item_numbers(
+    dfsItemInfo: ItemInfo, items: Union[None, int, List[int], List[str]]
+) -> List[int]:
     n_items_file = len(dfsItemInfo)
     if items is None:
         return list(range(n_items_file))
@@ -105,7 +108,9 @@ def _item_numbers_by_name(dfsItemInfo, item_names):
     return item_numbers
 
 
-def _get_item_info(dfsItemInfo, item_numbers=None):
+def _get_item_info(
+    dfsItemInfo: ItemInfo, item_numbers=Optional[List[int]]
+) -> List[ItemInfo]:
     """Read DFS ItemInfo for specific item numbers
 
     Parameters
