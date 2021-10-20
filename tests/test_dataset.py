@@ -655,7 +655,8 @@ def test_quantile_axis1(ds1):
     # q as list
     dsq = ds1.quantile(q=[0.25, 0.75], axis=1)
     assert dsq.n_items == 2 * ds1.n_items
-    assert "Quantile 0.25, " in dsq.items[1].name
+    assert "Quantile 0.75, " in dsq.items[1].name
+    assert "Quantile 0.25, " in dsq.items[2].name
 
 
 def test_quantile_axis0(ds1):
@@ -670,13 +671,14 @@ def test_quantile_axis0(ds1):
     # q as list
     dsq = ds1.quantile(q=[0.25, 0.75], axis=0)
     assert dsq[0][0, 0] == 0.1
-    assert dsq[1][0, 0] == 0.2
-    assert dsq[2][0, 0] == 0.1
+    assert dsq[1][0, 0] == 0.1
+    assert dsq[2][0, 0] == 0.2
     assert dsq[3][0, 0] == 0.2
 
     assert dsq.n_items == 2 * ds1.n_items
-    assert "Quantile 0.25, " in dsq.items[1].name
-    assert "Quantile 0.75, " in dsq.items[2].name
+    assert "Quantile 0.75, " in dsq.items[1].name
+    assert "Quantile 0.25, " in dsq.items[2].name
+    assert "Quantile 0.75, " in dsq.items[3].name
 
 
 def test_nanquantile():

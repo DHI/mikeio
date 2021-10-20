@@ -52,6 +52,19 @@ def _items_except_Z_coordinate(items):
     return items
 
 
+def _get_repeated_items(
+    items_in: List[ItemInfo], prefixes: List[str]
+) -> List[ItemInfo]:
+    new_items = []
+    for item_in in items_in:
+        for prefix in prefixes:
+            item = deepcopy(item_in)
+            item.name = f"{prefix}, {item.name}"
+            new_items.append(item)
+
+    return new_items
+
+
 def _reshape_data_by_axis(data, orig_shape, axis):
     if isinstance(axis, int):
         return data
@@ -526,26 +539,21 @@ class Dataset(TimeSeries):
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
-        items = _items_except_Z_coordinate(self.items)
+        items_in = _items_except_Z_coordinate(self.items)
         axis = _parse_axis(self.shape, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = _keepdims_by_axis(axis)
 
         qvec = [q] if np.isscalar(q) else q
+        qtxt = [f"Quantile {q}" for q in qvec]
+        itemsq = _get_repeated_items(items_in, qtxt)
 
         res = []
-        itemsq = []
-        for q in qvec:
-            res.extend(
-                [
-                    func(self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs)
-                    for item in items
-                ]
-            )
-            itms = deepcopy(items)
-            for it in itms:
-                it.name = f"Quantile {q}, {it.name}"
-            itemsq.extend(itms)
+        for item in items_in:
+            qdat = func(self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs)
+            for j in range(len(qvec)):
+                qdat_item = qdat[j, ...] if len(qvec) > 1 else qdat
+                res.append(qdat_item)
 
         res = _reshape_data_by_axis(res, self.shape, axis)
 
