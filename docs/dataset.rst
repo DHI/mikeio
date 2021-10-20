@@ -112,6 +112,7 @@ including different ways of *selecting* data:
 * `average() <#mikeio.Dataset.average>`_ - Compute the weighted average along the specified axis.
 * `aggregate() <#mikeio.Dataset.aggregate>`_ - Aggregate along an axis
 * `quantile() <#mikeio.Dataset.quantile>`_ - Quantiles along an axis
+* `nanquantile() <#mikeio.Dataset.nanquantile>`_ - Quantiles along an axis (NaN ignored)
 
 *Mathematical operations* +, - and * with numerical values:
 
