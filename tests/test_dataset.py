@@ -599,13 +599,13 @@ def test_aggregation_workflows(tmpdir):
     dfs = Dfsu(filename)
 
     ds = dfs.read(["Surface elevation", "Current speed"])
-    ds2 = ds.max()
+    ds2 = ds.max(axis=1)
 
     outfilename = os.path.join(tmpdir.dirname, "max.dfs0")
     ds2.to_dfs0(outfilename)
     assert os.path.isfile(outfilename)
 
-    ds3 = ds.min()
+    ds3 = ds.min(axis=1)
 
     outfilename = os.path.join(tmpdir.dirname, "min.dfs0")
     ds3.to_dfs0(outfilename)
@@ -624,6 +624,9 @@ def test_aggregations(tmpdir):
         ds.nanmin(axis=axis)
         ds.nanmax(axis=axis)
 
+    ds2 = ds.mean(axis=(1, 2))
+    ds.mean(axis=None)
+
     assert True
 
 
@@ -634,7 +637,7 @@ def test_weighted_average(tmpdir):
     ds = dfs.read(["Surface elevation", "Current speed"])
 
     area = dfs.get_element_area()
-    ds2 = ds.average(weights=area)
+    ds2 = ds.average(weights=area, axis=1)
 
     outfilename = os.path.join(tmpdir.dirname, "average.dfs0")
     ds2.to_dfs0(outfilename)
