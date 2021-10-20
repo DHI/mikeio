@@ -397,8 +397,8 @@ class Dataset(TimeSeries):
         Parameters
         ----------
         idx: int, scalar or array_like
-        axis: int, optional
-            default 1, 0= temporal axis
+        axis: (int, str, None), optional
+            axis number or "time", by default 1
 
         Returns
         -------
@@ -443,8 +443,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: (int,str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
         func: function, optional
             default np.nanmean
 
@@ -478,13 +478,19 @@ class Dataset(TimeSeries):
         q: array_like of float
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
-        axis: (int, str), optional
+        axis: (int, str, None), optional
             axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
         Dataset
             dataset with quantile values
+
+        Examples
+        --------
+        >>> ds.quantile(q=[0.25,0.75])
+        >>> ds.quantile(q=0.5)
+        >>> ds.quantile(q=[0.01,0.5,0.99], axis="space")
 
         See Also
         --------
@@ -502,8 +508,14 @@ class Dataset(TimeSeries):
         q: array_like of float
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
-        axis: (int, str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Examples
+        --------
+        >>> ds.nanquantile(q=[0.25,0.75])
+        >>> ds.nanquantile(q=0.5)
+        >>> ds.nanquantile(q=[0.01,0.5,0.99], axis="space")
 
         Returns
         -------
@@ -544,8 +556,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: int, optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -563,8 +575,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: (int, str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -582,8 +594,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: (int, str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -603,8 +615,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: (int, str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -637,8 +649,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: (int, str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -652,8 +664,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: (int, str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -667,8 +679,8 @@ class Dataset(TimeSeries):
 
         Parameters
         ----------
-        axis: (int, str), optional
-            axis number, by default "time"=0
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
