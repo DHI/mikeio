@@ -410,10 +410,9 @@ class Dataset(TimeSeries):
             for item in items
         ]
 
-        ds = Dataset(res, time, items)
-        return ds
+        return Dataset(res, time, items)
 
-    def quantile(self, q, *, axis=1, **kwargs):
+    def quantile(self, q, *, axis=0, **kwargs):
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -424,16 +423,20 @@ class Dataset(TimeSeries):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: int, optional
-            default 1= first spatial axis
+            default 0= temporal axis
 
         Returns
         -------
         Dataset
             dataset with quantile values
+
+        See Also
+        --------
+        nanquantile : quantile with NaN values ignored
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis=1, **kwargs):
+    def nanquantile(self, q, *, axis=0, **kwargs):
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -444,7 +447,7 @@ class Dataset(TimeSeries):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: int, optional
-            default 1= first spatial axis
+            default 0= temporal axis
 
         Returns
         -------
@@ -453,7 +456,7 @@ class Dataset(TimeSeries):
         """
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
-    def _quantile(self, q, *, axis=1, func=np.quantile, **kwargs):
+    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
         items = self.items
 
         if items[0].name == "Z coordinate":
@@ -483,8 +486,7 @@ class Dataset(TimeSeries):
                 it.name = f"Quantile {q}, {it.name}"
             itemsq.extend(itms)
 
-        ds = Dataset(res, time, itemsq)
-        return ds
+        return Dataset(res, time, itemsq)
 
     def max(self, axis=1):
         """Max value along an axis
