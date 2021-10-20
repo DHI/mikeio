@@ -83,11 +83,6 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
         for item in items:
             builder.AddDynamicItem(item)
 
-    # Copy dynamic items
-    # item_numbers = _valid_item_numbers(source.ItemInfo, items)
-    # for item in item_numbers:
-    #     builder.AddDynamicItem(source.ItemInfo[item])
-
     # Create file
     builder.CreateFile(outfilename)
 
@@ -127,7 +122,7 @@ def scale(
     factor: float, optional
         value to multiply to all items, default 1.0
     items: List[str] or List[int], optional
-        Process only selected items, by number (0-based)
+        Process only selected items, by number (0-based) or name, by default: all
     """
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
@@ -261,9 +256,8 @@ def concat(infilenames: List[str], outfilename: str) -> None:
     ----------
     infilenames: List[str]
         filenames to concatenate
-
     outfilename: str
-        filename
+        filename of output
 
     Notes
     ------
@@ -477,7 +471,7 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
         input filename
     outfilename : str
         output filename
-    skipna : bool
+    skipna : bool, optional
         exclude NaN/delete values when computing the result, default True
     """
 
@@ -530,7 +524,9 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
     dfs_o.Close()
 
 
-def quantile(infilename: str, outfilename: str, q, skipna=False, buffer_size=1.0e9):
+def quantile(
+    infilename: str, outfilename: str, q, items=None, skipna=True, buffer_size=1.0e9
+):
     """Create temporal quantiles of all items in dfs file
 
     Parameters
@@ -542,8 +538,10 @@ def quantile(infilename: str, outfilename: str, q, skipna=False, buffer_size=1.0
     q: array_like of float
         Quantile or sequence of quantiles to compute,
         which must be between 0 and 1 inclusive.
-    skipna : bool
-        exclude NaN/delete values when computing the result, default False
+    items: List[str] or List[int], optional
+        Process only selected items, by number (0-based) or name, by default: all
+    skipna : bool, optional
+        exclude NaN/delete values when computing the result, default True
     buffer_size: float, optional
         for huge files the quantiles need to be calculated for chunks of
         elements. buffer_size gives the maximum amount of memory available
@@ -555,13 +553,14 @@ def quantile(infilename: str, outfilename: str, q, skipna=False, buffer_size=1.0
 
     >>> quantile("huge.dfsu", "Q01.dfsu", q=0.1, buffer_size=5.0e9)
 
-    >>> quantile("with_nans.dfsu", "Q05.dfsu", q=0.5, skipna=True)
+    >>> quantile("with_nans.dfsu", "Q05.dfsu", q=0.5, skipna=False)
     """
     func = np.nanquantile if skipna else np.quantile
 
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
-    n_items = len(dfs_i.ItemInfo)
-    item_numbers = list(range(n_items))
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+    n_items_in = len(item_numbers)
 
     n_data = 0
     for item in item_numbers:
@@ -573,12 +572,13 @@ def quantile(infilename: str, outfilename: str, q, skipna=False, buffer_size=1.0
 
     mem_need = 8 * n_time_steps * n_data  # n_items *
     n_chunks = int(np.ceil(mem_need / buffer_size))
-    n_data = int(n_data / n_items)
+    n_data = int(n_data / n_items_in)
     chunk_size = int(np.ceil(n_data / n_chunks))
 
     qvec = [q] if np.isscalar(q) else q
     qtxt = [f"Quantile {q}" for q in qvec]
-    items = _get_repeated_items(dfs_i.ItemInfo, None, qtxt)
+    ItemInfos = [dfs_i.ItemInfo[i] for i in item_numbers]
+    items = _get_repeated_items(ItemInfos, None, qtxt)
     dfs_o = _clone(infilename, outfilename, items=items)
     n_items_out = len(items)
 
@@ -605,15 +605,17 @@ def quantile(infilename: str, outfilename: str, q, skipna=False, buffer_size=1.0
 
         # read all data for this chunk
         for timestep in range(n_time_steps):
-            for item in range(n_items):
+            item_out = 0
+            for item in range(n_items_in):
                 itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
                 d = itemdata.Data[e1:e2]
                 d[d == deletevalue] = np.nan
-                datalist[item][timestep, 0:chunk_end] = d
+                datalist[item_out][timestep, 0:chunk_end] = d
+                item_out += 1
 
         # calculate quantiles (for this chunk)
         item_out = 0
-        for item in range(n_items):
+        for item in range(n_items_in):
             qdat = np.zeros((len(qvec), (e2 - e1)))
             qdat[:, :] = func(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
             for j in range(len(qvec)):
