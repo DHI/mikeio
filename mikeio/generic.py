@@ -15,7 +15,7 @@ from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
 from mikecore.eum import eumQuantity
 from .dfsutil import _valid_item_numbers, _get_item_info
-from .eum import ItemInfo
+from .eum import EUMType, ItemInfo
 
 show_progress = False
 
@@ -103,14 +103,26 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
     for customBlock in fi.CustomBlocks:
         builder.AddCustomBlock(customBlock)
 
+    names = [x.Name for x in source.ItemInfo]
+    item_lookup = {name: i for i, name in enumerate(names)}
+
     # Copy dynamic items
-    if isinstance(items, (list, tuple)) and (isinstance(items[0], ItemInfo)):
+    if isinstance(items, (list, tuple)):
         for item in items:
-            builder.AddCreateDynamicItem(
-                item.name,
-                eumQuantity.Create(item.type, item.unit),
-                spatialAxis=source.ItemInfo[-1].SpatialAxis,
-            )
+            if isinstance(item, ItemInfo):
+                builder.AddCreateDynamicItem(
+                    item.name,
+                    eumQuantity.Create(item.type, item.unit),
+                    spatialAxis=source.ItemInfo[-1].SpatialAxis,
+                )
+            elif isinstance(item, DfsDynamicItemInfo):
+                builder.AddDynamicItem(item)
+            elif isinstance(item, int):
+                builder.AddDynamicItem(source.ItemInfo[item])
+            elif isinstance(item, str):
+                item_no = item_lookup[item]
+                builder.AddDynamicItem(source.ItemInfo[item_no])
+
     else:
         # must be str/int refering to original file (or None)
         item_numbers = _valid_item_numbers(source.ItemInfo, items)
@@ -594,7 +606,13 @@ def quantile(
 
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
+    is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
+
     item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+
+    if is_dfsu_3d and 0 in item_numbers:
+        item_numbers.remove(0)  # Remove Zn item for special treatment
+
     n_items_in = len(item_numbers)
 
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -607,8 +625,15 @@ def quantile(
     qtxt = [f"Quantile {q}" for q in qvec]
     core_iteminfos = [dfs_i.ItemInfo[i] for i in item_numbers]
     items = _get_repeated_items(core_iteminfos, prefixes=qtxt)
+
+    if is_dfsu_3d:
+        items.insert(0, dfs_i.ItemInfo[0])
+
     dfs_o = _clone(infilename, outfilename, items=items)
+
     n_items_out = len(items)
+    if is_dfsu_3d:
+        n_items_out = n_items_out - 1
 
     datalist = []
     outdatalist = []
@@ -647,6 +672,12 @@ def quantile(
 
         e1 = e2
 
+    if is_dfsu_3d:
+        znitemdata = dfs_i.ReadItemTimeStep(1, 0)
+        # TODO should this be static Z coordinates instead?
+        d = znitemdata.Data.astype(np.float32)
+        dfs_o.WriteItemTimeStepNext(0.0, d)
+
     for item in range(n_items_out):
         darray = outdatalist[item].astype(np.float32)
         dfs_o.WriteItemTimeStepNext(0.0, darray)
@@ -668,6 +699,7 @@ def _get_repeated_items(
 ) -> List[ItemInfo]:
     item_numbers = _valid_item_numbers(items_in)
     items_in = _get_item_info(items_in)
+
     new_items = []
     for item_num in item_numbers:
         for prefix in prefixes:
