@@ -530,7 +530,7 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
     dfs_o.Close()
 
 
-def quantile(infilename: str, outfilename: str, q, buffer_size=1.0e9):
+def quantile(infilename: str, outfilename: str, q, skipna=False, buffer_size=1.0e9):
     """Create temporal quantiles of all items in dfs file
 
     Parameters
@@ -542,6 +542,8 @@ def quantile(infilename: str, outfilename: str, q, buffer_size=1.0e9):
     q: array_like of float
         Quantile or sequence of quantiles to compute,
         which must be between 0 and 1 inclusive.
+    skipna : bool
+        exclude NaN/delete values when computing the result, default False
     buffer_size: float, optional
         for huge files the quantiles need to be calculated for chunks of
         elements. buffer_size gives the maximum amount of memory available
@@ -550,7 +552,13 @@ def quantile(infilename: str, outfilename: str, q, buffer_size=1.0e9):
     Examples
     --------
     >>> quantile("in.dfsu", "IQR.dfsu", q=[0.25,0.75])
+
+    >>> quantile("huge.dfsu", "Q01.dfsu", q=0.1, buffer_size=5.0e9)
+
+    >>> quantile("with_nans.dfsu", "Q05.dfsu", q=0.5, skipna=True)
     """
+    func = np.nanquantile if skipna else np.quantile
+
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
     n_items = len(dfs_i.ItemInfo)
     item_numbers = list(range(n_items))
@@ -607,7 +615,7 @@ def quantile(infilename: str, outfilename: str, q, buffer_size=1.0e9):
         item_out = 0
         for item in range(n_items):
             qdat = np.zeros((len(qvec), (e2 - e1)))
-            qdat[:, :] = np.quantile(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
+            qdat[:, :] = func(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
             for j in range(len(qvec)):
                 outdatalist[item_out][e1:e2] = qdat[j, :]
                 item_out += 1
