@@ -8,7 +8,8 @@ from mikecore.DfsFile import DfsDynamicItemInfo
 
 
 def _valid_item_numbers(
-    dfsItemInfo: List[DfsDynamicItemInfo], items: Union[None, int, List[int], List[str]]
+    dfsItemInfo: List[DfsDynamicItemInfo],
+    items: Union[int, List[int], List[str]] = None,
 ) -> List[int]:
     n_items_file = len(dfsItemInfo)
     if items is None:

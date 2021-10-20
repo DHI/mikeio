@@ -1,5 +1,7 @@
 import os
-from typing import List, Optional, Union
+from typing import List, Optional, Sized, Tuple, Union
+from dataclasses import dataclass
+import math
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -11,12 +13,45 @@ from tqdm import trange, tqdm
 
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFile import DfsFile
+from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
 from mikecore.eum import eumQuantity
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .eum import ItemInfo
 
 show_progress = False
+
+
+@dataclass
+class _ChunkInfo:
+    """Class for keeping track of an chunked processing"""
+
+    n_data: int
+    n_chunks: int
+
+    @property
+    def chunk_size(self):
+        return math.ceil(self.n_data / self.n_chunks)
+
+    def stop(self, start: int) -> int:
+        return min(start + self.chunk_size, self.n_data)
+
+    def chunk_end(self, start):
+        e2 = self.end(start)
+        return self.chunk_size - ((start + self.chunk_size) - e2)
+
+    @staticmethod
+    def from_dfs(
+        dfs: DfsFile, item_numbers: List[int], buffer_size: float
+    ) -> "_ChunkInfo":
+        """Calculate chunk info based on # of elements in dfs file and selected buffer size"""
+
+        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        n_data_all = np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers])
+        mem_need = 8 * n_time_steps * n_data_all  # n_items *
+        n_chunks = math.ceil(mem_need / buffer_size)
+        n_data = n_data_all // len(item_numbers)
+
+        return _ChunkInfo(n_data, n_chunks)
 
 
 def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> DfsFile:
@@ -562,23 +597,16 @@ def quantile(
     item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
     n_items_in = len(item_numbers)
 
-    n_data = 0
-    for item in item_numbers:
-        # TODO: better handling of different item sizes (zn...)
-        n_data += dfs_i.ItemInfo[item].ElementCount
-
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-    deletevalue = dfs_i.FileInfo.DeleteValueFloat
 
-    mem_need = 8 * n_time_steps * n_data  # n_items *
-    n_chunks = int(np.ceil(mem_need / buffer_size))
-    n_data = int(n_data / n_items_in)
-    chunk_size = int(np.ceil(n_data / n_chunks))
+    # TODO: better handling of different item sizes (zn...)
+
+    ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
 
     qvec = [q] if np.isscalar(q) else q
     qtxt = [f"Quantile {q}" for q in qvec]
-    ItemInfos = [dfs_i.ItemInfo[i] for i in item_numbers]
-    items = _get_repeated_items(ItemInfos, None, qtxt)
+    core_iteminfos = [dfs_i.ItemInfo[i] for i in item_numbers]
+    items = _get_repeated_items(core_iteminfos, prefixes=qtxt)
     dfs_o = _clone(infilename, outfilename, items=items)
     n_items_out = len(items)
 
@@ -588,29 +616,24 @@ def quantile(
     # TODO: skip zn if dfsu3d !
 
     for item in item_numbers:
-        indatatime = dfs_i.ReadItemTimeStep(item + 1, 0.0)
-        indata = indatatime.Data
-        has_value = indata != deletevalue
-        indata[~has_value] = np.nan
-        indata.astype(np.float64)
+        indata = _read_item(dfs_i, item, 0)
         for _ in qvec:
             outdatalist.append(np.zeros_like(indata))
-        datalist.append(np.zeros((n_time_steps, chunk_size)))
+        datalist.append(np.zeros((n_time_steps, ci.chunk_size)))
 
     e1 = 0
-    for _ in range(n_chunks):
-        e2 = min(e1 + chunk_size, n_data)
+    for _ in range(ci.n_chunks):
+        e2 = ci.stop(e1)
         # the last chunk may be smaller than the rest:
-        chunk_end = chunk_size - ((e1 + chunk_size) - e2)
+        chunk_end = ci.chunk_end(e1)
 
         # read all data for this chunk
         for timestep in range(n_time_steps):
             item_out = 0
-            for item in range(n_items_in):
-                itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
-                d = itemdata.Data[e1:e2]
-                d[d == deletevalue] = np.nan
-                datalist[item_out][timestep, 0:chunk_end] = d
+            for item_no in item_numbers:
+                itemdata = _read_item(dfs_i, item_no, timestep)
+                data_chunk = itemdata[e1:e2]
+                datalist[item_out][timestep, 0:chunk_end] = data_chunk
                 item_out += 1
 
         # calculate quantiles (for this chunk)
@@ -631,14 +654,25 @@ def quantile(
     dfs_o.Close()
 
 
-def _get_repeated_items(items_in, items, repeat_texts):
-    item_numbers = _valid_item_numbers(items_in, items)
+def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
+    indatatime = dfs.ReadItemTimeStep(item + 1, timestepIndex=timestep)
+    indata = indatatime.Data
+    has_value = indata != dfs.FileInfo.DeleteValueFloat
+    indata[~has_value] = np.nan
+
+    return indata.astype(np.float64)
+
+
+def _get_repeated_items(
+    items_in: List[DfsDynamicItemInfo], prefixes: List[str]
+) -> List[ItemInfo]:
+    item_numbers = _valid_item_numbers(items_in)
     items_in = _get_item_info(items_in)
     new_items = []
     for item_num in item_numbers:
-        for txt in repeat_texts:
+        for prefix in prefixes:
             item = deepcopy(items_in[item_num])
-            item.name = f"{txt}, {item.name}"
+            item.name = f"{prefix}, {item.name}"
             new_items.append(item)
 
     return new_items
