@@ -438,6 +438,18 @@ def test_quantile_dfsu(tmpdir):
     assert np.allclose(org[0], q10[0])
 
 
+def test_quantile_dfsu_buffer_size(tmpdir):
+
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "oresund_q10.dfsu")
+    generic.quantile(infilename, outfilename, q=0.1, buffer_size=1e5)
+
+    org = mikeio.read(infilename).quantile(q=0.1, axis=0)
+    q10 = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], q10[0])
+
+
 def test_quantile_dfs2(tmpdir):
 
     infilename = "tests/testdata/eq.dfs2"
