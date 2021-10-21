@@ -1,5 +1,5 @@
 import os
-from typing import List, Optional, Sized, Tuple, Union
+from typing import Iterable, List, Union
 import math
 import numpy as np
 import pandas as pd
@@ -109,8 +109,7 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
     names = [x.Name for x in source.ItemInfo]
     item_lookup = {name: i for i, name in enumerate(names)}
 
-    # Copy dynamic items
-    if isinstance(items, (list, tuple)):
+    if isinstance(items, Iterable) and not isinstance(items, str):
         for item in items:
             if isinstance(item, ItemInfo):
                 builder.AddCreateDynamicItem(
@@ -126,12 +125,14 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
                 item_no = item_lookup[item]
                 builder.AddDynamicItem(source.ItemInfo[item_no])
 
-    else:
+    elif isinstance(items, (int, str)) or items is None:
         # must be str/int refering to original file (or None)
         item_numbers = _valid_item_numbers(source.ItemInfo, items)
         items = [source.ItemInfo[item] for item in item_numbers]
         for item in items:
             builder.AddDynamicItem(item)
+    else:
+        raise ValueError("Items of type: {type(items)} is not supported")
 
     # Create file
     builder.CreateFile(outfilename)
@@ -396,12 +397,19 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
+    is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
+
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
-    items = _valid_item_numbers(dfs_i.ItemInfo, items)
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
 
-    dfs_o = _clone(infilename, outfilename, start_time=file_start_new, items=items)
+    if is_dfsu_3d and 0 not in item_numbers:
+        item_numbers.insert(0, 0)
+
+    dfs_o = _clone(
+        infilename, outfilename, start_time=file_start_new, items=item_numbers
+    )
 
     file_start_shift = 0
     if file_start_new is not None:
@@ -410,7 +418,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
 
     timestep_out = -1
     for timestep in range(start_step, end_step):
-        for item_out, item in enumerate(items):
+        for item_out, item in enumerate(item_numbers):
             itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
             time_sec = itemdata.Time
 
@@ -420,7 +428,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
                 return
 
             if time_sec >= start_sec:
-                if item == items[0]:
+                if item == item_numbers[0]:
                     timestep_out = timestep_out + 1
                 time_sec_out = time_sec - file_start_shift
 

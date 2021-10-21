@@ -351,20 +351,28 @@ def test_extract_relative_time_axis(tmpdir):
 
 def test_extract_items(tmpdir):
 
+    # This is a Dfsu 3d file (i.e. first item is Z coordinate)
     infile = "tests/testdata/oresund_vertical_slice.dfsu"
     outfile = os.path.join(tmpdir.dirname, "extracted_vertical_slice.dfsu")
 
     extract(infile, outfile, items="Temperature")
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 1
+    assert extracted.n_items == 2
+    assert extracted.items[0].name == "Z coordinate"
 
     extract(infile, outfile, items=[0, 2])
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 2
+    assert extracted.items[1].name == "Salinity"
+
+    extract(infile, outfile, items=range(0, 2))  # [0,1]
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 2
+    assert extracted.items[1].name == "Temperature"
 
     extract(infile, outfile, items=["Salinity", 1])
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 2
+    assert extracted.n_items == 3  # Z coordinate item is always included
 
     with pytest.raises(Exception):
         # must be unique
