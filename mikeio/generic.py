@@ -28,6 +28,9 @@ class _ChunkInfo:
         self.n_data = n_data
         self.n_chunks = n_chunks
 
+    def __repr__(self):
+        return f"_ChunkInfo(n_chunks={self.n_chunks}, n_data={self.n_data}, chunk_size={self.chunk_size})"
+
     @property
     def chunk_size(self):
         return math.ceil(self.n_data / self.n_chunks)
@@ -638,8 +641,6 @@ def quantile(
     datalist = []
     outdatalist = []
 
-    # TODO: skip zn if dfsu3d !
-
     for item in item_numbers:
         indata = _read_item(dfs_i, item, 0)
         for _ in qvec:
@@ -664,7 +665,7 @@ def quantile(
         # calculate quantiles (for this chunk)
         item_out = 0
         for item in range(n_items_in):
-            qdat = np.zeros((len(qvec), (e2 - e1)))
+            qdat = np.zeros((len(qvec), (ci.chunk_size)))
             qdat[:, :] = func(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
             for j in range(len(qvec)):
                 outdatalist[item_out][e1:e2] = qdat[j, :]
@@ -675,8 +676,7 @@ def quantile(
     if is_dfsu_3d:
         znitemdata = dfs_i.ReadItemTimeStep(1, 0)
         # TODO should this be static Z coordinates instead?
-        d = znitemdata.Data.astype(np.float32)
-        dfs_o.WriteItemTimeStepNext(0.0, d)
+        dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
 
     for item in range(n_items_out):
         darray = outdatalist[item].astype(np.float32)
