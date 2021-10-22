@@ -386,7 +386,7 @@ class Dataset(TimeSeries):
 
     def to_numpy(self):
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
-        
+
         Returns
         -------
         np.ndarray
