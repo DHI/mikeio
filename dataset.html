@@ -378,6 +378,12 @@ including different ways of <em>selecting</em> data:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.append_items">
+<span class="sig-name descname"><span class="pre">append_items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.append_items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append items from other Dataset to this Dataset</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.average">
 <span class="sig-name descname"><span class="pre">average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.average" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the weighted average along the specified axis.</p>
@@ -408,6 +414,18 @@ including different ways of <em>selecting</em> data:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">weights</span><span class="o">=</span><span class="n">area</span><span class="p">)</span>
 </pre></div>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.combine">
+<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">datasets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.combine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine n Datasets either along items or time axis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.concat">
+<span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.concat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate this Dataset with data from other Dataset</p>
 </dd></dl>
 
 <dl class="py method">
@@ -939,6 +957,12 @@ least two time instances); otherwise None</p>
 <dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – full path and file name to the dfs0 file.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.to_numpy">
+<span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_numpy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stack data to a single ndarray with shape (n_items, n_timesteps, …)</p>
 </dd></dl>
 
 </dd></dl>
