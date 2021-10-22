@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
-from mikeio import Dataset, Dfsu, Dfs2
+from mikeio import Dataset, Dfsu, Dfs2, Dfs0
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
@@ -599,13 +599,13 @@ def test_aggregation_workflows(tmpdir):
     dfs = Dfsu(filename)
 
     ds = dfs.read(["Surface elevation", "Current speed"])
-    ds2 = ds.max()
+    ds2 = ds.max(axis=1)
 
     outfilename = os.path.join(tmpdir.dirname, "max.dfs0")
     ds2.to_dfs0(outfilename)
     assert os.path.isfile(outfilename)
 
-    ds3 = ds.min()
+    ds3 = ds.min(axis=1)
 
     outfilename = os.path.join(tmpdir.dirname, "min.dfs0")
     ds3.to_dfs0(outfilename)
@@ -624,7 +624,10 @@ def test_aggregations(tmpdir):
         ds.nanmin(axis=axis)
         ds.nanmax(axis=axis)
 
-    assert True
+    assert ds.mean(axis=None).shape == (1,)
+    assert ds.mean(axis=(1, 2)).shape == (1,)
+    assert ds.mean(axis=(0, 1)).shape == (1, 216)
+    assert ds.mean(axis=(0, 2)).shape == (1, 264)
 
 
 def test_weighted_average(tmpdir):
@@ -634,11 +637,66 @@ def test_weighted_average(tmpdir):
     ds = dfs.read(["Surface elevation", "Current speed"])
 
     area = dfs.get_element_area()
-    ds2 = ds.average(weights=area)
+    ds2 = ds.average(weights=area, axis=1)
 
     outfilename = os.path.join(tmpdir.dirname, "average.dfs0")
     ds2.to_dfs0(outfilename)
     assert os.path.isfile(outfilename)
+
+
+def test_quantile_axis1(ds1):
+    dsq = ds1.quantile(q=0.345, axis=1)
+    assert dsq[0][0] == 0.1
+    assert dsq[1][0] == 0.2
+
+    assert dsq.n_items == ds1.n_items
+    assert dsq.n_timesteps == ds1.n_timesteps
+
+    # q as list
+    dsq = ds1.quantile(q=[0.25, 0.75], axis=1)
+    assert dsq.n_items == 2 * ds1.n_items
+    assert "Quantile 0.75, " in dsq.items[1].name
+    assert "Quantile 0.25, " in dsq.items[2].name
+
+
+def test_quantile_axis0(ds1):
+    dsq = ds1.quantile(q=0.345)  # axis=0 is default
+    assert dsq[0][0, 0] == 0.1
+    assert dsq[1][0, 0] == 0.2
+
+    assert dsq.n_items == ds1.n_items
+    assert dsq.n_timesteps == 1
+    assert dsq.shape[-1] == ds1.shape[-1]
+
+    # q as list
+    dsq = ds1.quantile(q=[0.25, 0.75], axis=0)
+    assert dsq[0][0, 0] == 0.1
+    assert dsq[1][0, 0] == 0.1
+    assert dsq[2][0, 0] == 0.2
+    assert dsq[3][0, 0] == 0.2
+
+    assert dsq.n_items == 2 * ds1.n_items
+    assert "Quantile 0.75, " in dsq.items[1].name
+    assert "Quantile 0.25, " in dsq.items[2].name
+    assert "Quantile 0.75, " in dsq.items[3].name
+
+
+def test_nanquantile():
+    q = 0.99
+    fn = "tests/testdata/random.dfs0"  # has delete value
+    ds = Dfs0(fn).read()
+
+    dsq1 = ds.quantile(q=q)
+    dsq2 = ds.nanquantile(q=q)
+
+    assert np.isnan(dsq1[0])
+    assert not np.isnan(dsq2[0])
+
+    qnt = np.quantile(ds[0], q=q)
+    nqnt = np.nanquantile(ds[0], q=q)
+
+    assert np.isnan(qnt)
+    assert dsq2[0] == nqnt
 
 
 def test_copy():

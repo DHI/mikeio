@@ -172,6 +172,17 @@ def test_read_all_time_steps():
     assert ds.data[0].shape[0] == 9
 
 
+def test_read_item_range():
+
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(items=range(1, 3))  # [1,2]
+
+    assert ds.n_items == 2
+    assert ds.items[0].name == "U velocity"
+
+
 def test_read_all_time_steps_without_progressbar():
 
     Dfsu.show_progress = True
