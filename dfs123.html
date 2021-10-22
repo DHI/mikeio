@@ -462,6 +462,12 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.is_geo">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Dfs2.is_geo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs2.items">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs2.items" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of items</p>
@@ -495,6 +501,37 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 <dt class="sig sig-object py" id="mikeio.Dfs2.orientation">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">orientation</span></span><a class="headerlink" href="#mikeio.Dfs2.orientation" title="Permalink to this definition">¶</a></dt>
 <dd><p>North to Y orientation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs2.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>z: np.array (2d)
+cmap: matplotlib.cm.cmap, optional</p>
+<blockquote>
+<div><p>colormap, default viridis</p>
+</div></blockquote>
+<dl class="simple">
+<dt>figsize: (float, float), optional</dt><dd><p>specify size of figure</p>
+</dd>
+<dt>ax: matplotlib.axes, optional</dt><dd><p>Adding to existing axis, instead of creating new fig</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>&lt;matplotlib.axes&gt;</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs2</span><span class="p">(</span><span class="s2">&quot;data/gebco_sound.dfs2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">elevation</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="s1">&#39;Elevation&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">elevation</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;jet&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
