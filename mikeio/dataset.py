@@ -390,7 +390,37 @@ class Dataset(TimeSeries):
 
     @classmethod
     def combine(cls, *datasets):
-        """Combine n Datasets either along items or time axis"""
+        """Combine n Datasets either along items or time axis
+
+        Examples
+        --------
+        >>> import mikeio
+        >>> from mikeio import Dataset
+        >>> ds1 = mikeio.read("HD2D.dfsu", items=0)
+        >>> ds1
+        <mikeio.Dataset>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        >>> ds2 = mikeio.read("HD2D.dfsu", items=[2,3])
+        >>> ds2
+        <mikeio.Dataset>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  V velocity <v velocity component> (meter per sec)
+        1:  Current speed <Current Speed> (meter per sec)
+        >>> ds3 = Dataset.combine(ds1,ds2)
+        >>> ds3
+        <mikeio.Dataset>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  V velocity <v velocity component> (meter per sec)
+        2:  Current speed <Current Speed> (meter per sec)
+        """
 
         if isinstance(datasets[0], Iterable):
             if isinstance(datasets[0][0], Dataset):

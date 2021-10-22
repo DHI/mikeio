@@ -224,6 +224,11 @@ class Dfs2(_Dfs123):
 
     def plot(self, z, *, cmap=None, figsize=None, ax=None):
         """
+        Plot dfs2 data
+
+        Parameters
+        ----------
+
         z: np.array (2d)
         cmap: matplotlib.cm.cmap, optional
             colormap, default viridis
