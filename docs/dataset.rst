@@ -136,7 +136,9 @@ Other methods that also return a Dataset:
 * `to_dataframe() <#mikeio.Dataset.to_dataframe>`_ - Convert Dataset to a Pandas DataFrame
 * `to_dfs0() <#mikeio.Dataset.to_dfs0>`_ - Write Dataset to a Dfs0 file
 
+*Combining datasets*:
 
+* `combine() <#mikeio.Dataset.combine>`_ - Combine two or more datasets either along the time axis (concatenation) or along the item axis.
 
 Dataset API
 -----------
