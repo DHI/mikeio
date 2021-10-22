@@ -102,7 +102,7 @@ the Mesh object has the following methods and properties:
 
     mikeio.Mesh.write
     mikeio.Mesh.plot_boundary_nodes
-    mikeio.zn
+    mikeio.Mesh.zn
 
 See the `Mesh API specification <#mikeio.Mesh>`_ below for a detailed description. 
 See the `Mesh Example notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Mesh.ipynb>`_ for more Mesh operations (including shapely examples).

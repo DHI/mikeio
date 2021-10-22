@@ -351,6 +351,10 @@ including different ways of <em>selecting</em> data:</p>
 <li><p><a class="reference external" href="#mikeio.Dataset.to_dataframe">to_dataframe()</a> - Convert Dataset to a Pandas DataFrame</p></li>
 <li><p><a class="reference external" href="#mikeio.Dataset.to_dfs0">to_dfs0()</a> - Write Dataset to a Dfs0 file</p></li>
 </ul>
+<p><em>Combining datasets</em>:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="#mikeio.Dataset.combine">combine()</a> - Combine two or more datasets either along the time axis (concatenation) or along the item axis.</p></li>
+</ul>
 </div>
 <div class="section" id="dataset-api">
 <h2>Dataset API<a class="headerlink" href="#dataset-api" title="Permalink to this headline">¶</a></h2>
@@ -420,6 +424,35 @@ including different ways of <em>selecting</em> data:</p>
 <dt class="sig sig-object py" id="mikeio.Dataset.combine">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">datasets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.combine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Combine n Datasets either along items or time axis</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds1</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds1</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">Dimensions: (9, 884)</span>
+<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
+<span class="go">Items:</span>
+<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">Dimensions: (9, 884)</span>
+<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
+<span class="go">Items:</span>
+<span class="go">0:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
+<span class="go">1:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds3</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">combine</span><span class="p">(</span><span class="n">ds1</span><span class="p">,</span><span class="n">ds2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds3</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">Dimensions: (9, 884)</span>
+<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
+<span class="go">Items:</span>
+<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
+<span class="go">1:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
+<span class="go">2:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
