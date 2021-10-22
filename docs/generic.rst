@@ -1,0 +1,41 @@
+.. _generic:
+
+Generic
+*******
+
+MIKE IO has `generic dfs <#module-mikeio.generic>`_ functionality that works for all dfs files: 
+
+* `read() <#mikeio.read>`_ - Read all data to a Dataset
+* `concat() <#mikeio.generic.concat>`_ - Concatenates files along the time axis
+* `extract() <#mikeio.generic.extract>`_ - Extract timesteps and/or items to a new dfs file
+* `diff() <#mikeio.generic.diff>`_ - Calculate difference between two dfs files
+* `sum() <#mikeio.generic.sum>`_ - Calculate the sum of two dfs files
+* `scale() <#mikeio.generic.scale>`_ - Apply scaling to any dfs file
+* `avg_time() <#mikeio.generic.avg_time>`_ - Create a temporally averaged dfs file
+* `quantile() <#mikeio.generic.quantile>`_ - Create a dfs file with temporal quantiles
+
+All methods except read() create a new dfs file.
+
+.. code-block:: python
+
+   from mikeio import generic
+   generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
+
+.. code-block:: python
+
+   import mikeio 
+   ds = mikeio.read("new_file.dfs2")
+
+See the `Generic notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb>`_ for more examples.
+
+
+
+
+
+Generic API
+-----------
+.. automodule:: mikeio
+	:members:
+
+.. automodule:: mikeio.generic
+	:members:

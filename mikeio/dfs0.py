@@ -28,7 +28,7 @@ class Dfs0(TimeSeries):
 
         Parameters
         ----------
-        filename: str, optional
+        filename: str or Path, optional
             File name including full path to the dfs0 file.
         """
 
@@ -44,7 +44,7 @@ class Dfs0(TimeSeries):
         self._n_timesteps = None
         self._dtype = None
 
-        self._filename = filename
+        self._filename = str(filename)
 
         if filename:
             self._read_header()
@@ -52,7 +52,7 @@ class Dfs0(TimeSeries):
     def __repr__(self):
         out = ["<mikeio.Dfs0>"]
 
-        if self._filename:
+        if os.path.isfile(self._filename):
             out.append(f"Timeaxis: {str(self._timeaxistype)}")
 
         if self._n_items is not None:
@@ -264,8 +264,6 @@ class Dfs0(TimeSeries):
             values
         start_time: datetime.datetime, , optional
             start date of type datetime.
-        timeseries_unit: TimestepUnit, optional
-            Timestep  unit, default TimeStepUnit.SECOND
         dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds. default to 1.0
@@ -278,13 +276,8 @@ class Dfs0(TimeSeries):
             default np.float32
 
         """
-        self._filename = filename
+        self._filename = str(filename)
         self._title = title
-
-        if timeseries_unit != TimeStepUnit.SECOND:
-            raise ValueError(
-                "Timestep units other than TimeStepUnit.SECOND are deprecated"
-            )
         self._dtype = dtype
 
         if isinstance(data, Dataset):

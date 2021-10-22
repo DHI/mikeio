@@ -1,5 +1,5 @@
-from mikeio.custom_exceptions import InvalidDataType
 import os
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import datetime
@@ -46,6 +46,14 @@ def test_simple_write(tmpdir):
     dfs.write(filename=filename, data=data)
 
     assert os.path.exists(filename)
+
+    filepath = Path(filename)
+
+    filepath.unlink()  # Remove file
+
+    dfs.write(filepath, data=data)
+
+    assert filepath.exists
 
 
 def test_write_float(tmpdir):
@@ -122,6 +130,13 @@ def test_write_2darray(tmpdir):
     ds = dfsnew.read()
     assert ds[0].shape == (nt,)
 
+    filepath = Path(filename)
+    dfsnew = Dfs0(filepath)
+    assert dfsnew.n_items == nitems
+
+    ds = dfsnew.read()
+    assert ds[0].shape == (nt,)
+
 
 def test_read_units_write_new(tmpdir):
 
@@ -172,33 +187,6 @@ def test_multiple_write(tmpdir):
     dfs.write(filename=filename, data=data, items=items, title="Zeros and ones")
 
     assert os.path.exists(filename)
-
-
-def test_write_timestep_7days_deprecated(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "random.dfs0")
-
-    data = []
-
-    nt = 10
-    d1 = np.zeros(nt)
-    data.append(d1)
-    d2 = np.ones(nt)
-    data.append(d2)
-
-    items = [ItemInfo("Zeros"), ItemInfo("Ones")]
-
-    dfs = Dfs0()
-
-    with pytest.raises(ValueError):
-        dfs.write(
-            filename=filename,
-            data=data,
-            items=items,
-            title="Zeros and ones",
-            timeseries_unit=TimeStepUnit.DAY,
-            dt=7,
-        )
 
 
 def test_write_equidistant_calendar(tmpdir):

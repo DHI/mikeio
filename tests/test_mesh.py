@@ -10,7 +10,7 @@ def test_get_number_of_elements():
     assert msh.n_elements == 654
 
 
-def test_get_element_coordinates():
+def test_element_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 
@@ -21,7 +21,7 @@ def test_get_element_coordinates():
     assert ec[0, 1] > 6153000.0
 
 
-def test_get_node_coordinates():
+def test_node_coordinates():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = Mesh(filename)
 
@@ -52,13 +52,10 @@ def test_set_z():
     msh = Mesh(filename)
     zn = msh.node_coordinates[:, 2]
     zn[zn < -3] = -3
-    msh.set_z(zn)
+
+    msh.node_coordinates[:, 2] = zn
     zn = msh.node_coordinates[:, 2]
     assert zn.min() == -3
-
-    with pytest.raises(ValueError):
-        # not same length
-        msh.set_z(zn[0:4])
 
 
 def test_set_codes():
@@ -66,13 +63,20 @@ def test_set_codes():
     msh = Mesh(filename)
     codes = msh.codes
     assert msh.codes[2] == 2
-    codes[codes == 2] = 7
-    msh.set_codes(codes)
+    codes[codes == 2] = 7  # work directly on reference
+
     assert msh.codes[2] == 7
+
+    new_codes = msh.codes.copy()
+    new_codes[new_codes == 7] = 9
+    msh.codes = new_codes  # assign from copy
+
+    assert msh.codes[2] == 9
 
     with pytest.raises(ValueError):
         # not same length
-        msh.set_codes(codes[0:4])
+        msh.codes = codes[0:4]
+
 
 def test_write(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple.mesh")

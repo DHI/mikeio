@@ -9,7 +9,7 @@ from mikeio import Dfs0
 def test_simple_write_big_file(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "big.dfs0")
-    
+
     data = []
 
     nt = 10_000_000
@@ -22,10 +22,11 @@ def test_simple_write_big_file(tmpdir):
 
     assert os.path.exists(filename)
 
+
 def test_simple_write_read_big_file(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "big.dfs0")
-    
+
     data = []
 
     nt = 10_000_000

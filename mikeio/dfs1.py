@@ -9,12 +9,13 @@ from .dfs import _Dfs123
 
 class Dfs1(_Dfs123):
     _ndim = 1
-    _dx = None
-    _nx = None
-    _x0 = 0
 
     def __init__(self, filename=None):
         super(Dfs1, self).__init__(filename)
+
+        self._dx = None
+        self._nx = None
+        self._x0 = 0
 
         if filename:
             self._read_dfs1_header()
@@ -22,7 +23,7 @@ class Dfs1(_Dfs123):
     def __repr__(self):
         out = ["<mikeio.Dfs1>"]
 
-        if self._filename:
+        if os.path.isfile(self._filename):
             out.append(f"dx: {self.dx:.5f}")
 
             if self._n_items is not None:
@@ -32,7 +33,7 @@ class Dfs1(_Dfs123):
                         out.append(f"  {i}:  {item}")
                 else:
                     out.append(f"Number of items: {self._n_items}")
-            if self._filename:
+            if os.path.isfile(self._filename):
                 if self._n_timesteps == 1:
                     out.append("Time: time-invariant file (1 step)")
                 else:
