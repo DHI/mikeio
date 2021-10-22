@@ -1,5 +1,5 @@
 import warnings
-from typing import Sequence, Union, List
+from typing import Iterable, Sequence, Union, List
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
@@ -383,6 +383,99 @@ class Dataset(TimeSeries):
         time = self.time.copy()
 
         return Dataset(data, time, items)
+
+    def to_numpy(self):
+        """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)"""
+        return np.stack(self.data)
+
+    @classmethod
+    def combine(cls, *datasets):
+        """Combine n Datasets either along items or time axis"""
+
+        if isinstance(datasets[0], Iterable):
+            if isinstance(datasets[0][0], Dataset):
+                datasets = datasets[0]
+
+        ds = datasets[0].copy()
+        for dsj in datasets[1:]:
+            ds = ds._combine(dsj, copy=False)
+        return ds
+
+    def _combine(self, other, copy=True):
+        try:
+            ds = self._concat_time(other, copy=copy)
+        except ValueError:
+            ds = self._append_items(other, copy=copy)
+        return ds
+
+    def append_items(self, other, inplace=False):
+        """Append items from other Dataset to this Dataset"""
+        if inplace:
+            self._append_items(other, copy=False)
+        else:
+            return self._append_items(other, copy=True)
+
+    def _append_items(self, other, copy=True):
+        if not np.all(self.time == other.time):
+            # if not: create common time?
+            raise ValueError("All timesteps must match")
+        ds = self.copy() if copy else self
+
+        for j in range(other.n_items):
+            ds.items.append(other.items[j])
+            ds.data.append(other.data[j])
+        return ds
+
+    def concat(self, other, inplace=False):
+        """Concatenate this Dataset with data from other Dataset"""
+        if inplace:
+            ds = self._concat_time(other, copy=False)
+            self.data = ds.data
+            self.time = ds.time
+        else:
+            return self._concat_time(other, copy=True)
+
+    def _concat_time(self, other, copy=True):
+        self._check_all_items_match(other)
+        if not np.all(self.shape == other.shape):
+            raise ValueError("Shape of the datasets must match")
+        ds = self.copy() if copy else self
+
+        s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
+        s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
+        df12 = pd.concat([s1, s2], axis=1)
+
+        newtime = df12.index
+        newdata = self.create_empty_data(
+            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
+        )
+        for j in range(ds.n_items):
+            idx1 = np.where(~df12["idx1"].isna())
+            newdata[j][idx1, :] = ds.data[j]
+            # if there is an overlap "other" data will be used!
+            idx2 = np.where(~df12["idx2"].isna())
+            newdata[j][idx2, :] = other.data[j]
+
+        return Dataset(newdata, newtime, ds.items)
+
+    def _check_all_items_match(self, other):
+        if self.n_items != other.n_items:
+            raise ValueError(
+                f"Number of items must match ({self.n_items} and {other.n_items})"
+            )
+        for j in range(self.n_items):
+            if self.items[j].name != other.items[j].name:
+                raise ValueError(
+                    f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}"
+                )
+            if self.items[j].type != other.items[j].type:
+                raise ValueError(
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                )
+            if self.items[j].unit != other.items[j].unit:
+                raise ValueError(
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                )
 
     def dropna(self):
         """Remove time steps where all items are NaN"""

@@ -3,6 +3,8 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
+
+import mikeio
 from mikeio import Dataset, Dfsu, Dfs2, Dfs0
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
@@ -1022,3 +1024,21 @@ def test_non_equidistant():
     )
 
     assert not ds.is_equidistant
+
+
+def test_combine():
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1")
+    ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset
+    ds3 = Dataset.combine(ds1, ds2)
+
+    assert isinstance(ds3, Dataset)
+    assert len(ds1) == len(ds2) == len(ds3)
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+
+    ds4 = Dataset.combine([ds1, ds2])
+
+    assert isinstance(ds4, Dataset)
+    assert len(ds1) == len(ds2) == len(ds4)
+    assert ds4.start_time == ds1.start_time
+    assert ds4.end_time == ds2.end_time
