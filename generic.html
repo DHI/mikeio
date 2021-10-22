@@ -212,6 +212,7 @@
 <li><p><a class="reference external" href="#mikeio.generic.sum">sum()</a> - Calculate the sum of two dfs files</p></li>
 <li><p><a class="reference external" href="#mikeio.generic.scale">scale()</a> - Apply scaling to any dfs file</p></li>
 <li><p><a class="reference external" href="#mikeio.generic.avg_time">avg_time()</a> - Create a temporally averaged dfs file</p></li>
+<li><p><a class="reference external" href="#mikeio.generic.quantile">quantile()</a> - Create a dfs file with temporal quantiles</p></li>
 </ul>
 <p>All methods except read() create a new dfs file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">generic</span>
@@ -255,7 +256,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>infilename</strong> (<em>str</em>) – input filename</p></li>
 <li><p><strong>outfilename</strong> (<em>str</em>) – output filename</p></li>
-<li><p><strong>skipna</strong> (<em>bool</em>) – exclude NaN/delete values when computing the result, default True</p></li>
+<li><p><strong>skipna</strong> (<em>bool</em><em>, </em><em>optional</em>) – exclude NaN/delete values when computing the result, default True</p></li>
 </ul>
 </dd>
 </dl>
@@ -270,7 +271,7 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>infilenames</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – filenames to concatenate</p></li>
-<li><p><strong>outfilename</strong> (<em>str</em>) – filename</p></li>
+<li><p><strong>outfilename</strong> (<em>str</em>) – filename of output</p></li>
 </ul>
 </dd>
 </dl>
@@ -322,6 +323,37 @@ or datetime/str, by default -1 (end of file)</p></li>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="mikeio.generic.quantile">
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.generic.quantile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create temporal quantiles of all items in dfs file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>infilename</strong> (<em>str</em>) – input filename</p></li>
+<li><p><strong>outfilename</strong> (<em>str</em>) – output filename</p></li>
+<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+which must be between 0 and 1 inclusive.</p></li>
+<li><p><strong>items</strong> (<em>List</em><em>[</em><em>str</em><em>] or </em><em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Process only selected items, by number (0-based) or name, by default: all</p></li>
+<li><p><strong>skipna</strong> (<em>bool</em><em>, </em><em>optional</em>) – exclude NaN/delete values when computing the result, default True</p></li>
+<li><p><strong>buffer_size</strong> (<em>float</em><em>, </em><em>optional</em>) – for huge files the quantiles need to be calculated for chunks of
+elements. buffer_size gives the maximum amount of memory available
+for the computation in bytes, by default 1e9 (=1GB)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">quantile</span><span class="p">(</span><span class="s2">&quot;in.dfsu&quot;</span><span class="p">,</span> <span class="s2">&quot;IQR.dfsu&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.75</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">quantile</span><span class="p">(</span><span class="s2">&quot;huge.dfsu&quot;</span><span class="p">,</span> <span class="s2">&quot;Q01.dfsu&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mf">5.0e9</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">quantile</span><span class="p">(</span><span class="s2">&quot;with_nans.dfsu&quot;</span><span class="p">,</span> <span class="s2">&quot;Q05.dfsu&quot;</span><span class="p">,</span> <span class="n">q</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.scale">
 <span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply scaling to any dfs file</p>
@@ -332,7 +364,7 @@ or datetime/str, by default -1 (end of file)</p></li>
 <li><p><strong>outfilename</strong> (<em>str</em>) – full path to the output file</p></li>
 <li><p><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – value to add to all items, default 0.0</p></li>
 <li><p><strong>factor</strong> (<em>float</em><em>, </em><em>optional</em>) – value to multiply to all items, default 1.0</p></li>
-<li><p><strong>items</strong> (<em>List</em><em>[</em><em>str</em><em>] or </em><em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Process only selected items, by number (0-based)</p></li>
+<li><p><strong>items</strong> (<em>List</em><em>[</em><em>str</em><em>] or </em><em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Process only selected items, by number (0-based) or name, by default: all</p></li>
 </ul>
 </dd>
 </dl>

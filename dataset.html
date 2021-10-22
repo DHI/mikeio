@@ -326,6 +326,8 @@ including different ways of <em>selecting</em> data:</p>
 <li><p><a class="reference external" href="#mikeio.Dataset.nanmin">nanmin()</a> - Min value along an axis (NaN removed)</p></li>
 <li><p><a class="reference external" href="#mikeio.Dataset.average">average()</a> - Compute the weighted average along the specified axis.</p></li>
 <li><p><a class="reference external" href="#mikeio.Dataset.aggregate">aggregate()</a> - Aggregate along an axis</p></li>
+<li><p><a class="reference external" href="#mikeio.Dataset.quantile">quantile()</a> - Quantiles along an axis</p></li>
+<li><p><a class="reference external" href="#mikeio.Dataset.nanquantile">nanquantile()</a> - Quantiles along an axis (NaN ignored)</p></li>
 </ul>
 <p><em>Mathematical operations</em> +, - and * with numerical values:</p>
 <ul class="simple">
@@ -357,12 +359,12 @@ including different ways of <em>selecting</em> data:</p>
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="pre">mikeio.eum.ItemInfo</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="eum.html#mikeio.eum.EUMType" title="mikeio.eum.EUMType"><span class="pre">mikeio.eum.EUMType</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.aggregate">
-<span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">axis=1</span></em>, <em class="sig-param"><span class="pre">func=&lt;function</span> <span class="pre">nanmean&gt;</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.aggregate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">axis='time'</span></em>, <em class="sig-param"><span class="pre">func=&lt;function</span> <span class="pre">nanmean&gt;</span></em>, <em class="sig-param"><span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.aggregate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Aggregate along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p></li>
+<li><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
 <li><p><strong>func</strong> (<em>function</em><em>, </em><em>optional</em>) – default np.nanmean</p></li>
 </ul>
 </dd>
@@ -377,11 +379,11 @@ including different ways of <em>selecting</em> data:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.average">
-<span class="sig-name descname"><span class="pre">average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.average" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">average</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weights</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.average" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute the weighted average along the specified axis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dataset with weighted average value</p>
@@ -630,7 +632,7 @@ similar to a dictionary.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>idx</strong> (<em>int</em><em>, </em><em>scalar</em><em> or </em><em>array_like</em>) – </p></li>
-<li><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1, 0= temporal axis</p></li>
+<li><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time”, by default 1</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -660,11 +662,11 @@ similar to a dictionary.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.max">
-<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.max" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.max" title="Permalink to this definition">¶</a></dt>
 <dd><p>Max value along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dataset with max value</p>
@@ -684,11 +686,11 @@ similar to a dictionary.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.mean">
-<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.mean" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.mean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean value along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dataset with mean value</p>
@@ -710,11 +712,11 @@ similar to a dictionary.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.min">
-<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.min" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.min" title="Permalink to this definition">¶</a></dt>
 <dd><p>Min value along an axis</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dataset with max value</p>
@@ -752,11 +754,11 @@ similar to a dictionary.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.nanmax">
-<span class="sig-name descname"><span class="pre">nanmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmax" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nanmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Max value along an axis (NaN removed)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dataset with max value</p>
@@ -769,11 +771,11 @@ similar to a dictionary.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.nanmean">
-<span class="sig-name descname"><span class="pre">nanmean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmean" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nanmean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmean" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mean value along an axis (NaN removed)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dataset with mean value</p>
@@ -786,11 +788,11 @@ similar to a dictionary.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.nanmin">
-<span class="sig-name descname"><span class="pre">nanmin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmin" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nanmin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanmin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Min value along an axis (NaN removed)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>axis</strong> (<em>int</em><em>, </em><em>optional</em>) – default 1= first spatial axis</p>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>dataset with max value</p>
@@ -799,6 +801,71 @@ similar to a dictionary.</p>
 <dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.nanquantile">
+<span class="sig-name descname"><span class="pre">nanquantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.nanquantile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the q-th quantile of the data along the specified axis, while ignoring nan values.</p>
+<p>Wrapping np.nanquantile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+which must be between 0 and 1 inclusive.</p></li>
+<li><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.75</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.99</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;space&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dataset with quantile values</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.quantile">
+<span class="sig-name descname"><span class="pre">quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.quantile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the q-th quantile of the data along the specified axis.</p>
+<p>Wrapping np.quantile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+which must be between 0 and 1 inclusive.</p></li>
+<li><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataset with quantile values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.75</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.99</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;space&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.Dataset.nanquantile" title="mikeio.Dataset.nanquantile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanquantile</span></code></a></dt><dd><p>quantile with NaN values ignored</p>
+</dd>
+</dl>
+</div>
 </dd></dl>
 
 <dl class="py property">
