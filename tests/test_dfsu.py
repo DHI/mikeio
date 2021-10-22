@@ -1,5 +1,5 @@
 import os
-import pathlib
+from pathlib import Path
 from datetime import datetime
 
 import numpy as np
@@ -36,6 +36,13 @@ def test_read_all_items_returns_all_items_and_names():
     dfs_text = repr(dfs)
 
     assert len(ds) == 4
+
+    # A filename can be a string or a Path object
+    filepath = Path(filename)
+
+    dfs = Dfsu(filepath)
+
+    assert dfs.n_items == 4
 
 
 def test_read_item_0():
@@ -1239,7 +1246,7 @@ def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
     dy = 25
     nx = 100
     ny = 100
-    filename = pathlib.Path(tmpdir.dirname) / "test.dfs2"
+    filename = Path(tmpdir.dirname) / "test.dfs2"
     dfs2 = dfsu_hd2d.to_dfs2(
         x0=605900,
         y0=6902400,

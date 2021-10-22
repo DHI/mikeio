@@ -1864,8 +1864,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
         super().__init__()
-        self._filename = filename
-        self._read_header(filename)
+        self._filename = str(filename)
+        self._read_header(self._filename)
         self._dtype = dtype
 
         # show progress bar for large files
@@ -2349,6 +2349,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         keep_open: bool, optional
             Keep file open for appending
         """
+        filename = str(filename)
 
         if isinstance(data, Dataset):
             items = data.items

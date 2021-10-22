@@ -28,7 +28,7 @@ class Dfs2(_Dfs123):
     def __repr__(self):
         out = ["<mikeio.Dfs2>"]
 
-        if self._filename:
+        if os.path.isfile(self._filename):
             out.append(f"dx: {self.dx:.5f}")
             out.append(f"dy: {self.dy:.5f}")
 
@@ -154,6 +154,7 @@ class Dfs2(_Dfs123):
         keep_open: bool, optional
             Keep file open for appending
         """
+        filename = str(filename)
 
         self._builder = DfsBuilder.Create(title, "mikeio", 0)
         if not self._dx:

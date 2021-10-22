@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import datetime
 import numpy as np
 import pytest
@@ -10,9 +11,9 @@ from mikeio.custom_exceptions import (
 )
 
 
-def test_simple_write(tmpdir):
+def test_simple_write(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+    filepath = tmp_path / "simple.dfs2"
 
     data = []
 
@@ -25,9 +26,9 @@ def test_simple_write(tmpdir):
 
     dfs = Dfs2()
 
-    dfs.write(filename=filename, data=data)
+    dfs.write(filepath, data=data)
 
-    newdfs = Dfs2(filename)
+    newdfs = Dfs2(filepath)
 
     ds = newdfs.read()
 
@@ -97,8 +98,8 @@ def test_write_single_item(tmpdir):
 
 def test_read():
 
-    filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2(filename)
+    filepath = Path("tests/testdata/random.dfs2")
+    dfs = Dfs2(filepath)
     ds = dfs.read(["testing water level"])
     data = ds.data[0]
     assert data[0, 11, 0] == 0

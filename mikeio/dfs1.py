@@ -23,7 +23,7 @@ class Dfs1(_Dfs123):
     def __repr__(self):
         out = ["<mikeio.Dfs1>"]
 
-        if self._filename:
+        if os.path.isfile(self._filename):
             out.append(f"dx: {self.dx:.5f}")
 
             if self._n_items is not None:
@@ -33,7 +33,7 @@ class Dfs1(_Dfs123):
                         out.append(f"  {i}:  {item}")
                 else:
                     out.append(f"Number of items: {self._n_items}")
-            if self._filename:
+            if os.path.isfile(self._filename):
                 if self._n_timesteps == 1:
                     out.append("Time: time-invariant file (1 step)")
                 else:

@@ -1,5 +1,5 @@
-from mikeio.custom_exceptions import InvalidDataType
 import os
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import datetime
@@ -46,6 +46,14 @@ def test_simple_write(tmpdir):
     dfs.write(filename=filename, data=data)
 
     assert os.path.exists(filename)
+
+    filepath = Path(filename)
+
+    filepath.unlink()  # Remove file
+
+    dfs.write(filepath, data=data)
+
+    assert filepath.exists
 
 
 def test_write_float(tmpdir):
@@ -117,6 +125,13 @@ def test_write_2darray(tmpdir):
     assert os.path.exists(filename)
 
     dfsnew = Dfs0(filename)
+    assert dfsnew.n_items == nitems
+
+    ds = dfsnew.read()
+    assert ds[0].shape == (nt,)
+
+    filepath = Path(filename)
+    dfsnew = Dfs0(filepath)
     assert dfsnew.n_items == nitems
 
     ds = dfsnew.read()
