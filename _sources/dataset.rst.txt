@@ -138,7 +138,8 @@ Other methods that also return a Dataset:
 
 *Combining datasets*:
 
-* `combine() <#mikeio.Dataset.combine>`_ - Combine two or more datasets either along the time axis (concatenation) or along the item axis.
+* `Dataset.combine() <#mikeio.Dataset.combine>`_ - Combine two or more datasets either along the time axis (concatenation) or along the item axis.
+* `concat() <#mikeio.Dataset.concat>`_ - Concatenate this Dataset with data from other Dataset, similar to Dataset.combine.
 
 Dataset API
 -----------

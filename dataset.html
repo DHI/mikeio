@@ -353,7 +353,8 @@ including different ways of <em>selecting</em> data:</p>
 </ul>
 <p><em>Combining datasets</em>:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="#mikeio.Dataset.combine">combine()</a> - Combine two or more datasets either along the time axis (concatenation) or along the item axis.</p></li>
+<li><p><a class="reference external" href="#mikeio.Dataset.combine">Dataset.combine()</a> - Combine two or more datasets either along the time axis (concatenation) or along the item axis.</p></li>
+<li><p><a class="reference external" href="#mikeio.Dataset.concat">concat()</a> - Concatenate this Dataset with data from other Dataset, similar to Dataset.combine.</p></li>
 </ul>
 </div>
 <div class="section" id="dataset-api">
@@ -424,6 +425,17 @@ including different ways of <em>selecting</em> data:</p>
 <dt class="sig sig-object py" id="mikeio.Dataset.combine">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">datasets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.combine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Combine n Datasets either along items or time axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*datasets</strong> (<em>datasets to combine</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a combined dataset</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dataset</span>
@@ -459,6 +471,31 @@ including different ways of <em>selecting</em> data:</p>
 <dt class="sig sig-object py" id="mikeio.Dataset.concat">
 <span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenate this Dataset with data from other Dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – Other dataset to concatenate with</p></li>
+<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – Default is to return a new dataset</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>concatenated dataset</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds1</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds1</span><span class="o">.</span><span class="n">n_timesteps</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds3</span> <span class="o">=</span> <span class="n">ds1</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">ds2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds3</span><span class="o">.</span><span class="n">n_timesteps</span>
+<span class="go">4</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -996,6 +1033,14 @@ least two time instances); otherwise None</p>
 <dt class="sig sig-object py" id="mikeio.Dataset.to_numpy">
 <span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_numpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stack data to a single ndarray with shape (n_items, n_timesteps, …)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
