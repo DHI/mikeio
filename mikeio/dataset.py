@@ -385,12 +385,26 @@ class Dataset(TimeSeries):
         return Dataset(data, time, items)
 
     def to_numpy(self):
-        """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)"""
+        """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
+        
+        Returns
+        -------
+        np.ndarray
+        """
         return np.stack(self.data)
 
     @classmethod
     def combine(cls, *datasets):
         """Combine n Datasets either along items or time axis
+
+        Parameters
+        ----------
+            *datasets: datasets to combine
+
+        Returns
+        -------
+        Dataset
+            a combined dataset
 
         Examples
         --------
@@ -457,7 +471,32 @@ class Dataset(TimeSeries):
         return ds
 
     def concat(self, other, inplace=False):
-        """Concatenate this Dataset with data from other Dataset"""
+        """Concatenate this Dataset with data from other Dataset
+
+        Parameters
+        ---------
+        other: Dataset
+            Other dataset to concatenate with
+        inplace: bool, optional
+            Default is to return a new dataset
+
+        Returns
+        -------
+        Dataset
+            concatenated dataset
+
+
+        Examples
+        --------
+        >>> import mikeio
+        >>> ds1 = mikeio.read("HD2D.dfsu", time_steps=[0,1])
+        >>> ds2 = mikeio.read("HD2D.dfsu", time_steps=[2,3])
+        >>> ds1.n_timesteps
+        2
+        >>> ds3 = ds1.concat(ds2)
+        >>> ds3.n_timesteps
+        4
+        """
         if inplace:
             ds = self._concat_time(other, copy=False)
             self.data = ds.data
