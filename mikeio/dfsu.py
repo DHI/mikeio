@@ -3,7 +3,6 @@ import os
 from collections import namedtuple
 import pandas as pd
 import pathlib
-from enum import IntEnum
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
@@ -35,33 +34,35 @@ from .base import EquidistantTimeSeries
 
 class _UnstructuredGeometry:
     # THIS CLASS KNOWS NOTHING ABOUT MIKE FILES!
-    _type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-    _projstr = None
 
-    _n_nodes = None
-    _n_elements = None
-    _nc = None
-    _ec = None
-    _codes = None
-    _valid_codes = None
-    _element_ids = None
-    _node_ids = None
-    _element_table = None
-    _element_table_mikecore = None
+    def __init__(self) -> None:
+        self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
+        self._projstr = None
 
-    _top_elems = None
-    _n_layers_column = None
-    _bot_elems = None
-    _n_layers = None
-    _n_sigma = None
+        self._n_nodes = None
+        self._n_elements = None
+        self._nc = None
+        self._ec = None
+        self._codes = None
+        self._valid_codes = None
+        self._element_ids = None
+        self._node_ids = None
+        self._element_table = None
+        self._element_table_mikecore = None
 
-    _geom2d = None
-    _e2_e3_table = None
-    _2d_ids = None
-    _layer_ids = None
+        self._top_elems = None
+        self._n_layers_column = None
+        self._bot_elems = None
+        self._n_layers = None
+        self._n_sigma = None
 
-    _shapely_domain_obj = None
-    _tree2d = None
+        self._geom2d = None
+        self._e2_e3_table = None
+        self._2d_ids = None
+        self._layer_ids = None
+
+        self._shapely_domain_obj = None
+        self._tree2d = None
 
     def __repr__(self):
         out = []
@@ -78,7 +79,8 @@ class _UnstructuredGeometry:
 
     @property
     def type_name(self):
-        return self._type.name
+        """Type name, e.g. Mesh, Dfsu2D"""
+        return self._type.name if self._type else "Mesh"
 
     @property
     def n_nodes(self):
@@ -105,8 +107,15 @@ class _UnstructuredGeometry:
 
     @property
     def codes(self):
-        """Node codes of all nodes"""
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
         return self._codes
+
+    @codes.setter
+    def codes(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
+        self._codes = np.array(v, dtype=np.int32)
+        self._valid_codes = None
 
     @property
     def valid_codes(self):
@@ -117,11 +126,12 @@ class _UnstructuredGeometry:
 
     @property
     def boundary_codes(self):
-        """provides a unique list of boundary codes"""
+        """Unique list of boundary codes"""
         return [code for code in self.valid_codes if code > 0]
 
     @property
     def projection_string(self):
+        """The projection string"""
         return self._projstr
 
     @property
@@ -131,6 +141,7 @@ class _UnstructuredGeometry:
 
     @property
     def is_local_coordinates(self):
+        """Are coordinates relative (NON-UTM)?"""
         return self._projstr == "NON-UTM"
 
     @property
@@ -259,7 +270,7 @@ class _UnstructuredGeometry:
         return [self.element_table[j] for j in elements]
 
     def elements_to_geometry(self, elements, node_layers="all"):
-        """export elements to new geometry
+        """export elements to new flexible file geometry
 
         Parameters
         ----------
@@ -451,22 +462,53 @@ class _UnstructuredGeometry:
     def element_coordinates(self):
         """Center coordinates of each element"""
         if self._ec is None:
-            self._ec = self._get_element_coords()
+            self._ec = self.calc_element_coordinates()
         return self._ec
 
-    def _get_element_coords(self):
+    def calc_element_coordinates(self, elements=None, zn=None):
         """Calculates the coordinates of the center of each element.
+
+        Only necessary for dynamic vertical coordinates,
+        otherwise use the property *element_coordinates* instead
+
+        Parameters
+        ----------
+        elements : np.array(int), optional
+            element ids of selected elements
+        zn : np.array(float), optional
+            only the z-coodinates of the nodes
+
+        Examples
+        --------
+        >>> elem_ids = dfs.find_nearest_profile_elements(x0, y0)
+        >>> ds = dfs.read(items=['Z coordinate','Temperature'], elements=elem_ids)
+        >>> ec_dyn = dfs.calc_element_coordinates(elements=elem_ids, zn=ds['Z coordinate'][0,:])
+        >>> plt.plot(ds['Temperature'][0, :], ec_dyn[:,2])
+
         Returns
         -------
         np.array
             x,y,z of each element
         """
-        n_elements = self.n_elements
+        node_coordinates = self._nc
 
+        element_table = self.element_table
+        if elements is not None:
+            element_table = element_table[elements]
+        if zn is not None:
+            node_coordinates = node_coordinates.copy()
+            if len(zn) == len(node_coordinates[:, 2]):
+                node_coordinates[:, 2] = zn
+            else:
+                # assume that user wants to find coords on a subset of points
+                idx = np.unique(np.hstack(element_table))
+                node_coordinates[idx, 2] = zn
+
+        n_elements = len(element_table)
         ec = np.empty([n_elements, 3])
 
         # pre-allocate for speed
-        maxnodes = self.max_nodes_per_element
+        maxnodes = 4 if self.is_2d else 8
         idx = np.zeros(maxnodes, dtype=int)
         xcoords = np.zeros([maxnodes, n_elements])
         ycoords = np.zeros([maxnodes, n_elements])
@@ -474,21 +516,20 @@ class _UnstructuredGeometry:
         nnodes_per_elem = np.zeros(n_elements)
 
         for j in range(n_elements):
-            nodes = self._element_table[j]
+            nodes = element_table[j]
             nnodes = len(nodes)
             nnodes_per_elem[j] = nnodes
             for i in range(nnodes):
                 idx[i] = nodes[i]  # - 1
 
-            xcoords[:nnodes, j] = self._nc[idx[:nnodes], 0]
-            ycoords[:nnodes, j] = self._nc[idx[:nnodes], 1]
-            zcoords[:nnodes, j] = self._nc[idx[:nnodes], 2]
+            xcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 0]
+            ycoords[:nnodes, j] = node_coordinates[idx[:nnodes], 1]
+            zcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 2]
 
         ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
         ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
         ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
 
-        self._ec = ec
         return ec
 
     def contains(self, points):
@@ -628,6 +669,11 @@ class _UnstructuredGeometry:
         self._tree2d = cKDTree(xy)
 
     def _find_n_nearest_2d_elements(self, x, y=None, n=1):
+        if n > self.geometry2d.n_elements:
+            raise ValueError(
+                f"Cannot find {n} nearest! Number of 2D elements: {self.geometry2d.n_elements}"
+            )
+
         if self._tree2d is None:
             self._create_tree2d()
 
@@ -1682,18 +1728,6 @@ class _UnstructuredFile(_UnstructuredGeometry):
     knows dotnet file, items and timesteps and reads file header
     """
 
-    _filename = None
-    _source = None
-    _deletevalue = None
-
-    _n_timesteps = None
-    _start_time = None
-    _timestep_in_seconds = None
-
-    _n_items = None
-    _items = None
-    _dtype = np.float64
-
     show_progress = False
 
     def __repr__(self):
@@ -1730,6 +1764,17 @@ class _UnstructuredFile(_UnstructuredGeometry):
 
     def __init__(self):
         super().__init__()
+        self._filename = None
+        self._source = None
+        self._deletevalue = None
+
+        self._n_timesteps = None
+        self._start_time = None
+        self._timestep_in_seconds = None
+
+        self._n_items = None
+        self._items = None
+        self._dtype = np.float64
 
     def _read_header(self, filename):
         if not os.path.isfile(filename):
@@ -1830,18 +1875,6 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         #    tot_size = self.n_elements * self.n_timesteps * self.n_items
         # if tot_size > 1e6:
         #    self.show_progress = True
-
-    @property
-    def element_coordinates(self):
-        # faster way of getting element coordinates than base class implementation
-        if self._ec is None:
-            self._ec = self._get_element_coords_from_source()
-        return self._ec
-
-    def _get_element_coords_from_source(self):
-        xc2, yc2, zc2 = DfsuFile.CalculateElementCenterCoordinates(self._source)
-        ec = np.column_stack([xc2, yc2, zc2])
-        return ec
 
     @property
     def deletevalue(self):
@@ -2241,7 +2274,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         elements=None,
         title=None,
     ):
-        """Write the header of a new dfsu file
+        """Write the header of a new dfsu file (for writing huge files)
 
         Parameters
         -----------
@@ -2649,6 +2682,25 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
 
 class Mesh(_UnstructuredFile):
+    """
+    The Mesh class is initialized with a mesh or a dfsu file.
+
+    Parameters
+    ---------
+    filename: str
+        dfsu or mesh filename
+
+    Examples
+    --------
+
+    >>> msh = Mesh("../tests/testdata/odense_rough.mesh")
+    >>> msh
+    Number of elements: 654
+    Number of nodes: 399
+    Projection: UTM-33
+
+    """
+
     def __init__(self, filename):
         super().__init__()
         self._filename = filename
@@ -2659,31 +2711,49 @@ class Mesh(_UnstructuredFile):
         self._n_sigma = None
         self._type = None  # DfsuFileType.Mesh
 
+    @property
+    def zn(self):
+        """Static bathymetry values (depth) at nodes"""
+        return self.node_coordinates[:, 2]
+
+    @zn.setter
+    def zn(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
+        self._nc[:, 2] = v
+        self._ec = None
+
     def set_z(self, z):
-        """Change the depth by setting the z value of each node
+        """Deprecated: use msh.zn = values instead
+
+        Change the depth by setting the z value of each node
 
         Parameters
         ----------
         z : np.array(float)
             new z value at each node
         """
-        if len(z) != self.n_nodes:
-            raise ValueError(f"z must have length of nodes ({self.n_nodes})")
-        self._nc[:, 2] = z
-        self._ec = None
+        warnings.warn(
+            "Mesh.set_z is deprecated, please use msh.zn = values instead.",
+            FutureWarning,
+        )
+        self.zn = z
 
     def set_codes(self, codes):
-        """Change the code values of the nodes
+        """Deprecated: use msh.codes = values instead
+
+        Change the code values of the nodes
 
         Parameters
         ----------
         codes : list(int)
             code of each node
         """
-        if len(codes) != self.n_nodes:
-            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
-        self._codes = codes
-        self._valid_codes = None
+        warnings.warn(
+            "Mesh.set_codes is deprecated, please use msh.codes = values instead.",
+            FutureWarning,
+        )
+        self.codes = codes
 
     def write(self, outfilename, elements=None):
         """write mesh to file (will overwrite if file exists)
@@ -2699,7 +2769,10 @@ class Mesh(_UnstructuredFile):
 
         if elements is None:
             geometry = self
-            quantity = self._source.EumQuantity
+            if hasattr(self._source, "EumQuantity"):
+                quantity = self._source.EumQuantity
+            else:
+                quantity = eumQuantity.Create(EUMType.Bathymetry, self._source.ZUnit)
             elem_table = self._source.ElementTable
         else:
             geometry = self.elements_to_geometry(elements)

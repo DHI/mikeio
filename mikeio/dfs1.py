@@ -9,12 +9,13 @@ from .dfs import _Dfs123
 
 class Dfs1(_Dfs123):
     _ndim = 1
-    _dx = None
-    _nx = None
-    _x0 = 0
 
     def __init__(self, filename=None):
         super(Dfs1, self).__init__(filename)
+
+        self._dx = None
+        self._nx = None
+        self._x0 = 0
 
         if filename:
             self._read_dfs1_header()

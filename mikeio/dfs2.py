@@ -11,15 +11,16 @@ from .dfs import _Dfs123
 class Dfs2(_Dfs123):
 
     _ndim = 2
-    _dx = None
-    _dy = None
-    _nx = None
-    _ny = None
-    _x0 = 0
-    _y0 = 0
 
     def __init__(self, filename=None):
         super(Dfs2, self).__init__(filename)
+
+        self._dx = None
+        self._dy = None
+        self._nx = None
+        self._ny = None
+        self._x0 = 0
+        self._y0 = 0
 
         if filename:
             self._read_dfs2_header()
@@ -207,6 +208,68 @@ class Dfs2(_Dfs123):
     @property
     def shape(self):
         return (self._n_timesteps, self._ny, self._nx)
+
+    @property
+    def nx(self):
+        return self._nx
+
+    @property
+    def ny(self):
+        return self._ny
+
+    @property
+    def is_geo(self):
+        """Are coordinates geographical (LONG/LAT)?"""
+        return self._projstr == "LONG/LAT"
+
+    def plot(self, z, *, cmap=None, figsize=None, ax=None):
+        """
+        z: np.array (2d)
+        cmap: matplotlib.cm.cmap, optional
+            colormap, default viridis
+        figsize: (float, float), optional
+            specify size of figure
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+
+        Returns
+        -------
+        <matplotlib.axes>
+
+        Examples
+        --------
+        >>> dfs = Dfs2("data/gebco_sound.dfs2")
+        >>> ds = dfs.read()
+        >>> elevation = ds['Elevation']
+        >>> dfs.plot(elevation[0], cmap='jet')
+        """
+        import matplotlib.pyplot as plt
+        import matplotlib.cm as cm
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
+
+        if z.ndim != 2:
+            raise ValueError(
+                "Only 2d data is supported. Hint select a specific timestep: e.g. z[0]"
+            )
+
+        if cmap is None:
+            cmap = cm.viridis
+
+        if self.is_geo and self.orientation == 0.0:
+            lats = [self.latitude + self.dy * i for i in range(self.ny)]
+            lons = [self.longitude + self.dx * i for i in range(self.nx)]
+
+            cf = ax.imshow(z, extent=(lons[0], lons[-1], lats[0], lats[-1]), cmap=cmap)
+
+        else:
+            # TODO get spatial axes in this case as well
+            cf = ax.imshow(z)
+
+        fig.colorbar(cf, ax=ax)
+
+        return ax
 
     def reproject(
         self,

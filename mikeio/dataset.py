@@ -3,11 +3,84 @@ from typing import Sequence, Union, List
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-from scipy.interpolate import interp1d
 from copy import deepcopy
 from mikeio.eum import EUMType, ItemInfo
 
 from .base import TimeSeries
+
+
+def _parse_axis(data_shape, axis):
+    axis = 0 if axis == "time" else axis
+    if (axis == "spatial") or (axis == "space"):
+        if len(data_shape) == 1:
+            ValueError(f"axis '{axis}' not allowed for Dataset with shape {data_shape}")
+        axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
+    if axis is None:
+        axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
+    if isinstance(axis, str):
+        ValueError(
+            f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
+        )
+    return axis
+
+
+def _time_by_axis(time, axis):
+    # time: Dataset time axis;
+    if axis == 0:
+        time = pd.DatetimeIndex([time[0]])
+    elif isinstance(axis, Sequence) and 0 in axis:
+        time = pd.DatetimeIndex([time[0]])
+    else:
+        time = time
+
+    return time
+
+
+def _keepdims_by_axis(axis):
+    # keepdims: input to numpy aggregate function
+    if axis == 0:
+        keepdims = True
+    else:
+        keepdims = False
+    return keepdims
+
+
+def _items_except_Z_coordinate(items):
+    if items[0].name == "Z coordinate":
+        items = deepcopy(items)
+        items.pop(0)
+    return items
+
+
+def _get_repeated_items(
+    items_in: List[ItemInfo], prefixes: List[str]
+) -> List[ItemInfo]:
+    new_items = []
+    for item_in in items_in:
+        for prefix in prefixes:
+            item = deepcopy(item_in)
+            item.name = f"{prefix}, {item.name}"
+            new_items.append(item)
+
+    return new_items
+
+
+def _reshape_data_by_axis(data, orig_shape, axis):
+    if isinstance(axis, int):
+        return data
+    if len(orig_shape) == len(axis):
+        shape = (1,)
+        data = [d.reshape(shape) for d in data]
+    if len(orig_shape) - len(axis) == 1:
+        # e.g. (0,2) for for dfs2
+        shape = [1] if (0 in axis) else [orig_shape[0]]
+        ndims = len(orig_shape)
+        for j in range(1, ndims):
+            if j not in axis:
+                shape.append(orig_shape[j])
+        data = [d.reshape(shape) for d in data]
+
+    return data
 
 
 class Dataset(TimeSeries):
@@ -100,7 +173,7 @@ class Dataset(TimeSeries):
 
         if isinstance(time, str):
             # default single-step time
-            time = self.create_time(time)
+            time = pd.date_range(time, periods=1)
 
         if np.isscalar(data) and isinstance(items, Sequence):
             # create empty dataset
@@ -110,10 +183,13 @@ class Dataset(TimeSeries):
             data = self.create_empty_data(
                 n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
             )
-
-        if isinstance(data, Sequence):
+        elif isinstance(data, Sequence):
             n_items = len(data)
             n_timesteps = data[0].shape[0]
+        else:
+            raise TypeError(
+                f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
+            )
 
         if items is None:
             # default Undefined items
@@ -162,31 +238,44 @@ class Dataset(TimeSeries):
     def __len__(self):
         return len(self.items)
 
-    def __getitem__(self, x):
+    def __setitem__(self, key, value):
 
-        if isinstance(x, slice):
-            s = self.time.slice_indexer(x.start, x.stop)
+        if isinstance(key, int):
+            self.data[key] = value
+
+        elif isinstance(key, str):
+            item_lookup = {item.name: i for i, item in enumerate(self.items)}
+            key = item_lookup[key]
+            self.data[key] = value
+        else:
+
+            raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
+
+    def __getitem__(self, key):
+
+        if isinstance(key, slice):
+            s = self.time.slice_indexer(key.start, key.stop)
             time_steps = list(range(s.start, s.stop))
             return self.isel(time_steps, axis=0)
 
-        if isinstance(x, int):
-            return self.data[x]
+        if isinstance(key, int):
+            return self.data[key]
 
-        if isinstance(x, str):
+        if isinstance(key, str):
             item_lookup = {item.name: i for i, item in enumerate(self.items)}
-            x = item_lookup[x]
-            return self.data[x]
+            key = item_lookup[key]
+            return self.data[key]
 
-        if isinstance(x, ItemInfo):
-            return self.__getitem__(x.name)
+        if isinstance(key, ItemInfo):
+            return self.__getitem__(key.name)
 
-        if isinstance(x, list):
+        if isinstance(key, list):
             data = []
             items = []
 
             item_lookup = {item.name: i for i, item in enumerate(self.items)}
 
-            for v in x:
+            for v in key:
                 data_item = self.__getitem__(v)
                 if isinstance(v, str):
                     i = item_lookup[v]
@@ -199,7 +288,7 @@ class Dataset(TimeSeries):
 
             return Dataset(data, self.time, items)
 
-        raise ValueError(f"indexing with a {type(x)} is not (yet) supported")
+        raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -229,51 +318,61 @@ class Dataset(TimeSeries):
         else:
             return self._multiply_value(other)
 
-    def _add_dataset(self, other, sign=1.0):        
+    def _add_dataset(self, other, sign=1.0):
         self._check_datasets_match(other)
         try:
-            data = [self[x] + sign*other[y] for x, y in zip(self.items, other.items)]
+            data = [self[x] + sign * other[y] for x, y in zip(self.items, other.items)]
         except:
             raise ValueError("Could not add data in Dataset")
         time = self.time.copy()
         items = deepcopy(self.items)
-        return Dataset(data, time, items) 
+        return Dataset(data, time, items)
 
     def _check_datasets_match(self, other):
         if self.n_items != other.n_items:
-            raise ValueError(f"Number of items must match ({self.n_items} and {other.n_items})")
+            raise ValueError(
+                f"Number of items must match ({self.n_items} and {other.n_items})"
+            )
         for j in range(self.n_items):
             if self.items[j].type != other.items[j].type:
-                raise ValueError(f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}")
+                raise ValueError(
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                )
             if self.items[j].unit != other.items[j].unit:
-                raise ValueError(f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}")            
+                raise ValueError(
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                )
         if not np.all(self.time == other.time):
             raise ValueError("All timesteps must match")
         if self.shape != other.shape:
-            raise ValueError("shape must match")    
+            raise ValueError("shape must match")
 
     def _add_value(self, value):
         try:
             data = [value + self[x] for x in self.items]
         except:
-            raise ValueError(f"{value} could not be added to Dataset")        
+            raise ValueError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(data, time, items)
-
 
     def _multiply_value(self, value):
         try:
             data = [value * self[x] for x in self.items]
         except:
-            raise ValueError(f"{value} could not be multiplied to Dataset")        
+            raise ValueError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(data, time, items)
 
     def describe(self, **kwargs):
         """Generate descriptive statistics by wrapping pandas describe()"""
-        all_df = [pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(**kwargs) for j in range(self.n_items)]
+        all_df = [
+            pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(
+                **kwargs
+            )
+            for j in range(self.n_items)
+        ]
         return pd.concat(all_df, axis=1)
 
     def copy(self):
@@ -311,8 +410,8 @@ class Dataset(TimeSeries):
         Parameters
         ----------
         idx: int, scalar or array_like
-        axis: int, optional
-            default 1, 0= temporal axis
+        axis: (int, str, None), optional
+            axis number or "time", by default 1
 
         Returns
         -------
@@ -336,15 +435,13 @@ class Dataset(TimeSeries):
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
 
-        items = self.items
-
-        if axis == 1 and items[0].name == "Z coordinate":
-            items = deepcopy(items)
-            items.pop(0)
-
-        time = self.time
+        axis = _parse_axis(self.shape, axis)
         if axis == 0:
-            time = time[idx]
+            time = self.time[idx]
+            items = self.items
+        else:
+            time = self.time
+            items = _items_except_Z_coordinate(self.items)
 
         res = []
         for item in items:
@@ -354,13 +451,13 @@ class Dataset(TimeSeries):
         ds = Dataset(res, time, items)
         return ds
 
-    def aggregate(self, axis=1, func=np.nanmean):
+    def aggregate(self, axis="time", func=np.nanmean, **kwargs):
         """Aggregate along an axis
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
         func: function, optional
             default np.nanmean
 
@@ -370,31 +467,105 @@ class Dataset(TimeSeries):
             dataset with aggregated values
         """
 
-        items = self.items
+        items = _items_except_Z_coordinate(self.items)
+        axis = _parse_axis(self.shape, axis)
+        time = _time_by_axis(self.time, axis)
+        keepdims = _keepdims_by_axis(axis)
 
-        if items[0].name == "Z coordinate":
-            items = deepcopy(items)
-            items.pop(0)
+        res = [
+            func(self[item.name], axis=axis, keepdims=keepdims, **kwargs)
+            for item in items
+        ]
 
-        if axis == 0:
-            time = pd.DatetimeIndex([self.time[0]])
-            keepdims = True
-        else:
-            time = self.time
-            keepdims = False
+        res = _reshape_data_by_axis(res, self.shape, axis)
 
-        res = [func(self[item.name], axis=axis, keepdims=keepdims) for item in items]
+        return Dataset(res, time, items)
 
-        ds = Dataset(res, time, items)
-        return ds
+    def quantile(self, q, *, axis="time", **kwargs):
+        """Compute the q-th quantile of the data along the specified axis.
 
-    def max(self, axis=1):
+        Wrapping np.quantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with quantile values
+
+        Examples
+        --------
+        >>> ds.quantile(q=[0.25,0.75])
+        >>> ds.quantile(q=0.5)
+        >>> ds.quantile(q=[0.01,0.5,0.99], axis="space")
+
+        See Also
+        --------
+        nanquantile : quantile with NaN values ignored
+        """
+        return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+
+    def nanquantile(self, q, *, axis="time", **kwargs):
+        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
+
+        Wrapping np.nanquantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Examples
+        --------
+        >>> ds.nanquantile(q=[0.25,0.75])
+        >>> ds.nanquantile(q=0.5)
+        >>> ds.nanquantile(q=[0.01,0.5,0.99], axis="space")
+
+        Returns
+        -------
+        Dataset
+            dataset with quantile values
+        """
+        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
+
+    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
+
+        items_in = _items_except_Z_coordinate(self.items)
+        axis = _parse_axis(self.shape, axis)
+        time = _time_by_axis(self.time, axis)
+        keepdims = _keepdims_by_axis(axis)
+
+        qvec = [q] if np.isscalar(q) else q
+        qtxt = [f"Quantile {q}" for q in qvec]
+        itemsq = _get_repeated_items(items_in, qtxt)
+
+        res = []
+        for item in items_in:
+            qdat = func(self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs)
+            for j in range(len(qvec)):
+                qdat_item = qdat[j, ...] if len(qvec) > 1 else qdat
+                res.append(qdat_item)
+
+        res = _reshape_data_by_axis(res, self.shape, axis)
+
+        return Dataset(res, time, itemsq)
+
+    def max(self, axis="time"):
         """Max value along an axis
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -407,13 +578,13 @@ class Dataset(TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.max)
 
-    def min(self, axis=1):
+    def min(self, axis="time"):
         """Min value along an axis
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -426,13 +597,13 @@ class Dataset(TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.min)
 
-    def mean(self, axis=1):
+    def mean(self, axis="time"):
         """Mean value along an axis
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -446,14 +617,14 @@ class Dataset(TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.mean)
 
-    def average(self, weights, axis=1):
+    def average(self, weights, axis="time"):
         """
         Compute the weighted average along the specified axis.
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -481,13 +652,13 @@ class Dataset(TimeSeries):
 
         return self.aggregate(axis=axis, func=func)
 
-    def nanmax(self, axis=1):
+    def nanmax(self, axis="time"):
         """Max value along an axis (NaN removed)
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -496,13 +667,13 @@ class Dataset(TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmax)
 
-    def nanmin(self, axis=1):
+    def nanmin(self, axis="time"):
         """Min value along an axis (NaN removed)
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -511,13 +682,13 @@ class Dataset(TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmin)
 
-    def nanmean(self, axis=1):
+    def nanmean(self, axis="time"):
         """Mean value along an axis (NaN removed)
 
         Parameters
         ----------
-        axis: int, optional
-            default 1= first spatial axis
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
 
         Returns
         -------
@@ -617,7 +788,6 @@ class Dataset(TimeSeries):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
-
         if isinstance(dt, pd.DatetimeIndex):
             t_out_index = dt
         elif isinstance(dt, Dataset):
@@ -640,6 +810,7 @@ class Dataset(TimeSeries):
 
     @staticmethod
     def _interpolate_item(intime, outtime, dataitem, method, extrapolate, fill_value):
+        from scipy.interpolate import interp1d
 
         interpolator = interp1d(
             intime,
@@ -708,7 +879,7 @@ class Dataset(TimeSeries):
 
     @staticmethod
     def create_time(start_time=None, dt=None, n_timesteps=None, end_time=None):
-        """create a equidistant time axis (calendar axis)
+        """Deprecated: use `pandas.date_range` instead
 
         Parameters
         ----------
@@ -733,6 +904,12 @@ class Dataset(TimeSeries):
         >>> t = Dateset.create_time('2018-1-1', dt=1800, n_timesteps=48)
         >>> t = Dateset.create_time('2018', dt=7200, end_time='2019')
         """
+
+        warnings.warn(
+            "Dataset.create_time is deprecated, please use `pandas.date_range` instead.",
+            FutureWarning,
+        )
+
         if isinstance(start_time, str):
             parts = start_time.split(",")
             if len(parts) == 2:

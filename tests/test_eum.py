@@ -1,4 +1,6 @@
-from mikeio.eum import EUMType, ItemInfo
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
+from mikecore.eum import eumItem, eumUnit
 
 
 def test_item_is_equivalent_to_int():
@@ -48,8 +50,28 @@ def test_create_info_with_type_only_positional():
     assert item.type == EUMType.Water_Level
 
 
+def test_equality():
+
+    item1 = ItemInfo("Foo", EUMType.Water_Level)
+    item2 = ItemInfo("Foo", EUMType.Water_Level)
+
+    assert item1 == item2
+
+
 def test_eum_type_search():
 
     types = EUMType.search("velocity")
 
     assert len(types) > 0
+
+
+def test_eum_conversion():
+    """Verify that all EUM types and units in mikecore have equivalents in MIKE IO"""
+
+    for code in eumItem:
+        EUMType(code)
+
+    for code in eumUnit:
+        EUMUnit(code)
+
+    assert True

@@ -228,4 +228,3 @@ def test_xy_to_bbox():
     bbox2 = Grid2D.xy_to_bbox(xy, buffer=0.2)
     assert bbox2[0] == -0.2
     assert bbox2[3] == 5.2
-

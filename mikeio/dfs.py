@@ -18,23 +18,21 @@ from mikecore.DfsFactory import DfsFactory
 
 class _Dfs123(TimeSeries):
 
-    _filename = None
-    _projstr = None
-    _start_time = None
-    _end_time = None
-    _is_equidistant = True
-    _items = None
-    _builder = None
-    _factory = None
-    _deletevalue = None
-    _override_coordinates = False
-    _timeseries_unit = TimeStepUnit.SECOND
-    _dt = None
-
     show_progress = False
 
     def __init__(self, filename=None):
         self._filename = str(filename)
+        self._projstr = None
+        self._start_time = None
+        self._end_time = None
+        self._is_equidistant = True
+        self._items = None
+        self._builder = None
+        self._factory = None
+        self._deletevalue = None
+        self._override_coordinates = False
+        self._timeseries_unit = TimeStepUnit.SECOND
+        self._dt = None
 
     def read(self, items=None, time_steps=None):
         """

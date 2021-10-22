@@ -90,4 +90,3 @@ def test_interp_itemstep():
     dati = _interp_itemstep(dat, elem_ids, weights)
     assert len(dati) == npts
     assert dati[0] == 8.262675285339355
-

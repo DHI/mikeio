@@ -2,7 +2,9 @@ import os
 from shutil import copyfile
 import numpy as np
 import mikeio
-from mikeio.generic import scale, diff, sum, extract
+from mikeio import Dfsu
+from mikeio import generic
+from mikeio.generic import scale, diff, sum, extract, avg_time
 import pytest
 
 
@@ -349,20 +351,28 @@ def test_extract_relative_time_axis(tmpdir):
 
 def test_extract_items(tmpdir):
 
+    # This is a Dfsu 3d file (i.e. first item is Z coordinate)
     infile = "tests/testdata/oresund_vertical_slice.dfsu"
     outfile = os.path.join(tmpdir.dirname, "extracted_vertical_slice.dfsu")
 
     extract(infile, outfile, items="Temperature")
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 1
+    assert extracted.n_items == 2
+    assert extracted.items[0].name == "Z coordinate"
 
     extract(infile, outfile, items=[0, 2])
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 2
+    assert extracted.items[1].name == "Salinity"
+
+    extract(infile, outfile, items=range(0, 2))  # [0,1]
+    extracted = mikeio.read(outfile)
+    assert extracted.n_items == 2
+    assert extracted.items[1].name == "Temperature"
 
     extract(infile, outfile, items=["Salinity", 1])
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 2
+    assert extracted.n_items == 3  # Z coordinate item is always included
 
     with pytest.raises(Exception):
         # must be unique
@@ -375,3 +385,108 @@ def test_extract_items(tmpdir):
     with pytest.raises(Exception):
         extract(infile, outfile, items=[0, "not_an_item"])
 
+
+def test_time_average(tmpdir):
+
+    infilename = "tests/testdata/NorthSea_HD_and_windspeed.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "NorthSea_HD_and_windspeed_avg.dfsu")
+    avg_time(infilename, outfilename)
+
+    org = mikeio.read(infilename)
+
+    averaged = mikeio.read(outfilename)
+
+    assert all([a == b for a, b in zip(org.items, averaged.items)])
+    assert org.time[0] == averaged.time[0]
+    assert org.shape[1] == averaged.shape[1]
+    assert averaged.shape[0] == 1
+    assert np.allclose(org.mean(axis=0)[0], averaged[0])
+
+
+def test_time_average_dfsu_3d(tmpdir):
+    infilename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = os.path.join(tmpdir, "oresund_sigma_z_avg.dfsu")
+    avg_time(infilename, outfilename)
+
+    org = Dfsu(infilename)
+    averaged = Dfsu(outfilename)
+
+    assert averaged.n_timesteps == 1
+    assert org.start_time == averaged.start_time
+    assert org.n_items == averaged.n_items
+
+
+def test_time_average_deletevalues(tmpdir):
+
+    infilename = "tests/testdata/gebco_sound.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "gebco_sound_avg.dfs2")
+    avg_time(infilename, outfilename)
+
+    org = mikeio.read(infilename)
+    averaged = mikeio.read(outfilename)
+
+    assert all([a == b for a, b in zip(org.items, averaged.items)])
+    assert org.time[0] == averaged.time[0]
+    assert org.shape[1] == averaged.shape[1]
+    nan1 = np.isnan(org[0])
+    nan2 = np.isnan(averaged[0])
+    assert np.all(nan1 == nan2)
+    assert np.allclose(org[0][~nan1], averaged[0][~nan2])
+
+
+def test_quantile_dfsu(tmpdir):
+
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "oresund_q10.dfsu")
+    generic.quantile(infilename, outfilename, q=0.1)
+
+    org = mikeio.read(infilename).quantile(q=0.1, axis=0)
+    q10 = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], q10[0])
+
+
+def test_quantile_dfsu_buffer_size(tmpdir):
+
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "oresund_q10.dfsu")
+    generic.quantile(infilename, outfilename, q=0.1, buffer_size=1e5)
+
+    org = mikeio.read(infilename).quantile(q=0.1, axis=0)
+    q10 = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], q10[0])
+
+
+def test_quantile_dfs2(tmpdir):
+
+    infilename = "tests/testdata/eq.dfs2"
+    outfilename = os.path.join(tmpdir.dirname, "eq_q90.dfs2")
+    generic.quantile(infilename, outfilename, q=0.9)
+
+    org = mikeio.read(infilename).quantile(q=0.9, axis=0)
+    q90 = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], q90[0])
+
+
+def test_quantile_dfs0(tmpdir):
+
+    infilename = "tests/testdata/da_diagnostic.dfs0"
+    outfilename = os.path.join(tmpdir.dirname, "da_q001_q05.dfs0")
+    generic.quantile(infilename, outfilename, q=[0.01, 0.5])
+
+    org = mikeio.read(infilename).quantile(q=[0.01, 0.5], axis=0)
+    qnt = mikeio.read(outfilename)
+
+    assert np.allclose(org[0], qnt[0])
+    # assert np.allclose(org[5], qnt[5])
+
+
+def test_quantile_dfsu_3d(tmpdir):
+    infilename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = os.path.join(tmpdir, "oresund_sigma_z_avg.dfsu")
+    generic.quantile(infilename, outfilename, q=[0.1, 0.9])
+
+    qd = Dfsu(outfilename)
+    assert qd.n_timesteps == 1

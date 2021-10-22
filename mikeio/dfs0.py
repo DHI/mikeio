@@ -264,8 +264,6 @@ class Dfs0(TimeSeries):
             values
         start_time: datetime.datetime, , optional
             start date of type datetime.
-        timeseries_unit: TimestepUnit, optional
-            Timestep  unit, default TimeStepUnit.SECOND
         dt: float, optional
             the time step. Therefore dt of 5.5 with timeseries_unit of minutes
             means 5 mins and 30 seconds. default to 1.0
@@ -280,11 +278,6 @@ class Dfs0(TimeSeries):
         """
         self._filename = str(filename)
         self._title = title
-
-        if timeseries_unit != TimeStepUnit.SECOND:
-            raise ValueError(
-                "Timestep units other than TimeStepUnit.SECOND are deprecated"
-            )
         self._dtype = dtype
 
         if isinstance(data, Dataset):

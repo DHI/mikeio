@@ -1,19 +1,60 @@
 import os
-from typing import List, Optional, Union
+from typing import Iterable, List, Union
+import math
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 import warnings
 from shutil import copyfile
+from copy import deepcopy
 
 from tqdm import trange, tqdm
 
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFile import DfsFile
-from .dfsutil import _valid_item_numbers, _item_numbers_by_name
+from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
+from mikecore.eum import eumQuantity
+from .dfsutil import _valid_item_numbers, _get_item_info
+from .eum import EUMType, ItemInfo
 
 show_progress = False
+
+
+class _ChunkInfo:
+    """Class for keeping track of an chunked processing"""
+
+    def __init__(self, n_data: int, n_chunks: np.int32):
+
+        self.n_data = n_data
+        self.n_chunks = n_chunks
+
+    def __repr__(self):
+        return f"_ChunkInfo(n_chunks={self.n_chunks}, n_data={self.n_data}, chunk_size={self.chunk_size})"
+
+    @property
+    def chunk_size(self):
+        return math.ceil(self.n_data / self.n_chunks)
+
+    def stop(self, start: int) -> int:
+        return min(start + self.chunk_size, self.n_data)
+
+    def chunk_end(self, start):
+        e2 = self.stop(start)
+        return self.chunk_size - ((start + self.chunk_size) - e2)
+
+    @staticmethod
+    def from_dfs(
+        dfs: DfsFile, item_numbers: List[int], buffer_size: float
+    ) -> "_ChunkInfo":
+        """Calculate chunk info based on # of elements in dfs file and selected buffer size"""
+
+        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        n_data_all = np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers])
+        mem_need = 8 * n_time_steps * n_data_all  # n_items *
+        n_chunks = math.ceil(mem_need / buffer_size)
+        n_data = n_data_all // len(item_numbers)
+
+        return _ChunkInfo(n_data, n_chunks)
 
 
 def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> DfsFile:
@@ -27,8 +68,10 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
         output filename
     start_time : datetime, optional
         new start time for the new file, default
-    items : list(int), optional
-        clone only these items, default: all items
+    items : list(int,str,eum.ItemInfo), optional
+        list of items for new file, either as a list of
+        ItemInfo or a list of str/int referring to original file,
+        default: all items from original file
 
     Returns
     -------
@@ -63,10 +106,33 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
     for customBlock in fi.CustomBlocks:
         builder.AddCustomBlock(customBlock)
 
-    # Copy dynamic items
-    item_numbers = _valid_item_numbers(source.ItemInfo, items)
-    for item in item_numbers:
-        builder.AddDynamicItem(source.ItemInfo[item])
+    names = [x.Name for x in source.ItemInfo]
+    item_lookup = {name: i for i, name in enumerate(names)}
+
+    if isinstance(items, Iterable) and not isinstance(items, str):
+        for item in items:
+            if isinstance(item, ItemInfo):
+                builder.AddCreateDynamicItem(
+                    item.name,
+                    eumQuantity.Create(item.type, item.unit),
+                    spatialAxis=source.ItemInfo[-1].SpatialAxis,
+                )
+            elif isinstance(item, DfsDynamicItemInfo):
+                builder.AddDynamicItem(item)
+            elif isinstance(item, int):
+                builder.AddDynamicItem(source.ItemInfo[item])
+            elif isinstance(item, str):
+                item_no = item_lookup[item]
+                builder.AddDynamicItem(source.ItemInfo[item_no])
+
+    elif isinstance(items, (int, str)) or items is None:
+        # must be str/int refering to original file (or None)
+        item_numbers = _valid_item_numbers(source.ItemInfo, items)
+        items = [source.ItemInfo[item] for item in item_numbers]
+        for item in items:
+            builder.AddDynamicItem(item)
+    else:
+        raise ValueError("Items of type: {type(items)} is not supported")
 
     # Create file
     builder.CreateFile(outfilename)
@@ -107,7 +173,7 @@ def scale(
     factor: float, optional
         value to multiply to all items, default 1.0
     items: List[str] or List[int], optional
-        Process only selected items, by number (0-based)
+        Process only selected items, by number (0-based) or name, by default: all
     """
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
@@ -241,9 +307,8 @@ def concat(infilenames: List[str], outfilename: str) -> None:
     ----------
     infilenames: List[str]
         filenames to concatenate
-
     outfilename: str
-        filename
+        filename of output
 
     Notes
     ------
@@ -332,12 +397,19 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
+    is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
+
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
-    items = _valid_item_numbers(dfs_i.ItemInfo, items)
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
 
-    dfs_o = _clone(infilename, outfilename, start_time=file_start_new, items=items)
+    if is_dfsu_3d and 0 not in item_numbers:
+        item_numbers.insert(0, 0)
+
+    dfs_o = _clone(
+        infilename, outfilename, start_time=file_start_new, items=item_numbers
+    )
 
     file_start_shift = 0
     if file_start_new is not None:
@@ -346,7 +418,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
 
     timestep_out = -1
     for timestep in range(start_step, end_step):
-        for item_out, item in enumerate(items):
+        for item_out, item in enumerate(item_numbers):
             itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
             time_sec = itemdata.Time
 
@@ -356,7 +428,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
                 return
 
             if time_sec >= start_sec:
-                if item == items[0]:
+                if item == item_numbers[0]:
                     timestep_out = timestep_out + 1
                 time_sec_out = time_sec - file_start_shift
 
@@ -446,3 +518,201 @@ def _parse_start_end(dfs_i, start, end):
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
     return file_start_new, start_step, start_sec, end_step, end_sec
+
+
+def avg_time(infilename: str, outfilename: str, skipna=True):
+    """Create a temporally averaged dfs file
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+    skipna : bool, optional
+        exclude NaN/delete values when computing the result, default True
+    """
+
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+    dfs_o = _clone(infilename, outfilename)
+
+    n_items = len(dfs_i.ItemInfo)
+    item_numbers = list(range(n_items))
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+    deletevalue = dfs_i.FileInfo.DeleteValueFloat
+
+    outdatalist = []
+    steps_list = []
+
+    # step 0
+    for item in item_numbers:
+        indatatime = dfs_i.ReadItemTimeStep(item + 1, 0.0)
+        indata = indatatime.Data
+        has_value = indata != deletevalue
+        indata[~has_value] = np.nan
+        outdatalist.append(indata.astype(np.float64))
+        step0 = np.zeros_like(indata, dtype=np.int32)
+        step0[has_value] = 1
+        steps_list.append(step0)
+
+    for timestep in trange(1, n_time_steps, disable=not show_progress):
+        for item in range(n_items):
+
+            itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+            d = itemdata.Data
+            has_value = d != deletevalue
+
+            outdatalist[item][has_value] += d[has_value]
+            steps_list[item][has_value] += 1
+
+    for item in range(n_items):
+        darray = np.zeros_like(outdatalist[item], dtype=np.float32)
+        if skipna:
+            has_value = steps_list[item] == n_time_steps
+        else:
+            has_value = steps_list[item] > 0
+        darray[has_value] = outdatalist[item][has_value].astype(
+            np.float32
+        ) / steps_list[item][has_value].astype(np.float32)
+        darray[~has_value] = deletevalue
+        dfs_o.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_o.Close()
+
+
+def quantile(
+    infilename: str, outfilename: str, q, *, items=None, skipna=True, buffer_size=1.0e9
+):
+    """Create temporal quantiles of all items in dfs file
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+    q: array_like of float
+        Quantile or sequence of quantiles to compute,
+        which must be between 0 and 1 inclusive.
+    items: List[str] or List[int], optional
+        Process only selected items, by number (0-based) or name, by default: all
+    skipna : bool, optional
+        exclude NaN/delete values when computing the result, default True
+    buffer_size: float, optional
+        for huge files the quantiles need to be calculated for chunks of
+        elements. buffer_size gives the maximum amount of memory available
+        for the computation in bytes, by default 1e9 (=1GB)
+
+    Examples
+    --------
+    >>> quantile("in.dfsu", "IQR.dfsu", q=[0.25,0.75])
+
+    >>> quantile("huge.dfsu", "Q01.dfsu", q=0.1, buffer_size=5.0e9)
+
+    >>> quantile("with_nans.dfsu", "Q05.dfsu", q=0.5, skipna=False)
+    """
+    func = np.nanquantile if skipna else np.quantile
+
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+    is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+
+    if is_dfsu_3d and 0 in item_numbers:
+        item_numbers.remove(0)  # Remove Zn item for special treatment
+
+    n_items_in = len(item_numbers)
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    # TODO: better handling of different item sizes (zn...)
+
+    ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
+
+    qvec = [q] if np.isscalar(q) else q
+    qtxt = [f"Quantile {q}" for q in qvec]
+    core_iteminfos = [dfs_i.ItemInfo[i] for i in item_numbers]
+    items = _get_repeated_items(core_iteminfos, prefixes=qtxt)
+
+    if is_dfsu_3d:
+        items.insert(0, dfs_i.ItemInfo[0])
+
+    dfs_o = _clone(infilename, outfilename, items=items)
+
+    n_items_out = len(items)
+    if is_dfsu_3d:
+        n_items_out = n_items_out - 1
+
+    datalist = []
+    outdatalist = []
+
+    for item in item_numbers:
+        indata = _read_item(dfs_i, item, 0)
+        for _ in qvec:
+            outdatalist.append(np.zeros_like(indata))
+        datalist.append(np.zeros((n_time_steps, ci.chunk_size)))
+
+    e1 = 0
+    for _ in range(ci.n_chunks):
+        e2 = ci.stop(e1)
+        # the last chunk may be smaller than the rest:
+        chunk_end = ci.chunk_end(e1)
+
+        # read all data for this chunk
+        for timestep in range(n_time_steps):
+            item_out = 0
+            for item_no in item_numbers:
+                itemdata = _read_item(dfs_i, item_no, timestep)
+                data_chunk = itemdata[e1:e2]
+                datalist[item_out][timestep, 0:chunk_end] = data_chunk
+                item_out += 1
+
+        # calculate quantiles (for this chunk)
+        item_out = 0
+        for item in range(n_items_in):
+            qdat = np.zeros((len(qvec), (ci.chunk_size)))
+            qdat[:, :] = func(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
+            for j in range(len(qvec)):
+                outdatalist[item_out][e1:e2] = qdat[j, :]
+                item_out += 1
+
+        e1 = e2
+
+    if is_dfsu_3d:
+        znitemdata = dfs_i.ReadItemTimeStep(1, 0)
+        # TODO should this be static Z coordinates instead?
+        dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
+
+    for item in range(n_items_out):
+        darray = outdatalist[item].astype(np.float32)
+        dfs_o.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_o.Close()
+
+
+def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
+    indatatime = dfs.ReadItemTimeStep(item + 1, timestepIndex=timestep)
+    indata = indatatime.Data
+    has_value = indata != dfs.FileInfo.DeleteValueFloat
+    indata[~has_value] = np.nan
+
+    return indata.astype(np.float64)
+
+
+def _get_repeated_items(
+    items_in: List[DfsDynamicItemInfo], prefixes: List[str]
+) -> List[ItemInfo]:
+    item_numbers = _valid_item_numbers(items_in)
+    items_in = _get_item_info(items_in)
+
+    new_items = []
+    for item_num in item_numbers:
+        for prefix in prefixes:
+            item = deepcopy(items_in[item_num])
+            item.name = f"{prefix}, {item.name}"
+            new_items.append(item)
+
+    return new_items
