@@ -1063,7 +1063,7 @@ values all around the domain.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<em>np.array</em><em>, </em><em>optional</em>) – value for each element to plot, default bathymetry</p></li>
+<li><p><strong>z</strong> (<em>np.array</em><em> or </em><em>a Dataset with a single item</em><em>, </em><em>optional</em>) – value for each element to plot, default bathymetry</p></li>
 <li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – list of element ids to be plotted</p></li>
 <li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘patch’ (default), ‘mesh_only’, ‘shaded’,
 ‘contour’, ‘contourf’ or ‘outline_only’</p></li>
@@ -1089,6 +1089,17 @@ do this number of mesh refinements for smoother plotting</p></li>
 <dd class="field-odd"><p>&lt;matplotlib.axes&gt;</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="c1"># bathymetry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Surface elevation&quot;</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1, 884)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">n_items</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">ds</span><span class="p">)</span> <span class="c1"># plot surface elevation</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -1765,7 +1776,7 @@ values all around the domain.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<em>np.array</em><em>, </em><em>optional</em>) – value for each element to plot, default bathymetry</p></li>
+<li><p><strong>z</strong> (<em>np.array</em><em> or </em><em>a Dataset with a single item</em><em>, </em><em>optional</em>) – value for each element to plot, default bathymetry</p></li>
 <li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – list of element ids to be plotted</p></li>
 <li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘patch’ (default), ‘mesh_only’, ‘shaded’,
 ‘contour’, ‘contourf’ or ‘outline_only’</p></li>
@@ -1791,6 +1802,17 @@ do this number of mesh refinements for smoother plotting</p></li>
 <dd class="field-odd"><p>&lt;matplotlib.axes&gt;</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="c1"># bathymetry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Surface elevation&quot;</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(1, 884)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">n_items</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">ds</span><span class="p">)</span> <span class="c1"># plot surface elevation</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
