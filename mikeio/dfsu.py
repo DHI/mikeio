@@ -1278,7 +1278,7 @@ class _UnstructuredGeometry:
 
         Parameters
         ----------
-        z: np.array, optional
+        z: np.array or a Dataset with a single item, optional
             value for each element to plot, default bathymetry
         elements: list(int), optional
             list of element ids to be plotted
@@ -1313,6 +1313,17 @@ class _UnstructuredGeometry:
         Returns
         -------
         <matplotlib.axes>
+
+        Examples
+        --------
+        >>> dfs = Dfsu("HD2D.dfsu")
+        >>> dfs.plot() # bathymetry
+        >>> ds = dfs.read(items="Surface elevation", time_steps=0)
+        >>> ds.shape
+        (1, 884)
+        >>> ds.n_items
+        1
+        >>> dfs.plot(z=ds) # plot surface elevation
         """
 
         import matplotlib.cm as cm
