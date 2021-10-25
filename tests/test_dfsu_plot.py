@@ -79,6 +79,15 @@ def test_plot_dfsu():
     assert True
 
 
+def test_plot_dfsu_squeeze():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = Dfsu(filename)
+    data = dfs.read(items=0, time_steps=0)
+    dfs.plot(z=data)  # 1 item-dataset
+    dfs.plot(z=data[0])  # 1 time-step-dataset
+    assert True
+
+
 def test_plot_dfsu_arguments():
     filename = os.path.join("tests", "testdata", "NorthSea_HD_and_windspeed.dfsu")
     dfs = Dfsu(filename)

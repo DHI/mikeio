@@ -1359,10 +1359,14 @@ class _UnstructuredGeometry:
                 if label is None:
                     label = "Bathymetry (m)"
         else:
+            if len(z) == 1:  # if single-item Dataset
+                z = z[0].copy()
             if len(z) != ne:
-                raise Exception(
-                    f"Length of z ({len(z)}) does not match geometry ({ne})"
-                )
+                z = np.squeeze(z).copy()  # handles single time step
+                if len(z) != ne:
+                    raise Exception(
+                        f"Length of z ({len(z)}) does not match geometry ({ne})"
+                    )
             if label is None:
                 label = ""
             if not plot_data:
