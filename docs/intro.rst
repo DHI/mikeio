@@ -24,13 +24,18 @@ Getting started
     >>>  dfs = Dfs0('simple.dfs0')
     >>>  df = dfs.to_dataframe()
 
+Read more in the `getting started guide <getting_started.html>`_.
+
 Notebooks
 ---------
+
+`List of all notebooks <https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/>`_
 
 * `Dfs0 <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb>`_
 * `Dfsu basic <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb>`_
 * `Create Dfs2 from netCDF <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb>`_
-* `Complete list of all notebooks <https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/>`_
+
+
 
 Where can I get help?
 ---------------------

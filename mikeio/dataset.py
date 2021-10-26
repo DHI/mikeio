@@ -803,7 +803,7 @@ class Dataset(TimeSeries):
         >>> dfs = Dfsu("HD2D.dfsu")
         >>> ds = dfs.read(["Current speed"])
         >>> area = dfs.get_element_area()
-        >>> ds2 = ds.average(weights=area)
+        >>> ds2 = ds.average(axis="space", weights=area)
         """
 
         def func(x, axis, keepdims):

@@ -38,6 +38,12 @@ From pandas DataFrame to Dfs0
     >>> df.to_dfs0("mauna_loa_co2.dfs0")
 
 
+Dfs0 example notebooks
+----------------------
+* `Dfs0 <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb>`_ - read, write, to_dataframe, non-equidistant, accumulated timestep, extrapolation
+* `Dfs0-Relative-time <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Relative%20time.ipynb>`_ - read file with relative time axis
+* `Dfs0 | getting-started-with-mikeio <https://dhi.github.io/getting-started-with-mikeio/dfs0.html>`_
+
 
 
 Dfs0 API
