@@ -29,7 +29,7 @@ Each element has:
 * Element table; specifies for each element the nodes that defines the element. 
 
 .. warning::
-    In MIKE Zero, node ids and element ids are 1-based. 
+    In MIKE Zero, node ids, element ids and layer ids are 1-based. 
     In MIKE IO, all ids are **0-based** following standard Python indexing. 
     That means, as an example, that when finding the element closest to a 
     point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.
@@ -196,6 +196,14 @@ Apart from the basic dfsu functionality, layered dfsu have the below additional 
     mikeio.Dfsu.get_layer_elements
     mikeio.Dfsu.find_nearest_profile_elements
     mikeio.Dfsu.plot_vertical_profile
+
+.. warning::
+    In MIKE Zero, layer ids are 1-based. 
+    In MIKE IO, all ids are **0-based** following standard Python indexing. 
+    The bottom layer is 0. 
+    In previous versions of MIKE IO, layer ids was 1-based! 
+    From release 0.10 all ids are 0-based.  
+
 
 
 Dfsu API

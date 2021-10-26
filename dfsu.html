@@ -266,7 +266,7 @@ available in a .dfsu file as static items.</p>
 </ul>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>In MIKE Zero, node ids and element ids are 1-based.
+<p>In MIKE Zero, node ids, element ids and layer ids are 1-based.
 In MIKE IO, all ids are <strong>0-based</strong> following standard Python indexing.
 That means, as an example, that when finding the element closest to a
 point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.</p>
@@ -497,7 +497,7 @@ but the following values types exists:</p>
 <td><p>Maximum number of z-layers</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.layer_ids" title="mikeio.Dfsu.layer_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.layer_ids</span></code></a></p></td>
-<td><p>The layer number for each 3d element</p></td>
+<td><p>The layer number (0=bottom, 1, 2, ...) for each 3d element</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.top_elements" title="mikeio.Dfsu.top_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.top_elements</span></code></a></p></td>
 <td><p>List of 3d element ids of surface layer</p></td>
@@ -537,6 +537,14 @@ but the following values types exists:</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In MIKE Zero, layer ids are 1-based.
+In MIKE IO, all ids are <strong>0-based</strong> following standard Python indexing.
+The bottom layer is 0.
+In previous versions of MIKE IO, layer ids was 1-based!
+From release 0.10 all ids are 0-based.</p>
+</div>
 </div>
 <div class="section" id="dfsu-api">
 <h2>Dfsu API<a class="headerlink" href="#dfsu-api" title="Permalink to this headline">¶</a></h2>
@@ -756,7 +764,7 @@ The first two items will be x- and y- coordinates of track</p>
 <li><p><strong>z</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Z coordinate(s)  (vertical coordinate, positive upwards)
 If not provided for a 3d file, the surface element is returned</p></li>
 <li><p><strong>layer</strong> (<em>int</em><em>, </em><em>optional</em>) – Search in a specific layer only (3D files only)
-Either z or layer can be provided for a 3D file</p></li>
+Either z or layer (0-based) can be provided for a 3D file</p></li>
 <li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – return this many (horizontally) nearest points for
 each coordinate set, default=1</p></li>
 <li><p><strong>return_distances</strong> (<em>bool</em><em>, </em><em>optional</em>) – should the horizontal distances to each point be returned?
@@ -857,8 +865,8 @@ only include elements within radius</p></li>
 <dd><p>3d element ids for one (or more) specific layer(s)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>layer</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – layer between 1 (bottom) and n_layers (top)
-(can also be negative counting from 0 at the top layer)</p>
+<dd class="field-odd"><p><strong>layer</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – layer between 0 (bottom) and n_layers-1 (top)
+(can also be negative counting from -1 at the top layer)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>element ids</p>
@@ -993,7 +1001,7 @@ values all around the domain.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfsu.layer_ids">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">layer_ids</span></span><a class="headerlink" href="#mikeio.Dfsu.layer_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>The layer number for each 3d element</p>
+<dd><p>The layer number (0=bottom, 1, 2, …) for each 3d element</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1487,7 +1495,7 @@ or ‘all’ can be selected, by default ‘all’</p></li>
 <li><p><strong>z</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Z coordinate(s)  (vertical coordinate, positive upwards)
 If not provided for a 3d file, the surface element is returned</p></li>
 <li><p><strong>layer</strong> (<em>int</em><em>, </em><em>optional</em>) – Search in a specific layer only (3D files only)
-Either z or layer can be provided for a 3D file</p></li>
+Either z or layer (0-based) can be provided for a 3D file</p></li>
 <li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – return this many (horizontally) nearest points for
 each coordinate set, default=1</p></li>
 <li><p><strong>return_distances</strong> (<em>bool</em><em>, </em><em>optional</em>) – should the horizontal distances to each point be returned?
@@ -1588,8 +1596,8 @@ only include elements within radius</p></li>
 <dd><p>3d element ids for one (or more) specific layer(s)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>layer</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – layer between 1 (bottom) and n_layers (top)
-(can also be negative counting from 0 at the top layer)</p>
+<dd class="field-odd"><p><strong>layer</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – layer between 0 (bottom) and n_layers-1 (top)
+(can also be negative counting from -1 at the top layer)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>element ids</p>
@@ -1718,7 +1726,7 @@ values all around the domain.</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.layer_ids">
 <em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">layer_ids</span></span><a class="headerlink" href="#mikeio.Mesh.layer_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>The layer number for each 3d element</p>
+<dd><p>The layer number (0=bottom, 1, 2, …) for each 3d element</p>
 </dd></dl>
 
 <dl class="py property">
