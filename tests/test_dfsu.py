@@ -414,7 +414,7 @@ def test_find_nearest_elements_3d():
     assert elem_id == 5323
     assert elem_id in dfs.top_elements
 
-    elem_id = dfs.find_nearest_elements(333934, 6158101, layer=8)
+    elem_id = dfs.find_nearest_elements(333934, 6158101, layer=7)
     assert elem_id == 5322
 
     elem_id = dfs.find_nearest_elements(333934, 6158101, -7)
@@ -608,21 +608,21 @@ def test_get_layer_elements():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
 
-    elem_ids = dfs.get_layer_elements(0)
+    elem_ids = dfs.get_layer_elements(-1)
     assert np.all(elem_ids == dfs.top_elements)
 
-    elem_ids = dfs.get_layer_elements(-1)
+    elem_ids = dfs.get_layer_elements(-2)
     assert elem_ids[5] == 23
 
-    elem_ids = dfs.get_layer_elements(1)
+    elem_ids = dfs.get_layer_elements(0)
     assert elem_ids[5] == 8638
     assert len(elem_ids) == 10
 
-    elem_ids = dfs.get_layer_elements([1, 3])
+    elem_ids = dfs.get_layer_elements([0, 2])
     assert len(elem_ids) == 197
 
     with pytest.raises(Exception):
-        elem_ids = dfs.get_layer_elements(12)
+        elem_ids = dfs.get_layer_elements(11)
 
 
 def test_find_nearest_profile_elements():
@@ -1033,7 +1033,7 @@ def test_get_layers_2d_error():
     assert dfs.is_2d
 
     with pytest.raises(InvalidGeometry):
-        dfs.get_layer_elements(0)
+        dfs.get_layer_elements(-1)
 
     with pytest.raises(InvalidGeometry):
         dfs.layer_ids
@@ -1088,7 +1088,7 @@ def test_elements_to_geometry():
     assert geom.n_layers == 5
     assert "nodes" in text
 
-    elements = dfs.get_layer_elements(layer=-2)
+    elements = dfs.get_layer_elements(layer=-1)
     geom = dfs.elements_to_geometry(elements, node_layers="top")
     assert geom.n_layers is None
     assert geom.n_elements == len(elements)
@@ -1215,13 +1215,13 @@ def test_find_nearest_element_in_Zlayer():
     dfs = Dfsu(filename)
     el2dindx = dfs.elem2d_ids[12]
     assert el2dindx == 2
-    ids = dfs.find_nearest_elements(357000, 6200000, layer=1)
+    ids = dfs.find_nearest_elements(357000, 6200000, layer=0)
     el2dindx = dfs.elem2d_ids[ids]
     table = dfs.e2_e3_table[el2dindx]
     assert ids == 3216
     assert el2dindx == 745
     assert len(table) == 9
-    ids = dfs.find_nearest_elements(357000, 6200000, layer=9)
+    ids = dfs.find_nearest_elements(357000, 6200000, layer=8)
     el2dindx = dfs.elem2d_ids[ids]
     table = dfs.e2_e3_table[el2dindx]
     assert ids == 3224
@@ -1230,7 +1230,7 @@ def test_find_nearest_element_in_Zlayer():
 
     with pytest.raises(Exception):
         # z and layer cannot both be given
-        dfs.find_nearest_elements(357000, 6200000, z=-3, layer=9)
+        dfs.find_nearest_elements(357000, 6200000, z=-3, layer=8)
 
 
 def test_e2_e3_table_2d_file():
