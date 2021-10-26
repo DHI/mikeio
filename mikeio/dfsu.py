@@ -710,7 +710,7 @@ class _UnstructuredGeometry:
                 idx[j] = row[d3d.argsort()[0]]
 
         elif z is None:
-            if 1 <= layer <= self.n_z_layers:
+            if 0 <= layer <= self.n_z_layers - 1:
                 idx = np.zeros_like(elem2d)
                 elem3d = self.e2_e3_table[elem2d]
                 for j, row in enumerate(elem3d):
@@ -755,7 +755,7 @@ class _UnstructuredGeometry:
             If not provided for a 3d file, the surface element is returned
         layer: int, optional
             Search in a specific layer only (3D files only)
-            Either z or layer can be provided for a 3D file
+            Either z or layer (0-based) can be provided for a 3D file
         n_nearest : int, optional
             return this many (horizontally) nearest points for
             each coordinate set, default=1
@@ -932,7 +932,7 @@ class _UnstructuredGeometry:
 
     @property
     def layer_ids(self):
-        """The layer number for each 3d element"""
+        """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
         if self._n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
@@ -1003,8 +1003,8 @@ class _UnstructuredGeometry:
         Parameters
         ----------
         layer : int or list(int)
-            layer between 1 (bottom) and n_layers (top)
-            (can also be negative counting from 0 at the top layer)
+            layer between 0 (bottom) and n_layers-1 (top)
+            (can also be negative counting from -1 at the top layer)
 
         Returns
         -------
@@ -1022,12 +1022,12 @@ class _UnstructuredGeometry:
         if n_lay is None:
             raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
 
-        if layer < (-n_lay + 1) or layer > n_lay:
+        if layer < (-n_lay) or layer >= n_lay:
             raise Exception(
-                f"Layer {layer} not allowed; must be between -{n_lay - 1} and {n_lay}"
+                f"Layer {layer} not allowed; must be between -{n_lay} and {n_lay-1}"
             )
 
-        if layer <= 0:
+        if layer < 0:
             layer = layer + n_lay
 
         return self.element_ids[self.layer_ids == layer]
@@ -1041,8 +1041,8 @@ class _UnstructuredGeometry:
         n2d = len(self.top_elements)
         topid = self.top_elements
         botid = self.bottom_elements
-        # layer_ids = 1, 2, 3...
-        global_layer_ids = np.arange(1, self.n_layers + 1)
+        # layer_ids = 0, 1, 2...
+        global_layer_ids = np.arange(self.n_layers)
         for j in range(n2d):
             col = list(range(botid[j], topid[j] + 1))
 
