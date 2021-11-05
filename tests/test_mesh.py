@@ -98,3 +98,16 @@ def test_write_part(tmpdir):
     msh.write(outfilename, elements=list(range(0, 100)))
 
     assert os.path.exists(outfilename)
+
+
+def test_write_mesh_from_dfsu(tmpdir):
+    outfilename = os.path.join(tmpdir.dirname, "quad_tri.mesh")
+    dfsufilename = os.path.join("tests", "testdata", "FakeLake.dfsu")
+
+    msh = Mesh(dfsufilename)
+
+    msh.write(outfilename)
+
+    msh2 = Mesh(outfilename)
+
+    assert os.path.exists(outfilename)
