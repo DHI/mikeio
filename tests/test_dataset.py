@@ -1026,7 +1026,7 @@ def test_non_equidistant():
     assert not ds.is_equidistant
 
 
-def test_combine():
+def test_combine_by_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset
     ds3 = Dataset.combine(ds1, ds2)
@@ -1034,7 +1034,11 @@ def test_combine():
     assert isinstance(ds3, Dataset)
     assert len(ds1) == len(ds2) == len(ds3)
     assert ds3.start_time == ds1.start_time
+    assert ds3.start_time < ds2.start_time
     assert ds3.end_time == ds2.end_time
+    assert ds3.end_time > ds1.end_time
+    assert ds3.n_timesteps == 145
+    assert ds3.is_equidistant
 
     ds4 = Dataset.combine([ds1, ds2])
 
@@ -1042,3 +1046,26 @@ def test_combine():
     assert len(ds1) == len(ds2) == len(ds4)
     assert ds4.start_time == ds1.start_time
     assert ds4.end_time == ds2.end_time
+
+
+def test_combine_by_time_2():
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1", time_steps=range(0,12))
+    ds2 = mikeio.read("tests/testdata/tide2.dfs1")
+    ds3 = Dataset.combine(ds1, ds2)
+
+    assert ds3.n_timesteps == 109
+    assert not ds3.is_equidistant
+
+
+def test_combine_by_item():
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1")
+    ds2 = mikeio.read("tests/testdata/tide1.dfs1")
+    ds2.items[0].name = ds2.items[0].name + " v2"     
+    ds3 = Dataset.combine(ds1, ds2)
+
+    assert isinstance(ds3, Dataset)
+    assert ds3.n_items == 2
+    assert ds3.items[1].name == ds1.items[0].name + " v2"
+
+
+    
