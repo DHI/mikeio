@@ -7,12 +7,14 @@ from mikeio import Mesh
 @pytest.fixture
 def tri_mesh():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    return Mesh(filename)    
+    return Mesh(filename)
+
 
 @pytest.fixture
 def mixed_mesh():
     filename = os.path.join("tests", "testdata", "quad_tri.mesh")
     return Mesh(filename)
+
 
 def test_get_number_of_elements(tri_mesh):
     msh = tri_mesh
@@ -32,12 +34,13 @@ def test_element_coordinates(tri_mesh):
 def test_read_mixed_mesh(mixed_mesh):
     msh = mixed_mesh
     assert msh.n_nodes == 798
-    
+
     el_tbl_vec = np.hstack(msh.element_table)
-    assert len(el_tbl_vec) > 3*msh.n_elements
-    assert len(el_tbl_vec) < 4*msh.n_elements
+    assert len(el_tbl_vec) > 3 * msh.n_elements
+    assert len(el_tbl_vec) < 4 * msh.n_elements
     assert np.all(el_tbl_vec >= 0)
     assert np.all(el_tbl_vec < msh.n_nodes)
+
 
 def test_node_coordinates(tri_mesh):
     msh = tri_mesh
@@ -48,7 +51,7 @@ def test_node_coordinates(tri_mesh):
 
 
 def test_get_land_node_coordinates(tri_mesh):
-    
+
     msh = tri_mesh
 
     nc = msh.node_coordinates[msh.codes == 1]
@@ -56,7 +59,7 @@ def test_get_land_node_coordinates(tri_mesh):
     assert nc.shape == (134, 3)
 
 
-def test_get_bad_node_coordinates(tri_mesh): 
+def test_get_bad_node_coordinates(tri_mesh):
     msh = tri_mesh
 
     with pytest.raises(Exception):
@@ -95,7 +98,7 @@ def test_set_codes(tri_mesh):
 
 
 def test_write(tri_mesh, tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "simple.mesh")    
+    outfilename = os.path.join(tmpdir.dirname, "simple.mesh")
     msh = tri_mesh
 
     msh.write(outfilename)
@@ -105,7 +108,7 @@ def test_write(tri_mesh, tmpdir):
 
 def test_write_part(tri_mesh, tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple_sub.mesh")
-    
+
     msh = tri_mesh
 
     msh.write(outfilename, elements=list(range(0, 100)))
