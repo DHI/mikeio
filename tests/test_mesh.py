@@ -42,6 +42,19 @@ def test_read_mixed_mesh(mixed_mesh):
     assert np.all(el_tbl_vec < msh.n_nodes)
 
 
+def test_read_write_mixed_mesh(mixed_mesh, tmpdir):
+    msh = mixed_mesh
+    outfilename = os.path.join(tmpdir.dirname, "quad_tri_v2.mesh")
+    msh.write(outfilename)
+
+    msh2 = Mesh(outfilename)
+
+    assert os.path.exists(outfilename)
+
+    assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
+    assert np.all(msh2.element_coordinates == msh.element_coordinates)
+
+
 def test_node_coordinates(tri_mesh):
     msh = tri_mesh
 
