@@ -466,8 +466,9 @@ class Dataset(TimeSeries):
         ds = self.copy() if copy else self
 
         for j in range(other.n_items):
-            ds.items.append(other.items[j])
-            ds.data.append(other.data[j])
+            if other.items[j].name != "Z coordinate":  #
+                ds.items.append(other.items[j])
+                ds.data.append(other.data[j])
         return ds
 
     def concat(self, other, inplace=False):
