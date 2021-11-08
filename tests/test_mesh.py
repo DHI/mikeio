@@ -1,18 +1,26 @@
 import os
+import numpy as np
 import pytest
 from mikeio import Mesh
 
 
-def test_get_number_of_elements():
+@pytest.fixture
+def tri_mesh():
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+    return Mesh(filename)    
 
+@pytest.fixture
+def mixed_mesh():
+    filename = os.path.join("tests", "testdata", "quad_tri.mesh")
+    return Mesh(filename)
+
+def test_get_number_of_elements(tri_mesh):
+    msh = tri_mesh
     assert msh.n_elements == 654
 
 
-def test_element_coordinates():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+def test_element_coordinates(tri_mesh):
+    msh = tri_mesh
 
     ec = msh.element_coordinates
 
@@ -21,35 +29,43 @@ def test_element_coordinates():
     assert ec[0, 1] > 6153000.0
 
 
-def test_node_coordinates():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+def test_read_mixed_mesh(mixed_mesh):
+    msh = mixed_mesh
+    assert msh.n_nodes == 798
+    
+    el_tbl_vec = np.hstack(msh.element_table)
+    assert len(el_tbl_vec) > 3*msh.n_elements
+    assert len(el_tbl_vec) < 4*msh.n_elements
+    assert np.all(el_tbl_vec >= 0)
+    assert np.all(el_tbl_vec < msh.n_nodes)
+
+def test_node_coordinates(tri_mesh):
+    msh = tri_mesh
 
     nc = msh.node_coordinates
 
     assert nc.shape == (399, 3)
 
 
-def test_get_land_node_coordinates():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+def test_get_land_node_coordinates(tri_mesh):
+    
+    msh = tri_mesh
 
     nc = msh.node_coordinates[msh.codes == 1]
 
     assert nc.shape == (134, 3)
 
 
-def test_get_bad_node_coordinates():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+def test_get_bad_node_coordinates(tri_mesh): 
+    msh = tri_mesh
 
     with pytest.raises(Exception):
         nc = msh.get_node_coords(code="foo")
 
 
-def test_set_z():
+def test_set_z(tri_mesh):
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+    msh = tri_mesh
     zn = msh.node_coordinates[:, 2]
     zn[zn < -3] = -3
 
@@ -58,9 +74,9 @@ def test_set_z():
     assert zn.min() == -3
 
 
-def test_set_codes():
+def test_set_codes(tri_mesh):
     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+    msh = tri_mesh
     codes = msh.codes
     assert msh.codes[2] == 2
     codes[codes == 2] = 7  # work directly on reference
@@ -78,22 +94,19 @@ def test_set_codes():
         msh.codes = codes[0:4]
 
 
-def test_write(tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "simple.mesh")
-    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
-
-    msh = Mesh(meshfilename)
+def test_write(tri_mesh, tmpdir):
+    outfilename = os.path.join(tmpdir.dirname, "simple.mesh")    
+    msh = tri_mesh
 
     msh.write(outfilename)
 
     assert os.path.exists(outfilename)
 
 
-def test_write_part(tmpdir):
+def test_write_part(tri_mesh, tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple_sub.mesh")
-    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
-
-    msh = Mesh(meshfilename)
+    
+    msh = tri_mesh
 
     msh.write(outfilename, elements=list(range(0, 100)))
 
@@ -111,3 +124,5 @@ def test_write_mesh_from_dfsu(tmpdir):
     msh2 = Mesh(outfilename)
 
     assert os.path.exists(outfilename)
+
+    assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
