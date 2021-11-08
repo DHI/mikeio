@@ -1079,3 +1079,18 @@ def test_combine_by_item():
     assert isinstance(ds3, Dataset)
     assert ds3.n_items == 2
     assert ds3.items[1].name == ds1.items[0].name + " v2"
+
+
+def test_combine_by_item_dfsu_3d():
+    ds1 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[0, 1])
+    assert ds1.n_items == 2
+    ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[0, 2])
+    assert ds2.n_items == 2
+
+    ds3 = Dataset.combine(ds1, ds2)
+
+    assert isinstance(ds3, Dataset)
+    itemnames = [x.name for x in ds3.items]
+    assert "Salinity" in itemnames
+    assert "Temperature" in itemnames
+    assert ds3.n_items == 3  # Only one instance of Z coordinate
