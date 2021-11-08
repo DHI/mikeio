@@ -1056,6 +1056,15 @@ def test_combine_by_time_2():
     assert ds3.n_timesteps == 109
     assert not ds3.is_equidistant
 
+    # create combined datasets in 8 chunks of 6 hours
+    dsall = []
+    for j in range(8):
+        dsall.append(mikeio.read("tests/testdata/tide1.dfs1", time_steps=range(j*12, 1 + (j+1)*12)))
+    ds4 = Dataset.combine(*dsall)
+    assert len(dsall) == 8
+    assert ds4.n_timesteps == 97 
+    assert ds4.is_equidistant
+
 
 def test_combine_by_item():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
