@@ -466,8 +466,9 @@ class Dataset(TimeSeries):
         ds = self.copy() if copy else self
 
         for j in range(other.n_items):
-            ds.items.append(other.items[j])
-            ds.data.append(other.data[j])
+            if other.items[j].name != "Z coordinate":  #
+                ds.items.append(other.items[j])
+                ds.data.append(other.data[j])
         return ds
 
     def concat(self, other, inplace=False):
@@ -506,8 +507,8 @@ class Dataset(TimeSeries):
 
     def _concat_time(self, other, copy=True):
         self._check_all_items_match(other)
-        if not np.all(self.shape == other.shape):
-            raise ValueError("Shape of the datasets must match")
+        if not np.all(self.shape[1:] == other.shape[1:]):
+            raise ValueError("Shape of the datasets must match (except time dimension)")
         ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
