@@ -1310,7 +1310,7 @@ class _UnstructuredGeometry:
             specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
-        add_olorbar: bool
+        add_colorbar: bool
             Add colorbar to plot, default True
 
         Returns
