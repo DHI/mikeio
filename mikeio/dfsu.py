@@ -1272,7 +1272,7 @@ class _UnstructuredGeometry:
         show_outline=True,
         figsize=None,
         ax=None,
-        colorbar=True,
+        add_colorbar=True,
     ):
         """
         Plot unstructured data and/or mesh, mesh outline
@@ -1310,7 +1310,7 @@ class _UnstructuredGeometry:
             specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
-        colorbar: bool
+        add_olorbar: bool
             Add colorbar to plot, default True
 
         Returns
@@ -1473,7 +1473,7 @@ class _UnstructuredGeometry:
             fig_obj.set_clim(vmin, vmax)
             ax.add_collection(fig_obj)
 
-            if colorbar:
+            if add_colorbar:
                 cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
                 cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
                 plt.colorbar(cmap_sm, label=label, cax=cax, extend=cbar_extend)
@@ -1525,7 +1525,7 @@ class _UnstructuredGeometry:
                         shading="gouraud",
                     )
 
-                if colorbar:
+                if add_colorbar:
                     cax = make_axes_locatable(ax).append_axes(
                         "right", size="5%", pad=0.05
                     )
@@ -1568,7 +1568,7 @@ class _UnstructuredGeometry:
                 )
 
                 # colorbar
-                if colorbar:
+                if add_colorbar:
                     cax = make_axes_locatable(ax).append_axes(
                         "right", size="5%", pad=0.05
                     )

@@ -22,7 +22,7 @@ def test_plot_bathymetry():
 def test_plot_bathymetry_no_colorbar():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = Dfsu(filename)
-    dfs.plot(colorbar=False)
+    dfs.plot(add_colorbar=False)
     assert True
 
 
