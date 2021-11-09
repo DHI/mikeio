@@ -1272,6 +1272,7 @@ class _UnstructuredGeometry:
         show_outline=True,
         figsize=None,
         ax=None,
+        add_colorbar=True,
     ):
         """
         Plot unstructured data and/or mesh, mesh outline
@@ -1309,6 +1310,8 @@ class _UnstructuredGeometry:
             specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
+        add_olorbar: bool
+            Add colorbar to plot, default True
 
         Returns
         -------
@@ -1470,9 +1473,10 @@ class _UnstructuredGeometry:
             fig_obj.set_clim(vmin, vmax)
             ax.add_collection(fig_obj)
 
-            cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-            cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-            plt.colorbar(cmap_sm, label=label, cax=cax, extend=cbar_extend)
+            if add_colorbar:
+                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+                cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
+                plt.colorbar(cmap_sm, label=label, cax=cax, extend=cbar_extend)
 
         else:
             # do node-based triangular plot
@@ -1521,11 +1525,19 @@ class _UnstructuredGeometry:
                         shading="gouraud",
                     )
 
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-                plt.colorbar(
-                    cmap_sm, label=label, cax=cax, boundaries=levels, extend=cbar_extend
-                )
+                if add_colorbar:
+                    cax = make_axes_locatable(ax).append_axes(
+                        "right", size="5%", pad=0.05
+                    )
+                    cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
+
+                    plt.colorbar(
+                        cmap_sm,
+                        label=label,
+                        cax=cax,
+                        boundaries=levels,
+                        extend=cbar_extend,
+                    )
 
             elif plot_type == "contour" or plot_type == "contour_lines":
                 ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
@@ -1556,16 +1568,19 @@ class _UnstructuredGeometry:
                 )
 
                 # colorbar
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                if cmap_ScMappable is None:
-                    plt.colorbar(fig_obj, label=label, cax=cax)
-                else:
-                    plt.colorbar(
-                        cmap_ScMappable,
-                        label=label,
-                        cax=cax,
-                        ticks=levels,
+                if add_colorbar:
+                    cax = make_axes_locatable(ax).append_axes(
+                        "right", size="5%", pad=0.05
                     )
+                    if cmap_ScMappable is None:
+                        plt.colorbar(fig_obj, label=label, cax=cax)
+                    else:
+                        plt.colorbar(
+                            cmap_ScMappable,
+                            label=label,
+                            cax=cax,
+                            ticks=levels,
+                        )
 
             else:
                 if (plot_type is not None) and plot_type != "outline_only":

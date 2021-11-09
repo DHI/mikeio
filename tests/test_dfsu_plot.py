@@ -19,6 +19,13 @@ def test_plot_bathymetry():
     assert True
 
 
+def test_plot_bathymetry_no_colorbar():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    dfs = Dfsu(filename)
+    dfs.plot(add_colorbar=False)
+    assert True
+
+
 def test_plot_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
