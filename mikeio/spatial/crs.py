@@ -1,7 +1,8 @@
 import warnings
 
 from mikecore.Projections import Cartography, MapProjection
-import pyproj
+
+# import pyproj
 
 
 class CRSConversionWarning(Warning):
@@ -71,7 +72,7 @@ class CRS:
     def is_projected(self) -> bool:
         return not self.is_geographical
 
-    def to_pyproj(self) -> pyproj.CRS:
+    def to_pyproj(self):
         """
         Convert projection to pyptoj.CRS object.
 
@@ -80,6 +81,8 @@ class CRS:
         pyproj.CRS
 
         """
+        import pyproj
+
         if self.projection_string == "LONG/LAT":
             warnings.warn(
                 message="LONG/LAT projection string was interpreted as EPSG:4326",
@@ -90,7 +93,7 @@ class CRS:
             return pyproj.CRS.from_string(self.projection_string)
 
     @classmethod
-    def from_pyproj(cls, pyproj_crs: pyproj.CRS):
+    def from_pyproj(cls, pyproj_crs):
         """
         Create CRS object from pyproj.CRS object.
 
@@ -105,6 +108,8 @@ class CRS:
             CRS instance.
 
         """
+        import pyproj
+
         return cls(projection_string=pyproj_crs.to_wkt(version="WKT1_ESRI"))
 
     def to_epsg(self, min_confidence: float = 70.0) -> int:
@@ -130,6 +135,8 @@ class CRS:
             Unexpected 'pyproj.to_epsg' return type.
 
         """
+        import pyproj
+
         epsg_code = self.to_pyproj().to_epsg(min_confidence=min_confidence)
         if epsg_code is None:
             raise CRSConversionError(
@@ -159,5 +166,7 @@ class CRS:
             CRS instance.
 
         """
+        import pyproj
+
         pyproj_crs = pyproj.CRS.from_epsg(epsg)
         return cls.from_pyproj(pyproj_crs=pyproj_crs)
