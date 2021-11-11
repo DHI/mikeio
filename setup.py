@@ -13,7 +13,6 @@ setuptools.setup(
         "scipy>1.0",
         "pyyaml",
         "tqdm",
-        "pyproj",
     ],
     extras_require={
         "dev": [
@@ -22,6 +21,7 @@ setuptools.setup(
             "sphinx",
             "sphinx-book-theme",
             "shapely",
+            "pyproj",
             "xarray",
             "netcdf4",
             "matplotlib",

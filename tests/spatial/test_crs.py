@@ -1,6 +1,10 @@
-import pyproj
 import pytest
 from mikeio.spatial.crs import CRS, CRSConversionError, CRSConversionWarning
+
+
+pytest.importorskip("pyproj")
+
+import pyproj
 
 
 class TestCRS:
