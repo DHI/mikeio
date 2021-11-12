@@ -169,8 +169,8 @@ def test_read_numbered_access(dfs2_random_2items):
 def test_x0y0(dfs2_pt_spectrum):
 
     dfs = dfs2_pt_spectrum
-    assert dfs.x0 == pytest.approx(1.1)
-    assert dfs.y0 == 22.5
+    assert dfs.x0 == pytest.approx(0.055)
+    assert dfs.y0 == 0
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):

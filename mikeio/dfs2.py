@@ -55,7 +55,7 @@ class Dfs2(_Dfs123):
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
         self._x0 = self._dfs.SpatialAxis.X0
-        self._x0 = self._dfs.SpatialAxis.Y0
+        self._y0 = self._dfs.SpatialAxis.Y0
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._nx = self._dfs.SpatialAxis.XCount
@@ -200,12 +200,12 @@ class Dfs2(_Dfs123):
     @property
     def x0(self):
         """Start point of x values (often 0)"""
-        return self._dx
+        return self._x0
 
     @property
     def y0(self):
         """Start point of y values (often 0)"""
-        return self._dy
+        return self._y0
 
     @property
     def dx(self):
