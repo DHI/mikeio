@@ -35,6 +35,12 @@ def dfs2_gebco():
     return Dfs2(filepath)
 
 
+@pytest.fixture
+def dfs2_gebco_rotate():
+    filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
+    return Dfs2(filepath)
+
+
 def test_simple_write(tmp_path):
 
     filepath = tmp_path / "simple.dfs2"
@@ -166,11 +172,34 @@ def test_read_numbered_access(dfs2_random_2items):
     assert res.items[0].name == "Untitled"
 
 
-def test_x0y0(dfs2_pt_spectrum):
-
+def test_properties_pt_spectrum(dfs2_pt_spectrum):
     dfs = dfs2_pt_spectrum
     assert dfs.x0 == pytest.approx(0.055)
     assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(1.1)
+    assert dfs.dy == 22.5
+    assert dfs.nx == 25
+    assert dfs.ny == 16
+    assert dfs.longitude == 0
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 1
+    assert dfs.n_timesteps == 31
+
+
+def test_properties_rotated(dfs2_gebco_rotate):
+    dfs = dfs2_gebco_rotate
+    assert dfs.x0 == 0
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(0.00416667)
+    assert dfs.dy == pytest.approx(0.00416667)
+    assert dfs.nx == 140
+    assert dfs.ny == 150
+    assert dfs.longitude == pytest.approx(12.2854167)
+    assert dfs.latitude == pytest.approx(55.3270833)
+    assert dfs.orientation == 45
+    assert dfs.n_items == 1
+    assert dfs.n_timesteps == 1
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
