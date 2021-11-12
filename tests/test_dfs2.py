@@ -11,6 +11,30 @@ from mikeio.custom_exceptions import (
 )
 
 
+@pytest.fixture
+def dfs2_random():
+    filepath = Path("tests/testdata/random.dfs2")
+    return Dfs2(filepath)
+
+
+@pytest.fixture
+def dfs2_random_2items():
+    filepath = Path("tests/testdata/random_two_item.dfs2")
+    return Dfs2(filepath)
+
+
+@pytest.fixture
+def dfs2_pt_spectrum():
+    filepath = Path("tests/testdata/pt_spectra.dfs2")
+    return Dfs2(filepath)
+
+
+@pytest.fixture
+def dfs2_gebco():
+    filepath = Path("tests/testdata/gebco_sound.dfs2")
+    return Dfs2(filepath)
+
+
 def test_simple_write(tmp_path):
 
     filepath = tmp_path / "simple.dfs2"
@@ -96,10 +120,9 @@ def test_write_single_item(tmpdir):
     assert newdfs.dy == 200.0
 
 
-def test_read():
+def test_read(dfs2_random):
 
-    filepath = Path("tests/testdata/random.dfs2")
-    dfs = Dfs2(filepath)
+    dfs = dfs2_random
     ds = dfs.read(["testing water level"])
     data = ds.data[0]
     assert data[0, 11, 0] == 0
@@ -107,11 +130,8 @@ def test_read():
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
-def test_read_bad_item():
-
-    filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2(filename)
-
+def test_read_bad_item(dfs2_random):
+    dfs = dfs2_random
     with pytest.raises(ItemsError):
         dfs.read(items=100)
 
@@ -125,10 +145,8 @@ def test_read_temporal_subset_slice():
     assert len(ds.time) == 13
 
 
-def test_read_item_names():
-
-    filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2(filename)
+def test_read_item_names(dfs2_random):
+    dfs = dfs2_random
 
     ds = dfs.read(["testing water level"])
     data = ds.data[0]
@@ -137,10 +155,9 @@ def test_read_item_names():
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
-def test_read_numbered_access():
+def test_read_numbered_access(dfs2_random_2items):
 
-    filename = r"tests/testdata/random_two_item.dfs2"
-    dfs = Dfs2(filename)
+    dfs = dfs2_random_2items
 
     res = dfs.read([1])
 
@@ -149,10 +166,16 @@ def test_read_numbered_access():
     assert res.items[0].name == "Untitled"
 
 
-def test_write_selected_item_to_new_file(tmpdir):
+def test_x0y0(dfs2_pt_spectrum):
 
-    filename = r"tests/testdata/random_two_item.dfs2"
-    dfs = Dfs2(filename)
+    dfs = dfs2_pt_spectrum
+    assert dfs.x0 == pytest.approx(1.1)
+    assert dfs.y0 == 22.5
+
+
+def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
+
+    dfs = dfs2_random_2items
 
     outfilename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
@@ -174,12 +197,9 @@ def test_write_selected_item_to_new_file(tmpdir):
     assert dfs.orientation == dfs2.orientation
 
 
-def test_repr():
+def test_repr(dfs2_gebco):
 
-    filename = r"tests/testdata/gebco_sound.dfs2"
-    dfs = Dfs2(filename)
-
-    text = repr(dfs)
+    text = repr(dfs2_gebco)
 
     assert "Dfs2" in text
     assert "Items" in text
@@ -195,11 +215,9 @@ def test_repr_empty():
     assert "Dfs2" in text
 
 
-def test_repr_time():
+def test_repr_time(dfs2_random):
 
-    filename = r"tests/testdata/random.dfs2"
-    dfs = Dfs2(filename)
-
+    dfs = dfs2_random
     text = repr(dfs)
 
     assert "Dfs2" in text
@@ -208,10 +226,9 @@ def test_repr_time():
     assert "steps" in text
 
 
-def test_write_modified_data_to_new_file(tmpdir):
+def test_write_modified_data_to_new_file(dfs2_gebco, tmpdir):
 
-    filename = r"tests/testdata/gebco_sound.dfs2"
-    dfs = Dfs2(filename)
+    dfs = dfs2_gebco
 
     outfilename = os.path.join(tmpdir.dirname, "mod.dfs2")
 
@@ -226,11 +243,9 @@ def test_write_modified_data_to_new_file(tmpdir):
     assert dfs._longitude == dfsmod._longitude
 
 
-def test_read_some_time_step():
+def test_read_some_time_step(dfs2_random_2items):
 
-    filename = r"tests/testdata/random_two_item.dfs2"
-    dfs = Dfs2(filename)
-
+    dfs = dfs2_random_2items
     res = dfs.read(time_steps=[1, 2])
 
     assert res.data[0].shape[0] == 2
@@ -284,11 +299,9 @@ def test_write_some_time_step(tmpdir):
     assert dfs2.start_time.day == 2
 
 
-def test_find_index_from_coordinate():
+def test_find_index_from_coordinate(dfs2_gebco):
 
-    filename = "tests/testdata/gebco_sound.dfs2"
-
-    dfs = Dfs2(filename)
+    dfs = dfs2_gebco
 
     # TODO it should not be necessary to read the data to get coordinates
     ds = dfs.read()
@@ -312,11 +325,9 @@ def test_find_index_from_coordinate():
     assert j == 215
 
 
-def test_reproject(tmpdir):
+def test_reproject(dfs2_gebco, tmpdir):
 
-    filename = "tests/testdata/gebco_sound.dfs2"
-
-    dfs = Dfs2(filename)
+    dfs = dfs2_gebco
 
     assert dfs.projection_string == "LONG/LAT"
     outfilename = os.path.join(tmpdir.dirname, "utm.dfs2")
@@ -345,11 +356,9 @@ def test_reproject(tmpdir):
     # assert dfs.projection_string != newdfs.projection_string
 
 
-def test_reproject_defaults(tmpdir):
+def test_reproject_defaults(dfs2_gebco, tmpdir):
 
-    filename = "tests/testdata/gebco_sound.dfs2"
-
-    dfs = Dfs2(filename)
+    dfs = dfs2_gebco
 
     assert dfs.projection_string == "LONG/LAT"
     outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
