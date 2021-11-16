@@ -164,7 +164,31 @@ class _UnstructuredGeometry:
     @property
     def is_2d(self):
         """Type is either mesh or Dfsu2D (2 horizontal dimensions)"""
-        return self._type in (DfsuFileType.Dfsu2D, None)  # Todo mesh
+        return self._type in (
+            DfsuFileType.Dfsu2D,
+            DfsuFileType.DfsuSpectral2D,
+            None,
+        )  # Todo mesh
+
+    @property
+    def is_layered(self):
+        """Type is layered dfsu (3d, vertical profile or vertical column)"""
+        return self._type in (
+            DfsuFileType.DfsuVerticalColumn,
+            DfsuFileType.DfsuVerticalProfileSigma,
+            DfsuFileType.DfsuVerticalProfileSigmaZ,
+            DfsuFileType.Dfsu3DSigma,
+            DfsuFileType.Dfsu3DSigmaZ,
+        )
+
+    @property
+    def is_spectral(self):
+        """Type is spectral dfsu (point, line or area spectrum)"""
+        return self._type in (
+            DfsuFileType.DfsuSpectral0D,
+            DfsuFileType.DfsuSpectral1D,
+            DfsuFileType.DfsuSpectral2D,
+        )
 
     @property
     def is_tri_only(self):
@@ -1256,6 +1280,121 @@ class _UnstructuredGeometry:
 
         return ax
 
+    def plot_spectrum(
+        self,
+        spectrum,
+        plot_type="contourf",
+        title=None,
+        label=None,
+        cmap=None,
+        vmin=None,
+        vmax=None,
+        levels=None,
+        figsize=(7, 7),
+        ax=None,
+        add_colorbar=True,
+        f_max=None,
+    ):
+        """
+        Plot spectrum in polar coordinates
+
+        Parameters
+        ----------
+        spectrum: np.array
+            spectral values as 2d array with dimensions: directions, frequencies
+        plot_type: str, optional
+            type of plot: str, optional
+            'contourf' (default), 'contour'
+        title: str, optional
+            axes title
+        label: str, optional
+            colorbar label (or title if contour plot)
+        cmap: matplotlib.cm.cmap, optional
+            colormap, default viridis
+        vmin: real, optional
+            lower bound of values to be shown on plot, default:None
+        vmax: real, optional
+            upper bound of values to be shown on plot, default:None
+        levels: int, list(float), optional
+            for contour plots: how many levels, default:10
+            or a list of discrete levels e.g. [3.0, 4.5, 6.0]
+        figsize: (float, float), optional
+            specify size of figure
+        add_colorbar: bool
+            Add colorbar to plot, default True
+
+        Returns
+        -------
+        <matplotlib.axes>
+
+        Examples
+        --------
+        >>> dfs = Dfsu("HD2D.dfsu")
+        >>> dfs.plot() # bathymetry
+        >>> ds = dfs.read(items="Surface elevation", time_steps=0)
+        >>> ds.shape
+        """
+        if not self.is_spectral:
+            warnings.warn("plot only supported for spectral data")
+            return
+
+        import matplotlib.pyplot as plt
+
+        dir = self.directions
+        freq = self.frequencies
+
+        fig = plt.figure(figsize=figsize)
+        ax = plt.subplot(111, polar=True)
+        ax.set_theta_direction(-1)
+        ax.set_theta_zero_location("N")
+
+        ddir = dir[1] - dir[0]
+
+        def is_circular(dir):
+            dir_diff = np.mod(dir[0], np.pi) - np.mod(dir[-1] + ddir, np.pi)
+            return np.abs(dir_diff) < 1e-6
+
+        if is_circular(dir):
+            # append last directional slice at the end
+            dir = np.append(dir, dir[-1] + ddir)
+            spectrum = np.concatenate((spectrum, spectrum[0:1, :]), axis=0)
+
+        if ("contour" in plot_type) and (levels is None):
+            levels = 10
+            n_levels = 10
+
+        if plot_type == "contourf":
+            colorax = ax.contourf(
+                dir, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
+            )
+        elif plot_type == "contour":
+            colorax = ax.contour(
+                dir, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
+            )
+            ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
+            if len(label) > 0:
+                ax.set_title(label)
+
+        plt.gca().set_thetagrids(
+            [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
+            labels=["N", "N-W", "W", "S-W", "S", "S-E", "E", "N-E"],
+        )
+
+        if f_max is not None:
+            ax.set_rmax(f_max)
+
+        if add_colorbar:
+            cbar = fig.colorbar(colorax)
+            if label is None:
+                label = "Energy Density [m*m/Hz/deg]"
+            cbar.set_label(label, rotation=270)
+            cbar.ax.get_yaxis().labelpad = 30
+
+        if title is not None:
+            ax.set_title(title)
+
+        return ax
+
     def plot(
         self,
         z=None,
@@ -1843,11 +1982,20 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._type = DfsuFileType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
 
-        # geometry
-        self._set_nodes_from_source(dfs)
-        self._set_elements_from_source(dfs)
+        if self.is_spectral:
+            self.directions = dfs.Direction
+            self.n_directions = len(self.directions)
+            self.frequencies = dfs.Frequency
+            self.n_frequencies = len(self.frequencies)
 
-        if not self.is_2d:
+        # geometry
+        if self._type == DfsuFileType.DfsuSpectral0D:
+            pass
+        else:
+            self._set_nodes_from_source(dfs)
+            self._set_elements_from_source(dfs)
+
+        if self.is_layered:
             self._n_layers = dfs.NumberOfLayers
             self._n_sigma = dfs.NumberOfSigmaLayers
 
@@ -2010,19 +2158,37 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         data_list = []
 
+        n_steps = len(time_steps)
         item0_is_node_based = False
         for item in range(n_items):
             # Initialize an empty data block
-            if item == 0 and items[item].name == "Z coordinate":
+            if self.is_spectral:
+                n_freq = self.n_frequencies
+                n_dir = self.n_directions
+                if self._type == DfsuFileType.DfsuSpectral0D:
+                    shape = (n_dir, n_freq)
+                    data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
+                elif self._type == DfsuFileType.DfsuSpectral1D:
+                    # node-based, FE-style
+                    data = np.ndarray(
+                        shape=(n_steps, n_elems + 1, n_dir, n_freq), dtype=self._dtype
+                    )
+                    shape = (n_dir, n_freq, n_elems + 1)
+                else:
+                    data = np.ndarray(
+                        shape=(n_steps, n_elems, n_dir, n_freq), dtype=self._dtype
+                    )
+                    shape = (n_dir, n_freq, n_elems)
+            elif item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(len(time_steps), n_nodes), dtype=self._dtype)
+                data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
             else:
-                data = np.ndarray(shape=(len(time_steps), n_elems), dtype=self._dtype)
+                data = np.ndarray(shape=(n_steps, n_elems), dtype=self._dtype)
             data_list.append(data)
 
-        t_seconds = np.zeros(len(time_steps), dtype=float)
+        t_seconds = np.zeros(n_steps, dtype=float)
 
-        for i in trange(len(time_steps), disable=not self.show_progress):
+        for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
 
@@ -2041,7 +2207,11 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     else:
                         d = d[elements]
 
-                data_list[item][i, :] = d
+                if self.is_spectral:
+                    d = np.reshape(d, newshape=shape)
+                    if self._type != DfsuFileType.DfsuSpectral0D:
+                        d = np.moveaxis(d, -1, 0)
+                data_list[item][i, ...] = d
 
             t_seconds[i] = itemdata.Time
 
