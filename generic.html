@@ -7,8 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generic &#8212; MIKE IO  documentation</title>
     
-  <link href="_static/css/theme.css" rel="stylesheet" />
-  <link href="_static/css/index.c5995385ac14fb8791e8eb36b4908be2.css" rel="stylesheet" />
+  <link href="_static/css/theme.css" rel="stylesheet">
+  <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
 
     
   <link rel="stylesheet"
@@ -25,7 +25,7 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinx-book-theme.css?digest=c3fdc42140077d1ad13ad2f1588a4309" />
     
-  <link rel="preload" as="script" href="_static/js/index.1c5a1a01449ed65a7b51.js">
+  <link rel="preload" as="script" href="_static/js/index.be7d3bbb2ef33a8344ce.js">
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
@@ -36,7 +36,10 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="EUM and items" href="eum.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="en" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
     
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
@@ -68,7 +71,7 @@
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
     <div class="bd-toc-item active">
-        <p class="caption" role="heading">
+        <p aria-level="2" class="caption" role="heading">
  <span class="caption-text">
   Contents:
  </span>
@@ -249,7 +252,7 @@
 
 <span class="target" id="module-mikeio.generic"></span><dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.avg_time">
-<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">avg_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.generic.avg_time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">avg_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.generic.avg_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a temporally averaged dfs file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -264,7 +267,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.concat">
-<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilenames</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.concat" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilenames</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenates files along the time axis</p>
 <p>If files are overlapping, the last one will be used.</p>
 <dl class="field-list simple">
@@ -281,7 +284,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.diff">
-<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename_a</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infilename_b</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.diff" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infilename_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.diff" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate difference between two dfs files (a-b)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -296,7 +299,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.extract">
-<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.extract" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.extract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract timesteps and/or items to a new dfs file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -324,7 +327,7 @@ or datetime/str, by default -1 (end of file)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.quantile">
-<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.generic.quantile" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.generic.quantile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create temporal quantiles of all items in dfs file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -355,7 +358,7 @@ for the computation in bytes, by default 1e9 (=1GB)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.scale">
-<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.scale" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply scaling to any dfs file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -372,7 +375,7 @@ for the computation in bytes, by default 1e9 (=1GB)</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.sum">
-<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename_a</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infilename_b</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.sum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename_a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infilename_b</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.generic.sum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sum two dfs files (a+b)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -392,22 +395,15 @@ for the computation in bytes, by default 1e9 (=1GB)</p></li>
               </div>
               
         
-            
-
-
-
-<div class='prev-next-bottom'>
-    
-    <div id="prev">
-        <a class="left-prev" href="eum.html" title="previous page">
-            <i class="prevnext-label fas fa-angle-left"></i>
-            <div class="prevnext-info">
-                <p class="prevnext-label">previous</p>
-                <p class="prevnext-title">EUM and items</p>
-            </div>
-        </a>
-    </div>
-
+            <!-- Previous / next buttons -->
+<div class='prev-next-area'> 
+    <a class='left-prev' id="prev-link" href="eum.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">EUM and items</p>
+        </div>
+    </a>
 </div>
         
         </div>
@@ -428,8 +424,7 @@ for the computation in bytes, by default 1e9 (=1GB)</p></li>
       </div>
     </div>
   
-  <script src="_static/js/index.1c5a1a01449ed65a7b51.js"></script>
+  <script src="_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
 
-  
   </body>
 </html>
