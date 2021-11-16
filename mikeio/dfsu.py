@@ -1286,14 +1286,15 @@ class _UnstructuredGeometry:
         plot_type="contourf",
         title=None,
         label=None,
-        cmap=None,
-        vmin=None,
+        cmap="Reds",
+        vmin=1e-5,
         vmax=None,
+        r_as_periods=True,
+        rmin=None,
+        rmax=None,
         levels=None,
         figsize=(7, 7),
-        ax=None,
         add_colorbar=True,
-        f_max=None,
     ):
         """
         Plot spectrum in polar coordinates
@@ -1303,24 +1304,30 @@ class _UnstructuredGeometry:
         spectrum: np.array
             spectral values as 2d array with dimensions: directions, frequencies
         plot_type: str, optional
-            type of plot: str, optional
-            'contourf' (default), 'contour'
+            type of plot: 'contour', 'contourf', 'patch', 'shaded',
+            by default: 'contourf'
         title: str, optional
             axes title
         label: str, optional
             colorbar label (or title if contour plot)
         cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis
+            colormap, default Reds
         vmin: real, optional
-            lower bound of values to be shown on plot, default:None
+            lower bound of values to be shown on plot, default: 1e-5
         vmax: real, optional
             upper bound of values to be shown on plot, default:None
+        r_as_periods: bool, optional
+            show radial axis as periods instead of frequency, default: True
+        rmin: float, optional
+            mininum frequency/period to be shown, default: None
+        rmax: float, optional
+            maximum frequency/period to be shown, default: None
         levels: int, list(float), optional
             for contour plots: how many levels, default:10
-            or a list of discrete levels e.g. [3.0, 4.5, 6.0]
+            or a list of discrete levels e.g. [0.03, 0.04, 0.05]
         figsize: (float, float), optional
-            specify size of figure
-        add_colorbar: bool
+            specify size of figure, default (7, 7)
+        add_colorbar: bool, optional
             Add colorbar to plot, default True
 
         Returns
@@ -1329,19 +1336,26 @@ class _UnstructuredGeometry:
 
         Examples
         --------
-        >>> dfs = Dfsu("HD2D.dfsu")
-        >>> dfs.plot() # bathymetry
-        >>> ds = dfs.read(items="Surface elevation", time_steps=0)
-        >>> ds.shape
+        >>> dfs = Dfsu("area_spectrum.dfsu")
+        >>> ds = dfs.read(items="Energy density")
+        >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
+        >>> dfs.plot_spectrum(spectrum, plot_type="patch")
+
+        >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
         """
         if not self.is_spectral:
-            warnings.warn("plot only supported for spectral data")
+            warnings.warn("plot_spectrum() is only supported for spectral data")
             return
 
         import matplotlib.pyplot as plt
 
         dir = self.directions
         freq = self.frequencies
+
+        inverse_r = r_as_periods
+        if inverse_r:
+            freq = 1.0 / np.flip(freq)
+            spectrum = np.fliplr(spectrum)
 
         fig = plt.figure(figsize=figsize)
         ax = plt.subplot(111, polar=True)
@@ -1359,9 +1373,30 @@ class _UnstructuredGeometry:
             dir = np.append(dir, dir[-1] + ddir)
             spectrum = np.concatenate((spectrum, spectrum[0:1, :]), axis=0)
 
-        if ("contour" in plot_type) and (levels is None):
+        # up-sample directions
+        if plot_type in ("shaded", "contour", "contourf"):
+            # more smoother plotting
+            factor = 4
+            dir2 = np.linspace(dir[0], dir[-1], (len(dir) - 1) * factor + 1)
+            spec2 = np.zeros(shape=(len(dir2), len(freq)))
+            for j in range(len(freq)):
+                spec2[:, j] = np.interp(dir2, dir, spectrum[:, j])
+            dir = dir2.copy()
+            spectrum = spec2.copy()
+
+        if vmin is None:
+            vmin = np.nanmin(spectrum)
+        if vmax is None:
+            vmax = np.nanmax(spectrum)
+        if levels is None:
             levels = 10
             n_levels = 10
+        if np.isscalar(levels):
+            n_levels = levels
+            levels = np.linspace(vmin, vmax, n_levels)
+
+        if plot_type != "shaded":
+            spectrum[spectrum < vmin] = np.nan
 
         if plot_type == "contourf":
             colorax = ax.contourf(
@@ -1371,17 +1406,47 @@ class _UnstructuredGeometry:
             colorax = ax.contour(
                 dir, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
             )
-            ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
-            if len(label) > 0:
+            # ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
+            if label is not None:
                 ax.set_title(label)
 
-        plt.gca().set_thetagrids(
+        elif plot_type in ("patch", "shaded", "box"):
+            shading = "gouraud" if plot_type == "shaded" else "auto"
+            colorax = ax.pcolormesh(
+                dir,
+                freq,
+                spectrum.T,
+                shading=shading,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+            )
+            ax.grid("on")
+        else:
+            raise ValueError(
+                f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
+            )
+
+        ax.set_thetagrids(
             [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
-            labels=["N", "N-W", "W", "S-W", "S", "S-E", "E", "N-E"],
+            labels=["N", "N-E", "E", "S-E", "S", "S-W", "W", "N-W"],
         )
 
-        if f_max is not None:
-            ax.set_rmax(f_max)
+        # if r_axis_as_periods:
+        #     Ts = [8, 6, 5, 4, 3.5, 3, 2.5, 2]
+        #     ax.set_rgrids(
+        #         1.0 / np.array(Ts),
+        #         labels=["8s", "6s", "5s", "4s", "3.5s", "3s", "2.5s", "2s"],
+        #     )
+        #     # , fontsize=12, angle=180)
+
+        # ax.grid(True, which='minor', axis='both', linestyle='-', color='0.8')
+        # ax.set_xticks(dfs.directions, minor=True);
+
+        if rmin is not None:
+            ax.set_rmin(rmin)
+        if rmax is not None:
+            ax.set_rmax(rmax)
 
         if add_colorbar:
             cbar = fig.colorbar(colorax)
