@@ -1346,6 +1346,9 @@ class _UnstructuredGeometry:
         if not self.is_spectral:
             warnings.warn("plot_spectrum() is only supported for spectral data")
             return
+        if self.n_directions == 0 or self.n_frequencies == 0:
+            warnings.warn("plot_spectrum() is only supported for 2D spectral data")
+            return
 
         import matplotlib.pyplot as plt
 
@@ -1427,6 +1430,7 @@ class _UnstructuredGeometry:
                 f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
             )
 
+        # TODO: optional
         ax.set_thetagrids(
             [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
             labels=["N", "N-E", "E", "S-E", "S", "S-W", "W", "N-W"],
@@ -2048,10 +2052,10 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._deletevalue = dfs.DeleteValueFloat
 
         if self.is_spectral:
-            self.directions = dfs.Direction
-            self.n_directions = len(self.directions)
-            self.frequencies = dfs.Frequency
-            self.n_frequencies = len(self.frequencies)
+            self.directions = dfs.Directions
+            self.n_directions = dfs.NumberOfDirections
+            self.frequencies = dfs.Frequencies
+            self.n_frequencies = dfs.NumberOfFrequencies
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
@@ -2230,20 +2234,24 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             if self.is_spectral:
                 n_freq = self.n_frequencies
                 n_dir = self.n_directions
+                shape = (n_dir, n_freq)
+                if n_dir == 0:
+                    shape = [n_freq]
+                elif n_freq == 0:
+                    shape = [n_dir]
                 if self._type == DfsuFileType.DfsuSpectral0D:
-                    shape = (n_dir, n_freq)
                     data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
                 elif self._type == DfsuFileType.DfsuSpectral1D:
                     # node-based, FE-style
                     data = np.ndarray(
-                        shape=(n_steps, n_elems + 1, n_dir, n_freq), dtype=self._dtype
+                        shape=(n_steps, n_elems + 1, *shape), dtype=self._dtype
                     )
-                    shape = (n_dir, n_freq, n_elems + 1)
+                    shape = (*shape, n_elems + 1)
                 else:
                     data = np.ndarray(
-                        shape=(n_steps, n_elems, n_dir, n_freq), dtype=self._dtype
+                        shape=(n_steps, n_elems, *shape), dtype=self._dtype
                     )
-                    shape = (n_dir, n_freq, n_elems)
+                    shape = (*shape, n_elems)
             elif item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
                 data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
