@@ -54,6 +54,8 @@ class Dfs2(_Dfs123):
 
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
+        self._x0 = self._dfs.SpatialAxis.X0
+        self._y0 = self._dfs.SpatialAxis.Y0
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._nx = self._dfs.SpatialAxis.XCount
@@ -196,6 +198,16 @@ class Dfs2(_Dfs123):
         )
 
     @property
+    def x0(self):
+        """Start point of x values (often 0)"""
+        return self._x0
+
+    @property
+    def y0(self):
+        """Start point of y values (often 0)"""
+        return self._y0
+
+    @property
     def dx(self):
         """Step size in x direction"""
         return self._dx
@@ -207,14 +219,17 @@ class Dfs2(_Dfs123):
 
     @property
     def shape(self):
+        """Tuple with number of values in the t-, y-, x-direction"""
         return (self._n_timesteps, self._ny, self._nx)
 
     @property
     def nx(self):
+        """Number of values in the x-direction"""
         return self._nx
 
     @property
     def ny(self):
+        """Number of values in the y-direction"""
         return self._ny
 
     @property
