@@ -1959,6 +1959,58 @@ class _UnstructuredGeometry:
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
+    def _frequency_bin_sizes(self, f):
+        """Calculate frequency bins for logarithmic distributed frequencies"""
+        df = np.zeros_like(f)
+        nfreq = len(f)
+        freq_factor = f[1] / f[0]
+        nf = 0
+        df[nf] = 0.5 * (f[nf] - f[nf] / freq_factor) + 0.5 * (f[nf + 1] - f[nf])
+        for nf in range(1, nfreq - 1):
+            df[nf] = 0.5 * (f[nf] - f[nf - 1]) + 0.5 * (f[nf + 1] - f[nf])
+        nf = nfreq - 1
+        df[nf] = 0.5 * (f[nf] - f[nf - 1]) + 0.5 * (f[nf] * freq_factor - f[nf])
+        return df
+
+    def _calc_Hm0_from_spectrum(self, spectrum, tail=True):
+        _, m0, _, _ = self._calc_moments_from_spectrum(spectrum, tail)
+        return 4 * np.sqrt(m0)
+        # f = self.frequencies
+        # sigma = np.ones_like(f)  # 2 * np.pi * f
+        # df = self._frequency_bin_sizes(f)
+
+        # if self.n_directions == 0:
+        #     m0 = np.dot(spectrum, df * sigma)
+        #     tail = 0.25 * f[-1] * spectrum[..., -1] * sigma[-1]
+        # else:
+        #     dir = self.directions
+        #     dtheta = (180.0 / np.pi) * (dir[-1] - dir[0]) / (self.n_directions - 1)
+        #     m0 = np.sum(np.dot(spectrum, df * sigma), axis=-1) * dtheta
+        #     tail = (
+        #         0.25 * f[-1] * np.sum(spectrum[..., -1] * sigma[-1], axis=-1) * dtheta
+        #     )
+        # return 4 * np.sqrt(m0 + tail)
+
+    def _calc_moments_from_spectrum(self, spectrum, tail=True):
+        f = self.frequencies
+        df = self._frequency_bin_sizes(f)
+
+        if self.n_directions == 0:
+            ee = spectrum
+        else:
+            dir = self.directions
+            dtheta = (180.0 / np.pi) * (dir[-1] - dir[0]) / (self.n_directions - 1)
+            ee = np.sum(spectrum, axis=-2) * dtheta
+        
+        ctail = 1 if tail else 0
+
+        mm1 = np.dot(ee, df / f) + ctail * ee[..., -1] * 0.2
+        m0 = np.dot(ee, df) + ctail * ee[..., -1] * f[-1] * 0.25
+        m1 = np.dot(ee, df * f) + ctail * ee[..., -1] * (f[-1] ** 2) / 0.3
+        m2 = np.dot(ee, df * f * f) + ctail * ee[..., -1] * (f[-1] ** 3) * 0.5
+
+        return mm1, m0, m1, m2
+
 
 class _UnstructuredFile(_UnstructuredGeometry):
     """
