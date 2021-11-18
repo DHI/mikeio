@@ -1961,6 +1961,12 @@ class _UnstructuredGeometry:
 
     def _frequency_bin_sizes(self, f):
         """Calculate frequency bins for logarithmic distributed frequencies"""
+
+        if np.isclose(np.diff(f).min(), np.diff(f).max()):
+            # equidistant frequency bins
+            df = (f[1] - f[0]) * np.ones_like(f)
+            return df
+            
         df = np.zeros_like(f)
         nfreq = len(f)
         freq_factor = f[1] / f[0]
@@ -1972,26 +1978,52 @@ class _UnstructuredGeometry:
         df[nf] = 0.5 * (f[nf] - f[nf - 1]) + 0.5 * (f[nf] * freq_factor - f[nf])
         return df
 
-    def _calc_Hm0_from_spectrum(self, spectrum, tail=True):
-        _, m0, _, _ = self._calc_moments_from_spectrum(spectrum, tail)
+    def calc_Hm0_from_spectrum(self, spectrum, tail=True):
+        """Calculate significant wave height (Hm0) from spectrum
+
+        Parameters
+        ----------
+        spectrum : np.ndarray
+            frequency or direction-frequency spectrum
+        tail : bool, optional
+            Should a parametric spectral tail be added in the computations? by default True
+
+        Returns
+        -------
+        np.ndarray
+            significant wave height values
+        """
+        m0 = self._calc_moments_from_spectrum(spectrum, tail, m0_only=True)
         return 4 * np.sqrt(m0)
-        # f = self.frequencies
-        # sigma = np.ones_like(f)  # 2 * np.pi * f
-        # df = self._frequency_bin_sizes(f)
 
-        # if self.n_directions == 0:
-        #     m0 = np.dot(spectrum, df * sigma)
-        #     tail = 0.25 * f[-1] * spectrum[..., -1] * sigma[-1]
-        # else:
-        #     dir = self.directions
-        #     dtheta = (180.0 / np.pi) * (dir[-1] - dir[0]) / (self.n_directions - 1)
-        #     m0 = np.sum(np.dot(spectrum, df * sigma), axis=-1) * dtheta
-        #     tail = (
-        #         0.25 * f[-1] * np.sum(spectrum[..., -1] * sigma[-1], axis=-1) * dtheta
-        #     )
-        # return 4 * np.sqrt(m0 + tail)
+    def calc_wave_parameters_from_spectrum(self, spectrum, tail=True):
+        """Calculate wave parameters from
 
-    def _calc_moments_from_spectrum(self, spectrum, tail=True):
+        Parameters
+        ----------
+        spectrum : np.ndarray
+            frequency or direction-frequency spectrum
+        tail : bool, optional
+            Should a parametric spectral tail be added in the computations? by default True
+
+        Returns
+        -------
+        named tuple of np.ndarray
+            tuple of Hm0, T01, T02, Tm10
+        """
+        mm1, m0, m1, m2 = self._calc_moments_from_spectrum(spectrum, tail)
+        WaveParameters = namedtuple("WaveParameters", ["Hm0", "T01", "T02", "Tm01"])
+        Hm0 = 4 * np.sqrt(m0)
+        T01 = m0 / m1
+        T02 = np.sqrt(m0 / m2)
+        Tm10 = mm1 / m0
+        return WaveParameters(Hm0, T01, T02, Tm10)
+
+    def _calc_moments_from_spectrum(self, spectrum, tail=True, m0_only=False):
+        if self.n_frequencies == 0:
+            raise ValueError(
+                "Moments cannot be calculated because dfsu has no frequency axis"
+            )
         f = self.frequencies
         df = self._frequency_bin_sizes(f)
 
@@ -2001,8 +2033,12 @@ class _UnstructuredGeometry:
             dir = self.directions
             dtheta = (180.0 / np.pi) * (dir[-1] - dir[0]) / (self.n_directions - 1)
             ee = np.sum(spectrum, axis=-2) * dtheta
-        
+
         ctail = 1 if tail else 0
+
+        if m0_only:
+            m0 = np.dot(ee, df) + ctail * ee[..., -1] * f[-1] * 0.25
+            return m0
 
         mm1 = np.dot(ee, df / f) + ctail * ee[..., -1] * 0.2
         m0 = np.dot(ee, df) + ctail * ee[..., -1] * f[-1] * 0.25
