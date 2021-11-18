@@ -1966,7 +1966,7 @@ class _UnstructuredGeometry:
             # equidistant frequency bins
             df = (f[1] - f[0]) * np.ones_like(f)
             return df
-            
+
         df = np.zeros_like(f)
         nfreq = len(f)
         freq_factor = f[1] / f[0]
