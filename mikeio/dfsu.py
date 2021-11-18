@@ -1783,12 +1783,15 @@ class _UnstructuredGeometry:
                     if cmap_ScMappable is None:
                         plt.colorbar(fig_obj, label=label, cax=cax)
                     else:
-                        plt.colorbar(
-                            cmap_ScMappable,
-                            label=label,
-                            cax=cax,
-                            ticks=levels,
-                        )
+                        try:
+                            plt.colorbar(
+                                cmap_ScMappable,
+                                label=label,
+                                cax=cax,
+                                ticks=levels,
+                            )
+                        except:
+                            warnings.warn("Cannot add colorbar")
 
             else:
                 if (plot_type is not None) and plot_type != "outline_only":
