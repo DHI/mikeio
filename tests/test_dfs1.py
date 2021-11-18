@@ -2,9 +2,10 @@ import datetime
 import os
 
 import numpy as np
+import pandas as pd
 import pytest
 
-from mikeio.dfs1 import Dfs1
+from mikeio import Dfs1, Dataset
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 
@@ -38,19 +39,17 @@ def test_simple_write(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfs1")
 
-    data = []
-
     nt = 100
     nx = 20
     d = np.random.random([nt, nx])
 
-    data.append(d)
+    ds = Dataset(
+        data=[d], time=pd.date_range("2000", freq="H", periods=nt), items=["My item"]
+    )
 
     dfs = Dfs1()
 
-    # write a file, without specifying dates, names, units etc.
-    # Proably not so useful
-    dfs.write(filename=filename, data=data)
+    dfs.write(filename=filename, data=ds)
 
     assert True
 
@@ -59,24 +58,21 @@ def test_write_single_item(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "random.dfs1")
 
-    data = []
     d = np.random.random([100, 3])
 
-    data.append(d)
-
-    items = [ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)]
-    title = "test dfs1"
+    ds = Dataset(
+        data=[d],
+        time=pd.date_range("2012-1-1", periods=100, freq="12s"),
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+    )
 
     dfs = Dfs1()
 
     dfs.write(
         filename=filename,
-        data=data,
-        start_time=datetime.datetime(2012, 1, 1),
-        dt=12,
+        data=ds,
         dx=100,
-        items=items,
-        title=title,
+        title="test dfs1",
     )
 
     assert True

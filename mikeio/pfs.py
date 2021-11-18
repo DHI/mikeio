@@ -4,8 +4,6 @@ import yaml
 import pandas as pd
 import warnings
 
-# from DHI.PFS import PFSFile, PFSSection, PFSParameter
-
 from types import SimpleNamespace
 
 
@@ -149,10 +147,3 @@ class Pfs:
             self._level -= 1
 
         return adj_line
-
-
-class PfsCore:
-    "PfsCore is no longer available in mikeio"
-
-    def __init__(self, filename, target=None):
-        raise NotImplementedError("PfsCore is no longer available in mikeio")
