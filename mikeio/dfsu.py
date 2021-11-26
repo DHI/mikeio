@@ -1,4 +1,3 @@
-from logging import warn
 import os
 from collections import namedtuple
 import pandas as pd
@@ -1615,7 +1614,7 @@ class _UnstructuredGeometry:
             levels_equidistant = all(np.diff(levels) == np.diff(levels)[0])
             # if not levels_equidistant:  # (isinstance(cmap, mplc.ListedColormap)) or (
             if (not isinstance(cmap, str)) and (not levels_equidistant):
-                print("ScalarMappable")
+                # print("ScalarMappable")
                 # cmap = mplc.Colormap(cmap)
                 cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
                 cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
@@ -1962,25 +1961,6 @@ class _UnstructuredGeometry:
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
-    def _frequency_bin_sizes(self, f):
-        """Calculate frequency bins for logarithmic distributed frequencies"""
-
-        if np.isclose(np.diff(f).min(), np.diff(f).max()):
-            # equidistant frequency bins
-            df = (f[1] - f[0]) * np.ones_like(f)
-            return df
-
-        df = np.zeros_like(f)
-        nfreq = len(f)
-        freq_factor = f[1] / f[0]
-        nf = 0
-        df[nf] = 0.5 * (f[nf] - f[nf] / freq_factor) + 0.5 * (f[nf + 1] - f[nf])
-        for nf in range(1, nfreq - 1):
-            df[nf] = 0.5 * (f[nf] - f[nf - 1]) + 0.5 * (f[nf + 1] - f[nf])
-        nf = nfreq - 1
-        df[nf] = 0.5 * (f[nf] - f[nf - 1]) + 0.5 * (f[nf] * freq_factor - f[nf])
-        return df
-
     def calc_Hm0_from_spectrum(self, spectrum, tail=True):
         """Calculate significant wave height (Hm0) from spectrum
 
@@ -1996,59 +1976,43 @@ class _UnstructuredGeometry:
         np.ndarray
             significant wave height values
         """
-        m0 = self._calc_moments_from_spectrum(spectrum, tail, m0_only=True)
+        m0 = self._calc_m0_from_spectrum(
+            spectrum, self.frequencies, self.directions, tail, m0_only=True
+        )
         return 4 * np.sqrt(m0)
 
-    def calc_wave_parameters_from_spectrum(self, spectrum, tail=True):
-        """Calculate wave parameters from
-
-        Parameters
-        ----------
-        spectrum : np.ndarray
-            frequency or direction-frequency spectrum
-        tail : bool, optional
-            Should a parametric spectral tail be added in the computations? by default True
-
-        Returns
-        -------
-        named tuple of np.ndarray
-            tuple of Hm0, T01, T02, Tm10
-        """
-        mm1, m0, m1, m2 = self._calc_moments_from_spectrum(spectrum, tail)
-        WaveParameters = namedtuple("WaveParameters", ["Hm0", "T01", "T02", "Tm01"])
-        Hm0 = 4 * np.sqrt(m0)
-        T01 = m0 / m1
-        T02 = np.sqrt(m0 / m2)
-        Tm10 = mm1 / m0
-        return WaveParameters(Hm0, T01, T02, Tm10)
-
-    def _calc_moments_from_spectrum(self, spectrum, tail=True, m0_only=False):
-        if self.n_frequencies == 0:
+    @staticmethod
+    def _calc_m0_from_spectrum(spec, f, dir=None, tail=True, m0_only=False):
+        if f is None:
             raise ValueError(
                 "Moments cannot be calculated because dfsu has no frequency axis"
             )
-        f = self.frequencies
-        df = self._frequency_bin_sizes(f)
+        df = Dfsu._f_to_df(f)
 
-        if self.n_directions == 0:
-            ee = spectrum
+        if dir is None:
+            ee = spec
         else:
-            dir = self.directions
-            dtheta = (180.0 / np.pi) * (dir[-1] - dir[0]) / (self.n_directions - 1)
-            ee = np.sum(spectrum, axis=-2) * dtheta
+            nd = len(dir)
+            dtheta = (180.0 / np.pi) * (dir[-1] - dir[0]) / (nd - 1)
+            ee = np.sum(spec, axis=-2) * dtheta
 
-        ctail = 1 if tail else 0
+        m0 = np.dot(ee, df)
+        if tail:
+            m0 = m0 + ee[..., -1] * f[-1] * 0.25
+        return m0
 
-        if m0_only:
-            m0 = np.dot(ee, df) + ctail * ee[..., -1] * f[-1] * 0.25
-            return m0
-
-        mm1 = np.dot(ee, df / f) + ctail * ee[..., -1] * 0.2
-        m0 = np.dot(ee, df) + ctail * ee[..., -1] * f[-1] * 0.25
-        m1 = np.dot(ee, df * f) + ctail * ee[..., -1] * (f[-1] ** 2) / 0.3
-        m2 = np.dot(ee, df * f * f) + ctail * ee[..., -1] * (f[-1] ** 3) * 0.5
-
-        return mm1, m0, m1, m2
+    @staticmethod
+    def _f_to_df(f):
+        """Frequency bins for equidistant or logrithmic frequency axis"""
+        if np.isclose(np.diff(f).min(), np.diff(f).max()):
+            # equidistant frequency bins
+            return (f[1] - f[0]) * np.ones_like(f)
+        else:
+            # logarithmic frequency bins
+            freq_factor = f[1] / f[0]
+            fm1 = np.insert(f, 0, f[0] / freq_factor)
+            fp1 = np.append(f, f[-1] * freq_factor)
+            return 0.5 * (np.diff(fm1) + np.diff(fp1))
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
