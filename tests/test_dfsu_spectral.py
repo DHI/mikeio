@@ -1,5 +1,6 @@
 import pytest
 import numpy as np
+import matplotlib.pyplot as plt
 from mikeio import Dfsu, eum
 from mikecore.DfsuFile import DfsuFileType
 
@@ -125,6 +126,26 @@ def test_read_spectrum_area_sector(dfsu_area_sector):
     assert np.mean(ds[0]) == pytest.approx(0.001861494)
 
 
+def test_read_spectrum_area_elements(dfsu_area):
+    dfs = dfsu_area
+    ds1 = dfs.read()
+
+    elems = [3, 4, 5, 6]
+    ds2 = dfs.read(elements=elems)
+    assert ds2.shape[1] == len(elems)
+    assert np.all(ds1[0][:, elems, ...] == ds2[0])
+
+
+def test_read_spectrum_line_elements(dfsu_line):
+    dfs = dfsu_line
+    ds1 = dfs.read()
+
+    nodes = [3, 4, 5, 6]
+    ds2 = dfs.read(elements=nodes)
+    assert ds2.shape[1] == len(nodes)
+    assert np.all(ds1[0][:, nodes, ...] == ds2[0])
+
+
 def test_read_spectrum_dir_line(dfsu_line_dir):
     dfs = dfsu_line_dir
     ds1 = dfs.read(time_steps=[0, 1])
@@ -181,6 +202,7 @@ def test_plot_spectrum(dfsu_pt):
     dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
     dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
     dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
+    plt.close("all")
 
 
 def test_plot_spectrum_sector(dfsu_area_sector):
@@ -191,3 +213,4 @@ def test_plot_spectrum_sector(dfsu_area_sector):
     dfs.plot_spectrum(spec, rmax=10, vmin=0)
     dfs.plot_spectrum(spec, rmin=0, plot_type="patch")
     dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
+    plt.close("all")
