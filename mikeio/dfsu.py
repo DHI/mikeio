@@ -2242,7 +2242,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.ndarray(shape=(n_steps, n_nodes, *shape), dtype=self._dtype)
             shape = (*shape, self.n_nodes)
         else:
-            n_elems = self.n_elems if elements is None else len(elements)
+            n_elems = self.n_elements if elements is None else len(elements)
             data = np.ndarray(shape=(n_steps, n_elems, *shape), dtype=self._dtype)
             shape = (*shape, self.n_elements)
 
