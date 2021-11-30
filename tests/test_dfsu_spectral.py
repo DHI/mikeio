@@ -126,7 +126,31 @@ def test_read_spectrum_area_sector(dfsu_area_sector):
     assert np.mean(ds[0]) == pytest.approx(0.001861494)
 
 
-def test_read_spectrum_area_elements(dfsu_area):
+def test_read_pt_freq_spectrum(dfsu_pt_freq):
+    dfs = dfsu_pt_freq
+    assert dfs.n_directions == 0
+    assert dfs.directions is None
+
+    ds = dfs.read()
+    assert ds.shape == (31, 25)
+    assert ds.items[0].type == eum.EUMType.Directional_integrated_spectral_density
+    assert np.min(ds[0]) >= 0
+    assert np.mean(ds[0]) == pytest.approx(0.4229705970)
+
+
+def test_read_area_freq_spectrum(dfsu_area_freq):
+    dfs = dfsu_area_freq
+    assert dfs.n_directions == 0
+    assert dfs.directions is None
+
+    ds = dfs.read()
+    assert ds.shape == (3, 40, 25)
+    assert ds.items[0].type == eum.EUMType.Directional_integrated_spectral_density
+    assert np.min(ds[0]) >= 0
+    assert np.mean(ds[0]) == pytest.approx(0.253988722)
+
+
+def test_read_area_spectrum_elements(dfsu_area):
     dfs = dfsu_area
     ds1 = dfs.read()
 
@@ -148,12 +172,16 @@ def test_read_spectrum_line_elements(dfsu_line):
 
 def test_read_spectrum_dir_line(dfsu_line_dir):
     dfs = dfsu_line_dir
+    assert dfs.n_frequencies == 0
+    assert dfs.frequencies is None
+
     ds1 = dfs.read(time_steps=[0, 1])
     assert ds1.shape == (2, 10, 16)
     assert ds1.items[0].type == eum.EUMType.Frequency_integrated_spectral_density
     assert np.nanmin(ds1[0]) >= 0
     assert np.nanmax(ds1[0]) == pytest.approx(0.22447659)
     assert np.nanmean(ds1[0]) == pytest.approx(0.02937540)
+    assert np.all(np.isnan(ds1[0][:, 0, :]))
 
     ds2 = dfs.read()
     assert ds2.shape == (4, 10, 16)
