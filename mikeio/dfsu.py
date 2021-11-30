@@ -1978,7 +1978,7 @@ class _UnstructuredGeometry:
         """
         if not self.is_spectral:
             raise ValueError("Method only supported for spectral dfsu!")
-        
+
         m0 = self._calc_m0_from_spectrum(
             spectrum, self.frequencies, self.directions, tail, m0_only=True
         )
