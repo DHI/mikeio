@@ -2321,7 +2321,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         for item in range(n_items):
             # Initialize an empty data block
             if self.is_spectral:
-                data, shape = self._get_spectral_data_shape(self, elements=elements)
+                data, shape = self._get_spectral_data_shape(n_steps, elements=elements)
             elif item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
                 data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
