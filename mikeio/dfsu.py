@@ -1342,16 +1342,15 @@ class _UnstructuredGeometry:
 
         >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
         """
-        if not self.is_spectral:
-            warnings.warn("plot_spectrum() is only supported for spectral data")
-            return
+
+        # TODO move this to specialized class e.g. DfsuSpectral
+
         if self.n_directions == 0 or self.n_frequencies == 0:
-            warnings.warn("plot_spectrum() is only supported for 2D spectral data")
-            return
+            raise ValueError("plot_spectrum() is only supported for spectral data")
 
         import matplotlib.pyplot as plt
 
-        dir = self.directions * (np.pi / 180)  # to radians
+        dirs = np.radians(self.directions)
         freq = self.frequencies
 
         inverse_r = r_as_periods
@@ -1364,26 +1363,26 @@ class _UnstructuredGeometry:
         ax.set_theta_direction(-1)
         ax.set_theta_zero_location("N")
 
-        ddir = dir[1] - dir[0]
+        ddir = dirs[1] - dirs[0]
 
         def is_circular(dir):
             dir_diff = np.mod(dir[0], 2 * np.pi) - np.mod(dir[-1] + ddir, 2 * np.pi)
             return np.abs(dir_diff) < 1e-6
 
-        if is_circular(dir):
+        if is_circular(dirs):
             # append last directional slice at the end
-            dir = np.append(dir, dir[-1] + ddir)
+            dirs = np.append(dirs, dirs[-1] + ddir)
             spectrum = np.concatenate((spectrum, spectrum[0:1, :]), axis=0)
 
         # up-sample directions
         if plot_type in ("shaded", "contour", "contourf"):
             # more smoother plotting
             factor = 4
-            dir2 = np.linspace(dir[0], dir[-1], (len(dir) - 1) * factor + 1)
+            dir2 = np.linspace(dirs[0], dirs[-1], (len(dirs) - 1) * factor + 1)
             spec2 = np.zeros(shape=(len(dir2), len(freq)))
             for j in range(len(freq)):
-                spec2[:, j] = np.interp(dir2, dir, spectrum[:, j])
-            dir = dir2.copy()
+                spec2[:, j] = np.interp(dir2, dirs, spectrum[:, j])
+            dirs = dir2.copy()
             spectrum = spec2.copy()
 
         if vmin is None:
@@ -1402,11 +1401,11 @@ class _UnstructuredGeometry:
 
         if plot_type == "contourf":
             colorax = ax.contourf(
-                dir, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
+                dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
             )
         elif plot_type == "contour":
             colorax = ax.contour(
-                dir, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
+                dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
             )
             # ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
             if label is not None:
@@ -1415,7 +1414,7 @@ class _UnstructuredGeometry:
         elif plot_type in ("patch", "shaded", "box"):
             shading = "gouraud" if plot_type == "shaded" else "auto"
             colorax = ax.pcolormesh(
-                dir,
+                dirs,
                 freq,
                 spectrum.T,
                 shading=shading,
