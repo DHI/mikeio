@@ -2031,10 +2031,10 @@ class _UnstructuredFile(_UnstructuredGeometry):
             if self._type is not DfsuFileType.DfsuSpectral1D:
                 out.append(f"Number of elements: {self.n_elements}")
             out.append(f"Number of nodes: {self.n_nodes}")
-        if self.n_frequencies > 0: 
+        if self.n_frequencies > 0:
             out.append(f"Number of frequencies: {self.n_frequencies}")
-        if self.n_directions > 0: 
-            out.append(f"Number of directions: {self.n_directions}")            
+        if self.n_directions > 0:
+            out.append(f"Number of directions: {self.n_directions}")
         if self._projstr:
             out.append(f"Projection: {self.projection_string}")
         if self.is_layered:
