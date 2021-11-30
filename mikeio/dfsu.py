@@ -1976,6 +1976,9 @@ class _UnstructuredGeometry:
         np.ndarray
             significant wave height values
         """
+        if not self.is_spectral:
+            raise ValueError("Method only supported for spectral dfsu!")
+        
         m0 = self._calc_m0_from_spectrum(
             spectrum, self.frequencies, self.directions, tail, m0_only=True
         )
@@ -2281,9 +2284,10 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             n_elems = self.n_elements
             n_nodes = self.n_nodes
         else:
-            node_ids, _ = self._get_nodes_and_table_for_elements(elements)
             n_elems = len(elements)
-            n_nodes = len(node_ids)
+            if self.is_layered and items[0].name == "Z coordinate":
+                node_ids, _ = self._get_nodes_and_table_for_elements(elements)
+                n_nodes = len(node_ids)
 
         deletevalue = self.deletevalue
 
@@ -2305,15 +2309,16 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
                 elif self._type == DfsuFileType.DfsuSpectral1D:
                     # node-based, FE-style
+                    n_nodes = self.n_nodes if elements is None else n_elems
                     data = np.ndarray(
-                        shape=(n_steps, n_elems + 1, *shape), dtype=self._dtype
+                        shape=(n_steps, n_nodes, *shape), dtype=self._dtype
                     )
-                    shape = (*shape, n_elems + 1)
+                    shape = (*shape, self.n_nodes)
                 else:
                     data = np.ndarray(
                         shape=(n_steps, n_elems, *shape), dtype=self._dtype
                     )
-                    shape = (*shape, n_elems)
+                    shape = (*shape, self.n_elements)
             elif item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
                 data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
@@ -2328,24 +2333,22 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-
-                src = itemdata.Data
-
-                # d = to_numpy(src)
-                d = src
-
+                d = itemdata.Data
                 d[d == deletevalue] = np.nan
-
-                if elements is not None:
-                    if item == 0 and item0_is_node_based:
-                        d = d[node_ids]
-                    else:
-                        d = d[elements]
 
                 if self.is_spectral:
                     d = np.reshape(d, newshape=shape)
                     if self._type != DfsuFileType.DfsuSpectral0D:
                         d = np.moveaxis(d, -1, 0)
+
+                if elements is not None:
+                    if item == 0 and item0_is_node_based:
+                        d = d[node_ids]
+                    elif self.is_spectral:
+                        d = d[elements, ...]
+                    else:
+                        d = d[elements]
+
                 data_list[item][i, ...] = d
 
             t_seconds[i] = itemdata.Time
@@ -2386,6 +2389,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         >>> ds = dfsu.extract_track('track_file.csv', items=0)
         """
+        if self.is_spectral:
+            raise ValueError("Method not supported for spectral dfsu!")
 
         dfs = DfsuFile.Open(self._filename)
 
@@ -2566,7 +2571,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         # validate input
         assert (
             self._type == DfsuFileType.Dfsu3DSigma
-            or self._type == DfsuFileType.Dfsu3DSigmaZ
+            or self._type == DfsuFileType.Dfsu3DSigmaZ,
+            "Method only supported for 3d dfsu!",
         )
         assert n_nearest > 0
         time_steps = _valid_timesteps(self._source, time_steps)
@@ -2684,6 +2690,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         keep_open: bool, optional
             Keep file open for appending
         """
+        if self.is_spectral:
+            raise ValueError("write() is not supported for spectral dfsu!")
+
         filename = str(filename)
 
         if isinstance(data, Dataset):
@@ -2922,6 +2931,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             mikeio Dfs2 object pointing to the file located at `filename`.
 
         """
+        if self.is_spectral:
+            raise ValueError("Method not supported for spectral dfsu!")
+
         # Process 'filename' argument
         if filename is None:
             filename = tempfile.NamedTemporaryFile().name + ".dfs2"
