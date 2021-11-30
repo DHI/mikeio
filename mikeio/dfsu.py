@@ -2571,8 +2571,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         # validate input
         assert (
             self._type == DfsuFileType.Dfsu3DSigma
-            or self._type == DfsuFileType.Dfsu3DSigmaZ,
-            "Method only supported for 3d dfsu!",
+            or self._type == DfsuFileType.Dfsu3DSigmaZ
         )
         assert n_nearest > 0
         time_steps = _valid_timesteps(self._source, time_steps)
