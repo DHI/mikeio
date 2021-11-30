@@ -1,15 +1,7 @@
 import pytest
 import numpy as np
-from mikeio import Dfsu
+from mikeio import Dfsu, eum
 from mikecore.DfsuFile import DfsuFileType
-
-import mikeio
-
-
-# MIKE21SW_dir_sector_area_spectra.dfsu
-# pt_freq_spectra.dfsu
-# area_freq_spectra.dfsu
-# line_dir_spectra.dfsu
 
 
 @pytest.fixture
@@ -110,7 +102,7 @@ def test_read_spectrum_pt(dfsu_pt):
     dfs = dfsu_pt
     ds1 = dfs.read(time_steps=0)
     assert ds1.shape == (1, 16, 25)
-    assert ds1.items[0].type == mikeio.eum.EUMType.Wave_energy_density
+    assert ds1.items[0].type == eum.EUMType.Wave_energy_density
     assert ds1[0].max() == pytest.approx(0.03205060)
 
     ds2 = dfs.read()
@@ -123,20 +115,21 @@ def test_read_spectrum_area_sector(dfsu_area_sector):
     assert len(dfs.frequencies) == 25
     assert dfs.n_directions == 19
     assert len(dfs.directions) == 19
+    assert dfs.directions.min() * (180 / np.pi) == pytest.approx(-90)
+    assert dfs.directions.max() * (180 / np.pi) == pytest.approx(45)
 
     ds = dfs.read()
     assert ds.shape == (3, 40, 19, 25)
-    assert ds.items[0].type == mikeio.eum.EUMType.Wave_energy_density
+    assert ds.items[0].type == eum.EUMType.Wave_energy_density
     assert np.min(ds[0]) >= 0
-    # assert np.max(ds[0]) == pytest.approx(0.22447659)
-    # assert np.mean(ds[0]) == pytest.approx(0.02937540)
+    assert np.mean(ds[0]) == pytest.approx(0.001861494)
 
 
 def test_read_spectrum_dir_line(dfsu_line_dir):
     dfs = dfsu_line_dir
     ds1 = dfs.read(time_steps=[0, 1])
     assert ds1.shape == (2, 10, 16)
-    assert ds1.items[0].type == mikeio.eum.EUMType.Frequency_integrated_spectral_density
+    assert ds1.items[0].type == eum.EUMType.Frequency_integrated_spectral_density
     assert np.nanmin(ds1[0]) >= 0
     assert np.nanmax(ds1[0]) == pytest.approx(0.22447659)
     assert np.nanmean(ds1[0]) == pytest.approx(0.02937540)
@@ -180,5 +173,21 @@ def test_calc_Hm0_from_spectrum_area(dfsu_area):
     assert np.max(Hm0) == pytest.approx(1.78410078776)
 
 
-def test_plot_spectrum():
-    pass
+def test_plot_spectrum(dfsu_pt):
+    dfs = dfsu_pt
+    ds = dfs.read(time_steps=0)
+    spec = ds[0][0]
+    dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
+    dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
+    dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
+    dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
+
+
+def test_plot_spectrum_sector(dfsu_area_sector):
+    dfs = dfsu_area_sector
+    ds = dfs.read(time_steps=0)
+    spec = ds[0][0, 0]
+    dfs.plot_spectrum(spec)
+    dfs.plot_spectrum(spec, rmax=10, vmin=0)
+    dfs.plot_spectrum(spec, rmin=0, plot_type="patch")
+    dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
