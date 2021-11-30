@@ -1351,7 +1351,7 @@ class _UnstructuredGeometry:
 
         import matplotlib.pyplot as plt
 
-        dir = self.directions
+        dir = self.directions * (np.pi / 180)  # to radians
         freq = self.frequencies
 
         inverse_r = r_as_periods
@@ -1367,7 +1367,7 @@ class _UnstructuredGeometry:
         ddir = dir[1] - dir[0]
 
         def is_circular(dir):
-            dir_diff = np.mod(dir[0], np.pi) - np.mod(dir[-1] + ddir, np.pi)
+            dir_diff = np.mod(dir[0], 2 * np.pi) - np.mod(dir[-1] + ddir, 2 * np.pi)
             return np.abs(dir_diff) < 1e-6
 
         if is_circular(dir):
@@ -1996,7 +1996,7 @@ class _UnstructuredGeometry:
             ee = spec
         else:
             nd = len(dir)
-            dtheta = (180.0 / np.pi) * (dir[-1] - dir[0]) / (nd - 1)
+            dtheta = (dir[-1] - dir[0]) / (nd - 1)
             ee = np.sum(spec, axis=-2) * dtheta
 
         m0 = np.dot(ee, df)
@@ -2117,7 +2117,8 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._deletevalue = dfs.DeleteValueFloat
 
         if self.is_spectral:
-            self.directions = dfs.Directions
+            dir = dfs.Directions
+            self.directions = None if dir is None else dir * (180 / np.pi)
             self.n_directions = dfs.NumberOfDirections
             self.frequencies = dfs.Frequencies
             self.n_frequencies = dfs.NumberOfFrequencies

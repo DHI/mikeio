@@ -116,8 +116,8 @@ def test_read_spectrum_area_sector(dfsu_area_sector):
     assert len(dfs.frequencies) == 25
     assert dfs.n_directions == 19
     assert len(dfs.directions) == 19
-    assert dfs.directions.min() * (180 / np.pi) == pytest.approx(-90)
-    assert dfs.directions.max() * (180 / np.pi) == pytest.approx(45)
+    assert dfs.directions.min() == pytest.approx(-90)
+    assert dfs.directions.max() == pytest.approx(45)
 
     ds = dfs.read()
     assert ds.shape == (3, 40, 19, 25)
