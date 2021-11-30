@@ -2227,8 +2227,6 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
     def _get_spectral_data_shape(self, n_steps: int, elements):
 
-        n_elems = len(elements)
-
         n_freq = self.n_frequencies
         n_dir = self.n_directions
         shape = (n_dir, n_freq)
@@ -2240,7 +2238,7 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
         elif self._type == DfsuFileType.DfsuSpectral1D:
             # node-based, FE-style
-            n_nodes = self.n_nodes if elements is None else n_elems
+            n_nodes = self.n_nodes if elements is None else len(elements)
             data = np.ndarray(shape=(n_steps, n_nodes, *shape), dtype=self._dtype)
             shape = (*shape, self.n_nodes)
         else:
