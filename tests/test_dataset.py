@@ -76,6 +76,18 @@ def test_select_subset_isel():
     assert selds["Bar"][0, 0] == 3.0
 
 
+def test_select_subset_isel_axis_out_of_range_error(ds2):
+
+    assert len(ds2.shape) == 2
+    dss = ds2.isel(idx=0)
+
+    # After subsetting there is only one dimension
+    assert len(dss.shape) == 1
+
+    with pytest.raises(ValueError):
+        dss.isel(idx=0, axis="spatial")
+
+
 def test_select_temporal_subset_by_idx():
 
     nt = 100

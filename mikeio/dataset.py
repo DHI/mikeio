@@ -13,12 +13,14 @@ def _parse_axis(data_shape, axis):
     axis = 0 if axis == "time" else axis
     if (axis == "spatial") or (axis == "space"):
         if len(data_shape) == 1:
-            ValueError(f"axis '{axis}' not allowed for Dataset with shape {data_shape}")
+            raise ValueError(
+                f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
+            )
         axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
     if axis is None:
         axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
     if isinstance(axis, str):
-        ValueError(
+        raise ValueError(
             f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
         )
     return axis
