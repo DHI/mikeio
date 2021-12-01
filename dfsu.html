@@ -1303,9 +1303,9 @@ in the system temporary directory.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
 <li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>] or </em><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
-<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime, default is datetime.now()</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The time step (in seconds)</p></li>
-<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – start datetime, default is datetime.now()</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – The time step (in seconds)</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – </p></li>
 <li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
 <li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
 <li><p><strong>keep_open</strong> (<em>bool</em><em>, </em><em>optional</em>) – Keep file open for appending</p></li>
@@ -1866,30 +1866,6 @@ positions, default: use static vertical positions</p></li>
 <dt class="sig sig-object py" id="mikeio.Mesh.projection_string">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.Mesh.projection_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>The projection string</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.set_codes">
-<span class="sig-name descname"><span class="pre">set_codes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">codes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_codes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deprecated: use msh.codes = values instead</p>
-<p>Change the code values of the nodes</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>codes</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – code of each node</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.set_z">
-<span class="sig-name descname"><span class="pre">set_z</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.set_z" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deprecated: use msh.zn = values instead</p>
-<p>Change the depth by setting the z value of each node</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>z</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – new z value at each node</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">

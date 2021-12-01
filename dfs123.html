@@ -382,8 +382,8 @@ The MIKE IO <a class="reference external" href="#mikeio.Dfs2">Dfs2 class</a> pro
 <li><p><strong>filename</strong> (<em>str</em>) – Location to write the dfs1 file</p></li>
 <li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – list of matrices, one for each item. Matrix dimension: x, time</p></li>
 <li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime</p></li>
-<li><p><strong>dt</strong> (<em>datetime</em>) – The time step in seconds.</p></li>
-<li><p><strong>dt</strong> – The list of datetimes for the case of nonEquadistant Timeaxis.</p></li>
+<li><p><strong>dt</strong> (<em>float</em>) – The time step in seconds.</p></li>
+<li><p><strong>datetimes</strong> (<em>List</em><em>[</em><em>datetime</em><em>]</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – The list of datetimes for the case of non-equidistant Timeaxis.</p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo (e.g. Water Level).</p></li>
 <li><p><strong>coordinate</strong> – list of [projection, origin_x, origin_y, orientation]
 e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
@@ -569,12 +569,6 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs2.reproject">
-<span class="sig-name descname"><span class="pre">reproject</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projectionstring</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude_origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.reproject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reprojection is only available in mikeio==0.6.3</p>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs2.shape">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#mikeio.Dfs2.shape" title="Permalink to this definition">¶</a></dt>
@@ -602,9 +596,9 @@ e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – Location to write the dfs2 file</p></li>
 <li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>] or </em><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
-<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start date of type datetime.</p></li>
-<li><p><strong>dt</strong> (<em>datetime</em>) – The time step in seconds.</p></li>
-<li><p><strong>dt</strong> – The list of datetimes for the case of nonEquadistant Timeaxis.</p></li>
+<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – start date of type datetime.</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The time step in seconds.</p></li>
+<li><p><strong>datetimes</strong> (<em>datetime</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – The list of datetimes for the case of non-equisstant Timeaxis.</p></li>
 <li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
 <li><p><strong>dx</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the x direction (projection units)</p></li>
 <li><p><strong>dy</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the y direction (projection units)</p></li>

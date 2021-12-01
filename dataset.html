@@ -507,35 +507,6 @@ including different ways of <em>selecting</em> data:</p>
 <dd><p>Returns a copy of this dataset.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.create_time">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_timesteps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.create_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deprecated: use <cite>pandas.date_range</cite> instead</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>start_time</strong> (<em>datetime</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – start_time, by default None (1970-1-1 00:00:00)
-can optionally contain end_time e.g. ‘2018-01-01, 2018-02-01’</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – time step in seconds, by default None</p></li>
-<li><p><strong>n_timesteps</strong> (<em>int</em><em>, </em><em>optional</em>) – number of timesteps, by default 1</p></li>
-<li><p><strong>end_time</strong> (<em>datetime</em><em> or </em><em>str</em><em>, </em><em>optional</em>) – end_time, by default 3600s or deduced from other parameters</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>time axis which can be used to create new Dataset</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>pandas.DatetimeIndex</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018-1-1,2018-2-1&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1800</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018-1-1&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">48</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">t</span> <span class="o">=</span> <span class="n">Dateset</span><span class="o">.</span><span class="n">create_time</span><span class="p">(</span><span class="s1">&#39;2018&#39;</span><span class="p">,</span> <span class="n">dt</span><span class="o">=</span><span class="mi">7200</span><span class="p">,</span> <span class="n">end_time</span><span class="o">=</span><span class="s1">&#39;2019&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dataset.deletevalue">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dataset.deletevalue" title="Permalink to this definition">¶</a></dt>
