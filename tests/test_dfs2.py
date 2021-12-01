@@ -2,7 +2,9 @@ import os
 from pathlib import Path
 import datetime
 import numpy as np
+import pandas as pd
 import pytest
+from mikeio.dataset import Dataset
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 from mikeio.custom_exceptions import (
@@ -78,7 +80,9 @@ def test_write_inconsistent_shape(tmpdir):
     d1 = np.random.random([nt, ny, nx])
     d2 = np.random.random([nt, ny, nx + 1])
 
-    data = [d1, d2]
+    data = Dataset(
+        data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H")
+    )
 
     dfs = Dfs2()
 
@@ -104,14 +108,17 @@ def test_write_single_item(tmpdir):
     # east = 308124
     # north = 6098907
 
+    ds = Dataset(
+        data=data,
+        time=pd.date_range("2012-1-1", freq="s", periods=100),
+        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+    )
+
     dfs = Dfs2()
 
     dfs.write(
         filename=filename,
-        data=data,
-        start_time=datetime.datetime(2012, 1, 1),
-        dt=12,
-        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+        data=ds,
         coordinate=["UTM-33", 12.0, 55.0, 0.0],
         dx=100,
         dy=200,
@@ -343,69 +350,15 @@ def test_find_index_from_coordinate(dfs2_gebco):
     assert ds.data[0][0, i, j] == -43.0
 
     # try some outside the domain
-    i, j = dfs.find_nearest_element(lon=11.0, lat=57.0)
+    i, j = dfs.find_nearest_elements(lon=11.0, lat=57.0)
 
     assert i == 0
     assert j == 0
 
-    i, j = dfs.find_nearest_element(lon=15.0, lat=50.0)
+    i, j = dfs.find_nearest_elements(lon=15.0, lat=50.0)
 
     assert i == 263
     assert j == 215
-
-
-def test_reproject(dfs2_gebco, tmpdir):
-
-    dfs = dfs2_gebco
-
-    assert dfs.projection_string == "LONG/LAT"
-    outfilename = os.path.join(tmpdir.dirname, "utm.dfs2")
-
-    longitude_origin = dfs.longitude
-    latitude_origin = dfs.latitude
-
-    # Reprojection is only available in mikeio==0.6.3
-    with pytest.raises(NotImplementedError):
-        dfs.reproject(
-            outfilename,
-            projectionstring="UTM-33",
-            longitude_origin=longitude_origin,
-            latitude_origin=latitude_origin,
-            dx=200.0,
-            dy=200.0,
-            nx=285,
-            ny=612,
-            interpolate=False,
-        )
-
-    # newdfs = Dfs2(outfilename)
-    # assert "UTM-33" in newdfs.projection_string
-    # assert newdfs.shape == (1, 612, 285)
-    # assert dfs.start_time == newdfs.start_time
-    # assert dfs.projection_string != newdfs.projection_string
-
-
-def test_reproject_defaults(dfs2_gebco, tmpdir):
-
-    dfs = dfs2_gebco
-
-    assert dfs.projection_string == "LONG/LAT"
-    outfilename = os.path.join(tmpdir.dirname, "utm2.dfs2")
-
-    # Reprojection is only available in mikeio==0.6.3
-    with pytest.raises(NotImplementedError):
-        dfs.reproject(
-            outfilename,
-            projectionstring="UTM-33",
-            dx=200.0,
-            dy=200.0,
-        )
-
-    # newdfs = Dfs2(outfilename)
-    # assert "UTM-33" in newdfs.projection_string
-    # assert newdfs.shape == dfs.shape
-    # assert dfs.start_time == newdfs.start_time
-    # assert dfs.projection_string != newdfs.projection_string
 
 
 def test_write_accumulated_datatype(tmpdir):
@@ -415,13 +368,9 @@ def test_write_accumulated_datatype(tmpdir):
     d = np.random.random([100, 2, 3])
     data.append(d)
 
-    dfs = Dfs2()
-
-    dfs.write(
-        filename=filename,
+    ds = Dataset(
         data=data,
-        start_time=datetime.datetime(2012, 1, 1),
-        dt=12,
+        time=pd.date_range("2021-1-1", periods=100, freq="s"),
         items=[
             ItemInfo(
                 "testing water level",
@@ -430,6 +379,13 @@ def test_write_accumulated_datatype(tmpdir):
                 data_value_type="MeanStepBackward",
             )
         ],
+    )
+
+    dfs = Dfs2()
+
+    dfs.write(
+        filename=filename,
+        data=ds,
         title="test dfs2",
     )
 
@@ -572,3 +528,18 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
     assert dfs.start_time == newdfs.start_time
     assert dfs.timestep == newdfs.timestep
     assert dfs.end_time == newdfs.end_time
+
+
+def test_dfs2_plot():
+
+    dfs = Dfs2("tests/testdata/random.dfs2")
+    ds = dfs.read(items=0)
+    # aggregate in time
+    dss = ds.aggregate(axis="time", func=np.std)
+
+    assert len(dss) == 1
+    assert dss[0].shape[0] == 1
+
+    dfs.plot(dss)
+
+    assert True

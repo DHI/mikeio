@@ -1040,92 +1040,12 @@ class Dataset(TimeSeries):
             data.append(dati)
         return data
 
-    @staticmethod
-    def create_time(start_time=None, dt=None, n_timesteps=None, end_time=None):
-        """Deprecated: use `pandas.date_range` instead
-
-        Parameters
-        ----------
-        start_time : datetime or str, optional
-            start_time, by default None (1970-1-1 00:00:00)
-            can optionally contain end_time e.g. '2018-01-01, 2018-02-01'
-        dt : float, optional
-            time step in seconds, by default None
-        n_timesteps : int, optional
-            number of timesteps, by default 1
-        end_time : datetime or str, optional
-            end_time, by default 3600s or deduced from other parameters
-
-        Returns
-        -------
-        pandas.DatetimeIndex
-            time axis which can be used to create new Dataset
-
-        Examples
-        ------
-        >>> t = Dateset.create_time('2018-1-1,2018-2-1', dt=1800)
-        >>> t = Dateset.create_time('2018-1-1', dt=1800, n_timesteps=48)
-        >>> t = Dateset.create_time('2018', dt=7200, end_time='2019')
-        """
-
-        warnings.warn(
-            "Dataset.create_time is deprecated, please use `pandas.date_range` instead.",
-            FutureWarning,
-        )
-
-        if isinstance(start_time, str):
-            parts = start_time.split(",")
-            if len(parts) == 2:
-                end_time = parts[1]
-            start_time = pd.to_datetime(parts[0])
-        if isinstance(end_time, str):
-            end_time = pd.to_datetime(end_time)
-
-        if start_time is None:
-            # start_time = datetime.now()
-            start_time = datetime(1970, 1, 1, 0, 0, 0)
-
-        if dt is None:
-            if (end_time is not None) and (n_timesteps is not None):
-                dur = (end_time - start_time).total_seconds()
-                dt = 0.0
-                if (dur > 0) and (n_timesteps > 1):
-                    dt = dur / (n_timesteps - 1)
-            else:
-                warnings.warn("Too little information. Assuming dt=3600s.")
-                dt = 3600
-
-        if (end_time is None) and (n_timesteps is None):
-            warnings.warn("Too little information. Assuming n_timesteps=1.")
-            n_timesteps = 1
-
-        # find end time
-        if end_time is None:
-            tot_seconds = (n_timesteps - 1) * dt
-            end_time = start_time + timedelta(seconds=tot_seconds)
-        elif (end_time is not None) and (n_timesteps is not None):
-            # both are given, do they match?
-            tot_seconds = (n_timesteps - 1) * dt
-            end_time_2 = start_time + timedelta(seconds=tot_seconds)
-            if end_time != end_time_2:
-                raise ValueError("All parameters where given, but they do not match")
-
-        if dt < 0:
-            raise ValueError("dt cannot be negative")
-
-        if (end_time - start_time).total_seconds() < 0:
-            raise ValueError("end_time must be greater than start_time")
-
-        offset = pd.tseries.offsets.DateOffset(seconds=dt)
-        return pd.date_range(start=start_time, end=end_time, freq=offset)
-
     @property
     def is_equidistant(self):
         """Is Dataset equidistant in time?"""
         if len(self.time) < 3:
             return True
         return len(self.time.to_series().diff().dropna().unique()) == 1
-        # return self.time.freq is not None
 
     @property
     def start_time(self):

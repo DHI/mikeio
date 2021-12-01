@@ -1,4 +1,5 @@
 import os
+import warnings
 
 from mikecore.eum import eumUnit
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -81,8 +82,8 @@ class Dfs1(_Dfs123):
             start datetime
         dt: float
             The time step in seconds.
-        dt: datetime
-            The list of datetimes for the case of nonEquadistant Timeaxis.
+        datetimes: List[datetime], optional, deprecated
+            The list of datetimes for the case of non-equidistant Timeaxis.
         items: list[ItemInfo], optional
             List of ItemInfo (e.g. Water Level).
         coordinate:
@@ -96,6 +97,32 @@ class Dfs1(_Dfs123):
             title of the dfs file (can be blank)
 
         """
+
+        self._x0 = x0
+
+        if start_time:
+            warnings.warn(
+                "setting start_time is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if datetimes:
+            warnings.warn(
+                "setting datetimes is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if items:
+            warnings.warn(
+                "setting items is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if isinstance(data, list):
+            warnings.warn(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
 
         self._builder = DfsBuilder.Create(title, "mikeio", 0)
         self._dx = dx

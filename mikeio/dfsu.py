@@ -757,10 +757,6 @@ class _UnstructuredGeometry:
 
         return idx
 
-    def find_nearest_element(self, x, y, z=None, layer=None, n_nearest=1):
-        warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
-        return self.find_nearest_elements(x, y, z, layer, n_nearest)
-
     def find_nearest_elements(
         self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
     ):
@@ -2680,11 +2676,11 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             full path to the new dfsu file
         data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, x
-        start_time: datetime, optional
+        start_time: datetime, optional, deprecated
             start datetime, default is datetime.now()
-        dt: float, optional
+        dt: float, optional, deprecated
             The time step (in seconds)
-        items: list[ItemInfo], optional
+        items: list[ItemInfo], optional, deprecated
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -2694,6 +2690,30 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         """
         if self.is_spectral:
             raise ValueError("write() is not supported for spectral dfsu!")
+
+        if start_time:
+            warnings.warn(
+                "setting start_time is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if dt:
+            warnings.warn(
+                "setting dt is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if items:
+            warnings.warn(
+                "setting items is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if isinstance(data, list):
+            warnings.warn(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
 
         filename = str(filename)
 
@@ -3071,38 +3091,6 @@ class Mesh(_UnstructuredFile):
             raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
         self._nc[:, 2] = v
         self._ec = None
-
-    def set_z(self, z):
-        """Deprecated: use msh.zn = values instead
-
-        Change the depth by setting the z value of each node
-
-        Parameters
-        ----------
-        z : np.array(float)
-            new z value at each node
-        """
-        warnings.warn(
-            "Mesh.set_z is deprecated, please use msh.zn = values instead.",
-            FutureWarning,
-        )
-        self.zn = z
-
-    def set_codes(self, codes):
-        """Deprecated: use msh.codes = values instead
-
-        Change the code values of the nodes
-
-        Parameters
-        ----------
-        codes : list(int)
-            code of each node
-        """
-        warnings.warn(
-            "Mesh.set_codes is deprecated, please use msh.codes = values instead.",
-            FutureWarning,
-        )
-        self.codes = codes
 
     def write(self, outfilename, elements=None):
         """write mesh to file (will overwrite if file exists)
