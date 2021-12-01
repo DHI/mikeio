@@ -185,7 +185,7 @@ class Dataset(TimeSeries):
             data = self.create_empty_data(
                 n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
             )
-        elif isinstance(data, Sequence):
+        elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
             n_items = len(data)
             n_timesteps = data[0].shape[0]
         else:

@@ -37,6 +37,17 @@ def ds2():
     return Dataset(data, time, items)
 
 
+def test_create_wrong_data_type_error():
+
+    data = ["item 1", "item 2"]
+
+    nt = 2
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+
+    with pytest.raises(TypeError, match="numpy"):
+        Dataset(data=data, time=time)
+
+
 def test_get_names():
 
     data = []
@@ -626,7 +637,7 @@ def test_aggregation_workflows(tmpdir):
     assert os.path.isfile(outfilename)
 
 
-def test_aggregations(tmpdir):
+def test_aggregations():
     filename = "tests/testdata/gebco_sound.dfs2"
     dfs = Dfs2(filename)
 
@@ -642,6 +653,11 @@ def test_aggregations(tmpdir):
     assert ds.mean(axis=(1, 2)).shape == (1,)
     assert ds.mean(axis=(0, 1)).shape == (1, 216)
     assert ds.mean(axis=(0, 2)).shape == (1, 264)
+    assert ds.mean(axis="spatial").shape == (1,)
+    assert ds.mean(axis="space").shape == (1,)
+
+    with pytest.raises(ValueError, match="space"):
+        ds.mean(axis="spaghetti")
 
 
 def test_weighted_average(tmpdir):
@@ -973,6 +989,18 @@ def test_add_scalar(ds1):
     assert np.all(ds3[1] == ds2[1])
 
 
+def test_add_bad_value(ds1):
+
+    with pytest.raises(ValueError):
+        ds1 + ["one"]
+
+
+def test_multiple_bad_value(ds1):
+
+    with pytest.raises(ValueError):
+        ds1 * ["pi"]
+
+
 def test_sub_scalar(ds1):
     ds2 = ds1 - 10.0
     assert np.all(ds1[0] - ds2[0] == 10.0)
@@ -1106,3 +1134,11 @@ def test_combine_by_item_dfsu_3d():
     assert "Salinity" in itemnames
     assert "Temperature" in itemnames
     assert ds3.n_items == 3  # Only one instance of Z coordinate
+
+
+def test_to_numpy(ds2):
+
+    X = ds2.to_numpy()
+
+    assert X.shape == (ds2.n_items,) + ds2.shape
+    assert isinstance(X, np.ndarray)
