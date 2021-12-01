@@ -17,7 +17,7 @@ Facilitates common data processing workflows for MIKE files.
 
 ## Requirements
 * Windows or Linux operating system
-* Python x64 3.6, 3.7,3.8 or 3.9 
+* Python x64 3.7 - 3.10
 * (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 [More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
@@ -34,7 +34,7 @@ From PyPI:
 
 `pip install mikeio`
 
-Or development version (*`main` is the default branch since 2021-04-23*):
+Or development version:
 
 `pip install https://github.com/DHI/mikeio/archive/main.zip`
 
