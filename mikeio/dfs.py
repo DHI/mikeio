@@ -288,7 +288,8 @@ class _Dfs123(TimeSeries):
 
         if self._dt is None:
             self._dt = 1
-            warnings.warn("No timestep supplied. Using 1s.")
+            if self._n_timesteps > 1:
+                warnings.warn("No timestep supplied. Using 1s.")
 
         if items:
             self._items = items

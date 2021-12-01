@@ -3,8 +3,6 @@ import pytest
 
 from mikeio import Pfs
 
-from mikeio.pfs import PfsCore
-
 
 def test_basic():
 
@@ -95,13 +93,6 @@ def test_output_by_id():
     df_inc = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
     # .loc refers to output_id irrespective of included or not
     assert df_inc.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
-
-
-## PFSCore wrapping DHI.PFS.PFSFile
-def test_sw_new_start_time_write():
-
-    with pytest.raises(NotImplementedError):
-        PfsCore("tests/testdata/lake.sw", "FemEngineSW")
 
 
 def test_encoding():
