@@ -463,10 +463,10 @@ class Dataset(TimeSeries):
 
     def _append_items(self, other, copy=True):
 
-        names = {item.name for item in self.items}
-        other_names = {item.name for item in other.items}
+        item_names = self._non_z_item_names
+        other_names = other._non_z_item_names
 
-        overlap = other_names.intersection(names)
+        overlap = other_names.intersection(item_names)
         if len(overlap) != 0:
             raise ValueError("Can not append items, names are not unique")
 
@@ -1102,6 +1102,11 @@ class Dataset(TimeSeries):
         if len(self) > 1 and self.items[0].name == "Z coordinate":
             return 1
         return 0
+
+    @property
+    def _non_z_item_names(self):
+        """Item names (Z coordinate excluded)"""
+        return {item.name for item in self.items[self._first_non_z_item :]}
 
     @property
     def n_elements(self):
