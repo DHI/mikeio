@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import warnings
 from mikecore.eum import eumUnit
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -258,7 +259,16 @@ class Dfs2(_Dfs123):
         """Are coordinates geographical (LONG/LAT)?"""
         return self._projstr == "LONG/LAT"
 
-    def plot(self, z, *, cmap=None, figsize=None, ax=None):
+    def plot(
+        self,
+        z,
+        *,
+        title=None,
+        label=None,
+        cmap=None,
+        figsize=None,
+        ax=None,
+    ):
         """
         Plot dfs2 data
 
@@ -266,6 +276,10 @@ class Dfs2(_Dfs123):
         ----------
 
         z: np.array (2d)
+        title: str, optional
+            axes title
+        label: str, optional
+            colorbar label (or title if contour plot)
         cmap: matplotlib.cm.cmap, optional
             colormap, default viridis
         figsize: (float, float), optional
@@ -286,6 +300,12 @@ class Dfs2(_Dfs123):
         """
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
+
+        if len(z) == 1:  # if single-item Dataset
+            z = z[0].copy()
+
+            if z.shape[0] == 1:
+                z = np.squeeze(z).copy()  # handles single time step
 
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)
@@ -308,6 +328,9 @@ class Dfs2(_Dfs123):
             # TODO get spatial axes in this case as well
             cf = ax.imshow(z)
 
-        fig.colorbar(cf, ax=ax)
+        fig.colorbar(cf, ax=ax, label=label)
+
+        if title:
+            ax.set_title(title)
 
         return ax

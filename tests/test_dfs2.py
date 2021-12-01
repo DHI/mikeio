@@ -528,3 +528,18 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
     assert dfs.start_time == newdfs.start_time
     assert dfs.timestep == newdfs.timestep
     assert dfs.end_time == newdfs.end_time
+
+
+def test_dfs2_plot():
+
+    dfs = Dfs2("tests/testdata/random.dfs2")
+    ds = dfs.read(items=0)
+    # aggregate in time
+    dss = ds.aggregate(axis="time", func=np.std)
+
+    assert len(dss) == 1
+    assert dss[0].shape[0] == 1
+
+    dfs.plot(dss)
+
+    assert True
