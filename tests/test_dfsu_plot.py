@@ -58,6 +58,12 @@ def test_plot_dfsu_contour_mixedmesh():
     filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
     msh = Mesh(filename)
     msh.plot(plot_type="contour", levels=5)
+    msh.plot(
+        plot_type="contourf",
+        title="contourf",
+        show_mesh=False,
+        levels=[-30, -24, -22, -10, -8],
+    )
     assert True
 
 
