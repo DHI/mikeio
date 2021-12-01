@@ -316,7 +316,7 @@ class Dataset(TimeSeries):
 
     def __mul__(self, other):
         if isinstance(other, self.__class__):
-            raise NotImplemented("Multiplication is not implemented for two Datasets")
+            raise ValueError("Multiplication is not possible for two Datasets")
         else:
             return self._multiply_value(other)
 
@@ -462,6 +462,14 @@ class Dataset(TimeSeries):
             return self._append_items(other, copy=True)
 
     def _append_items(self, other, copy=True):
+
+        names = {item.name for item in self.items}
+        other_names = {item.name for item in other.items}
+
+        overlap = other_names.intersection(names)
+        if len(overlap) != 0:
+            raise ValueError("Can not append items, names are not unique")
+
         if not np.all(self.time == other.time):
             # if not: create common time?
             raise ValueError("All timesteps must match")

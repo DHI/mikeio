@@ -503,8 +503,15 @@ def test_set_data_name():
     assert ds["Foo"][0, 0] == 0.0
 
     ds["Foo"] = np.zeros((nt, 10)) + 1.0
-
     assert ds["Foo"][0, 0] == 1.0
+
+    ds[0] = np.zeros((nt, 10)) + 2.0  # Set using position
+    assert ds["Foo"][0, 0] == 2.0  # Read using name
+
+    with pytest.raises(ValueError):
+        ds[[0, 1]] = (
+            np.zeros((nt, 10)) + 2.0
+        )  # You can't set data for several items (at least not yet)
 
 
 def test_get_bad_name():
@@ -989,6 +996,19 @@ def test_add_scalar(ds1):
     assert np.all(ds3[1] == ds2[1])
 
 
+def test_add_inconsistent_dataset(ds1):
+
+    ds2 = ds1[[0]]
+
+    assert len(ds1) != len(ds2)
+
+    with pytest.raises(ValueError):
+        ds1 + ds2
+
+    with pytest.raises(ValueError):
+        ds1 * ds2
+
+
 def test_add_bad_value(ds1):
 
     with pytest.raises(ValueError):
@@ -1142,3 +1162,44 @@ def test_to_numpy(ds2):
 
     assert X.shape == (ds2.n_items,) + ds2.shape
     assert isinstance(X, np.ndarray)
+
+
+def test_concat():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds1 = mikeio.read(filename, time_steps=[0, 1])
+    ds2 = mikeio.read(filename, time_steps=[2, 3])
+    ds3 = ds1.concat(ds2)
+    ds3.n_timesteps
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.n_timesteps == (ds1.n_timesteps + ds2.n_timesteps)
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+
+
+def test_append_items():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds1 = mikeio.read(filename, items=0)
+    ds2 = mikeio.read(filename, items=1)
+
+    assert ds1.n_items == 1
+    assert ds2.n_items == 1
+    ds3 = ds1.append_items(ds2)
+    assert ds1.n_items == 1
+    assert ds2.n_items == 1
+    assert ds3.n_items == 2
+
+    ds1.append_items(ds2, inplace=True)
+
+    assert ds1.n_items == 2
+
+
+def test_append_items_same_name_error():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds1 = mikeio.read(filename, items=0)
+    ds2 = mikeio.read(filename, items=0)
+
+    assert ds1.items[0].name == ds2.items[0].name
+
+    with pytest.raises(ValueError):
+        ds1.append_items(ds2)
