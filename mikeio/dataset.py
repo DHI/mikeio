@@ -13,12 +13,14 @@ def _parse_axis(data_shape, axis):
     axis = 0 if axis == "time" else axis
     if (axis == "spatial") or (axis == "space"):
         if len(data_shape) == 1:
-            ValueError(f"axis '{axis}' not allowed for Dataset with shape {data_shape}")
+            raise ValueError(
+                f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
+            )
         axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
     if axis is None:
         axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
     if isinstance(axis, str):
-        ValueError(
+        raise ValueError(
             f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
         )
     return axis
@@ -183,7 +185,7 @@ class Dataset(TimeSeries):
             data = self.create_empty_data(
                 n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
             )
-        elif isinstance(data, Sequence):
+        elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
             n_items = len(data)
             n_timesteps = data[0].shape[0]
         else:
@@ -314,7 +316,7 @@ class Dataset(TimeSeries):
 
     def __mul__(self, other):
         if isinstance(other, self.__class__):
-            raise NotImplemented("Multiplication is not implemented for two Datasets")
+            raise ValueError("Multiplication is not possible for two Datasets")
         else:
             return self._multiply_value(other)
 
@@ -460,6 +462,14 @@ class Dataset(TimeSeries):
             return self._append_items(other, copy=True)
 
     def _append_items(self, other, copy=True):
+
+        item_names = self._non_z_item_names
+        other_names = other._non_z_item_names
+
+        overlap = other_names.intersection(item_names)
+        if len(overlap) != 0:
+            raise ValueError("Can not append items, names are not unique")
+
         if not np.all(self.time == other.time):
             # if not: create common time?
             raise ValueError("All timesteps must match")
@@ -1092,6 +1102,11 @@ class Dataset(TimeSeries):
         if len(self) > 1 and self.items[0].name == "Z coordinate":
             return 1
         return 0
+
+    @property
+    def _non_z_item_names(self):
+        """Item names (Z coordinate excluded)"""
+        return {item.name for item in self.items[self._first_non_z_item :]}
 
     @property
     def n_elements(self):
