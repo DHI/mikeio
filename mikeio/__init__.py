@@ -18,14 +18,10 @@ from platform import architecture
 # Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
-__version__ = "0.11.dev1"
+__version__ = "0.11.0"
 
 if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
-
-mike_bin_path = os.path.join(os.path.dirname(__file__), "bin")
-sys.path.append(mike_bin_path)
-
 
 from .dfs0 import Dfs0
 from .dfs1 import Dfs1
