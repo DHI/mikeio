@@ -1,4 +1,3 @@
-from logging import warn
 import os
 from collections import namedtuple
 import pandas as pd
@@ -164,7 +163,31 @@ class _UnstructuredGeometry:
     @property
     def is_2d(self):
         """Type is either mesh or Dfsu2D (2 horizontal dimensions)"""
-        return self._type in (DfsuFileType.Dfsu2D, None)  # Todo mesh
+        return self._type in (
+            DfsuFileType.Dfsu2D,
+            DfsuFileType.DfsuSpectral2D,
+            None,
+        )  # Todo mesh
+
+    @property
+    def is_layered(self):
+        """Type is layered dfsu (3d, vertical profile or vertical column)"""
+        return self._type in (
+            DfsuFileType.DfsuVerticalColumn,
+            DfsuFileType.DfsuVerticalProfileSigma,
+            DfsuFileType.DfsuVerticalProfileSigmaZ,
+            DfsuFileType.Dfsu3DSigma,
+            DfsuFileType.Dfsu3DSigmaZ,
+        )
+
+    @property
+    def is_spectral(self):
+        """Type is spectral dfsu (point, line or area spectrum)"""
+        return self._type in (
+            DfsuFileType.DfsuSpectral0D,
+            DfsuFileType.DfsuSpectral1D,
+            DfsuFileType.DfsuSpectral2D,
+        )
 
     @property
     def is_tri_only(self):
@@ -734,10 +757,6 @@ class _UnstructuredGeometry:
 
         return idx
 
-    def find_nearest_element(self, x, y, z=None, layer=None, n_nearest=1):
-        warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
-        return self.find_nearest_elements(x, y, z, layer, n_nearest)
-
     def find_nearest_elements(
         self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
     ):
@@ -1256,6 +1275,189 @@ class _UnstructuredGeometry:
 
         return ax
 
+    def plot_spectrum(
+        self,
+        spectrum,
+        plot_type="contourf",
+        title=None,
+        label=None,
+        cmap="Reds",
+        vmin=1e-5,
+        vmax=None,
+        r_as_periods=True,
+        rmin=None,
+        rmax=None,
+        levels=None,
+        figsize=(7, 7),
+        add_colorbar=True,
+    ):
+        """
+        Plot spectrum in polar coordinates
+
+        Parameters
+        ----------
+        spectrum: np.array
+            spectral values as 2d array with dimensions: directions, frequencies
+        plot_type: str, optional
+            type of plot: 'contour', 'contourf', 'patch', 'shaded',
+            by default: 'contourf'
+        title: str, optional
+            axes title
+        label: str, optional
+            colorbar label (or title if contour plot)
+        cmap: matplotlib.cm.cmap, optional
+            colormap, default Reds
+        vmin: real, optional
+            lower bound of values to be shown on plot, default: 1e-5
+        vmax: real, optional
+            upper bound of values to be shown on plot, default:None
+        r_as_periods: bool, optional
+            show radial axis as periods instead of frequency, default: True
+        rmin: float, optional
+            mininum frequency/period to be shown, default: None
+        rmax: float, optional
+            maximum frequency/period to be shown, default: None
+        levels: int, list(float), optional
+            for contour plots: how many levels, default:10
+            or a list of discrete levels e.g. [0.03, 0.04, 0.05]
+        figsize: (float, float), optional
+            specify size of figure, default (7, 7)
+        add_colorbar: bool, optional
+            Add colorbar to plot, default True
+
+        Returns
+        -------
+        <matplotlib.axes>
+
+        Examples
+        --------
+        >>> dfs = Dfsu("area_spectrum.dfsu")
+        >>> ds = dfs.read(items="Energy density")
+        >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
+        >>> dfs.plot_spectrum(spectrum, plot_type="patch")
+
+        >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
+        """
+
+        # TODO move this to specialized class e.g. DfsuSpectral
+
+        if self.n_directions == 0 or self.n_frequencies == 0:
+            raise ValueError("plot_spectrum() is only supported for spectral data")
+
+        import matplotlib.pyplot as plt
+
+        dirs = np.radians(self.directions)
+        freq = self.frequencies
+
+        inverse_r = r_as_periods
+        if inverse_r:
+            freq = 1.0 / np.flip(freq)
+            spectrum = np.fliplr(spectrum)
+
+        fig = plt.figure(figsize=figsize)
+        ax = plt.subplot(111, polar=True)
+        ax.set_theta_direction(-1)
+        ax.set_theta_zero_location("N")
+
+        ddir = dirs[1] - dirs[0]
+
+        def is_circular(dir):
+            dir_diff = np.mod(dir[0], 2 * np.pi) - np.mod(dir[-1] + ddir, 2 * np.pi)
+            return np.abs(dir_diff) < 1e-6
+
+        if is_circular(dirs):
+            # append last directional slice at the end
+            dirs = np.append(dirs, dirs[-1] + ddir)
+            spectrum = np.concatenate((spectrum, spectrum[0:1, :]), axis=0)
+
+        # up-sample directions
+        if plot_type in ("shaded", "contour", "contourf"):
+            # more smoother plotting
+            factor = 4
+            dir2 = np.linspace(dirs[0], dirs[-1], (len(dirs) - 1) * factor + 1)
+            spec2 = np.zeros(shape=(len(dir2), len(freq)))
+            for j in range(len(freq)):
+                spec2[:, j] = np.interp(dir2, dirs, spectrum[:, j])
+            dirs = dir2.copy()
+            spectrum = spec2.copy()
+
+        if vmin is None:
+            vmin = np.nanmin(spectrum)
+        if vmax is None:
+            vmax = np.nanmax(spectrum)
+        if levels is None:
+            levels = 10
+            n_levels = 10
+        if np.isscalar(levels):
+            n_levels = levels
+            levels = np.linspace(vmin, vmax, n_levels)
+
+        if plot_type != "shaded":
+            spectrum[spectrum < vmin] = np.nan
+
+        if plot_type == "contourf":
+            colorax = ax.contourf(
+                dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
+            )
+        elif plot_type == "contour":
+            colorax = ax.contour(
+                dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
+            )
+            # ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
+            if label is not None:
+                ax.set_title(label)
+
+        elif plot_type in ("patch", "shaded", "box"):
+            shading = "gouraud" if plot_type == "shaded" else "auto"
+            colorax = ax.pcolormesh(
+                dirs,
+                freq,
+                spectrum.T,
+                shading=shading,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+            )
+            ax.grid("on")
+        else:
+            raise ValueError(
+                f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
+            )
+
+        # TODO: optional
+        ax.set_thetagrids(
+            [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
+            labels=["N", "N-E", "E", "S-E", "S", "S-W", "W", "N-W"],
+        )
+
+        # if r_axis_as_periods:
+        #     Ts = [8, 6, 5, 4, 3.5, 3, 2.5, 2]
+        #     ax.set_rgrids(
+        #         1.0 / np.array(Ts),
+        #         labels=["8s", "6s", "5s", "4s", "3.5s", "3s", "2.5s", "2s"],
+        #     )
+        #     # , fontsize=12, angle=180)
+
+        # ax.grid(True, which='minor', axis='both', linestyle='-', color='0.8')
+        # ax.set_xticks(dfs.directions, minor=True);
+
+        if rmin is not None:
+            ax.set_rmin(rmin)
+        if rmax is not None:
+            ax.set_rmax(rmax)
+
+        if add_colorbar:
+            cbar = fig.colorbar(colorax)
+            if label is None:
+                label = "Energy Density [m*m/Hz/deg]"
+            cbar.set_label(label, rotation=270)
+            cbar.ax.get_yaxis().labelpad = 30
+
+        if title is not None:
+            ax.set_title(title)
+
+        return ax
+
     def plot(
         self,
         z=None,
@@ -1407,7 +1609,7 @@ class _UnstructuredGeometry:
             levels_equidistant = all(np.diff(levels) == np.diff(levels)[0])
             # if not levels_equidistant:  # (isinstance(cmap, mplc.ListedColormap)) or (
             if (not isinstance(cmap, str)) and (not levels_equidistant):
-                print("ScalarMappable")
+                # print("ScalarMappable")
                 # cmap = mplc.Colormap(cmap)
                 cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
                 cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
@@ -1575,12 +1777,15 @@ class _UnstructuredGeometry:
                     if cmap_ScMappable is None:
                         plt.colorbar(fig_obj, label=label, cax=cax)
                     else:
-                        plt.colorbar(
-                            cmap_ScMappable,
-                            label=label,
-                            cax=cax,
-                            ticks=levels,
-                        )
+                        try:
+                            plt.colorbar(
+                                cmap_ScMappable,
+                                label=label,
+                                cax=cax,
+                                ticks=levels,
+                            )
+                        except:
+                            warnings.warn("Cannot add colorbar")
 
             else:
                 if (plot_type is not None) and plot_type != "outline_only":
@@ -1751,6 +1956,62 @@ class _UnstructuredGeometry:
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
+    def calc_Hm0_from_spectrum(self, spectrum, tail=True):
+        """Calculate significant wave height (Hm0) from spectrum
+
+        Parameters
+        ----------
+        spectrum : np.ndarray
+            frequency or direction-frequency spectrum
+        tail : bool, optional
+            Should a parametric spectral tail be added in the computations? by default True
+
+        Returns
+        -------
+        np.ndarray
+            significant wave height values
+        """
+        if not self.is_spectral:
+            raise ValueError("Method only supported for spectral dfsu!")
+
+        m0 = self._calc_m0_from_spectrum(
+            spectrum, self.frequencies, self.directions, tail, m0_only=True
+        )
+        return 4 * np.sqrt(m0)
+
+    @staticmethod
+    def _calc_m0_from_spectrum(spec, f, dir=None, tail=True, m0_only=False):
+        if f is None:
+            raise ValueError(
+                "Moments cannot be calculated because dfsu has no frequency axis"
+            )
+        df = Dfsu._f_to_df(f)
+
+        if dir is None:
+            ee = spec
+        else:
+            nd = len(dir)
+            dtheta = (dir[-1] - dir[0]) / (nd - 1)
+            ee = np.sum(spec, axis=-2) * dtheta
+
+        m0 = np.dot(ee, df)
+        if tail:
+            m0 = m0 + ee[..., -1] * f[-1] * 0.25
+        return m0
+
+    @staticmethod
+    def _f_to_df(f):
+        """Frequency bins for equidistant or logrithmic frequency axis"""
+        if np.isclose(np.diff(f).min(), np.diff(f).max()):
+            # equidistant frequency bins
+            return (f[1] - f[0]) * np.ones_like(f)
+        else:
+            # logarithmic frequency bins
+            freq_factor = f[1] / f[0]
+            fm1 = np.insert(f, 0, f[0] / freq_factor)
+            fp1 = np.append(f, f[-1] * freq_factor)
+            return 0.5 * (np.diff(fm1) + np.diff(fp1))
+
 
 class _UnstructuredFile(_UnstructuredGeometry):
     """
@@ -1764,11 +2025,18 @@ class _UnstructuredFile(_UnstructuredGeometry):
         out = []
         if self._type is not None:
             out.append(self.type_name)
-        out.append(f"Number of elements: {self.n_elements}")
-        out.append(f"Number of nodes: {self.n_nodes}")
+        if self._type is not DfsuFileType.DfsuSpectral0D:
+            if self._type is not DfsuFileType.DfsuSpectral1D:
+                out.append(f"Number of elements: {self.n_elements}")
+            out.append(f"Number of nodes: {self.n_nodes}")
+        if self.is_spectral:
+            if self.n_frequencies > 0:
+                out.append(f"Number of frequencies: {self.n_frequencies}")
+            if self.n_directions > 0:
+                out.append(f"Number of directions: {self.n_directions}")
         if self._projstr:
             out.append(f"Projection: {self.projection_string}")
-        if not self.is_2d:
+        if self.is_layered:
             out.append(f"Number of sigma layers: {self.n_sigma_layers}")
         if (
             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
@@ -1843,11 +2111,21 @@ class _UnstructuredFile(_UnstructuredGeometry):
         self._type = DfsuFileType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
 
-        # geometry
-        self._set_nodes_from_source(dfs)
-        self._set_elements_from_source(dfs)
+        if self.is_spectral:
+            dir = dfs.Directions
+            self.directions = None if dir is None else dir * (180 / np.pi)
+            self.n_directions = dfs.NumberOfDirections
+            self.frequencies = dfs.Frequencies
+            self.n_frequencies = dfs.NumberOfFrequencies
 
-        if not self.is_2d:
+        # geometry
+        if self._type == DfsuFileType.DfsuSpectral0D:
+            pass
+        else:
+            self._set_nodes_from_source(dfs)
+            self._set_elements_from_source(dfs)
+
+        if self.is_layered:
             self._n_layers = dfs.NumberOfLayers
             self._n_sigma = dfs.NumberOfSigmaLayers
 
@@ -1943,6 +2221,29 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             seconds=((self.n_timesteps - 1) * self.timestep)
         )
 
+    def _get_spectral_data_shape(self, n_steps: int, elements):
+
+        n_freq = self.n_frequencies
+        n_dir = self.n_directions
+        shape = (n_dir, n_freq)
+        if n_dir == 0:
+            shape = [n_freq]
+        elif n_freq == 0:
+            shape = [n_dir]
+        if self._type == DfsuFileType.DfsuSpectral0D:
+            data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
+        elif self._type == DfsuFileType.DfsuSpectral1D:
+            # node-based, FE-style
+            n_nodes = self.n_nodes if elements is None else len(elements)
+            data = np.ndarray(shape=(n_steps, n_nodes, *shape), dtype=self._dtype)
+            shape = (*shape, self.n_nodes)
+        else:
+            n_elems = self.n_elements if elements is None else len(elements)
+            data = np.ndarray(shape=(n_steps, n_elems, *shape), dtype=self._dtype)
+            shape = (*shape, self.n_elements)
+
+        return data, shape
+
     def read(self, items=None, time_steps=None, elements=None):
         """
         Read data from a dfsu file
@@ -2002,46 +2303,52 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             n_elems = self.n_elements
             n_nodes = self.n_nodes
         else:
-            node_ids, _ = self._get_nodes_and_table_for_elements(elements)
             n_elems = len(elements)
-            n_nodes = len(node_ids)
+            if self.is_layered and items[0].name == "Z coordinate":
+                node_ids, _ = self._get_nodes_and_table_for_elements(elements)
+                n_nodes = len(node_ids)
 
         deletevalue = self.deletevalue
 
         data_list = []
 
+        n_steps = len(time_steps)
         item0_is_node_based = False
         for item in range(n_items):
             # Initialize an empty data block
-            if item == 0 and items[item].name == "Z coordinate":
+            if self.is_spectral:
+                data, shape = self._get_spectral_data_shape(n_steps, elements=elements)
+            elif item == 0 and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(len(time_steps), n_nodes), dtype=self._dtype)
+                data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
             else:
-                data = np.ndarray(shape=(len(time_steps), n_elems), dtype=self._dtype)
+                data = np.ndarray(shape=(n_steps, n_elems), dtype=self._dtype)
             data_list.append(data)
 
-        t_seconds = np.zeros(len(time_steps), dtype=float)
+        t_seconds = np.zeros(n_steps, dtype=float)
 
-        for i in trange(len(time_steps), disable=not self.show_progress):
+        for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-
-                src = itemdata.Data
-
-                # d = to_numpy(src)
-                d = src
-
+                d = itemdata.Data
                 d[d == deletevalue] = np.nan
+
+                if self.is_spectral:
+                    d = np.reshape(d, newshape=shape)
+                    if self._type != DfsuFileType.DfsuSpectral0D:
+                        d = np.moveaxis(d, -1, 0)
 
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
                         d = d[node_ids]
+                    elif self.is_spectral:
+                        d = d[elements, ...]
                     else:
                         d = d[elements]
 
-                data_list[item][i, :] = d
+                data_list[item][i, ...] = d
 
             t_seconds[i] = itemdata.Time
 
@@ -2081,6 +2388,8 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         >>> ds = dfsu.extract_track('track_file.csv', items=0)
         """
+        if self.is_spectral:
+            raise ValueError("Method not supported for spectral dfsu!")
 
         dfs = DfsuFile.Open(self._filename)
 
@@ -2367,11 +2676,11 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             full path to the new dfsu file
         data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, x
-        start_time: datetime, optional
+        start_time: datetime, optional, deprecated
             start datetime, default is datetime.now()
-        dt: float, optional
+        dt: float, optional, deprecated
             The time step (in seconds)
-        items: list[ItemInfo], optional
+        items: list[ItemInfo], optional, deprecated
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -2379,6 +2688,33 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         keep_open: bool, optional
             Keep file open for appending
         """
+        if self.is_spectral:
+            raise ValueError("write() is not supported for spectral dfsu!")
+
+        if start_time:
+            warnings.warn(
+                "setting start_time is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if dt:
+            warnings.warn(
+                "setting dt is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if items:
+            warnings.warn(
+                "setting items is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if isinstance(data, list):
+            warnings.warn(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
         filename = str(filename)
 
         if isinstance(data, Dataset):
@@ -2617,6 +2953,9 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             mikeio Dfs2 object pointing to the file located at `filename`.
 
         """
+        if self.is_spectral:
+            raise ValueError("Method not supported for spectral dfsu!")
+
         # Process 'filename' argument
         if filename is None:
             filename = tempfile.NamedTemporaryFile().name + ".dfs2"
@@ -2752,38 +3091,6 @@ class Mesh(_UnstructuredFile):
             raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
         self._nc[:, 2] = v
         self._ec = None
-
-    def set_z(self, z):
-        """Deprecated: use msh.zn = values instead
-
-        Change the depth by setting the z value of each node
-
-        Parameters
-        ----------
-        z : np.array(float)
-            new z value at each node
-        """
-        warnings.warn(
-            "Mesh.set_z is deprecated, please use msh.zn = values instead.",
-            FutureWarning,
-        )
-        self.zn = z
-
-    def set_codes(self, codes):
-        """Deprecated: use msh.codes = values instead
-
-        Change the code values of the nodes
-
-        Parameters
-        ----------
-        codes : list(int)
-            code of each node
-        """
-        warnings.warn(
-            "Mesh.set_codes is deprecated, please use msh.codes = values instead.",
-            FutureWarning,
-        )
-        self.codes = codes
 
     def write(self, outfilename, elements=None):
         """write mesh to file (will overwrite if file exists)

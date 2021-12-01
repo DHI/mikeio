@@ -66,10 +66,6 @@ class Dfs2(_Dfs123):
 
         self._read_header()
 
-    def find_nearest_element(self, lon, lat):
-        warnings.warn("OBSOLETE! method name changed to find_nearest_elements")
-        return self.find_nearest_elements(lon, lat)
-
     def find_nearest_elements(
         self,
         lon,
@@ -137,12 +133,12 @@ class Dfs2(_Dfs123):
             Location to write the dfs2 file
         data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, y, x
-        start_time: datetime, optional
+        start_time: datetime, optional, deprecated
             start date of type datetime.
         dt: float, optional
             The time step in seconds.
-        dt: datetime
-            The list of datetimes for the case of nonEquadistant Timeaxis.
+        datetimes: datetime, optional, deprecated
+            The list of datetimes for the case of non-equisstant Timeaxis.
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
         dx: float, optional
@@ -157,6 +153,31 @@ class Dfs2(_Dfs123):
         keep_open: bool, optional
             Keep file open for appending
         """
+
+        if start_time:
+            warnings.warn(
+                "setting start_time is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if datetimes:
+            warnings.warn(
+                "setting datetimes is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if items:
+            warnings.warn(
+                "setting items is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if isinstance(data, list):
+            warnings.warn(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
         filename = str(filename)
 
         self._builder = DfsBuilder.Create(title, "mikeio", 0)
@@ -313,22 +334,3 @@ class Dfs2(_Dfs123):
             ax.set_title(title)
 
         return ax
-
-    def reproject(
-        self,
-        filename,
-        projectionstring,
-        dx,
-        dy,
-        longitude_origin=None,
-        latitude_origin=None,
-        nx=None,
-        ny=None,
-        orientation=0.0,
-        interpolate=True,
-    ):
-        """
-        Reprojection is only available in mikeio==0.6.3
-        """
-
-        raise NotImplementedError("Reprojection is no longer available in mikeio")
