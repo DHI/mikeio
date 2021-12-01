@@ -584,6 +584,26 @@ From release 0.10 all ids are 0-based.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfsu.calc_Hm0_from_spectrum">
+<span class="sig-name descname"><span class="pre">calc_Hm0_from_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.calc_Hm0_from_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate significant wave height (Hm0) from spectrum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>np.ndarray</em>) – frequency or direction-frequency spectrum</p></li>
+<li><p><strong>tail</strong> (<em>bool</em><em>, </em><em>optional</em>) – Should a parametric spectral tail be added in the computations? by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>significant wave height values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dfsu.calc_element_coordinates">
 <span class="sig-name descname"><span class="pre">calc_element_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.calc_element_coordinates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the coordinates of the center of each element.</p>
@@ -984,9 +1004,21 @@ values all around the domain.</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.is_layered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.Dfsu.is_layered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfsu.is_local_coordinates">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.Dfsu.is_local_coordinates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfsu.is_spectral">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.Dfsu.is_spectral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1110,6 +1142,49 @@ do this number of mesh refinements for smoother plotting</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">n_items</span>
 <span class="go">1</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">ds</span><span class="p">)</span> <span class="c1"># plot surface elevation</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfsu.plot_spectrum">
+<span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'contourf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Reds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_as_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(7,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.plot_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot spectrum in polar coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>np.array</em>) – spectral values as 2d array with dimensions: directions, frequencies</p></li>
+<li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘contour’, ‘contourf’, ‘patch’, ‘shaded’,
+by default: ‘contourf’</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
+<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label (or title if contour plot)</p></li>
+<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default Reds</p></li>
+<li><p><strong>vmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default: 1e-5</p></li>
+<li><p><strong>vmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
+<li><p><strong>r_as_periods</strong> (<em>bool</em><em>, </em><em>optional</em>) – show radial axis as periods instead of frequency, default: True</p></li>
+<li><p><strong>rmin</strong> (<em>float</em><em>, </em><em>optional</em>) – mininum frequency/period to be shown, default: None</p></li>
+<li><p><strong>rmax</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum frequency/period to be shown, default: None</p></li>
+<li><p><strong>levels</strong> (<em>int</em><em>, </em><em>list</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – for contour plots: how many levels, default:10
+or a list of discrete levels e.g. [0.03, 0.04, 0.05]</p></li>
+<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure, default (7, 7)</p></li>
+<li><p><strong>add_colorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Add colorbar to plot, default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>&lt;matplotlib.axes&gt;</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;area_spectrum.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Energy density&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="c1"># first timestep, element 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;patch&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Wave spectrum T&lt;9s&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -1386,6 +1461,26 @@ in the system temporary directory.</p></li>
 <dt class="sig sig-object py" id="mikeio.Mesh.boundary_polylines">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.Mesh.boundary_polylines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lists of closed polylines defining domain outline</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Mesh.calc_Hm0_from_spectrum">
+<span class="sig-name descname"><span class="pre">calc_Hm0_from_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.calc_Hm0_from_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate significant wave height (Hm0) from spectrum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>np.ndarray</em>) – frequency or direction-frequency spectrum</p></li>
+<li><p><strong>tail</strong> (<em>bool</em><em>, </em><em>optional</em>) – Should a parametric spectral tail be added in the computations? by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>significant wave height values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1716,9 +1811,21 @@ values all around the domain.</p></li>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Mesh.is_layered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.Mesh.is_layered" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.is_local_coordinates">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.is_local_coordinates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Mesh.is_spectral">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.Mesh.is_spectral" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1832,6 +1939,49 @@ do this number of mesh refinements for smoother plotting</p></li>
 <dt class="sig sig-object py" id="mikeio.Mesh.plot_boundary_nodes">
 <span class="sig-name descname"><span class="pre">plot_boundary_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundary_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_boundary_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot mesh boundary nodes and their codes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Mesh.plot_spectrum">
+<span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'contourf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Reds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_as_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(7,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot spectrum in polar coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<em>np.array</em>) – spectral values as 2d array with dimensions: directions, frequencies</p></li>
+<li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘contour’, ‘contourf’, ‘patch’, ‘shaded’,
+by default: ‘contourf’</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
+<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label (or title if contour plot)</p></li>
+<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default Reds</p></li>
+<li><p><strong>vmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default: 1e-5</p></li>
+<li><p><strong>vmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
+<li><p><strong>r_as_periods</strong> (<em>bool</em><em>, </em><em>optional</em>) – show radial axis as periods instead of frequency, default: True</p></li>
+<li><p><strong>rmin</strong> (<em>float</em><em>, </em><em>optional</em>) – mininum frequency/period to be shown, default: None</p></li>
+<li><p><strong>rmax</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum frequency/period to be shown, default: None</p></li>
+<li><p><strong>levels</strong> (<em>int</em><em>, </em><em>list</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – for contour plots: how many levels, default:10
+or a list of discrete levels e.g. [0.03, 0.04, 0.05]</p></li>
+<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure, default (7, 7)</p></li>
+<li><p><strong>add_colorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Add colorbar to plot, default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>&lt;matplotlib.axes&gt;</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;area_spectrum.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Energy density&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="c1"># first timestep, element 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;patch&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Wave spectrum T&lt;9s&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
