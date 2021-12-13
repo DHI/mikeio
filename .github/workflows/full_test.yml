@@ -28,7 +28,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest pytest-cov
-        pip install mikecore==0.2a0 # TODO Remove this line!
         
     - name: Lint with flake8
       run: |
