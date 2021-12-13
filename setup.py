@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.11.1",
+    version="0.12.a0",
     install_requires=[
         "mikecore>=0.1.4",
         "numpy>=1.15.0.",  # first version with numpy.quantile
