@@ -703,6 +703,9 @@ class EUMType(IntEnum):
     NearBedLoad_per_Length = 110307
     Substance_per_UnitArea = 110308
     AccNearBedLoad_per_Length = 110309
+    ThermalConductivity = 110310
+    DirectionalVariance = 110311
+    SpecificDissipationRate = 110312
 
     def __init__(self, code):
         self.code = code
@@ -1160,6 +1163,7 @@ class EUMUnit(IntEnum):
     pound_per_Feet_per_Second = 2312
     degree50 = 2402
     degree_pow_2 = 2403
+    radian_pow_2 = 2404
     degree_per_meter = 2500
     radian_per_meter = 2501
     degree_per_sec = 2510
@@ -1331,6 +1335,8 @@ class EUMUnit(IntEnum):
     MW_per_meter = 99202
     GW_per_meter = 99203
     kW_per_feet = 99204
+    watt_per_meter_per_degree_celsius = 99220
+    watt_per_feet_per_degree_fahrenheit = 99221
     siemens = 99250
     millisiemens = 99251
     microsiemens = 99252
