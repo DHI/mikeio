@@ -1,10 +1,9 @@
 import warnings
-from typing import Iterable, Sequence, Union, List
+from typing import Iterable, Sequence, Union, Mapping
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
 from copy import deepcopy
-from mikeio.eum import EUMType, ItemInfo
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 from .base import TimeSeries
 
@@ -47,7 +46,7 @@ def _keepdims_by_axis(axis):
     return keepdims
 
 
-def _items_except_Z_coordinate(items):
+def _items_except_Z_coordinate(items) -> Sequence[ItemInfo]:
     if items[0].name == "Z coordinate":
         items = deepcopy(items)
         items.pop(0)
@@ -55,8 +54,8 @@ def _items_except_Z_coordinate(items):
 
 
 def _get_repeated_items(
-    items_in: List[ItemInfo], prefixes: List[str]
-) -> List[ItemInfo]:
+    items_in: Sequence[ItemInfo], prefixes: Sequence[str]
+) -> Sequence[ItemInfo]:
     new_items = []
     for item_in in items_in:
         for prefix in prefixes:
@@ -83,6 +82,97 @@ def _reshape_data_by_axis(data, orig_shape, axis):
         data = [d.reshape(shape) for d in data]
 
     return data
+
+
+class DataArray(TimeSeries):
+
+    deletevalue = 1.0e-35
+
+    def __init__(self, data, time: Union[pd.DatetimeIndex, str], item: ItemInfo = None):
+
+        if not hasattr(data, "shape"):
+            raise ValueError("Data must be ArrayLike, but it lacks a shape property")
+        if not hasattr(data, "ndim"):
+            raise ValueError("Data must be ArrayLike, but it lacks a ndim property")
+        if not hasattr(data, "dtype"):
+            raise ValueError("Data must be ArrayLike, it lacks a dtype property")
+
+        self.data: np.ndarray = data
+        self.time = time
+
+        if item:
+            self.item = item
+        else:
+            self.item = ItemInfo()
+
+    def to_numpy(self) -> np.ndarray:
+        return self.data
+
+    @property
+    def name(self) -> str:
+        return self.item.name
+
+    @name.setter
+    def name(self, value):
+        self.item.name = value
+
+    @property
+    def type(self) -> EUMType:
+        return self.item.type
+
+    @property
+    def unit(self) -> EUMUnit:
+        return self.item.unit
+
+    @property
+    def start_time(self):
+        """First time instance (as datetime)"""
+        return self.time[0].to_pydatetime()
+
+    @property
+    def end_time(self):
+        """Last time instance (as datetime)"""
+        return self.time[-1].to_pydatetime()
+
+    @property
+    def timestep(self):
+        """Time step in seconds if equidistant (and at
+        least two time instances); otherwise None
+        """
+        dt = None
+        if len(self.time) > 1:
+            if self.is_equidistant:
+                dt = (self.time[1] - self.time[0]).total_seconds()
+        return dt
+
+    @property
+    def n_timesteps(self) -> int:
+        """Number of time steps"""
+        return len(self.time)
+
+    @property
+    def n_items(self) -> int:
+        """Number of items"""
+        return 1
+
+    @property
+    def items(self) -> Sequence[ItemInfo]:
+        return [self.item]
+
+    @property
+    def shape(self):
+        return self.data.shape
+
+    def __repr__(self):
+
+        out = ["<mikeio.DataArray>"]
+        out.append(f"Name: {self.name}")
+        out.append(f"Dimensions: {self.shape}")
+        out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+        if not self.is_equidistant:
+            out.append("-- Non-equidistant calendar axis --")
+
+        return out
 
 
 class Dataset(TimeSeries):
@@ -162,64 +252,79 @@ class Dataset(TimeSeries):
       1:  VarFun01 <Water Level> (meter)
     """
 
-    def __init__(
-        self,
-        data: Union[List[np.ndarray], float],
+    @staticmethod
+    def from_data_time_items(
+        data: Union[Sequence[np.ndarray], float],
         time: Union[pd.DatetimeIndex, str],
-        items: Union[List[ItemInfo], List[EUMType], List[str]] = None,
+        items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
     ):
 
-        item_infos: List[ItemInfo] = []
+        # item_infos: List[ItemInfo] = []
 
-        self._deletevalue = Dataset.deletevalue
+        # if isinstance(time, str):
+        #    # default single-step time
+        #    time = pd.date_range(time, periods=1)
 
-        if isinstance(time, str):
-            # default single-step time
-            time = pd.date_range(time, periods=1)
+        # if np.isscalar(data) and isinstance(items, Sequence):
+        #    # create empty dataset
+        #    n_elements = data
+        #    n_items = len(items)
+        #    n_timesteps = len(time)
+        #    data = self.create_empty_data(
+        #        n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
+        #   )
+        # elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
+        #    n_items = len(data)
+        #    n_timesteps = data[0].shape[0]
+        # else:
+        #    raise TypeError(
+        #        f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
+        #    )
 
-        if np.isscalar(data) and isinstance(items, Sequence):
-            # create empty dataset
-            n_elements = data
-            n_items = len(items)
-            n_timesteps = len(time)
-            data = self.create_empty_data(
-                n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
-            )
-        elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
-            n_items = len(data)
-            n_timesteps = data[0].shape[0]
-        else:
-            raise TypeError(
-                f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
-            )
+        # if items is None:
+        #    # default Undefined items
+        #    for j in range(n_items):
+        #        item_infos.append(ItemInfo(f"Item {j+1}"))
+        # else:
+        #    for item in items:
+        #        if isinstance(item, EUMType) or isinstance(item, str):
+        #            item_infos.append(ItemInfo(item))
+        #        elif isinstance(item, ItemInfo):
+        #            item_infos.append(item)
+        #        else:
+        #            raise ValueError(f"items of type: {type(item)} is not supported")
 
-        if items is None:
-            # default Undefined items
-            for j in range(n_items):
-                item_infos.append(ItemInfo(f"Item {j+1}"))
-        else:
-            for item in items:
-                if isinstance(item, EUMType) or isinstance(item, str):
-                    item_infos.append(ItemInfo(item))
-                elif isinstance(item, ItemInfo):
-                    item_infos.append(item)
-                else:
-                    raise ValueError(f"items of type: {type(item)} is not supported")
+        #    if len(items) != n_items:
+        #        raise ValueError(
+        #            f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
+        #        )
 
-            if len(items) != n_items:
-                raise ValueError(
-                    f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
-                )
+        # if len(time) != n_timesteps:
+        #    raise ValueError(
+        #        f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
+        #    )
 
-        if len(time) != n_timesteps:
-            raise ValueError(
-                f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
-            )
+        # self.data = data
+        # self.time = pd.DatetimeIndex(time)
 
-        self.data = data
-        self.time = pd.DatetimeIndex(time)
+        # self._items = item_infos
 
-        self._items = item_infos
+        data_vars = {}
+        for dd, it in zip(data, items):
+            data_vars[it.name] = DataArray(dd, time, it)
+
+        ds = Dataset(data_vars)
+
+        return ds
+
+    def __init__(self, data: Mapping[str, DataArray], time=None, items=None):
+
+        if data is not None and time is not None:
+            ds = Dataset.from_data_time_items(data, time, items)
+            data = ds.data_vars
+
+        self.data_vars = data
+        self.time = list(data.values())[0].time
 
     def __repr__(self):
 
@@ -238,20 +343,17 @@ class Dataset(TimeSeries):
         return str.join("\n", out)
 
     def __len__(self):
-        return len(self.items)
+        return len(self.data_vars)
 
     def __setitem__(self, key, value):
 
+        if not isinstance(value, DataArray):
+            raise ValueError("Use a DataArray")
+
         if isinstance(key, int):
-            self.data[key] = value
+            raise NotImplementedError()
 
-        elif isinstance(key, str):
-            item_lookup = {item.name: i for i, item in enumerate(self.items)}
-            key = item_lookup[key]
-            self.data[key] = value
-        else:
-
-            raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
+        self.data_vars[key] = value
 
     def __getitem__(self, key):
 
@@ -261,34 +363,31 @@ class Dataset(TimeSeries):
             return self.isel(time_steps, axis=0)
 
         if isinstance(key, int):
-            return self.data[key]
+            index = key
+            return list(self.data_vars.values())[index]
 
         if isinstance(key, str):
-            item_lookup = {item.name: i for i, item in enumerate(self.items)}
-            key = item_lookup[key]
-            return self.data[key]
+            return self.data_vars[key]
 
         if isinstance(key, ItemInfo):
             return self.__getitem__(key.name)
 
         if isinstance(key, list):
-            data = []
-            items = []
 
-            item_lookup = {item.name: i for i, item in enumerate(self.items)}
-
+            data_vars = {}
             for v in key:
-                data_item = self.__getitem__(v)
-                if isinstance(v, str):
-                    i = item_lookup[v]
                 if isinstance(v, int):
-                    i = v
+                    d = list(self.data_vars.values())[v]
+                    nkey = d.item.name
+                    data_vars[nkey] = d
+                elif isinstance(v, str):
+                    data_vars[v] = self.__getitem__(v)
+                elif isinstance(v, ItemInfo):
+                    data_vars[v] = self.__getitem__(v.name)
+                else:
+                    raise ValueError(f"indexing with a {type(v)} is not supported")
 
-                item = self.items[i]
-                items.append(item)
-                data.append(data_item)
-
-            return Dataset(data, self.time, items)
+            return Dataset(data_vars)
 
         raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
 
@@ -380,11 +479,7 @@ class Dataset(TimeSeries):
     def copy(self):
         """Returns a copy of this dataset."""
 
-        items = deepcopy(self.items)
-        data = [self[x].copy() for x in self.items]
-        time = self.time.copy()
-
-        return Dataset(data, time, items)
+        return deepcopy(self)
 
     def to_numpy(self):
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
@@ -561,7 +656,7 @@ class Dataset(TimeSeries):
         """Remove time steps where all items are NaN"""
 
         # TODO consider all items
-        x = self[0]
+        x = self[0].to_numpy()
 
         # this seems overly complicated...
         axes = tuple(range(1, x.ndim))
@@ -618,7 +713,7 @@ class Dataset(TimeSeries):
 
         res = []
         for item in items:
-            x = np.take(self[item.name], idx, axis=axis)
+            x = np.take(self[item.name].to_numpy(), idx, axis=axis)
             res.append(x)
 
         ds = Dataset(res, time, items)
@@ -1079,6 +1174,10 @@ class Dataset(TimeSeries):
         return dt
 
     @property
+    def data(self) -> Sequence[np.ndarray]:
+        return [x.to_numpy() for x in self.data_vars.values()]
+
+    @property
     def n_timesteps(self):
         """Number of time steps"""
         return len(self.time)
@@ -1086,11 +1185,11 @@ class Dataset(TimeSeries):
     @property
     def n_items(self):
         """Number of items"""
-        return len(self.items)
+        return len(self.data_vars)
 
     @property
     def items(self):
-        return self._items
+        return [x.item for x in self.data_vars.values()]
 
     @property
     def shape(self):

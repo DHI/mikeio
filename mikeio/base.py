@@ -1,35 +1,39 @@
 from abc import ABC, abstractmethod
+from typing import Sequence
+import pandas as pd
+
+from .dataset import ItemInfo
 
 
 class TimeSeries(ABC):
     @property
     @abstractmethod
-    def start_time(self):
+    def start_time(self) -> pd.Timestamp:
         pass
 
     @property
     @abstractmethod
-    def end_time(self):
+    def end_time(self) -> pd.Timestamp:
         pass
 
     @property
     @abstractmethod
-    def n_timesteps(self):
+    def n_timesteps(self) -> int:
         pass
 
     @property
     @abstractmethod
-    def deletevalue(self):
+    def deletevalue(self) -> float:
         pass
 
     @property
     @abstractmethod
-    def n_items(self):
+    def n_items(self) -> int:
         pass
 
     @property
     @abstractmethod
-    def items(self):
+    def items(self) -> Sequence[ItemInfo]:
         pass
 
 

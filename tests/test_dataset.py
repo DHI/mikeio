@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio import Dataset, Dfsu, Dfs2, Dfs0
+from mikeio import DataArray, Dataset, Dfsu, Dfs2, Dfs0
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 
 
@@ -50,18 +50,16 @@ def test_create_wrong_data_type_error():
 
 def test_get_names():
 
-    data = []
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
-    data.append(d)
-
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
-    items = [ItemInfo("Foo")]
-    ds = Dataset(data, time, items)
+    data_vars = {"Foo": DataArray(data=d, time=time, item=ItemInfo(name="Foo"))}
 
-    assert ds.items[0].name == "Foo"
-    assert ds.items[0].type == EUMType.Undefined
-    assert repr(ds.items[0].unit) == "undefined"
+    ds = Dataset(data_vars)
+
+    assert ds["Foo"].name == "Foo"
+    assert ds["Foo"].type == EUMType.Undefined
+    assert repr(ds["Foo"].unit) == "undefined"
 
 
 def test_select_subset_isel():
@@ -83,8 +81,8 @@ def test_select_subset_isel():
     assert len(selds.items) == 2
     assert len(selds.data) == 2
     assert selds["Foo"].shape == (100, 30)
-    assert selds["Foo"][0, 0] == 2.0
-    assert selds["Bar"][0, 0] == 3.0
+    assert selds["Foo"].to_numpy()[0, 0] == 2.0
+    assert selds["Bar"].to_numpy()[0, 0] == 3.0
 
 
 def test_select_subset_isel_axis_out_of_range_error(ds2):
@@ -176,7 +174,7 @@ def test_select_item_by_name():
     ds = Dataset(data, time, items)
 
     foo_data = ds["Foo"]
-    assert foo_data[0, 10, 0] == 2.0
+    assert foo_data.to_numpy()[0, 10, 0] == 2.0
 
 
 def test_select_multiple_items_by_name():
@@ -197,7 +195,7 @@ def test_select_multiple_items_by_name():
     newds = ds[["Baz", "Foo"]]
     assert newds.items[0].name == "Baz"
     assert newds.items[1].name == "Foo"
-    assert newds["Foo"][0, 10, 0] == 1.5
+    assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
 
     assert len(newds) == 2
 
@@ -219,7 +217,7 @@ def test_select_multiple_items_by_index():
     newds = ds[[2, 0]]
     assert newds.items[0].name == "Baz"
     assert newds.items[1].name == "Foo"
-    assert newds["Foo"][0, 10, 0] == 1.5
+    assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
 
     assert len(newds) == 2
 
@@ -240,7 +238,7 @@ def test_select_item_by_iteminfo():
     foo_item = items[0]
 
     foo_data = ds[foo_item]
-    assert foo_data[0, 10, 0] == 2.0
+    assert foo_data.to_numpy()[0, 10, 0] == 2.0
 
 
 def test_select_subset_isel_multiple_idxs():
@@ -275,16 +273,15 @@ def test_create_undefined():
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
 
-    data = [d1, d2]
-
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
-    # items = 2
-    ds = Dataset(data, time)
+    data = {"Item 1": DataArray(d1, time), "Item 2": DataArray(d2, time)}
+
+    ds = Dataset(data)
 
     assert len(ds.items) == 2
     assert len(ds.data) == 2
-    assert ds.items[0].name == "Item 1"
-    assert ds.items[0].type == EUMType.Undefined
+    assert ds[0].name == "Item 1"
+    assert ds[0].type == EUMType.Undefined
 
 
 def test_create_named_undefined():
@@ -500,18 +497,12 @@ def test_set_data_name():
     items = [ItemInfo("Foo")]
     ds = Dataset([np.zeros((nt, 10))], time, items)
 
-    assert ds["Foo"][0, 0] == 0.0
+    assert ds["Foo"].to_numpy()[0, 0] == 0.0
 
-    ds["Foo"] = np.zeros((nt, 10)) + 1.0
-    assert ds["Foo"][0, 0] == 1.0
-
-    ds[0] = np.zeros((nt, 10)) + 2.0  # Set using position
-    assert ds["Foo"][0, 0] == 2.0  # Read using name
-
-    with pytest.raises(ValueError):
-        ds[[0, 1]] = (
-            np.zeros((nt, 10)) + 2.0
-        )  # You can't set data for several items (at least not yet)
+    ds["Foo"] = DataArray(
+        data=np.zeros((nt, 10)) + 1.0, time=time, item=ItemInfo(name="Foo")
+    )
+    assert ds["Foo"].to_numpy()[0, 0] == 1.0
 
 
 def test_get_bad_name():
@@ -749,14 +740,14 @@ def test_copy():
 
     assert len(ds.items) == 2
     assert len(ds.data) == 2
-    assert ds.items[0].name == "Foo"
+    assert ds[0].name == "Foo"
 
     ds2 = ds.copy()
 
-    ds2.items[0].name = "New name"
+    ds2[0].name = "New name"
 
-    assert ds2.items[0].name == "New name"
-    assert ds.items[0].name == "Foo"
+    assert ds2[0].name == "New name"
+    assert ds[0].name == "Foo"
 
 
 def test_dropna():
@@ -972,19 +963,6 @@ def test_create_infer_name_from_eum():
     assert isinstance(ds.items[0], ItemInfo)
     assert ds.items[0].type == EUMType.Wind_speed
     assert ds.items[0].name == "Wind speed"
-
-
-def test_init():
-    n_elements = 45
-    data = n_elements
-    time = "2018-01-01"
-    items = [ItemInfo("Foo")]
-    ds = Dataset(data, time, items)
-
-    assert ds.n_timesteps == 1
-    assert ds.start_time == datetime(2018, 1, 1, 0, 0, 0)
-    assert ds.n_elements == n_elements
-    assert ds.items[0].name == "Foo"
 
 
 def test_add_scalar(ds1):
