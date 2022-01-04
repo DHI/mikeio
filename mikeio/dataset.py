@@ -252,8 +252,8 @@ class DataArray(TimeSeries):
         out.append(f"Name: {self.name}")
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
-        if not self.is_equidistant:
-            out.append("-- Non-equidistant calendar axis --")
+        # if not self.is_equidistant:
+        #    out.append("-- Non-equidistant calendar axis --")
 
         return out
 
@@ -572,6 +572,20 @@ class Dataset(TimeSeries):
         """
         return np.stack(self.data)
 
+    def rename(self, mapper: Mapping[str, str], inplace=False):
+
+        if inplace:
+            ds = self
+        else:
+            ds = self.copy()
+
+        for key, value in mapper.items():
+            da = ds.data_vars.pop(key)
+            da.name = value
+            ds.data_vars[value] = da
+
+        return ds
+
     @classmethod
     def combine(cls, *datasets):
         """Combine n Datasets either along items or time axis
@@ -652,10 +666,10 @@ class Dataset(TimeSeries):
             raise ValueError("All timesteps must match")
         ds = self.copy() if copy else self
 
-        for j in range(other.n_items):
-            if other.items[j].name != "Z coordinate":  #
-                ds.items.append(other.items[j])
-                ds.data.append(other.data[j])
+        for key, value in other.data_vars.items():
+            if key != "Z coordinate":
+                ds[key] = value
+
         return ds
 
     def concat(self, other, inplace=False):

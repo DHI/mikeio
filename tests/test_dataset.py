@@ -1131,12 +1131,15 @@ def test_combine_by_time_2():
 def test_combine_by_item():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide1.dfs1")
-    ds2.items[0].name = ds2.items[0].name + " v2"
+    old_name = ds2[0].name
+    new_name = old_name + " v2"
+    # ds2[0].name = ds2[0].name + " v2"
+    ds2.rename({old_name: new_name}, inplace=True)
     ds3 = Dataset.combine(ds1, ds2)
 
     assert isinstance(ds3, Dataset)
     assert ds3.n_items == 2
-    assert ds3.items[1].name == ds1.items[0].name + " v2"
+    assert ds3[1].name == ds1[0].name + " v2"
 
 
 def test_combine_by_item_dfsu_3d():
