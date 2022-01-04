@@ -234,9 +234,8 @@ class Dataset(TimeSeries):
                 value.item = ItemInfo(name=key)
 
             # TODO Replace bad chars like space, comma, etc.
-            setattr(
-                self, key, value
-            )  # to be able to use ds.Salinity instead of ds["Salinity"] and have TAB completion
+            # TODO verify that this is only a pointer to the same data, and not a copy
+            setattr(self, key, value)
 
         self.data_vars = data
 
@@ -269,6 +268,9 @@ class Dataset(TimeSeries):
         if isinstance(key, int):
             raise NotImplementedError()
 
+        # TODO this is easy to use, but most likely duplicates the data, which is bad...
+        # TODO Replace bad chars like space, comma, etc.
+        setattr(self, key, value)
         self.data_vars[key] = value
 
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:

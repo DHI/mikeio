@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Sequence, Union, Mapping
+from typing import Iterable, Optional, Sequence, Union, Mapping
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -27,13 +27,32 @@ class DataArray(TimeSeries):
                 "Data must be ArrayLike, e.g. numpy array, it lacks a dtype property"
             )
 
-        self.data: np.ndarray = data
+        self._values = data
         self.time = time
-        self.item = item
+
+        if isinstance(item, ItemInfo):
+            self.item = item
+        else:
+            raise ValueError("Item must be an ItemInfo")
+
+    @property
+    def values(self):
+        return self._values
+
+    @values.setter
+    def values(self, value):
+        if value.shape != self._values.shape:
+            raise ValueError("Shape of new data is wrong")
+
+        self._values = value
 
     def __getitem__(self, key) -> "DataArray":
-        da = self.copy()
-        da.data = da.data[key]
+
+        subset = self._values[key].copy()
+        # TODO similar subsetting on geometry
+
+        da = DataArray(data=subset, time=self.time, item=self.item)
+
         return da
 
     def plot(self, ax=None):
@@ -45,19 +64,19 @@ class DataArray(TimeSeries):
         if ax is None:
             fig, ax = plt.subplots()
 
-        ax.plot(self.time, self.data)
+        ax.plot(self.time, self.values)
         ax.set_xlabel("time")
         ax.set_ylabel(f"{self.name} [{self.unit.name}]")
 
         return ax
 
     def to_numpy(self) -> np.ndarray:
-        return self.data
+        return self._values
 
     def flipud(self) -> "DataArray":
         """Flip updside down"""
 
-        self.data = np.flip(self.data, axis=1)
+        self.values = np.flip(self.values, axis=1)
         return self
 
     def __radd__(self, other):
@@ -91,36 +110,36 @@ class DataArray(TimeSeries):
     def _add_dataarray(self, other, sign=1.0):
         # self._check_datasets_match(other) # TODO
         try:
-            data = self.data + sign * other.data
+            data = self.values + sign * other.values
         except:
             raise ValueError("Could not add data")
 
         new_da = self.copy()
 
-        new_da.data = data
+        new_da.values = data
 
         return new_da
 
     def _add_value(self, value):
         try:
-            data = value + self.data
+            data = value + self.values
         except:
             raise ValueError(f"{value} could not be added to DataArray")
 
         new_da = self.copy()
 
-        new_da.data = data
+        new_da.values = data
 
         return new_da
 
     def _multiply_value(self, value):
         try:
-            data = value * self.data
+            data = value * self.values
         except:
             raise ValueError(f"{value} could not be multiplied to DataArray")
         new_da = self.copy()
 
-        new_da.data = data
+        new_da.values = data
 
         return new_da
 
@@ -129,8 +148,11 @@ class DataArray(TimeSeries):
         return deepcopy(self)
 
     @property
-    def name(self) -> str:
-        return self.item.name
+    def name(self) -> Optional[str]:
+        if self.item.name:
+            return self.item.name
+        else:
+            return None
 
     @name.setter
     def name(self, value):
@@ -153,6 +175,13 @@ class DataArray(TimeSeries):
     def end_time(self):
         """Last time instance (as datetime)"""
         return self.time[-1].to_pydatetime()
+
+    @property
+    def is_equidistant(self):
+        """Is Dataset equidistant in time?"""
+        if len(self.time) < 3:
+            return True
+        return len(self.time.to_series().diff().dropna().unique()) == 1
 
     @property
     def timestep(self):
@@ -181,23 +210,24 @@ class DataArray(TimeSeries):
 
     @property
     def shape(self):
-        return self.data.shape
+        return self.values.shape
 
     @property
     def ndim(self):
-        return self.data.ndim
+        return self.values.ndim
 
     @property
     def dtype(self):
-        return self.data.dtype
+        return self.values.dtype
 
     def __repr__(self):
 
         out = ["<mikeio.DataArray>"]
-        out.append(f"Name: {self.name}")
+        if self.name is not None:
+            out.append(f"Name: {self.name}")
         out.append(f"Dimensions: {self.shape}")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
-        # if not self.is_equidistant:
-        #    out.append("-- Non-equidistant calendar axis --")
+        if not self.is_equidistant:
+            out.append("-- Non-equidistant calendar axis --")
 
         return str.join("\n", out)

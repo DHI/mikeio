@@ -64,7 +64,7 @@ def test_get_names():
 
 def test_index_with_attribute():
 
-    nt = 100
+    nt = 10000
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     data_vars = {
@@ -75,6 +75,13 @@ def test_index_with_attribute():
     ds = Dataset(data_vars)
     assert ds["Foo"].name == "Foo"
     assert ds.Bar.name == "Bar"
+
+    assert ds["Foo"] is ds.Foo  # This is the same object
+
+    ds["Foo"] == ds.Foo + 2.0
+    assert (
+        ds["Foo"] is ds.Foo
+    )  # This is now modfied, but both methods points to the same object
 
 
 def test_select_subset_isel():
@@ -507,7 +514,7 @@ def test_get_data_name():
     assert ds["Foo"].shape == (100, 100, 30)
 
 
-def test_set_data_name():
+def test_modify_selected_variable():
 
     nt = 100
 
@@ -515,12 +522,13 @@ def test_set_data_name():
     items = [ItemInfo("Foo")]
     ds = Dataset([np.zeros((nt, 10))], time, items)
 
-    assert ds["Foo"].to_numpy()[0, 0] == 0.0
+    assert ds.Foo.to_numpy()[0, 0] == 0.0
 
-    ds["Foo"] = DataArray(
-        data=np.zeros((nt, 10)) + 1.0, time=time, item=ItemInfo(name="Foo")
-    )
-    assert ds["Foo"].to_numpy()[0, 0] == 1.0
+    foo = ds.Foo
+    foo_mod = foo + 1.0
+
+    ds["Foo"] = foo_mod
+    assert ds.Foo.to_numpy()[0, 0] == 1.0
 
 
 def test_get_bad_name():
@@ -1019,9 +1027,11 @@ def test_multiple_bad_value(ds1):
 
 def test_sub_scalar(ds1):
     ds2 = ds1 - 10.0
+    assert isinstance(ds2, Dataset)
     assert np.all(ds1[0].to_numpy() - ds2[0].to_numpy() == 10.0)
 
     ds3 = 10.0 - ds1
+    assert isinstance(ds3, Dataset)
     assert np.all(ds3[0].to_numpy() == 9.9)
     assert np.all(ds3[1].to_numpy() == 9.8)
 
