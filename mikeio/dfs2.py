@@ -302,7 +302,7 @@ class Dfs2(_Dfs123):
         import matplotlib.cm as cm
 
         if len(z) == 1:  # if single-item Dataset
-            z = z[0].copy()
+            z = z[0].to_numpy().copy()
 
             if z.shape[0] == 1:
                 z = np.squeeze(z).copy()  # handles single time step

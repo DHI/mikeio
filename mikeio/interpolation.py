@@ -1,5 +1,7 @@
 import numpy as np
-from .dataset import Dataset
+
+from mikeio.eum import ItemInfo
+from .dataset import Dataset, DataArray
 
 # class Interpolation2D:
 def get_idw_interpolant(distances, p=2):
@@ -66,7 +68,21 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     if isinstance(data, Dataset):
         is_dataset = True
         ds = data.copy()
-        data = ds.data
+
+        ni = len(elem_ids)
+
+        interp_data_vars = {}
+
+        for key, da in ds.data_vars.items():
+            nt, ne = da.shape
+            idatitem = np.empty(shape=(nt, ni))
+            for step in range(nt):
+                idatitem[step, :] = _interp_itemstep(da[step, :], elem_ids, weights)
+
+            interp_data_vars[key] = DataArray(data=idatitem, time=da.time, item=da.item)
+
+        new_ds = Dataset(interp_data_vars)
+        return new_ds
 
     is_single_item = False
     if isinstance(data, np.ndarray):
@@ -90,9 +106,6 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
         idat.append(idatitem)
 
-    if is_dataset:
-        ds.data = idat
-        idat = ds
     if is_single_item:
         idat = idat[0]
 

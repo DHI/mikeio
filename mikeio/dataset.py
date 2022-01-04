@@ -109,7 +109,7 @@ class DataArray(TimeSeries):
         if item:
             self.item = item
         else:
-            self.item = ItemInfo()
+            self.item = ItemInfo("Undefined")  # TODO
 
     def __getitem__(self, key):
         return self.data[key]
@@ -122,6 +122,74 @@ class DataArray(TimeSeries):
 
         self.data = np.flip(self.data, axis=1)
         return self
+
+    def __radd__(self, other):
+        return self.__add__(other)
+
+    def __add__(self, other):
+        if isinstance(other, self.__class__):
+            return self._add_datarray(other)
+        else:
+            return self._add_value(other)
+
+    def __rsub__(self, other):
+        ds = self.__mul__(-1.0)
+        return other + ds
+
+    def __sub__(self, other):
+        if isinstance(other, self.__class__):
+            return self._add_dataarray(other, sign=-1.0)
+        else:
+            return self._add_value(-other)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __mul__(self, other):
+        if isinstance(other, self.__class__):
+            raise ValueError("Multiplication is not possible for two DataArrays")
+        else:
+            return self._multiply_value(other)
+
+    def _add_dataarray(self, other, sign=1.0):
+        # self._check_datasets_match(other) # TODO
+        try:
+            data = self.data + sign * other.data
+        except:
+            raise ValueError("Could not add data")
+
+        new_da = self.copy()
+
+        new_da.data = data
+
+        return new_da
+
+    def _add_value(self, value):
+        try:
+            data = value + self.data
+        except:
+            raise ValueError(f"{value} could not be added to DataArray")
+
+        new_da = self.copy()
+
+        new_da.data = data
+
+        return new_da
+
+    def _multiply_value(self, value):
+        try:
+            data = value * self.data
+        except:
+            raise ValueError(f"{value} could not be multiplied to DataArray")
+        new_da = self.copy()
+
+        new_da.data = data
+
+        return new_da
+
+    def copy(self):
+
+        return deepcopy(self)
 
     @property
     def name(self) -> str:
@@ -433,7 +501,10 @@ class Dataset(TimeSeries):
     def _add_dataset(self, other, sign=1.0):
         self._check_datasets_match(other)
         try:
-            data = [self[x] + sign * other[y] for x, y in zip(self.items, other.items)]
+            data = [
+                self[x].to_numpy() + sign * other[y].to_numpy()
+                for x, y in zip(self.items, other.items)
+            ]
         except:
             raise ValueError("Could not add data in Dataset")
         time = self.time.copy()
@@ -461,7 +532,7 @@ class Dataset(TimeSeries):
 
     def _add_value(self, value):
         try:
-            data = [value + self[x] for x in self.items]
+            data = [value + self[x].to_numpy() for x in self.items]
         except:
             raise ValueError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
@@ -470,7 +541,7 @@ class Dataset(TimeSeries):
 
     def _multiply_value(self, value):
         try:
-            data = [value * self[x] for x in self.items]
+            data = [value * self[x].to_numpy() for x in self.items]
         except:
             raise ValueError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)

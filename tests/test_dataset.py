@@ -37,8 +37,8 @@ def ds2():
     return Dataset(data, time, items)
 
 
-def test_dataarray_indexing():
-
+@pytest.fixture
+def da1():
     nt = 10
     start = 10.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
@@ -46,7 +46,12 @@ def test_dataarray_indexing():
         data=np.arange(start, start + nt, dtype=float), time=time, item="Foo"
     )
 
-    assert da[3] == 13.0
+    return da
+
+
+def test_dataarray_indexing(da1: DataArray):
+
+    assert da1[3] == 13.0
 
 
 def test_create_wrong_data_type_error():
@@ -982,11 +987,11 @@ def test_create_infer_name_from_eum():
 
 def test_add_scalar(ds1):
     ds2 = ds1 + 10.0
-    assert np.all(ds2[0] - ds1[0] == 10.0)
+    assert np.all(ds2[0].to_numpy() - ds1[0].to_numpy() == 10.0)
 
     ds3 = 10.0 + ds1
-    assert np.all(ds3[0] == ds2[0])
-    assert np.all(ds3[1] == ds2[1])
+    assert np.all(ds3[0].to_numpy() == ds2[0].to_numpy())
+    assert np.all(ds3[1].to_numpy() == ds2[1].to_numpy())
 
 
 def test_add_inconsistent_dataset(ds1):
@@ -1016,33 +1021,33 @@ def test_multiple_bad_value(ds1):
 
 def test_sub_scalar(ds1):
     ds2 = ds1 - 10.0
-    assert np.all(ds1[0] - ds2[0] == 10.0)
+    assert np.all(ds1[0].to_numpy() - ds2[0].to_numpy() == 10.0)
 
     ds3 = 10.0 - ds1
-    assert np.all(ds3[0] == 9.9)
-    assert np.all(ds3[1] == 9.8)
+    assert np.all(ds3[0].to_numpy() == 9.9)
+    assert np.all(ds3[1].to_numpy() == 9.8)
 
 
 def test_mul_scalar(ds1):
     ds2 = ds1 * 2.0
-    assert np.all(ds2[0] * 0.5 == ds1[0])
+    assert np.all(ds2[0].to_numpy() * 0.5 == ds1[0].to_numpy())
 
     ds3 = 2.0 * ds1
-    assert np.all(ds3[0] == ds2[0])
-    assert np.all(ds3[1] == ds2[1])
+    assert np.all(ds3[0].to_numpy() == ds2[0].to_numpy())
+    assert np.all(ds3[1].to_numpy() == ds2[1].to_numpy())
 
 
 def test_add_dataset(ds1, ds2):
     ds3 = ds1 + ds2
-    assert np.all(ds3[0] == 1.1)
-    assert np.all(ds3[1] == 2.2)
+    assert np.all(ds3[0].to_numpy() == 1.1)
+    assert np.all(ds3[1].to_numpy() == 2.2)
 
     ds4 = ds2 + ds1
-    assert np.all(ds3[0] == ds4[0])
-    assert np.all(ds3[1] == ds4[1])
+    assert np.all(ds3[0].to_numpy() == ds4[0].to_numpy())
+    assert np.all(ds3[1].to_numpy() == ds4[1].to_numpy())
 
     ds2b = ds2.copy()
-    ds2b.items[0] = ItemInfo(EUMType.Wind_Velocity)
+    ds2b[0].item = ItemInfo(EUMType.Wind_Velocity)
     with pytest.raises(ValueError):
         # item type does not match
         ds1 + ds2b
@@ -1058,8 +1063,8 @@ def test_add_dataset(ds1, ds2):
 
 def test_sub_dataset(ds1, ds2):
     ds3 = ds2 - ds1
-    assert np.all(ds3[0] == 0.9)
-    assert np.all(ds3[1] == 1.8)
+    assert np.all(ds3[0].to_numpy() == 0.9)
+    assert np.all(ds3[1].to_numpy() == 1.8)
 
 
 def test_non_equidistant():
