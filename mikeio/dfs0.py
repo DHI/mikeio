@@ -344,7 +344,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def to_dataframe(self, unit_in_name=False, round_time="ms"):
+    def to_dataframe(self, unit_in_name=False, round_time="ms") -> pd.DataFrame:
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
 

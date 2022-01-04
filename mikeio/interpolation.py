@@ -79,6 +79,8 @@ def interp2d(data, elem_ids, weights=None, shape=None):
             for step in range(nt):
                 idatitem[step, :] = _interp_itemstep(da[step, :], elem_ids, weights)
 
+            if shape:
+                idatitem = idatitem.reshape((nt, *shape))
             interp_data_vars[key] = DataArray(data=idatitem, time=da.time, item=da.item)
 
         new_ds = Dataset(interp_data_vars)

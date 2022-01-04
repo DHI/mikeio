@@ -204,7 +204,9 @@ class Dfs3(_Dfs123):
 
         return data
 
-    def read(self, items=None, layers=None, coordinates=None, time_steps=None):
+    def read(
+        self, items=None, layers=None, coordinates=None, time_steps=None
+    ) -> Dataset:
         """Function: Read data from a dfs3 file
 
         Usage:

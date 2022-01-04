@@ -239,12 +239,16 @@ class DataArray(TimeSeries):
         return 1
 
     @property
-    def items(self) -> Sequence[ItemInfo]:
+    def items(self) -> Sequence[ItemInfo]:  # Sequence with a single element!
         return [self.item]
 
     @property
     def shape(self):
         return self.data.shape
+
+    @property
+    def dtype(self):
+        return self.data.dtype
 
     def __repr__(self):
 
@@ -1210,6 +1214,10 @@ class Dataset(TimeSeries):
         -------
         pd.DataFrame
         """
+
+        if len(self.data[0].shape) != 1:
+            self = self.squeeze()
+
         if len(self.data[0].shape) != 1:
             raise ValueError(
                 "Only data with a single dimension can be converted to a dataframe. Hint: use `isel` to create a subset."

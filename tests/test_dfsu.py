@@ -368,7 +368,7 @@ def test_dfsu_to_dfs0_via_dataframe(tmpdir):
     dfs0 = Dfs0(outfilename)
     newds = dfs0.read()
 
-    assert newds.items[0].name == ds.items[0].name
+    assert newds[0].name == ds[0].name
     assert ds.time[0] == newds.time[0]
     assert ds.time[-1] == newds.time[-1]
 

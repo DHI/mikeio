@@ -443,7 +443,7 @@ def test_quantile_dfsu(tmpdir):
     org = mikeio.read(infilename).quantile(q=0.1, axis=0)
     q10 = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], q10[0])
+    assert np.allclose(org[0].to_numpy(), q10[0].to_numpy())
 
 
 def test_quantile_dfsu_buffer_size(tmpdir):
@@ -455,7 +455,7 @@ def test_quantile_dfsu_buffer_size(tmpdir):
     org = mikeio.read(infilename).quantile(q=0.1, axis=0)
     q10 = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], q10[0])
+    assert np.allclose(org[0].to_numpy(), q10[0].to_numpy())
 
 
 def test_quantile_dfs2(tmpdir):
@@ -467,7 +467,7 @@ def test_quantile_dfs2(tmpdir):
     org = mikeio.read(infilename).quantile(q=0.9, axis=0)
     q90 = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], q90[0])
+    assert np.allclose(org[0].to_numpy(), q90[0].to_numpy())
 
 
 def test_quantile_dfs0(tmpdir):
@@ -479,7 +479,7 @@ def test_quantile_dfs0(tmpdir):
     org = mikeio.read(infilename).quantile(q=[0.01, 0.5], axis=0)
     qnt = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], qnt[0])
+    assert np.allclose(org[0].to_numpy(), qnt[0].to_numpy())
     # assert np.allclose(org[5], qnt[5])
 
 

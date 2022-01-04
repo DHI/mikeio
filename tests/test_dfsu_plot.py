@@ -97,7 +97,7 @@ def test_plot_dfsu_squeeze():
     dfs = Dfsu(filename)
     data = dfs.read(items=0, time_steps=0)
     dfs.plot(z=data)  # 1 item-dataset
-    dfs.plot(z=data[0])  # 1 time-step-dataset
+    dfs.plot(z=data[0])  # 1 time-step-dataarray
     assert True
 
 

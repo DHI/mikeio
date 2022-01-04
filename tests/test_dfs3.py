@@ -9,10 +9,11 @@ from mikeio.eum import EUMType, ItemInfo
 def test_read_dfs3():
     dfs = Dfs3("tests/testdata/Grid1.dfs3")
     ds = dfs.read()
-    assert len(ds.data) == 2
-    assert len(ds.time) == 30
-    assert ds.data[0].shape == (30, 10, 10, 10)  # t  # z  # y  # x
-    assert ds.items[0].name == "Untitled"
+    assert ds.n_items == 2
+    assert ds.n_timesteps == 30
+    da = ds[0]
+    assert da.shape == (30, 10, 10, 10)  # t  # z  # y  # x
+    assert da.name == "Item 1"
 
 
 def test_write_single_item(tmpdir):

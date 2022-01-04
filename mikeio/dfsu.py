@@ -20,7 +20,7 @@ from mikecore.MeshFile import MeshFile
 from mikecore.MeshBuilder import MeshBuilder
 
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .dataset import Dataset
+from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
 from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
@@ -1575,8 +1575,10 @@ class _UnstructuredGeometry:
                 if label is None:
                     label = "Bathymetry (m)"
         else:
-            if len(z) == 1:  # if single-item Dataset
-                z = z[0].copy()
+            if isinstance(z, DataArray):
+                z = z.to_numpy().copy()
+            if isinstance(z, Dataset) and len(z) == 1:  # if single-item Dataset
+                z = z[0].to_numpy().copy()
             if len(z) != ne:
                 z = np.squeeze(z).copy()  # handles single time step
                 if len(z) != ne:
