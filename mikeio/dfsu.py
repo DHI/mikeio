@@ -65,7 +65,6 @@ class _UnstructuredGeometry:
 
         self._boundary_polylines = None
 
-
     def __repr__(self):
         out = []
         out.append("Unstructured Geometry")
