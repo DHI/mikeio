@@ -259,7 +259,7 @@ class DataArray(TimeSeries):
         # if not self.is_equidistant:
         #    out.append("-- Non-equidistant calendar axis --")
 
-        return out
+        return str.join("\n", out)
 
 
 class Dataset(TimeSeries):
@@ -676,15 +676,13 @@ class Dataset(TimeSeries):
 
         return ds
 
-    def concat(self, other, inplace=False):
+    def concat(self, other):
         """Concatenate this Dataset with data from other Dataset
 
         Parameters
         ---------
         other: Dataset
             Other dataset to concatenate with
-        inplace: bool, optional
-            Default is to return a new dataset
 
         Returns
         -------
@@ -703,12 +701,10 @@ class Dataset(TimeSeries):
         >>> ds3.n_timesteps
         4
         """
-        if inplace:
-            ds = self._concat_time(other, copy=False)
-            self.data = ds.data
-            self.time = ds.time
-        else:
-            return self._concat_time(other, copy=True)
+
+        ds = self._concat_time(other, copy=True)
+
+        return ds
 
     def _concat_time(self, other, copy=True):
         self._check_all_items_match(other)
