@@ -732,14 +732,14 @@ def test_nanquantile():
     dsq1 = ds.quantile(q=q)
     dsq2 = ds.nanquantile(q=q)
 
-    assert np.isnan(dsq1[0])
-    assert not np.isnan(dsq2[0])
+    assert np.isnan(dsq1[0].to_numpy())
+    assert not np.isnan(dsq2[0].to_numpy())
 
-    qnt = np.quantile(ds[0], q=q)
-    nqnt = np.nanquantile(ds[0], q=q)
+    qnt = np.quantile(ds[0].to_numpy(), q=q)
+    nqnt = np.nanquantile(ds[0].to_numpy(), q=q)
 
     assert np.isnan(qnt)
-    assert dsq2[0] == nqnt
+    assert dsq2[0].to_numpy() == nqnt
 
 
 def test_copy():

@@ -285,7 +285,7 @@ class Dataset(TimeSeries):
             n_elements = data
             n_items = len(items)
             n_timesteps = len(time)
-            data = self.create_empty_data(
+            data = Dataset.create_empty_data(
                 n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
             )
         elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
@@ -753,7 +753,7 @@ class Dataset(TimeSeries):
         keepdims = _keepdims_by_axis(axis)
 
         res = [
-            func(self[item.name], axis=axis, keepdims=keepdims, **kwargs)
+            func(self[item.name].to_numpy(), axis=axis, keepdims=keepdims, **kwargs)
             for item in items
         ]
 
@@ -830,7 +830,9 @@ class Dataset(TimeSeries):
 
         res = []
         for item in items_in:
-            qdat = func(self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs)
+            qdat = func(
+                self[item.name].to_numpy(), q=q, axis=axis, keepdims=keepdims, **kwargs
+            )
             for j in range(len(qvec)):
                 qdat_item = qdat[j, ...] if len(qvec) > 1 else qdat
                 res.append(qdat_item)
@@ -1014,7 +1016,7 @@ class Dataset(TimeSeries):
 
         time = self.time
 
-        res = [np.squeeze(self[item.name]) for item in items]
+        res = [np.squeeze(self[item.name].to_numpy()) for item in items]
 
         ds = Dataset(res, time, items)
         return ds
@@ -1123,9 +1125,6 @@ class Dataset(TimeSeries):
         -------
         pd.DataFrame
         """
-        if len(self.data[0].shape) != 1:
-            self = self.squeeze()
-
         if len(self.data[0].shape) != 1:
             raise ValueError(
                 "Only data with a single dimension can be converted to a dataframe. Hint: use `isel` to create a subset."
