@@ -91,11 +91,17 @@ class DataArray(TimeSeries):
     def __init__(self, data, time: Union[pd.DatetimeIndex, str], item: ItemInfo = None):
 
         if not hasattr(data, "shape"):
-            raise ValueError("Data must be ArrayLike, but it lacks a shape property")
+            raise TypeError(
+                "Data must be ArrayLike, e.g. numpy array, but it lacks a shape property"
+            )
         if not hasattr(data, "ndim"):
-            raise ValueError("Data must be ArrayLike, but it lacks a ndim property")
+            raise TypeError(
+                "Data must be ArrayLike, e.g. numpy array, but it lacks a ndim property"
+            )
         if not hasattr(data, "dtype"):
-            raise ValueError("Data must be ArrayLike, it lacks a dtype property")
+            raise TypeError(
+                "Data must be ArrayLike, e.g. numpy array, it lacks a dtype property"
+            )
 
         self.data: np.ndarray = data
         self.time = time
@@ -105,8 +111,17 @@ class DataArray(TimeSeries):
         else:
             self.item = ItemInfo()
 
+    def __getitem__(self, key):
+        return self.data[key]
+
     def to_numpy(self) -> np.ndarray:
         return self.data
+
+    def flipud(self) -> "DataArray":
+        """Flip updside down"""
+
+        self.data = np.flip(self.data, axis=1)
+        return self
 
     @property
     def name(self) -> str:
@@ -259,58 +274,54 @@ class Dataset(TimeSeries):
         items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
     ):
 
-        # item_infos: List[ItemInfo] = []
+        item_infos = []
 
-        # if isinstance(time, str):
-        #    # default single-step time
-        #    time = pd.date_range(time, periods=1)
+        if isinstance(time, str):
+            # default single-step time
+            time = pd.date_range(time, periods=1)
 
-        # if np.isscalar(data) and isinstance(items, Sequence):
-        #    # create empty dataset
-        #    n_elements = data
-        #    n_items = len(items)
-        #    n_timesteps = len(time)
-        #    data = self.create_empty_data(
-        #        n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
-        #   )
-        # elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
-        #    n_items = len(data)
-        #    n_timesteps = data[0].shape[0]
-        # else:
-        #    raise TypeError(
-        #        f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
-        #    )
+        if np.isscalar(data) and isinstance(items, Sequence):
+            # create empty dataset
+            n_elements = data
+            n_items = len(items)
+            n_timesteps = len(time)
+            data = self.create_empty_data(
+                n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
+            )
+        elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
+            n_items = len(data)
+            n_timesteps = data[0].shape[0]
+        else:
+            raise TypeError(
+                f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
+            )
 
-        # if items is None:
-        #    # default Undefined items
-        #    for j in range(n_items):
-        #        item_infos.append(ItemInfo(f"Item {j+1}"))
-        # else:
-        #    for item in items:
-        #        if isinstance(item, EUMType) or isinstance(item, str):
-        #            item_infos.append(ItemInfo(item))
-        #        elif isinstance(item, ItemInfo):
-        #            item_infos.append(item)
-        #        else:
-        #            raise ValueError(f"items of type: {type(item)} is not supported")
+        if items is None:
+            # default Undefined items
+            for j in range(n_items):
+                item_infos.append(ItemInfo(f"Item {j+1}"))
+        else:
+            for item in items:
+                if isinstance(item, EUMType) or isinstance(item, str):
+                    item_infos.append(ItemInfo(item))
+                elif isinstance(item, ItemInfo):
+                    item_infos.append(item)
+                else:
+                    raise ValueError(f"items of type: {type(item)} is not supported")
 
-        #    if len(items) != n_items:
-        #        raise ValueError(
-        #            f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
-        #        )
+            if len(items) != n_items:
+                raise ValueError(
+                    f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
+                )
 
-        # if len(time) != n_timesteps:
-        #    raise ValueError(
-        #        f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
-        #    )
-
-        # self.data = data
-        # self.time = pd.DatetimeIndex(time)
-
-        # self._items = item_infos
+        if len(time) != n_timesteps:
+            raise ValueError(
+                f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
+            )
+        time = pd.DatetimeIndex(time)
 
         data_vars = {}
-        for dd, it in zip(data, items):
+        for dd, it in zip(data, item_infos):
             data_vars[it.name] = DataArray(dd, time, it)
 
         ds = Dataset(data_vars)
@@ -355,7 +366,7 @@ class Dataset(TimeSeries):
 
         self.data_vars[key] = value
 
-    def __getitem__(self, key):
+    def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
 
         if isinstance(key, slice):
             s = self.time.slice_indexer(key.start, key.stop)
@@ -667,8 +678,9 @@ class Dataset(TimeSeries):
 
     def flipud(self):
         """Flip dataset updside down"""
-
-        self.data = [np.flip(self[x], axis=1) for x in self.items]
+        self.data_vars = {
+            key: value.flipud() for (key, value) in self.data_vars.items()
+        }
         return self
 
     def isel(self, idx, axis=1):
@@ -1023,7 +1035,7 @@ class Dataset(TimeSeries):
         dt: float or pd.DatetimeIndex or Dataset
             output timestep in seconds
         method: str or int, optional
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.
+            Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
         extrapolate: bool, optional
             Default True. If False, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If True, out of bounds values are assigned fill_value
         fill_value: float or array-like, optional
@@ -1070,19 +1082,28 @@ class Dataset(TimeSeries):
         t_out = t_out_index.values.astype(float)
 
         data = [
-            self._interpolate_item(t_in, t_out, item, method, extrapolate, fill_value)
-            for item in self
+            self._interpolate_item(t_in, t_out, da, method, extrapolate, fill_value)
+            for da in self
         ]
 
         return Dataset(data, t_out_index, self.items.copy())
 
     @staticmethod
-    def _interpolate_item(intime, outtime, dataitem, method, extrapolate, fill_value):
+    def _interpolate_item(
+        intime,
+        outtime,
+        dataarray: DataArray,
+        method: Union[str, int],
+        extrapolate: bool,
+        fill_value: float,
+    ):
         from scipy.interpolate import interp1d
+
+        data = dataarray.to_numpy()
 
         interpolator = interp1d(
             intime,
-            dataitem,
+            data,
             axis=0,
             kind=method,
             bounds_error=not extrapolate,

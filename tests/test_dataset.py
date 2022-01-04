@@ -37,6 +37,18 @@ def ds2():
     return Dataset(data, time, items)
 
 
+def test_dataarray_indexing():
+
+    nt = 10
+    start = 10.0
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    da = DataArray(
+        data=np.arange(start, start + nt, dtype=float), time=time, item="Foo"
+    )
+
+    assert da[3] == 13.0
+
+
 def test_create_wrong_data_type_error():
 
     data = ["item 1", "item 2"]
@@ -274,7 +286,10 @@ def test_create_undefined():
     d2 = np.zeros([nt])
 
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
-    data = {"Item 1": DataArray(d1, time), "Item 2": DataArray(d2, time)}
+    data = {
+        "Item 1": DataArray(d1, time, item=ItemInfo("Item 1")),  # TODO redundant name
+        "Item 2": DataArray(d2, time, item=ItemInfo("Item 2")),
+    }
 
     ds = Dataset(data)
 
@@ -297,8 +312,8 @@ def test_create_named_undefined():
 
     assert len(ds.items) == 2
     assert len(ds.data) == 2
-    assert ds.items[1].name == "Bar"
-    assert ds.items[1].type == EUMType.Undefined
+    assert ds[1].name == "Bar"
+    assert ds[1].type == EUMType.Undefined
 
 
 def test_to_dataframe_single_timestep():
@@ -372,12 +387,12 @@ def test_interp_time():
     items = [ItemInfo("Foo")]
     ds = Dataset(data, time, items)
 
-    assert ds.data[0].shape == (nt, 10, 3)
+    assert ds[0].shape == (nt, 10, 3)
 
     dsi = ds.interp_time(dt=3600)
 
     assert ds.time[0] == dsi.time[0]
-    assert dsi.data[0].shape == (73, 10, 3)
+    assert dsi[0].shape == (73, 10, 3)
 
 
 def test_interp_time_to_other_dataset():
@@ -614,7 +629,7 @@ def test_flipud():
     dsud.flipud()
 
     assert dsud.shape == ds.shape
-    assert dsud["Foo"][0, 0, 0] == ds["Foo"][0, -1, 0]
+    assert dsud["Foo"].to_numpy()[0, 0, 0] == ds["Foo"].to_numpy()[0, -1, 0]
 
 
 def test_aggregation_workflows(tmpdir):
