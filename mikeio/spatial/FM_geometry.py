@@ -1,7 +1,7 @@
 import numpy as np
 from collections import namedtuple
 from mikecore.DfsuFile import DfsuFileType
-from geometry import _Geometry
+from geometry import _Geometry, BoundingBox
 
 
 class GeometryFM(_Geometry):
