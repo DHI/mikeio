@@ -63,6 +63,8 @@ class _UnstructuredGeometry:
         self._shapely_domain_obj = None
         self._tree2d = None
 
+        self._boundary_polylines = None
+
     def __repr__(self):
         out = []
         out.append("Unstructured Geometry")
@@ -193,8 +195,6 @@ class _UnstructuredGeometry:
     def is_tri_only(self):
         """Does the mesh consist of triangles only?"""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
-
-    _boundary_polylines = None
 
     @property
     def boundary_polylines(self):
