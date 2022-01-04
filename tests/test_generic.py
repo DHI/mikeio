@@ -71,14 +71,14 @@ def test_multiply_constant_single_item_name(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue_speed = org["Wind speed"][0, 0]
+    orgvalue_speed = org["Wind speed"].to_numpy()[0, 0]
     expected_speed = orgvalue_speed * 1.5
-    scaledvalue_speed = scaled["Wind speed"][0, 0]
+    scaledvalue_speed = scaled["Wind speed"].to_numpy()[0, 0]
     assert scaledvalue_speed == pytest.approx(expected_speed)
 
-    orgvalue_dir = org["Wind direction"][0, 0]
+    orgvalue_dir = org["Wind direction"].to_numpy()[0, 0]
     expected_dir = orgvalue_dir
-    scaledvalue_dir = scaled["Wind direction"][0, 0]
+    scaledvalue_dir = scaled["Wind direction"].to_numpy()[0, 0]
     assert scaledvalue_dir == pytest.approx(expected_dir)
 
 
@@ -92,13 +92,13 @@ def test_diff_itself(tmpdir):
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"][0][0, -1])
+    assert np.isnan(org["Elevation"].to_numpy()[0][0, -1])
 
     diffed = mikeio.read(outfilename)
 
-    diffedvalue = diffed["Elevation"][0, 0, 0]
+    diffedvalue = diffed["Elevation"].to_numpy()[0, 0, 0]
     assert diffedvalue == pytest.approx(0.0)
-    assert np.isnan(diffed["Elevation"][0][0, -1])
+    assert np.isnan(diffed["Elevation"].to_numpy()[0][0, -1])
 
 
 def test_sum_itself(tmpdir):
@@ -111,11 +111,11 @@ def test_sum_itself(tmpdir):
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"][0][0, -1])
+    assert np.isnan(org["Elevation"].to_numpy()[0][0, -1])
 
     summed = mikeio.read(outfilename)
 
-    assert np.isnan(summed["Elevation"][0][0, -1])
+    assert np.isnan(summed["Elevation"].to_numpy()[0][0, -1])
 
 
 def test_add_constant_delete_values_unchanged(tmpdir):
@@ -128,14 +128,14 @@ def test_add_constant_delete_values_unchanged(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org["Elevation"][0, 0, 0]
-    scaledvalue = scaled["Elevation"][0, 0, 0]
+    orgvalue = org["Elevation"].to_numpy()[0, 0, 0]
+    scaledvalue = scaled["Elevation"].to_numpy()[0, 0, 0]
     assert scaledvalue == pytest.approx(orgvalue - 2.1)
 
-    orgvalue = org["Elevation"][0, 100, 0]
+    orgvalue = org["Elevation"].to_numpy()[0, 100, 0]
     assert np.isnan(orgvalue)
 
-    scaledvalue = scaled["Elevation"][0, 100, 0]
+    scaledvalue = scaled["Elevation"].to_numpy()[0, 100, 0]
     assert np.isnan(scaledvalue)
 
 
@@ -152,14 +152,14 @@ def test_multiply_constant_delete_values_unchanged_2(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org[item_name][0, 0, 0]
-    scaledvalue = scaled[item_name][0, 0, 0]
+    orgvalue = org[item_name].to_numpy()[0, 0, 0]
+    scaledvalue = scaled[item_name].to_numpy()[0, 0, 0]
     assert scaledvalue == pytest.approx(orgvalue * 1000.0)
 
-    orgvalue = org[item_name][0, 10, 0]
+    orgvalue = org[item_name].to_numpy()[0, 10, 0]
     assert np.isnan(orgvalue)
 
-    scaledvalue = scaled[item_name][0, 10, 0]
+    scaledvalue = scaled[item_name].to_numpy()[0, 10, 0]
     assert np.isnan(scaledvalue)
 
 

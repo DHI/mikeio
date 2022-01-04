@@ -356,9 +356,9 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 5
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
 
 
@@ -382,9 +382,9 @@ def test_write_from_pandas_series_monkey_patched(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 1
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
 
 
@@ -607,9 +607,9 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 1
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
     assert ds.items[0].data_value_type == 3
 
@@ -641,8 +641,8 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 5
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
     assert ds.items[0].data_value_type == 3

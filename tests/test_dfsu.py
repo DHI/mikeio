@@ -277,7 +277,9 @@ def test_calc_element_coordinates_3d():
     # extract dynamic z values for profile
     elem_ids = dfs.find_nearest_profile_elements(333934.1, 6158101.5)
     ds = dfs.read(items=["Z coordinate"], elements=elem_ids, time_steps=0)
-    ec = dfs.calc_element_coordinates(elements=elem_ids, zn=ds["Z coordinate"][0, :])
+    ec = dfs.calc_element_coordinates(
+        elements=elem_ids, zn=ds["Z coordinate"].to_numpy()[0, :]
+    )
 
     assert ec[0, 2] == pytest.approx(-6.981768845)
 
@@ -1148,7 +1150,7 @@ def test_interp2d_radius():
     dsi = dfs.interp2d(ds, *interpolant)
 
     assert dsi.shape == (nt, 20 * 10)
-    assert np.isnan(dsi[0][0][0])
+    assert np.isnan(dsi["Wind speed"].to_numpy()[0][0])
 
 
 def test_interp2d_reshaped():

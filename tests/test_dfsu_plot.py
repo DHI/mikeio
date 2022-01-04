@@ -166,7 +166,7 @@ def test_plot_dfsu_vertical_profile():
     dfs = Dfsu(filename)
     time_step = 1
     item_number = 1
-    data = dfs.read()[item_number][time_step, :]
+    data = dfs.read()[item_number].to_numpy()[time_step, :]
     # defaults
     dfs.plot_vertical_profile(data)
     dfs.plot_vertical_profile(data, time_step, 0, 20)

@@ -196,12 +196,12 @@ class _Dfs123(TimeSeries):
         else:
             return self
 
-    def append(self, data):
+    def append(self, data: Dataset) -> None:
         """Append to a dfs file opened with `write(...,keep_open=True)`
 
         Parameters
         -----------
-        data: list[np.array]
+        data: Dataset
         """
 
         deletevalue = self._dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
@@ -209,7 +209,7 @@ class _Dfs123(TimeSeries):
         for i in trange(self._n_timesteps, disable=not self.show_progress):
             for item in range(self._n_items):
 
-                d = data[item][i]
+                d = data[item].to_numpy()[i]
                 d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 

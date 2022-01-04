@@ -1230,7 +1230,7 @@ class _UnstructuredGeometry:
         if time_step is None:
             y_coordinate = nc[:, 2]
         else:
-            y_coordinate = self.read()[0][time_step, :]
+            y_coordinate = self.read()[0].to_numpy()[time_step, :]
 
         elements = self._Get_2DVertical_elements()
 
@@ -2857,12 +2857,12 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             self._dfs.Close()
             os.remove(filename)
 
-    def append(self, data):
+    def append(self, data: Dataset) -> None:
         """Append to a dfsu file opened with `write(...,keep_open=True)`
 
         Parameters
         -----------
-        data: list[np.array]
+        data: Dataset
         """
 
         deletevalue = self._dfs.DeleteValueFloat
@@ -2870,11 +2870,13 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         n_time_steps = np.shape(data[0])[0]
         for i in trange(n_time_steps, disable=not self.show_progress):
             for item in range(n_items):
-                d = data[item][i, :]
+                di = data[item]
+                if isinstance(data, Dataset):
+                    di = di.to_numpy()
+                d = di[i, :]
                 d[np.isnan(d)] = deletevalue
-                # darray = to_dotnet_float_array(d)
                 darray = d.astype(np.float32)
-                self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                self._dfs.WriteItemTimeStepNext(0, darray)
 
     def close(self):
         "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"

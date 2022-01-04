@@ -45,7 +45,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
     Parameters
     ----------
-    data : mikeio.Dateset, list(ndarray), or ndarray
+    data : mikeio.Dataset, list(ndarray), or ndarray
         dfsu data
     elem_ids : ndarray(int)
         n sized array of 1 or more element ids used for interpolation
@@ -77,7 +77,9 @@ def interp2d(data, elem_ids, weights=None, shape=None):
             nt, ne = da.shape
             idatitem = np.empty(shape=(nt, ni))
             for step in range(nt):
-                idatitem[step, :] = _interp_itemstep(da[step, :], elem_ids, weights)
+                idatitem[step, :] = _interp_itemstep(
+                    da[step, :].to_numpy(), elem_ids, weights
+                )
 
             if shape:
                 idatitem = idatitem.reshape((nt, *shape))
