@@ -29,11 +29,13 @@ class DataArray(TimeSeries):
 
         self._values = data
         self.time = time
+        self.item = None
 
-        if isinstance(item, ItemInfo):
-            self.item = item
-        else:
-            raise ValueError("Item must be an ItemInfo")
+        if item is not None:
+            if isinstance(item, ItemInfo):
+                self.item = item
+            else:
+                raise ValueError("Item must be an ItemInfo")
 
     @property
     def values(self):
