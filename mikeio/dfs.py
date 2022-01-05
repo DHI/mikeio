@@ -33,6 +33,7 @@ class _Dfs123(TimeSeries):
         self._override_coordinates = False
         self._timeseries_unit = TimeStepUnit.SECOND
         self._dt = None
+        self.geometry = None
 
     def read(self, items=None, time_steps=None):
         """
@@ -91,7 +92,7 @@ class _Dfs123(TimeSeries):
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
-        return Dataset(data_list, time, items)
+        return Dataset(data_list, time, items, geometry=self.geometry)
 
     def _read_header(self):
         dfs = self._dfs
@@ -255,6 +256,13 @@ class _Dfs123(TimeSeries):
                     self._longitude,
                     self._latitude,
                     self._orientation,
+                ]
+            elif isinstance(data, Dataset) and (data.geometry is not None):
+                self._coordinate = [
+                    data.geometry.projection_string,
+                    data.geometry.origin[0],
+                    data.geometry.origin[1],
+                    data.geometry.orientation,
                 ]
             else:
                 warnings.warn("No coordinate system provided")

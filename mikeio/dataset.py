@@ -7,6 +7,8 @@ from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 from .base import TimeSeries
 from .dataarray import DataArray
+from .spatial.geometry import _Geometry
+from .spatial.grid_geometry import Grid1D, Grid2D
 
 
 def _parse_axis(data_shape, axis):
@@ -167,6 +169,7 @@ class Dataset(TimeSeries):
         data: Union[Sequence[np.ndarray], float],
         time: Union[pd.DatetimeIndex, str],
         items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
+        geometry: _Geometry = None,
     ):
 
         item_infos = []
@@ -217,16 +220,22 @@ class Dataset(TimeSeries):
 
         data_vars = {}
         for dd, it in zip(data, item_infos):
-            data_vars[it.name] = DataArray(dd, time, it)
+            data_vars[it.name] = DataArray(dd, time, it, geometry)
 
         ds = Dataset(data_vars)
 
         return ds
 
-    def __init__(self, data: Mapping[str, DataArray], time=None, items=None):
+    def __init__(
+        self,
+        data: Mapping[str, DataArray],
+        time=None,
+        items=None,
+        geometry: _Geometry = None,
+    ):
 
         if data is not None and time is not None:
-            ds = Dataset.from_data_time_items(data, time, items)
+            ds = Dataset.from_data_time_items(data, time, items, geometry)
             data = ds.data_vars
 
         for key, value in data.items():
@@ -240,6 +249,8 @@ class Dataset(TimeSeries):
         self.data_vars = data
 
         self.time = list(data.values())[0].time
+
+        self.geometry = geometry
 
     def __repr__(self):
 
@@ -1167,3 +1178,15 @@ class Dataset(TimeSeries):
     def deletevalue(self):
         """File delete value"""
         return self._deletevalue
+
+    def to_dfs(self, filename):
+        if self.geometry is None:
+            raise ValueError("Cannot write Dataset with no geometry to file!")
+        if isinstance(self.geometry, Grid2D):
+            self._to_dfs2(filename)
+
+    def _to_dfs2(self, filename):
+        # assumes Grid2D geometry
+        from .dfs2 import write_dfs2
+
+        write_dfs2(filename, self)

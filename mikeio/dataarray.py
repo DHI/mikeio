@@ -6,36 +6,38 @@ from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 from .base import TimeSeries
+from .spatial.geometry import _Geometry
 
 
 class DataArray(TimeSeries):
 
     deletevalue = 1.0e-35
 
-    def __init__(self, data, time: Union[pd.DatetimeIndex, str], item: ItemInfo = None):
+    def __init__(
+        self,
+        data,
+        time: Union[pd.DatetimeIndex, str],
+        item: ItemInfo = None,
+        geometry: _Geometry = None,
+    ):
 
-        if not hasattr(data, "shape"):
+        data_lacks = []
+        for p in ("shape", "ndim", "dtype"):
+            if not hasattr(data, p):
+                data_lacks.append(p)
+        if len(data_lacks) > 0:
             raise TypeError(
-                "Data must be ArrayLike, e.g. numpy array, but it lacks a shape property"
-            )
-        if not hasattr(data, "ndim"):
-            raise TypeError(
-                "Data must be ArrayLike, e.g. numpy array, but it lacks a ndim property"
-            )
-        if not hasattr(data, "dtype"):
-            raise TypeError(
-                "Data must be ArrayLike, e.g. numpy array, it lacks a dtype property"
+                "Data must be ArrayLike, e.g. numpy array, but it lacks properties: "
+                + ", ".join(data_lacks)
             )
 
         self._values = data
         self.time = time
-        self.item = None
+        if (item is not None) and (not isinstance(item, ItemInfo)):
+            raise ValueError("Item must be an ItemInfo")
+        self.item = item
 
-        if item is not None:
-            if isinstance(item, ItemInfo):
-                self.item = item
-            else:
-                raise ValueError("Item must be an ItemInfo")
+        self.geometry = geometry
 
     @property
     def values(self):
