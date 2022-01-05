@@ -260,9 +260,9 @@ class _Dfs123(TimeSeries):
             elif isinstance(data, Dataset) and (data.geometry is not None):
                 self._coordinate = [
                     data.geometry.projection_string,
-                    data.geometry.origin[0],
-                    data.geometry.origin[1],
-                    data.geometry.orientation,
+                    data.geometry._origin[0],
+                    data.geometry._origin[1],
+                    data.geometry._orientation,
                 ]
             else:
                 warnings.warn("No coordinate system provided")
