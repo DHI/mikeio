@@ -1225,6 +1225,9 @@ class _UnstructuredGeometry:
         import matplotlib.pyplot as plt
         from matplotlib.collections import PolyCollection
 
+        if isinstance(values, DataArray):
+            values = values.to_numpy()
+
         nc = self.node_coordinates
         x_coordinate = np.hypot(nc[:, 0], nc[:, 1])
         if time_step is None:

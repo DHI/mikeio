@@ -60,11 +60,16 @@ class DataArray(TimeSeries):
     def plot(self, ax=None):
         import matplotlib.pyplot as plt
 
-        if self.ndim != 1:
-            raise NotImplementedError()
-
         if ax is None:
             fig, ax = plt.subplots()
+
+        if self.ndim > 2:
+            ax.histogram(self.values)
+            return ax
+
+        if self.ndim == 2:
+            ax.imshow(self.values)
+            return ax
 
         ax.plot(self.time, self.values)
         ax.set_xlabel("time")
