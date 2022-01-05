@@ -2,40 +2,76 @@ import numpy as np
 from geometry import _Geometry, BoundingBox
 
 
-class _GridAxis:
-    def __init__(self, x=None, dx=None):
-        """create equidistant spatial axis"""
-        self._elements = None
-        self._nodes = None
-        self._ds = None
-
-
 class GeometryGrid(_Geometry):
-    pass
+    def __init__(
+        self,
+        projection_string=None,
+        origin=None,
+        orientation=None,
+    ) -> None:
+        super().__init__()
+
+        self._projstr = projection_string
+        self._origin = origin
+        self._orientation = orientation
 
 
 class Grid1D(GeometryGrid):
-    def __init__(self):
+    def __init__(
+        self,
+        x0=None,
+        dx=None,
+        n=None,
+        projection_string=None,
+        origin=None,
+        orientation=None,
+    ):
         """Create equidistant 1D spatial geometry"""
-        self._x_axis = None
+        super().__init__(
+            projection_string=projection_string, origin=origin, orientation=orientation
+        )
+
+        if n is None:
+            raise ValueError("n must be provided")
+        if dx is None:
+            raise ValueError("dx must be provided")
+        self._nx = n
+        self._dx = dx
+        self._x0 = 0 if x0 is None else x0
+        x1 = self._x0 + dx * (n - 1)
+        self._x = np.linspace(self._x0, x1, n)
+
+    def __repr__(self):
+        out = []
+        out.append("<mikeio.Grid1D>")
+        out.append(
+            f"axis: nx={self.n} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
+        )
+        return str.join("\n", out)
+
+    @property
+    def x(self):
+        """array of node coordinates"""
+        return self._x
+
+    @property
+    def x0(self):
+        """left end-point"""
+        return self._x0
+
+    @property
+    def x1(self):
+        """right end-point"""
+        return self.x[-1]
+
+    @property
+    def n(self):
+        """number of grid points"""
+        return self._nx
 
 
 class Grid2D(GeometryGrid):
     """2D grid"""
-
-    _x = None
-    _x0 = None
-    _x1 = None
-    _dx = None
-    _nx = None
-    _y = None
-    _y0 = None
-    _y1 = None
-    _dy = None
-    _ny = None
-
-    _xx = None
-    _yy = None
 
     @property
     def x(self):
@@ -50,7 +86,7 @@ class Grid2D(GeometryGrid):
     @property
     def x1(self):
         """center of right end-point"""
-        return self._x1
+        return self.x[-1]
 
     @property
     def dx(self):
@@ -75,7 +111,7 @@ class Grid2D(GeometryGrid):
     @property
     def y1(self):
         """center of upper end-point"""
-        return self._y1
+        return self.y[-1]
 
     @property
     def dy(self):
@@ -123,13 +159,26 @@ class Grid2D(GeometryGrid):
         """bounding box (left, bottom, right, top)
         Note: not the same as the cell center values (x0,y0,x1,y1)!
         """
-        left = self._x0 - self.dx / 2
-        bottom = self._y0 - self.dy / 2
-        right = self._x1 + self.dx / 2
-        top = self._y1 + self.dy / 2
-        return left, bottom, right, top  # BoundingBox(
+        left = self.x0 - self.dx / 2
+        bottom = self.y0 - self.dy / 2
+        right = self.x1 + self.dx / 2
+        top = self.y1 + self.dy / 2
+        return BoundingBox(left, bottom, right, top)
 
-    def __init__(self, x=None, y=None, bbox=None, dx=None, dy=None, shape=None):
+    def __init__(
+        self,
+        x=None,
+        y=None,
+        bbox=None,
+        dx=None,
+        dy=None,
+        shape=None,
+        x0=None,
+        y0=None,
+        projection_string=None,
+        origin=None,
+        orientation=None,
+    ):
         """create 2d grid
 
         Parameters
@@ -147,9 +196,16 @@ class Grid2D(GeometryGrid):
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
+        x0
+        y0
+        projection_string
+        origin
+        orientation
 
         Examples
         --------
+        >>> g = Grid2D(dx=0.25, shape=(5,10))
+
         >>> g = Grid2D(bbox=[0,0,10,20], dx=0.25)
 
         >>> g = Grid2D(bbox=[0,0,10,20], shape=(5,10))
@@ -159,6 +215,23 @@ class Grid2D(GeometryGrid):
         >>> g = Grid2D(x, y)
 
         """
+        super().__init__(
+            projection_string=projection_string, origin=origin, orientation=orientation
+        )
+
+        self._x = None
+        self._x0 = None
+        self._dx = None
+        self._nx = None
+
+        self._y = None
+        self._y0 = None
+        self._dy = None
+        self._ny = None
+
+        self._xx = None
+        self._yy = None
+
         dxdy = dx
         if dy is not None:
             if not np.isscalar(dx):
@@ -174,6 +247,8 @@ class Grid2D(GeometryGrid):
             self._create_in_bbox(bbox, dxdy, shape)
         elif (x is not None) and (y is not None):
             self._create_from_x_and_y(x, y)
+        elif (shape is not None) and (dx is not None):
+            self._create_from_nx_ny_dx_dy(x0, dx, shape[0], y0, dy, shape[1])
         else:
             raise ValueError("Please provide either bbox or both x and y")
 
@@ -247,95 +322,94 @@ class Grid2D(GeometryGrid):
         self._x0 = left + dx / 2
         self._dx = dx
         self._nx = nx
-        self._create_x_axis(self._x0, dx, nx)
+        self._x = self._create_axis(self._x0, dx, nx)
 
         self._y0 = bottom + dy / 2
         self._dy = dy
         self._ny = ny
-        self._create_y_axis(self._y0, dy, ny)
+        self._y = self._create_axis(self._y0, dy, ny)
 
     def _create_from_x_and_y(self, x, y):
 
         self._x0 = x[0]
-        self._x1 = x[-1]
         self._nx = len(x)
         self._dx = x[1] - x[0]
-        self._x = np.array(x)
+        self._x = np.asarray(x)
 
         self._y0 = y[0]
-        self._y1 = y[-1]
         self._ny = len(y)
         self._dy = y[1] - y[0]
-        self._y = np.array(y)
+        self._y = np.asarray(y)
 
         self._xx, self._yy = None, None
 
-    def _create_x_axis(self, x0, dx, nx):
-        self._x1 = x0 + dx * (nx - 1)
-        self._x = np.linspace(x0, self._x1, nx)
-        self._xx, self._yy = None, None
+    def _create_from_nx_ny_dx_dy(self, x0, dx, nx, y0, dy, ny):
+        if nx is None:
+            raise ValueError("nx must be provided")
+        if dx is None:
+            raise ValueError("dx must be provided")
+        self._x0 = 0 if x0 is None else x0
+        self._x = self._create_axis(self._x0, dx, nx)
+        self._dx = dx
+        self._nx = nx
 
-    def _create_y_axis(self, y0, dy, ny):
-        self._y1 = y0 + dy * (ny - 1)
-        self._y = np.linspace(y0, self._y1, ny)
+        if ny is None:
+            raise ValueError("ny must be provided")
+        self._y0 = 0 if y0 is None else y0
+        self._dy = dx if dy is None else dy
+        self._y = self._create_axis(self._y0, self._dy, ny)
+        self._ny = ny
+
+    def _create_axis(self, x0, dx, nx):
         self._xx, self._yy = None, None
+        x1 = x0 + dx * (nx - 1)
+        return np.linspace(x0, x1, nx)
 
     def _create_meshgrid(self, x, y):
         self._xx, self._yy = np.meshgrid(x, y)
 
-    def contains(self, x, y=None):
+    def contains(self, xy):
         """test if a list of points are inside grid
 
         Parameters
         ----------
-        x : array(float)
-            x-coordinate of point(s)
-            or xy-coordinate of points given as n-by-2 array
-        y : array(float), optional
-            y-coordinate of point(s), by default None
+        xy : array(float)
+            xy-coordinate of points given as n-by-2 array
 
         Returns
         -------
         bool array
             True for points inside, False otherwise
         """
-        if y is None:
-            xy = x
-            xy = np.atleast_2d(xy)
-            y = xy[:, 1]
-            x = xy[:, 0]
+        xy = np.atleast_2d(xy)
+        y = xy[:, 1]
+        x = xy[:, 0]
 
         xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def find_index(self, x, y=None):
+    def find_index(self, xy):
         """Find nearest index (i,j) of point(s)
            -1 is returned if point is outside grid
 
         Parameters
         ----------
-        x : array(float)
-            x-coordinate of point(s)
-            or xy-coordinate of points given as n-by-2 array
-        y : array(float), optional
-            y-coordinate of point(s), by default None
+        xy : array(float)
+            xy-coordinate of points given as n-by-2 array
 
         Returns
         -------
         array(int), array(int)
             i- and j-index of nearest cell
         """
-        if y is None:
-            xy = x
-            xy = np.atleast_2d(xy)
-            y = xy[:, 1]
-            x = xy[:, 0]
-        else:
-            xy = np.vstack([x, y]).T
+
+        xy = np.atleast_2d(xy)
+        y = xy[:, 1]
+        x = xy[:, 0]
 
         ii = (-1) * np.ones_like(x, dtype=int)
-        jj = (-1) * np.ones_like(x, dtype=int)
+        jj = (-1) * np.ones_like(y, dtype=int)
 
         inside = self.contains(xy)
         for j, xyp in enumerate(xy):
