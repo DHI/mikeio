@@ -1,5 +1,5 @@
 import numpy as np
-from geometry import _Geometry, BoundingBox
+from .geometry import _Geometry, BoundingBox
 
 
 class GeometryGrid(_Geometry):
