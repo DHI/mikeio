@@ -1341,7 +1341,8 @@ class _UnstructuredGeometry:
 
         >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
         """
-
+        if isinstance(spectrum, DataArray):
+            spectrum = spectrum.to_numpy()
         # TODO move this to specialized class e.g. DfsuSpectral
 
         if self.n_directions == 0 or self.n_frequencies == 0:
