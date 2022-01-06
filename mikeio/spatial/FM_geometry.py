@@ -328,6 +328,73 @@ class GeometryFM(_Geometry):
         d, elem_id = self._tree2d.query(p, k=n)
         return elem_id, d
 
+    def get_element_area(self):
+        """Calculate the horizontal area of each element.
+
+        Returns
+        -------
+        np.array(float)
+            areas in m2
+        """
+        n_elements = self.n_elements
+
+        # Node coordinates
+        xn = self.node_coordinates[:, 0]
+        yn = self.node_coordinates[:, 1]
+
+        area = np.empty(n_elements)
+        xcoords = np.empty(8)
+        ycoords = np.empty(8)
+
+        for j in range(n_elements):
+            nodes = self.element_table[j]
+            n_nodes = len(nodes)
+
+            for i in range(n_nodes):
+                nidx = nodes[i]
+                xcoords[i] = xn[nidx]
+                ycoords[i] = yn[nidx]
+
+            # ab : edge vector corner a to b
+            abx = xcoords[1] - xcoords[0]
+            aby = ycoords[1] - ycoords[0]
+
+            # ac : edge vector corner a to c
+            acx = xcoords[2] - xcoords[0]
+            acy = ycoords[2] - ycoords[0]
+
+            isquad = False
+            if n_nodes > 3:
+                isquad = True
+                # ad : edge vector corner a to d
+                adx = xcoords[3] - xcoords[0]
+                ady = ycoords[3] - ycoords[0]
+
+            # if geographical coords, convert all length to meters
+            if self.is_geo:
+                earth_radius = 6366707.0
+                deg_to_rad = np.pi / 180.0
+                earth_radius_deg_to_rad = earth_radius * deg_to_rad
+
+                # Y on element centers
+                Ye = np.sum(ycoords[:n_nodes]) / n_nodes
+                cosYe = np.cos(np.deg2rad(Ye))
+
+                abx = earth_radius_deg_to_rad * abx * cosYe
+                aby = earth_radius_deg_to_rad * aby
+                acx = earth_radius_deg_to_rad * acx * cosYe
+                acy = earth_radius_deg_to_rad * acy
+                if isquad:
+                    adx = earth_radius_deg_to_rad * adx * cosYe
+                    ady = earth_radius_deg_to_rad * ady
+
+            # calculate area in m2
+            area[j] = 0.5 * (abx * acy - aby * acx)
+            if isquad:
+                area[j] = area[j] + 0.5 * (acx * ady - acy * adx)
+
+        return np.abs(area)
+
     @property
     def codes(self):
         """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""

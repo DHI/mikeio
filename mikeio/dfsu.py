@@ -38,31 +38,19 @@ class _UnstructuredGeometry:
 
     def __init__(self) -> None:
         self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-        self._projstr = None
+        # self._projstr = None
 
-        # self._nc = None
-        # self._ec = None
-        # self._codes = None
-        # self._element_ids = None
-        # self._node_ids = None
-        # self._element_table = None
-
-        self._top_elems = None
-        self._n_layers_column = None
-        self._bot_elems = None
-        # self._n_layers = None
-        # self._n_sigma = None
+        # self._top_elems = None
+        # self._n_layers_column = None
+        # self._bot_elems = None
 
         self._geometry = None
         self._geom2d = None
-        self._e2_e3_table = None
-        self._2d_ids = None
-        self._layer_ids = None
+        # self._e2_e3_table = None
+        # self._2d_ids = None
+        # self._layer_ids = None
 
         self._shapely_domain_obj = None
-        # self._tree2d = None
-
-        self._boundary_polylines = None
 
     def __repr__(self):
         out = []
@@ -73,7 +61,7 @@ class _UnstructuredGeometry:
             out.append(f"Number of elements: {self.n_elements}")
         if self.n_layers:
             out.append(f"Number of layers: {self.n_layers}")
-        if self._projstr:
+        if self._geometry.projection_string:
             out.append(f"Projection: {self.projection_string}")
         return str.join("\n", out)
 
@@ -144,8 +132,6 @@ class _UnstructuredGeometry:
     @property
     def element_table(self):
         """Element to node connectivity"""
-        # if (self._element_table is None) and (self._element_table_mikecore is not None):
-        #    self._element_table = self._get_element_table_from_mikecore()
         return self._geometry.element_table
 
     @property
@@ -196,9 +182,6 @@ class _UnstructuredGeometry:
     def boundary_polylines(self):
         """Lists of closed polylines defining domain outline"""
         return self._geometry.boundary_polylines
-        # if self._boundary_polylines is None:
-        #     self._boundary_polylines = self._get_boundary_polylines()
-        # return self._boundary_polylines
 
     def get_node_coords(self, code=None):
         """Get the coordinates of each node.
@@ -225,7 +208,7 @@ class _UnstructuredGeometry:
 
     @staticmethod
     def _get_element_table_from_mikecore(element_table_mikecore):
-        # Note: this can tak 10-20 seconds for large dfsu3d!
+        # Note: this can take 10-20 seconds for large dfsu3d!
 
         elem_tbl = element_table_mikecore.copy()
         for j in range(len(element_table_mikecore)):
@@ -238,60 +221,6 @@ class _UnstructuredGeometry:
         for j in range(len(elem_table)):
             new_elem_table[j] = np.array(elem_table[j]) + 1
         return new_elem_table
-        # new_elem_table = []
-        # n_elements = len(elem_table)
-        # for j in range(n_elements):
-        #     elem_nodes = elem_table[j]
-        #     elem_nodes = [nd + 1 for nd in elem_nodes]  # make 1-based
-        #     new_elem_table.append(np.array(elem_nodes))
-        # return new_elem_table
-
-    # def _set_nodes(
-    #     self, node_coordinates, codes=None, node_ids=None, projection_string=None
-    # ):
-    #     self._nc = np.asarray(node_coordinates)
-    #     if codes is None:
-    #         codes = np.zeros(len(node_coordinates), dtype=int)
-    #     self._codes = np.asarray(codes)
-    #     # self._n_nodes = len(codes)
-    #     if node_ids is None:
-    #         node_ids = list(range(self.n_nodes))
-    #     self._node_ids = np.asarray(node_ids)
-    #     if projection_string is None:
-    #         projection_string = "LONG/LAT"
-    #     self._projstr = projection_string
-
-    # def _set_elements(self, element_table, element_ids=None, geometry_type=None):
-    #     self._element_table = element_table
-    #     # self._n_elements = len(element_table)
-    #     if element_ids is None:
-    #         element_ids = list(range(self.n_elements))
-    #     self._element_ids = np.asarray(element_ids)
-
-    #     if geometry_type is None:
-    #         # guess type
-    #         if self.max_nodes_per_element < 5:
-    #             geometry_type = DfsuFileType.Dfsu2D
-    #         else:
-    #             geometry_type = DfsuFileType.Dfsu3DSigma
-    #     self._type = geometry_type
-
-    # def _reindex(self):
-    #     new_node_ids = range(self.n_nodes)
-    #     new_element_ids = range(self.n_elements)
-    #     node_dict = dict(zip(self.node_ids, new_node_ids))
-    #     for j in range(self.n_elements):
-    #         elem_nodes = self._element_table[j]
-    #         new_elem_nodes = []
-    #         for idx in elem_nodes:
-    #             new_elem_nodes.append(node_dict[idx])
-    #         self._element_table[j] = new_elem_nodes
-
-    #     self._node_ids = np.array(list(new_node_ids))
-    #     self._element_ids = np.array(list(new_element_ids))
-
-    # def _get_element_table_for_elements(self, elements):
-    #     return [self.element_table[j] for j in elements]
 
     def elements_to_geometry(self, elements, node_layers="all"):
         """export elements to new flexible file geometry
@@ -311,65 +240,6 @@ class _UnstructuredGeometry:
         """
         return self._geometry.elements_to_geometry(elements, node_layers)
 
-        # elements = np.sort(elements)  # make sure elements are sorted!
-
-    #     # extract information for selected elements
-    #     node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-    #         elements, node_layers=node_layers
-    #     )
-    #     node_coords = self.node_coordinates[node_ids]
-    #     codes = self.codes[node_ids]
-
-    #     # create new geometry
-    #     geom = _UnstructuredGeometry()
-    #     geom._set_nodes(
-    #         node_coords,
-    #         codes=codes,
-    #         node_ids=node_ids,
-    #         projection_string=self.projection_string,
-    #     )
-    #     geom._set_elements(elem_tbl, self.element_ids[elements])
-    #     geom._reindex()
-
-    #     geom._type = self._type  #
-    #     if not self.is_2d:
-    #         # original file was 3d
-
-    #         layers_used = self.layer_ids[elements]
-    #         unique_layer_ids = np.unique(layers_used)
-    #         n_layers = len(unique_layer_ids)
-
-    #         if (
-    #             self._type == DfsuFileType.Dfsu3DSigma
-    #             or self._type == DfsuFileType.Dfsu3DSigmaZ
-    #         ) and n_layers == 1:
-    #             # If source is 3d, but output only has 1 layer
-    #             # then change type to 2d
-    #             geom._type = DfsuFileType.Dfsu2D
-    #             geom._n_layers = None
-    #             if node_layers == "all":
-    #                 warnings.warn(
-    #                     "Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
-    #                 )
-    #         else:
-    #             geom._type = self._type
-    #             geom._n_layers = n_layers
-    #             lowest_sigma = self.n_layers - self.n_sigma_layers + 1
-    #             geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
-
-    #             # If source is sigma-z but output only has sigma layers
-    #             # then change type accordingly
-    #             if (
-    #                 self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-    #                 or self._type == DfsuFileType.Dfsu3DSigmaZ
-    #             ) and n_layers == geom._n_sigma:
-    #                 # TODO fix this
-    #                 geom._type = DfsuFileType.Dfsu3DSigma
-
-    #             geom._top_elems = geom._get_top_elements_from_coordinates()
-
-    #     return geom
-
     def to_2d_geometry(self):
         """extract 2d geometry from 3d geometry
 
@@ -379,92 +249,6 @@ class _UnstructuredGeometry:
             2d geometry (bottom nodes)
         """
         return self._geometry._geometry2d
-
-        # if self.is_2d:
-        #     return self
-
-        # # extract information for selected elements
-        # elem_ids = self.bottom_elements
-        # if self._type == DfsuFileType.Dfsu3DSigmaZ:
-        #     # for z-layers nodes will not match on neighboring elements!
-        #     elem_ids = self.top_elements
-
-        # node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-        #     elem_ids, node_layers="bottom"
-        # )
-        # node_coords = self.node_coordinates[node_ids]
-        # codes = self.codes[node_ids]
-
-        # # create new geometry
-        # geom = _UnstructuredGeometry()
-        # geom._set_nodes(
-        #     node_coords,
-        #     codes=codes,
-        #     node_ids=node_ids,
-        #     projection_string=self._geometry.projection_string,
-        # )
-        # geom._set_elements(elem_tbl, self.element_ids[elem_ids])
-
-        # # TODO how to handle Mesh filetype
-        # geom._type = None  # DfsuFileType.Mesh
-
-        # geom._reindex()
-
-        # # Fix z-coordinate for sigma-z:
-        # if self._type == DfsuFileType.Dfsu3DSigmaZ:
-        #     zn = geom.node_coordinates[:, 2].copy()
-        #     for j, elem_nodes in enumerate(geom.element_table):
-        #         elem_nodes3d = self.element_table[self.bottom_elements[j]]
-        #         for jn in range(len(elem_nodes)):
-        #             znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
-        #             zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
-        #     geom.node_coordinates[:, 2] = zn
-
-        # return geom
-
-    # def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
-    #     """list of nodes and element table for a list of elements
-
-    #     Parameters
-    #     ----------
-    #     elements : np.array(int)
-    #         array of element ids
-    #     node_layers : str, optional
-    #         for 3D files 'all', 'bottom' or 'top' nodes
-    #         of each element, by default 'all'
-
-    #     Returns
-    #     -------
-    #     np.array(int)
-    #         array of node ids (unique)
-    #     list(list(int))
-    #         element table with a list of nodes for each element
-    #     """
-    #     nodes = []
-    #     elem_tbl = []
-    #     if (node_layers is None) or (node_layers == "all") or self.is_2d:
-    #         for j in elements:
-    #             elem_nodes = self.element_table[j]
-    #             elem_tbl.append(elem_nodes)
-    #             for node in elem_nodes:
-    #                 nodes.append(node)
-    #     else:
-    #         # 3D file
-    #         if (node_layers != "bottom") and (node_layers != "top"):
-    #             raise Exception("node_layers must be either all, bottom or top")
-    #         for j in elements:
-    #             elem_nodes = self.element_table[j]
-    #             nn = len(elem_nodes)
-    #             halfn = int(nn / 2)
-    #             if node_layers == "bottom":
-    #                 elem_nodes = elem_nodes[:halfn]
-    #             if node_layers == "top":
-    #                 elem_nodes = elem_nodes[halfn:]
-    #             elem_tbl.append(elem_nodes)
-    #             for node in elem_nodes:
-    #                 nodes.append(node)
-
-    #     return np.unique(nodes), elem_tbl
 
     @property
     def element_coordinates(self):
@@ -497,47 +281,6 @@ class _UnstructuredGeometry:
             x,y,z of each element
         """
         return self._geometry.calc_element_coordinates(elements, zn)
-        # node_coordinates = self._geometry.node_coordinates
-
-        # element_table = self.element_table
-        # if elements is not None:
-        #     element_table = element_table[elements]
-        # if zn is not None:
-        #     node_coordinates = node_coordinates.copy()
-        #     if len(zn) == len(node_coordinates[:, 2]):
-        #         node_coordinates[:, 2] = zn
-        #     else:
-        #         # assume that user wants to find coords on a subset of points
-        #         idx = np.unique(np.hstack(element_table))
-        #         node_coordinates[idx, 2] = zn
-
-        # n_elements = len(element_table)
-        # ec = np.empty([n_elements, 3])
-
-        # # pre-allocate for speed
-        # maxnodes = 4 if self.is_2d else 8
-        # idx = np.zeros(maxnodes, dtype=int)
-        # xcoords = np.zeros([maxnodes, n_elements])
-        # ycoords = np.zeros([maxnodes, n_elements])
-        # zcoords = np.zeros([maxnodes, n_elements])
-        # nnodes_per_elem = np.zeros(n_elements)
-
-        # for j in range(n_elements):
-        #     nodes = element_table[j]
-        #     nnodes = len(nodes)
-        #     nnodes_per_elem[j] = nnodes
-        #     for i in range(nnodes):
-        #         idx[i] = nodes[i]  # - 1
-
-        #     xcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 0]
-        #     ycoords[:nnodes, j] = node_coordinates[idx[:nnodes], 1]
-        #     zcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 2]
-
-        # ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
-        # ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
-        # ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
-
-        # return ec
 
     def contains(self, points):
         """test if a list of points are contained by mesh
@@ -553,25 +296,6 @@ class _UnstructuredGeometry:
             True for points inside, False otherwise
         """
         return self._geometry.contains(points)
-        # import matplotlib.path as mp
-
-        # points = np.atleast_2d(points)
-
-        # exterior = self.boundary_polylines.exteriors[0]
-        # cnts = mp.Path(exterior.xy).contains_points(points)
-
-        # if self.boundary_polylines.n_exteriors > 1:
-        #     # in case of several dis-joint outer domains
-        #     for exterior in self.boundary_polylines.exteriors[1:]:
-        #         in_domain = mp.Path(exterior.xy).contains_points(points)
-        #         cnts = np.logical_or(cnts, in_domain)
-
-        # # subtract any holes
-        # for interior in self.boundary_polylines.interiors:
-        #     in_hole = mp.Path(interior.xy).contains_points(points)
-        #     cnts = np.logical_and(cnts, ~in_hole)
-
-        # return cnts
 
     def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None):
         """get a 2d grid that covers the domain by specifying spacing or shape
@@ -624,26 +348,6 @@ class _UnstructuredGeometry:
             element ids and weights
         """
         return self._geometry.get_2d_interpolant(xy, n_nearest, extrapolate, p, radius)
-        # xy = np.atleast_2d(xy)
-        # ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
-        # weights = None
-
-        # if n_nearest == 1:
-        #     weights = np.ones(dists.shape)
-        #     if not extrapolate:
-        #         weights[~self.contains(xy)] = np.nan
-        # elif n_nearest > 1:
-        #     weights = get_idw_interpolant(dists, p=p)
-        #     if not extrapolate:
-        #         weights[~self.contains(xy), :] = np.nan
-        # else:
-        #     ValueError("n_nearest must be at least 1")
-
-        # if radius is not None:
-        #     idx = np.where(dists > radius)[0]
-        #     weights[idx] = np.nan
-
-        # return ids, weights
 
     def interp2d(self, data, elem_ids, weights=None, shape=None):
         """interp spatially in data (2d only)
@@ -672,30 +376,6 @@ class _UnstructuredGeometry:
         >>> dsi = dfs.interp2d(ds, elem_ids, weights)
         """
         return interp2d(data, elem_ids, weights, shape)
-
-    # def _create_tree2d(self):
-    #     xy = self.geometry2d.element_coordinates[:, :2]
-    #     self._tree2d = cKDTree(xy)
-
-    def _find_n_nearest_2d_elements(self, x, y=None, n=1):
-        return self._geometry._find_n_nearest_2d_elements(x, y, n)
-
-        # if n > self.geometry2d.n_elements:
-        #     raise ValueError(
-        #         f"Cannot find {n} nearest! Number of 2D elements: {self.geometry2d.n_elements}"
-        #     )
-
-        # if self._tree2d is None:
-        #     self._create_tree2d()
-
-        # if y is None:
-        #     p = x
-        #     if (not np.isscalar(x)) and (np.ndim(x) == 2):
-        #         p = x[:, 0:2]
-        # else:
-        #     p = np.array((x, y)).T
-        # d, elem_id = self._tree2d.query(p, k=n)
-        # return elem_id, d
 
     def find_nearest_elements(
         self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
@@ -793,64 +473,7 @@ class _UnstructuredGeometry:
         np.array(float)
             areas in m2
         """
-        n_elements = self.n_elements
-
-        # Node coordinates
-        xn = self.node_coordinates[:, 0]
-        yn = self.node_coordinates[:, 1]
-
-        area = np.empty(n_elements)
-        xcoords = np.empty(8)
-        ycoords = np.empty(8)
-
-        for j in range(n_elements):
-            nodes = self.element_table[j]
-            n_nodes = len(nodes)
-
-            for i in range(n_nodes):
-                nidx = nodes[i]
-                xcoords[i] = xn[nidx]
-                ycoords[i] = yn[nidx]
-
-            # ab : edge vector corner a to b
-            abx = xcoords[1] - xcoords[0]
-            aby = ycoords[1] - ycoords[0]
-
-            # ac : edge vector corner a to c
-            acx = xcoords[2] - xcoords[0]
-            acy = ycoords[2] - ycoords[0]
-
-            isquad = False
-            if n_nodes > 3:
-                isquad = True
-                # ad : edge vector corner a to d
-                adx = xcoords[3] - xcoords[0]
-                ady = ycoords[3] - ycoords[0]
-
-            # if geographical coords, convert all length to meters
-            if self.is_geo:
-                earth_radius = 6366707.0
-                deg_to_rad = np.pi / 180.0
-                earth_radius_deg_to_rad = earth_radius * deg_to_rad
-
-                # Y on element centers
-                Ye = np.sum(ycoords[:n_nodes]) / n_nodes
-                cosYe = np.cos(np.deg2rad(Ye))
-
-                abx = earth_radius_deg_to_rad * abx * cosYe
-                aby = earth_radius_deg_to_rad * aby
-                acx = earth_radius_deg_to_rad * acx * cosYe
-                acy = earth_radius_deg_to_rad * acy
-                if isquad:
-                    adx = earth_radius_deg_to_rad * adx * cosYe
-                    ady = earth_radius_deg_to_rad * ady
-
-            # calculate area in m2
-            area[j] = 0.5 * (abx * acy - aby * acx)
-            if isquad:
-                area[j] = area[j] + 0.5 * (acx * ady - acy * adx)
-
-        return np.abs(area)
+        return self._geometry.get_element_area()
 
     # 3D dfsu stuff
     @property
@@ -869,26 +492,13 @@ class _UnstructuredGeometry:
             print("Object has no layers: cannot return e2_e3_table")
             return None
         return self._geometry.e2_e3_table
-        # if self._e2_e3_table is None:
-        #     res = self._get_2d_to_3d_association()
-        #     self._e2_e3_table = res[0]
-        #     self._2d_ids = res[1]
-        #     self._layer_ids = res[2]
-        # return self._e2_e3_table
 
     @property
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
         if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-            # or return self._2d_ids ??
+            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")            
         return self._geometry.elem2d_ids
-        # if self._2d_ids is None:
-        #     res = self._get_2d_to_3d_association()
-        #     self._e2_e3_table = res[0]
-        #     self._2d_ids = res[1]
-        #     self._layer_ids = res[2]
-        # return self._2d_ids
 
     @property
     def layer_ids(self):
@@ -896,13 +506,6 @@ class _UnstructuredGeometry:
         if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot return layer_ids")
         return self._geometry.layer_ids
-
-        # if self._layer_ids is None:
-        #     res = self._get_2d_to_3d_association()
-        #     self._e2_e3_table = res[0]
-        #     self._2d_ids = res[1]
-        #     self._layer_ids = res[2]
-        # return self._layer_ids
 
     @property
     def n_layers(self):
@@ -927,12 +530,7 @@ class _UnstructuredGeometry:
         if self.n_layers is None:
             print("Object has no layers: cannot find top_elements")
             return None
-        elif (self._top_elems is None) and (self._source is not None):
-            # note: if subset of elements is selected then this cannot be done!
-            self._top_elems = np.array(
-                DfsuUtil.FindTopLayerElements(self._source.ElementTable)
-            )
-        return self._top_elems
+        return self._geometry.top_elements
 
     @property
     def n_layers_per_column(self):
@@ -940,14 +538,7 @@ class _UnstructuredGeometry:
         if self.n_layers is None:
             print("Object has no layers: cannot find n_layers_per_column")
             return None
-        elif self._n_layers_column is None:
-            top_elems = self.top_elements
-            n = len(top_elems)
-            tmp = top_elems.copy()
-            tmp[0] = -1
-            tmp[1:n] = top_elems[0 : (n - 1)]
-            self._n_layers_column = top_elems - tmp
-        return self._n_layers_column
+        return self._geometry.n_layers_per_column
 
     @property
     def bottom_elements(self):
@@ -955,9 +546,7 @@ class _UnstructuredGeometry:
         if self.n_layers is None:
             print("Object has no layers: cannot find bottom_elements")
             return None
-        elif self._bot_elems is None:
-            self._bot_elems = self.top_elements - self.n_layers_per_column + 1
-        return self._bot_elems
+        return self._geometry.bottom_elements
 
     def get_layer_elements(self, layer):
         """3d element ids for one (or more) specific layer(s)
@@ -976,54 +565,6 @@ class _UnstructuredGeometry:
         if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
         return self._geometry.get_layer_elements(layer)
-        # if not np.isscalar(layer):
-        #     elem_ids = []
-        #     for nn in layer:
-        #         elem_ids.append(self.get_layer_elements(nn))
-        #     elem_ids = np.concatenate(elem_ids, axis=0)
-        #     return np.sort(elem_ids)
-
-        # n_lay = self.n_layers
-        # if n_lay is None:
-        #     raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
-
-        # if layer < (-n_lay) or layer >= n_lay:
-        #     raise Exception(
-        #         f"Layer {layer} not allowed; must be between -{n_lay} and {n_lay-1}"
-        #     )
-
-        # if layer < 0:
-        #     layer = layer + n_lay
-
-        # return self.element_ids[self.layer_ids == layer]
-
-    # def _get_2d_to_3d_association(self):
-    #     e2_to_e3 = (
-    #         []
-    #     )  # for each 2d element: the corresponding 3d element ids from bot to top
-    #     index2d = []  # for each 3d element: the associated 2d element id
-    #     layerid = []  # for each 3d element: the associated layer number
-    #     n2d = len(self.top_elements)
-    #     topid = self.top_elements
-    #     botid = self.bottom_elements
-    #     # layer_ids = 0, 1, 2...
-    #     global_layer_ids = np.arange(self.n_layers)
-    #     for j in range(n2d):
-    #         col = list(range(botid[j], topid[j] + 1))
-
-    #         e2_to_e3.append(col)
-    #         for jj in col:
-    #             index2d.append(j)
-
-    #         n_local_layers = len(col)
-    #         local_layers = global_layer_ids[-n_local_layers:]
-    #         for ll in local_layers:
-    #             layerid.append(ll)
-
-    #     e2_to_e3 = np.array(e2_to_e3, dtype=object)
-    #     index2d = np.array(index2d)
-    #     layerid = np.array(layerid)
-    #     return e2_to_e3, index2d, layerid
 
     def _to_polygons(self, geometry=None):
         """generate matplotlib polygons from element table for plotting
@@ -1034,24 +575,6 @@ class _UnstructuredGeometry:
             list of polygons for plotting
         """
         return geometry._to_polygons(geometry)
-
-        # if geometry is None:
-        #     geometry = self._geometry
-
-        # from matplotlib.patches import Polygon
-
-        # polygons = []
-
-        # for j in range(geometry.n_elements):
-        #     nodes = geometry.element_table[j]
-        #     pcoords = np.empty([len(nodes), 2])
-        #     for i in range(len(nodes)):
-        #         nidx = nodes[i]
-        #         pcoords[i, :] = geometry.node_coordinates[nidx, 0:2]
-
-        #     polygon = Polygon(pcoords, True)
-        #     polygons.append(polygon)
-        # return polygons
 
     def to_shapely(self):
         """Export mesh as shapely MultiPolygon
@@ -1134,6 +657,7 @@ class _UnstructuredGeometry:
 
         return node_centered_data
 
+    # TODO: remove _source from this
     def _Get_2DVertical_elements(self):
         if (self._type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
             self._type == DfsuFileType.DfsuVerticalProfileSigma
@@ -1839,85 +1363,6 @@ class _UnstructuredGeometry:
 
         return np.asarray(elem_table), ec, data
 
-    # def _get_boundary_polylines_uncategorized(self):
-    #     """Construct closed polylines for all boundary faces"""
-    #     boundary_faces = self._get_boundary_faces()
-    #     face_remains = boundary_faces.copy()
-    #     polylines = []
-    #     while face_remains.shape[0] > 1:
-    #         n0 = face_remains[:, 0]
-    #         n1 = face_remains[:, 1]
-    #         polyline = [n0[0], n1[0]]
-    #         index_to_delete = [0]
-    #         count = 0
-    #         end_points = face_remains[0, 1]
-    #         while True:
-    #             next_point_index = np.where(n0 == end_points)
-    #             if next_point_index[0].size != 0:
-    #                 polyline.append(face_remains[next_point_index[0][0], 1])
-    #                 index_to_delete.append(next_point_index[0][0])
-    #                 end_points = polyline[-1]
-    #             count += 1
-    #             if count > face_remains.shape[0] or polyline[0] == end_points:
-    #                 break
-
-    #         face_remains = np.delete(face_remains, index_to_delete, axis=0)
-    #         polylines.append(polyline)
-    #     return polylines
-
-    # def _get_boundary_polylines(self):
-    #     """Get boundary polylines and categorize as inner or outer by
-    #     assessing the signed area
-    #     """
-    #     polylines = self._get_boundary_polylines_uncategorized()
-
-    #     poly_lines_int = []
-    #     poly_lines_ext = []
-    #     Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
-
-    #     for polyline in polylines:
-    #         xy = self.geometry2d.node_coordinates[polyline, :2]
-    #         area = (
-    #             np.dot(xy[:, 1], np.roll(xy[:, 0], 1))
-    #             - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
-    #         ) * 0.5
-    #         poly_line = np.asarray(polyline)
-    #         xy = self.geometry2d.node_coordinates[poly_line, 0:2]
-    #         poly = Polyline(len(polyline), poly_line, xy, area)
-    #         if area > 0:
-    #             poly_lines_ext.append(poly)
-    #         else:
-    #             poly_lines_int.append(poly)
-
-    #     BoundaryPolylines = namedtuple(
-    #         "BoundaryPolylines",
-    #         ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-    #     )
-    #     n_ext = len(poly_lines_ext)
-    #     n_int = len(poly_lines_int)
-    #     return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
-
-    # def _get_boundary_faces(self):
-    #     """Construct list of faces"""
-    #     element_table = self.geometry2d.element_table
-
-    #     all_faces = []
-    #     for el in element_table:
-    #         ele = [*el, el[0]]
-    #         for j in range(len(el)):
-    #             all_faces.append(ele[j : j + 2])
-
-    #     all_faces = np.asarray(all_faces)
-
-    #     all_faces_sorted = np.sort(all_faces, axis=1)
-    #     _, uf_id, face_counts = np.unique(
-    #         all_faces_sorted, axis=0, return_index=True, return_counts=True
-    #     )
-
-    #     # boundary faces are those appearing only once
-    #     bnd_face_id = face_counts == 1
-    #     return all_faces[uf_id[bnd_face_id]]
-
     def calc_Hm0_from_spectrum(self, spectrum, tail=True):
         """Calculate significant wave height (Hm0) from spectrum
 
@@ -1996,7 +1441,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
                 out.append(f"Number of frequencies: {self.n_frequencies}")
             if self.n_directions > 0:
                 out.append(f"Number of directions: {self.n_directions}")
-        if self._projstr:
+        if self._geometry.projection_string:
             out.append(f"Projection: {self.projection_string}")
         if self.is_layered:
             out.append(f"Number of sigma layers: {self.n_sigma_layers}")
@@ -2058,23 +1503,11 @@ class _UnstructuredFile(_UnstructuredGeometry):
         """
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
-        self._projstr = msh.ProjectionString
+        # self._projstr = msh.ProjectionString
         self._type = None  # DfsuFileType.Mesh
 
-        # geometry
-        # self._set_nodes_from_source(msh)
-        # self._set_elements_from_source(msh)
-
         nc, codes, node_ids = self._get_nodes_from_source(msh)
-        # self._nc = nc
-        # self._codes = codes
-        # self._n_nodes = len(node_ids)
-        # self._node_ids = node_ids
-
         el_table, el_ids = self._get_elements_from_source(msh)
-        # self._n_elements = len(el_ids)
-        # self._element_table = el_table
-        # self._element_ids = el_ids
 
         # create geometry
         self._geometry = GeometryFM(
@@ -2093,7 +1526,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
         """
         dfs = DfsuFile.Open(filename)
         self._source = dfs
-        self._projstr = dfs.Projection.WKTString
+        # self._projstr = dfs.Projection.WKTString
         self._type = DfsuFileType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
 
@@ -2111,15 +1544,7 @@ class _UnstructuredFile(_UnstructuredGeometry):
             self._geometry._node_ids = []
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
-            # self._nc = nc
-            # self._codes = codes
-            # self._n_nodes = len(node_ids)
-            # self._node_ids = node_ids
-
             el_table, el_ids = self._get_elements_from_source(dfs)
-            # self._n_elements = len(el_ids)
-            # self._element_table = el_table
-            # self._element_ids = el_ids
 
             if self.is_layered:
                 geometry_cls = GeometryFMLayered
