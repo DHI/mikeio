@@ -10,6 +10,7 @@ from mikecore.Projections import Cartography
 from .dfs import _Dfs123
 from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
+from . import __version__ as mikeio_version
 
 
 def write_dfs2(filename, ds, title=""):
@@ -19,7 +20,7 @@ def write_dfs2(filename, ds, title=""):
 
 
 def _write_dfs2_header(filename, ds, title=""):
-    builder = DfsBuilder.Create(title, "MIKE IO", 0)
+    builder = DfsBuilder.Create(title, "MIKE IO", mikeio_version)
     builder.SetDataType(0)
 
     factory = DfsFactory()
@@ -72,6 +73,7 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
 def _write_dfs2_data(dfs, ds):
 
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
+    t_rel = 0
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
 
@@ -83,11 +85,10 @@ def _write_dfs2_data(dfs, ds):
             d = np.flipud(d)
             darray = d.reshape(d.size, 1)[:, 0]
 
-            if ds.is_equidistant:
-                dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
-            else:
-                relt = (ds.time[i] - ds.time[0]).total_seconds()
-                dfs.WriteItemTimeStepNext(relt, darray.astype(np.float32))
+            if not ds.is_equidistant:
+                t_rel = (ds.time[i] - ds.time[0]).total_seconds()
+
+            dfs.WriteItemTimeStepNext(t_rel, darray.astype(np.float32))
 
     dfs.Close()
 
