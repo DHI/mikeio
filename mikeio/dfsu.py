@@ -497,7 +497,7 @@ class _UnstructuredGeometry:
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
         if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")            
+            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
         return self._geometry.elem2d_ids
 
     @property
