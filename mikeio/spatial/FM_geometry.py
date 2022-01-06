@@ -117,6 +117,10 @@ class GeometryFM(_Geometry):
         return len(self._element_ids)
 
     @property
+    def element_ids(self):
+        return self._element_ids
+
+    @property
     def element_table(self):
         """Element to node connectivity"""
         if (self._element_table is None) and (self._element_table_mikecore is not None):
@@ -222,6 +226,11 @@ class GeometryFM(_Geometry):
         ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
 
         return ec
+
+    @property
+    def codes(self):
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
+        return self._codes
 
     @property
     def boundary_polylines(self):
@@ -477,9 +486,108 @@ class GeometryFM(_Geometry):
             self._geom2d = self.to_2d_geometry()
         return self._geom2d
 
+    def _to_polygons(self, geometry=None):
+        """generate matplotlib polygons from element table for plotting
 
-class GeometryFMHorizontal(GeometryFM):
-    pass
+        Returns
+        -------
+        list(matplotlib.patches.Polygon)
+            list of polygons for plotting
+        """
+        if geometry is None:
+            geometry = self
+        from matplotlib.patches import Polygon
+
+        polygons = []
+
+        for j in range(geometry.n_elements):
+            nodes = geometry.element_table[j]
+            pcoords = np.empty([len(nodes), 2])
+            for i in range(len(nodes)):
+                nidx = nodes[i]
+                pcoords[i, :] = geometry.node_coordinates[nidx, 0:2]
+
+            polygon = Polygon(pcoords, True)
+            polygons.append(polygon)
+        return polygons
+
+    def plot_mesh(self, figsize=None, ax=None):
+        import matplotlib.pyplot as plt
+        from matplotlib.collections import PatchCollection
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+        ax.set_aspect(self._plot_aspect())
+
+        patches = self._geometry2d._to_polygons()
+        fig_obj = PatchCollection(
+            patches, edgecolor="0.6", facecolor="none", linewidths=0.3
+        )
+        ax.add_collection(fig_obj)
+        self.plot_outline(ax=ax)
+        return ax
+
+    def plot_outline(self, figsize=None, ax=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+        ax.set_aspect(self._plot_aspect())
+
+        linwid = 1.2
+        out_col = "0.4"
+        for exterior in self.boundary_polylines.exteriors:
+            ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
+        for interior in self.boundary_polylines.interiors:
+            ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
+        return ax
+
+    def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
+        """
+        Plot mesh boundary nodes and their codes
+        """
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
+        ax.set_aspect(self._plot_aspect())
+
+        nc = self.node_coordinates
+        c = self.codes
+        valid_codes = list(set(self.codes))
+        boundary_codes = [code for code in valid_codes if code > 0]
+
+        if boundary_names is not None:
+            if len(boundary_codes) != len(boundary_names):
+                raise Exception(
+                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})"
+                )
+            user_defined_labels = dict(zip(boundary_codes, boundary_names))
+
+        for code in boundary_codes:
+            xn = nc[c == code, 0]
+            yn = nc[c == code, 1]
+            if boundary_names is None:
+                label = f"Code {code}"
+            else:
+                label = user_defined_labels[code]
+            plt.plot(xn, yn, ".", label=label)
+
+        plt.legend()
+        plt.title("Boundary nodes")
+        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
+        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+
+    def _plot_aspect(self):
+        if self.is_geo:
+            mean_lat = np.mean(self.node_coordinates[:, 1])
+            return 1.0 / np.cos(np.pi * mean_lat / 180)
+        else:
+            return "equal"
+
+
+# class GeometryFMHorizontal(GeometryFM):
+#     pass
 
 
 class GeometryFMLayered(GeometryFM):
@@ -747,48 +855,48 @@ class GeometryFMLayered(GeometryFM):
     # TODO: add methods for extracting layers etc
 
 
-class GeometryFMSpectral(GeometryFM):
-    # TODO: add specialized classes: FrequencySpectrum, DirectionalSpectrum
-    def __init__(
-        self,
-        frequencies=None,
-        directions=None,
-        node_coordinates=None,
-        element_table=None,
-        codes=None,
-        projection_string=None,
-        dfsu_type=None,
-    ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection_string=projection_string,
-            dfsu_type=dfsu_type,
-        )
-        self._frequencies = frequencies
-        self._directions = directions
-        self._n_axis = 0 if (self.n_elements == 0) else 1
-        self._n_axis = (
-            self._n_axis + int(self.n_frequencies > 0) + int(self.n_directions > 0)
-        )
+# class GeometryFMSpectral(GeometryFM):
+#     # TODO: add specialized classes: FrequencySpectrum, DirectionalSpectrum
+#     def __init__(
+#         self,
+#         frequencies=None,
+#         directions=None,
+#         node_coordinates=None,
+#         element_table=None,
+#         codes=None,
+#         projection_string=None,
+#         dfsu_type=None,
+#     ) -> None:
+#         super().__init__(
+#             node_coordinates=node_coordinates,
+#             element_table=element_table,
+#             codes=codes,
+#             projection_string=projection_string,
+#             dfsu_type=dfsu_type,
+#         )
+#         self._frequencies = frequencies
+#         self._directions = directions
+#         self._n_axis = 0 if (self.n_elements == 0) else 1
+#         self._n_axis = (
+#             self._n_axis + int(self.n_frequencies > 0) + int(self.n_directions > 0)
+#         )
 
-    @property
-    def n_frequencies(self):
-        """Number of frequencies"""
-        return 0 if self.frequencies is None else len(self.frequencies)
+#     @property
+#     def n_frequencies(self):
+#         """Number of frequencies"""
+#         return 0 if self.frequencies is None else len(self.frequencies)
 
-    @property
-    def frequencies(self):
-        """Frequency axis"""
-        return self._frequencies
+#     @property
+#     def frequencies(self):
+#         """Frequency axis"""
+#         return self._frequencies
 
-    @property
-    def n_directions(self):
-        """Number of directions"""
-        return 0 if self.directions is None else len(self.directions)
+#     @property
+#     def n_directions(self):
+#         """Number of directions"""
+#         return 0 if self.directions is None else len(self.directions)
 
-    @property
-    def directions(self):
-        """Directional axis"""
-        return self._directions
+#     @property
+#     def directions(self):
+#         """Directional axis"""
+#         return self._directions
