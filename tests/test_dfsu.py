@@ -508,7 +508,7 @@ def test_n_sigma_layers():
 
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    assert dfs.n_sigma_layers is None
+    assert not hasattr(dfs, "n_sigma_layers")
 
 
 def test_n_z_layers():
@@ -1092,7 +1092,7 @@ def test_elements_to_geometry():
 
     elements = dfs.get_layer_elements(layer=-1)
     geom = dfs.elements_to_geometry(elements, node_layers="top")
-    assert geom.n_layers is None
+    assert not hasattr(geom, "n_layers")
     assert geom.n_elements == len(elements)
 
     with pytest.raises(Exception):

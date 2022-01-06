@@ -1,8 +1,10 @@
 import warnings
 import numpy as np
 from collections import namedtuple
+from scipy.spatial import cKDTree
 from mikecore.DfsuFile import DfsuFileType
 from .geometry import _Geometry, BoundingBox
+from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
 
 
@@ -14,6 +16,8 @@ class GeometryFM(_Geometry):
         codes=None,
         projection_string=None,
         dfsu_type=None,
+        element_ids=None,
+        node_ids=None,
     ) -> None:
         super().__init__()
 
@@ -36,14 +40,14 @@ class GeometryFM(_Geometry):
             self._set_nodes(
                 node_coordinates=node_coordinates,
                 codes=codes,
-                node_ids=None,
+                node_ids=node_ids,
                 projection_string=projection_string,
             )
 
         if element_table is not None:
             self._set_elements(
                 element_table=element_table,
-                element_ids=None,
+                element_ids=element_ids,
                 dfsu_type=dfsu_type,
             )
 
@@ -109,12 +113,16 @@ class GeometryFM(_Geometry):
     @property
     def n_nodes(self):
         """Number of nodes"""
-        return len(self._node_ids)
+        return None if self._node_ids is None else len(self._node_ids)
+
+    @property
+    def node_ids(self):
+        return self._node_ids
 
     @property
     def n_elements(self):
         """Number of elements"""
-        return len(self._element_ids)
+        return None if self._element_ids is None else len(self._element_ids)
 
     @property
     def element_ids(self):
@@ -123,8 +131,6 @@ class GeometryFM(_Geometry):
     @property
     def element_table(self):
         """Element to node connectivity"""
-        if (self._element_table is None) and (self._element_table_mikecore is not None):
-            self._element_table = self._get_element_table_from_mikecore()
         return self._element_table
 
     # cache this?
@@ -226,6 +232,101 @@ class GeometryFM(_Geometry):
         ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
 
         return ec
+
+    def get_2d_interpolant(
+        self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
+    ):
+        """IDW interpolant for list of coordinates
+
+        Parameters
+        ----------
+        xy : array-like
+            x,y coordinates of new points
+        n_nearest : int, optional
+            [description], by default 1
+        extrapolate : bool, optional
+            allow , by default False
+        p : float, optional
+            power of inverse distance weighting, default=2
+        radius: float, optional
+            an alternative to extrapolate=False,
+            only include elements within radius
+
+        Returns
+        -------
+        (np.array, np.array)
+            element ids and weights
+        """
+        xy = np.atleast_2d(xy)
+        ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
+        weights = None
+
+        if n_nearest == 1:
+            weights = np.ones(dists.shape)
+            if not extrapolate:
+                weights[~self.contains(xy)] = np.nan
+        elif n_nearest > 1:
+            weights = get_idw_interpolant(dists, p=p)
+            if not extrapolate:
+                weights[~self.contains(xy), :] = np.nan
+        else:
+            ValueError("n_nearest must be at least 1")
+
+        if radius is not None:
+            idx = np.where(dists > radius)[0]
+            weights[idx] = np.nan
+
+        return ids, weights
+
+    def interp2d(self, data, elem_ids, weights=None, shape=None):
+        """interp spatially in data (2d only)
+
+        Parameters
+        ----------
+        data : ndarray or list(ndarray)
+            dfsu data
+        elem_ids : ndarray(int)
+            n sized array of 1 or more element ids used for interpolation
+        weights : ndarray(float), optional
+            weights with same size as elem_ids used for interpolation
+        shape: tuple, optional
+            reshape output
+
+        Returns
+        -------
+        ndarray or list(ndarray)
+            spatially interped data
+
+        Examples
+        --------
+        >>> ds = dfsu.read()
+        >>> g = dfs.get_overset_grid(shape=(50,40))
+        >>> elem_ids, weights = dfs.get_2d_interpolant(g.xy)
+        >>> dsi = dfs.interp2d(ds, elem_ids, weights)
+        """
+        return interp2d(data, elem_ids, weights, shape)
+
+    def _create_tree2d(self):
+        xy = self._geometry2d.element_coordinates[:, :2]
+        self._tree2d = cKDTree(xy)
+
+    def _find_n_nearest_2d_elements(self, x, y=None, n=1):
+        if n > self._geometry2d.n_elements:
+            raise ValueError(
+                f"Cannot find {n} nearest! Number of 2D elements: {self._geometry2d.n_elements}"
+            )
+
+        if self._tree2d is None:
+            self._create_tree2d()
+
+        if y is None:
+            p = x
+            if (not np.isscalar(x)) and (np.ndim(x) == 2):
+                p = x[:, 0:2]
+        else:
+            p = np.array((x, y)).T
+        d, elem_id = self._tree2d.query(p, k=n)
+        return elem_id, d
 
     @property
     def codes(self):
@@ -432,6 +533,26 @@ class GeometryFM(_Geometry):
 
         return geom
 
+    def _get_top_elements_from_coordinates(self, ec=None):
+        """Get list of top element ids based on element coordinates"""
+        if ec is None:
+            ec = self.element_coordinates
+
+        d_eps = 1e-4
+        top_elems = []
+        x_old = ec[0, 0]
+        y_old = ec[0, 1]
+        for j in range(1, len(ec)):
+            d2 = (ec[j, 0] - x_old) ** 2 + (ec[j, 1] - y_old) ** 2
+            # print(d2)
+            if d2 > d_eps:
+                # this is a new x,y point
+                # then the previous element must be a top element
+                top_elems.append(j - 1)
+            x_old = ec[j, 0]
+            y_old = ec[j, 1]
+        return np.array(top_elems)
+
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
         """list of nodes and element table for a list of elements
 
@@ -585,6 +706,23 @@ class GeometryFM(_Geometry):
         else:
             return "equal"
 
+    # @staticmethod
+    # def _to_mesh(outfilename):
+
+    #     builder = MeshBuilder()
+
+    #     nc = self.node_coordinates
+    #     builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
+    #     # builder.SetNodeIds(self.node_ids+1)
+    #     # builder.SetElementIds(self.elements+1)
+    #     element_table_MZ = self.element_table + 1
+    #     builder.SetElements(element_table_MZ)
+    #     builder.SetProjection(self.projection_string)
+    #     quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
+    #     builder.SetEumQuantity(quantity)
+    #     newMesh = builder.CreateMesh()
+    #     newMesh.Write(outfilename)
+
 
 # class GeometryFMHorizontal(GeometryFM):
 #     pass
@@ -598,6 +736,10 @@ class GeometryFMLayered(GeometryFM):
         codes=None,
         projection_string=None,
         dfsu_type=None,
+        element_ids=None,
+        node_ids=None,
+        n_layers=None,
+        n_sigma=None,
     ) -> None:
         super().__init__(
             node_coordinates=node_coordinates,
@@ -605,12 +747,14 @@ class GeometryFMLayered(GeometryFM):
             codes=codes,
             projection_string=projection_string,
             dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
         )
         self._top_elems = None
         self._n_layers_column = None
         self._bot_elems = None
-        self._n_layers = None
-        self._n_sigma = None
+        self._n_layers = n_layers
+        self._n_sigma = n_sigma
 
         self._geom2d = None
         self._e2_e3_table = None
@@ -620,7 +764,7 @@ class GeometryFMLayered(GeometryFM):
     @property
     def geometry2d(self):
         """The 2d geometry for a 3d object"""
-        return self._geometry2d()
+        return self._geometry2d
 
     def to_2d_geometry(self):
         """extract 2d geometry from 3d geometry
@@ -675,7 +819,7 @@ class GeometryFMLayered(GeometryFM):
     @property
     def e2_e3_table(self):
         """The 2d-to-3d element connectivity table for a 3d object"""
-        if self._n_layers is None:
+        if self.n_layers is None:
             print("Object has no layers: cannot return e2_e3_table")
             return None
         if self._e2_e3_table is None:
@@ -688,7 +832,7 @@ class GeometryFMLayered(GeometryFM):
     @property
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
-        if self._n_layers is None:
+        if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
             # or return self._2d_ids ??
 
@@ -702,7 +846,7 @@ class GeometryFMLayered(GeometryFM):
     @property
     def layer_ids(self):
         """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
-        if self._n_layers is None:
+        if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
@@ -724,22 +868,86 @@ class GeometryFMLayered(GeometryFM):
     @property
     def n_z_layers(self):
         """Maximum number of z-layers"""
-        if self._n_layers is None:
+        if self.n_layers is None:
             return None
-        return self._n_layers - self._n_sigma
+        return self.n_layers - self.n_sigma_layers
 
     @property
     def top_elements(self):
         """List of 3d element ids of surface layer"""
-        if self._n_layers is None:
+        if self.n_layers is None:
             print("Object has no layers: cannot find top_elements")
             return None
-        elif (self._top_elems is None) and (self._source is not None):
+        elif self._top_elems is None:
             # note: if subset of elements is selected then this cannot be done!
-            self._top_elems = np.array(
-                DfsuUtil.FindTopLayerElements(self._source.ElementTable)
-            )
+
+            # TODO: check 0-based, 1-based...
+            self._top_elems = self._findTopLayerElements(self.element_table)
         return self._top_elems
+
+    @staticmethod
+    def _findTopLayerElements(elementTable):
+        """
+        Find element indices (zero based) of the elements being the upper-most element
+        in its column.
+        Each column is identified by matching node id numbers. For 3D elements the
+        last half of the node numbers of the bottom element must match the first half
+        of the node numbers in the top element. For 2D vertical elements the order of
+        the node numbers in the bottom element (last half number of nodes) are reversed
+        compared to those in the top element (first half number of nodes).
+        To find the number of elements in each column, assuming the result
+        is stored in res:
+        For the first column it is res[0]+1.
+        For the i'th column, it is res[i]-res[i-1].
+        :returns: A list of element indices of top layer elements
+        """
+
+        topLayerElments = []
+
+        # Find top layer elements by matching the number numers of the last half of elmt i
+        # with the first half of element i+1.
+        # Elements always start from the bottom, and the element of one columne are following
+        # each other in the element table.
+        for i in range(len(elementTable) - 1):
+            elmt1 = elementTable[i]
+            elmt2 = elementTable[i + 1]
+
+            if elmt1.size != elmt2.size:
+                # elements with different number of nodes can not be on top of each other,
+                # so elmt2 must be another column, and elmt1 must be a top element
+                topLayerElments.append(i)
+                continue
+
+            if elmt1.size % 2 != 0:
+                raise Exception(
+                    "In a layered mesh, each element must have an even number of elements (element index "
+                    + i
+                    + ")"
+                )
+
+            # Number of nodes in a 2D element
+            elmt2DSize = int(elmt1.size / 2)
+
+            for j in range(elmt2DSize):
+                if elmt2DSize > 2:
+                    if elmt1[j + elmt2DSize] != elmt2[j]:
+                        # At least one node number did not match
+                        # so elmt2 must be another column, and elmt1 must be a top element
+                        topLayerElments.append(i)
+                        break
+                else:
+                    # for 2D vertical profiles the nodes in the element on the
+                    # top is in reverse order of those in the bottom.
+                    if elmt1[j + elmt2DSize] != elmt2[(elmt2DSize - 1) - j]:
+                        # At least one node number did not match
+                        # so elmt2 must be another column, and elmt1 must be a top element
+                        topLayerElments.append(i)
+                        break
+
+        # The last element will always be a top layer element
+        topLayerElments.append(len(elementTable) - 1)
+
+        return np.array(topLayerElments, dtype=np.int32)
 
     @property
     def n_layers_per_column(self):
@@ -828,6 +1036,54 @@ class GeometryFMLayered(GeometryFM):
         index2d = np.array(index2d)
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
+
+    def _find_3d_from_2d_points(self, elem2d, z=None, layer=None):
+
+        was_scalar = np.isscalar(elem2d)
+        if was_scalar:
+            elem2d = np.array([elem2d])
+        else:
+            orig_shape = elem2d.shape
+            elem2d = np.reshape(elem2d, (elem2d.size,))
+
+        if (layer is None) and (z is None):
+            # return top element
+            idx = self.top_elements[elem2d]
+
+        elif layer is None:
+            idx = np.zeros_like(elem2d)
+            if np.isscalar(z):
+                z = z * np.ones_like(elem2d, dtype=float)
+            elem3d = self.e2_e3_table[elem2d]
+            for j, row in enumerate(elem3d):
+                zc = self.element_coordinates[row, 2]
+                d3d = np.abs(z[j] - zc)
+                idx[j] = row[d3d.argsort()[0]]
+
+        elif z is None:
+            if 0 <= layer <= self.n_z_layers - 1:
+                idx = np.zeros_like(elem2d)
+                elem3d = self.e2_e3_table[elem2d]
+                for j, row in enumerate(elem3d):
+                    try:
+                        layer_ids = self.layer_ids[row]
+                        id = row[list(layer_ids).index(layer)]
+                        idx[j] = id
+                    except:
+                        print(f"Layer {layer} not present for 2d element {elem2d[j]}")
+            else:
+                # sigma layer
+                idx = self.get_layer_elements(layer=layer)[elem2d]
+
+        else:
+            raise ValueError("layer and z cannot both be supplied!")
+
+        if was_scalar:
+            idx = idx[0]
+        else:
+            idx = np.reshape(idx, orig_shape)
+
+        return idx
 
     def calc_element_coordinates(self, elements=None, zn=None):
         """Calculates the coordinates of the center of each element.
