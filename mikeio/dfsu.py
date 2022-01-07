@@ -5,6 +5,7 @@ import pathlib
 import warnings
 import numpy as np
 from datetime import datetime, timedelta
+from functools import wraps
 
 from scipy.spatial import cKDTree
 import tempfile
@@ -191,22 +192,8 @@ class _UnstructuredGeometry:
             return nc[self.codes == code]
         return nc
 
+    @wraps(GeometryFM.elements_to_geometry)
     def elements_to_geometry(self, elements, node_layers="all"):
-        """export elements to new flexible file geometry
-
-        Parameters
-        ----------
-        elements : list(int)
-            list of element ids
-        node_layers : str, optional
-            for 3d files either 'top', 'bottom' layer nodes
-            or 'all' can be selected, by default 'all'
-
-        Returns
-        -------
-        UnstructuredGeometry
-            which can be used for further extraction or saved to file
-        """
         return self._geometry.elements_to_geometry(elements, node_layers)
 
     @staticmethod
@@ -225,14 +212,8 @@ class _UnstructuredGeometry:
     def _element_table_to_mikecore(element_table):
         return _UnstructuredGeometry._offset_element_table_by(element_table, 1)
 
+    @wraps(GeometryFMLayered.to_2d_geometry)
     def to_2d_geometry(self):
-        """extract 2d geometry from 3d geometry
-
-        Returns
-        -------
-        UnstructuredGeometry
-            2d geometry (bottom nodes)
-        """
         return self._geometry._geometry2d
 
     @property
@@ -240,46 +221,12 @@ class _UnstructuredGeometry:
         """Center coordinates of each element"""
         return self._geometry.element_coordinates
 
+    @wraps(GeometryFMLayered.calc_element_coordinates)
     def calc_element_coordinates(self, elements=None, zn=None):
-        """Calculates the coordinates of the center of each element.
-
-        Only necessary for dynamic vertical coordinates,
-        otherwise use the property *element_coordinates* instead
-
-        Parameters
-        ----------
-        elements : np.array(int), optional
-            element ids of selected elements
-        zn : np.array(float), optional
-            only the z-coodinates of the nodes
-
-        Examples
-        --------
-        >>> elem_ids = dfs.find_nearest_profile_elements(x0, y0)
-        >>> ds = dfs.read(items=['Z coordinate','Temperature'], elements=elem_ids)
-        >>> ec_dyn = dfs.calc_element_coordinates(elements=elem_ids, zn=ds['Z coordinate'][0,:])
-        >>> plt.plot(ds['Temperature'][0, :], ec_dyn[:,2])
-
-        Returns
-        -------
-        np.array
-            x,y,z of each element
-        """
         return self._geometry.calc_element_coordinates(elements, zn)
 
+    @wraps(GeometryFM.contains)
     def contains(self, points):
-        """test if a list of points are contained by mesh
-
-        Parameters
-        ----------
-        points : array-like n-by-2
-            x,y-coordinates of n points to be tested
-
-        Returns
-        -------
-        bool array
-            True for points inside, False otherwise
-        """
         return self._geometry.contains(points)
 
     def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None):
@@ -308,30 +255,10 @@ class _UnstructuredGeometry:
         bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
         return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
 
+    @wraps(GeometryFM.get_2d_interpolant)
     def get_2d_interpolant(
         self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
     ):
-        """IDW interpolant for list of coordinates
-
-        Parameters
-        ----------
-        xy : array-like
-            x,y coordinates of new points
-        n_nearest : int, optional
-            [description], by default 1
-        extrapolate : bool, optional
-            allow , by default False
-        p : float, optional
-            power of inverse distance weighting, default=2
-        radius: float, optional
-            an alternative to extrapolate=False,
-            only include elements within radius
-
-        Returns
-        -------
-        (np.array, np.array)
-            element ids and weights
-        """
         return self._geometry.get_2d_interpolant(xy, n_nearest, extrapolate, p, radius)
 
     def interp2d(self, data, elem_ids, weights=None, shape=None):
@@ -450,14 +377,8 @@ class _UnstructuredGeometry:
             elem3d = self._geometry.e2_e3_table[elem2d]
             return elem3d
 
+    @wraps(GeometryFM.get_element_area)
     def get_element_area(self):
-        """Calculate the horizontal area of each element.
-
-        Returns
-        -------
-        np.array(float)
-            areas in m2
-        """
         return self._geometry.get_element_area()
 
     # 3D dfsu stuff
@@ -533,32 +454,14 @@ class _UnstructuredGeometry:
             return None
         return self._geometry.bottom_elements
 
+    @wraps(GeometryFMLayered.get_layer_elements)
     def get_layer_elements(self, layer):
-        """3d element ids for one (or more) specific layer(s)
-
-        Parameters
-        ----------
-        layer : int or list(int)
-            layer between 0 (bottom) and n_layers-1 (top)
-            (can also be negative counting from -1 at the top layer)
-
-        Returns
-        -------
-        np.array(int)
-            element ids
-        """
         if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
         return self._geometry.get_layer_elements(layer)
 
+    @wraps(GeometryFM._to_polygons)
     def _to_polygons(self, geometry=None):
-        """generate matplotlib polygons from element table for plotting
-
-        Returns
-        -------
-        list(matplotlib.patches.Polygon)
-            list of polygons for plotting
-        """
         return geometry._to_polygons(geometry)
 
     def to_shapely(self):
@@ -2558,10 +2461,8 @@ class Mesh(_UnstructuredFile):
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
+    @wraps(GeometryFM.plot_boundary_nodes)
     def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
-        """
-        Plot mesh boundary nodes and their codes
-        """
         return self._geometry.plot_boundary_nodes(boundary_names, figsize, ax)
 
     @staticmethod
