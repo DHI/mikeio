@@ -38,18 +38,8 @@ class _UnstructuredGeometry:
 
     def __init__(self) -> None:
         self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-        # self._projstr = None
-
-        # self._top_elems = None
-        # self._n_layers_column = None
-        # self._bot_elems = None
-
         self._geometry = None
         self._geom2d = None
-        # self._e2_e3_table = None
-        # self._2d_ids = None
-        # self._layer_ids = None
-
         self._shapely_domain_obj = None
 
     def __repr__(self):
@@ -137,12 +127,7 @@ class _UnstructuredGeometry:
     @property
     def max_nodes_per_element(self):
         """The maximum number of nodes for an element"""
-        maxnodes = 0
-        for local_nodes in self.element_table:
-            n = len(local_nodes)
-            if n > maxnodes:
-                maxnodes = n
-        return maxnodes
+        return self._geometry.max_nodes_per_element
 
     @property
     def is_2d(self):
@@ -151,7 +136,7 @@ class _UnstructuredGeometry:
             DfsuFileType.Dfsu2D,
             DfsuFileType.DfsuSpectral2D,
             None,
-        )  # Todo mesh
+        )
 
     @property
     def is_layered(self):
@@ -176,7 +161,7 @@ class _UnstructuredGeometry:
     @property
     def is_tri_only(self):
         """Does the mesh consist of triangles only?"""
-        return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
+        return self._geometry.is_tri_only
 
     @property
     def boundary_polylines(self):
@@ -206,22 +191,6 @@ class _UnstructuredGeometry:
             return nc[self.codes == code]
         return nc
 
-    @staticmethod
-    def _get_element_table_from_mikecore(element_table_mikecore):
-        # Note: this can take 10-20 seconds for large dfsu3d!
-
-        elem_tbl = element_table_mikecore.copy()
-        for j in range(len(element_table_mikecore)):
-            elem_tbl[j] = np.array(element_table_mikecore[j]) - 1
-        return elem_tbl
-
-    @staticmethod
-    def _element_table_to_mikecore(elem_table):
-        new_elem_table = elem_table.copy()
-        for j in range(len(elem_table)):
-            new_elem_table[j] = np.array(elem_table[j]) + 1
-        return new_elem_table
-
     def elements_to_geometry(self, elements, node_layers="all"):
         """export elements to new flexible file geometry
 
@@ -239,6 +208,22 @@ class _UnstructuredGeometry:
             which can be used for further extraction or saved to file
         """
         return self._geometry.elements_to_geometry(elements, node_layers)
+
+    @staticmethod
+    def _offset_element_table_by(element_table, offset):
+        offset = int(offset)
+        new_elem_table = element_table.copy()
+        for j in range(len(element_table)):
+            new_elem_table[j] = np.array(element_table[j]) + offset
+        return new_elem_table
+
+    @staticmethod
+    def _get_element_table_from_mikecore(element_table):
+        return _UnstructuredGeometry._offset_element_table_by(element_table, -1)
+
+    @staticmethod
+    def _element_table_to_mikecore(element_table):
+        return _UnstructuredGeometry._offset_element_table_by(element_table, 1)
 
     def to_2d_geometry(self):
         """extract 2d geometry from 3d geometry
@@ -497,7 +482,7 @@ class _UnstructuredGeometry:
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
         if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")            
+            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
         return self._geometry.elem2d_ids
 
     @property
@@ -1526,7 +1511,6 @@ class _UnstructuredFile(_UnstructuredGeometry):
         """
         dfs = DfsuFile.Open(filename)
         self._source = dfs
-        # self._projstr = dfs.Projection.WKTString
         self._type = DfsuFileType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
 
@@ -1540,8 +1524,6 @@ class _UnstructuredFile(_UnstructuredGeometry):
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
             self._geometry = GeometryFM()  # EMPTY
-            self._geometry._element_ids = []
-            self._geometry._node_ids = []
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
             el_table, el_ids = self._get_elements_from_source(dfs)
@@ -2027,7 +2009,6 @@ class Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         xye = geom.element_coordinates[:, 0:2]
         xyn = geom.node_coordinates[:, 0:2]
         tree2d = cKDTree(xyn)
-        # geom._create_tree2d(self)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
         if n_nearest == 1:
             weights = None
@@ -2527,8 +2508,6 @@ class Mesh(_UnstructuredFile):
         self._read_header(filename)
         self._n_timesteps = None
         self._n_items = None
-        # self._n_layers = None
-        # self._n_sigma = None
         self._type = None  # DfsuFileType.Mesh
 
     @property
@@ -2579,36 +2558,11 @@ class Mesh(_UnstructuredFile):
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
-    def plot_boundary_nodes(self, boundary_names=None):
+    def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
         """
         Plot mesh boundary nodes and their codes
         """
-        import matplotlib.pyplot as plt
-
-        nc = self.node_coordinates
-        c = self.codes
-
-        if boundary_names is not None:
-            if len(self.boundary_codes) != len(boundary_names):
-                raise Exception(
-                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})"
-                )
-            user_defined_labels = dict(zip(self.boundary_codes, boundary_names))
-
-        fig, ax = plt.subplots()
-        for code in self.boundary_codes:
-            xn = nc[c == code, 0]
-            yn = nc[c == code, 1]
-            if boundary_names is None:
-                label = f"Code {code}"
-            else:
-                label = user_defined_labels[code]
-            plt.plot(xn, yn, ".", label=label)
-
-        plt.legend()
-        plt.title("Boundary nodes")
-        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
-        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+        return self._geometry.plot_boundary_nodes(boundary_names, figsize, ax)
 
     @staticmethod
     def _geometry_to_mesh(outfilename, geometry):

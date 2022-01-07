@@ -773,8 +773,8 @@ class GeometryFM(_Geometry):
         else:
             return "equal"
 
-    # @staticmethod
-    # def _to_mesh(outfilename):
+    # TODO 
+    # def to_mesh(outfilename):
 
     #     builder = MeshBuilder()
 
