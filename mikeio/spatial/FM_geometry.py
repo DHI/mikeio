@@ -233,6 +233,72 @@ class GeometryFM(_Geometry):
 
         return ec
 
+    def find_nearest_elements(
+        self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
+    ):
+        """Find index of nearest elements (optionally for a list)
+
+        Parameters
+        ----------
+
+        x: float or array(float)
+            X coordinate(s) (easting or longitude)
+        y: float or array(float)
+            Y coordinate(s) (northing or latitude)
+        z: float or array(float), optional
+            Z coordinate(s)  (vertical coordinate, positive upwards)
+            If not provided for a 3d file, the surface element is returned
+        layer: int, optional
+            Search in a specific layer only (3D files only)
+            Either z or layer (0-based) can be provided for a 3D file
+        n_nearest : int, optional
+            return this many (horizontally) nearest points for
+            each coordinate set, default=1
+        return_distances : bool, optional
+            should the horizontal distances to each point be returned?
+            default=False
+
+        Returns
+        -------
+        np.array
+            element ids of nearest element(s)
+        np.array, optional
+            horizontal distances
+
+        Examples
+        --------
+        >>> id = dfs.find_nearest_elements(3, 4)
+        >>> ids = dfs.find_nearest_elements([3, 8], [4, 6])
+        >>> ids = dfs.find_nearest_elements(xy)
+        >>> ids = dfs.find_nearest_elements(3, 4, n_nearest=4)
+        >>> ids, d = dfs.find_nearest_elements(xy, return_distances=True)
+
+        >>> ids = dfs.find_nearest_elements(3, 4, z=-3)
+        >>> ids = dfs.find_nearest_elements(3, 4, layer=4)
+        >>> ids = dfs.find_nearest_elements(xyz)
+        >>> ids = dfs.find_nearest_elements(xyz, n_nearest=3)
+        """
+        idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
+
+        if self.is_layered:
+            if self._use_third_col_as_z(x, z, layer):
+                z = x[:, 2]
+            idx = self._find_3d_from_2d_points(idx, z=z, layer=layer)
+
+        if return_distances:
+            return idx, d2d
+
+        return idx
+
+    def _use_third_col_as_z(self, x, z, layer):
+        return (
+            (z is None)
+            and (layer is None)
+            and (not np.isscalar(x))
+            and (np.ndim(x) == 2)
+            and (x.shape[1] >= 3)
+        )
+
     def get_2d_interpolant(
         self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
     ):
@@ -664,7 +730,91 @@ class GeometryFM(_Geometry):
 
         return np.unique(nodes), elem_tbl
 
-    # 3D dfsu stuff
+    def get_node_centered_data(self, data, extrapolate=True):
+        """convert cell-centered data to node-centered by pseudo-laplacian method
+
+        Parameters
+        ----------
+        data : np.array(float)
+            cell-centered data
+        extrapolate : bool, optional
+            allow the method to extrapolate, default:True
+
+        Returns
+        -------
+        np.array(float)
+            node-centered data
+        """
+        geometry = self._geometry2d
+
+        nc = geometry.node_coordinates
+        elem_table, ec, data = self._create_tri_only_element_table(data)
+
+        node_cellID = [
+            list(np.argwhere(elem_table == i)[:, 0])
+            for i in np.unique(
+                elem_table.reshape(
+                    -1,
+                )
+            )
+        ]
+        node_centered_data = np.zeros(shape=nc.shape[0])
+        for n, item in enumerate(node_cellID):
+            I = ec[item][:, :2] - nc[n][:2]
+            I2 = (I ** 2).sum(axis=0)
+            Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
+            lamb = I2[0] * I2[1] - Ixy ** 2
+            omega = np.zeros(1)
+            if lamb > 1e-10 * (I2[0] * I2[1]):
+                # Standard case - Pseudo
+                lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
+                lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
+                omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
+                if not extrapolate:
+                    omega[np.where(omega > 2)] = 2
+                    omega[np.where(omega < 0)] = 0
+            if omega.sum() > 0:
+                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
+            else:
+                # We did not succeed using pseudo laplace procedure, use inverse distance instead
+                InvDis = [
+                    1 / np.hypot(case[0], case[1])
+                    for case in ec[item][:, :2] - nc[n][:2]
+                ]
+                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
+
+        return node_centered_data
+
+    def _create_tri_only_element_table(self, data=None):
+        """Convert quad/tri mesh to pure tri-mesh"""
+        ec = self.element_coordinates
+        if self.is_tri_only:
+            return np.vstack(self.element_table), ec, data
+
+        if data is None:
+            data = []
+
+        elem_table = [list(self.element_table[i]) for i in range(self.n_elements)]
+        tmp_elmnt_nodes = elem_table.copy()
+        for el, item in enumerate(tmp_elmnt_nodes):
+            if len(item) == 4:
+                elem_table.pop(el)  # remove quad element
+
+                # insert two new tri elements in table
+                elem_table.insert(el, item[:3])
+                tri2_nodes = [item[i] for i in [2, 3, 0]]
+                elem_table.append(tri2_nodes)
+
+                # new center coordinates for new tri-elements
+                ec[el] = self.node_coordinates[item[:3]].mean(axis=1)
+                tri2_ec = self.node_coordinates[tri2_nodes].mean(axis=1)
+                ec = np.append(ec, tri2_ec.reshape(1, -1), axis=0)
+
+                # use same data in two new tri elements
+                data = np.append(data, data[el])
+
+        return np.asarray(elem_table), ec, data
+
     @property
     def _geometry2d(self):
         """The 2d geometry for a 3d object"""
@@ -698,6 +848,29 @@ class GeometryFM(_Geometry):
             polygon = Polygon(pcoords, True)
             polygons.append(polygon)
         return polygons
+
+    def to_shapely(self):
+        """Export mesh as shapely MultiPolygon
+
+        Returns
+        -------
+        shapely.geometry.MultiPolygon
+            polygons with mesh elements
+        """
+        from shapely.geometry import Polygon, MultiPolygon
+
+        polygons = []
+        for j in range(self.n_elements):
+            nodes = self.element_table[j]
+            pcoords = np.empty([len(nodes), 2])
+            for i in range(len(nodes)):
+                nidx = nodes[i]
+                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
+            polygon = Polygon(pcoords)
+            polygons.append(polygon)
+        mp = MultiPolygon(polygons)
+
+        return mp
 
     def plot_mesh(self, figsize=None, ax=None):
         import matplotlib.pyplot as plt

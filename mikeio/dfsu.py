@@ -15,8 +15,7 @@ import typing
 from mikecore.eum import eumUnit, eumQuantity
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
-from mikecore.DfsuFile import DfsuFile
-from mikecore.DfsuFile import DfsuFileType, DfsuUtil
+from mikecore.DfsuFile import DfsuFile, DfsuFileType
 
 from mikecore.MeshFile import MeshFile
 from mikecore.MeshBuilder import MeshBuilder
@@ -29,9 +28,9 @@ from .eum import ItemInfo, EUMType, EUMUnit
 from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 
 from .spatial import Grid2D
-from .interpolation import get_idw_interpolant, interp2d
 from .custom_exceptions import InvalidGeometry
 from .base import EquidistantTimeSeries
+from .interpolation import get_idw_interpolant, interp2d
 
 
 class Dfsu:
@@ -101,19 +100,6 @@ class _UnstructuredGeometry:
         self._geometry = None
         self._geom2d = None
         self._shapely_domain_obj = None
-
-    # def __repr__(self):
-    #     out = []
-    #     out.append("Unstructured Geometry")
-    #     if self.n_nodes:
-    #         out.append(f"Number of nodes: {self.n_nodes}")
-    #     if self.n_elements:
-    #         out.append(f"Number of elements: {self.n_elements}")
-    #     if self._n_layers:
-    #         out.append(f"Number of layers: {self.n_layers}")
-    #     if self.geometry.projection_string:
-    #         out.append(f"Projection: {self.projection_string}")
-    #     return str.join("\n", out)
 
     @property
     def type_name(self):
@@ -329,98 +315,16 @@ class _UnstructuredGeometry:
     ):
         return self.geometry.get_2d_interpolant(xy, n_nearest, extrapolate, p, radius)
 
+    @wraps(GeometryFM.interp2d)
     def interp2d(self, data, elem_ids, weights=None, shape=None):
-        """interp spatially in data (2d only)
+        return self.geometry.interp2d(data, elem_ids, weights, shape)
 
-        Parameters
-        ----------
-        data : ndarray or list(ndarray)
-            dfsu data
-        elem_ids : ndarray(int)
-            n sized array of 1 or more element ids used for interpolation
-        weights : ndarray(float), optional
-            weights with same size as elem_ids used for interpolation
-        shape: tuple, optional
-            reshape output
-
-        Returns
-        -------
-        ndarray or list(ndarray)
-            spatially interped data
-
-        Examples
-        --------
-        >>> ds = dfsu.read()
-        >>> g = dfs.get_overset_grid(shape=(50,40))
-        >>> elem_ids, weights = dfs.get_2d_interpolant(g.xy)
-        >>> dsi = dfs.interp2d(ds, elem_ids, weights)
-        """
-        return interp2d(data, elem_ids, weights, shape)
-
+    @wraps(GeometryFM.find_nearest_elements)
     def find_nearest_elements(
         self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
     ):
-        """Find index of nearest elements (optionally for a list)
-
-        Parameters
-        ----------
-
-        x: float or array(float)
-            X coordinate(s) (easting or longitude)
-        y: float or array(float)
-            Y coordinate(s) (northing or latitude)
-        z: float or array(float), optional
-            Z coordinate(s)  (vertical coordinate, positive upwards)
-            If not provided for a 3d file, the surface element is returned
-        layer: int, optional
-            Search in a specific layer only (3D files only)
-            Either z or layer (0-based) can be provided for a 3D file
-        n_nearest : int, optional
-            return this many (horizontally) nearest points for
-            each coordinate set, default=1
-        return_distances : bool, optional
-            should the horizontal distances to each point be returned?
-            default=False
-
-        Returns
-        -------
-        np.array
-            element ids of nearest element(s)
-        np.array, optional
-            horizontal distances
-
-        Examples
-        --------
-        >>> id = dfs.find_nearest_elements(3, 4)
-        >>> ids = dfs.find_nearest_elements([3, 8], [4, 6])
-        >>> ids = dfs.find_nearest_elements(xy)
-        >>> ids = dfs.find_nearest_elements(3, 4, n_nearest=4)
-        >>> ids, d = dfs.find_nearest_elements(xy, return_distances=True)
-
-        >>> ids = dfs.find_nearest_elements(3, 4, z=-3)
-        >>> ids = dfs.find_nearest_elements(3, 4, layer=4)
-        >>> ids = dfs.find_nearest_elements(xyz)
-        >>> ids = dfs.find_nearest_elements(xyz, n_nearest=3)
-        """
-        idx, d2d = self.geometry._find_n_nearest_2d_elements(x, y, n=n_nearest)
-
-        if self.is_layered:
-            if self._use_third_col_as_z(x, z, layer):
-                z = x[:, 2]
-            idx = self.geometry._find_3d_from_2d_points(idx, z=z, layer=layer)
-
-        if return_distances:
-            return idx, d2d
-
-        return idx
-
-    def _use_third_col_as_z(self, x, z, layer):
-        return (
-            (z is None)
-            and (layer is None)
-            and (not np.isscalar(x))
-            and (np.ndim(x) == 2)
-            and (x.shape[1] >= 3)
+        return self.geometry.find_nearest_elements(
+            x, y, z, layer, n_nearest, return_distances
         )
 
     @wraps(GeometryFM.get_element_area)
@@ -431,86 +335,13 @@ class _UnstructuredGeometry:
     def _to_polygons(self, geometry=None):
         return geometry._to_polygons(geometry)
 
+    @wraps(GeometryFM.to_shapely)
     def to_shapely(self):
-        """Export mesh as shapely MultiPolygon
+        return self.geometry.to_shapely()
 
-        Returns
-        -------
-        shapely.geometry.MultiPolygon
-            polygons with mesh elements
-        """
-        from shapely.geometry import Polygon, MultiPolygon
-
-        polygons = []
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            pcoords = np.empty([len(nodes), 2])
-            for i in range(len(nodes)):
-                nidx = nodes[i]
-                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
-            polygon = Polygon(pcoords)
-            polygons.append(polygon)
-        mp = MultiPolygon(polygons)
-
-        return mp
-
-    def get_node_centered_data(self, data, geometry=None, extrapolate=True):
-        """convert cell-centered data to node-centered by pseudo-laplacian method
-
-        Parameters
-        ----------
-        data : np.array(float)
-            cell-centered data
-        extrapolate : bool, optional
-            allow the method to extrapolate, default:True
-
-        Returns
-        -------
-        np.array(float)
-            node-centered data
-        """
-        if geometry is None:
-            geometry = self._geometry2d
-
-        nc = geometry.node_coordinates
-        elem_table, ec, data = self._create_tri_only_element_table(
-            data, geometry=geometry
-        )
-
-        node_cellID = [
-            list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(
-                elem_table.reshape(
-                    -1,
-                )
-            )
-        ]
-        node_centered_data = np.zeros(shape=nc.shape[0])
-        for n, item in enumerate(node_cellID):
-            I = ec[item][:, :2] - nc[n][:2]
-            I2 = (I ** 2).sum(axis=0)
-            Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
-            lamb = I2[0] * I2[1] - Ixy ** 2
-            omega = np.zeros(1)
-            if lamb > 1e-10 * (I2[0] * I2[1]):
-                # Standard case - Pseudo
-                lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
-                lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
-                omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
-                if not extrapolate:
-                    omega[np.where(omega > 2)] = 2
-                    omega[np.where(omega < 0)] = 0
-            if omega.sum() > 0:
-                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
-            else:
-                # We did not succeed using pseudo laplace procedure, use inverse distance instead
-                InvDis = [
-                    1 / np.hypot(case[0], case[1])
-                    for case in ec[item][:, :2] - nc[n][:2]
-                ]
-                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
-
-        return node_centered_data
+    @wraps(GeometryFM.get_node_centered_data)
+    def get_node_centered_data(self, data, extrapolate=True):
+        return self.geometry.get_node_centered_data(data, extrapolate)
 
     def plot(
         self,
@@ -749,12 +580,10 @@ class _UnstructuredGeometry:
                     n_refinements = 0
                     print("Warning: mesh refinement is not possible if plot_mesh=True")
 
-            elem_table, ec, z = self._create_tri_only_element_table(
-                data=z, geometry=geometry
-            )
+            elem_table, ec, z = geometry._create_tri_only_element_table(data=z)
             triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
-            zn = self.get_node_centered_data(z, geometry)
+            zn = geometry.get_node_centered_data(z)
 
             if n_refinements > 0:
                 # TODO: refinements doesn't seem to work for 3d files?
@@ -899,41 +728,6 @@ class _UnstructuredGeometry:
         else:
             extend = "neither"
         return extend
-
-    def _create_tri_only_element_table(self, data=None, geometry=None):
-        """Convert quad/tri mesh to pure tri-mesh"""
-        if geometry is None:
-            geometry = self.geometry
-
-        ec = geometry.element_coordinates
-        if geometry.is_tri_only:
-            return np.vstack(geometry.element_table), ec, data
-
-        if data is None:
-            data = []
-
-        elem_table = [
-            list(geometry.element_table[i]) for i in range(geometry.n_elements)
-        ]
-        tmp_elmnt_nodes = elem_table.copy()
-        for el, item in enumerate(tmp_elmnt_nodes):
-            if len(item) == 4:
-                elem_table.pop(el)  # remove quad element
-
-                # insert two new tri elements in table
-                elem_table.insert(el, item[:3])
-                tri2_nodes = [item[i] for i in [2, 3, 0]]
-                elem_table.append(tri2_nodes)
-
-                # new center coordinates for new tri-elements
-                ec[el] = geometry.node_coordinates[item[:3]].mean(axis=1)
-                tri2_ec = geometry.node_coordinates[tri2_nodes].mean(axis=1)
-                ec = np.append(ec, tri2_ec.reshape(1, -1), axis=0)
-
-                # use same data in two new tri elements
-                data = np.append(data, data[el])
-
-        return np.asarray(elem_table), ec, data
 
 
 class _UnstructuredFile(_UnstructuredGeometry):
@@ -2127,16 +1921,15 @@ class Dfsu2DV(DfsuLayered):
 
         return ax
 
-    # TODO: remove _source from this
     def _Get_2DVertical_elements(self):
         if (self._type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
             self._type == DfsuFileType.DfsuVerticalProfileSigma
         ):
             elements = [
-                list(self._source.ElementTable[i])
-                for i in range(len(list(self._source.ElementTable)))
+                list(self.geometry.element_table[i])
+                for i in range(len(list(self.geometry.element_table)))
             ]
-            return np.asarray(elements) - 1
+            return np.asarray(elements)  # - 1
 
 
 class Dfsu3D(DfsuLayered):
