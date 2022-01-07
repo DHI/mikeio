@@ -42,6 +42,7 @@ def test_read_all_items_returns_all_items_and_names():
 
     dfs = Dfsu(filepath)
 
+    assert isinstance(filepath, Path)
     assert dfs.n_items == 4
 
 
