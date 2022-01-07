@@ -26,6 +26,7 @@ from .dfs0 import Dfs0
 from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
 from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
+from .spatial.FM_utils import _plot_map
 
 from .spatial import Grid2D
 from .custom_exceptions import InvalidGeometry
@@ -331,9 +332,9 @@ class _UnstructuredGeometry:
     def get_element_area(self):
         return self.geometry.get_element_area()
 
-    @wraps(GeometryFM._to_polygons)
-    def _to_polygons(self, geometry=None):
-        return geometry._to_polygons(geometry)
+    # @wraps(GeometryFM._to_polygons)
+    # def _to_polygons(self, geometry=None):
+    #     return geometry._to_polygons(geometry)
 
     @wraps(GeometryFM.to_shapely)
     def to_shapely(self):
@@ -415,27 +416,6 @@ class _UnstructuredGeometry:
         1
         >>> dfs.plot(z=ds) # plot surface elevation
         """
-
-        import matplotlib.cm as cm
-        import matplotlib.colors as mplc
-        import matplotlib.pyplot as plt
-        from matplotlib.patches import Polygon
-        from matplotlib.collections import PatchCollection
-        from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-        mesh_col = "0.95"
-        mesh_col_dark = "0.6"
-
-        if plot_type is None:
-            plot_type = "outline_only"
-
-        plot_data = True
-        if plot_type == "mesh_only" or plot_type == "outline_only":
-            plot_data = False
-
-        if cmap is None:
-            cmap = cm.viridis
-
         if elements is None:
             if self.is_2d:
                 geometry = self.geometry
@@ -449,285 +429,33 @@ class _UnstructuredGeometry:
                 geometry = self.geometry.elements_to_geometry(
                     elements, node_layers="bottom"
                 )
-
-        nc = geometry.node_coordinates
-        ec = geometry.element_coordinates
-        ne = ec.shape[0]
-
-        is_bathy = False
-        if z is None:
-            is_bathy = True
-            if plot_data:
-                z = ec[:, 2]
-                if label is None:
-                    label = "Bathymetry (m)"
-        else:
+        if z is not None:
             if isinstance(z, DataArray):
                 z = z.to_numpy().copy()
             if isinstance(z, Dataset) and len(z) == 1:  # if single-item Dataset
                 z = z[0].to_numpy().copy()
-            if len(z) != ne:
-                z = np.squeeze(z).copy()  # handles single time step
-                if len(z) != ne:
-                    raise Exception(
-                        f"Length of z ({len(z)}) does not match geometry ({ne})"
-                    )
-            if label is None:
-                label = ""
-            if not plot_data:
-                print(f"Cannot plot data in {plot_type} plot!")
 
-        if plot_data and vmin is None:
-            vmin = np.nanmin(z)
-        if plot_data and vmax is None:
-            vmax = np.nanmax(z)
-
-        # set levels
-        cmap_norm = None
-        cmap_ScMappable = None
-        if ("only" not in plot_type) and (levels is not None):
-            if np.isscalar(levels):
-                n_levels = levels
-                levels = np.linspace(vmin, vmax, n_levels)
-            else:
-                n_levels = len(levels)
-                vmin = min(levels)
-                vmax = max(levels)
-
-            levels = np.array(levels)
-            levels_equidistant = all(np.diff(levels) == np.diff(levels)[0])
-            # if not levels_equidistant:  # (isinstance(cmap, mplc.ListedColormap)) or (
-            if (not isinstance(cmap, str)) and (not levels_equidistant):
-                # print("ScalarMappable")
-                # cmap = mplc.Colormap(cmap)
-                cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
-                cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
-        if ("contour" in plot_type) and (levels is None):
-            levels = 10
-            n_levels = 10
-
-        cbar_extend = self._cbar_extend(z, vmin, vmax)
-
-        # plot in existing or new axes?
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-
-        # set aspect ratio
-        if geometry.is_geo:
-            mean_lat = np.mean(nc[:, 1])
-            ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
-        else:
-            ax.set_aspect("equal")
-
-        # set plot limits
-        xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
-        ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
-
-        # scale height of colorbar
-        cbar_frac = 0.046 * nc[:, 1].ptp() / nc[:, 0].ptp()
-
-        if plot_type == "outline_only":
-            fig_obj = None
-
-        elif plot_type == "mesh_only":
-            if show_mesh == False:
-                print("Not possible to use show_mesh=False on a mesh_only plot!")
-            patches = geometry._to_polygons()
-            fig_obj = PatchCollection(
-                patches, edgecolor=mesh_col_dark, facecolor="none", linewidths=0.3
-            )
-            ax.add_collection(fig_obj)
-
-        elif plot_type == "patch" or plot_type == "box":
-            patches = geometry._to_polygons()
-            # do plot as patches (like MZ "box contour")
-            # with (constant) element center values
-            if show_mesh:
-                fig_obj = PatchCollection(
-                    patches,
-                    cmap=cmap,
-                    norm=cmap_norm,
-                    edgecolor=mesh_col,
-                    linewidths=0.4,
-                )
-            else:
-                fig_obj = PatchCollection(
-                    patches,
-                    cmap=cmap,
-                    norm=cmap_norm,
-                    edgecolor="face",
-                    alpha=None,
-                    linewidths=None,
-                )
-
-            fig_obj.set_array(z)
-            fig_obj.set_clim(vmin, vmax)
-            ax.add_collection(fig_obj)
-
-            if add_colorbar:
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-                plt.colorbar(cmap_sm, label=label, cax=cax, extend=cbar_extend)
-
-        else:
-            # do node-based triangular plot
-            import matplotlib.tri as tri
-
-            mesh_linewidth = 0.0
-            if show_mesh and geometry.is_tri_only:
-                mesh_linewidth = 0.4
-                if n_refinements > 0:
-                    n_refinements = 0
-                    print("Warning: mesh refinement is not possible if plot_mesh=True")
-
-            elem_table, ec, z = geometry._create_tri_only_element_table(data=z)
-            triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
-
-            zn = geometry.get_node_centered_data(z)
-
-            if n_refinements > 0:
-                # TODO: refinements doesn't seem to work for 3d files?
-                refiner = tri.UniformTriRefiner(triang)
-                triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
-
-            if plot_type == "shaded" or plot_type == "smooth":
-                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-                if cmap_norm is None:
-                    fig_obj = ax.tripcolor(
-                        triang,
-                        zn,
-                        edgecolors="face",
-                        vmin=vmin,
-                        vmax=vmax,
-                        cmap=cmap,
-                        linewidths=0.3,
-                        shading="gouraud",
-                    )
-                else:
-                    fig_obj = ax.tripcolor(
-                        triang,
-                        zn,
-                        edgecolors="face",
-                        cmap=cmap,
-                        norm=cmap_norm,
-                        linewidths=0.3,
-                        shading="gouraud",
-                    )
-
-                if add_colorbar:
-                    cax = make_axes_locatable(ax).append_axes(
-                        "right", size="5%", pad=0.05
-                    )
-                    cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-
-                    plt.colorbar(
-                        cmap_sm,
-                        label=label,
-                        cax=cax,
-                        boundaries=levels,
-                        extend=cbar_extend,
-                    )
-
-            elif plot_type == "contour" or plot_type == "contour_lines":
-                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
-                fig_obj = ax.tricontour(
-                    triang,
-                    zn,
-                    levels=levels,
-                    linewidths=[1.2],
-                    cmap=cmap,
-                    norm=cmap_norm,
-                )
-                ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
-                if len(label) > 0:
-                    ax.set_title(label)
-
-            elif plot_type == "contourf" or plot_type == "contour_filled":
-                ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-                vbuf = 0.01 * (vmax - vmin) / n_levels
-                # avoid white outside limits
-                zn = np.clip(zn, vmin + vbuf, vmax - vbuf)
-                fig_obj = ax.tricontourf(
-                    triang,
-                    zn,
-                    levels=levels,
-                    cmap=cmap,
-                    norm=cmap_norm,
-                    extend=cbar_extend,
-                )
-
-                # colorbar
-                if add_colorbar:
-                    cax = make_axes_locatable(ax).append_axes(
-                        "right", size="5%", pad=0.05
-                    )
-                    if cmap_ScMappable is None:
-                        plt.colorbar(fig_obj, label=label, cax=cax)
-                    else:
-                        try:
-                            plt.colorbar(
-                                cmap_ScMappable,
-                                label=label,
-                                cax=cax,
-                                ticks=levels,
-                            )
-                        except:
-                            warnings.warn("Cannot add colorbar")
-
-            else:
-                if (plot_type is not None) and plot_type != "outline_only":
-                    raise Exception(f"plot_type {plot_type} unknown!")
-
-            if show_mesh and (not geometry.is_tri_only):
-                # if mesh is not tri only, we need to add it manually on top
-                patches = geometry._to_polygons()
-                mesh_linewidth = 0.4
-                if plot_type == "contour":
-                    mesh_col = mesh_col_dark
-                p = PatchCollection(
-                    patches,
-                    edgecolor=mesh_col,
-                    facecolor="none",
-                    linewidths=mesh_linewidth,
-                )
-                ax.add_collection(p)
-
-        if show_outline:
-            linwid = 1.2
-            out_col = "0.4"
-            for exterior in self.boundary_polylines.exteriors:
-                ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-                xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
-                xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
-                ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
-
-            for interior in self.boundary_polylines.interiors:
-                ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
-
-        # set plot limits
-        xybuf = 6e-3 * (xmax - xmin)
-        ax.set_xlim(xmin - xybuf, xmax + xybuf)
-        ax.set_ylim(ymin - xybuf, ymax + xybuf)
-
-        if title is not None:
-            ax.set_title(title)
-
-        return ax
-
-    def _cbar_extend(self, calc_data, vmin, vmax):
-        if calc_data is None:
-            return "neither"
-        extend_min = calc_data.min() < vmin if vmin is not None else False
-        extend_max = calc_data.max() > vmax if vmax is not None else False
-        if extend_min and extend_max:
-            extend = "both"
-        elif extend_min:
-            extend = "min"
-        elif extend_max:
-            extend = "max"
-        else:
-            extend = "neither"
-        return extend
+        return _plot_map(
+            element_coordinates=geometry.element_coordinates,
+            element_table=geometry.element_table,
+            node_coordinates=geometry.node_coordinates,
+            boundary_polylines=self.boundary_polylines,
+            is_geo=geometry.is_geo,
+            z=z,
+            plot_type=plot_type,
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            figsize=figsize,
+            ax=ax,
+            add_colorbar=add_colorbar,
+        )
 
 
 class _UnstructuredFile(_UnstructuredGeometry):

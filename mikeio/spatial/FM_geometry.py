@@ -6,6 +6,7 @@ from mikecore.DfsuFile import DfsuFileType
 from .geometry import _Geometry, BoundingBox
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
+from .FM_utils import _get_node_centered_data, _to_polygons
 
 
 class GeometryFM(_Geometry):
@@ -746,74 +747,10 @@ class GeometryFM(_Geometry):
             node-centered data
         """
         geometry = self._geometry2d
-
         nc = geometry.node_coordinates
-        elem_table, ec, data = self._create_tri_only_element_table(data)
-
-        node_cellID = [
-            list(np.argwhere(elem_table == i)[:, 0])
-            for i in np.unique(
-                elem_table.reshape(
-                    -1,
-                )
-            )
-        ]
-        node_centered_data = np.zeros(shape=nc.shape[0])
-        for n, item in enumerate(node_cellID):
-            I = ec[item][:, :2] - nc[n][:2]
-            I2 = (I ** 2).sum(axis=0)
-            Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
-            lamb = I2[0] * I2[1] - Ixy ** 2
-            omega = np.zeros(1)
-            if lamb > 1e-10 * (I2[0] * I2[1]):
-                # Standard case - Pseudo
-                lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
-                lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
-                omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
-                if not extrapolate:
-                    omega[np.where(omega > 2)] = 2
-                    omega[np.where(omega < 0)] = 0
-            if omega.sum() > 0:
-                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
-            else:
-                # We did not succeed using pseudo laplace procedure, use inverse distance instead
-                InvDis = [
-                    1 / np.hypot(case[0], case[1])
-                    for case in ec[item][:, :2] - nc[n][:2]
-                ]
-                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
-
-        return node_centered_data
-
-    def _create_tri_only_element_table(self, data=None):
-        """Convert quad/tri mesh to pure tri-mesh"""
-        ec = self.element_coordinates
-        if self.is_tri_only:
-            return np.vstack(self.element_table), ec, data
-
-        if data is None:
-            data = []
-
-        elem_table = [list(self.element_table[i]) for i in range(self.n_elements)]
-        tmp_elmnt_nodes = elem_table.copy()
-        for el, item in enumerate(tmp_elmnt_nodes):
-            if len(item) == 4:
-                elem_table.pop(el)  # remove quad element
-
-                # insert two new tri elements in table
-                elem_table.insert(el, item[:3])
-                tri2_nodes = [item[i] for i in [2, 3, 0]]
-                elem_table.append(tri2_nodes)
-
-                # new center coordinates for new tri-elements
-                ec[el] = self.node_coordinates[item[:3]].mean(axis=1)
-                tri2_ec = self.node_coordinates[tri2_nodes].mean(axis=1)
-                ec = np.append(ec, tri2_ec.reshape(1, -1), axis=0)
-
-                # use same data in two new tri elements
-                data = np.append(data, data[el])
-
-        return np.asarray(elem_table), ec, data
+        ec = geometry.element_coordinates
+        elem_table = geometry.element_table
+        return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
 
     @property
     def _geometry2d(self):
@@ -823,31 +760,6 @@ class GeometryFM(_Geometry):
         if self._geom2d is None:
             self._geom2d = self.to_2d_geometry()
         return self._geom2d
-
-    def _to_polygons(self, geometry=None):
-        """generate matplotlib polygons from element table for plotting
-
-        Returns
-        -------
-        list(matplotlib.patches.Polygon)
-            list of polygons for plotting
-        """
-        if geometry is None:
-            geometry = self
-        from matplotlib.patches import Polygon
-
-        polygons = []
-
-        for j in range(geometry.n_elements):
-            nodes = geometry.element_table[j]
-            pcoords = np.empty([len(nodes), 2])
-            for i in range(len(nodes)):
-                nidx = nodes[i]
-                pcoords[i, :] = geometry.node_coordinates[nidx, 0:2]
-
-            polygon = Polygon(pcoords, True)
-            polygons.append(polygon)
-        return polygons
 
     def to_shapely(self):
         """Export mesh as shapely MultiPolygon
@@ -880,7 +792,7 @@ class GeometryFM(_Geometry):
             _, ax = plt.subplots(figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
-        patches = self._geometry2d._to_polygons()
+        patches = _to_polygons(self._geometry2d.node_coordinates, self._geometry2d.element_table)
         fig_obj = PatchCollection(
             patches, edgecolor="0.6", facecolor="none", linewidths=0.3
         )
