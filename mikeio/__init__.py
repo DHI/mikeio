@@ -53,25 +53,37 @@ def read(filename, items=None, time_steps=None):
 
     _, ext = os.path.splitext(filename)
 
-    if ext == ".dfs0":
-
-        dfs = Dfs0(filename)
-
-    elif ext == ".dfs1":
-
-        dfs = Dfs1(filename)
-
-    elif ext == ".dfs2":
-
-        dfs = Dfs2(filename)
-
-    elif ext == ".dfsu":
-
-        dfs = Dfsu(filename)
-
-    elif ext == ".xyz":
+    if ext == ".xyz":
         return read_xyz(filename)
+    elif ext == ".mesh":
+        # or should Mesh.read() just return geometry? 
+        raise Exception(f"{ext} cannot be read(). Try open() instead.")
     else:
-        raise Exception(f"{ext} is an unsupported extension")
+        dfs = open(filename)
 
     return dfs.read(items, time_steps)
+
+
+def open(filename: str):
+    _, ext = os.path.splitext(filename)
+
+    if ext == ".dfs0":
+        return Dfs0(filename)
+
+    elif ext == ".dfs1":
+        return Dfs1(filename)
+
+    elif ext == ".dfs2":
+        return Dfs2(filename)
+
+    elif ext == ".dfs3":
+        return Dfs3(filename)
+
+    elif ext == ".dfsu":
+        return Dfsu(filename)
+
+    elif ext == ".mesh":
+        return Mesh(filename)
+
+    else:
+        raise Exception(f"{ext} is an unsupported extension")
