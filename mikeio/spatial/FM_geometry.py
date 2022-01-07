@@ -792,7 +792,9 @@ class GeometryFM(_Geometry):
             _, ax = plt.subplots(figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
-        patches = _to_polygons(self._geometry2d.node_coordinates, self._geometry2d.element_table)
+        patches = _to_polygons(
+            self._geometry2d.node_coordinates, self._geometry2d.element_table
+        )
         fig_obj = PatchCollection(
             patches, edgecolor="0.6", facecolor="none", linewidths=0.3
         )
