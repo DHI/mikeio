@@ -10,7 +10,6 @@ from mikecore.Projections import Cartography
 from .dfs import _Dfs123
 from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
-from . import __version__ as mikeio_version
 
 
 def write_dfs2(filename, ds, title=""):
@@ -20,7 +19,7 @@ def write_dfs2(filename, ds, title=""):
 
 
 def _write_dfs2_header(filename, ds, title=""):
-    builder = DfsBuilder.Create(title, "MIKE IO", mikeio_version)
+    builder = DfsBuilder.Create(title, "MIKE IO", 1)
     builder.SetDataType(0)
 
     factory = DfsFactory()
