@@ -3,6 +3,7 @@ import numpy as np
 from .dfsu import _Dfsu
 from .dataset import DataArray
 
+
 class DfsuSpectral(_Dfsu):
     def plot_spectrum(
         self,
