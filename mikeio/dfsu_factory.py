@@ -1,8 +1,10 @@
 import os
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from .dfsu import Dfsu2DH, DfsuSpectral
-#from .dfsu_spectral import DfsuSpectral
+
+from .dfsu import Dfsu2DH
 from .dfsu_layered import Dfsu3D, Dfsu2DV
+from .dfsu_spectral import DfsuSpectral
+
 
 class Dfsu:
     def __new__(self, filename, *args, **kwargs):
