@@ -27,7 +27,8 @@ from .dfs0 import Dfs0
 from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
-from .dfsu import Dfsu, Mesh
+from .dfsu_factory import Dfsu
+from .dfsu import Mesh
 from .pfs import Pfs
 from .xyz import read_xyz
 from .dataset import Dataset, DataArray

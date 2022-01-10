@@ -1,6 +1,6 @@
 from mikeio.dataset import Dataset
 from mikeio.interpolation import get_idw_interpolant, interp2d, _interp_itemstep
-from mikeio.dfsu import Dfsu
+from mikeio import Dfsu
 import numpy as np
 
 

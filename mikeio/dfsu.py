@@ -1,5 +1,6 @@
 import os
-from collections import namedtuple
+
+# from collections import namedtuple
 import pandas as pd
 import pathlib
 import warnings
@@ -7,7 +8,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from functools import wraps
 
-from scipy.spatial import cKDTree
+# from scipy.spatial import cKDTree
 import tempfile
 from tqdm import trange
 import typing
@@ -29,78 +30,164 @@ from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .spatial.FM_utils import _plot_map
 
 from .spatial import Grid2D
-from .custom_exceptions import InvalidGeometry
+
+# from .custom_exceptions import InvalidGeometry
 from .base import EquidistantTimeSeries
-from .interpolation import get_idw_interpolant, interp2d
+
+# from .interpolation import get_idw_interpolant, interp2d
 
 
-class Dfsu:
-    def __new__(self, filename, *args, **kwargs):
-        filename = str(filename)
-        type = self._get_DfsuFileType(filename)
+class _UnstructuredFile:
+    """
+    _UnstructuredFile is base class for Mesh and Dfsu
+    has file handle, items and timesteps and reads file header
+    """
 
-        if self._type_is_spectral(type):
-            return DfsuSpectral(filename, *args, **kwargs)
-        elif self._type_is_2d_horizontal(type):
-            return Dfsu2DH(filename, *args, **kwargs)
-        elif self._type_is_2d_vertical(type):
-            return Dfsu2DV(filename, *args, **kwargs)
-        elif self._type_is_3d(type):
-            return Dfsu3D(filename, *args, **kwargs)
-        else:
-            raise ValueError(f"Type {type} is unsupported!")
-
-    @staticmethod
-    def _get_DfsuFileType(filename: str):
-        ext = os.path.splitext(filename)[-1]
-        if "dfs" in ext:
-            dfs = DfsuFile.Open(filename)
-            type = DfsuFileType(dfs.DfsuFileType)
-            dfs.Close()
-        elif "mesh" in ext:
-            type = None
-        else:
-            raise ValueError(f"{ext} is an unsupported extension")
-        return type
-
-    @staticmethod
-    def _type_is_2d_horizontal(type):
-        return type in (
-            DfsuFileType.Dfsu2D,
-            DfsuFileType.DfsuSpectral2D,
-            None,
-        )
-
-    @staticmethod
-    def _type_is_2d_vertical(type):
-        return type in (
-            DfsuFileType.DfsuVerticalProfileSigma,
-            DfsuFileType.DfsuVerticalProfileSigmaZ,
-        )
-
-    @staticmethod
-    def _type_is_3d(type):
-        return type in (
-            DfsuFileType.Dfsu3DSigma,
-            DfsuFileType.Dfsu3DSigmaZ,
-        )
-
-    @staticmethod
-    def _type_is_spectral(type):
-        """Type is spectral dfsu (point, line or area spectrum)"""
-        return type in (
-            DfsuFileType.DfsuSpectral0D,
-            DfsuFileType.DfsuSpectral1D,
-            DfsuFileType.DfsuSpectral2D,
-        )
-
-
-class _UnstructuredGeometry:
     def __init__(self) -> None:
         self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
         self._geometry = None
         self._geom2d = None
-        self._shapely_domain_obj = None
+        # self._shapely_domain_obj = None
+
+        self._filename = None
+        self._source = None
+        self._deletevalue = None
+
+        self._n_timesteps = None
+        self._start_time = None
+        self._timestep_in_seconds = None
+
+        self._n_items = None
+        self._items = None
+        self._dtype = np.float64
+
+    def _read_header(self, filename):
+        if not os.path.isfile(filename):
+            raise Exception(f"file {filename} does not exist!")
+
+        _, ext = os.path.splitext(filename)
+
+        if ext == ".mesh":
+            self._read_mesh_header(filename)
+
+        elif ext == ".dfsu":
+            self._read_dfsu_header(filename)
+        else:
+            raise Exception(f"Filetype {ext} not supported (mesh,dfsu)")
+
+    def _read_mesh_header(self, filename):
+        """
+        Read header of mesh file and set object properties
+        """
+        msh = MeshFile.ReadMesh(filename)
+        self._source = msh
+        self._type = None  # =DfsuFileType.Mesh
+
+        nc, codes, node_ids = self._get_nodes_from_source(msh)
+        el_table, el_ids = self._get_elements_from_source(msh)
+
+        # create geometry
+        self._geometry = GeometryFM(
+            node_coordinates=nc,
+            element_table=el_table,
+            codes=codes,
+            projection_string=msh.ProjectionString,
+            dfsu_type=self._type,
+            element_ids=el_ids,
+            node_ids=node_ids,
+        )
+
+    def _read_dfsu_header(self, filename):
+        """
+        Read header of dfsu file and set object properties
+        """
+        dfs = DfsuFile.Open(filename)
+        self._source = dfs
+        self._type = DfsuFileType(dfs.DfsuFileType)
+        self._deletevalue = dfs.DeleteValueFloat
+
+        if self.is_spectral:
+            dir = dfs.Directions
+            self.directions = None if dir is None else dir * (180 / np.pi)
+            self.n_directions = dfs.NumberOfDirections
+            self.frequencies = dfs.Frequencies
+            self.n_frequencies = dfs.NumberOfFrequencies
+
+        # geometry
+        if self._type == DfsuFileType.DfsuSpectral0D:
+            self._geometry = GeometryFM()  # EMPTY
+        else:
+            nc, codes, node_ids = self._get_nodes_from_source(dfs)
+            el_table, el_ids = self._get_elements_from_source(dfs)
+
+            if self.is_layered:
+                geometry_cls = GeometryFMLayered
+                self._geometry = geometry_cls(
+                    node_coordinates=nc,
+                    element_table=el_table,
+                    codes=codes,
+                    projection_string=dfs.Projection.WKTString,
+                    dfsu_type=self._type,
+                    element_ids=el_ids,
+                    node_ids=node_ids,
+                    n_layers=dfs.NumberOfLayers,
+                    n_sigma=dfs.NumberOfSigmaLayers,
+                )
+            else:
+                self._geometry = GeometryFM(
+                    node_coordinates=nc,
+                    element_table=el_table,
+                    codes=codes,
+                    projection_string=dfs.Projection.WKTString,
+                    dfsu_type=self._type,
+                    element_ids=el_ids,
+                    node_ids=node_ids,
+                )
+
+        # items
+        self._n_items = len(dfs.ItemInfo)
+        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
+
+        # time
+        self._start_time = dfs.StartDateTime
+        self._n_timesteps = dfs.NumberOfTimeSteps
+        self._timestep_in_seconds = dfs.TimeStepInSeconds
+
+        dfs.Close()
+
+    @staticmethod
+    def _get_nodes_from_source(source):
+        xn = source.X
+        yn = source.Y
+        zn = source.Z
+        nc = np.column_stack([xn, yn, zn])
+        codes = np.array(list(source.Code))
+        node_ids = source.NodeIds - 1
+        return nc, codes, node_ids
+
+    @staticmethod
+    def _get_elements_from_source(source):
+        element_table = _UnstructuredFile._get_element_table_from_mikecore(
+            source.ElementTable
+        )
+        element_ids = source.ElementIds - 1
+        return element_table, element_ids
+
+    @staticmethod
+    def _offset_element_table_by(element_table, offset):
+        offset = int(offset)
+        new_elem_table = element_table.copy()
+        for j in range(len(element_table)):
+            new_elem_table[j] = np.array(element_table[j]) + offset
+        return new_elem_table
+
+    @staticmethod
+    def _get_element_table_from_mikecore(element_table):
+        return _UnstructuredFile._offset_element_table_by(element_table, -1)
+
+    @staticmethod
+    def _element_table_to_mikecore(element_table):
+        return _UnstructuredFile._offset_element_table_by(element_table, 1)
 
     @property
     def type_name(self):
@@ -254,22 +341,6 @@ class _UnstructuredGeometry:
     @wraps(GeometryFM.elements_to_geometry)
     def elements_to_geometry(self, elements, node_layers="all"):
         return self.geometry.elements_to_geometry(elements, node_layers)
-
-    @staticmethod
-    def _offset_element_table_by(element_table, offset):
-        offset = int(offset)
-        new_elem_table = element_table.copy()
-        for j in range(len(element_table)):
-            new_elem_table[j] = np.array(element_table[j]) + offset
-        return new_elem_table
-
-    @staticmethod
-    def _get_element_table_from_mikecore(element_table):
-        return _UnstructuredGeometry._offset_element_table_by(element_table, -1)
-
-    @staticmethod
-    def _element_table_to_mikecore(element_table):
-        return _UnstructuredGeometry._offset_element_table_by(element_table, 1)
 
     @property
     def element_coordinates(self):
@@ -457,13 +528,6 @@ class _UnstructuredGeometry:
             add_colorbar=add_colorbar,
         )
 
-
-class _UnstructuredFile(_UnstructuredGeometry):
-    """
-    _UnstructuredFile based on _UnstructuredGeometry and base class for Mesh and Dfsu
-    has file handle, items and timesteps and reads file header
-    """
-
     show_progress = False
 
     def __repr__(self):
@@ -504,134 +568,6 @@ class _UnstructuredFile(_UnstructuredGeometry):
                 )
                 out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)
-
-    def __init__(self):
-        super().__init__()
-        self._filename = None
-        self._source = None
-        self._deletevalue = None
-
-        self._n_timesteps = None
-        self._start_time = None
-        self._timestep_in_seconds = None
-
-        self._n_items = None
-        self._items = None
-        self._dtype = np.float64
-
-        self._geometry = None
-
-    def _read_header(self, filename):
-        if not os.path.isfile(filename):
-            raise Exception(f"file {filename} does not exist!")
-
-        _, ext = os.path.splitext(filename)
-
-        if ext == ".mesh":
-            self._read_mesh_header(filename)
-
-        elif ext == ".dfsu":
-            self._read_dfsu_header(filename)
-        else:
-            raise Exception(f"Filetype {ext} not supported (mesh,dfsu)")
-
-    def _read_mesh_header(self, filename):
-        """
-        Read header of mesh file and set object properties
-        """
-        msh = MeshFile.ReadMesh(filename)
-        self._source = msh
-        self._type = None  # DfsuFileType.Mesh
-
-        nc, codes, node_ids = self._get_nodes_from_source(msh)
-        el_table, el_ids = self._get_elements_from_source(msh)
-
-        # create geometry
-        self._geometry = GeometryFM(
-            node_coordinates=nc,
-            element_table=el_table,
-            codes=codes,
-            projection_string=msh.ProjectionString,
-            dfsu_type=self._type,
-            element_ids=el_ids,
-            node_ids=node_ids,
-        )
-
-    def _read_dfsu_header(self, filename):
-        """
-        Read header of dfsu file and set object properties
-        """
-        dfs = DfsuFile.Open(filename)
-        self._source = dfs
-        self._type = DfsuFileType(dfs.DfsuFileType)
-        self._deletevalue = dfs.DeleteValueFloat
-
-        if self.is_spectral:
-            dir = dfs.Directions
-            self.directions = None if dir is None else dir * (180 / np.pi)
-            self.n_directions = dfs.NumberOfDirections
-            self.frequencies = dfs.Frequencies
-            self.n_frequencies = dfs.NumberOfFrequencies
-
-        # geometry
-        if self._type == DfsuFileType.DfsuSpectral0D:
-            self._geometry = GeometryFM()  # EMPTY
-        else:
-            nc, codes, node_ids = self._get_nodes_from_source(dfs)
-            el_table, el_ids = self._get_elements_from_source(dfs)
-
-            if self.is_layered:
-                geometry_cls = GeometryFMLayered
-                self._geometry = geometry_cls(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
-                    projection_string=dfs.Projection.WKTString,
-                    dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
-                    n_layers=dfs.NumberOfLayers,
-                    n_sigma=dfs.NumberOfSigmaLayers,
-                )
-            else:
-                self._geometry = GeometryFM(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
-                    projection_string=dfs.Projection.WKTString,
-                    dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
-                )
-
-        # items
-        self._n_items = len(dfs.ItemInfo)
-        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
-
-        # time
-        self._start_time = dfs.StartDateTime
-        self._n_timesteps = dfs.NumberOfTimeSteps
-        self._timestep_in_seconds = dfs.TimeStepInSeconds
-
-        dfs.Close()
-
-    @staticmethod
-    def _get_nodes_from_source(source):
-        xn = source.X
-        yn = source.Y
-        zn = source.Z
-        nc = np.column_stack([xn, yn, zn])
-        codes = np.array(list(source.Code))
-        node_ids = source.NodeIds - 1
-        return nc, codes, node_ids
-
-    @staticmethod
-    def _get_elements_from_source(source):
-        element_table = _UnstructuredGeometry._get_element_table_from_mikecore(
-            source.ElementTable
-        )
-        element_ids = source.ElementIds - 1
-        return element_table, element_ids
 
 
 class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
@@ -1479,267 +1415,6 @@ class Dfsu2DH(_Dfsu):
         return Dataset(data_list, times, items_out)
 
 
-class DfsuLayered(_Dfsu):
-    @wraps(GeometryFMLayered.to_2d_geometry)
-    def to_2d_geometry(self):
-        return self.geometry2d
-
-    @property
-    def geometry2d(self):
-        """The 2d geometry for a 3d object"""
-        return self._geometry2d
-
-    @property
-    def n_layers(self):
-        """Maximum number of layers"""
-        return self.geometry._n_layers
-
-    @property
-    def n_sigma_layers(self):
-        """Number of sigma layers"""
-        return self.geometry.n_sigma_layers
-
-    @property
-    def n_z_layers(self):
-        """Maximum number of z-layers"""
-        if self.n_layers is None:
-            return None
-        return self.n_layers - self.n_sigma_layers
-
-    @property
-    def e2_e3_table(self):
-        """The 2d-to-3d element connectivity table for a 3d object"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot return e2_e3_table")
-            return None
-        return self.geometry.e2_e3_table
-
-    @property
-    def elem2d_ids(self):
-        """The associated 2d element id for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-        return self.geometry.elem2d_ids
-
-    @property
-    def layer_ids(self):
-        """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
-        return self.geometry.layer_ids
-
-    @property
-    def top_elements(self):
-        """List of 3d element ids of surface layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find top_elements")
-            return None
-        return self.geometry.top_elements
-
-    @property
-    def n_layers_per_column(self):
-        """List of number of layers for each column"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find n_layers_per_column")
-            return None
-        return self.geometry.n_layers_per_column
-
-    @property
-    def bottom_elements(self):
-        """List of 3d element ids of bottom layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find bottom_elements")
-            return None
-        return self.geometry.bottom_elements
-
-    @wraps(GeometryFMLayered.get_layer_elements)
-    def get_layer_elements(self, layer):
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
-        return self.geometry.get_layer_elements(layer)
-
-
-class Dfsu2DV(DfsuLayered):
-    def plot_vertical_profile(
-        self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
-    ):
-        """
-        Plot unstructured vertical profile
-
-        Parameters
-        ----------
-        values: np.array
-            value for each element to plot
-        timestep: int, optional
-            the timestep that fits with the data to get correct vertical
-            positions, default: use static vertical positions
-        cmin: real, optional
-            lower bound of values to be shown on plot, default:None
-        cmax: real, optional
-            upper bound of values to be shown on plot, default:None
-        title: str, optional
-            axes title
-        label: str, optional
-            colorbar label
-        cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis
-        figsize: (float, float), optional
-            specify size of figure
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-
-        Returns
-        -------
-        <matplotlib.axes>
-        """
-        import matplotlib.pyplot as plt
-        from matplotlib.collections import PolyCollection
-
-        if isinstance(values, DataArray):
-            values = values.to_numpy()
-
-        nc = self.node_coordinates
-        x_coordinate = np.hypot(nc[:, 0], nc[:, 1])
-        if time_step is None:
-            y_coordinate = nc[:, 2]
-        else:
-            y_coordinate = self.read()[0].to_numpy()[time_step, :]
-
-        elements = self._Get_2DVertical_elements()
-
-        # plot in existing or new axes?
-        if "ax" in kwargs:
-            ax = kwargs["ax"]
-        else:
-            figsize = None
-            if "figsize" in kwargs:
-                figsize = kwargs["figsize"]
-            _, ax = plt.subplots(figsize=figsize)
-
-        yz = np.c_[x_coordinate, y_coordinate]
-        verts = yz[elements]
-
-        if "cmap" in kwargs:
-            cmap = kwargs["cmap"]
-        else:
-            cmap = "jet"
-        pc = PolyCollection(verts, cmap=cmap)
-
-        if cmin is None:
-            cmin = np.nanmin(values)
-        if cmax is None:
-            cmax = np.nanmax(values)
-        pc.set_clim(cmin, cmax)
-
-        plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
-        pc.set_array(values)
-
-        if "edge_color" in kwargs:
-            edge_color = kwargs["edge_color"]
-        else:
-            edge_color = None
-        pc.set_edgecolor(edge_color)
-
-        ax.add_collection(pc)
-        ax.autoscale()
-
-        if "title" in kwargs:
-            ax.set_title(kwargs["title"])
-
-        return ax
-
-    def _Get_2DVertical_elements(self):
-        if (self._type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
-            self._type == DfsuFileType.DfsuVerticalProfileSigma
-        ):
-            elements = [
-                list(self.geometry.element_table[i])
-                for i in range(len(list(self.geometry.element_table)))
-            ]
-            return np.asarray(elements)  # - 1
-
-
-class Dfsu3D(DfsuLayered):
-    def find_nearest_profile_elements(self, x, y):
-        """Find 3d elements of profile nearest to (x,y) coordinates
-
-        Parameters
-        ----------
-        x : float
-            x-coordinate of point
-        y : float
-            y-coordinate of point
-
-        Returns
-        -------
-        np.array(int)
-            element ids of vertical profile
-        """
-        if self.is_2d:
-            raise InvalidGeometry("Object is 2d. Cannot get_nearest_profile")
-        else:
-            elem2d, _ = self.geometry._find_n_nearest_2d_elements(x, y)
-            elem3d = self.geometry.e2_e3_table[elem2d]
-            return elem3d
-
-    def extract_surface_elevation_from_3d(
-        self, filename=None, time_steps=None, n_nearest=4
-    ):
-        """
-        Extract surface elevation from a 3d dfsu file (based on zn)
-        to a new 2d dfsu file with a surface elevation item.
-
-        Parameters
-        ---------
-        filename: str
-            Output file name
-        time_steps: str, int or list[int], optional
-            Extract only selected time_steps
-        n_nearest: int, optional
-            number of points for spatial interpolation (inverse_distance), default=4
-
-        Examples
-        --------
-        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time_steps='2018-1-1,2018-2-1')
-        """
-        # validate input
-        assert (
-            self._type == DfsuFileType.Dfsu3DSigma
-            or self._type == DfsuFileType.Dfsu3DSigmaZ
-        )
-        assert n_nearest > 0
-        time_steps = _valid_timesteps(self._source, time_steps)
-
-        # make 2d nodes-to-elements interpolator
-        top_el = self.top_elements
-        geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
-        xye = geom.element_coordinates[:, 0:2]
-        xyn = geom.node_coordinates[:, 0:2]
-        tree2d = cKDTree(xyn)
-        dist, node_ids = tree2d.query(xye, k=n_nearest)
-        if n_nearest == 1:
-            weights = None
-        else:
-            weights = get_idw_interpolant(dist)
-
-        # read zn from 3d file and interpolate to element centers
-        ds = self.read(items=0, time_steps=time_steps)  # read only zn
-        node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
-            top_el, node_layers="top"
-        )
-        zn_surf = ds.data[0][:, node_ids_surf]  # surface
-        surf2d = interp2d(zn_surf, node_ids, weights)
-
-        # create output
-        items = [ItemInfo(EUMType.Surface_Elevation)]
-        ds2 = Dataset([surf2d], ds.time, items, geometry=geom)
-        if filename is None:
-            return ds2
-        else:
-            title = "Surface extracted from 3D file"
-            self.write(filename, ds2, elements=top_el, title=title)
-
-
 class DfsuSpectral(_Dfsu):
     def plot_spectrum(
         self,
@@ -2044,7 +1719,7 @@ class Mesh(_UnstructuredFile):
         else:
             geometry = self.geometry.elements_to_geometry(elements)
             quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-            elem_table = _UnstructuredGeometry._element_table_to_mikecore(
+            elem_table = _UnstructuredFile._element_table_to_mikecore(
                 geometry.element_table
             )
 
@@ -2072,7 +1747,7 @@ class Mesh(_UnstructuredFile):
         # builder.SetNodeIds(geometry.node_ids+1)
         # builder.SetElementIds(geometry.elements+1)
         builder.SetElements(
-            _UnstructuredGeometry._element_table_to_mikecore(geometry.element_table)
+            _UnstructuredFile._element_table_to_mikecore(geometry.element_table)
         )
         builder.SetProjection(geometry.projection_string)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
