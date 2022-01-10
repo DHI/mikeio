@@ -28,6 +28,11 @@ def _plot_map(
 
     Parameters
     ----------
+    node_coordinates,
+    element_table,
+    element_coordinates,
+    boundary_polylines,
+    is_geo,
     z: np.array or a Dataset with a single item, optional
         value for each element to plot, default bathymetry
     elements: list(int), optional
