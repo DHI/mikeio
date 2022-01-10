@@ -3,9 +3,9 @@ import warnings
 
 
 def _plot_map(
-    element_coordinates,
-    element_table,
     node_coordinates,
+    element_table,
+    element_coordinates,
     boundary_polylines,
     is_geo,
     z=None,
@@ -455,8 +455,8 @@ def _create_tri_only_element_table(
     """Convert quad/tri mesh to pure tri-mesh"""
 
     if _is_tri_only(element_table):
-        # already tri-only? do nothing
-        return np.asarray(element_table), element_coordinates, data
+        # already tri-only? just convert to 2d array
+        return np.stack(element_table), element_coordinates, data
 
     ec = element_coordinates.copy()
 

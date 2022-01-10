@@ -436,9 +436,9 @@ class _UnstructuredGeometry:
                 z = z[0].to_numpy().copy()
 
         return _plot_map(
-            element_coordinates=geometry.element_coordinates,
-            element_table=geometry.element_table,
             node_coordinates=geometry.node_coordinates,
+            element_table=geometry.element_table,
+            element_coordinates=geometry.element_coordinates,
             boundary_polylines=self.boundary_polylines,
             is_geo=geometry.is_geo,
             z=z,
@@ -541,7 +541,6 @@ class _UnstructuredFile(_UnstructuredGeometry):
         """
         msh = MeshFile.ReadMesh(filename)
         self._source = msh
-        # self._projstr = msh.ProjectionString
         self._type = None  # DfsuFileType.Mesh
 
         nc, codes, node_ids = self._get_nodes_from_source(msh)
