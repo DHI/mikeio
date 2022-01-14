@@ -298,7 +298,7 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     dfs_o.Close()
 
 
-def concat(infilenames: List[str], outfilename: str, keep='last') -> None:
+def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     """Concatenates files along the time axis
 
     If files are overlapping, the last one will be used.
@@ -310,9 +310,9 @@ def concat(infilenames: List[str], outfilename: str, keep='last') -> None:
     outfilename: str
         filename of output
     keep: str
-        either 'first' (keep older), 'last' (keep newer) 
+        either 'first' (keep older), 'last' (keep newer)
         or 'average' can be selected. By default 'last'
-        
+
     Notes
     ------
 
@@ -342,9 +342,8 @@ def concat(infilenames: List[str], outfilename: str, keep='last') -> None:
             raise Exception("Gap in time axis detected - not supported")
 
         current_time = start_time
-        
-        if keep == "last":
 
+        if keep == "last":
 
             if i < (len(infilenames) - 1):
                 dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
@@ -370,14 +369,15 @@ def concat(infilenames: List[str], outfilename: str, keep='last') -> None:
 
                     dfs_o.WriteItemTimeStepNext(0, darray)
             dfs_i.Close()
-            
+
         if keep == "first":
-            
-            
-            if i == 0: # all timesteps in first file are kept (is there a more efficient way to do this without the loop?)
+
+            if (
+                i == 0
+            ):  # all timesteps in first file are kept (is there a more efficient way to do this without the loop?)
                 for timestep in range(n_time_steps):
                     current_time = start_time + timedelta(seconds=timestep * dt)
-                    
+
                     for item in range(n_items):
 
                         itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
@@ -386,16 +386,20 @@ def concat(infilenames: List[str], outfilename: str, keep='last') -> None:
                         darray = d.astype(np.float32)
 
                         dfs_o.WriteItemTimeStepNext(0, darray)
-                end_time = start_time + timedelta(seconds=timestep * dt) # reuse last timestep since there is no EndDateTime attribute in t_axis.
-                dfs_i.Close()   
-                    
-            else: 
-                # determine overlap in number of timesteps 
-                start_timestep = int((end_time - start_time) / timedelta(seconds=dt)) + 1
+                end_time = start_time + timedelta(
+                    seconds=timestep * dt
+                )  # reuse last timestep since there is no EndDateTime attribute in t_axis.
+                dfs_i.Close()
+
+            else:
+                # determine overlap in number of timesteps
+                start_timestep = (
+                    int((end_time - start_time) / timedelta(seconds=dt)) + 1
+                )
                 # loop only through those timesteps that are not in previous file
                 for timestep in range(start_timestep, n_time_steps):
                     current_time = start_time + timedelta(seconds=timestep * dt)
-                   
+
                     for item in range(n_items):
 
                         itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
@@ -404,9 +408,10 @@ def concat(infilenames: List[str], outfilename: str, keep='last') -> None:
                         darray = d.astype(np.float32)
 
                         dfs_o.WriteItemTimeStepNext(0, darray)
-                end_time = start_time + timedelta(seconds=timestep * dt) # get end time from current file                       
-                dfs_i.Close()                     
-                
+                end_time = start_time + timedelta(
+                    seconds=timestep * dt
+                )  # get end time from current file
+                dfs_i.Close()
 
     dfs_o.Close()
 
