@@ -1,9 +1,12 @@
 import warnings
-from typing import Iterable, Optional, Sequence, Union, Mapping
+from typing import Iterable, Optional, Sequence, Tuple, Union, Mapping
 import numpy as np
 import pandas as pd
 from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
+
+from .spatial.FM_geometry import GeometryFM
+from .spatial.FM_utils import _plot_map
 
 from .base import TimeSeries
 from .spatial.geometry import _Geometry
@@ -51,39 +54,99 @@ class DataArray(TimeSeries):
         self._values = value
 
     def __getitem__(self, key) -> "DataArray":
+        if isinstance(key, tuple):
+            steps = key[0]
+        else:
+            steps = key
 
-        subset = self._values[key].copy()
-        # TODO similar subsetting on geometry
+        # select in time
+        if isinstance(steps, str):
+            steps = slice(steps, steps)
+        if isinstance(steps, slice):
+            try:
+                s = self.time.slice_indexer(steps.start, steps.stop)
+                steps = list(range(s.start, s.stop))
+            except:
+                steps = list(range(*steps.indices(self.n_timesteps)))
+            time = self.time[steps]
+        elif isinstance(steps, int):
+            time = self.time[[steps]]
+        else:
+            time = self.time[steps]
 
-        da = DataArray(data=subset, time=self.time, item=self.item)
+        # select in space
+        geometry = self.geometry
+        if isinstance(key, tuple):
+            if isinstance(self.geometry, GeometryFM):
+                # TODO: allow for selection of layers
+                elements = key[1]
+                if isinstance(elements, slice):
+                    elements = list(range(*elements.indices(self.geometry.n_elements)))
+                else:
+                    elements = np.atleast_1d(elements)
+                geometry = self.geometry.elements_to_geometry(elements)
+                key = (steps, elements)
+            else:
+                # TODO: better handling of dfs1,2,3
+                key = (steps, *key[1:])
+        else:
+            key = steps
 
-        return da
+        data = self._values[key].copy()
+        return DataArray(data=data, time=time, item=self.item, geometry=geometry)
 
-    def plot(self, ax=None):
+    def plot(self, ax=None, figsize=None, **kwargs):
         import matplotlib.pyplot as plt
 
         if ax is None:
-            fig, ax = plt.subplots()
+            _, ax = plt.subplots(figsize=figsize)
 
-        if self.ndim > 2:
-            ax.histogram(self.values)
+        if self.ndim == 0:
+            ax.plot(self.time, self.values, **kwargs)
+            ax.set_xlabel("time")
+            ax.set_ylabel(f"{self.name} [{self.unit.name}]")
             return ax
+
+        if isinstance(self.geometry, GeometryFM):
+            if self.geometry.is_2d:
+                self._plot_FM_map(ax, **kwargs)
+                return ax
 
         if self.ndim == 2:
-            ax.imshow(self.values)
+            ax.imshow(self.values, **kwargs)
             return ax
 
-        ax.plot(self.time, self.values)
-        ax.set_xlabel("time")
-        ax.set_ylabel(f"{self.name} [{self.unit.name}]")
-
+        # if everything else fails, plot histogram
+        ax.hist(self.values, **kwargs)
         return ax
+
+    def _plot_FM_map(self, ax, **kwargs):
+        if self.n_timesteps > 1:
+            z = self.values[0]  # select first step as default plotting behaviour
+        else:
+            z = np.squeeze(self.values)
+
+        if "label" not in kwargs:
+            kwargs["label"] = f"{self.name} [{self.unit.name}]"
+        if "title" not in kwargs:
+            kwargs["title"] = f"{self.time[0]}"
+
+        _plot_map(
+            node_coordinates=self.geometry.node_coordinates,
+            element_table=self.geometry.element_table,
+            element_coordinates=self.geometry.element_coordinates,
+            boundary_polylines=self.geometry.boundary_polylines,
+            is_geo=self.geometry.is_geo,
+            z=z,
+            ax=ax,
+            **kwargs,
+        )
 
     def to_numpy(self) -> np.ndarray:
         return self._values
 
     def flipud(self) -> "DataArray":
-        """Flip updside down"""
+        """Flip upside down"""
 
         self.values = np.flip(self.values, axis=1)
         return self
