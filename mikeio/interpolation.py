@@ -1,7 +1,6 @@
 import numpy as np
-
 from mikeio.eum import ItemInfo
-from .dataset import Dataset, DataArray
+
 
 # class Interpolation2D:
 def get_idw_interpolant(distances, p=2):
@@ -64,6 +63,8 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     >>> elem_ids, weights = dfs.get_2d_interpolant(xy)
     >>> dsi = interp2d(ds, elem_ids, weights)
     """
+    from .dataset import Dataset, DataArray
+
     is_dataset = False
     if isinstance(data, Dataset):
         is_dataset = True
@@ -78,7 +79,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
             idatitem = np.empty(shape=(nt, ni))
             for step in range(nt):
                 idatitem[step, :] = _interp_itemstep(
-                    da[step, :].to_numpy(), elem_ids, weights
+                    da[step].to_numpy(), elem_ids, weights
                 )
 
             if shape:
@@ -103,7 +104,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
         nt, ne = datitem.shape
         idatitem = np.empty(shape=(nt, ni))
         for step in range(nt):
-            idatitem[step, :] = _interp_itemstep(datitem[step, :], elem_ids, weights)
+            idatitem[step, :] = _interp_itemstep(datitem[step], elem_ids, weights)
 
         if shape:
             idatitem = idatitem.reshape((nt, *shape))
