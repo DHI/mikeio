@@ -32,6 +32,23 @@ def test_dataarray_indexing(da1: DataArray):
     assert subset.to_numpy() == np.array([13.0])
 
 
+def test_dataarray_dfsu3d_indexing():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfsu = Dfsu(filename)
+    ds = dfsu.read()
+    assert isinstance(
+        ds.Salinity.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered
+    )
+
+    # indexing in space selecting a single item
+    da = ds.Salinity[0, :]
+    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
+
+    # indexing in space selecting a single item
+    da = ds.Salinity[:, 0]
+    assert da.geometry is None
+
+
 def test_timestep(da1):
 
     assert da1.timestep == 1.0

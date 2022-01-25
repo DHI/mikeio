@@ -114,7 +114,11 @@ class DataArray(TimeSeries):
                     elements = list(range(*elements.indices(self.geometry.n_elements)))
                 else:
                     elements = np.atleast_1d(elements)
-                geometry = self.geometry.elements_to_geometry(elements)
+                if len(elements) == 1:
+                    geometry = None
+                else:
+                    geometry = self.geometry.elements_to_geometry(elements)
+
                 key = (steps, elements)
             else:
                 # TODO: better handling of dfs1,2,3
@@ -131,16 +135,16 @@ class DataArray(TimeSeries):
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
 
-        if self.ndim == 0:
-            ax.plot(self.time, self.values, **kwargs)
-            ax.set_xlabel("time")
-            ax.set_ylabel(f"{self.name} [{self.unit.name}]")
-            return ax
-
         if isinstance(self.geometry, GeometryFM):
             if self.geometry.is_2d:
                 self._plot_FM_map(ax, **kwargs)
                 return ax
+
+        if self.ndim == 1:
+            ax.plot(self.time, self.values, **kwargs)
+            ax.set_xlabel("time")
+            ax.set_ylabel(f"{self.name} [{self.unit.name}]")
+            return ax
 
         if self.ndim == 2:
             ax.imshow(self.values, **kwargs)
