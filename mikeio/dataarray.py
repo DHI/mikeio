@@ -12,6 +12,83 @@ from .base import TimeSeries
 from .spatial.geometry import _Geometry
 
 
+class _DataArrayPlotter:
+    def __init__(self, da: "DataArray") -> None:
+        self.da = da
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+
+        if self.da.ndim == 0:
+            ax.plot(self.da.time, self.da.values, **kwargs)
+            ax.set_xlabel("time")
+            ax.set_ylabel(self._label_txt)
+            return ax
+
+        if isinstance(self.da.geometry, GeometryFM):
+            if self.da.geometry.is_2d:
+                self._plot_FM_map(ax, **kwargs)
+                return ax
+
+        if self.da.ndim == 2:
+            ax.imshow(self.da.values, **kwargs)
+            return ax
+
+        # if everything else fails, plot histogram
+        ax.hist(self.da.values, **kwargs)
+        return ax
+
+    def hist(self, ax=None, figsize=None, **kwargs):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+        ax.hist(self.da.values.ravel(), **kwargs)
+        return ax
+
+    def map(self, ax=None, figsize=None, **kwargs):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+
+        if isinstance(self.da.geometry, GeometryFM):
+            if self.da.geometry.is_2d:
+                self._plot_FM_map(ax, **kwargs)
+                return ax
+
+    def line():
+        pass
+
+    def _plot_FM_map(self, ax, **kwargs):
+        if self.da.n_timesteps > 1:
+            z = self.da.values[0]  # select first step as default plotting behaviour
+        else:
+            z = np.squeeze(self.da.values)
+
+        if "label" not in kwargs:
+            kwargs["label"] = self._label_txt()
+        if "title" not in kwargs:
+            kwargs["title"] = f"{self.da.time[0]}"
+
+        _plot_map(
+            node_coordinates=self.da.geometry.node_coordinates,
+            element_table=self.da.geometry.element_table,
+            element_coordinates=self.da.geometry.element_coordinates,
+            boundary_polylines=self.da.geometry.boundary_polylines,
+            is_geo=self.da.geometry.is_geo,
+            z=z,
+            ax=ax,
+            **kwargs,
+        )
+
+    def _label_txt(self):
+        return f"{self.da.name} [{self.da.unit.name}]"
+
+
 class DataArray(TimeSeries):
 
     deletevalue = 1.0e-35
@@ -41,6 +118,8 @@ class DataArray(TimeSeries):
         self.item = item
 
         self.geometry = geometry
+
+        self.plot = _DataArrayPlotter(self)
 
     @property
     def values(self):
@@ -94,53 +173,6 @@ class DataArray(TimeSeries):
 
         data = self._values[key].copy()
         return DataArray(data=data, time=time, item=self.item, geometry=geometry)
-
-    def plot(self, ax=None, figsize=None, **kwargs):
-        import matplotlib.pyplot as plt
-
-        if ax is None:
-            _, ax = plt.subplots(figsize=figsize)
-
-        if self.ndim == 0:
-            ax.plot(self.time, self.values, **kwargs)
-            ax.set_xlabel("time")
-            ax.set_ylabel(f"{self.name} [{self.unit.name}]")
-            return ax
-
-        if isinstance(self.geometry, GeometryFM):
-            if self.geometry.is_2d:
-                self._plot_FM_map(ax, **kwargs)
-                return ax
-
-        if self.ndim == 2:
-            ax.imshow(self.values, **kwargs)
-            return ax
-
-        # if everything else fails, plot histogram
-        ax.hist(self.values, **kwargs)
-        return ax
-
-    def _plot_FM_map(self, ax, **kwargs):
-        if self.n_timesteps > 1:
-            z = self.values[0]  # select first step as default plotting behaviour
-        else:
-            z = np.squeeze(self.values)
-
-        if "label" not in kwargs:
-            kwargs["label"] = f"{self.name} [{self.unit.name}]"
-        if "title" not in kwargs:
-            kwargs["title"] = f"{self.time[0]}"
-
-        _plot_map(
-            node_coordinates=self.geometry.node_coordinates,
-            element_table=self.geometry.element_table,
-            element_coordinates=self.geometry.element_coordinates,
-            boundary_polylines=self.geometry.boundary_polylines,
-            is_geo=self.geometry.is_geo,
-            z=z,
-            ax=ax,
-            **kwargs,
-        )
 
     def to_numpy(self) -> np.ndarray:
         return self._values
