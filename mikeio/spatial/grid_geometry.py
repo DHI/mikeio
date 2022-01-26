@@ -50,6 +50,11 @@ class Grid1D(GeometryGrid):
         return str.join("\n", out)
 
     @property
+    def dx(self):
+        """grid spacing"""
+        return self._dx
+
+    @property
     def x(self):
         """array of node coordinates"""
         return self._x

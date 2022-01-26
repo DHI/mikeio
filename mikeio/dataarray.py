@@ -5,6 +5,7 @@ import pandas as pd
 from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
+from .spatial.grid_geometry import Grid1D
 from .spatial.FM_geometry import GeometryFM
 from .spatial.FM_utils import _plot_map
 
@@ -50,7 +51,7 @@ class _DataArrayPlotter:
         fig, ax = self._get_fig_ax(ax, figsize)
 
         if self.da.ndim == 1:
-            return self._timeseries(fig, ax, **kwargs)
+            return self._timeseries(self.da.values, fig, ax, **kwargs)
 
         if self.da.ndim == 2:
             return ax.imshow(self.da.values, **kwargs)
@@ -87,13 +88,13 @@ class _DataArrayPlotter:
 
     def line(self, ax=None, figsize=None, **kwargs):
         fig, ax = self._get_fig_ax(ax, figsize)
-        return self._timeseries(fig, ax, **kwargs)
+        return self._timeseries(self.da.values, fig, ax, **kwargs)
 
-    def _timeseries(self, fig, ax, **kwargs):
+    def _timeseries(self, values, fig, ax, **kwargs):
         if "title" in kwargs:
             title = kwargs.pop("title")
             ax.set_title(title)
-        ax.plot(self.da.time, self.da.values, **kwargs)
+        ax.plot(self.da.time, values, **kwargs)
         ax.set_xlabel("time")
         fig.autofmt_xdate()
         ax.set_ylabel(self._label_txt())
@@ -101,6 +102,48 @@ class _DataArrayPlotter:
 
     def _label_txt(self):
         return f"{self.da.name} [{self.da.unit.name}]"
+
+
+class _DataArrayPlotterGrid1D(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._lines(ax, **kwargs)
+
+    def timeseries(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+        return super()._timeseries(self.da.values, fig, ax, **kwargs)
+
+    def imshow(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+        pos = ax.imshow(self.da.values, **kwargs)
+        fig.colorbar(pos, ax=ax, label=self._label_txt())
+        return ax
+
+    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+        pos = ax.pcolormesh(
+            self.da.geometry.x,
+            self.da.time,
+            self.da.values,
+            shading="nearest",
+            **kwargs,
+        )
+        cbar = fig.colorbar(pos, label=self._label_txt())
+        ax.set_xlabel("x")
+        ax.set_ylabel("time")
+        return ax
+
+    def _lines(self, ax=None, **kwargs):
+        if "title" in kwargs:
+            title = kwargs.pop("title")
+            ax.set_title(title)
+        ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
+        ax.set_xlabel("x")
+        ax.set_ylabel(self._label_txt())
+        return ax
 
 
 class _DataArrayPlotterFM(_DataArrayPlotter):
@@ -134,17 +177,19 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         else:
             values = np.squeeze(self.da.values)
 
+        title = f"{self.da.time[0]}"
         if self.da.geometry.is_2d:
             geometry = self.da.geometry
         else:
             # select surface as default plotting for 3d files
             values = values[self.da.geometry.top_elements]
-            geometry = self.da.geometry2d
+            geometry = self.da.geometry.geometry2d
+            title = "Surface, " + title
 
         if "label" not in kwargs:
             kwargs["label"] = self._label_txt()
         if "title" not in kwargs:
-            kwargs["title"] = f"{self.da.time[0]}"
+            kwargs["title"] = title
 
         return _plot_map(
             node_coordinates=geometry.node_coordinates,
@@ -190,6 +235,8 @@ class DataArray(TimeSeries):
 
         if isinstance(geometry, GeometryFM):
             self.plot = _DataArrayPlotterFM(self)
+        elif isinstance(geometry, Grid1D):
+            self.plot = _DataArrayPlotterGrid1D(self)
         else:
             self.plot = _DataArrayPlotter(self)
 
