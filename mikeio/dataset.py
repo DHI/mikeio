@@ -87,6 +87,39 @@ def _reshape_data_by_axis(data, orig_shape, axis):
     return data
 
 
+class _DatasetPlotter:
+    def __init__(self, ds: "Dataset") -> None:
+        self.ds = ds
+
+    # def __call__(self, ax=None, figsize=None, **kwargs):
+    #     fig, ax = self._get_fig_ax(ax, figsize)
+
+    @staticmethod
+    def _get_fig_ax(ax=None, figsize=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
+        else:
+            fig = plt.gcf()
+        return fig, ax
+
+    def scatter(self, x, y, ax=None, figsize=None, **kwargs):
+        _, ax = self._get_fig_ax(ax, figsize)
+        if "title" in kwargs:
+            title = kwargs.pop("title")
+            ax.set_title(title)
+        xval = self.ds[x].values.ravel()
+        yval = self.ds[y].values.ravel()
+        ax.scatter(xval, yval, **kwargs)
+
+        x = self.ds.items[x].name if isinstance(x, int) else x
+        y = self.ds.items[y].name if isinstance(y, int) else y
+        ax.set_xlabel(x)
+        ax.set_ylabel(y)
+        return ax
+
+
 class Dataset(TimeSeries):
 
     deletevalue = 1.0e-35
@@ -251,6 +284,9 @@ class Dataset(TimeSeries):
         self.time = list(data.values())[0].time
 
         self.geometry = geometry
+
+        if len(self.items) > 1:
+            self.plot = _DatasetPlotter(self)
 
     def __repr__(self):
 
