@@ -5,7 +5,7 @@ import pandas as pd
 from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
-from .spatial.grid_geometry import Grid1D
+from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import GeometryFM
 from .spatial.FM_utils import _plot_map
 
@@ -146,6 +146,81 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         return ax
 
 
+class _DataArrayPlotterGrid2D(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        return self.pcolormesh(ax, figsize, **kwargs)
+
+    def contour(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+
+        x, y = self._get_x_y()
+        values = self._get_first_step_values()
+
+        pos = ax.contour(x, y, np.flipud(values), **kwargs)
+        # fig.colorbar(pos, label=self._label_txt())
+        ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
+        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
+        return ax
+
+    def contourf(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+
+        x, y = self._get_x_y()
+        values = self._get_first_step_values()
+
+        pos = ax.contourf(x, y, np.flipud(values), **kwargs)
+        fig.colorbar(pos, label=self._label_txt())
+        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
+        return ax
+
+    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+
+        xn, yn = self._get_xn_yn()
+        values = self._get_first_step_values()
+
+        pos = ax.pcolormesh(xn, yn, np.flipud(values), **kwargs)
+        fig.colorbar(pos, label=self._label_txt())
+        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, yn)
+        return ax
+
+    def _get_first_step_values(self):
+        if self.da.n_timesteps > 1:
+            # select first step as default plotting behaviour
+            return self.da.values[0]
+        else:
+            return np.squeeze(self.da.values)
+
+    def _get_x_y(self):
+        x = self.da.geometry.x
+        y = self.da.geometry.y
+        x = x + self.da.geometry._origin[0]
+        y = y + self.da.geometry._origin[1]
+        return x, y
+
+    def _get_xn_yn(self):
+        xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
+        yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
+        xn = xn + self.da.geometry._origin[0]
+        yn = yn + self.da.geometry._origin[1]
+        return xn, yn
+
+    @staticmethod
+    def _set_aspect_and_labels(ax, is_geo, y):
+        if is_geo:
+            ax.set_xlabel("Longitude [degrees]")
+            ax.set_ylabel("Latitude [degrees]")
+            mean_lat = np.mean(y)
+            ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
+        else:
+            ax.set_xlabel("Easting [m]")
+            ax.set_ylabel("Northing [m]")
+            ax.set_aspect("equal")
+
+
 class _DataArrayPlotterFM(_DataArrayPlotter):
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
@@ -237,6 +312,8 @@ class DataArray(TimeSeries):
             self.plot = _DataArrayPlotterFM(self)
         elif isinstance(geometry, Grid1D):
             self.plot = _DataArrayPlotterGrid1D(self)
+        elif isinstance(geometry, Grid2D):
+            self.plot = _DataArrayPlotterGrid2D(self)
         else:
             self.plot = _DataArrayPlotter(self)
 
