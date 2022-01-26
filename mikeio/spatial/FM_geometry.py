@@ -784,7 +784,7 @@ class GeometryFM(_Geometry):
 
         return mp
 
-    def plot_mesh(self, figsize=None, ax=None):
+    def plot_mesh(self, title="Mesh", figsize=None, ax=None):
         import matplotlib.pyplot as plt
         from matplotlib.collections import PatchCollection
 
@@ -800,9 +800,10 @@ class GeometryFM(_Geometry):
         )
         ax.add_collection(fig_obj)
         self.plot_outline(ax=ax)
+        ax.set_title(title)
         return ax
 
-    def plot_outline(self, figsize=None, ax=None):
+    def plot_outline(self, title="Outline", figsize=None, ax=None):
         import matplotlib.pyplot as plt
 
         if ax is None:
@@ -815,6 +816,7 @@ class GeometryFM(_Geometry):
             ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
         for interior in self.boundary_polylines.interiors:
             ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
+        ax.set_title(title)
         return ax
 
     def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
