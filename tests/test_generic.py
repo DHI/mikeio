@@ -1,6 +1,7 @@
 import os
 from shutil import copyfile
 import numpy as np
+import pandas as pd
 import mikeio
 from mikeio import Dfsu
 from mikeio import generic
@@ -299,14 +300,13 @@ def test_concat_keep(tmpdir):
         "tests/testdata/tide2_offset.dfs1",
         "tests/testdata/tide4.dfs1",
     ]
-    # create outfile and store it in temp directory
     outfilename = os.path.join(tmpdir.dirname, "concat.dfs1")
-    mikeio.generic.concat(infiles, outfilename)
 
-    """ loop through keep args to test all"""
+    # loop through keep args to test all
     for keep_arg in keep_args:
-        # apply concatenation (keep: last, first, average) and write outfile from it
-        generic.concat(infilenames=infilenames, outfilename=outfilename, keep=keep_arg)
+        mikeio.generic.concat(
+            infilenames=infiles, outfilename=outfilename, keep=keep_arg
+        )
 
         # read outfile
         dso = mikeio.read(outfilename)
@@ -314,7 +314,7 @@ def test_concat_keep(tmpdir):
 
         """ handle data (always keep two data in memory to compare in overlapping period) """
         # !!! checks below solely consider one item !!
-        for i, infile in enumerate(infilenames):
+        for i, infile in enumerate(infiles):
             dsi = mikeio.read(infile)
 
             # just store current (=last) data in first loop. no check required
