@@ -47,76 +47,115 @@ class _DataArrayPlotter:
         self.da = da
 
     def __call__(self, ax=None, figsize=None, **kwargs):
-        import matplotlib.pyplot as plt
+        fig, ax = self._get_fig_ax(ax, figsize)
 
-        if ax is None:
-            _, ax = plt.subplots(figsize=figsize)
-
-        if self.da.ndim == 0:
-            ax.plot(self.da.time, self.da.values, **kwargs)
-            ax.set_xlabel("time")
-            ax.set_ylabel(self._label_txt)
-            return ax
-
-        if isinstance(self.da.geometry, GeometryFM):
-            if self.da.geometry.is_2d:
-                self._plot_FM_map(ax, **kwargs)
-                return ax
+        if self.da.ndim == 1:
+            return self._timeseries(fig, ax, **kwargs)
 
         if self.da.ndim == 2:
-            ax.imshow(self.da.values, **kwargs)
-            return ax
+            return ax.imshow(self.da.values, **kwargs)
 
         # if everything else fails, plot histogram
-        ax.hist(self.da.values, **kwargs)
+        return self._hist(ax, **kwargs)
+
+    @staticmethod
+    def _get_ax(ax=None, figsize=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
         return ax
+
+    @staticmethod
+    def _get_fig_ax(ax=None, figsize=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
+        else:
+            fig = plt.gcf()
+        return fig, ax
 
     def hist(self, ax=None, figsize=None, **kwargs):
-        import matplotlib.pyplot as plt
+        ax = self._get_ax(ax, figsize)
+        return self._hist(ax, **kwargs)
 
-        if ax is None:
-            _, ax = plt.subplots(figsize=figsize)
-        ax.hist(self.da.values.ravel(), **kwargs)
+    def _hist(self, ax, **kwargs):
+        result = ax.hist(self.da.values.ravel(), **kwargs)
+        ax.set_xlabel(self._label_txt())
+        return result
+
+    def line(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+        return self._timeseries(fig, ax, **kwargs)
+
+    def _timeseries(self, fig, ax, **kwargs):
+        if "title" in kwargs:
+            title = kwargs.pop("title")
+            ax.set_title(title)
+        ax.plot(self.da.time, self.da.values, **kwargs)
+        ax.set_xlabel("time")
+        fig.autofmt_xdate()
+        ax.set_ylabel(self._label_txt())
         return ax
 
-    def map(self, ax=None, figsize=None, **kwargs):
-        import matplotlib.pyplot as plt
+    def _label_txt(self):
+        return f"{self.da.name} [{self.da.unit.name}]"
 
-        if ax is None:
-            _, ax = plt.subplots(figsize=figsize)
 
-        if isinstance(self.da.geometry, GeometryFM):
-            if self.da.geometry.is_2d:
-                self._plot_FM_map(ax, **kwargs)
-                return ax
+class _DataArrayPlotterFM(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
 
-    def line():
-        pass
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._plot_FM_map(ax, **kwargs)
+
+    def contour(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = "contour"
+        return self._plot_FM_map(ax, **kwargs)
+
+    def contourf(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = "contourf"
+        return self._plot_FM_map(ax, **kwargs)
+
+    def mesh(self, ax=None, figsize=None, **kwargs):
+        return self.da.geometry.plot_mesh(figsize=figsize, ax=ax, **kwargs)
+
+    def outline(self, ax=None, figsize=None, **kwargs):
+        return self.da.geometry.plot_outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax, **kwargs):
         if self.da.n_timesteps > 1:
-            z = self.da.values[0]  # select first step as default plotting behaviour
+            # select first step as default plotting behaviour
+            values = self.da.values[0]
         else:
-            z = np.squeeze(self.da.values)
+            values = np.squeeze(self.da.values)
+
+        if self.da.geometry.is_2d:
+            geometry = self.da.geometry
+        else:
+            # select surface as default plotting for 3d files
+            values = values[self.da.geometry.top_elements]
+            geometry = self.da.geometry2d
 
         if "label" not in kwargs:
             kwargs["label"] = self._label_txt()
         if "title" not in kwargs:
             kwargs["title"] = f"{self.da.time[0]}"
 
-        _plot_map(
-            node_coordinates=self.da.geometry.node_coordinates,
-            element_table=self.da.geometry.element_table,
-            element_coordinates=self.da.geometry.element_coordinates,
-            boundary_polylines=self.da.geometry.boundary_polylines,
-            is_geo=self.da.geometry.is_geo,
-            z=z,
+        return _plot_map(
+            node_coordinates=geometry.node_coordinates,
+            element_table=geometry.element_table,
+            element_coordinates=geometry.element_coordinates,
+            boundary_polylines=geometry.boundary_polylines,
+            is_geo=geometry.is_geo,
+            z=values,
             ax=ax,
             **kwargs,
         )
-
-    def _label_txt(self):
-        return f"{self.da.name} [{self.da.unit.name}]"
 
 
 class DataArray(TimeSeries):
@@ -149,7 +188,10 @@ class DataArray(TimeSeries):
 
         self.geometry = geometry
 
-        self.plot = _DataArrayPlotter(self)
+        if isinstance(geometry, GeometryFM):
+            self.plot = _DataArrayPlotterFM(self)
+        else:
+            self.plot = _DataArrayPlotter(self)
 
     @property
     def values(self):
