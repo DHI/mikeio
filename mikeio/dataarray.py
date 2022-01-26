@@ -11,6 +11,36 @@ from .spatial.FM_utils import _plot_map
 from .base import TimeSeries
 from .spatial.geometry import _Geometry
 
+# TODO use for dataset as well
+def _parse_axis(data_shape, axis):
+    axis = 0 if axis == "time" else axis
+    if (axis == "spatial") or (axis == "space"):
+        if len(data_shape) == 1:
+            raise ValueError(
+                f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
+            )
+        axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
+    if axis is None:
+        axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
+    if isinstance(axis, str):
+        raise ValueError(
+            f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
+        )
+    return axis
+
+
+def _time_by_axis(
+    time: pd.DatetimeIndex, axis: Union[int, Sequence[int]]
+) -> pd.DatetimeIndex:
+    if axis == 0:
+        time = pd.DatetimeIndex([time[0]])
+    elif isinstance(axis, Sequence) and 0 in axis:
+        time = pd.DatetimeIndex([time[0]])
+    else:
+        time = time
+
+    return time
+
 
 class _DataArrayPlotter:
     def __init__(self, da: "DataArray") -> None:
@@ -163,7 +193,11 @@ class DataArray(TimeSeries):
                     elements = list(range(*elements.indices(self.geometry.n_elements)))
                 else:
                     elements = np.atleast_1d(elements)
-                geometry = self.geometry.elements_to_geometry(elements)
+                if len(elements) == 1:
+                    geometry = None
+                else:
+                    geometry = self.geometry.elements_to_geometry(elements)
+
                 key = (steps, elements)
             else:
                 # TODO: better handling of dfs1,2,3
@@ -182,6 +216,153 @@ class DataArray(TimeSeries):
 
         self.values = np.flip(self.values, axis=1)
         return self
+
+    def max(self, axis="time") -> "DataArray":
+        """Max value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with max values
+
+        See Also
+        --------
+            nanmax : Max values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.max)
+
+    def min(self, axis="time") -> "DataArray":
+        """Min value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with min values
+
+        See Also
+        --------
+            nanmin : Min values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.min)
+
+    def mean(self, axis="time") -> "DataArray":
+        """Mean value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with mean values
+
+        See Also
+        --------
+            nanmean : Mean values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.mean)
+
+    def nanmax(self, axis="time") -> "DataArray":
+        """Max value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with max values
+
+        See Also
+        --------
+            nanmax : Max values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.nanmax)
+
+    def nanmin(self, axis="time") -> "DataArray":
+        """Min value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with min values
+
+        See Also
+        --------
+            nanmin : Min values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.nanmin)
+
+    def nanmean(self, axis="time") -> "DataArray":
+        """Mean value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with mean values
+
+        See Also
+        --------
+            mean : Mean values
+        """
+        return self.aggregate(axis=axis, func=np.nanmean)
+
+    def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "DataArray":
+        """Aggregate along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+        func: function, optional
+            default np.nanmean
+
+        Returns
+        -------
+        DataArray
+            dataarray with aggregated values
+
+        See Also
+        --------
+            max : Max values
+            nanmax : Max values with NaN values removed
+        """
+
+        axis = _parse_axis(self.shape, axis)
+        time = _time_by_axis(self.time, axis)
+        keepdims = axis == 0
+
+        data = func(self.to_numpy(), axis=axis, keepdims=keepdims, **kwargs)
+
+        if keepdims:
+            geometry = self.geometry
+        else:
+            geometry = None
+        return DataArray(data=data, time=time, item=self.item, geometry=geometry)
 
     def __radd__(self, other):
         return self.__add__(other)

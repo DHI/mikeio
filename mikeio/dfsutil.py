@@ -66,7 +66,16 @@ def _valid_timesteps(dfsFileInfo, time_steps):
 
         freq = pd.tseries.offsets.DateOffset(seconds=time_step_file)
         time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
-        s = time.slice_indexer(time_steps.start, time_steps.stop)
+        if time_steps.start is None:
+            time_steps_start = time[0]
+        else:
+            time_steps_start = pd.Timestamp(time_steps.start)
+        if time_steps.stop is None:
+            time_steps_stop = time[-1]
+        else:
+            time_steps_stop = pd.Timestamp(time_steps.stop)
+
+        s = time.slice_indexer(time_steps_start, time_steps_stop)
         time_steps = list(range(s.start, s.stop))
     elif isinstance(time_steps[0], int):
         time_steps = np.array(time_steps)

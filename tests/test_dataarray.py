@@ -32,6 +32,23 @@ def test_dataarray_indexing(da1: DataArray):
     assert subset.to_numpy() == np.array([13.0])
 
 
+def test_dataarray_dfsu3d_indexing():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfsu = Dfsu(filename)
+    ds = dfsu.read()
+    assert isinstance(
+        ds.Salinity.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered
+    )
+
+    # indexing in space selecting a single item
+    da = ds.Salinity[0, :]
+    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
+
+    # indexing in space selecting a single item
+    da = ds.Salinity[:, 0]
+    assert da.geometry is None
+
+
 def test_timestep(da1):
 
     assert da1.timestep == 1.0
@@ -96,3 +113,59 @@ def test_add_two_dataarrays(da1):
     da3 = da1 + da1
     assert isinstance(da3, DataArray)
     assert da1.shape == da3.shape
+
+
+def test_daarray_aggregation():
+
+    filename = "tests/testdata/HD2D.dfsu"
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(items=[3])
+    da = ds["Current speed"]
+    da_max = da.max()
+    assert isinstance(da_max, DataArray)
+    assert da_max.geometry == da.geometry
+    assert da_max.start_time == da.start_time  # TODO is this consistent
+    assert len(da_max.time) == 1
+    # TODO verify values
+
+    da_min = da.min()
+    assert isinstance(da_max, DataArray)
+    assert da_min.geometry == da.geometry
+    assert da_min.start_time == da.start_time  # TODO is this consistent
+    assert len(da_min.time) == 1
+    # TODO verify values
+
+    da_mean = da.mean()
+    assert isinstance(da_mean, DataArray)
+    assert da_mean.geometry == da.geometry
+    assert da_mean.start_time == da.start_time  # TODO is this consistent
+    assert len(da_mean.time) == 1
+    # TODO verify values
+
+
+def test_daarray_aggregation_nan_versions():
+
+    # TODO find better file, e.g. with flood/dry
+    filename = "tests/testdata/HD2D.dfsu"
+    dfs = Dfsu(filename)
+
+    ds = dfs.read(items=[3])
+    da = ds["Current speed"]
+    da_max = da.nanmax()
+    assert isinstance(da_max, DataArray)
+    assert da_max.geometry == da.geometry
+    assert da_max.start_time == da.start_time  # TODO is this consistent
+    assert len(da_max.time) == 1
+
+    da_min = da.nanmin()
+    assert isinstance(da_max, DataArray)
+    assert da_min.geometry == da.geometry
+    assert da_min.start_time == da.start_time  # TODO is this consistent
+    assert len(da_min.time) == 1
+
+    da_mean = da.nanmean()
+    assert isinstance(da_mean, DataArray)
+    assert da_mean.geometry == da.geometry
+    assert da_mean.start_time == da.start_time  # TODO is this consistent
+    assert len(da_mean.time) == 1
