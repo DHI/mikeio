@@ -285,9 +285,11 @@ class DataArray(TimeSeries):
     def __init__(
         self,
         data,
+        # *,
         time: Union[pd.DatetimeIndex, str],
         item: ItemInfo = None,
         geometry: _Geometry = None,
+        dims: Optional[Sequence[str]] = None,
     ):
 
         data_lacks = []
@@ -299,6 +301,22 @@ class DataArray(TimeSeries):
                 "Data must be ArrayLike, e.g. numpy array, but it lacks properties: "
                 + ", ".join(data_lacks)
             )
+
+        if dims is None:  # This is not very robust, but is probably a reasonable guess
+            if data.ndim == 1:
+                self.dims = ("t",)
+            elif data.ndim == 2:
+                self.dims = ("t", "x")
+                # TODO FM
+                # self.dims = ("t","e")
+            elif data.ndim == 3:
+                self.dims = ("t", "y", "x")
+            elif data.ndim == 4:
+                self.dims = ("t", "z", "y", "x")
+        else:
+            if data.ndim != len(dims):
+                raise ValueError("Number of named dimensions does not equal data ndim")
+            self.dims = dims
 
         self._values = data
         self.time = time
@@ -676,7 +694,9 @@ class DataArray(TimeSeries):
         out = ["<mikeio.DataArray>"]
         if self.name is not None:
             out.append(f"Name: {self.name}")
-        out.append(f"Dimensions: {self.shape}")
+        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
+        dimsstr = ", ".join(dims)
+        out.append(f"Dimensions: ({dimsstr})")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
