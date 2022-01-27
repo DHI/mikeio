@@ -203,6 +203,7 @@ class Dataset(TimeSeries):
         time: Union[pd.DatetimeIndex, str],
         items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
         geometry: _Geometry = None,
+        zn=None,
     ):
 
         item_infos = []
@@ -253,7 +254,7 @@ class Dataset(TimeSeries):
 
         data_vars = {}
         for dd, it in zip(data, item_infos):
-            data_vars[it.name] = DataArray(dd, time, it, geometry)
+            data_vars[it.name] = DataArray(dd, time, it, geometry, zn)
 
         ds = Dataset(data_vars)
 
@@ -265,10 +266,11 @@ class Dataset(TimeSeries):
         time=None,
         items=None,
         geometry: _Geometry = None,
+        zn=None,
     ):
 
         if data is not None and time is not None:
-            ds = Dataset.from_data_time_items(data, time, items, geometry)
+            ds = Dataset.from_data_time_items(data, time, items, geometry, zn)
             data = ds.data_vars
 
         for key, value in data.items():

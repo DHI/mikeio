@@ -6,7 +6,7 @@ from copy import deepcopy
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 from .spatial.grid_geometry import Grid1D, Grid2D
-from .spatial.FM_geometry import GeometryFM
+from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .spatial.FM_utils import _plot_map
 
 from .base import TimeSeries
@@ -288,6 +288,7 @@ class DataArray(TimeSeries):
         time: Union[pd.DatetimeIndex, str],
         item: ItemInfo = None,
         geometry: _Geometry = None,
+        zn=None,
     ):
 
         data_lacks = []
@@ -307,6 +308,9 @@ class DataArray(TimeSeries):
         self.item = item
 
         self.geometry = geometry
+
+        if zn is not None:
+            self._zn = zn
 
         if isinstance(geometry, GeometryFM):
             self.plot = _DataArrayPlotterFM(self)
@@ -351,6 +355,7 @@ class DataArray(TimeSeries):
 
         # select in space
         geometry = self.geometry
+        zn = None
         if isinstance(key, tuple):
             if isinstance(self.geometry, GeometryFM):
                 # TODO: allow for selection of layers
@@ -364,6 +369,11 @@ class DataArray(TimeSeries):
                 else:
                     geometry = self.geometry.elements_to_geometry(elements)
 
+                if isinstance(self.geometry, GeometryFMLayered):
+                    nodes = self.geometry.element_table[elements]
+                    unodes = np.unique(np.hstack(nodes))
+                    zn = self._zn[:, unodes]
+
                 key = (steps, elements)
             else:
                 # TODO: better handling of dfs1,2,3
@@ -372,7 +382,7 @@ class DataArray(TimeSeries):
             key = steps
 
         data = self._values[key].copy()
-        return DataArray(data=data, time=time, item=self.item, geometry=geometry)
+        return DataArray(data=data, time=time, item=self.item, geometry=geometry, zn=zn)
 
     def to_numpy(self) -> np.ndarray:
         return self._values
@@ -676,8 +686,24 @@ class DataArray(TimeSeries):
         out = ["<mikeio.DataArray>"]
         if self.name is not None:
             out.append(f"Name: {self.name}")
+        if isinstance(self.geometry, GeometryFM):
+            gtxt = f"Geometry: {self.geometry.type_name}"
+            if self.geometry.is_layered:
+                n_z_layers = (
+                    "no"
+                    if self.geometry.n_z_layers is None
+                    else self.geometry.n_z_layers
+                )
+                gtxt += f" ({self.geometry.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
+
+            out.append(gtxt)
         out.append(f"Dimensions: {self.shape}")
-        out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+        timetxt = (
+            f"Time: {self.time[0]} (time-invariant)"
+            if self.n_timesteps == 1
+            else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
+        )
+        out.append(timetxt)
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
 
