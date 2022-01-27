@@ -285,10 +285,12 @@ class DataArray(TimeSeries):
     def __init__(
         self,
         data,
+        # *,
         time: Union[pd.DatetimeIndex, str],
         item: ItemInfo = None,
         geometry: _Geometry = None,
         zn=None,
+        dims: Optional[Sequence[str]] = None,
     ):
 
         data_lacks = []
@@ -300,6 +302,22 @@ class DataArray(TimeSeries):
                 "Data must be ArrayLike, e.g. numpy array, but it lacks properties: "
                 + ", ".join(data_lacks)
             )
+
+        if dims is None:  # This is not very robust, but is probably a reasonable guess
+            if data.ndim == 1:
+                self.dims = ("t",)
+            elif data.ndim == 2:
+                self.dims = ("t", "x")
+                # TODO FM
+                # self.dims = ("t","e")
+            elif data.ndim == 3:
+                self.dims = ("t", "y", "x")
+            elif data.ndim == 4:
+                self.dims = ("t", "z", "y", "x")
+        else:
+            if data.ndim != len(dims):
+                raise ValueError("Number of named dimensions does not equal data ndim")
+            self.dims = dims
 
         self._values = data
         self.time = time
@@ -697,13 +715,18 @@ class DataArray(TimeSeries):
                 gtxt += f" ({self.geometry.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
 
             out.append(gtxt)
-        out.append(f"Dimensions: {self.shape}")
+
+        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
+        dimsstr = ", ".join(dims)
+        out.append(f"Dimensions: ({dimsstr})")
+
         timetxt = (
             f"Time: {self.time[0]} (time-invariant)"
             if self.n_timesteps == 1
             else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
         )
         out.append(timetxt)
+
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
 

@@ -23,6 +23,20 @@ def da1():
     return da
 
 
+@pytest.fixture
+def da_time_space():
+    nt = 10
+    start = 10.0
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    da = DataArray(
+        data=np.zeros(shape=(nt, 2), dtype=float),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+
+    return da
+
+
 def test_dataarray_indexing(da1: DataArray):
 
     assert da1.shape == (10,)
@@ -54,10 +68,21 @@ def test_timestep(da1):
     assert da1.timestep == 1.0
 
 
-def test_repr(da1):
+def test_dims_time(da1):
 
-    text = repr(da1)
+    assert da1.dims == ("t",)
+
+
+def test_dims_time_space1d(da_time_space):
+
+    assert da_time_space.dims == ("t", "x")
+
+
+def test_repr(da_time_space):
+
+    text = repr(da_time_space)
     assert "DataArray" in text
+    assert "Dimensions: (t:10, x:2)" in text
 
 
 def test_plot(da1):
