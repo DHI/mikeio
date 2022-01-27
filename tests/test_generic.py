@@ -357,26 +357,26 @@ def test_extract_items(tmpdir):
 
     extract(infile, outfile, items="Temperature")
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 2
-    assert extracted.items[0].name == "Z coordinate"
+    assert extracted.n_items == 1
+    assert extracted.items[0].name == "Temperature"
 
-    extract(infile, outfile, items=[0, 2])
+    extract(infile, outfile, items=[1])
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 2
-    assert extracted.items[1].name == "Salinity"
+    assert extracted.n_items == 1
+    assert extracted.items[0].name == "Salinity"
 
     extract(infile, outfile, items=range(0, 2))  # [0,1]
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 2
-    assert extracted.items[1].name == "Temperature"
+    assert extracted.items[0].name == "Temperature"
 
-    extract(infile, outfile, items=["Salinity", 1])
+    extract(infile, outfile, items=["Salinity", 0])
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 3  # Z coordinate item is always included
+    assert extracted.n_items == 2
 
     with pytest.raises(Exception):
         # must be unique
-        extract(infile, outfile, items=["Salinity", 2])
+        extract(infile, outfile, items=["Salinity", 1])
 
     with pytest.raises(Exception):
         # no negative numbers

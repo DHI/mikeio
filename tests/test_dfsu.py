@@ -88,11 +88,11 @@ def test_read_simple_3d():
 
     ds = dfs.read()
 
-    assert len(ds.data) == 4
-    assert len(ds.items) == 4
+    assert len(ds.data) == 3
+    assert len(ds.items) == 3
 
-    assert ds.items[0].name == "Z coordinate"
-    assert ds.items[3].name == "W velocity"
+    assert ds.items[0].name != "Z coordinate"
+    assert ds.items[2].name == "W velocity"
 
 
 def test_read_simple_2dv():
@@ -101,11 +101,11 @@ def test_read_simple_2dv():
 
     ds = dfs.read()
 
-    assert len(ds.data) == 4
-    assert len(ds.items) == 4
+    assert len(ds.data) == 3
+    assert len(ds.items) == 3
 
-    assert ds.items[0].name == "Z coordinate"
-    assert ds.items[3].name == "W velocity"
+    assert ds.items[0].name != "Z coordinate"
+    assert ds.items[2].name == "W velocity"
 
 
 def test_read_single_item_returns_single_item():
@@ -163,10 +163,10 @@ def test_read_returns_correct_items_sigma_z():
 
     ds = dfs.read()
 
-    assert len(ds) == 3
-    assert ds.items[0].name == "Z coordinate"
-    assert ds.items[1].name == "Temperature"
-    assert ds.items[2].name == "Salinity"
+    assert len(ds) == 2
+    # assert ds.items[0].name == "Z coordinate"
+    assert ds.items[0].name == "Temperature"
+    assert ds.items[1].name == "Salinity"
 
 
 def test_read_all_time_steps():
@@ -277,10 +277,9 @@ def test_calc_element_coordinates_3d():
 
     # extract dynamic z values for profile
     elem_ids = dfs.find_nearest_profile_elements(333934.1, 6158101.5)
-    ds = dfs.read(items=["Z coordinate"], elements=elem_ids, time_steps=0)
-    ec = dfs.calc_element_coordinates(
-        elements=elem_ids, zn=ds["Z coordinate"].to_numpy()[0, :]
-    )
+    ds = dfs.read(items=0, elements=elem_ids, time_steps=0)
+    zn_dyn = ds[0]._zn  # TODO
+    ec = dfs.calc_element_coordinates(elements=elem_ids, zn=zn_dyn)
 
     assert ec[0, 2] == pytest.approx(-6.981768845)
 
@@ -696,7 +695,12 @@ def test_write(tmpdir):
     data = []
     data.append(d)
 
-    ds = Dataset(data, time=[datetime(2000, 1, 1)], items=[ItemInfo("Zeros")])
+    ds = Dataset(
+        data,
+        time=[datetime(2000, 1, 1)],
+        items=[ItemInfo("Zeros")],
+        geometry=msh.geometry,
+    )
 
     dfs = Dfsu(meshfilename)
 
@@ -850,25 +854,25 @@ def test_write_from_dfsu3D(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple3D.dfsu")
     dfs = Dfsu(sourcefilename)
 
-    ds = dfs.read([0, 1, 2])
+    ds = dfs.read([0, 1])
 
     dfs.write(outfilename, ds)
 
     assert os.path.exists(outfilename)
 
 
-def test_write_from_dfsu3D_withou_z_coords_fails(tmpdir):
+# def test_write_from_dfsu3D_withou_z_coords_fails(tmpdir):
 
-    sourcefilename = os.path.join("tests", "testdata", "basin_3d.dfsu")
-    outfilename = os.path.join(tmpdir.dirname, "simple3D_fail.dfsu")
-    dfs = Dfsu(sourcefilename)
+#     sourcefilename = os.path.join("tests", "testdata", "basin_3d.dfsu")
+#     outfilename = os.path.join(tmpdir.dirname, "simple3D_fail.dfsu")
+#     dfs = Dfsu(sourcefilename)
 
-    ds = dfs.read([1, 2])
-    with pytest.raises(Exception) as excinfo:
-        dfs.write(outfilename, ds)
+#     ds = dfs.read([1, 2])
+#     with pytest.raises(Exception) as excinfo:
+#         dfs.write(outfilename, ds)
 
-    assert "coord" in str(excinfo.value)
-    assert not os.path.exists(outfilename)
+#     assert "coord" in str(excinfo.value)
+#     assert not os.path.exists(outfilename)
 
 
 def test_write_invalid_data_closes_and_deletes_file(tmpdir):

@@ -397,14 +397,17 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
-    is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
+    is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
-    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+    item_numbers = _valid_item_numbers(
+        dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
+    )
 
-    if is_dfsu_3d and 0 not in item_numbers:
+    if is_layered_dfsu:
+        item_numbers = [it + 1 for it in item_numbers]
         item_numbers.insert(0, 0)
 
     dfs_o = _clone(

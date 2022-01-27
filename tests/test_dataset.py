@@ -880,7 +880,7 @@ def test_dfsu3d_dataset():
 
     text = repr(ds)
 
-    assert len(ds) == 3  # Z coordinate, Salinity, Temperature
+    assert len(ds) == 2  # Salinity, Temperature
 
     dsagg = ds.nanmean(axis=0)  # Time averaged
 
@@ -892,7 +892,7 @@ def test_dfsu3d_dataset():
 
     ds_elm = dfsu.read(elements=[0])
 
-    assert len(ds_elm) == 3  # Z coordinate, Salinity, Temperature
+    assert len(ds_elm) == 2  # Salinity, Temperature
 
     dss = ds_elm.squeeze()
 
@@ -932,7 +932,7 @@ def test_properties_dfs2():
     assert ds.n_items == 1
     assert np.all(ds.shape == (1, 264, 216))
     assert ds.n_elements == (264 * 216)
-    assert ds._first_non_z_item == 0
+    # assert ds._first_non_z_item == 0
     assert ds.is_equidistant
 
 
@@ -945,10 +945,10 @@ def test_properties_dfsu():
     assert ds.start_time == datetime(1997, 9, 15, 21, 0, 0)
     assert ds.end_time == datetime(1997, 9, 16, 3, 0, 0)
     assert ds.timestep == (3 * 3600)
-    assert ds.n_items == 3
+    assert ds.n_items == 2
     assert np.all(ds.shape == (3, 441))
     assert ds.n_elements == 441
-    assert ds._first_non_z_item == 1
+    # assert ds._first_non_z_item == 1
     assert ds.is_equidistant
 
 
@@ -1151,10 +1151,10 @@ def test_combine_by_item():
 
 
 def test_combine_by_item_dfsu_3d():
-    ds1 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[0, 1])
-    assert ds1.n_items == 2
-    ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[0, 2])
-    assert ds2.n_items == 2
+    ds1 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[0])
+    assert ds1.n_items == 1
+    ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[1])
+    assert ds2.n_items == 1
 
     ds3 = Dataset.combine(ds1, ds2)
 
@@ -1162,7 +1162,7 @@ def test_combine_by_item_dfsu_3d():
     itemnames = [x.name for x in ds3.items]
     assert "Salinity" in itemnames
     assert "Temperature" in itemnames
-    assert ds3.n_items == 3  # Only one instance of Z coordinate
+    assert ds3.n_items == 2
 
 
 def test_to_numpy(ds2):

@@ -136,7 +136,8 @@ class Dfsu2DV(DfsuLayered):
         if time_step is None:
             y_coordinate = nc[:, 2]
         else:
-            y_coordinate = self.read()[0].to_numpy()[time_step, :]
+            raise NotImplementedError()  # TODO
+            # y_coordinate = self.read()[0].to_numpy()[time_step, :]
 
         elements = self._Get_2DVertical_elements()
 

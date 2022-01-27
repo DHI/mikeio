@@ -10,8 +10,10 @@ from mikecore.DfsFile import DfsDynamicItemInfo
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
     items: Union[int, List[int], List[str]] = None,
+    ignore_first: bool = False,
 ) -> List[int]:
-    n_items_file = len(dfsItemInfo)
+    start_idx = 1 if ignore_first else 0
+    n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
         return list(range(n_items_file))
 
@@ -20,7 +22,7 @@ def _valid_item_numbers(
 
     for idx, item in enumerate(items):
         if isinstance(item, str):
-            items[idx] = _item_numbers_by_name(dfsItemInfo, [item])[0]
+            items[idx] = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
         elif isinstance(item, int):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
@@ -90,7 +92,7 @@ def _valid_timesteps(dfsFileInfo, time_steps):
     return time_steps
 
 
-def _item_numbers_by_name(dfsItemInfo, item_names):
+def _item_numbers_by_name(dfsItemInfo, item_names, ignore_first=False):
     """Utility function to find item numbers
 
     Parameters
@@ -110,7 +112,9 @@ def _item_numbers_by_name(dfsItemInfo, item_names):
     KeyError
         In case item is not found in the dfs file
     """
-    names = [x.Name for x in dfsItemInfo]
+    first_idx = 1 if ignore_first else 0
+    names = [x.Name for x in dfsItemInfo[first_idx:]]
+
     item_lookup = {name: i for i, name in enumerate(names)}
     try:
         item_numbers = [item_lookup[x] for x in item_names]
@@ -121,7 +125,9 @@ def _item_numbers_by_name(dfsItemInfo, item_names):
 
 
 def _get_item_info(
-    dfsItemInfo: List[DfsDynamicItemInfo], item_numbers: List[int] = None
+    dfsItemInfo: List[DfsDynamicItemInfo],
+    item_numbers: List[int] = None,
+    ignore_first: bool = False,
 ) -> List[ItemInfo]:
     """Read DFS ItemInfo for specific item numbers
 
@@ -134,11 +140,13 @@ def _get_item_info(
     -------
     list[ItemInfo]
     """
+    first_idx = 1 if ignore_first else 0
     if item_numbers is None:
-        item_numbers = list(range(len(dfsItemInfo)))
+        item_numbers = list(range(len(dfsItemInfo) - first_idx))
 
     items = []
     for item in item_numbers:
+        item = item + first_idx
         name = dfsItemInfo[item].Name
         eumItem = dfsItemInfo[item].Quantity.Item
         eumUnit = dfsItemInfo[item].Quantity.Unit

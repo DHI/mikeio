@@ -49,11 +49,11 @@ def _keepdims_by_axis(axis):
     return keepdims
 
 
-def _items_except_Z_coordinate(items) -> Sequence[ItemInfo]:
-    if items[0].name == "Z coordinate":
-        items = deepcopy(items)
-        items.pop(0)
-    return items
+# def _items_except_Z_coordinate(items) -> Sequence[ItemInfo]:
+#     if items[0].name == "Z coordinate":
+#         items = deepcopy(items)
+#         items.pop(0)
+#     return items
 
 
 def _get_repeated_items(
@@ -285,6 +285,7 @@ class Dataset(TimeSeries):
 
         self.time = list(data.values())[0].time
 
+        # TODO: require geometry if ndims>1
         self.geometry = geometry
 
         if len(self.items) > 1:
@@ -546,8 +547,8 @@ class Dataset(TimeSeries):
 
     def _append_items(self, other, copy=True):
 
-        item_names = self._non_z_item_names
-        other_names = other._non_z_item_names
+        item_names = {item.name for item in self.items}
+        other_names = {item.name for item in other.items}
 
         overlap = other_names.intersection(item_names)
         if len(overlap) != 0:
@@ -692,17 +693,20 @@ class Dataset(TimeSeries):
         if axis == 0:
             time = self.time[idx]
             items = self.items
+            geometry = self.geometry
+            zn = self._zn[idx] if hasattr(self, "_zn") else None
         else:
             time = self.time
-            items = _items_except_Z_coordinate(self.items)
+            items = self.items
+            geometry = None  # TODO
+            zn = None  # TODO
 
         res = []
         for item in items:
             x = np.take(self[item.name].to_numpy(), idx, axis=axis)
             res.append(x)
 
-        ds = Dataset(res, time, items)
-        return ds
+        return Dataset(data=res, time=time, items=items, geometry=geometry, zn=zn)
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs):
         """Aggregate along an axis
@@ -720,7 +724,7 @@ class Dataset(TimeSeries):
             dataset with aggregated values
         """
 
-        items = _items_except_Z_coordinate(self.items)
+        items = self.items
         axis = _parse_axis(self.shape, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = _keepdims_by_axis(axis)
@@ -792,7 +796,7 @@ class Dataset(TimeSeries):
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
-        items_in = _items_except_Z_coordinate(self.items)
+        items_in = self.items
         axis = _parse_axis(self.shape, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = _keepdims_by_axis(axis)
@@ -983,7 +987,10 @@ class Dataset(TimeSeries):
 
         items = self.items
 
-        if items[0].name == "Z coordinate":
+        # TODO: remove this?
+        if (items[0].name == "Z coordinate") and (
+            items[0].type == EUMType.ItemGeometry3D
+        ):
             items = deepcopy(items)
             items.pop(0)
 
@@ -1191,18 +1198,18 @@ class Dataset(TimeSeries):
     @property
     def shape(self):
         """Shape of each item"""
-        return self.data[self._first_non_z_item].shape
+        return self.data[0].shape
 
-    @property
-    def _first_non_z_item(self):
-        if len(self) > 1 and self.items[0].name == "Z coordinate":
-            return 1
-        return 0
+    # @property
+    # def _first_non_z_item(self):
+    #     if len(self) > 1 and self.items[0].name == "Z coordinate":
+    #         return 1
+    #     return 0
 
-    @property
-    def _non_z_item_names(self):
-        """Item names (Z coordinate excluded)"""
-        return {item.name for item in self.items[self._first_non_z_item :]}
+    # @property
+    # def _non_z_item_names(self):
+    #     """Item names (Z coordinate excluded)"""
+    #     return {item.name for item in self.items[self._first_non_z_item :]}
 
     @property
     def n_elements(self):
