@@ -390,7 +390,7 @@ class DataArray(TimeSeries):
                 if isinstance(self.geometry, GeometryFMLayered):
                     nodes = self.geometry.element_table[elements]
                     unodes = np.unique(np.hstack(nodes))
-                    zn = self._zn[:, unodes]
+                    # zn = self._zn[:, unodes]
 
                 key = (steps, elements)
             else:
