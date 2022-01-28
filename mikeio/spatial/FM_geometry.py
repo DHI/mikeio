@@ -3,17 +3,36 @@ import numpy as np
 from collections import namedtuple
 from scipy.spatial import cKDTree
 from mikecore.DfsuFile import DfsuFileType
+from mikecore.eum import eumQuantity
+from mikecore.MeshBuilder import MeshBuilder
+from ..eum import EUMType, EUMUnit
 from .geometry import _Geometry, BoundingBox
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
 from .FM_utils import _get_node_centered_data, _to_polygons
 
 
+class GeometryFMPointSpectrum(_Geometry):
+    def __init__(self) -> None:
+        super().__init__()
+        self.n_nodes = 0
+        self.n_elements = 0
+        self._type = DfsuFileType.DfsuSpectral0D
+        self.is_layered = False
+        self.is_2d = False
+        self.is_spectral = True
+
+    @property
+    def type_name(self):
+        """Type name, e.g. DfsuSpectral0D"""
+        return self._type.name
+
+
 class GeometryFM(_Geometry):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection_string=None,
         dfsu_type=None,
@@ -21,6 +40,11 @@ class GeometryFM(_Geometry):
         node_ids=None,
     ) -> None:
         super().__init__()
+
+        if node_coordinates is None:
+            raise ValueError("node_coordinates must be provided")
+        if element_table is None:
+            raise ValueError("element_table must be provided")
 
         self._type = None  # None: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
 
@@ -37,20 +61,18 @@ class GeometryFM(_Geometry):
         self._boundary_polylines = None
         self._geom2d = None
 
-        if node_coordinates is not None:
-            self._set_nodes(
-                node_coordinates=node_coordinates,
-                codes=codes,
-                node_ids=node_ids,
-                projection_string=projection_string,
-            )
+        self._set_nodes(
+            node_coordinates=node_coordinates,
+            codes=codes,
+            node_ids=node_ids,
+            projection_string=projection_string,
+        )
 
-        if element_table is not None:
-            self._set_elements(
-                element_table=element_table,
-                element_ids=element_ids,
-                dfsu_type=dfsu_type,
-            )
+        self._set_elements(
+            element_table=element_table,
+            element_ids=element_ids,
+            dfsu_type=dfsu_type,
+        )
 
     def __repr__(self):
         out = []
@@ -624,17 +646,18 @@ class GeometryFM(_Geometry):
                 new_type = DfsuFileType.Dfsu2D
 
         if self.is_layered and (new_type != DfsuFileType.Dfsu2D):
-            geom = GeometryFMLayered()
+            GeometryClass = GeometryFMLayered
         else:
-            geom = GeometryFM()
+            GeometryClass = GeometryFM
 
-        geom._set_nodes(
-            node_coords,
+        geom = GeometryClass(
+            node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
             projection_string=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=self.element_ids[elements],
         )
-        geom._set_elements(elem_tbl, self.element_ids[elements])
         geom._reindex()
 
         geom._type = self._type  #
@@ -863,21 +886,21 @@ class GeometryFM(_Geometry):
             return "equal"
 
     # TODO
-    # def to_mesh(outfilename):
+    def to_mesh(self, outfilename):
 
-    #     builder = MeshBuilder()
+        builder = MeshBuilder()
 
-    #     nc = self.node_coordinates
-    #     builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
-    #     # builder.SetNodeIds(self.node_ids+1)
-    #     # builder.SetElementIds(self.elements+1)
-    #     element_table_MZ = self.element_table + 1
-    #     builder.SetElements(element_table_MZ)
-    #     builder.SetProjection(self.projection_string)
-    #     quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-    #     builder.SetEumQuantity(quantity)
-    #     newMesh = builder.CreateMesh()
-    #     newMesh.Write(outfilename)
+        nc = self.node_coordinates
+        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
+        # builder.SetNodeIds(self.node_ids+1)
+        # builder.SetElementIds(self.elements+1)
+        element_table_MZ = self.element_table + 1
+        builder.SetElements(element_table_MZ)
+        builder.SetProjection(self.projection_string)
+        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
+        builder.SetEumQuantity(quantity)
+        newMesh = builder.CreateMesh()
+        newMesh.Write(outfilename)
 
 
 # class GeometryFMHorizontal(GeometryFM):
@@ -946,18 +969,16 @@ class GeometryFMLayered(GeometryFM):
         codes = self.codes[node_ids]
 
         # create new geometry
-        geom = GeometryFM()
-        geom._set_nodes(
-            node_coords,
+        geom = GeometryFM(
+            node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
             projection_string=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=self.element_ids[elem_ids],
         )
-        geom._set_elements(elem_tbl, self.element_ids[elem_ids])
 
-        # TODO how to handle Mesh filetype
         geom._type = None  # DfsuFileType.Mesh
-
         geom._reindex()
 
         # Fix z-coordinate for sigma-z:

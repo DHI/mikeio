@@ -23,9 +23,9 @@ from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
 from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
+from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
 from .spatial.FM_utils import _plot_map
-from .spatial import Grid2D
+from .spatial.grid_geometry import Grid2D
 
 
 class _UnstructuredFile:
@@ -145,7 +145,7 @@ class _UnstructuredFile:
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
-            self._geometry = GeometryFM()  # EMPTY
+            self._geometry = GeometryFMPointSpectrum() #GeometryFM()  # EMPTY
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
             el_table, el_ids = self._get_elements_from_source(dfs)

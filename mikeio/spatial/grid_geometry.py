@@ -1,5 +1,8 @@
 import numpy as np
+from mikecore.eum import eumQuantity
+from mikecore.MeshBuilder import MeshBuilder
 from .geometry import _Geometry, BoundingBox
+from ..eum import EUMType, EUMUnit
 
 
 class GeometryGrid(_Geometry):
@@ -462,6 +465,58 @@ class Grid2D(GeometryGrid):
         yn = Grid2D._centers_to_nodes(self.y)
         gn = Grid2D(xn, yn)
         return gn.xy
+
+    def to_mesh(self, outfilename, projection=None, z=None):
+        """export grid to mesh file
+
+        Parameters
+        ----------
+        outfilename : str
+            path of new mesh file
+        projection : str, optional
+            WKT projection string, by default 'LONG/LAT'
+        z : float or array(float), optional
+            bathymetry values for each node, by default 0
+            if array: must have length=(nx+1)*(ny+1)
+        """
+        if projection is None:
+            projection = "LONG/LAT"
+
+        # get node based grid
+        xn = Grid2D._centers_to_nodes(self.x)
+        yn = Grid2D._centers_to_nodes(self.y)
+        gn = Grid2D(xn, yn)
+
+        x = gn.xy[:, 0]
+        y = gn.xy[:, 1]
+        if z is None:
+            z = np.zeros(gn.n)
+        else:
+            if np.isscalar(z):
+                z = z * np.ones(gn.n)
+            else:
+                if len(z) != gn.n:
+                    raise ValueError(
+                        "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
+                    )
+        codes = np.zeros(gn.n, dtype=int)
+        codes[y == gn.bbox.top] = 5  # north
+        codes[x == gn.bbox.right] = 4  # east
+        codes[y == gn.bbox.bottom] = 3  # south
+        codes[x == gn.bbox.left] = 2  # west
+        codes[(y == gn.bbox.top) & (x == gn.bbox.left)] = 5  # corner->north
+
+        builder = MeshBuilder()
+        builder.SetNodes(x, y, z, codes)
+
+        elem_table = gn._to_element_table(index_base=1)
+        builder.SetElements(elem_table)
+
+        builder.SetProjection(projection)
+        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
+        builder.SetEumQuantity(quantity)
+        newMesh = builder.CreateMesh()
+        newMesh.Write(outfilename)
 
     @staticmethod
     def xy_to_bbox(xy, buffer=None):
