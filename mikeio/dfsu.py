@@ -145,7 +145,7 @@ class _UnstructuredFile:
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
-            self._geometry = GeometryFMPointSpectrum() #GeometryFM()  # EMPTY
+            self._geometry = GeometryFMPointSpectrum()  # GeometryFM()  # EMPTY
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
             el_table, el_ids = self._get_elements_from_source(dfs)
