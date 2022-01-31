@@ -43,6 +43,26 @@ def _time_by_axis(
     return time
 
 
+def _is_boolean_mask(x):
+    if isinstance(x, np.ndarray):
+        return x.dtype == np.dtype("bool")
+    return False
+
+
+def _get_by_boolean_mask(data: np.ndarray, mask: np.ndarray):
+    if data.shape != mask.shape:
+        return data[np.broadcast_to(mask, data.shape)]
+    return data[mask]
+
+
+def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value):
+    if data.shape != mask.shape:
+        data[np.broadcast_to(mask, data.shape)] = value
+    else:
+        data[mask] = value
+    return
+
+
 class _DataArrayPlotter:
     def __init__(self, da: "DataArray") -> None:
         self.da = da
@@ -350,7 +370,15 @@ class DataArray(TimeSeries):
 
         self._values = value
 
+    def __setitem__(self, key, value):
+        if _is_boolean_mask(key):
+            return _set_by_boolean_mask(self._values, key, value)
+        self._values[key] = value
+
     def __getitem__(self, key) -> "DataArray":
+        if _is_boolean_mask(key):
+            return _get_by_boolean_mask(self._values, key)
+
         if isinstance(key, tuple):
             steps = key[0]
         else:
