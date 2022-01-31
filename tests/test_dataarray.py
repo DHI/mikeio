@@ -93,8 +93,9 @@ def test_plot(da1):
 
 def test_modify_values(da1):
 
-    with pytest.raises(TypeError):
-        da1[0] = 1.0  # you are not allowed to set individual values
+    # TODO: Now you are...
+    # with pytest.raises(TypeError):
+    #     da1[0] = 1.0  # you are not allowed to set individual values
 
     with pytest.raises(ValueError):
         da1.values = np.array([1.0])  # you can not set data to another shape
