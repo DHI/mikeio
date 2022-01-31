@@ -900,8 +900,8 @@ class GeometryFM(_Geometry):
         nc = self.node_coordinates
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
         # builder.SetNodeIds(self.node_ids+1)
-        # builder.SetElementIds(self.elements+1)
-        element_table_MZ = self.element_table + 1
+        # builder.SetElementIds(self.elements+1)        
+        element_table_MZ = [np.asarray(row) + 1 for row in self.element_table]
         builder.SetElements(element_table_MZ)
         builder.SetProjection(self.projection_string)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
