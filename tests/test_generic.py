@@ -1,6 +1,7 @@
 import os
 from shutil import copyfile
 import numpy as np
+import pandas as pd
 import mikeio
 from mikeio import Dfsu
 from mikeio import generic
@@ -285,6 +286,69 @@ def test_concat_closes_files(tmpdir):
 
     # ds = mikeio.read(outfilename)
     # assert len(ds.time) == (5 * 48 + 1)
+
+
+def test_concat_keep(tmpdir):
+    """
+    test keep arguments of concatenation function
+    """
+    # added keep arguments to test
+    keep_args = ["first", "last"]
+
+    infiles = [
+        "tests/testdata/tide1.dfs1",
+        "tests/testdata/tide2_offset.dfs1",
+        "tests/testdata/tide4.dfs1",
+    ]
+    outfilename = os.path.join(tmpdir.dirname, "concat.dfs1")
+
+    # loop through keep args to test all
+    for keep_arg in keep_args:
+        mikeio.generic.concat(
+            infilenames=infiles, outfilename=outfilename, keep=keep_arg
+        )
+
+        # read outfile
+        dso = mikeio.read(outfilename)
+        df_o = pd.DataFrame(dso.data[0], index=dso.time)
+
+        """ handle data (always keep two data in memory to compare in overlapping period) """
+        # !!! checks below solely consider one item !!
+        for i, infile in enumerate(infiles):
+            dsi = mikeio.read(infile)
+
+            # just store current (=last) data in first loop. no check required
+            if i == 0:
+                df_last = pd.DataFrame(dsi.data[0], index=dsi.time)
+            else:
+                # move previously last to first
+                df_first = df_last.copy()
+                # overwrite last with new / current data
+                df_last = pd.DataFrame(dsi.data[0], index=dsi.time)
+
+                # find overlapping timesteps via merge
+                overlap_idx = pd.merge(
+                    df_first, df_last, how="inner", left_index=True, right_index=True
+                ).index
+
+                # check if first and output are identical (results in dataframe with overlapping datetime index and bool values)
+                first_out = (
+                    (df_first.loc[overlap_idx] == df_o.loc[overlap_idx])
+                    .eq(True)
+                    .all()
+                    .all()
+                )
+                last_out = (
+                    (df_last.loc[overlap_idx] == df_o.loc[overlap_idx])
+                    .eq(True)
+                    .all()
+                    .all()
+                )
+
+                if keep_arg == "first":
+                    assert first_out, "overlap should be with first dataset"
+                elif keep_arg == "last":
+                    assert last_out, "overlap should be with last dataset"
 
 
 def test_extract_equidistant(tmpdir):
