@@ -24,8 +24,15 @@ class GeometryFMPointSpectrum(_Geometry):
 
     @property
     def type_name(self):
-        """Type name, e.g. DfsuSpectral0D"""
+        """Type name: DfsuSpectral0D"""
         return self._type.name
+
+    def __repr__(self):
+        return "Flexible Mesh Point Geometry (empty)"
+
+    @property
+    def ndim(self):
+        return 0
 
 
 class GeometryFM(_Geometry):
