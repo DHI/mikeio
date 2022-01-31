@@ -14,7 +14,7 @@ from .spatial.geometry import _Geometry
 
 # TODO use for dataset as well
 def _parse_axis(data_shape, axis):
-    axis = 0 if axis == "time" else axis
+    axis = 0 if axis[0] == "t" else axis  # "time"[0] == "t"
     if (axis == "spatial") or (axis == "space"):
         if len(data_shape) == 1:
             raise ValueError(
