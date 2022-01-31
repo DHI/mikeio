@@ -145,7 +145,7 @@ class _UnstructuredFile:
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
-            self._geometry = GeometryFMPointSpectrum() #GeometryFM()  # EMPTY
+            self._geometry = GeometryFMPointSpectrum()  # GeometryFM()  # EMPTY
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
             el_table, el_ids = self._get_elements_from_source(dfs)
@@ -1091,7 +1091,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         else:
             geometry = self._geometry2d
 
-        Mesh._geometry_to_mesh(outfilename, geometry)
+        geometry.to_mesh(outfilename)
 
     def to_dfs2(
         self,
@@ -1513,20 +1513,20 @@ class Mesh(_UnstructuredFile):
     def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
         return self.geometry.plot_boundary_nodes(boundary_names, figsize, ax)
 
-    @staticmethod
-    def _geometry_to_mesh(outfilename, geometry):
+    # @staticmethod
+    # def _geometry_to_mesh(outfilename, geometry):
 
-        builder = MeshBuilder()
+    #     builder = MeshBuilder()
 
-        nc = geometry.node_coordinates
-        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geometry.codes)
-        # builder.SetNodeIds(geometry.node_ids+1)
-        # builder.SetElementIds(geometry.elements+1)
-        builder.SetElements(
-            _UnstructuredFile._element_table_to_mikecore(geometry.element_table)
-        )
-        builder.SetProjection(geometry.projection_string)
-        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-        builder.SetEumQuantity(quantity)
-        newMesh = builder.CreateMesh()
-        newMesh.Write(outfilename)
+    #     nc = geometry.node_coordinates
+    #     builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geometry.codes)
+    #     # builder.SetNodeIds(geometry.node_ids+1)
+    #     # builder.SetElementIds(geometry.elements+1)
+    #     builder.SetElements(
+    #         _UnstructuredFile._element_table_to_mikecore(geometry.element_table)
+    #     )
+    #     builder.SetProjection(geometry.projection_string)
+    #     quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
+    #     builder.SetEumQuantity(quantity)
+    #     newMesh = builder.CreateMesh()
+    #     newMesh.Write(outfilename)
