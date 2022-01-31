@@ -7,6 +7,7 @@ import pytest
 import mikeio
 from mikeio import DataArray, Dataset, Dfsu, Dfs2, Dfs0
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio.spatial.grid_geometry import Grid1D
 
 
 @pytest.fixture
@@ -18,6 +19,21 @@ def da1():
         data=np.arange(start, start + nt, dtype=float),
         time=time,
         item=ItemInfo(name="Foo"),
+    )
+
+    return da
+
+
+@pytest.fixture
+def da2():
+    nt = 10
+    nx = 7
+
+    da = DataArray(
+        data=np.zeros([nt, nx]) + 0.1,
+        time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
+        item=ItemInfo("Foo"),
+        geometry=Grid1D(x0=1000.0, dx=10.0, n=nx),
     )
 
     return da
@@ -194,3 +210,38 @@ def test_daarray_aggregation_nan_versions():
     assert da_mean.geometry == da.geometry
     assert da_mean.start_time == da.start_time  # TODO is this consistent
     assert len(da_mean.time) == 1
+
+
+def test_da_quantile_axis0(da2):
+    assert da2.geometry.n == 7
+    assert len(da2.time) == 10
+    daq = da2.quantile(q=0.345, axis="time")
+    assert daq.geometry.n == 7
+    assert len(da2.time) == 10  # this should not change
+    assert len(daq.time) == 1  # aggregated
+
+    assert daq.to_numpy()[0] == 0.1
+    assert daq.ndim == 1
+    assert daq.dims[0] == "x"
+    assert daq.n_timesteps == 1
+
+    daqs = da2.quantile(q=0.345, axis="space")
+    assert not isinstance(
+        daqs.geometry, Grid1D
+    )  # it could be None, or maybe NullGeometry, but not Grid1D
+    assert isinstance(da2.geometry, Grid1D)  # But this one is intact
+    assert len(daqs.time) == 10
+    assert daqs.ndim == 1
+    assert daqs.dims[0] == "t"  # Because it's a Grid1D, remember!
+
+    # q as list
+    # daq = da2.quantile(q=[0.25, 0.75], axis=0)
+    # assert daq[0].to_numpy()[0, 0] == 0.1
+    # assert daq[1].to_numpy()[0, 0] == 0.1
+    # assert daq[2].to_numpy()[0, 0] == 0.2
+    # assert daq[3].to_numpy()[0, 0] == 0.2
+
+    # assert daq.n_items == 2 * da2.n_items
+    # assert "Quantile 0.75, " in daq.items[1].name
+    # assert "Quantile 0.25, " in daq.items[2].name
+    # assert "Quantile 0.75, " in daq.items[3].name
