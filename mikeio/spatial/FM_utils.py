@@ -430,9 +430,9 @@ def _get_node_centered_data(
     node_centered_data = np.zeros(shape=nc.shape[0])
     for n, item in enumerate(node_cellID):
         I = ec[item][:, :2] - nc[n][:2]
-        I2 = (I ** 2).sum(axis=0)
+        I2 = (I**2).sum(axis=0)
         Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
-        lamb = I2[0] * I2[1] - Ixy ** 2
+        lamb = I2[0] * I2[1] - Ixy**2
         omega = np.zeros(1)
         if lamb > 1e-10 * (I2[0] * I2[1]):
             # Standard case - Pseudo
