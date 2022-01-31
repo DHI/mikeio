@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v1
-      - run: pip install black
+      - run: pip install black==22.1.0
       - run: black --check .
       - name: If needed, commit black changes to a new pull request
         if: failure()
