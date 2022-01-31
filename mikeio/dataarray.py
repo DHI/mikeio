@@ -586,6 +586,55 @@ class DataArray(TimeSeries):
             geometry = None
         return DataArray(data=data, time=time, item=self.item, geometry=geometry)
 
+    def quantile(self, q, *, axis="time", **kwargs):
+        """Compute the q-th quantile of the data along the specified axis.
+
+        Wrapping np.quantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            data with quantile values
+
+        Examples
+        --------
+        >>> da.quantile(q=[0.25,0.75])
+        >>> da.quantile(q=0.5)
+        >>> da.quantile(q=[0.01,0.5,0.99], axis="space")
+
+        See Also
+        --------
+        nanquantile : quantile with NaN values ignored
+        """
+        return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+
+    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
+
+        axis = _parse_axis(self.shape, axis)
+        time = _time_by_axis(self.time, axis)
+
+        if not np.isscalar(q):
+            raise NotImplementedError()
+
+        qdat = func(self.values, q=q, axis=axis, **kwargs)
+
+        geometry = deepcopy(self.geometry)
+        if axis != 0:
+            geometry = None
+
+        dims = tuple(
+            [d for i, d in enumerate(self.dims) if i != axis]
+        )  # TODO we will need this in many places
+        return DataArray(qdat, time, item=self.item, geometry=geometry, dims=dims)
+
     def __radd__(self, other):
         return self.__add__(other)
 
