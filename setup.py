@@ -17,7 +17,7 @@ setuptools.setup(
     extras_require={
         "dev": [
             "pytest",
-            "black",
+            "black==22.1.0",
             "sphinx",
             "sphinx-book-theme",
             "shapely",
