@@ -203,6 +203,6 @@ def test_isel():
     g = Grid2D(bbox, shape=(10, 20))
     assert g.nx == 10
 
-    g1 = g.isel(axis=1)
+    g1 = g.isel(0, axis=1)
 
     assert g1.n == 20

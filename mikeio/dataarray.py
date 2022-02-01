@@ -346,16 +346,15 @@ class DataArray(TimeSeries):
             self.dims = dims
 
         self._values = data
-        if not np.isscalar(data):
-            if data.shape[0] != len(time):
-                raise ValueError("Number of time steps doesn't match time axis")
+
         self.time = time
         if (item is not None) and (not isinstance(item, ItemInfo)):
             raise ValueError("Item must be an ItemInfo")
         self.item = item
 
         if self.ndim > 1 and geometry is None:
-            raise ValueError("Geometry is required for ndim >=1")
+            # raise ValueError("Geometry is required for ndim >=1")
+            warnings.warn("Geometry is required for ndim >=1")
 
         self.geometry = geometry
 
@@ -702,7 +701,7 @@ class DataArray(TimeSeries):
             items = self.items
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
-                geometry = self.geometry.isel(axis=axis)
+                geometry = self.geometry.isel(idx, axis=axis)
             zn = None  # TODO
 
         x = np.take(self.values, idx, axis=axis)

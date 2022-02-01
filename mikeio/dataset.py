@@ -710,7 +710,7 @@ class Dataset(TimeSeries):
             items = self.items
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
-                geometry = self.geometry.isel(axis=axis)
+                geometry = self.geometry.isel(idx, axis=axis)
             zn = None  # TODO
 
         res = []
@@ -718,9 +718,13 @@ class Dataset(TimeSeries):
             x = np.take(self[item.name].to_numpy(), idx, axis=axis)
             res.append(x)
 
-        dims = tuple(
-            [d for i, d in enumerate(self.dims) if i != axis]
-        )  # TODO we will need this in many places
+        if np.isscalar(idx):
+            # Selecting a single index, removes this dimension
+            dims = tuple(
+                [d for i, d in enumerate(self.dims) if i != axis]
+            )  # TODO we will need this in many places
+        else:
+            dims = self.dims  # multiple points, dims is intact
         return Dataset(
             data=res, time=time, items=items, geometry=geometry, zn=zn, dims=dims
         )
@@ -1251,7 +1255,7 @@ class Dataset(TimeSeries):
 
     def to_dfs(self, filename):
         if self.geometry is None:
-            if self.ndim == 1 and self.dims[0] == "t":
+            if self.ndim == 1 and self.dims[0][0] == "t":
                 self.to_dfs0(filename)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")

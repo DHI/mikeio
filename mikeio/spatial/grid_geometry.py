@@ -433,7 +433,10 @@ class Grid2D(GeometryGrid):
         xn = xn + self._origin[0]
         yn = yn + self._origin[1]
 
-    def isel(self, axis):
+    def isel(self, idx, axis):
+
+        if not np.isscalar(idx):
+            return None
 
         if axis == 0:
             return Grid1D(
