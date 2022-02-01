@@ -294,7 +294,9 @@ class Dataset(TimeSeries):
     def __repr__(self):
 
         out = ["<mikeio.Dataset>"]
-        out.append(f"Dimensions: {self.shape}")
+        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
+        dimsstr = ", ".join(dims)
+        out.append(f"Dimensions: ({dimsstr})")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
@@ -699,6 +701,8 @@ class Dataset(TimeSeries):
             time = self.time
             items = self.items
             geometry = None  # TODO
+            if hasattr(self.geometry, "isel"):
+                geometry = self.geometry.isel(axis=axis)
             zn = None  # TODO
 
         res = []
@@ -1234,16 +1238,28 @@ class Dataset(TimeSeries):
 
     def to_dfs(self, filename):
         if self.geometry is None:
-
             if self.ndim == 1 and self.dims[0] == "t":
                 self.to_dfs0(filename)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
-        if isinstance(self.geometry, Grid2D):
+        elif isinstance(self.geometry, Grid2D):
             self._to_dfs2(filename)
+
+        elif isinstance(self.geometry, Grid1D):
+            self._to_dfs1(filename)
+        else:
+            raise NotImplementedError(
+                "Writing this type of dataset is not yet implemented"
+            )
 
     def _to_dfs2(self, filename):
         # assumes Grid2D geometry
         from .dfs2 import write_dfs2
 
         write_dfs2(filename, self)
+
+    def _to_dfs1(self, filename):
+        from .dfs1 import Dfs1
+
+        dfs = Dfs1()
+        dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry.x0)

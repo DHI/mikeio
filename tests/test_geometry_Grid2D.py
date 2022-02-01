@@ -196,3 +196,13 @@ def test_xy_to_bbox():
     bbox2 = Grid2D.xy_to_bbox(xy, buffer=0.2)
     assert bbox2[0] == -0.2
     assert bbox2[3] == 5.2
+
+
+def test_isel():
+    bbox = [0, 0, 1, 5]
+    g = Grid2D(bbox, shape=(10, 20))
+    assert g.nx == 10
+
+    g1 = g.isel(axis=1)
+
+    assert g1.n == 20
