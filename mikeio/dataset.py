@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Sequence, Union, Mapping
+from typing import Iterable, Sequence, Union, Mapping, Optional
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -11,7 +11,7 @@ from .spatial.geometry import _Geometry
 from .spatial.grid_geometry import Grid1D, Grid2D
 
 
-def _parse_axis(data_shape, axis):
+def _parse_axis(data_shape, dims, axis):
     axis = 0 if axis == "time" else axis
     if (axis == "spatial") or (axis == "space"):
         if len(data_shape) == 1:
@@ -22,9 +22,13 @@ def _parse_axis(data_shape, axis):
     if axis is None:
         axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
     if isinstance(axis, str):
-        raise ValueError(
-            f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
-        )
+
+        if axis in dims:
+            return dims.index(axis)
+        else:
+            raise ValueError(
+                f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
+            )
     return axis
 
 
@@ -204,6 +208,7 @@ class Dataset(TimeSeries):
         items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
         geometry: _Geometry = None,
         zn=None,
+        dims: Optional[Sequence[str]] = None,
     ):
 
         item_infos = []
@@ -254,7 +259,9 @@ class Dataset(TimeSeries):
 
         data_vars = {}
         for dd, it in zip(data, item_infos):
-            data_vars[it.name] = DataArray(dd, time, it, geometry, zn)
+            data_vars[it.name] = DataArray(
+                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
+            )
 
         ds = Dataset(data_vars)
 
@@ -267,10 +274,11 @@ class Dataset(TimeSeries):
         items=None,
         geometry: _Geometry = None,
         zn=None,
+        dims=None,
     ):
 
         if data is not None and time is not None:
-            ds = Dataset.from_data_time_items(data, time, items, geometry, zn)
+            ds = Dataset.from_data_time_items(data, time, items, geometry, zn, dims)
             data = ds.data_vars
 
         for key, value in data.items():
@@ -691,7 +699,7 @@ class Dataset(TimeSeries):
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
 
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         if axis == 0:
             time = self.time[idx]
             items = self.items
@@ -710,7 +718,12 @@ class Dataset(TimeSeries):
             x = np.take(self[item.name].to_numpy(), idx, axis=axis)
             res.append(x)
 
-        return Dataset(data=res, time=time, items=items, geometry=geometry, zn=zn)
+        dims = tuple(
+            [d for i, d in enumerate(self.dims) if i != axis]
+        )  # TODO we will need this in many places
+        return Dataset(
+            data=res, time=time, items=items, geometry=geometry, zn=zn, dims=dims
+        )
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs):
         """Aggregate along an axis
@@ -729,7 +742,7 @@ class Dataset(TimeSeries):
         """
 
         items = self.items
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = _keepdims_by_axis(axis)
 
@@ -801,7 +814,7 @@ class Dataset(TimeSeries):
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
         items_in = self.items
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = _keepdims_by_axis(axis)
 

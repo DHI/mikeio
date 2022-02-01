@@ -769,10 +769,12 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         dfs.Close()
         if geometry.is_layered:
             return Dataset(
-                data_list[1:], time, items, geometry=geometry, zn=data_list[0]
+                data_list[1:], time, items, geometry=geometry, zn=data_list[0], , dims=("time", "element")
             )
         else:
-            return Dataset(data_list, time, items, geometry=geometry)
+            return Dataset(
+                data_list, time, items, geometry=geometry, dims=("time", "element")
+            )
 
     def write_header(
         self,

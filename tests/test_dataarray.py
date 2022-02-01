@@ -7,7 +7,7 @@ import pytest
 import mikeio
 from mikeio import DataArray, Dataset, Dfsu, Dfs2, Dfs0
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
-from mikeio.spatial.grid_geometry import Grid1D
+from mikeio.spatial.grid_geometry import Grid1D, Grid2D
 
 
 @pytest.fixture
@@ -40,6 +40,22 @@ def da2():
 
 
 @pytest.fixture
+def da_grid2d():
+    nt = 10
+    nx = 7
+    ny = 14
+
+    da = DataArray(
+        data=np.zeros([nt, ny, nx]) + 0.1,
+        time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
+        item=ItemInfo("Foo"),
+        geometry=Grid2D(x0=1000.0, dx=10.0, shape=(nx, ny), dy=1.0, y0=-10.0),
+    )
+
+    return da
+
+
+@pytest.fixture
 def da_time_space():
     nt = 10
     start = 10.0
@@ -48,9 +64,26 @@ def da_time_space():
         data=np.zeros(shape=(nt, 2), dtype=float),
         time=time,
         item=ItemInfo(name="Foo"),
+        geometry=Grid1D(n=2, dx=1.0),
     )
 
     return da
+
+
+def test_data_2d_no_geometry_not_allowed():
+
+    nt = 10
+    nx = 7
+    ny = 14
+
+    with pytest.raises(ValueError) as excinfo:
+        DataArray(
+            data=np.zeros([nt, ny, nx]) + 0.1,
+            time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
+            item=ItemInfo("Foo"),
+        )
+
+    assert "geometry" in str(excinfo.value).lower()
 
 
 def test_dataarray_indexing(da1: DataArray):
@@ -86,19 +119,19 @@ def test_timestep(da1):
 
 def test_dims_time(da1):
 
-    assert da1.dims == ("t",)
+    assert da1.dims[0][0] == "t"
 
 
 def test_dims_time_space1d(da_time_space):
 
-    assert da_time_space.dims == ("t", "x")
+    assert da_time_space.dims[1] == "x"
 
 
 def test_repr(da_time_space):
 
     text = repr(da_time_space)
     assert "DataArray" in text
-    assert "Dimensions: (t:10, x:2)" in text
+    assert "Dimensions: (time:10, x:2)" in text
 
 
 def test_plot(da1):
@@ -213,6 +246,22 @@ def test_daarray_aggregation_nan_versions():
     assert len(da_mean.time) == 1
 
 
+def test_da_isel_space(da_grid2d):
+    assert da_grid2d.geometry.nx == 7
+    assert da_grid2d.geometry.ny == 14
+    da_sel = da_grid2d.isel(0, axis="y")
+    assert da_sel.dims[0][0] == "t"
+    assert da_sel.dims[1] == "x"
+
+    da_sel = da_grid2d.isel(0, axis="x")
+    assert da_sel.dims[0][0] == "t"
+    assert da_sel.dims[1] == "y"
+
+    da_sel = da_grid2d.isel(0, axis="t")
+    assert da_sel.dims[0] == "y"
+    assert da_sel.dims[1] == "x"
+
+
 def test_da_quantile_axis0(da2):
     assert da2.geometry.n == 7
     assert len(da2.time) == 10
@@ -233,7 +282,7 @@ def test_da_quantile_axis0(da2):
     assert isinstance(da2.geometry, Grid1D)  # But this one is intact
     assert len(daqs.time) == 10
     assert daqs.ndim == 1
-    assert daqs.dims[0] == "t"  # Because it's a Grid1D, remember!
+    assert daqs.dims[0][0] == "t"  # Because it's a Grid1D, remember!
 
     # q as list
     # daq = da2.quantile(q=[0.25, 0.75], axis=0)
@@ -246,3 +295,25 @@ def test_da_quantile_axis0(da2):
     # assert "Quantile 0.75, " in daq.items[1].name
     # assert "Quantile 0.25, " in daq.items[2].name
     # assert "Quantile 0.75, " in daq.items[3].name
+
+
+def test_write_dfs2():
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from mikeio.spatial.grid_geometry import Grid2D
+    from mikeio import DataArray, Dataset
+    from mikeio.eum import ItemInfo
+
+    g = Grid2D(
+        x=np.linspace(10, 20, 30),
+        y=np.linspace(10, 20, 20),
+        projection_string="LONG/LAT",
+    )
+    da = DataArray(
+        np.random.random(size=(1, g.ny, g.nx)),
+        time=pd.date_range(start="2000", periods=1),
+        item=ItemInfo("Random"),
+        geometry=g,
+    )
+    da.to_dfs("foo.dfs2")

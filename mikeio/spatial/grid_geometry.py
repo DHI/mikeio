@@ -184,8 +184,8 @@ class Grid2D(GeometryGrid):
         x0=None,
         y0=None,
         projection_string=None,
-        origin=None,
-        orientation=None,
+        origin=(0, 0),
+        orientation=0.0,
     ):
         """create 2d grid
 
@@ -426,6 +426,12 @@ class Grid2D(GeometryGrid):
                 jj[j] = (np.abs(self.y - xyp[1])).argmin()
 
         return ii, jj
+
+    def plot(self):
+        xn = self._centers_to_nodes(self.x)
+        yn = self._centers_to_nodes(self.y)
+        xn = xn + self._origin[0]
+        yn = yn + self._origin[1]
 
     def isel(self, axis):
 

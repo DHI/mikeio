@@ -7,6 +7,7 @@ import pytest
 import mikeio
 from mikeio import DataArray, Dataset, Dfsu, Dfs2, Dfs0
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio.spatial.grid_geometry import Grid2D
 
 
 @pytest.fixture
@@ -92,11 +93,17 @@ def test_select_subset_isel():
 
     d1[0, 10, :] = 2.0
     d2[0, 10, :] = 3.0
-    data = [d1, d2]
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
-    items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = Dataset(data, time, items)
+
+    geometry = Grid2D(shape=(30, 100), bbox=[0, 0, 1, 1])
+
+    data = {
+        "Foo": DataArray(data=d1, time=time, geometry=geometry, item=ItemInfo("Foo")),
+        "Bar": DataArray(data=d2, time=time, geometry=geometry, item=ItemInfo("Bar")),
+    }
+
+    ds = Dataset(data)
 
     selds = ds.isel(10, axis=1)
 
@@ -105,6 +112,11 @@ def test_select_subset_isel():
     assert selds["Foo"].shape == (100, 30)
     assert selds["Foo"].to_numpy()[0, 0] == 2.0
     assert selds["Bar"].to_numpy()[0, 0] == 3.0
+
+    selds_named_axis = ds.isel(10, axis="y")
+
+    assert len(selds_named_axis.items) == 2
+    assert selds_named_axis["Foo"].shape == (100, 30)
 
 
 def test_select_subset_isel_axis_out_of_range_error(ds2):

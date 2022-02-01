@@ -13,7 +13,7 @@ from .spatial.FM_utils import _plot_map
 
 
 # TODO use for dataset as well
-def _parse_axis(data_shape, axis):
+def _parse_axis(data_shape, dims, axis):
     axis = 0 if axis[0] == "t" else axis  # "time"[0] == "t"
     if (axis == "spatial") or (axis == "space"):
         if len(data_shape) == 1:
@@ -24,6 +24,12 @@ def _parse_axis(data_shape, axis):
     if axis is None:
         axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
     if isinstance(axis, str):
+        if axis in dims:
+            return dims.index(axis)
+        else:
+            raise ValueError(
+                f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
+            )
         raise ValueError(
             f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
         )
@@ -325,30 +331,35 @@ class DataArray(TimeSeries):
 
         if dims is None:  # This is not very robust, but is probably a reasonable guess
             if data.ndim == 1:
-                self.dims = ("t",)
+                self.dims = ("time",)
             elif data.ndim == 2:
-                self.dims = ("t", "x")
+                self.dims = ("time", "x")
                 # TODO FM
-                # self.dims = ("t","e")
+                # self.dims = ("time","element")
             elif data.ndim == 3:
-                self.dims = ("t", "y", "x")
+                self.dims = ("time", "y", "x")
             elif data.ndim == 4:
-                self.dims = ("t", "z", "y", "x")
+                self.dims = ("time", "z", "y", "x")
         else:
             if data.ndim != len(dims):
                 raise ValueError("Number of named dimensions does not equal data ndim")
             self.dims = dims
 
         self._values = data
+        if not np.isscalar(data):
+            if data.shape[0] != len(time):
+                raise ValueError("Number of time steps doesn't match time axis")
         self.time = time
         if (item is not None) and (not isinstance(item, ItemInfo)):
             raise ValueError("Item must be an ItemInfo")
         self.item = item
 
+        if self.ndim > 1 and geometry is None:
+            raise ValueError("Geometry is required for ndim >=1")
+
         self.geometry = geometry
 
-        if zn is not None:
-            self._zn = zn
+        self._zn = zn
 
         if isinstance(geometry, GeometryFM):
             self.plot = _DataArrayPlotterFM(self)
@@ -478,6 +489,13 @@ class DataArray(TimeSeries):
 
         self.values = np.flip(self.values, axis=1)
         return self
+
+    def to_dfs(self, filename):
+
+        from mikeio import Dataset
+
+        ds = Dataset({self.name: self}, geometry=self.geometry)
+        ds.to_dfs(filename)
 
     def max(self, axis="time") -> "DataArray":
         """Max value along an axis
@@ -614,7 +632,7 @@ class DataArray(TimeSeries):
             nanmax : Max values with NaN values removed
         """
 
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = axis == 0
 
@@ -656,9 +674,55 @@ class DataArray(TimeSeries):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
+    def isel(self, idx, axis=1):
+        """
+        Select subset along an axis.
+
+        Parameters
+        ----------
+        idx: int, scalar or array_like
+        axis: (int, str, None), optional
+            axis number or "time", by default 1
+
+        Returns
+        -------
+        DataArray
+            data with subset
+
+        """
+
+        axis = _parse_axis(self.shape, self.dims, axis)
+        if axis == 0:
+            time = self.time[idx]
+            items = self.items
+            geometry = self.geometry
+            zn = None  # TODO self._zn[idx] if hasattr(self, "_zn") else None
+        else:
+            time = self.time
+            items = self.items
+            geometry = None  # TODO
+            if hasattr(self.geometry, "isel"):
+                geometry = self.geometry.isel(axis=axis)
+            zn = None  # TODO
+
+        x = np.take(self.values, idx, axis=axis)
+
+        dims = tuple(
+            [d for i, d in enumerate(self.dims) if i != axis]
+        )  # TODO we will need this in many places
+
+        return DataArray(
+            data=x,
+            time=self.time,
+            item=self.item,
+            geometry=self.geometry,
+            zn=zn,
+            dims=dims,
+        )
+
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         time = _time_by_axis(self.time, axis)
 
         if not np.isscalar(q):
