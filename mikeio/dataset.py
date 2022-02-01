@@ -1196,9 +1196,17 @@ class Dataset(TimeSeries):
         return [x.item for x in self.data_vars.values()]
 
     @property
+    def ndim(self):
+        return self[0].ndim
+
+    @property
+    def dims(self):
+        return self[0].dims
+
+    @property
     def shape(self):
         """Shape of each item"""
-        return self.data[0].shape
+        return self[0].shape
 
     # @property
     # def _first_non_z_item(self):
@@ -1226,7 +1234,11 @@ class Dataset(TimeSeries):
 
     def to_dfs(self, filename):
         if self.geometry is None:
-            raise ValueError("Cannot write Dataset with no geometry to file!")
+
+            if self.ndim == 1 and self.dims[0] == "t":
+                self.to_dfs0(filename)
+            else:
+                raise ValueError("Cannot write Dataset with no geometry to file!")
         if isinstance(self.geometry, Grid2D):
             self._to_dfs2(filename)
 

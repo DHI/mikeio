@@ -78,7 +78,7 @@ def test_index_with_attribute():
 
     assert ds["Foo"] is ds.Foo  # This is the same object
 
-    ds["Foo"] == ds.Foo + 2.0
+    ds["Foo"] = ds.Foo + 2.0
     assert (
         ds["Foo"] is ds.Foo
     )  # This is now modfied, but both methods points to the same object
