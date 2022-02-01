@@ -3,14 +3,14 @@ from typing import Iterable, Optional, Sequence, Tuple, Union, Mapping
 import numpy as np
 import pandas as pd
 from copy import deepcopy
-from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
+from .base import TimeSeries
+from .eum import EUMType, EUMUnit, ItemInfo
+from .spatial.geometry import _Geometry
 from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .spatial.FM_utils import _plot_map
 
-from .base import TimeSeries
-from .spatial.geometry import _Geometry
 
 # TODO use for dataset as well
 def _parse_axis(data_shape, axis):
@@ -44,7 +44,7 @@ def _time_by_axis(
 
 
 def _is_boolean_mask(x):
-    if isinstance(x, np.ndarray):
+    if isinstance(x, (np.ndarray, DataArray)):
         return x.dtype == np.dtype("bool")
     return False
 
@@ -371,13 +371,16 @@ class DataArray(TimeSeries):
         self._values = value
 
     def __setitem__(self, key, value):
+        # TODO: use .values instead?
         if _is_boolean_mask(key):
-            return _set_by_boolean_mask(self._values, key, value)
+            mask = key if isinstance(key, np.ndarray) else key.values
+            return _set_by_boolean_mask(self._values, mask, value)
         self._values[key] = value
 
     def __getitem__(self, key) -> "DataArray":
         if _is_boolean_mask(key):
-            return _get_by_boolean_mask(self._values, key)
+            mask = key if isinstance(key, np.ndarray) else key.values
+            return _get_by_boolean_mask(self.values, mask)
 
         if isinstance(key, tuple):
             steps = key[0]
@@ -429,6 +432,43 @@ class DataArray(TimeSeries):
 
         data = self._values[key].copy()
         return DataArray(data=data, time=time, item=self.item, geometry=geometry, zn=zn)
+
+    @staticmethod
+    def _other_to_values(other):
+        return other.values if isinstance(other, DataArray) else other
+
+    def _boolmask_to_new_DataArray(self, bmask):
+        return DataArray(
+            data=bmask,
+            time=self.time,
+            item=ItemInfo("Boolean"),
+            geometry=self.geometry,
+            zn=self._zn,
+        )
+
+    def __lt__(self, other):
+        bmask = self.values < self._other_to_values(other)
+        return self._boolmask_to_new_DataArray(bmask)
+
+    def __gt__(self, other):
+        bmask = self.values > self._other_to_values(other)
+        return self._boolmask_to_new_DataArray(bmask)
+
+    def __le__(self, other):
+        bmask = self.values <= self._other_to_values(other)
+        return self._boolmask_to_new_DataArray(bmask)
+
+    def __ge__(self, other):
+        bmask = self.values >= self._other_to_values(other)
+        return self._boolmask_to_new_DataArray(bmask)
+
+    def __eq__(self, other):
+        bmask = self.values == self._other_to_values(other)
+        return self._boolmask_to_new_DataArray(bmask)
+
+    def __ne__(self, other):
+        bmask = self.values != self._other_to_values(other)
+        return self._boolmask_to_new_DataArray(bmask)
 
     def to_numpy(self) -> np.ndarray:
         return self._values
