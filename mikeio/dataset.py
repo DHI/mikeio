@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Sequence, Union, Mapping
+from typing import Iterable, Sequence, Union, Mapping, Optional
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -11,7 +11,7 @@ from .spatial.geometry import _Geometry
 from .spatial.grid_geometry import Grid1D, Grid2D
 
 
-def _parse_axis(data_shape, axis):
+def _parse_axis(data_shape, dims, axis):
     axis = 0 if axis == "time" else axis
     if (axis == "spatial") or (axis == "space"):
         if len(data_shape) == 1:
@@ -22,9 +22,13 @@ def _parse_axis(data_shape, axis):
     if axis is None:
         axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
     if isinstance(axis, str):
-        raise ValueError(
-            f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
-        )
+
+        if axis in dims:
+            return dims.index(axis)
+        else:
+            raise ValueError(
+                f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
+            )
     return axis
 
 
@@ -204,6 +208,7 @@ class Dataset(TimeSeries):
         items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
         geometry: _Geometry = None,
         zn=None,
+        dims: Optional[Sequence[str]] = None,
     ):
 
         item_infos = []
@@ -254,7 +259,9 @@ class Dataset(TimeSeries):
 
         data_vars = {}
         for dd, it in zip(data, item_infos):
-            data_vars[it.name] = DataArray(dd, time, it, geometry, zn)
+            data_vars[it.name] = DataArray(
+                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
+            )
 
         ds = Dataset(data_vars)
 
@@ -267,10 +274,11 @@ class Dataset(TimeSeries):
         items=None,
         geometry: _Geometry = None,
         zn=None,
+        dims=None,
     ):
 
         if data is not None and time is not None:
-            ds = Dataset.from_data_time_items(data, time, items, geometry, zn)
+            ds = Dataset.from_data_time_items(data, time, items, geometry, zn, dims)
             data = ds.data_vars
 
         for key, value in data.items():
@@ -294,7 +302,9 @@ class Dataset(TimeSeries):
     def __repr__(self):
 
         out = ["<mikeio.Dataset>"]
-        out.append(f"Dimensions: {self.shape}")
+        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
+        dimsstr = ", ".join(dims)
+        out.append(f"Dimensions: ({dimsstr})")
         out.append(f"Time: {self.time[0]} - {self.time[-1]}")
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
@@ -689,7 +699,7 @@ class Dataset(TimeSeries):
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
 
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         if axis == 0:
             time = self.time[idx]
             items = self.items
@@ -699,6 +709,8 @@ class Dataset(TimeSeries):
             time = self.time
             items = self.items
             geometry = None  # TODO
+            if hasattr(self.geometry, "isel"):
+                geometry = self.geometry.isel(idx, axis=axis)
             zn = None  # TODO
 
         res = []
@@ -706,7 +718,16 @@ class Dataset(TimeSeries):
             x = np.take(self[item.name].to_numpy(), idx, axis=axis)
             res.append(x)
 
-        return Dataset(data=res, time=time, items=items, geometry=geometry, zn=zn)
+        if np.isscalar(idx):
+            # Selecting a single index, removes this dimension
+            dims = tuple(
+                [d for i, d in enumerate(self.dims) if i != axis]
+            )  # TODO we will need this in many places
+        else:
+            dims = self.dims  # multiple points, dims is intact
+        return Dataset(
+            data=res, time=time, items=items, geometry=geometry, zn=zn, dims=dims
+        )
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs):
         """Aggregate along an axis
@@ -725,7 +746,7 @@ class Dataset(TimeSeries):
         """
 
         items = self.items
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = _keepdims_by_axis(axis)
 
@@ -797,7 +818,7 @@ class Dataset(TimeSeries):
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
         items_in = self.items
-        axis = _parse_axis(self.shape, axis)
+        axis = _parse_axis(self.shape, self.dims, axis)
         time = _time_by_axis(self.time, axis)
         keepdims = _keepdims_by_axis(axis)
 
@@ -1196,9 +1217,17 @@ class Dataset(TimeSeries):
         return [x.item for x in self.data_vars.values()]
 
     @property
+    def ndim(self):
+        return self[0].ndim
+
+    @property
+    def dims(self):
+        return self[0].dims
+
+    @property
     def shape(self):
         """Shape of each item"""
-        return self.data[0].shape
+        return self[0].shape
 
     # @property
     # def _first_non_z_item(self):
@@ -1226,12 +1255,28 @@ class Dataset(TimeSeries):
 
     def to_dfs(self, filename):
         if self.geometry is None:
-            raise ValueError("Cannot write Dataset with no geometry to file!")
-        if isinstance(self.geometry, Grid2D):
+            if self.ndim == 1 and self.dims[0][0] == "t":
+                self.to_dfs0(filename)
+            else:
+                raise ValueError("Cannot write Dataset with no geometry to file!")
+        elif isinstance(self.geometry, Grid2D):
             self._to_dfs2(filename)
+
+        elif isinstance(self.geometry, Grid1D):
+            self._to_dfs1(filename)
+        else:
+            raise NotImplementedError(
+                "Writing this type of dataset is not yet implemented"
+            )
 
     def _to_dfs2(self, filename):
         # assumes Grid2D geometry
         from .dfs2 import write_dfs2
 
         write_dfs2(filename, self)
+
+    def _to_dfs1(self, filename):
+        from .dfs1 import Dfs1
+
+        dfs = Dfs1()
+        dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry.x0)

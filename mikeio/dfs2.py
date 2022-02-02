@@ -31,9 +31,10 @@ def _write_dfs2_header(filename, ds, title=""):
     builder.SetGeographicalProjection(proj)
 
     timestep_unit = TimeStepUnit.SECOND
+    dt = ds.timestep or 1.0  # It can not be None
     if ds.is_equidistant:
         time_axis = factory.CreateTemporalEqCalendarAxis(
-            timestep_unit, ds.time[0], 0, ds.timestep
+            timestep_unit, ds.time[0], 0, dt
         )
     else:
         time_axis = factory.CreateTemporalNonEqCalendarAxis(timestep_unit, ds.time[0])

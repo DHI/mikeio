@@ -25,9 +25,9 @@ class Grid1D(GeometryGrid):
         x0=None,
         dx=None,
         n=None,
-        projection_string=None,
-        origin=None,
-        orientation=None,
+        projection_string="Local coordinates",
+        origin=(0, 0),
+        orientation=0.0,
     ):
         """Create equidistant 1D spatial geometry"""
         super().__init__(
@@ -184,8 +184,8 @@ class Grid2D(GeometryGrid):
         x0=None,
         y0=None,
         projection_string=None,
-        origin=None,
-        orientation=None,
+        origin=(0, 0),
+        orientation=0.0,
     ):
         """create 2d grid
 
@@ -426,6 +426,32 @@ class Grid2D(GeometryGrid):
                 jj[j] = (np.abs(self.y - xyp[1])).argmin()
 
         return ii, jj
+
+    def plot(self):
+        xn = self._centers_to_nodes(self.x)
+        yn = self._centers_to_nodes(self.y)
+        xn = xn + self._origin[0]
+        yn = yn + self._origin[1]
+
+    def isel(self, idx, axis):
+
+        if not np.isscalar(idx):
+            return None
+
+        if axis == 0:
+            return Grid1D(
+                x0=self.x0,
+                dx=self.dx,
+                n=self.nx,
+                projection_string=self.projection_string,
+            )
+        else:
+            return Grid1D(
+                x0=self.y0,
+                dx=self.dy,
+                n=self.ny,
+                projection_string=self.projection_string,
+            )
 
     def _to_element_table(self, index_base=0):
 

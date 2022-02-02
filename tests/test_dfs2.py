@@ -4,6 +4,9 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
+
+import mikeio
+
 from mikeio.dataset import Dataset
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
@@ -543,3 +546,40 @@ def test_dfs2_plot():
     dfs.plot(dss)
 
     assert True
+
+
+def test_spatial_aggregation_dfs2_to_dfs0(tmp_path):
+
+    outfilename = tmp_path / "waves_max.dfs0"
+
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    ds_max = ds.nanmax(axis="space")
+    ds_max.to_dfs(outfilename)
+
+    dsnew = mikeio.read(outfilename)
+
+    assert dsnew.n_timesteps == ds.n_timesteps
+    assert dsnew.n_items == ds.n_items
+
+
+def test_select_col_in_dfs2(tmp_path):
+
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    assert ds.geometry.nx == 31
+    assert ds.geometry.ny == 31
+
+    assert ds.dims[2] == "x"
+
+    ds_col = ds.isel(29, axis=2)  # TODO axis="x"
+
+    assert ds_col.geometry.n == 31
+
+    outfilename = str(tmp_path / "waves_col.dfs1")
+
+    ds_col.to_dfs(outfilename)
+
+    dsnew = mikeio.read(outfilename)
+
+    assert dsnew.geometry.n == 31
+
+    assert ds[0].to_numpy()[0, 1, 29] == dsnew[0].to_numpy()[0, 1]

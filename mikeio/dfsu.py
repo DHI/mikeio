@@ -767,12 +767,24 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dfs.Close()
+
+        dims = ("time", "element")
+
+        if self.is_spectral:
+            # TODO add something like ("time", "freq", "dir", "element")
+            dims = None
+
         if geometry.is_layered:
             return Dataset(
-                data_list[1:], time, items, geometry=geometry, zn=data_list[0]
+                data_list[1:],
+                time,
+                items,
+                geometry=geometry,
+                zn=data_list[0],
+                dims=dims,
             )
         else:
-            return Dataset(data_list, time, items, geometry=geometry)
+            return Dataset(data_list, time, items, geometry=geometry, dims=dims)
 
     def write_header(
         self,
