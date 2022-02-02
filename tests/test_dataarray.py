@@ -198,7 +198,10 @@ def test_daarray_aggregation():
 
     ds = dfs.read(items=[3])
     da = ds["Current speed"]
-    da_max = da.max()
+    assert da.ndim == 2
+    assert da.dims[0][0] == "t"  # time
+    da_max = da.max("time")
+    assert da_max.dims[0][0] == "e"  # element
     assert isinstance(da_max, DataArray)
     assert da_max.geometry == da.geometry
     assert da_max.start_time == da.start_time  # TODO is this consistent

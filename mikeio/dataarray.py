@@ -633,15 +633,18 @@ class DataArray(TimeSeries):
 
         axis = _parse_axis(self.shape, self.dims, axis)
         time = _time_by_axis(self.time, axis)
-        keepdims = axis == 0
 
-        data = func(self.to_numpy(), axis=axis, keepdims=keepdims, **kwargs)
+        dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
 
-        if keepdims:
+        data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
+
+        if axis == 0:
             geometry = self.geometry
         else:
             geometry = None
-        return DataArray(data=data, time=time, item=self.item, geometry=geometry)
+        return DataArray(
+            data=data, time=time, item=self.item, geometry=geometry, dims=dims
+        )
 
     def quantile(self, q, *, axis="time", **kwargs):
         """Compute the q-th quantile of the data along the specified axis.
