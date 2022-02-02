@@ -43,6 +43,23 @@ def _time_by_axis(
     return time
 
 
+def _get_time_idx(time, steps):
+    """Find idx in DateTimeAxis"""
+    # TODO: allow steps to be other DateTimeAxis
+    if isinstance(steps, str):
+        steps = slice(steps, steps)
+    if isinstance(steps, slice):
+        try:
+            s = time.slice_indexer(steps.start, steps.stop)
+            steps = list(range(s.start, s.stop))
+        except:
+            steps = list(range(*steps.indices(len(time))))
+    elif isinstance(steps, int):
+        steps = [steps]
+
+    return steps
+
+
 def _is_boolean_mask(x):
     if isinstance(x, (np.ndarray, DataArray)):
         return x.dtype == np.dtype("bool")
@@ -388,19 +405,8 @@ class DataArray(TimeSeries):
             steps = key
 
         # select in time
-        if isinstance(steps, str):
-            steps = slice(steps, steps)
-        if isinstance(steps, slice):
-            try:
-                s = self.time.slice_indexer(steps.start, steps.stop)
-                steps = list(range(s.start, s.stop))
-            except:
-                steps = list(range(*steps.indices(self.n_timesteps)))
-            time = self.time[steps]
-        elif isinstance(steps, int):
-            time = self.time[[steps]]
-        else:
-            time = self.time[steps]
+        steps = _get_time_idx(self.time, steps)
+        time = self.time[steps]
 
         # select in space
         geometry = self.geometry
