@@ -1,5 +1,5 @@
 import warnings
-from typing import Iterable, Optional, Sequence, Tuple, Union, Mapping
+from typing import Optional, Sequence, Union
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -10,80 +10,7 @@ from .spatial.geometry import _Geometry
 from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .spatial.FM_utils import _plot_map
-
-
-# TODO use for dataset as well
-def _parse_axis(data_shape, dims, axis):
-    axis = 0 if axis[0] == "t" else axis  # "time"[0] == "t"
-    if (axis == "spatial") or (axis == "space"):
-        if len(data_shape) == 1:
-            raise ValueError(
-                f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
-            )
-        axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
-    if axis is None:
-        axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
-    if isinstance(axis, str):
-        if axis in dims:
-            return dims.index(axis)
-        else:
-            raise ValueError(
-                f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
-            )
-        raise ValueError(
-            f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
-        )
-    return axis
-
-
-def _time_by_axis(
-    time: pd.DatetimeIndex, axis: Union[int, Sequence[int]]
-) -> pd.DatetimeIndex:
-    if axis == 0:
-        time = pd.DatetimeIndex([time[0]])
-    elif isinstance(axis, Sequence) and 0 in axis:
-        time = pd.DatetimeIndex([time[0]])
-    else:
-        time = time
-
-    return time
-
-
-def _get_time_idx(time, steps):
-    """Find idx in DateTimeAxis"""
-    # TODO: allow steps to be other DateTimeAxis
-    if isinstance(steps, str):
-        steps = slice(steps, steps)
-    if isinstance(steps, slice):
-        try:
-            s = time.slice_indexer(steps.start, steps.stop)
-            steps = list(range(s.start, s.stop))
-        except:
-            steps = list(range(*steps.indices(len(time))))
-    elif isinstance(steps, int):
-        steps = [steps]
-
-    return steps
-
-
-def _is_boolean_mask(x):
-    if isinstance(x, (np.ndarray, DataArray)):
-        return x.dtype == np.dtype("bool")
-    return False
-
-
-def _get_by_boolean_mask(data: np.ndarray, mask: np.ndarray):
-    if data.shape != mask.shape:
-        return data[np.broadcast_to(mask, data.shape)]
-    return data[mask]
-
-
-def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value):
-    if data.shape != mask.shape:
-        data[np.broadcast_to(mask, data.shape)] = value
-    else:
-        data[mask] = value
-    return
+import mikeio.data_utils as du
 
 
 class _DataArrayPlotter:
@@ -374,7 +301,6 @@ class DataArray(TimeSeries):
             warnings.warn("Geometry is required for ndim >=1")
 
         self.geometry = geometry
-
         self._zn = zn
 
         if isinstance(geometry, GeometryFM):
@@ -399,38 +325,47 @@ class DataArray(TimeSeries):
 
     def __setitem__(self, key, value):
         # TODO: use .values instead?
-        if _is_boolean_mask(key):
+        if du._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
-            return _set_by_boolean_mask(self._values, mask, value)
+            return du._set_by_boolean_mask(self._values, mask, value)
         self._values[key] = value
 
     def __getitem__(self, key) -> "DataArray":
-        if _is_boolean_mask(key):
+        if du._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
-            return _get_by_boolean_mask(self.values, mask)
+            return du._get_by_boolean_mask(self.values, mask)
 
-        if isinstance(key, tuple):
-            steps = key[0]
+        dims = self.dims
+        if "time" in dims:
+            steps = key[0] if isinstance(key, tuple) else key
+            space_key = key[1:] if isinstance(key, tuple) else None
+
+            # select in time
+            steps = du._get_time_idx_list(self.time, steps)
+            time = self.time[steps]
+            if len(steps) == 1:
+                dims = tuple([d for d in dims if d != "time"])
+
+            key = (steps, *space_key) if isinstance(key, tuple) else steps
         else:
-            steps = key
-
-        # select in time
-        steps = _get_time_idx(self.time, steps)
-        time = self.time[steps]
+            time = self.time
+            steps = None
+            space_key = key
 
         # select in space
         geometry = self.geometry
-        zn = None
-        if isinstance(key, tuple):
+        zn = self._zn
+        if space_key is not None:
             if isinstance(self.geometry, GeometryFM):
                 # TODO: allow for selection of layers
-                elements = key[1]
+                elements = space_key[0] if isinstance(space_key, tuple) else space_key
                 if isinstance(elements, slice):
                     elements = list(range(*elements.indices(self.geometry.n_elements)))
                 else:
                     elements = np.atleast_1d(elements)
                 if len(elements) == 1:
                     geometry = None
+                    dims = tuple([d for d in dims if d != "element"])
                 else:
                     geometry = self.geometry.elements_to_geometry(elements)
 
@@ -439,15 +374,20 @@ class DataArray(TimeSeries):
                     unodes = np.unique(np.hstack(nodes))
                     zn = self._zn[:, unodes]
 
-                key = (steps, elements)
+                key = elements if (steps is None) else (steps, elements)
             else:
                 # TODO: better handling of dfs1,2,3
-                key = (steps, *key[1:])
-        else:
-            key = steps
+                key = space_key if (steps is None) else (steps, *space_key)
 
-        data = self._values[key].copy()
-        return DataArray(data=data, time=time, item=self.item, geometry=geometry, zn=zn)
+        data = self._values[key]  # .copy()
+        return DataArray(
+            data=np.squeeze(data),
+            time=time,
+            item=self.item,
+            geometry=geometry,
+            zn=zn,
+            dims=dims,
+        )
 
     @staticmethod
     def _other_to_values(other):
@@ -637,8 +577,8 @@ class DataArray(TimeSeries):
             nanmax : Max values with NaN values removed
         """
 
-        axis = _parse_axis(self.shape, self.dims, axis)
-        time = _time_by_axis(self.time, axis)
+        axis = du._parse_axis(self.shape, self.dims, axis)
+        time = du._time_by_agg_axis(self.time, axis)
 
         dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
 
@@ -699,15 +639,15 @@ class DataArray(TimeSeries):
 
         """
 
-        axis = _parse_axis(self.shape, self.dims, axis)
+        axis = du._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
             time = self.time[idx]
-            items = self.items
+            item = self.item
             geometry = self.geometry
-            zn = None  # TODO self._zn[idx] if hasattr(self, "_zn") else None
+            zn = self._zn[idx] if self._zn else None
         else:
             time = self.time
-            items = self.items
+            item = self.item
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
                 geometry = self.geometry.isel(idx, axis=axis)
@@ -721,17 +661,17 @@ class DataArray(TimeSeries):
 
         return DataArray(
             data=x,
-            time=self.time,
-            item=self.item,
-            geometry=self.geometry,
+            time=time,
+            item=item,
+            geometry=geometry,
             zn=zn,
             dims=dims,
         )
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
-        axis = _parse_axis(self.shape, self.dims, axis)
-        time = _time_by_axis(self.time, axis)
+        axis = du._parse_axis(self.shape, self.dims, axis)
+        time = du._time_by_agg_axis(self.time, axis)
 
         if not np.isscalar(q):
             raise NotImplementedError()

@@ -1,68 +1,20 @@
-import warnings
 from typing import Iterable, Sequence, Union, Mapping, Optional
 import numpy as np
 import pandas as pd
 from copy import deepcopy
-from mikeio.eum import EUMType, EUMUnit, ItemInfo
+from mikeio.eum import EUMType, ItemInfo
 
+import mikeio.data_utils as du
 from .base import TimeSeries
 from .dataarray import DataArray
 from .spatial.geometry import _Geometry
 from .spatial.grid_geometry import Grid1D, Grid2D
 
 
-def _parse_axis(data_shape, dims, axis):
-    axis = 0 if axis == "time" else axis
-    if (axis == "spatial") or (axis == "space"):
-        if len(data_shape) == 1:
-            raise ValueError(
-                f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
-            )
-        axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
-    if axis is None:
-        axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
-    if isinstance(axis, str):
-
-        if axis in dims:
-            return dims.index(axis)
-        else:
-            raise ValueError(
-                f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
-            )
-    return axis
-
-
-def _time_by_axis(time, axis):
-    # time: Dataset time axis;
-    if axis == 0:
-        time = pd.DatetimeIndex([time[0]])
-    elif isinstance(axis, Sequence) and 0 in axis:
-        time = pd.DatetimeIndex([time[0]])
-    else:
-        time = time
-
-    return time
-
-
-def _keepdims_by_axis(axis):
-    # keepdims: input to numpy aggregate function
-    if axis == 0:
-        keepdims = True
-    else:
-        keepdims = False
-    return keepdims
-
-
-# def _items_except_Z_coordinate(items) -> Sequence[ItemInfo]:
-#     if items[0].name == "Z coordinate":
-#         items = deepcopy(items)
-#         items.pop(0)
-#     return items
-
-
-def _get_repeated_items(
+def _repeat_items(
     items_in: Sequence[ItemInfo], prefixes: Sequence[str]
 ) -> Sequence[ItemInfo]:
+    """Rereat a list of items n times with different prefixes"""
     new_items = []
     for item_in in items_in:
         for prefix in prefixes:
@@ -71,24 +23,6 @@ def _get_repeated_items(
             new_items.append(item)
 
     return new_items
-
-
-def _reshape_data_by_axis(data, orig_shape, axis):
-    if isinstance(axis, int):
-        return data
-    if len(orig_shape) == len(axis):
-        shape = (1,)
-        data = [d.reshape(shape) for d in data]
-    if len(orig_shape) - len(axis) == 1:
-        # e.g. (0,2) for for dfs2
-        shape = [1] if (0 in axis) else [orig_shape[0]]
-        ndims = len(orig_shape)
-        for j in range(1, ndims):
-            if j not in axis:
-                shape.append(orig_shape[j])
-        data = [d.reshape(shape) for d in data]
-
-    return data
 
 
 class _DatasetPlotter:
@@ -295,6 +229,7 @@ class Dataset(TimeSeries):
 
         # TODO: require geometry if ndims>1
         self.geometry = geometry
+        self._zn = zn
 
         if len(self.items) > 1:
             self.plot = _DatasetPlotter(self)
@@ -699,12 +634,12 @@ class Dataset(TimeSeries):
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
 
-        axis = _parse_axis(self.shape, self.dims, axis)
+        axis = du._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
             time = self.time[idx]
             items = self.items
             geometry = self.geometry
-            zn = self._zn[idx] if hasattr(self, "_zn") else None
+            zn = self._zn[idx] if self._zn else None
         else:
             time = self.time
             items = self.items
@@ -746,16 +681,16 @@ class Dataset(TimeSeries):
         """
 
         items = self.items
-        axis = _parse_axis(self.shape, self.dims, axis)
-        time = _time_by_axis(self.time, axis)
-        keepdims = _keepdims_by_axis(axis)
+        axis = du._parse_axis(self.shape, self.dims, axis)
+        time = du._time_by_agg_axis(self.time, axis)
+        keepdims = du._keepdims_by_axis(axis)
 
         res = [
             func(self[item.name].to_numpy(), axis=axis, keepdims=keepdims, **kwargs)
             for item in items
         ]
 
-        res = _reshape_data_by_axis(res, self.shape, axis)
+        res = du._reshape_data_by_axis(res, self.shape, axis)
 
         return Dataset(res, time, items)
 
@@ -818,13 +753,13 @@ class Dataset(TimeSeries):
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
         items_in = self.items
-        axis = _parse_axis(self.shape, self.dims, axis)
-        time = _time_by_axis(self.time, axis)
-        keepdims = _keepdims_by_axis(axis)
+        axis = du._parse_axis(self.shape, self.dims, axis)
+        time = du._time_by_agg_axis(self.time, axis)
+        keepdims = du._keepdims_by_axis(axis)
 
         qvec = [q] if np.isscalar(q) else q
         qtxt = [f"Quantile {q}" for q in qvec]
-        itemsq = _get_repeated_items(items_in, qtxt)
+        itemsq = _repeat_items(items_in, qtxt)
 
         res = []
         for item in items_in:
@@ -835,7 +770,7 @@ class Dataset(TimeSeries):
                 qdat_item = qdat[j, ...] if len(qvec) > 1 else qdat
                 res.append(qdat_item)
 
-        res = _reshape_data_by_axis(res, self.shape, axis)
+        res = du._reshape_data_by_axis(res, self.shape, axis)
 
         return Dataset(res, time, itemsq)
 
