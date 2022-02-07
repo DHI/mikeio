@@ -439,17 +439,18 @@ class Grid2D(GeometryGrid):
             return None
 
         if axis == 0:
-            return Grid1D(
-                x0=self.x0,
-                dx=self.dx,
-                n=self.nx,
-                projection_string=self.projection_string,
-            )
-        else:
+            # y is first axis!
             return Grid1D(
                 x0=self.y0,
                 dx=self.dy,
                 n=self.ny,
+                projection_string=self.projection_string,
+            )
+        else:
+            return Grid1D(
+                x0=self.x0,
+                dx=self.dx,
+                n=self.nx,
                 projection_string=self.projection_string,
             )
 
