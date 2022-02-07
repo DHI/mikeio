@@ -729,7 +729,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             if self.is_spectral:
                 data, shape = self._get_spectral_data_shape(n_steps, elements=elements)
             elif (
-                self.is_layered and item == 0
+                geometry.is_layered and item == 0
             ):  # and items[item].name == "Z coordinate":
                 item0_is_node_based = True
                 data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
@@ -776,7 +776,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         if geometry.is_layered:
             return Dataset(
-                data_list[1:],
+                data_list[1:],  # skip zn item
                 time,
                 items,
                 geometry=geometry,
@@ -784,6 +784,12 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 dims=dims,
             )
         else:
+            if (self._type == DfsuFileType.DfsuSpectral1D) and (elements is not None):
+                # TODO: fix this
+                warnings.warn(
+                    "Geometry is not supported when reading specific nodes from a DfsuSpectral1D."
+                )
+                geometry = None
             return Dataset(data_list, time, items, geometry=geometry, dims=dims)
 
     def write_header(
