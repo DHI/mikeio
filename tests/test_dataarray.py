@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio import DataArray, Dataset, Dfsu, Dfs2, Dfs0
+from mikeio import DataArray, Dfsu
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 from mikeio.spatial.grid_geometry import Grid1D, Grid2D
 
@@ -85,6 +85,219 @@ def da_time_space():
 #        )
 #
 #    assert "geometry" in str(excinfo.value).lower()
+
+
+def test_dataarray_init():
+    nt = 10
+    start = 10.0
+    data = np.arange(start, start + nt, dtype=float)
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    item = ItemInfo(name="Foo")
+
+    da = DataArray(data=data, time=time)
+    assert isinstance(da, DataArray)
+    assert da.name == "Item"  # default name
+    assert da.item.type == EUMType.Undefined
+
+    da = DataArray(data=data, time=time, item=item)
+    assert isinstance(da, DataArray)
+    assert da.name == "Foo"
+    assert da.ndim == 1
+    assert da.dims == ("time",)
+
+    da = DataArray(data=data, time="2018")
+    assert isinstance(da, DataArray)
+    assert da.n_timesteps == 1
+    assert da.ndim == 1
+    assert da.dims == ("x",)
+
+
+def test_dataarray_init_2d():
+    nt = 10
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+
+    # 2d with time
+    ny, nx = 5, 6
+    data2d = np.zeros([nt, ny, nx]) + 0.1
+    da = DataArray(data=data2d, time=time)
+    assert da.ndim == 3
+    assert da.dims == ("time", "y", "x")
+
+    # singleton time, requires spec of dims
+    dims = ("time", "y", "x")
+    data2d = np.zeros([1, ny, nx]) + 0.1
+    da = DataArray(data=data2d, time="2018", dims=dims)
+    assert isinstance(da, DataArray)
+    assert da.n_timesteps == 1
+    assert da.ndim == 3
+    assert da.dims == dims
+
+    # no time
+    data2d = np.zeros([ny, nx]) + 0.1
+    da = DataArray(data=data2d, time="2018")
+    assert isinstance(da, DataArray)
+    assert da.n_timesteps == 1
+    assert da.ndim == 2
+    assert da.dims == ("y", "x")
+
+    # x, y swapped
+    dims = ("x", "y")
+    data2d = np.zeros([nx, ny]) + 0.1
+    da = DataArray(data=data2d, time="2018", dims=dims)
+    assert da.n_timesteps == 1
+    assert da.ndim == 2
+    assert da.dims == dims
+
+
+def test_dataarray_init_5d():
+    nt = 10
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+
+    # 5d with named dimensions
+    dims = ("x", "y", "layer", "member", "season")
+    data5d = np.zeros([2, 4, 5, 3, 3]) + 0.1
+    da = DataArray(data=data5d, time="2018", dims=dims)
+    assert da.n_timesteps == 1
+    assert da.ndim == 5
+    assert da.dims == dims
+
+    # 5d with named dimensions and time
+    dims = ("time", "dummy", "layer", "member", "season")
+    data5d = np.zeros([nt, 4, 5, 3, 3]) + 0.1
+    da = DataArray(data=data5d, time=time, dims=dims)
+    assert da.n_timesteps == nt
+    assert da.ndim == 5
+    assert da.dims == dims
+
+
+def test_dataarray_init_wrong_dim():
+    nt = 10
+    start = 10.0
+    data = np.arange(start, start + nt, dtype=float)
+    time_long = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=(nt + 1))
+    item = ItemInfo(name="Foo")
+
+    with pytest.raises(ValueError):
+        DataArray(data=data, time=time_long, item=item)
+
+    nt, ny, nx = 10, 5, 6
+    data2d = np.zeros([nt, ny, nx]) + 0.1
+    with pytest.raises(ValueError):
+        DataArray(data=data2d, time=time_long)
+
+    # time must be first dim
+    dims = ("x", "y", "time")
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    with pytest.raises(ValueError):
+        DataArray(data=data2d, time=time, dims=dims)
+
+    # time must be first dim
+    data2d = np.zeros([ny, nt, nx]) + 0.1
+    with pytest.raises(ValueError):
+        DataArray(data=data2d, time=time)
+
+
+def test_dataarray_init_grid1d():
+    nt = 10
+    nx = 5
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    data = np.zeros([nt, nx]) + 0.1
+    g = Grid1D(n=nx, dx=1.0)
+    da = DataArray(data=data, time=time, geometry=g)
+    assert da.ndim == 2
+    assert da.dims == ("time", "x")
+
+    # singleton time
+    data = np.zeros([1, nx]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 2
+    assert da.dims == ("time", "x")
+
+    # no time
+    data = np.zeros([nx]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 1
+    assert da.dims == ("x",)
+
+
+def test_dataarray_init_grid2d():
+    nt = 10
+    ny, nx = 7, 5
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    data = np.zeros([nt, ny, nx]) + 0.1
+    g = Grid2D(dx=0.5, shape=(nx, ny))
+    da = DataArray(data=data, time=time, geometry=g)
+    assert da.ndim == 3
+    assert da.dims == ("time", "y", "x")
+
+    # singleton time
+    data = np.zeros([1, ny, nx]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 3
+    assert da.dims == ("time", "y", "x")  # TODO: fails
+
+    # no time
+    data = np.zeros([ny, nx]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 2
+    assert da.dims == ("y", "x")
+
+
+def test_dataarray_init_dfsu2d():
+    nt = 10
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    filename = "tests/testdata/north_sea_2.mesh"
+    dfs = mikeio.open(filename)
+    g = dfs.geometry
+    ne = g.n_elements
+
+    # time-varying
+    data = np.zeros([nt, ne]) + 0.1
+    da = DataArray(data=data, time=time, geometry=g)
+    assert da.ndim == 2
+    assert da.dims == ("time", "element")
+    assert da.geometry == g
+
+    # singleton time
+    data = np.zeros([1, ne]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 2
+    assert da.dims == ("time", "element")  # TODO: fails
+    assert da.n_timesteps == 1
+
+    # no time
+    data = np.zeros([ne]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 1
+    assert da.dims == ("element",)
+
+
+def test_dataarray_init_dfsu3d():
+    nt = 10
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    filename = "tests/testdata/basin_3d.dfsu"
+    dfs = mikeio.open(filename)
+    g = dfs.geometry
+    ne = g.n_elements
+
+    # time-varying
+    data = np.zeros([nt, ne]) + 0.1
+    da = DataArray(data=data, time=time, geometry=g)
+    assert da.ndim == 2
+    assert da.dims == ("time", "element")
+    assert da.geometry == g
+
+    # singleton time
+    data = np.zeros([1, ne]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 2
+    assert da.dims == ("time", "element")  # TODO: fails
+
+    # no time
+    data = np.zeros([ne]) + 0.1
+    da = DataArray(data=data, time="2018", geometry=g)
+    assert da.ndim == 1
+    assert da.dims == ("element",)
 
 
 def test_dataarray_indexing(da1: DataArray):
