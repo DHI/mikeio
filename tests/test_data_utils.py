@@ -49,4 +49,3 @@ def test_parse_time_list_Timestamp():
     assert isinstance(time, pd.DatetimeIndex)
     assert len(time) == 3
     assert time[-1] == pd.Timestamp(2018, 1, 3)
-

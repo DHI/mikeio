@@ -803,7 +803,7 @@ class DataArray(TimeSeries):
             item = self.item
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
-                # TODO: should we subtract the time axis first? 
+                # TODO: should we subtract the time axis first?
                 geometry = self.geometry.isel(idx, axis=axis)
             zn = None  # TODO
 
