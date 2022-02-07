@@ -59,6 +59,7 @@ class _DatasetPlotter:
 
 
 class Dataset(TimeSeries):
+    # TODO: Dataset(Mapping)
 
     deletevalue = 1.0e-35
 
@@ -135,104 +136,161 @@ class Dataset(TimeSeries):
       1:  VarFun01 <Water Level> (meter)
     """
 
+    # @staticmethod
+    # def from_data_time_items(
+    #     data: Union[Sequence[np.ndarray], float],
+    #     time: Union[pd.DatetimeIndex, str],
+    #     items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
+    #     geometry: _Geometry = None,
+    #     zn=None,
+    #     dims: Optional[Sequence[str]] = None,
+    # ):
+
+    #     item_infos = []
+    #     time = du._parse_time(time)
+
+    #     if isinstance(data, Sequence) and hasattr(data[0], "shape"):
+    #         n_items = len(data)
+    #         n_timesteps = data[0].shape[0]
+    #     else:
+    #         raise TypeError(
+    #             f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
+    #         )
+
+    #     item_infos = Dataset._parse_items(items, n_items)
+
+    #     if len(time) != n_timesteps:
+    #         raise ValueError(
+    #             f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
+    #         )
+    #     time = pd.DatetimeIndex(time)
+
+    #     data_vars = {}
+    #     for dd, it in zip(data, item_infos):
+    #         data_vars[it.name] = DataArray(
+    #             data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
+    #         )
+
+    #     ds = Dataset(data_vars)
+
+    #     return ds
+
     @staticmethod
-    def from_data_time_items(
-        data: Union[Sequence[np.ndarray], float],
-        time: Union[pd.DatetimeIndex, str],
-        items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
-        geometry: _Geometry = None,
-        zn=None,
-        dims: Optional[Sequence[str]] = None,
-    ):
-
-        item_infos = []
-
-        if isinstance(time, str):
-            # default single-step time
-            time = pd.date_range(time, periods=1)
-
-        if np.isscalar(data) and isinstance(items, Sequence):
-            # create empty dataset
-            n_elements = data
-            n_items = len(items)
-            n_timesteps = len(time)
-            data = Dataset.create_empty_data(
-                n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
-            )
-        elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
-            n_items = len(data)
-            n_timesteps = data[0].shape[0]
-        else:
-            raise TypeError(
-                f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
-            )
-
-        if items is None:
-            # default Undefined items
-            for j in range(n_items):
-                item_infos.append(ItemInfo(f"Item {j+1}"))
-        else:
-            for item in items:
-                if isinstance(item, EUMType) or isinstance(item, str):
-                    item_infos.append(ItemInfo(item))
-                elif isinstance(item, ItemInfo):
-                    item_infos.append(item)
-                else:
-                    raise ValueError(f"items of type: {type(item)} is not supported")
-
-            if len(items) != n_items:
-                raise ValueError(
-                    f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
-                )
-
-        if len(time) != n_timesteps:
-            raise ValueError(
-                f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
-            )
-        time = pd.DatetimeIndex(time)
-
-        data_vars = {}
-        for dd, it in zip(data, item_infos):
-            data_vars[it.name] = DataArray(
-                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
-            )
-
-        ds = Dataset(data_vars)
-
-        return ds
-
-    def __init__(
-        self,
-        data: Mapping[str, DataArray],
+    def _create_dataarrays(
+        data: Sequence[np.ndarray],
         time=None,
         items=None,
         geometry: _Geometry = None,
         zn=None,
         dims=None,
     ):
+        if not isinstance(data, Sequence):
+            data = [data]
+        items = Dataset._parse_items(items, len(data))
 
-        if data is not None and time is not None:
-            ds = Dataset.from_data_time_items(data, time, items, geometry, zn, dims)
-            data = ds.data_vars
+        # TODO: skip validation for all items after the first?
+        data_vars = {}
+        names = []
+        for dd, it in zip(data, items):
+            n = it.name  # TODO: du._to_safe_name(it.name)
+            if n in names:
+                raise ValueError()  # TODO: repeated item names!
+            names.append(n)
+            data_vars[n] = DataArray(
+                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
+            )
+        return data_vars
 
-        for key, value in data.items():
-            if value.item is None:
-                value.item = ItemInfo(name=key)
+    @staticmethod
+    def _parse_items(items, n_items_data):
+        if items is None:
+            # default Undefined items
+            item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
+        else:
+            if len(items) != n_items_data:
+                raise ValueError(
+                    f"Number of items ({len(items)}) must match len of data ({n_items_data})"
+                )
 
-            # TODO Replace bad chars like space, comma, etc.
-            # TODO verify that this is only a pointer to the same data, and not a copy
-            setattr(self, key, value)
+            item_infos = []
+            for item in items:
+                if isinstance(item, (EUMType, str)):
+                    item = ItemInfo(item)
+                elif not isinstance(item, ItemInfo):
+                    raise TypeError(f"items of type: {type(item)} is not supported")
+                # TODO: item.name = du._to_safe_name(item.name)
+                item_infos.append(item)
 
-        self.data_vars = data
+        return item_infos
 
-        self.time = list(data.values())[0].time
+    @staticmethod
+    def _DataArrays_as_mapping(data):
+        """Create dict of DataArrays if necessary"""
+        if isinstance(data, Mapping):
+            # TODO: What if keys and item names does not match?
+            return data
+        else:
+            assert isinstance(data[0], DataArray)
 
-        # TODO: require geometry if ndims>1
-        self.geometry = geometry
-        self._zn = zn
+            item_names = []
+            for da in data:
+                item_names.append(du._to_safe_name(da.name))
+            if len(set(item_names)) != len(item_names):
+                raise ValueError(f"Item names must be unique! ({item_names})")
+            # TODO: make a list of unique items names
+
+            data_map = {}
+            for n, da in zip(item_names, data):
+                data_map[n] = da
+            return data_map
+
+    def _init_from_DataArrays(self, data):
+        # assume that data is iterable of DataArrays
+        self.data_vars = self._DataArrays_as_mapping(data)
+
+        for key, value in self.data_vars.items():
+            setattr(self, du._to_safe_name(key), value)
 
         if len(self.items) > 1:
             self.plot = _DatasetPlotter(self)
+
+    def __init__(
+        self,
+        data: Union[Mapping[str, DataArray], Iterable[DataArray]],
+        time=None,
+        items=None,
+        geometry: _Geometry = None,
+        zn=None,
+        dims=None,
+    ):
+        try:
+            return self._init_from_DataArrays(data)
+        except:
+            # if not Iterable[DataArray] then let us create it...
+            dataarrays = self._create_dataarrays(
+                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
+            )
+            return self._init_from_DataArrays(dataarrays)
+
+    @property
+    def time(self):
+        return list(self.data_vars.values())[0].time
+
+    @time.setter
+    def time(self, new_time):
+        new_time = du._parse_time(new_time)
+        if len(self.time) != len(new_time):
+            raise ValueError("Length of new time is wrong")
+        for da in self.data_vars.values():
+            da.time = new_time
+
+    @property
+    def geometry(self):
+        return list(self.data_vars.values())[0].geometry
+
+    @property
+    def _zn(self):
+        return list(self.data_vars.values())[0]._zn
 
     def __repr__(self):
 
@@ -265,7 +323,7 @@ class Dataset(TimeSeries):
 
         # TODO this is easy to use, but most likely duplicates the data, which is bad...
         # TODO Replace bad chars like space, comma, etc.
-        setattr(self, key, value)
+        setattr(self, du._to_safe_name(key), value)
         self.data_vars[key] = value
 
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
@@ -468,10 +526,15 @@ class Dataset(TimeSeries):
         """
 
         if isinstance(datasets[0], Iterable):
-            if isinstance(datasets[0][0], Dataset):
+            if isinstance(datasets[0][0], (Dataset, DataArray)):
                 datasets = datasets[0]
 
-        ds = datasets[0].copy()
+        if isinstance(datasets[0], DataArray):
+            ds = datasets[0]._to_dataset()
+            print("to dataset")
+        else:
+            ds = datasets[0].copy()
+
         for dsj in datasets[1:]:
             ds = ds._combine(dsj, copy=False)
         return ds
@@ -491,7 +554,8 @@ class Dataset(TimeSeries):
             return self._append_items(other, copy=True)
 
     def _append_items(self, other, copy=True):
-
+        if isinstance(other, DataArray):
+            other = other._to_dataset()
         item_names = {item.name for item in self.items}
         other_names = {item.name for item in other.items}
 
@@ -1163,17 +1227,6 @@ class Dataset(TimeSeries):
     def shape(self):
         """Shape of each item"""
         return self[0].shape
-
-    # @property
-    # def _first_non_z_item(self):
-    #     if len(self) > 1 and self.items[0].name == "Z coordinate":
-    #         return 1
-    #     return 0
-
-    # @property
-    # def _non_z_item_names(self):
-    #     """Item names (Z coordinate excluded)"""
-    #     return {item.name for item in self.items[self._first_non_z_item :]}
 
     @property
     def n_elements(self):

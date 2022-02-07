@@ -1,4 +1,4 @@
-from typing import Sequence, Union
+from typing import Iterable, Sequence, Union
 import numpy as np
 import pandas as pd
 
@@ -57,6 +57,18 @@ def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value):
     return
 
 
+def _parse_time(time):
+    """Allow anything that we can create a DatetimeIndex from"""
+    if isinstance(time, pd.DatetimeIndex):
+        return time
+    if isinstance(time, str) or (not isinstance(time, Iterable)):
+        time = [time]
+        # default single-step time
+        # return pd.date_range(time, periods=1)
+    # TODO: accept None and n_timesteps_data
+    return pd.DatetimeIndex(time)
+
+
 def _parse_axis(data_shape, dims, axis):
     # axis = 0 if axis == "time" else axis
     if (axis == "spatial") or (axis == "space"):
@@ -78,6 +90,10 @@ def _parse_axis(data_shape, dims, axis):
             )
 
     return axis
+
+
+def _to_safe_name(name):
+    return "".join([x if x.isalnum() else "_" for x in name])
 
 
 def _keepdims_by_axis(axis):

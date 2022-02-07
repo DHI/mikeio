@@ -8,7 +8,8 @@ from .base import TimeSeries
 from .eum import EUMType, EUMUnit, ItemInfo
 from .spatial.geometry import _Geometry
 from .spatial.grid_geometry import Grid1D, Grid2D
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
+from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
+from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
 import mikeio.data_utils as du
 
@@ -262,55 +263,168 @@ class DataArray(TimeSeries):
         zn=None,
         dims: Optional[Sequence[str]] = None,
     ):
+        # TODO: add optional validation validate=True
+        self._values = self._parse_data(data)
+        self.time = du._parse_time(time)
+        if (len(self.time) > 1) and self._values.shape[0] != len(self.time):
+            raise ValueError(
+                f"Number of timesteps ({self.n_timesteps}) does not fit with data shape {self.values.shape}"
+            )
+        self.dims = self._parse_dims(dims, geometry)
+        self.item = self._parse_item(item)
+        self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
+        self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
+        self.plot = self._get_plotter_by_geometry()
 
-        data_lacks = []
+    @staticmethod
+    def _parse_data(data):
+        validation_errors = []
         for p in ("shape", "ndim", "dtype"):
             if not hasattr(data, p):
-                data_lacks.append(p)
-        if len(data_lacks) > 0:
+                validation_errors.append(p)
+        if len(validation_errors) > 0:
             raise TypeError(
                 "Data must be ArrayLike, e.g. numpy array, but it lacks properties: "
-                + ", ".join(data_lacks)
+                + ", ".join(validation_errors)
             )
+        return data
 
-        if dims is None:  # This is not very robust, but is probably a reasonable guess
-            if data.ndim == 1:
-                self.dims = ("time",)
-            elif data.ndim == 2:
-                self.dims = ("time", "x")
-                # TODO FM
-                # self.dims = ("time","element")
-            elif data.ndim == 3:
-                self.dims = ("time", "y", "x")
-            elif data.ndim == 4:
-                self.dims = ("time", "z", "y", "x")
+    def _parse_dims(self, dims, geometry):
+        if dims is None:
+            return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
-            if data.ndim != len(dims):
+            if self.ndim != len(dims):
                 raise ValueError("Number of named dimensions does not equal data ndim")
-            self.dims = dims
+            if ("time" in dims) and dims[0] != "time":
+                raise ValueError("time must be first dimension if present!")
+            if (self.n_timesteps > 1) and ("time" not in dims):
+                raise ValueError(
+                    f"time missing from named dimensions {dims}! (number of timesteps: {self.n_timesteps})"
+                )
+            return dims
 
-        self._values = data
+    @staticmethod
+    def _guess_dims(ndim, shape, n_timesteps, geometry):
+        # This is not very robust, but is probably a reasonable guess
+        time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
+        dims = ["time"] if time_is_first else []
+        ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
-        self.time = time
-        if (item is not None) and (not isinstance(item, ItemInfo)):
-            raise ValueError("Item must be an ItemInfo")
-        self.item = item
+        if isinstance(geometry, GeometryFMPointSpectrum):
+            if ndim_no_time > 0:
+                dims.append("frequency")
+            if ndim_no_time > 1:
+                dims.append("direction")
+        elif isinstance(geometry, GeometryFM):
+            if geometry._type == DfsuFileType.DfsuSpectral1D:
+                if ndim_no_time > 0:
+                    dims.append("node")
+            else:
+                if ndim_no_time > 0:
+                    dims.append("element")
+            if geometry.is_spectral:
+                if ndim_no_time > 1:
+                    dims.append("frequency")
+                if ndim_no_time > 2:
+                    dims.append("direction")
+        elif isinstance(geometry, Grid1D):
+            dims.append("x")
+        elif isinstance(geometry, Grid2D):
+            dims.append("y")
+            dims.append("x")
+        else:
+            # gridded
+            if ndim_no_time > 2:
+                dims.append("z")
+            if ndim_no_time > 1:
+                dims.append("y")
+            if ndim_no_time > 0:
+                dims.append("x")
+        return tuple(dims)
 
-        if self.ndim > 1 and geometry is None:
+        #     return ("time", "x")
+        # elif ndim == 3:
+        #     return ("time", "y", "x")
+        # elif ndim == 4:
+        #     return ("time", "z", "y", "x")
+
+    @staticmethod
+    def _parse_item(item):
+        if item is None:
+            return ItemInfo("Item")
+
+        if not isinstance(item, ItemInfo):
+            try:
+                item = ItemInfo(item)
+            except:
+                raise ValueError(
+                    "Item must be None, ItemInfo or valid input to ItemInfo"
+                )
+        return item
+
+    @staticmethod
+    def _parse_geometry(geometry, dims, shape):
+        if len(dims) > 1 and geometry is None:
             # raise ValueError("Geometry is required for ndim >=1")
             warnings.warn("Geometry is required for ndim >=1")
 
-        self.geometry = geometry
-        self._zn = zn
+        axis = 1 if "time" in dims else 0
+        dims_no_time = tuple([d for d in dims if d != "time"])
+        shape_no_time = shape[1:] if ("time" in dims) else shape
 
-        if isinstance(geometry, GeometryFM):
-            self.plot = _DataArrayPlotterFM(self)
+        if isinstance(geometry, GeometryFMPointSpectrum):
+            pass
+        elif isinstance(geometry, GeometryFM):
+            if geometry.is_spectral:
+                if geometry._type == DfsuFileType.DfsuSpectral1D:
+                    assert (
+                        shape[axis] == geometry.n_nodes
+                    ), "data shape does not match number of nodes"
+                elif geometry._type == DfsuFileType.DfsuSpectral2D:
+                    assert (
+                        shape[axis] == geometry.n_elements
+                    ), "data shape does not match number of elements"
+            else:
+                assert (
+                    shape[axis] == geometry.n_elements
+                ), "data shape does not match number of elements"
         elif isinstance(geometry, Grid1D):
-            self.plot = _DataArrayPlotterGrid1D(self)
+            assert (
+                shape[axis] == geometry.n
+            ), "data shape does not match number of grid points"
         elif isinstance(geometry, Grid2D):
-            self.plot = _DataArrayPlotterGrid2D(self)
+            assert shape[axis] == geometry.ny, "data shape does not match ny"
+            assert shape[axis + 1] == geometry.nx, "data shape does not match nx"
+        # elif isinstance(geometry, Grid3D): # TODO
+
+        return geometry
+
+    @staticmethod
+    def _parse_zn(zn, geometry, n_timesteps):
+        if zn is not None:
+            if isinstance(geometry, GeometryFMLayered):
+                # TODO: np.squeeze(zn) if n_timesteps=1 ?
+                if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
+                    raise ValueError(
+                        f"zn has wrong shape ({zn.shape}). First dimension should be of size n_timesteps ({n_timesteps})"
+                    )
+                if zn.shape[-1] != geometry.n_nodes:
+                    raise ValueError(
+                        f"zn has wrong shape ({zn.shape}). Last dimension should be of size n_nodes ({geometry.n_nodes})"
+                    )
+            else:
+                raise ValueError("zn can only be provided for layered dfsu data")
+        return zn
+
+    def _get_plotter_by_geometry(self):
+        if isinstance(self.geometry, GeometryFM):
+            return _DataArrayPlotterFM(self)
+        elif isinstance(self.geometry, Grid1D):
+            return _DataArrayPlotterGrid1D(self)
+        elif isinstance(self.geometry, Grid2D):
+            return _DataArrayPlotterGrid2D(self)
         else:
-            self.plot = _DataArrayPlotter(self)
+            return _DataArrayPlotter(self)
 
     @property
     def values(self):
@@ -365,14 +479,18 @@ class DataArray(TimeSeries):
                     elements = np.atleast_1d(elements)
                 if len(elements) == 1:
                     geometry = None
+                    zn = None
                     dims = tuple([d for d in dims if d != "element"])
                 else:
                     geometry = self.geometry.elements_to_geometry(elements)
 
                 if isinstance(self.geometry, GeometryFMLayered):
-                    nodes = self.geometry.element_table[elements]
-                    unodes = np.unique(np.hstack(nodes))
-                    zn = self._zn[:, unodes]
+                    if isinstance(geometry, GeometryFMLayered):
+                        nodes = self.geometry.element_table[elements]
+                        unodes = np.unique(np.hstack(nodes))
+                        zn = self._zn[:, unodes]
+                    else:
+                        zn = None
 
                 key = elements if (steps is None) else (steps, elements)
             else:
@@ -388,6 +506,38 @@ class DataArray(TimeSeries):
             zn=zn,
             dims=dims,
         )
+
+    # TODO: other name
+    def _is_equivalent(self, other, raise_error=False):
+        """check if other DataArray has equivalent dimensions, time and geometry"""
+        problems = []
+        if not isinstance(other, DataArray):
+            return False
+        if self.shape != other.shape:
+            problems.append("shape of data must be the same")
+        if self.n_timesteps != other.n_timesteps:
+            problems.append("Number of timesteps must be the same")
+        if self.start_time != self.start_time:
+            problems.append("start_time must be the same")
+        if type(self.geometry) != type(other.geometry):
+            problems.append("The type of geometry must be the same")
+        if hasattr(self.geometry, "__eq__"):
+            if not (self.geometry == self.geometry):
+                problems.append("The geometries must be the same")
+        if self._zn is not None:
+            # it can be expensive to check equality of zn
+            # so we test only size, first and last element
+            if (
+                len(self._zn) != len(other._zn)
+                or self._zn[0] != other._zn[0]
+                or self._zn[-1] != other._zn[-1]
+            ):
+                problems.append("zn must be the same")
+
+        if self.dims != other.dims:
+            problems.append("Dimension names (dims) must be the same")
+
+        return len(problems) == 0
 
     @staticmethod
     def _other_to_values(other):
@@ -435,12 +585,15 @@ class DataArray(TimeSeries):
         self.values = np.flip(self.values, axis=1)
         return self
 
-    def to_dfs(self, filename):
-
+    def _to_dataset(self):
         from mikeio import Dataset
 
-        ds = Dataset({self.name: self}, geometry=self.geometry)
-        ds.to_dfs(filename)
+        return Dataset(
+            {self.name: self}, items=[self.item], geometry=self.geometry, zn=self._zn
+        )
+
+    def to_dfs(self, filename):
+        self._to_dataset().to_dfs(filename)
 
     def max(self, axis="time") -> "DataArray":
         """Max value along an axis
@@ -650,6 +803,7 @@ class DataArray(TimeSeries):
             item = self.item
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
+                # TODO: should we subtract the time axis first? 
                 geometry = self.geometry.isel(idx, axis=axis)
             zn = None  # TODO
 
