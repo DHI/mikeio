@@ -514,13 +514,7 @@ def test_da_quantile_axis0(da2):
     # assert "Quantile 0.75, " in daq.items[3].name
 
 
-def test_write_dfs2():
-    import numpy as np
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    from mikeio.spatial.grid_geometry import Grid2D
-    from mikeio import DataArray, Dataset
-    from mikeio.eum import ItemInfo
+def test_write_dfs2(tmp_path):
 
     g = Grid2D(
         x=np.linspace(10, 20, 30),
@@ -533,4 +527,27 @@ def test_write_dfs2():
         item=ItemInfo("Random"),
         geometry=g,
     )
-    da.to_dfs("foo.dfs2")
+
+    fn = str(tmp_path / "test.dfs2")
+
+    da.to_dfs(fn)
+
+
+def test_write_dfs2_single_time_no_time_dim(tmp_path):
+
+    g = Grid2D(
+        x=np.linspace(10, 20, 30),
+        y=np.linspace(10, 20, 20),
+        projection_string="LONG/LAT",
+    )
+    da = DataArray(
+        np.random.random(size=(g.ny, g.nx)),  # No singleton time
+        time=pd.date_range(start="2000", periods=1),
+        item=ItemInfo("Random"),
+        geometry=g,
+        dims=("y", "x"),
+    )
+
+    fn = str(tmp_path / "test_2.dfs2")
+
+    da.to_dfs(fn)

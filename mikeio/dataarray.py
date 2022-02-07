@@ -579,14 +579,15 @@ class DataArray(TimeSeries):
         self.values = np.flip(self.values, axis=1)
         return self
 
-    def _to_dataset(self):
+    def _to_dataset(self) -> "Dataset":
+        """Create a single-item dataset"""
         from mikeio import Dataset
 
         return Dataset(
-            {self.name: self}, items=[self.item], geometry=self.geometry, zn=self._zn
-        )
+            {self.name: self}
+        )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename):
+    def to_dfs(self, filename) -> None:
         self._to_dataset().to_dfs(filename)
 
     def max(self, axis="time") -> "DataArray":

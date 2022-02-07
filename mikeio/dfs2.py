@@ -77,13 +77,16 @@ def _write_dfs2_data(dfs, ds):
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
 
-            d = ds[item].values[i]
+            if "t" not in ds.dims:
+                d = ds[item].values
+            else:
+                d = ds[item].values[i]
             d = d.copy()  # to avoid modifying the input
             d[np.isnan(d)] = deletevalue
 
-            d = d.reshape(ds.shape[1:])
-            d = np.flipud(d)
-            darray = d.reshape(d.size, 1)[:, 0]
+            d = d.reshape(ds.shape[-2:])  # spatial axes
+            d = np.flipud(d)  # NumPy vs MIKE y axis convention
+            darray = d.flatten()
 
             if not ds.is_equidistant:
                 t_rel = (ds.time[i] - ds.time[0]).total_seconds()
