@@ -316,51 +316,72 @@ class Dataset(TimeSeries):
     def __setitem__(self, key, value):
 
         if not isinstance(value, DataArray):
-            raise ValueError("Use a DataArray")
+            try:
+                value = DataArray(value)
+                # TODO: warn that this is not the preferred way!
+            except:
+                raise ValueError("Use a DataArray")
 
         if isinstance(key, int):
             raise NotImplementedError()
+            # key_str = value.name
+            # new_keys = list(self.data_vars.keys())
+            # new_keys.insert(key, key_str)
 
-        # TODO this is easy to use, but most likely duplicates the data, which is bad...
-        # TODO Replace bad chars like space, comma, etc.
-        setattr(self, du._to_safe_name(key), value)
         self.data_vars[key] = value
+        setattr(self, du._to_safe_name(key), value)
 
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
 
         if isinstance(key, slice):
+            # TODO: do we still want this behaviour?
+            # slicing = slicing in time???
+            # better to use sel or isel for this
             s = self.time.slice_indexer(key.start, key.stop)
             time_steps = list(range(s.start, s.stop))
             return self.isel(time_steps, axis=0)
 
-        if isinstance(key, int):
-            index = key
-            return list(self.data_vars.values())[index]
-
+        key = self._key_to_str(key)
         if isinstance(key, str):
             return self.data_vars[key]
 
-        if isinstance(key, ItemInfo):
-            return self.__getitem__(key.name)
-
         if isinstance(key, list):
-
             data_vars = {}
             for v in key:
-                if isinstance(v, int):
-                    d = list(self.data_vars.values())[v]
-                    nkey = d.item.name
-                    data_vars[nkey] = d
-                elif isinstance(v, str):
-                    data_vars[v] = self.__getitem__(v)
-                elif isinstance(v, ItemInfo):
-                    data_vars[v] = self.__getitem__(v.name)
-                else:
-                    raise ValueError(f"indexing with a {type(v)} is not supported")
-
+                data_vars[v] = self.data_vars[v]
             return Dataset(data_vars)
 
-        raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
+        raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
+
+    def _key_to_str(self, key):
+
+        if isinstance(key, str):
+            return key
+        if isinstance(key, int):
+            return list(self.data_vars.keys())[key]
+        if isinstance(key, slice):
+            return self._key_to_str(list(range(key.start, key.stop, key.step)))
+        if isinstance(key, Iterable):
+            keys = []
+            for k in key:
+                keys.append(self._key_to_str(k))
+            return keys
+        if hasattr(key, "name"):
+            return key.name
+        raise TypeError(f"indexing with type {type(key)} is not supported")
+
+    def __delitem__(self, key):
+
+        key = self._key_to_str(key)
+        delattr(self, du._to_safe_name(key))
+
+        data_vars = {}
+        for n, da in self.data_vars.items():
+            if n != key:
+                data_vars[n] = da
+
+        # TODO: return ?
+        self = Dataset(data_vars)
 
     # def __getattr__(self, key) -> DataArray:
     #

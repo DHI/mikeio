@@ -190,7 +190,7 @@ def test_subset_with_datetime_is_not_supported():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ds[datetime(2000, 1, 1)]
 
 
