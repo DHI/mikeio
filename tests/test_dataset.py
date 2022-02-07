@@ -69,8 +69,8 @@ def test_index_with_attribute():
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     data_vars = {
-        "Foo": DataArray(data=d, time=time),
-        "Bar": DataArray(data=d, time=time),
+        "Foo": DataArray(data=d, time=time, item="Foo"),
+        "Bar": DataArray(data=d, time=time, item="Bar"),
     }
 
     ds = Dataset(data_vars)
