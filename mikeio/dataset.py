@@ -709,7 +709,8 @@ class Dataset(TimeSeries):
             items = self.items
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
-                geometry = self.geometry.isel(idx, axis=axis)
+                spatial_axis = du._axis_to_spatial_axis(self.dims, axis)
+                geometry = self.geometry.isel(idx, axis=spatial_axis)
             zn = None  # TODO
 
         res = []

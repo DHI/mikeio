@@ -342,12 +342,6 @@ class DataArray(TimeSeries):
                 dims.append("x")
         return tuple(dims)
 
-        #     return ("time", "x")
-        # elif ndim == 3:
-        #     return ("time", "y", "x")
-        # elif ndim == 4:
-        #     return ("time", "z", "y", "x")
-
     @staticmethod
     def _parse_item(item):
         if item is None:
@@ -369,8 +363,8 @@ class DataArray(TimeSeries):
             warnings.warn("Geometry is required for ndim >=1")
 
         axis = 1 if "time" in dims else 0
-        dims_no_time = tuple([d for d in dims if d != "time"])
-        shape_no_time = shape[1:] if ("time" in dims) else shape
+        # dims_no_time = tuple([d for d in dims if d != "time"])
+        # shape_no_time = shape[1:] if ("time" in dims) else shape
 
         if isinstance(geometry, GeometryFMPointSpectrum):
             pass
@@ -803,8 +797,8 @@ class DataArray(TimeSeries):
             item = self.item
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
-                # TODO: should we subtract the time axis first?
-                geometry = self.geometry.isel(idx, axis=axis)
+                spatial_axis = du._axis_to_spatial_axis(self.dims, axis)
+                geometry = self.geometry.isel(idx, axis=spatial_axis)
             zn = None  # TODO
 
         x = np.take(self.values, idx, axis=axis)

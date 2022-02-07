@@ -92,6 +92,11 @@ def _parse_axis(data_shape, dims, axis):
     return axis
 
 
+def _axis_to_spatial_axis(dims, axis):
+    # subtract 1 if has time axis; assumes axis is integer
+    return axis - int(dims[0] == "time")
+
+
 def _to_safe_name(name):
     return "".join([x if x.isalnum() else "_" for x in name])
 
