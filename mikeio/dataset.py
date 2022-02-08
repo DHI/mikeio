@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from mikeio.eum import EUMType, ItemInfo
+import collections.abc
 
 import mikeio.data_utils as du
 from .base import TimeSeries
@@ -58,7 +59,7 @@ class _DatasetPlotter:
         return ax
 
 
-class Dataset(TimeSeries):
+class Dataset(TimeSeries, collections.abc.MutableMapping):
     # TODO: Dataset(Mapping)
 
     deletevalue = 1.0e-35
@@ -293,6 +294,8 @@ class Dataset(TimeSeries):
         return list(self.data_vars.values())[0]._zn
 
     def __repr__(self):
+        if len(self) == 0:
+            return "Empty <mikeio.Dataset>"
 
         out = ["<mikeio.Dataset>"]
         dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
@@ -312,6 +315,13 @@ class Dataset(TimeSeries):
 
     def __len__(self):
         return len(self.data_vars)
+
+    def __iter__(self):
+        yield from self.data_vars.values()
+
+    def keys(self):
+        # should not be necessary
+        return self.data_vars.keys()
 
     def __setitem__(self, key, value):
 
@@ -337,9 +347,10 @@ class Dataset(TimeSeries):
             # TODO: do we still want this behaviour?
             # slicing = slicing in time???
             # better to use sel or isel for this
-            s = self.time.slice_indexer(key.start, key.stop)
-            time_steps = list(range(s.start, s.stop))
-            return self.isel(time_steps, axis=0)
+            if self._slice_is_time_slice(key):
+                s = self.time.slice_indexer(key.start, key.stop)
+                time_steps = list(range(s.start, s.stop))
+                return self.isel(time_steps, axis=0)
 
         key = self._key_to_str(key)
         if isinstance(key, str):
@@ -353,6 +364,29 @@ class Dataset(TimeSeries):
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
+    def _slice_is_time_slice(self, s):
+        if (s.start is None) and (s.stop is None):
+            return False
+        if s.start is not None:
+            if isinstance(s.start, int):
+                return False
+            if (
+                isinstance(s.start, str)
+                and (len(s.start) > 0)
+                and (not s.start[0].isnumeric())
+            ):
+                return False
+        if s.stop is not None:
+            if isinstance(s.stop, int):
+                return False
+            if (
+                isinstance(s.stop, str)
+                and (len(s.stop) > 0)
+                and (not s.stop[0].isnumeric())
+            ):
+                return False
+        return True
+
     def _key_to_str(self, key):
 
         if isinstance(key, str):
@@ -360,7 +394,8 @@ class Dataset(TimeSeries):
         if isinstance(key, int):
             return list(self.data_vars.keys())[key]
         if isinstance(key, slice):
-            return self._key_to_str(list(range(key.start, key.stop, key.step)))
+            s = key.indices(len(self))
+            return self._key_to_str(list(range(*s)))
         if isinstance(key, Iterable):
             keys = []
             for k in key:
@@ -373,15 +408,8 @@ class Dataset(TimeSeries):
     def __delitem__(self, key):
 
         key = self._key_to_str(key)
+        self.data_vars.__delitem__(key)
         delattr(self, du._to_safe_name(key))
-
-        data_vars = {}
-        for n, da in self.data_vars.items():
-            if n != key:
-                data_vars[n] = da
-
-        # TODO: return ?
-        self = Dataset(data_vars)
 
     # def __getattr__(self, key) -> DataArray:
     #
@@ -547,14 +575,14 @@ class Dataset(TimeSeries):
         """
 
         if isinstance(datasets[0], Iterable):
-            if isinstance(datasets[0][0], (Dataset, DataArray)):
+            if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
                 datasets = datasets[0]
 
-        if isinstance(datasets[0], DataArray):
-            ds = datasets[0]._to_dataset()
-            print("to dataset")
-        else:
-            ds = datasets[0].copy()
+        # if isinstance(datasets[0], DataArray):
+        #     ds = datasets[0]._to_dataset()
+        #     print("to dataset")
+        # else:
+        ds = datasets[0].copy()
 
         for dsj in datasets[1:]:
             ds = ds._combine(dsj, copy=False)
