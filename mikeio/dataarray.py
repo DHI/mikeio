@@ -521,9 +521,10 @@ class DataArray(TimeSeries):
             # it can be expensive to check equality of zn
             # so we test only size, first and last element
             if (
-                len(self._zn) != len(other._zn)
-                or self._zn[0] != other._zn[0]
-                or self._zn[-1] != other._zn[-1]
+                other._zn is None
+                or self._zn.shape != other._zn.shape
+                or self._zn.ravel()[0] != other._zn.ravel()[0]
+                or self._zn.ravel()[-1] != other._zn.ravel()[-1]
             ):
                 problems.append("zn must be the same")
 
