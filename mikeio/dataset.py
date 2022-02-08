@@ -1,4 +1,5 @@
 from typing import Iterable, Sequence, Union, Mapping, Optional
+import warnings
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -228,34 +229,55 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def _DataArrays_as_mapping(data):
         """Create dict of DataArrays if necessary"""
         if isinstance(data, Mapping):
-            # TODO: What if keys and item names does not match?
-            _ = Dataset._unique_item_names(data.values(), data.keys())
+            if isinstance(data, Dataset):
+                return data
+            for da in data.values():
+                assert isinstance(da, DataArray), "Please provide List/Mapping of DataArrays"
+            Dataset._validate_item_names_and_keys(data)
+            _ = Dataset._unique_item_names(data.values())
             return data
-        else:
-            assert isinstance(data[0], DataArray)
-            item_names = Dataset._unique_item_names(data)
+        
+        if isinstance(data, DataArray):
+            data = [data]
+        if not isinstance(data, Iterable):
+            raise TypeError("Please provide List/Mapping of DataArrays")
+        for da in data:
+            assert isinstance(da, DataArray), "Please provide List/Mapping of DataArrays"
+        item_names = Dataset._unique_item_names(data)
 
-            data_map = {}
-            for n, da in zip(item_names, data):
-                data_map[n] = da
-            return data_map
+        data_map = {}
+        for n, da in zip(item_names, data):
+            data_map[n] = da
+        return data_map
 
     @staticmethod
-    def _unique_item_names(das: Sequence[DataArray], new_names=None):
+    def _validate_item_names_and_keys(data_map: Mapping[str, DataArray]):
+        for key, da in data_map.items():
+            if da.name == "NoName":
+                da.name = key
+            elif da.name != key:
+                warnings.warn(
+                    f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. This may lead to confusion!"
+                )
+
+    @staticmethod
+    def _unique_item_names(das: Sequence[DataArray]):
         item_names = [da.name for da in das]
-        if new_names is not None:
-            for j in range(len(item_names)):
-                if item_names[j] == "NoName":
-                    item_names[j] = new_names[j]
-                    das[j].name = new_names[j]
         if len(set(item_names)) != len(item_names):
-            raise ValueError(f"Item names must be unique! ({item_names})")
+            raise ValueError(
+                f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
+            )
             # TODO: make a list of unique items names
         return item_names
 
-    def _init_from_DataArrays(self, data):
+    def _init_from_DataArrays(self, data, validate=True):
         # assume that data is iterable of DataArrays
         self.data_vars = self._DataArrays_as_mapping(data)
+
+        if (len(self) > 1) and validate:
+            first = self[0]
+            for da in self[1:]:
+                first._is_compatible(da)
 
         self.__itemattr = []
         for key, value in self.data_vars.items():
@@ -280,7 +302,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             dataarrays = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )
-            return self._init_from_DataArrays(dataarrays)
+            return self._init_from_DataArrays(dataarrays, validate=False)
 
     @property
     def time(self):
@@ -341,9 +363,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             except:
                 raise ValueError("Use a DataArray")
 
-        # if len(self) > 0:
-        #     # check for equivalence when inserting new item
-        #     self[0]._is_compatible(value)
+        if len(self) > 0:
+            # check for equivalence when inserting new item
+            self[0]._is_compatible(value)
 
         if isinstance(key, int):
             key_str = value.name
