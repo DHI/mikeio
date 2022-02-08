@@ -229,28 +229,37 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """Create dict of DataArrays if necessary"""
         if isinstance(data, Mapping):
             # TODO: What if keys and item names does not match?
+            _ = Dataset._unique_item_names(data.values(), data.keys())
             return data
         else:
             assert isinstance(data[0], DataArray)
-
-            item_names = []
-            for da in data:
-                item_names.append(du._to_safe_name(da.name))
-            if len(set(item_names)) != len(item_names):
-                raise ValueError(f"Item names must be unique! ({item_names})")
-            # TODO: make a list of unique items names
+            item_names = Dataset._unique_item_names(data)
 
             data_map = {}
             for n, da in zip(item_names, data):
                 data_map[n] = da
             return data_map
 
+    @staticmethod
+    def _unique_item_names(das: Sequence[DataArray], new_names=None):
+        item_names = [da.name for da in das]
+        if new_names is not None:
+            for j in range(len(item_names)):
+                if item_names[j] == "NoName":
+                    item_names[j] = new_names[j]
+                    das[j].name = new_names[j]
+        if len(set(item_names)) != len(item_names):
+            raise ValueError(f"Item names must be unique! ({item_names})")
+            # TODO: make a list of unique items names
+        return item_names
+
     def _init_from_DataArrays(self, data):
         # assume that data is iterable of DataArrays
         self.data_vars = self._DataArrays_as_mapping(data)
 
+        self.__itemattr = []
         for key, value in self.data_vars.items():
-            setattr(self, du._to_safe_name(key), value)
+            self._set_name_attr(key, value)
 
         if len(self.items) > 1:
             self.plot = _DatasetPlotter(self)
@@ -332,14 +341,43 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             except:
                 raise ValueError("Use a DataArray")
 
-        if isinstance(key, int):
-            raise NotImplementedError()
-            # key_str = value.name
-            # new_keys = list(self.data_vars.keys())
-            # new_keys.insert(key, key_str)
+        # if len(self) > 0:
+        #     # check for equivalence when inserting new item
+        #     self[0]._is_compatible(value)
 
-        self.data_vars[key] = value
-        setattr(self, du._to_safe_name(key), value)
+        if isinstance(key, int):
+            key_str = value.name
+            new_keys = list(self.data_vars.keys())
+            new_keys.insert(key, key_str)
+
+            data_vars = {}
+            for k in new_keys:
+                if k in self.data_vars.keys():
+                    data_vars[k] = self.data_vars[k]
+                else:
+                    data_vars[k] = value
+            self.data_vars = data_vars
+            self._set_name_attr(key, value)
+        else:
+            self.data_vars[key] = value
+            self._set_name_attr(key, value)
+
+    def _set_name_attr(self, name: str, value: DataArray):
+        name = du._to_safe_name(name)
+        item_names = [du._to_safe_name(n) for n in self.keys()]
+        if (name not in item_names) and hasattr(self, name):
+            # oh-no the item_name matches the name of another attr
+            pass
+        else:
+            if name not in self.__itemattr:
+                self.__itemattr.append(name)  # keep track of what we insert
+            setattr(self, name, value)
+
+    def _del_name_attr(self, name: str):
+        name = du._to_safe_name(name)
+        if name in self.__itemattr:
+            self.__itemattr.remove(name)
+            delattr(self, name)
 
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
 
@@ -348,6 +386,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             # slicing = slicing in time???
             # better to use sel or isel for this
             if self._slice_is_time_slice(key):
+                # TODO warnings.warn()
                 s = self.time.slice_indexer(key.start, key.stop)
                 time_steps = list(range(s.start, s.stop))
                 return self.isel(time_steps, axis=0)
@@ -409,11 +448,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         key = self._key_to_str(key)
         self.data_vars.__delitem__(key)
-        delattr(self, du._to_safe_name(key))
-
-    # def __getattr__(self, key) -> DataArray:
-    #
-    #    return self.data_vars[key]
+        self._del_name_attr(key)
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -524,10 +559,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         else:
             ds = self.copy()
 
-        for key, value in mapper.items():
-            da = ds.data_vars.pop(key)
-            da.name = value
-            ds.data_vars[value] = da
+        for old_name, new_name in mapper.items():
+            da = ds.data_vars.pop(old_name)
+            da.name = new_name
+            ds.data_vars[new_name] = da
+            self._del_name_attr(old_name)
+            self._set_name_attr(new_name, da)
 
         return ds
 
@@ -594,6 +631,10 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         except ValueError:
             ds = self._append_items(other, copy=copy)
         return ds
+
+    def append(self, other, inplace=False):
+        # TODO: require other da
+        return self.append_items(self, other, inplace)
 
     def append_items(self, other, inplace=False):
         """Append items from other Dataset to this Dataset"""
