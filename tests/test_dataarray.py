@@ -96,7 +96,7 @@ def test_dataarray_init():
 
     da = DataArray(data=data, time=time)
     assert isinstance(da, DataArray)
-    assert da.name == "Item"  # default name
+    assert da.name == "NoName"  # default name
     assert da.item.type == EUMType.Undefined
 
     da = DataArray(data=data, time=time, item=item)

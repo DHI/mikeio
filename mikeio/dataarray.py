@@ -345,7 +345,7 @@ class DataArray(TimeSeries):
     @staticmethod
     def _parse_item(item):
         if item is None:
-            return ItemInfo("Item")
+            return ItemInfo("NoName")
 
         if not isinstance(item, ItemInfo):
             try:
@@ -501,8 +501,7 @@ class DataArray(TimeSeries):
             dims=dims,
         )
 
-    # TODO: other name
-    def _is_equivalent(self, other, raise_error=False):
+    def _is_compatible(self, other, raise_error=False):
         """check if other DataArray has equivalent dimensions, time and geometry"""
         problems = []
         if not isinstance(other, DataArray):
@@ -530,6 +529,9 @@ class DataArray(TimeSeries):
 
         if self.dims != other.dims:
             problems.append("Dimension names (dims) must be the same")
+
+        if raise_error:
+            raise ValueError("".join(problems))
 
         return len(problems) == 0
 
