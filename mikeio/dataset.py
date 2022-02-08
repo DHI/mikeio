@@ -232,17 +232,21 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             if isinstance(data, Dataset):
                 return data
             for da in data.values():
-                assert isinstance(da, DataArray), "Please provide List/Mapping of DataArrays"
+                assert isinstance(
+                    da, DataArray
+                ), "Please provide List/Mapping of DataArrays"
             Dataset._validate_item_names_and_keys(data)
             _ = Dataset._unique_item_names(data.values())
             return data
-        
+
         if isinstance(data, DataArray):
             data = [data]
         if not isinstance(data, Iterable):
             raise TypeError("Please provide List/Mapping of DataArrays")
         for da in data:
-            assert isinstance(da, DataArray), "Please provide List/Mapping of DataArrays"
+            assert isinstance(
+                da, DataArray
+            ), "Please provide List/Mapping of DataArrays"
         item_names = Dataset._unique_item_names(data)
 
         data_map = {}
