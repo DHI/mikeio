@@ -77,7 +77,7 @@ def _write_dfs2_data(dfs, ds):
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
 
-            if "t" not in ds.dims:
+            if "time" not in ds.dims:
                 d = ds[item].values
             else:
                 d = ds[item].values[i]
@@ -119,7 +119,7 @@ class Dfs2(_Dfs123):
                 shape=(self._nx, self._ny),
                 x0=self._x0,
                 y0=self._y0,
-                projection_string=self._projstr,
+                projection=self._projstr,
                 origin=[self._longitude, self._latitude],
                 orientation=self._orientation,
             )
