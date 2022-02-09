@@ -40,7 +40,7 @@ def _write_dfs2_header(filename, ds, title=""):
         time_axis = factory.CreateTemporalNonEqCalendarAxis(timestep_unit, ds.time[0])
     builder.SetTemporalAxis(time_axis)
 
-    for item in ds.items:
+    for item in ds.iteminfos:
         builder.AddCreateDynamicItem(
             item.name,
             eumQuantity.Create(item.type, item.unit),
@@ -133,7 +133,7 @@ class Dfs2(_Dfs123):
             if self._n_items is not None:
                 if self._n_items < 10:
                     out.append("Items:")
-                    for i, item in enumerate(self.items):
+                    for i, item in enumerate(self.iteminfos):
                         out.append(f"  {i}:  {item}")
                 else:
                     out.append(f"Number of items: {self._n_items}")

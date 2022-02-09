@@ -68,7 +68,7 @@ def test_simple_write(tmp_path):
     ds = newdfs.read()
 
     assert len(ds) == 1
-    assert ds.items[0].type == EUMType.Undefined
+    assert ds.iteminfos[0].type == EUMType.Undefined
 
 
 def test_write_inconsistent_shape(tmpdir):
@@ -169,7 +169,7 @@ def test_read_numbered_access(dfs2_random_2items):
 
     assert np.isnan(res.data[0][0, 0, 0])
     assert res.time is not None
-    assert res.items[0].name == "Untitled"
+    assert res.iteminfos[0].name == "Untitled"
 
 
 def test_properties_pt_spectrum(dfs2_pt_spectrum):
@@ -217,7 +217,7 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
     ds2 = dfs2.read()
 
     assert len(ds2) == 1
-    assert ds.items[0].name == "Untitled"
+    assert ds.iteminfos[0].name == "Untitled"
     assert dfs.start_time == dfs2.start_time
     assert dfs.end_time == dfs2.end_time
     assert dfs.projection_string == dfs2.projection_string
@@ -365,7 +365,7 @@ def test_write_accumulated_datatype(tmpdir):
     )
 
     newdfs = Dfs2(filename)
-    assert newdfs.items[0].data_value_type == 3
+    assert newdfs.iteminfos[0].data_value_type == 3
 
 
 def test_write_default_datatype(tmpdir):
@@ -387,7 +387,7 @@ def test_write_default_datatype(tmpdir):
     )
 
     newdfs = Dfs2(filename)
-    assert newdfs.items[0].data_value_type == 0
+    assert newdfs.iteminfos[0].data_value_type == 0
 
 
 def test_write_NonEqCalendarAxis(tmpdir):

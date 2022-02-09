@@ -149,9 +149,9 @@ def test_read_names_access():
     time = res.time
     assert item.shape == (100, 3)  # time, x
     assert len(time) == 100
-    assert res.items[0].name == "testing water level"
-    assert res.items[0].type == EUMType.Water_Level
-    assert res.items[0].unit == EUMUnit.meter
+    assert res.iteminfos[0].name == "testing water level"
+    assert res.iteminfos[0].type == EUMType.Water_Level
+    assert res.iteminfos[0].unit == EUMUnit.meter
 
 
 def test_read_start_end_time():

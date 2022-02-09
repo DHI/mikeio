@@ -960,13 +960,15 @@ class DataArray(TimeSeries):
         """Number of time steps"""
         return len(self.time)
 
+    # TODO: remove this
     @property
     def n_items(self) -> int:
         """Number of items"""
         return 1
 
+    # TODO: remove this
     @property
-    def items(self) -> Sequence[ItemInfo]:  # Sequence with a single element!
+    def iteminfos(self) -> Sequence[ItemInfo]:  # Sequence with a single element!
         return [self.item]
 
     @property

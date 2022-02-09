@@ -33,7 +33,7 @@ class TimeSeries(ABC):
 
     @property
     @abstractmethod
-    def items(self) -> Sequence[ItemInfo]:
+    def iteminfos(self) -> Sequence[ItemInfo]:
         pass
 
 

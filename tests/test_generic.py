@@ -356,17 +356,17 @@ def test_extract_items(tmpdir):
     extract(infile, outfile, items="Temperature")
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 1
-    assert extracted.items[0].name == "Temperature"
+    assert extracted.iteminfos[0].name == "Temperature"
 
     extract(infile, outfile, items=[1])
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 1
-    assert extracted.items[0].name == "Salinity"
+    assert extracted.iteminfos[0].name == "Salinity"
 
     extract(infile, outfile, items=range(0, 2))  # [0,1]
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 2
-    assert extracted.items[0].name == "Temperature"
+    assert extracted.iteminfos[0].name == "Temperature"
 
     extract(infile, outfile, items=["Salinity", 0])
     extracted = mikeio.read(outfile)
@@ -394,7 +394,7 @@ def test_time_average(tmpdir):
 
     averaged = mikeio.read(outfilename)
 
-    assert all([a == b for a, b in zip(org.items, averaged.items)])
+    assert all([a == b for a, b in zip(org.iteminfos, averaged.iteminfos)])
     assert org.time[0] == averaged.time[0]
     assert org.shape[1] == averaged.shape[1]
     assert averaged.shape[0] == 1
@@ -423,7 +423,7 @@ def test_time_average_deletevalues(tmpdir):
     org = mikeio.read(infilename)
     averaged = mikeio.read(outfilename)
 
-    assert all([a == b for a, b in zip(org.items, averaged.items)])
+    assert all([a == b for a, b in zip(org.iteminfos, averaged.iteminfos)])
     assert org.time[0] == averaged.time[0]
     assert org.shape[1] == averaged.shape[1]
     nan1 = np.isnan(org[0].to_numpy())

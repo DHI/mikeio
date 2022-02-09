@@ -74,7 +74,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
         interp_data_vars = {}
 
-        for key, da in ds.data_vars.items():
+        for key, da in ds.items():
             nt, ne = da.shape
             idatitem = np.empty(shape=(nt, ni))
             for step in range(nt):

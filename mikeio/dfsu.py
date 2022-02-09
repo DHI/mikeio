@@ -75,10 +75,10 @@ class _UnstructuredFile:
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         ):
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
-        if self.items is not None:
+        if self.iteminfos is not None:
             if self.n_items < 10:
                 out.append("Items:")
-                for i, item in enumerate(self.items):
+                for i, item in enumerate(self.iteminfos):
                     out.append(f"  {i}:  {item}")
             else:
                 out.append(f"Number of items: {self.n_items}")
@@ -593,10 +593,10 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
     @property
     def n_items(self):
         """Number of items"""
-        return len(self.items)
+        return len(self.iteminfos)
 
     @property
-    def items(self):
+    def iteminfos(self):
         """List of items"""
         return self._items
 
@@ -910,7 +910,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         filename = str(filename)
 
         if isinstance(data, Dataset):
-            items = data.items
+            items = data.iteminfos
             start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 if not data.is_equidistant:
@@ -1242,7 +1242,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data=interpolated_dataset,
             start_time=dataset.time[0].to_pydatetime(),
             dt=dataset.timestep,
-            items=self.items,
+            items=self.iteminfos,
             dx=grid.dx,
             dy=grid.dy,
             coordinate=[
