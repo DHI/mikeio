@@ -61,7 +61,6 @@ class _DatasetPlotter:
 
 
 class Dataset(TimeSeries, collections.abc.MutableMapping):
-    # TODO: Dataset(Mapping)
 
     deletevalue = 1.0e-35
 
@@ -232,9 +231,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             if isinstance(data, Dataset):
                 return data
             for da in data.values():
-                assert isinstance(
-                    da, DataArray
-                ), "Please provide List/Mapping of DataArrays"
+                if not isinstance(da, DataArray):
+                    raise TypeError("Please provide List/Mapping of DataArrays")
             Dataset._validate_item_names_and_keys(data)
             _ = Dataset._unique_item_names(data.values())
             return data
@@ -244,9 +242,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if not isinstance(data, Iterable):
             raise TypeError("Please provide List/Mapping of DataArrays")
         for da in data:
-            assert isinstance(
-                da, DataArray
-            ), "Please provide List/Mapping of DataArrays"
+            if not isinstance(da, DataArray):
+                raise TypeError("Please provide List/Mapping of DataArrays")
         item_names = Dataset._unique_item_names(data)
 
         data_map = {}
@@ -275,7 +272,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return item_names
 
     def _init_from_DataArrays(self, data, validate=True):
-        # assume that data is iterable of DataArrays
+        """Initialize Dataset object with Iterable of DataArrays"""
         self.data_vars = self._DataArrays_as_mapping(data)
 
         if (len(self) > 1) and validate:
@@ -283,12 +280,39 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             for da in self[1:]:
                 first._is_compatible(da)
 
+        self._check_all_different_ids(self.data_vars.values())
+
         self.__itemattr = []
         for key, value in self.data_vars.items():
             self._set_name_attr(key, value)
 
         if len(self.items) > 1:
             self.plot = _DatasetPlotter(self)
+
+    @staticmethod
+    def _check_all_different_ids(das):
+        """Are all the DataArrays different objects or are some referring to the same"""
+        for j, da1 in enumerate(das):
+            for k, da2 in enumerate(das):
+                if j != k:
+                    Dataset._id_of_DataArrays_equal(da1, da2)
+
+    @staticmethod
+    def _id_of_DataArrays_equal(da1, da2):
+        """Check if two DataArrays are actually the same object"""
+        if id(da1) == id(da2):
+            raise ValueError(
+                f"Cannot add the same object ({da1.name}) twice! Create a copy first."
+            )
+        if id(da1.values) == id(da2.values):
+            raise ValueError(
+                f"DataArrays {da1.name} and {da2.name} refer to the same data! Create a copy first."
+            )
+
+    def _check_already_present(self, new_da):
+        """Is the DataArray already present in the Dataset?"""
+        for da in self.data_vars.values():
+            self._id_of_DataArrays_equal(da, new_da)
 
     def __init__(
         self,
@@ -301,7 +325,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     ):
         try:
             return self._init_from_DataArrays(data)
-        except:
+        except TypeError:
             # if not Iterable[DataArray] then let us create it...
             dataarrays = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
@@ -368,7 +392,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 raise ValueError("Use a DataArray")
 
         if len(self) > 0:
-            # check for equivalence when inserting new item
+            self._check_already_present(value)
             self[0]._is_compatible(value)
 
         if isinstance(key, int):
@@ -734,11 +758,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         newdata = self.create_empty_data(
             n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
         )
+        idx1 = np.where(~df12["idx1"].isna())
+        idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            idx1 = np.where(~df12["idx1"].isna())
-            newdata[j][idx1, :] = ds.data[j]
             # if there is an overlap "other" data will be used!
-            idx2 = np.where(~df12["idx2"].isna())
+            newdata[j][idx1, :] = ds.data[j]
             newdata[j][idx2, :] = other.data[j]
 
         return Dataset(newdata, newtime, ds.items)
@@ -1283,7 +1307,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         dati = np.empty(shape=(n_timesteps, *shape))
         dati[:] = np.nan
         for _ in range(n_items):
-            data.append(dati)
+            data.append(dati.copy())
         return data
 
     @property

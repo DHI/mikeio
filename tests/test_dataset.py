@@ -68,11 +68,25 @@ def test_index_with_attribute():
     nt = 10000
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
-    data_vars = {
-        "Foo": DataArray(data=d, time=time, item="Foo"),
-        "Bar": DataArray(data=d, time=time, item="Bar"),
-    }
 
+    # We cannot create a Dataset with multiple references to the same DataArray
+    da = DataArray(data=d, time=time)
+    data_vars = {"Foo": da, "Bar": da}
+    with pytest.raises(ValueError):
+        Dataset(data_vars)
+
+    # We cannot create a Dataset with multiple references to the same data
+    da1 = DataArray(data=d, time=time)
+    da2 = DataArray(data=d, time=time)
+    data_vars = {"Foo": da1, "Bar": da2}
+    with pytest.raises(ValueError):
+        Dataset(data_vars)
+
+    # Create copy of data
+    data_vars = {
+        "Foo": DataArray(data=d, time=time),
+        "Bar": DataArray(data=d.copy(), time=time),
+    }
     ds = Dataset(data_vars)
     assert ds["Foo"].name == "Foo"
     assert ds.Bar.name == "Bar"
