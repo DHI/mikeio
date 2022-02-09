@@ -85,7 +85,6 @@ def _write_dfs2_data(dfs, ds):
             d[np.isnan(d)] = deletevalue
 
             d = d.reshape(ds.shape[-2:])  # spatial axes
-            d = np.flipud(d)  # NumPy vs MIKE y axis convention
             darray = d.flatten()
 
             if not ds.is_equidistant:

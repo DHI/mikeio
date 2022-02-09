@@ -81,7 +81,6 @@ class _Dfs123(TimeSeries):
 
                 if self._ndim == 2:
                     d = d.reshape(self._ny, self._nx)
-                    d = np.flipud(d)
 
                 data_list[item][i] = d
 
@@ -219,7 +218,6 @@ class _Dfs123(TimeSeries):
 
                 if self._ndim == 2:
                     d = d.reshape(self.shape[1:])
-                    d = np.flipud(d)
                     darray = d.reshape(d.size, 1)[:, 0]
 
                 if self._is_equidistant:

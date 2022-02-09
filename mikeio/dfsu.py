@@ -1235,8 +1235,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             shape=(grid.ny, grid.nx),
         )
 
-        interpolated_dataset = interpolated_dataset.flipud()
-
         # Write interpolated data to 'filename'
         dfs2 = Dfs2()
         dfs2.write(
