@@ -130,7 +130,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         x, y = self._get_x_y()
         values = self._get_first_step_values()
 
-        pos = ax.contour(x, y, np.flipud(values), **kwargs)
+        pos = ax.contour(x, y, values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
         self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
@@ -142,7 +142,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         x, y = self._get_x_y()
         values = self._get_first_step_values()
 
-        pos = ax.contourf(x, y, np.flipud(values), **kwargs)
+        pos = ax.contourf(x, y, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
         self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
         return ax
@@ -153,7 +153,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         xn, yn = self._get_xn_yn()
         values = self._get_first_step_values()
 
-        pos = ax.pcolormesh(xn, yn, np.flipud(values), **kwargs)
+        pos = ax.pcolormesh(xn, yn, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
         self._set_aspect_and_labels(ax, self.da.geometry.is_geo, yn)
         return ax

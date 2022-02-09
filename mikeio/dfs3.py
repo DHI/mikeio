@@ -291,7 +291,7 @@ class Dfs3(_Dfs123):
 
                     # DO a direct copy instead of eleement by elment
                     d = d.reshape(zNum, yNum, xNum)  # .swapaxes(0, 2).swapaxes(0, 1)
-                    d = np.flipud(d)
+                    d = np.flipud(d)  # TODO
                     d[d == deleteValue] = np.nan
                     if layers is None:
                         data_list[item][it_number, :, :, :] = d
@@ -436,7 +436,7 @@ class Dfs3(_Dfs123):
             for item in range(n_items):
                 d = data[item][i]
                 d[np.isnan(d)] = deletevalue
-                d = np.flipud(d)
+                d = np.flipud(d)  # TODO
                 # darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
                 darray = d.reshape(d.size, 1)[:, 0].astype(np.float32)
 

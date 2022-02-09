@@ -32,6 +32,7 @@ from .dfsu import Mesh
 from .pfs import Pfs
 from .xyz import read_xyz
 from .dataset import Dataset, DataArray
+from .spatial import Grid1D, Grid2D
 
 
 def read(filename, items=None, time_steps=None):

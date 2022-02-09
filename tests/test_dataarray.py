@@ -516,14 +516,15 @@ def test_da_quantile_axis0(da2):
 
 def test_write_dfs2(tmp_path):
 
+    nt = 10
     g = Grid2D(
         x=np.linspace(10, 20, 30),
         y=np.linspace(10, 20, 20),
-        projection_string="LONG/LAT",
+        projection="LONG/LAT",
     )
     da = DataArray(
-        np.random.random(size=(1, g.ny, g.nx)),
-        time=pd.date_range(start="2000", periods=1),
+        np.random.random(size=(nt, g.ny, g.nx)),
+        time=pd.date_range(start="2000", freq="H", periods=nt),
         item=ItemInfo("Random"),
         geometry=g,
     )
@@ -538,7 +539,7 @@ def test_write_dfs2_single_time_no_time_dim(tmp_path):
     g = Grid2D(
         x=np.linspace(10, 20, 30),
         y=np.linspace(10, 20, 20),
-        projection_string="LONG/LAT",
+        projection="LONG/LAT",
     )
     da = DataArray(
         np.random.random(size=(g.ny, g.nx)),  # No singleton time

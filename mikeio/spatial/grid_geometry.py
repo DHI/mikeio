@@ -8,13 +8,13 @@ from ..eum import EUMType, EUMUnit
 class GeometryGrid(_Geometry):
     def __init__(
         self,
-        projection_string=None,
+        projection=None,
         origin=None,
         orientation=None,
     ) -> None:
         super().__init__()
 
-        self._projstr = projection_string
+        self._projstr = projection  # TODO Validation
         self._origin = origin
         self._orientation = orientation
 
@@ -25,14 +25,12 @@ class Grid1D(GeometryGrid):
         x0=None,
         dx=None,
         n=None,
-        projection_string="Local coordinates",
+        projection="NON-UTM",
         origin=(0, 0),
         orientation=0.0,
     ):
         """Create equidistant 1D spatial geometry"""
-        super().__init__(
-            projection_string=projection_string, origin=origin, orientation=orientation
-        )
+        super().__init__(projection=projection, origin=origin, orientation=orientation)
 
         if n is None:
             raise ValueError("n must be provided")
@@ -183,7 +181,7 @@ class Grid2D(GeometryGrid):
         shape=None,
         x0=None,
         y0=None,
-        projection_string=None,
+        projection=None,
         origin=None,
         orientation=0.0,
     ):
@@ -223,9 +221,7 @@ class Grid2D(GeometryGrid):
         >>> g = Grid2D(x, y)
 
         """
-        super().__init__(
-            projection_string=projection_string, origin=origin, orientation=orientation
-        )
+        super().__init__(projection=projection, origin=origin, orientation=orientation)
 
         self._x = None
         self._x0 = None
@@ -244,6 +240,11 @@ class Grid2D(GeometryGrid):
         if dy is not None:
             if not np.isscalar(dx):
                 dx = dx[0]
+
+            if dx <= 0.0:
+                raise ValueError("dx must be a positive number")
+            if dy <= 0.0:
+                raise ValueError("dy must be a positive number")
             dxdy = (dx, dy)
 
         if (x is not None) and (len(x) == 4):
@@ -341,6 +342,12 @@ class Grid2D(GeometryGrid):
         self._y = self._create_axis(self._y0, dy, ny)
 
     def _create_from_x_and_y(self, x, y):
+
+        if x[0] > x[-1]:
+            raise ValueError("x values must be increasing")
+
+        if y[0] > y[-1]:
+            raise ValueError("y values must be increasing")
 
         self._x0 = x[0]
         self._nx = len(x)
@@ -448,14 +455,14 @@ class Grid2D(GeometryGrid):
                 x0=self.x0,
                 dx=self.dx,
                 n=self.nx,
-                projection_string=self.projection_string,
+                projection=self.projection,
             )
         else:
             return Grid1D(
                 x0=self.y0,
                 dx=self.dy,
                 n=self.ny,
-                projection_string=self.projection_string,
+                projection=self.projection,
             )
 
     def _to_element_table(self, index_base=0):

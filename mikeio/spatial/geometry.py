@@ -10,28 +10,33 @@ class _Geometry:
         self._projstr = None
 
     @property
-    def projection_string(self):
+    def projection_string(self) -> str:
         """The projection string"""
         return self._projstr
 
     @property
-    def is_geo(self):
+    def projection(self):
+        """The projection"""
+        return self._projstr
+
+    @property
+    def is_geo(self) -> bool:
         """Are coordinates geographical (LONG/LAT)?"""
         return self._projstr == "LONG/LAT"
 
     @property
-    def is_local_coordinates(self):
+    def is_local_coordinates(self) -> bool:
         """Are coordinates relative (NON-UTM)?"""
         return self._projstr == "NON-UTM"
 
-    def contains(self, coords):
+    def contains(self, coords) -> bool:
         raise NotImplementedError
 
     def nearest_points(self, coords):
         raise NotImplementedError
 
     @property
-    def ndim(self):
+    def ndim(self) -> int:
         raise NotImplementedError
 
     @property

@@ -77,7 +77,7 @@ def _write_dfs2_data(dfs, ds):
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
 
-            if "t" not in ds.dims:
+            if "time" not in ds.dims:
                 d = ds[item].values
             else:
                 d = ds[item].values[i]
@@ -85,7 +85,6 @@ def _write_dfs2_data(dfs, ds):
             d[np.isnan(d)] = deletevalue
 
             d = d.reshape(ds.shape[-2:])  # spatial axes
-            d = np.flipud(d)  # NumPy vs MIKE y axis convention
             darray = d.flatten()
 
             if not ds.is_equidistant:
@@ -119,7 +118,7 @@ class Dfs2(_Dfs123):
                 shape=(self._nx, self._ny),
                 x0=self._x0,
                 y0=self._y0,
-                projection_string=self._projstr,
+                projection=self._projstr,
                 origin=[self._longitude, self._latitude],
                 orientation=self._orientation,
             )

@@ -1,9 +1,10 @@
 import os
+from pathlib import Path
 
 import numpy as np
 import pytest
-from mikeio.dfsu import Mesh
-from mikeio.spatial import Grid2D
+from mikeio import Mesh
+from mikeio import Grid2D
 
 
 def test_x_y():
@@ -35,6 +36,31 @@ def test_x_y():
 
     text = repr(g)
     assert "<mikeio.Grid2D>" in text
+
+
+def test_dx_dy_is_positive():
+
+    with pytest.raises(ValueError) as excinfo:
+        Grid2D(shape=(2, 4), dx=-1.0, dy=1.0)
+
+    assert "positive" in str(excinfo.value).lower()
+
+    with pytest.raises(ValueError) as excinfo:
+        Grid2D(shape=(2, 4), dx=1.0, dy=0.0)
+
+    assert "positive" in str(excinfo.value).lower()
+
+
+def test_x_y_is_increasing():
+    with pytest.raises(ValueError) as excinfo:
+        Grid2D(x=[2.0, 1.0], y=[0.0, 1.0])
+
+    assert "increasing" in str(excinfo.value)
+
+    with pytest.raises(ValueError) as excinfo:
+        Grid2D(x=[0.0, 1.0], y=[2.0, 1.0])
+
+    assert "increasing" in str(excinfo.value)
 
 
 def test_xx_yy():
@@ -156,33 +182,38 @@ def test_find_index():
     assert jj[2] == j2
 
 
-def test_to_mesh():
-    outfilename = "temp.mesh"
+def test_to_mesh(tmp_path: Path):
+    outfilename = tmp_path / "temp.mesh"
+
+    # 1
 
     g = Grid2D([0, 0, 1, 5])
     g.to_mesh(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
     mesh = Mesh(outfilename)
     assert mesh.n_elements == g.n
-    os.remove(outfilename)  # clean up
+    outfilename.unlink()
 
+    # 2
     nc = g.get_node_coordinates()
     new_z = nc[:, 1] - 10
     g.to_mesh(outfilename, z=new_z)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
     mesh = Mesh(outfilename)
     assert mesh.node_coordinates[0, 2] == new_z[2]
-    os.remove(outfilename)  # clean up
+
+    outfilename.unlink()
+
+    # 3
 
     new_z = -10
     g.to_mesh(outfilename, z=new_z)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
     mesh = Mesh(outfilename)
     assert mesh.node_coordinates[0, 2] == -10
-    os.remove(outfilename)  # clean up
 
 
 def test_xy_to_bbox():
