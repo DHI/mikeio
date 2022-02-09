@@ -184,7 +184,7 @@ class Grid2D(GeometryGrid):
         x0=None,
         y0=None,
         projection_string=None,
-        origin=(0, 0),
+        origin=None,
         orientation=0.0,
     ):
         """create 2d grid
@@ -259,6 +259,9 @@ class Grid2D(GeometryGrid):
             self._create_from_nx_ny_dx_dy(x0, dx, shape[0], y0, dy, shape[1])
         else:
             raise ValueError("Please provide either bbox or both x and y")
+
+        if origin is None:
+            self._origin = (self.x0, self.y0)
 
     def _create_in_bbox(self, bbox, dxdy=None, shape=None):
         """create 2d grid in bounding box, specifying spacing or shape

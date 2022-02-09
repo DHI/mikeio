@@ -168,15 +168,15 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     def _get_x_y(self):
         x = self.da.geometry.x
         y = self.da.geometry.y
-        x = x + self.da.geometry._origin[0]
-        y = y + self.da.geometry._origin[1]
+        # x = x + self.da.geometry._origin[0] # TODO WTF?
+        # y = y + self.da.geometry._origin[1] # TODO
         return x, y
 
     def _get_xn_yn(self):
         xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
         yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
-        xn = xn + self.da.geometry._origin[0]
-        yn = yn + self.da.geometry._origin[1]
+        # xn = xn + self.da.geometry._origin[0] # TODO
+        # yn = yn + self.da.geometry._origin[1] # TODO
         return xn, yn
 
     @staticmethod
@@ -185,7 +185,8 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_xlabel("Longitude [degrees]")
             ax.set_ylabel("Latitude [degrees]")
             mean_lat = np.mean(y)
-            ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
+            # aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
+            # ax.set_aspect(aspect_ratio)
         else:
             ax.set_xlabel("Easting [m]")
             ax.set_ylabel("Northing [m]")
