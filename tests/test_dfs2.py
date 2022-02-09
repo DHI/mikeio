@@ -141,8 +141,8 @@ def test_read(dfs2_random):
     dfs = dfs2_random
     ds = dfs.read(["testing water level"])
     data = ds.data[0]
-    assert data[0, 11, 0] == 0
-    assert np.isnan(data[0, 10, 0])
+    assert data[0, 88, 0] == 0
+    assert np.isnan(data[0, 89, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
@@ -159,16 +159,6 @@ def test_read_temporal_subset_slice():
     ds = dfs.read(time_steps=slice("2000-01-01 00:00", "2000-01-01 12:00"))
 
     assert len(ds.time) == 13
-
-
-def test_read_item_names(dfs2_random):
-    dfs = dfs2_random
-
-    ds = dfs.read(["testing water level"])
-    data = ds.data[0]
-    assert data[0, 11, 0] == 0
-    assert np.isnan(data[0, 10, 0])
-    assert data.shape == (3, 100, 2)  # time, y, x
 
 
 def test_read_numbered_access(dfs2_random_2items):
@@ -338,30 +328,12 @@ def test_write_some_time_step(tmpdir):
     assert dfs2.start_time.day == 2
 
 
-def test_find_index_from_coordinate(dfs2_gebco):
+# TODO when we have the .sel method
+# def test_find_by_x_y():
 
-    dfs = dfs2_gebco
+#  ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
-    # TODO it should not be necessary to read the data to get coordinates
-    ds = dfs.read()
-
-    i, j = dfs.find_nearest_elements(lon=12.74792, lat=55.865)
-
-    assert i == 104
-    assert j == 131
-
-    assert ds.data[0][0, i, j] == -43.0
-
-    # try some outside the domain
-    i, j = dfs.find_nearest_elements(lon=11.0, lat=57.0)
-
-    assert i == 0
-    assert j == 0
-
-    i, j = dfs.find_nearest_elements(lon=15.0, lat=50.0)
-
-    assert i == 263
-    assert j == 215
+#  assert ds.Elevation.sel(x=12.74792, y=55.865) == -43.0
 
 
 def test_write_accumulated_datatype(tmpdir):

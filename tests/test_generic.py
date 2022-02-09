@@ -92,13 +92,13 @@ def test_diff_itself(tmpdir):
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"].to_numpy()[0][0, -1])
+    assert np.isnan(org["Elevation"].to_numpy()[0, -1, -1])
 
     diffed = mikeio.read(outfilename)
 
     diffedvalue = diffed["Elevation"].to_numpy()[0, 0, 0]
     assert diffedvalue == pytest.approx(0.0)
-    assert np.isnan(diffed["Elevation"].to_numpy()[0][0, -1])
+    assert np.isnan(diffed["Elevation"].to_numpy()[0, -1, -1])
 
 
 def test_sum_itself(tmpdir):
@@ -111,11 +111,9 @@ def test_sum_itself(tmpdir):
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"].to_numpy()[0][0, -1])
-
     summed = mikeio.read(outfilename)
 
-    assert np.isnan(summed["Elevation"].to_numpy()[0][0, -1])
+    assert np.isnan(summed["Elevation"].to_numpy()[0][-1, -1])
 
 
 def test_add_constant_delete_values_unchanged(tmpdir):
@@ -156,10 +154,10 @@ def test_multiply_constant_delete_values_unchanged_2(tmpdir):
     scaledvalue = scaled[item_name].to_numpy()[0, 0, 0]
     assert scaledvalue == pytest.approx(orgvalue * 1000.0)
 
-    orgvalue = org[item_name].to_numpy()[0, 10, 0]
+    orgvalue = org[item_name].to_numpy()[0, -11, 0]
     assert np.isnan(orgvalue)
 
-    scaledvalue = scaled[item_name].to_numpy()[0, 10, 0]
+    scaledvalue = scaled[item_name].to_numpy()[0, -11, 0]
     assert np.isnan(scaledvalue)
 
 

@@ -27,7 +27,7 @@ def test_read_dfs2_generic_read():
 
     res = mikeio.read(filename, ["testing water level"])
     data = res.data[0]
-    assert data[0, 11, 0] == 0
+    assert data[0, 88, 0] == 0
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
