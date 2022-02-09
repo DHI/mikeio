@@ -191,13 +191,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         # TODO: skip validation for all items after the first?
         data_vars = {}
-        names = []
         for dd, it in zip(data, items):
-            n = it.name  # TODO: du._to_safe_name(it.name)
-            if n in names:
-                raise ValueError()  # TODO: repeated item names!
-            names.append(n)
-            data_vars[n] = DataArray(
+            data_vars[it.name] = DataArray(
                 data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
             )
         return data_vars
@@ -221,6 +216,10 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                     raise TypeError(f"items of type: {type(item)} is not supported")
                 # TODO: item.name = du._to_safe_name(item.name)
                 item_infos.append(item)
+
+            item_names = [it.name for it in item_infos]
+            if len(set(item_names)) != len(item_names):
+                raise ValueError(f"Item names must be unique ({item_names})!")
 
         return item_infos
 
@@ -383,34 +382,86 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return self.data_vars.keys()
 
     def __setitem__(self, key, value):
+        self.__set_or_insert_item(key, value, insert=False)
 
+    def __set_or_insert_item(self, key, value, insert=False):
         if not isinstance(value, DataArray):
             try:
                 value = DataArray(value)
                 # TODO: warn that this is not the preferred way!
             except:
-                raise ValueError("Use a DataArray")
+                raise ValueError("Input could not be interpreted as a DataArray")
 
         if len(self) > 0:
-            self._check_already_present(value)
             self[0]._is_compatible(value)
 
         if isinstance(key, int):
-            key_str = value.name
-            new_keys = list(self.data_vars.keys())
-            new_keys.insert(key, key_str)
+            is_replacement = not insert
+            item_name = value.name
+            if is_replacement:
+                key_str = self.keys()[key]
+                # key_str = list(self.data_vars.keys())[key]
+                self.data_vars[key_str] = value
+            else:
+                self._check_already_present(value)
+                item_names = [it.name for it in self.items]
+                if item_name in item_names:
+                    raise ValueError(
+                        f"Item name {item_name} already in Dataset ({item_names})"
+                    )
+                all_keys = list(self.data_vars.keys())
+                if item_name in all_keys:
+                    raise ValueError(
+                        f"Item name {item_name} already in Dataset keys ({all_keys})"
+                    )
+                all_keys.insert(key, item_name)
 
-            data_vars = {}
-            for k in new_keys:
-                if k in self.data_vars.keys():
-                    data_vars[k] = self.data_vars[k]
-                else:
-                    data_vars[k] = value
-            self.data_vars = data_vars
-            self._set_name_attr(key, value)
+                data_vars = {}
+                for k in all_keys:
+                    if k in self.data_vars.keys():
+                        data_vars[k] = self.data_vars[k]
+                    else:
+                        data_vars[k] = value
+                self.data_vars = data_vars
+
+            self._set_name_attr(item_name, value)
         else:
+            is_replacement = key in self.keys()
+            if not is_replacement:
+                self._check_already_present(value)
             self.data_vars[key] = value
             self._set_name_attr(key, value)
+
+        if len(self) == 2 and not is_replacement:
+            # now big enough for a plotter
+            self.plot = _DatasetPlotter(self)
+
+    def insert(self, key: int, value: DataArray):
+        """Insert DataArray in a specific position
+
+        Parameters
+        ----------
+        key : int
+            index in Dataset where DataArray should be inserted
+        value : DataArray
+            DataArray to be inserted, must comform with with existing DataArrays
+            and must have a unique item name
+        """
+        self.__set_or_insert_item(key, value, insert=True)
+
+    def remove(self, key: Union[int, str]):
+        """Remove DataArray from Dataset
+
+        Parameters
+        ----------
+        key : int, str
+            index or name of DataArray to be remove from Dataset
+
+        See also
+        --------
+        pop
+        """
+        self.__delitem__(key)
 
     def _set_name_attr(self, name: str, value: DataArray):
         name = du._to_safe_name(name)
