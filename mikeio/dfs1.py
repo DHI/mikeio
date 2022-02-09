@@ -32,7 +32,7 @@ class Dfs1(_Dfs123):
             if self._n_items is not None:
                 if self._n_items < 10:
                     out.append("Items:")
-                    for i, item in enumerate(self.items):
+                    for i, item in enumerate(self.iteminfos):
                         out.append(f"  {i}:  {item}")
                 else:
                     out.append(f"Number of items: {self._n_items}")

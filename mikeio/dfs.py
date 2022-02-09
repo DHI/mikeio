@@ -151,14 +151,14 @@ class _Dfs123(TimeSeries):
         self._set_spatial_axis()
 
         if self._ndim == 1:
-            if not all(np.shape(d)[1] == self._nx for d in data):
+            if not all(np.shape(d)[1] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
 
         if self._ndim == 2:
-            if not all(np.shape(d)[1] == self._ny for d in data):
+            if not all(np.shape(d)[1] == self._ny for d in self._data):
                 raise DataDimensionMismatch()
 
-            if not all(np.shape(d)[2] == self._nx for d in data):
+            if not all(np.shape(d)[2] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
         if datetimes is not None:
             self._is_equidistant = False
@@ -272,7 +272,7 @@ class _Dfs123(TimeSeries):
             self._coordinate = coordinate
 
         if isinstance(data, Dataset):
-            self._items = data.items
+            self._items = data.iteminfos
             self._start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
@@ -423,7 +423,7 @@ class _Dfs123(TimeSeries):
         return self._n_items
 
     @property
-    def items(self):
+    def iteminfos(self):
         "List of items"
         return self._items
 

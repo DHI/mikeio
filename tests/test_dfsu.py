@@ -89,10 +89,10 @@ def test_read_simple_3d():
     ds = dfs.read()
 
     assert len(ds.data) == 3
-    assert len(ds.items) == 3
+    assert len(ds.iteminfos) == 3
 
-    assert ds.items[0].name != "Z coordinate"
-    assert ds.items[2].name == "W velocity"
+    assert ds.iteminfos[0].name != "Z coordinate"
+    assert ds.iteminfos[2].name == "W velocity"
 
 
 def test_read_simple_2dv():
@@ -102,10 +102,10 @@ def test_read_simple_2dv():
     ds = dfs.read()
 
     assert len(ds.data) == 3
-    assert len(ds.items) == 3
+    assert len(ds.iteminfos) == 3
 
-    assert ds.items[0].name != "Z coordinate"
-    assert ds.items[2].name == "W velocity"
+    assert ds.iteminfos[0].name != "Z coordinate"
+    assert ds.iteminfos[2].name == "W velocity"
 
 
 def test_read_single_item_returns_single_item():
@@ -114,7 +114,7 @@ def test_read_single_item_returns_single_item():
 
     ds = dfs.read(items=[3])
 
-    assert len(ds.items) == 1
+    assert len(ds.iteminfos) == 1
 
 
 def test_read_single_item_scalar_index():
@@ -142,8 +142,8 @@ def test_read_selected_item_returns_correct_items():
     ds = dfs.read([0, 3])
 
     assert len(ds) == 2
-    assert ds.items[0].name == "Surface elevation"
-    assert ds.items[1].name == "Current speed"
+    assert ds.iteminfos[0].name == "Surface elevation"
+    assert ds.iteminfos[1].name == "Current speed"
 
 
 def test_read_selected_item_names_returns_correct_items():
@@ -153,8 +153,8 @@ def test_read_selected_item_names_returns_correct_items():
     ds = dfs.read(["Surface elevation", "Current speed"])
 
     assert len(ds) == 2
-    assert ds.items[0].name == "Surface elevation"
-    assert ds.items[1].name == "Current speed"
+    assert ds.iteminfos[0].name == "Surface elevation"
+    assert ds.iteminfos[1].name == "Current speed"
 
 
 def test_read_returns_correct_items_sigma_z():
@@ -164,9 +164,9 @@ def test_read_returns_correct_items_sigma_z():
     ds = dfs.read()
 
     assert len(ds) == 2
-    # assert ds.items[0].name == "Z coordinate"
-    assert ds.items[0].name == "Temperature"
-    assert ds.items[1].name == "Salinity"
+    # assert ds.iteminfos[0].name == "Z coordinate"
+    assert ds.iteminfos[0].name == "Temperature"
+    assert ds.iteminfos[1].name == "Salinity"
 
 
 def test_read_all_time_steps():
@@ -188,7 +188,7 @@ def test_read_item_range():
     ds = dfs.read(items=range(1, 3))  # [1,2]
 
     assert ds.n_items == 2
-    assert ds.items[0].name == "U velocity"
+    assert ds.iteminfos[0].name == "U velocity"
 
 
 def test_read_all_time_steps_without_progressbar():
@@ -393,7 +393,7 @@ def test_dfsu_to_dfs0(tmpdir):
     dfs0 = Dfs0(outfilename)
     newds = dfs0.read()
 
-    assert newds.items[0].name == ds.items[0].name
+    assert newds.iteminfos[0].name == ds.iteminfos[0].name
     assert ds.time[0] == newds.time[0]
     assert ds.time[-1] == newds.time[-1]
 
@@ -845,7 +845,7 @@ def test_write_from_dfsu_default_items_numbered(tmpdir):
     assert os.path.exists(outfilename)
 
     newdfs = Dfsu(outfilename)
-    assert newdfs.items[0].name == "Item 1"
+    assert newdfs.iteminfos[0].name == "Item 1"
 
 
 def test_write_from_dfsu3D(tmpdir):
@@ -1271,9 +1271,9 @@ def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
     assert dfs2._filename == str(filename)
 
     # Ensure all items are identical
-    for i, dfsu_item in enumerate(dfsu_hd2d.items):
+    for i, dfsu_item in enumerate(dfsu_hd2d.iteminfos):
         for parameter in ["data_value_type", "name", "type", "unit"]:
-            assert getattr(dfsu_item, parameter) == getattr(dfs2.items[i], parameter)
+            assert getattr(dfsu_item, parameter) == getattr(dfs2.iteminfos[i], parameter)
 
     # Check timesteps
     assert dfs2.timestep == dfsu_hd2d.timestep

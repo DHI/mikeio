@@ -122,7 +122,7 @@ def test_select_subset_isel():
 
     selds = ds.isel(10, axis=1)
 
-    assert len(selds.items) == 2
+    assert len(selds.iteminfos) == 2
     assert len(selds.data) == 2
     assert selds["Foo"].shape == (100, 30)
     assert selds["Foo"].to_numpy()[0, 0] == 2.0
@@ -130,7 +130,7 @@ def test_select_subset_isel():
 
     selds_named_axis = ds.isel(10, axis="y")
 
-    assert len(selds_named_axis.items) == 2
+    assert len(selds_named_axis.iteminfos) == 2
     assert selds_named_axis["Foo"].shape == (100, 30)
 
 
@@ -242,8 +242,8 @@ def test_select_multiple_items_by_name():
     assert len(ds) == 3  # Length of a dataset is the number of items
 
     newds = ds[["Baz", "Foo"]]
-    assert newds.items[0].name == "Baz"
-    assert newds.items[1].name == "Foo"
+    assert newds.iteminfos[0].name == "Baz"
+    assert newds.iteminfos[1].name == "Foo"
     assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
 
     assert len(newds) == 2
@@ -264,8 +264,8 @@ def test_select_multiple_items_by_index():
     assert len(ds) == 3  # Length of a dataset is the number of items
 
     newds = ds[[2, 0]]
-    assert newds.items[0].name == "Baz"
-    assert newds.items[1].name == "Foo"
+    assert newds.iteminfos[0].name == "Baz"
+    assert newds.iteminfos[1].name == "Foo"
     assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
 
     assert len(newds) == 2
@@ -304,7 +304,7 @@ def test_select_subset_isel_multiple_idxs():
 
     selds = ds.isel([10, 15], axis=1)
 
-    assert len(selds.items) == 2
+    assert len(selds.iteminfos) == 2
     assert len(selds.data) == 2
     assert selds["Foo"].shape == (100, 2, 30)
 
@@ -330,7 +330,7 @@ def test_create_undefined():
 
     ds = Dataset(data)
 
-    assert len(ds.items) == 2
+    assert len(ds.iteminfos) == 2
     assert len(ds.data) == 2
     assert ds[0].name == "Item 1"
     assert ds[0].type == EUMType.Undefined
@@ -347,7 +347,7 @@ def test_create_named_undefined():
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
     ds = Dataset(data=data, time=time, items=["Foo", "Bar"])
 
-    assert len(ds.items) == 2
+    assert len(ds.iteminfos) == 2
     assert len(ds.data) == 2
     assert ds[1].name == "Bar"
     assert ds[1].type == EUMType.Undefined
@@ -736,8 +736,8 @@ def test_quantile_axis1(ds1):
     # q as list
     dsq = ds1.quantile(q=[0.25, 0.75], axis=1)
     assert dsq.n_items == 2 * ds1.n_items
-    assert "Quantile 0.75, " in dsq.items[1].name
-    assert "Quantile 0.25, " in dsq.items[2].name
+    assert "Quantile 0.75, " in dsq.iteminfos[1].name
+    assert "Quantile 0.25, " in dsq.iteminfos[2].name
 
 
 def test_quantile_axis0(ds1):
@@ -757,9 +757,9 @@ def test_quantile_axis0(ds1):
     assert dsq[3].to_numpy()[0, 0] == 0.2
 
     assert dsq.n_items == 2 * ds1.n_items
-    assert "Quantile 0.75, " in dsq.items[1].name
-    assert "Quantile 0.25, " in dsq.items[2].name
-    assert "Quantile 0.75, " in dsq.items[3].name
+    assert "Quantile 0.75, " in dsq.iteminfos[1].name
+    assert "Quantile 0.25, " in dsq.iteminfos[2].name
+    assert "Quantile 0.75, " in dsq.iteminfos[3].name
 
 
 def test_nanquantile():
@@ -791,7 +791,7 @@ def test_copy():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
-    assert len(ds.items) == 2
+    assert len(ds.iteminfos) == 2
     assert len(ds.data) == 2
     assert ds[0].name == "Foo"
 
@@ -817,7 +817,7 @@ def test_dropna():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
-    assert len(ds.items) == 2
+    assert len(ds.iteminfos) == 2
     assert len(ds.data) == 2
 
     ds2 = ds.dropna()
@@ -1013,9 +1013,9 @@ def test_create_infer_name_from_eum():
         items=[EUMType.Wind_speed],
     )
 
-    assert isinstance(ds.items[0], ItemInfo)
-    assert ds.items[0].type == EUMType.Wind_speed
-    assert ds.items[0].name == "Wind speed"
+    assert isinstance(ds.iteminfos[0], ItemInfo)
+    assert ds.iteminfos[0].type == EUMType.Wind_speed
+    assert ds.iteminfos[0].name == "Wind speed"
 
 
 def test_add_scalar(ds1):
@@ -1186,7 +1186,7 @@ def test_combine_by_item_dfsu_3d():
     ds3 = Dataset.combine(ds1, ds2)
 
     assert isinstance(ds3, Dataset)
-    itemnames = [x.name for x in ds3.items]
+    itemnames = [x.name for x in ds3.iteminfos]
     assert "Salinity" in itemnames
     assert "Temperature" in itemnames
     assert ds3.n_items == 2
@@ -1235,7 +1235,7 @@ def test_append_items_same_name_error():
     ds1 = mikeio.read(filename, items=0)
     ds2 = mikeio.read(filename, items=0)
 
-    assert ds1.items[0].name == ds2.items[0].name
+    assert ds1.iteminfos[0].name == ds2.iteminfos[0].name
 
     with pytest.raises(ValueError):
         ds1.append_items(ds2)
