@@ -51,7 +51,16 @@ def test_dx_dy_is_positive():
     assert "positive" in str(excinfo.value).lower()
 
 
-# def test_x_y_is_monotonic():
+def test_x_y_is_increasing():
+    with pytest.raises(ValueError) as excinfo:
+        Grid2D(x=[2.0, 1.0], y=[0.0, 1.0])
+
+    assert "increasing" in str(excinfo.value)
+
+    with pytest.raises(ValueError) as excinfo:
+        Grid2D(x=[0.0, 1.0], y=[2.0, 1.0])
+
+    assert "increasing" in str(excinfo.value)
 
 
 def test_xx_yy():

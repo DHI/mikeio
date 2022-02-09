@@ -343,6 +343,12 @@ class Grid2D(GeometryGrid):
 
     def _create_from_x_and_y(self, x, y):
 
+        if x[0] > x[-1]:
+            raise ValueError("x values must be increasing")
+
+        if y[0] > y[-1]:
+            raise ValueError("y values must be increasing")
+
         self._x0 = x[0]
         self._nx = len(x)
         self._dx = x[1] - x[0]
