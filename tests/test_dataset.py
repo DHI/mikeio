@@ -82,10 +82,11 @@ def test_index_with_attribute():
     with pytest.raises(ValueError):
         Dataset(data_vars)
 
-    # Create copy of data
+    # Needs to be copy of data...
+    d2 = d.copy()
     data_vars = {
         "Foo": DataArray(data=d, time=time),
-        "Bar": DataArray(data=d.copy(), time=time),
+        "Bar": DataArray(data=d2, time=time),
     }
     ds = Dataset(data_vars)
     assert ds["Foo"].name == "Foo"
