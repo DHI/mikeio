@@ -1273,7 +1273,9 @@ def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
     # Ensure all items are identical
     for i, dfsu_item in enumerate(dfsu_hd2d.iteminfos):
         for parameter in ["data_value_type", "name", "type", "unit"]:
-            assert getattr(dfsu_item, parameter) == getattr(dfs2.iteminfos[i], parameter)
+            assert getattr(dfsu_item, parameter) == getattr(
+                dfs2.iteminfos[i], parameter
+            )
 
     # Check timesteps
     assert dfs2.timestep == dfsu_hd2d.timestep
