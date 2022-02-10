@@ -82,7 +82,7 @@ class Grid2D(GeometryGrid):
     @property
     def x(self):
         """array of x-coordinates (single row)"""
-        return self._x
+        return self._x + self._origin[0]  # TODO
 
     @property
     def x0(self):
@@ -107,7 +107,7 @@ class Grid2D(GeometryGrid):
     @property
     def y(self):
         """array of y-coordinates (single column)"""
-        return self._y
+        return self._y + self._origin[1]  # TODO
 
     @property
     def y0(self):
