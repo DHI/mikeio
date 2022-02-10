@@ -502,6 +502,33 @@ class DataArray(TimeSeries):
             dims=dims,
         )
 
+    def to_xarray(self):
+        import xarray as xr
+
+        coords = None
+
+        if isinstance(self.geometry, Grid2D):
+            coords = {}
+            coords["time"] = xr.DataArray(self.time, dims="time")
+            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
+            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
+
+        # TODO other geometries
+
+        xr_da = xr.DataArray(
+            data=self.values,
+            name=self.name,
+            dims=self.dims,
+            coords=coords,
+            attrs={
+                "name": self.name,
+                "units": self.unit.name,
+                "eumType": self.type,
+                "eumUnit": self.unit,
+            },
+        )
+        return xr_da
+
     def _is_compatible(self, other, raise_error=False):
         """check if other DataArray has equivalent dimensions, time and geometry"""
         problems = []
