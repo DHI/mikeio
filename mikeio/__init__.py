@@ -33,6 +33,7 @@ from .pfs import Pfs
 from .xyz import read_xyz
 from .dataset import Dataset, DataArray
 from .spatial import Grid1D, Grid2D
+from .eum import ItemInfo, EUMType, EUMUnit
 
 
 def read(filename, items=None, time_steps=None):
