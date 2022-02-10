@@ -1,5 +1,6 @@
 from typing import Iterable, Sequence, Union, Mapping, Optional
 import warnings
+from isort import file
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -7,6 +8,7 @@ from mikeio.eum import EUMType, ItemInfo
 import collections.abc
 
 import mikeio.data_utils as du
+from mikeio.spatial.FM_geometry import GeometryFM
 from .base import TimeSeries
 from .dataarray import DataArray
 from .spatial.geometry import _Geometry
@@ -1430,7 +1432,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     @property
     def deletevalue(self):
         """File delete value"""
-        return self._deletevalue
+        return self[0].deletevalue
 
     def to_dfs(self, filename):
         if self.geometry is None:
@@ -1443,6 +1445,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         elif isinstance(self.geometry, Grid1D):
             self._to_dfs1(filename)
+        elif isinstance(self.geometry, GeometryFM):
+            self._to_dfsu(filename)
         else:
             raise NotImplementedError(
                 "Writing this type of dataset is not yet implemented"
@@ -1459,3 +1463,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         dfs = Dfs1()
         dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry.x0)
+
+    def _to_dfsu(self, filename):
+        from .dfsu import _write_dfsu
+
+        _write_dfsu(filename, self)

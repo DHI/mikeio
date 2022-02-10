@@ -5,6 +5,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
+import mikeio
 from mikeio import Dataset, Dfs0, Dfsu, Mesh
 from mikeio.custom_exceptions import InvalidGeometry
 from mikeio.eum import ItemInfo
@@ -1289,3 +1290,13 @@ def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
 
     # Make sure data was interpolated (not all values are nan's)
     assert not np.all(np.isnan(dfs2.read().data))
+
+
+def test_dataset_write_dfsu(tmp_path):
+
+    outfilename = tmp_path / "HD2D_start.dfsu"
+    ds = mikeio.read("tests/testdata/HD2D.dfsu", time_steps=[0, 1])
+    ds.to_dfs(outfilename)
+
+    ds2 = mikeio.read(outfilename)
+    assert ds2.n_timesteps == 2

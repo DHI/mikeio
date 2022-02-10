@@ -28,6 +28,62 @@ from .spatial.FM_utils import _plot_map
 from .spatial.grid_geometry import Grid2D
 
 
+def _write_dfsu(filename: str, data: Dataset):
+
+    filename = str(filename)
+
+    items = data.iteminfos
+
+    dt = (data.time[1] - data.time[0]).total_seconds()
+    n_time_steps = len(data.time)
+
+    geometry = data.geometry
+
+    # TODO
+    if geometry.is_layered:
+        raise NotImplementedError()
+    dfsu_filetype = DfsuFileType.Dfsu2D
+
+    xn = geometry.node_coordinates[:, 0]
+    yn = geometry.node_coordinates[:, 1]
+    zn = geometry.node_coordinates[:, 2]
+
+    # element_table += 1
+    elem_table = []
+    for j in range(geometry.n_elements):
+        elem_nodes = geometry.element_table[j]
+        elem_nodes = [nd + 1 for nd in elem_nodes]
+        elem_table.append(np.array(elem_nodes))
+
+    builder = DfsuBuilder.Create(dfsu_filetype)
+
+    builder.SetNodes(xn, yn, zn, geometry.codes)
+    builder.SetElements(elem_table)
+
+    factory = DfsFactory()
+    proj = factory.CreateProjection(geometry.projection_string)
+    builder.SetProjection(proj)
+    builder.SetTimeInfo(data.time[0], dt)
+    builder.SetZUnit(eumUnit.eumUmeter)
+
+    if dfsu_filetype != DfsuFileType.Dfsu2D:
+        builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
+
+    for item in data.iteminfos:
+        builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
+
+    dfs = builder.CreateFile(filename)
+
+    for i in range(n_time_steps):
+        for item in range(len(data.iteminfos)):  # TODO for da in data
+            d = data[item].to_numpy()[
+                i, :
+            ]  # TODO make sure to_numpy does not make a copy, then this is inefficient
+            d[np.isnan(d)] = data.deletevalue
+            dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
+    dfs.Close()
+
+
 class _UnstructuredFile:
     """
     _UnstructuredFile is base class for Mesh and Dfsu
