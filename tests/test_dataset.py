@@ -113,6 +113,37 @@ def test_popitem(ds1):
     assert da.name == "Foo"
 
 
+def test_insert(ds1):
+    da = ds1[0].copy()
+    da.name = "Baz"
+
+    ds1.insert(2, da)
+    assert len(ds1) == 3
+    assert ds1.names == ["Foo", "Bar", "Baz"]
+    assert ds1[-1] == da
+
+
+def test_insert_fail(ds1):
+    da = ds1[0]
+    with pytest.raises(ValueError, match="Cannot add the same object"):
+        ds1.insert(2, da)
+
+    vals = ds1[0].values
+    da = ds1[0].copy()
+    da.values = vals
+    with pytest.raises(ValueError, match="refer to the same data"):
+        ds1.insert(2, da)
+
+
+def test_remove(ds1):
+    ds1.remove(-1)
+    assert len(ds1) == 1
+    assert ds1.names == ["Foo"]
+
+    ds1.remove("Foo")
+    assert len(ds1) == 0
+
+
 def test_index_with_attribute():
 
     nt = 10000
