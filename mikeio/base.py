@@ -26,16 +26,6 @@ class TimeSeries(ABC):
     def deletevalue(self) -> float:
         pass
 
-    @property
-    @abstractmethod
-    def n_items(self) -> int:
-        pass
-
-    @property
-    @abstractmethod
-    def iteminfos(self) -> Sequence[ItemInfo]:
-        pass
-
 
 class EquidistantTimeSeries(TimeSeries):
     @property
