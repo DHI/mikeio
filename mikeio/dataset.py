@@ -928,7 +928,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         res = {
             name: da.aggregate(axis=axis, func=func, **kwargs)
-            for name, da in self.data_vars.items()
+            for name, da in self._data_vars.items()
         }
 
         return Dataset(res)
@@ -1179,7 +1179,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         -------
         Dataset
         """
-        res = {name: da.squeeze() for name, da in self.data_vars.items()}
+        res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
         return Dataset(res)
 
