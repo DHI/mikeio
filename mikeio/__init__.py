@@ -36,7 +36,7 @@ from .spatial import Grid1D, Grid2D
 from .eum import ItemInfo, EUMType, EUMUnit
 
 
-def read(filename, items=None, time_steps=None):
+def read(filename, items=None, time_steps=None) -> Dataset:
     """Read data from a dfs file
 
     Parameters
@@ -56,13 +56,10 @@ def read(filename, items=None, time_steps=None):
 
     _, ext = os.path.splitext(filename)
 
-    if ext == ".xyz":
-        return read_xyz(filename)
-    elif ext == ".mesh":
-        # or should Mesh.read() just return geometry?
-        raise Exception(f"{ext} cannot be read(). Try open() instead.")
-    else:
-        dfs = open(filename)
+    if "dfs" not in ext:
+        raise ValueError("mikeio.read is only supported for Dfs files")
+
+    dfs = open(filename)
 
     return dfs.read(items, time_steps)
 
