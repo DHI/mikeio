@@ -610,7 +610,7 @@ class DataArray(TimeSeries):
         self.values = np.flip(self.values, axis=1)
         return self
 
-    def _to_dataset(self) -> "Dataset":
+    def _to_dataset(self):
         """Create a single-item dataset"""
         from mikeio import Dataset
 
