@@ -38,6 +38,21 @@ def ds2():
     return Dataset(data, time, items)
 
 
+@pytest.fixture
+def ds3():
+
+    nt = 100
+    d1 = np.zeros([nt, 100, 30]) + 1.5
+    d2 = np.zeros([nt, 100, 30]) + 2.0
+    d3 = np.zeros([nt, 100, 30]) + 3.0
+
+    data = [d1, d2, d3]
+
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
+    items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
+    return Dataset(data, time, items)
+
+
 def test_create_wrong_data_type_error():
 
     data = ["item 1", "item 2"]
@@ -330,26 +345,24 @@ def test_select_multiple_items_by_name():
     assert len(newds) == 2
 
 
-def test_select_multiple_items_by_index():
-    nt = 100
-    d1 = np.zeros([nt, 100, 30]) + 1.5
-    d2 = np.zeros([nt, 100, 30]) + 2.0
-    d3 = np.zeros([nt, 100, 30]) + 3.0
+def test_select_multiple_items_by_index(ds3):
+    assert len(ds3) == 3  # Length of a dataset is the number of items
 
-    data = [d1, d2, d3]
-
-    time = pd.date_range("2000-1-2", freq="H", periods=nt)
-    items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
-    ds = Dataset(data, time, items)
-
-    assert len(ds) == 3  # Length of a dataset is the number of items
-
-    newds = ds[[2, 0]]
+    newds = ds3[[2, 0]]
+    assert len(newds) == 2
     assert newds.items[0].name == "Baz"
     assert newds.items[1].name == "Foo"
     assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
 
+
+def test_select_multiple_items_by_slice(ds3):
+    assert len(ds3) == 3  # Length of a dataset is the number of items
+
+    newds = ds3[:2]
     assert len(newds) == 2
+    assert newds.items[0].name == "Foo"
+    assert newds.items[1].name == "Bar"
+    assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
 
 
 def test_select_item_by_iteminfo():
