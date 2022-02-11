@@ -61,6 +61,56 @@ def test_get_names():
     assert ds["Foo"].name == "Foo"
     assert ds["Foo"].type == EUMType.Undefined
     assert repr(ds["Foo"].unit) == "undefined"
+    assert ds.names == ["Foo"]
+
+
+def test_properties(ds1):
+    nt = 10
+    ne = 7
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+
+    assert ds1.names == ["Foo", "Bar"]
+    assert ds1.n_items == 2
+
+    assert np.all(ds1.time == time)
+    assert ds1.n_timesteps == nt
+    assert ds1.timestep == 1
+    assert ds1.start_time == time[0]
+    assert ds1.end_time == time[-1]
+
+    assert ds1.shape == (nt, ne)
+    assert ds1.dims == ("time", "x")
+    assert ds1.geometry is None
+    assert ds1._zn is None
+
+    # assert not hasattr(ds1, "keys")   # TODO: remove this
+    # assert not hasattr(ds1, "values") # TODO: remove this
+    assert isinstance(ds1.items[0], ItemInfo)
+
+
+def test_pop(ds1):
+    da = ds1.pop("Foo")
+    assert len(ds1) == 1
+    assert ds1.names == ["Bar"]
+    assert isinstance(da, DataArray)
+    assert da.name == "Foo"
+
+    ds1["Foo2"] = da  # re-insert
+    assert len(ds1) == 2
+
+    da = ds1.pop(-1)
+    assert len(ds1) == 1
+    assert ds1.names == ["Bar"]
+    assert isinstance(da, DataArray)
+    assert da.name == "Foo2"
+
+
+def test_popitem(ds1):
+    da = ds1.popitem()
+    assert len(ds1) == 1
+    assert ds1.names == ["Bar"]
+    assert isinstance(da, DataArray)
+    assert da.name == "Foo"
 
 
 def test_index_with_attribute():
