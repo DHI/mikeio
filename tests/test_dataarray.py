@@ -70,21 +70,20 @@ def da_time_space():
     return da
 
 
-# TODO this should be here, but we need to update some tests first
-# def test_data_2d_no_geometry_not_allowed():
+def test_data_2d_no_geometry_not_allowed():
 
-#   nt = 10
-#    nx = 7
-#    ny = 14
+    nt = 10
+    nx = 7
+    ny = 14
 
-#    with pytest.raises(ValueError) as excinfo:
-#        DataArray(
-#            data=np.zeros([nt, ny, nx]) + 0.1,
-#            time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
-#            item=ItemInfo("Foo"),
-#        )
-#
-#    assert "geometry" in str(excinfo.value).lower()
+    with pytest.warns(Warning) as w:
+        DataArray(
+            data=np.zeros([nt, ny, nx]) + 0.1,
+            time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
+            item=ItemInfo("Foo"),
+        )
+
+    assert "geometry" in str(w[0].message).lower()
 
 
 def test_dataarray_init():
@@ -404,12 +403,43 @@ def test_add_two_dataarrays(da1):
     assert da1.shape == da3.shape
 
 
+def test_daarray_squeeze():
+
+    filename = "tests/testdata/gebco_sound.dfs2"
+    ds = mikeio.read(filename)
+    da: DataArray = ds.Elevation
+    assert da.shape == (1, 264, 216)
+
+    das = da.squeeze()
+    assert das.shape == (264, 216)
+    assert das.dims[0] == "y"
+
+
+def test_daarray_aggregation_dfs2():
+
+    filename = "tests/testdata/gebco_sound.dfs2"
+    ds = mikeio.read(filename)
+    da = ds.Elevation
+
+    assert da.shape == (1, 264, 216)
+    assert da.dims[0] == "time"
+
+    dam = da.mean(axis="time")
+
+    assert dam.shape == (264, 216)
+    assert dam.dims[0] != "time"
+
+    dasm = da.mean(axis="space")
+
+    assert dasm.shape == (1,)
+    assert dasm.dims[0] == "time"
+
+
 def test_daarray_aggregation():
 
     filename = "tests/testdata/HD2D.dfsu"
-    dfs = Dfsu(filename)
+    ds = mikeio.read(filename, items=[3])
 
-    ds = dfs.read(items=[3])
     da = ds["Current speed"]
     assert da.ndim == 2
     assert da.dims[0][0] == "t"  # time

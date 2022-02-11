@@ -926,19 +926,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             dataset with aggregated values
         """
 
-        items = self.items
-        axis = du._parse_axis(self.shape, self.dims, axis)
-        time = du._time_by_agg_axis(self.time, axis)
-        keepdims = du._keepdims_by_axis(axis)
+        res = {
+            name: da.aggregate(axis=axis, func=func, **kwargs)
+            for name, da in self.data_vars.items()
+        }
 
-        res = [
-            func(self[item.name].to_numpy(), axis=axis, keepdims=keepdims, **kwargs)
-            for item in items
-        ]
-
-        res = du._reshape_data_by_axis(res, self.shape, axis)
-
-        return Dataset(res, time, items)
+        return Dataset(res)
 
     def quantile(self, q, *, axis="time", **kwargs):
         """Compute the q-th quantile of the data along the specified axis.
@@ -1186,22 +1179,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         -------
         Dataset
         """
+        res = {name: da.squeeze() for name, da in self.data_vars.items()}
 
-        items = self.items
-
-        # TODO: remove this?
-        if (items[0].name == "Z coordinate") and (
-            items[0].type == EUMType.ItemGeometry3D
-        ):
-            items = deepcopy(items)
-            items.pop(0)
-
-        time = self.time
-
-        res = [np.squeeze(self[item.name].to_numpy()) for item in items]
-
-        ds = Dataset(res, time, items)
-        return ds
+        return Dataset(res)
 
     def interp_time(
         self,

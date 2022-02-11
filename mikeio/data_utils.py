@@ -1,4 +1,4 @@
-from typing import Iterable, Sequence, Union
+from typing import Iterable, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 
@@ -69,7 +69,7 @@ def _parse_time(time):
     return pd.DatetimeIndex(time)
 
 
-def _parse_axis(data_shape, dims, axis):
+def _parse_axis(data_shape, dims, axis) -> Union[int, Tuple[int]]:
     # axis = 0 if axis == "time" else axis
     if (axis == "spatial") or (axis == "space"):
         if len(data_shape) == 1:
