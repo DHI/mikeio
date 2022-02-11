@@ -701,7 +701,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         return data, shape
 
-    def read(self, items=None, time_steps=None, elements=None):
+    def read(self, items=None, time_steps=None, elements=None) -> Dataset:
         """
         Read data from a dfsu file
 

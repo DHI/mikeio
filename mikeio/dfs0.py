@@ -89,7 +89,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def read(self, items=None, time_steps=None):
+    def read(self, items=None, time_steps=None) -> Dataset:
         """
         Read data from a dfs0 file.
 
