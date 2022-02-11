@@ -291,7 +291,7 @@ def test_temporal_subset_fancy():
     assert selds["Foo"].shape == (49, 100, 30)
 
 
-def test_subset_with_datetime_is_not_supported():
+def test_subset_with_datetime():
     nt = (24 * 31) + 1
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -301,8 +301,8 @@ def test_subset_with_datetime_is_not_supported():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = Dataset(data, time, items)
 
-    with pytest.raises(TypeError):
-        ds[datetime(2000, 1, 1)]
+    dssub = ds[datetime(2000, 1, 2)]
+    assert len(dssub.time) == 1  # TODO - this should give 25
 
 
 def test_select_item_by_name():

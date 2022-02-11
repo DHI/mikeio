@@ -1,6 +1,7 @@
 from typing import Iterable, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 # from copy import deepcopy
 # from mikeio.eum import ItemInfo
@@ -20,10 +21,12 @@ def _time_by_agg_axis(
     return time
 
 
-def _get_time_idx_list(time, steps):
+def _get_time_idx_list(time: pd.DatetimeIndex, steps):
     """Find list of idx in DatetimeIndex"""
     # TODO: allow steps to be other DateTimeAxis
-    if isinstance(steps, str):
+    if isinstance(steps, pd.DatetimeIndex):
+        return time.get_indexer(steps)
+    if isinstance(steps, (str, datetime, np.datetime64, pd.Timestamp)):
         steps = slice(steps, steps)
     if isinstance(steps, slice):
         try:

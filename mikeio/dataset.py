@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Iterable, Sequence, Union, Mapping, Optional
 import warnings
 import numpy as np
@@ -321,7 +322,90 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             da.time = new_time
 
     @property
+    def start_time(self):
+        """First time instance (as datetime)"""
+        return self.time[0].to_pydatetime()
+
+    @property
+    def end_time(self):
+        """Last time instance (as datetime)"""
+        return self.time[-1].to_pydatetime()
+
+    @property
+    def timestep(self):
+        """Time step in seconds if equidistant (and at
+        least two time instances); otherwise None
+        """
+        dt = None
+        if len(self.time) > 1:
+            if self.is_equidistant:
+                dt = (self.time[1] - self.time[0]).total_seconds()
+        return dt
+
+    @property
+    def is_equidistant(self):
+        """Is Dataset equidistant in time?"""
+        if len(self.time) < 3:
+            return True
+        return len(self.time.to_series().diff().dropna().unique()) == 1
+
+    @property
+    def data(self) -> Sequence[np.ndarray]:
+        """Data as list of numpy arrays"""
+        return [x.to_numpy() for x in self]
+
+    @property
+    def n_timesteps(self):
+        """Number of time steps"""
+        return len(self.time)
+
+    @property
+    def items(self):
+        """ItemInfo for each of the DataArrays as a list"""
+        return [x.item for x in self]
+
+    @property
+    def names(self):
+        """Name of each of the DataArrays as a list"""
+        return [da.name for da in self]
+
+    @property
+    def n_items(self):
+        """Number of items/DataArrays, equivalent to len()"""
+        return len(self._data_vars)
+
+    @property
+    def ndim(self):
+        """Number of data dimensions of each DataArray"""
+        return self[0].ndim
+
+    @property
+    def dims(self):
+        """Named data dimensions of each DataArray"""
+        return self[0].dims
+
+    @property
+    def shape(self):
+        """Shape of each DataArray"""
+        return self[0].shape
+
+    # TODO: remove this
+    @property
+    def n_elements(self):
+        """Number of spatial elements/points"""
+        n_elem = np.prod(self.shape)
+        if self.n_timesteps > 1:
+            n_elem = int(n_elem / self.n_timesteps)
+        return n_elem
+
+    @property
+    def deletevalue(self):
+        """File delete value"""
+        return self[0].deletevalue
+
+    @property
     def geometry(self):
+        """Geometry of each DataArray"""
         return list(self)[0].geometry
 
     @property
@@ -333,10 +417,22 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             return "Empty <mikeio.Dataset>"
 
         out = ["<mikeio.Dataset>"]
+
+        gtxt = list(self)[0]._geometry_txt()
+        if gtxt:
+            out.append(gtxt)
+
         dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
         dimsstr = ", ".join(dims)
         out.append(f"Dimensions: ({dimsstr})")
-        out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+
+        timetxt = (
+            f"Time: {self.time[0]} (time-invariant)"
+            if self.n_timesteps == 1
+            else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
+        )
+        out.append(timetxt)
+
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
         if self.n_items > 10:
@@ -353,10 +449,6 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def __iter__(self):
         yield from self._data_vars.values()
-
-    @property
-    def names(self):
-        return [da.name for da in self]
 
     def __setitem__(self, key, value):
         self.__set_or_insert_item(key, value, insert=False)
@@ -470,21 +562,36 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
 
+        # select time steps
+        if self._is_key_time(key):
+            # key = self.time.get_loc(key)   
+            # TODO: work in progress         
+            try:
+                key = pd.DatetimeIndex(key)
+            except:
+                key = pd.DatetimeIndex([key])
+        if isinstance(key, pd.DatetimeIndex):
+            key = slice(key[0], key[-1])
+            # TODO: work in progress
+            # step0 = 0 if key[0]<self.time self.time.get_indexer(key[0])
+            # step1 = self.time.get_indexer(key[-1])
+            # time_steps = self.time.get_indexer(key)
+            # return self.isel(, axis=0)
         if isinstance(key, slice):
-            # TODO: do we still want this behaviour?
-            # slicing = slicing in time???
-            # better to use sel or isel for this
-            if self._slice_is_time_slice(key):
-                # TODO warnings.warn()
-                s = self.time.slice_indexer(key.start, key.stop)
-                time_steps = list(range(s.start, s.stop))
+            if self._is_slice_time_slice(key):
+                try:
+                    s = self.time.slice_indexer(key.start, key.stop)
+                    time_steps = list(range(s.start, s.stop))
+                except:
+                    time_steps = list(range(*key.indices(len(self.time))))
                 return self.isel(time_steps, axis=0)
 
+        # select items
         key = self._key_to_str(key)
         if isinstance(key, str):
             return self._data_vars[key]
 
-        if isinstance(key, list):
+        if isinstance(key, Iterable):
             data_vars = {}
             for v in key:
                 data_vars[v] = self._data_vars[v]
@@ -492,28 +599,26 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
-    def _slice_is_time_slice(self, s):
+    def _is_slice_time_slice(self, s):
         if (s.start is None) and (s.stop is None):
             return False
         if s.start is not None:
-            if isinstance(s.start, int):
-                return False
-            if (
-                isinstance(s.start, str)
-                and (len(s.start) > 0)
-                and (not s.start[0].isnumeric())
-            ):
+            if not self._is_key_time(s.start):
                 return False
         if s.stop is not None:
-            if isinstance(s.stop, int):
-                return False
-            if (
-                isinstance(s.stop, str)
-                and (len(s.stop) > 0)
-                and (not s.stop[0].isnumeric())
-            ):
+            if not self._is_key_time(s.stop):
                 return False
         return True
+
+    def _is_key_time(self, key):
+        if isinstance(key, str) and key in self.names:
+            return False
+        if isinstance(key, str) and len(key) > 0 and key[0].isnumeric():
+            # TODO: try to parse with pandas
+            return True
+        if isinstance(key, (datetime, np.datetime64, pd.Timestamp)):
+            return True
+        return False
 
     def _key_to_str(self, key):
 
@@ -878,13 +983,16 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         Shape: (3, 2)
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
+        if idx is None or (not np.isscalar(idx) and len(idx) == 0):
+            return None
 
         axis = du._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
+            idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
             time = self.time[idx]
             items = self.items
             geometry = self.geometry
-            zn = self._zn[idx] if self._zn else None
+            zn = None if self._zn is None else self._zn[idx]
         else:
             time = self.time
             items = self.items
@@ -1330,78 +1438,6 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         for _ in range(n_items):
             data.append(dati.copy())
         return data
-
-    @property
-    def is_equidistant(self):
-        """Is Dataset equidistant in time?"""
-        if len(self.time) < 3:
-            return True
-        return len(self.time.to_series().diff().dropna().unique()) == 1
-
-    @property
-    def start_time(self):
-        """First time instance (as datetime)"""
-        return self.time[0].to_pydatetime()
-
-    @property
-    def end_time(self):
-        """Last time instance (as datetime)"""
-        return self.time[-1].to_pydatetime()
-
-    @property
-    def timestep(self):
-        """Time step in seconds if equidistant (and at
-        least two time instances); otherwise None
-        """
-        dt = None
-        if len(self.time) > 1:
-            if self.is_equidistant:
-                dt = (self.time[1] - self.time[0]).total_seconds()
-        return dt
-
-    @property
-    def data(self) -> Sequence[np.ndarray]:
-        return [x.to_numpy() for x in self._data_vars.values()]
-
-    @property
-    def n_timesteps(self):
-        """Number of time steps"""
-        return len(self.time)
-
-    @property
-    def n_items(self):
-        """Number of items"""
-        return len(self._data_vars)
-
-    @property
-    def items(self):
-        return [x.item for x in self._data_vars.values()]
-
-    @property
-    def ndim(self):
-        return self[0].ndim
-
-    @property
-    def dims(self):
-        return self[0].dims
-
-    @property
-    def shape(self):
-        """Shape of each item"""
-        return self[0].shape
-
-    @property
-    def n_elements(self):
-        """Number of spatial elements/points"""
-        n_elem = np.prod(self.shape)
-        if self.n_timesteps > 1:
-            n_elem = int(n_elem / self.n_timesteps)
-        return n_elem
-
-    @property
-    def deletevalue(self):
-        """File delete value"""
-        return self[0].deletevalue
 
     def to_dfs(self, filename):
         if self.geometry is None:

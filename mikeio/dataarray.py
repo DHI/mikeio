@@ -1022,11 +1022,9 @@ class DataArray(TimeSeries):
     def dtype(self):
         return self.values.dtype
 
-    def __repr__(self):
-
-        out = ["<mikeio.DataArray>"]
-        if self.name is not None:
-            out.append(f"Name: {self.name}")
+    def _geometry_txt(self):
+        gtxt = None
+        # TODO: grid geometry
         if isinstance(self.geometry, GeometryFM):
             gtxt = f"Geometry: {self.geometry.type_name}"
             if self.geometry.is_layered:
@@ -1037,8 +1035,16 @@ class DataArray(TimeSeries):
                 )
                 gtxt += f" ({self.geometry.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
 
-            out.append(gtxt)
+        return gtxt
 
+    def __repr__(self):
+
+        out = ["<mikeio.DataArray>"]
+        if self.name is not None:
+            out.append(f"Name: {self.name}")
+        gtxt = self._geometry_txt()
+        if gtxt: 
+            out.append(gtxt)
         dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
         dimsstr = ", ".join(dims)
         out.append(f"Dimensions: ({dimsstr})")
