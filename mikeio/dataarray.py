@@ -1043,7 +1043,7 @@ class DataArray(TimeSeries):
         if self.name is not None:
             out.append(f"Name: {self.name}")
         gtxt = self._geometry_txt()
-        if gtxt: 
+        if gtxt:
             out.append(gtxt)
         dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
         dimsstr = ", ".join(dims)
