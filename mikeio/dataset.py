@@ -564,15 +564,15 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         # select time steps
         if self._is_key_time(key):
-            # key = self.time.get_loc(key)   
-            # TODO: work in progress         
+            # key = self.time.get_loc(key)
+            # TODO: work in progress
             try:
                 key = pd.DatetimeIndex(key)
             except:
                 key = pd.DatetimeIndex([key])
         if isinstance(key, pd.DatetimeIndex):
             key = slice(key[0], key[-1])
-            # TODO: work in progress
+            # TODO: work-in-progress
             # step0 = 0 if key[0]<self.time self.time.get_indexer(key[0])
             # step1 = self.time.get_indexer(key[-1])
             # time_steps = self.time.get_indexer(key)
