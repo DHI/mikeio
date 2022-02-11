@@ -1,6 +1,5 @@
 from typing import Iterable, Sequence, Union, Mapping, Optional
 import warnings
-from isort import file
 import numpy as np
 import pandas as pd
 from copy import deepcopy
