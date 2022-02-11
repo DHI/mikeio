@@ -563,20 +563,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
 
         # select time steps
-        if self._is_key_time(key):
-            # key = self.time.get_loc(key)
-            # TODO: work in progress
-            try:
-                key = pd.DatetimeIndex(key)
-            except:
-                key = pd.DatetimeIndex([key])
-        if isinstance(key, pd.DatetimeIndex):
-            key = slice(key[0], key[-1])
-            # TODO: work-in-progress
-            # step0 = 0 if key[0]<self.time self.time.get_indexer(key[0])
-            # step1 = self.time.get_indexer(key[-1])
-            # time_steps = self.time.get_indexer(key)
-            # return self.isel(, axis=0)
+        if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
+            time_steps = pd.Series(range(len(self.time)), index=self.time)[key]
+            time_steps = (
+                [time_steps] if np.isscalar(time_steps) else time_steps.to_numpy()
+            )
+            return self.isel(time_steps, axis=0)
         if isinstance(key, slice):
             if self._is_slice_time_slice(key):
                 try:

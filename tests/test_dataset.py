@@ -302,7 +302,13 @@ def test_subset_with_datetime():
     ds = Dataset(data, time, items)
 
     dssub = ds[datetime(2000, 1, 2)]
-    assert len(dssub.time) == 1  # TODO - this should give 25
+    assert dssub.n_timesteps == 1
+
+    dssub = ds[pd.Timestamp(datetime(2000, 1, 2))]
+    assert dssub.n_timesteps == 1
+
+    dssub = ds["2000-1-2"]
+    assert dssub.n_timesteps == 24
 
 
 def test_select_item_by_name():
