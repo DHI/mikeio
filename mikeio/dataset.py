@@ -564,8 +564,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         # select time steps
         if self._is_key_time(key):
-            # key = self.time.get_loc(key)   
-            # TODO: work in progress         
+            # key = self.time.get_loc(key)
+            # TODO: work in progress
             try:
                 key = pd.DatetimeIndex(key)
             except:
