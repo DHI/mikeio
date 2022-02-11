@@ -138,44 +138,41 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
       1:  VarFun01 <Water Level> (meter)
     """
 
-    # @staticmethod
-    # def from_data_time_items(
-    #     data: Union[Sequence[np.ndarray], float],
-    #     time: Union[pd.DatetimeIndex, str],
-    #     items: Union[Sequence[ItemInfo], Sequence[EUMType], Sequence[str]] = None,
-    #     geometry: _Geometry = None,
-    #     zn=None,
-    #     dims: Optional[Sequence[str]] = None,
-    # ):
+    def __init__(
+        self,
+        data: Union[Mapping[str, DataArray], Iterable[DataArray]],
+        time=None,
+        items=None,
+        geometry: _Geometry = None,
+        zn=None,
+        dims=None,
+    ):
+        if self._is_DataArrays(data):
+            validate = True
+        else:
+            data = self._create_dataarrays(
+                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
+            )
+            validate = False
+        return self._init_from_DataArrays(data, validate=validate)
 
-    #     item_infos = []
-    #     time = du._parse_time(time)
-
-    #     if isinstance(data, Sequence) and hasattr(data[0], "shape"):
-    #         n_items = len(data)
-    #         n_timesteps = data[0].shape[0]
-    #     else:
-    #         raise TypeError(
-    #             f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
-    #         )
-
-    #     item_infos = Dataset._parse_items(items, n_items)
-
-    #     if len(time) != n_timesteps:
-    #         raise ValueError(
-    #             f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
-    #         )
-    #     time = pd.DatetimeIndex(time)
-
-    #     data_vars = {}
-    #     for dd, it in zip(data, item_infos):
-    #         data_vars[it.name] = DataArray(
-    #             data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
-    #         )
-
-    #     ds = Dataset(data_vars)
-
-    #     return ds
+    @staticmethod
+    def _is_DataArrays(data):
+        """Check if input is Sequence/Mapping of DataArrays"""
+        if isinstance(data, (Dataset, DataArray)):
+            return True
+        if isinstance(data, Mapping):
+            for da in data.values():
+                if not isinstance(da, DataArray):
+                    raise TypeError("Please provide List/Mapping of DataArrays")
+            return True
+        if isinstance(data, Iterable):
+            for da in data:
+                if not isinstance(da, DataArray):
+                    return False
+                    # raise TypeError("Please provide List/Mapping of DataArrays")
+            return True
+        return False
 
     @staticmethod
     def _create_dataarrays(
@@ -186,7 +183,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         zn=None,
         dims=None,
     ):
-        if not isinstance(data, Sequence):
+        if not isinstance(data, Iterable):
             data = [data]
         items = Dataset._parse_items(items, len(data))
 
@@ -197,6 +194,24 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
             )
         return data_vars
+
+    def _init_from_DataArrays(self, data, validate=True):
+        """Initialize Dataset object with Iterable of DataArrays"""
+        self._data_vars = self._DataArrays_as_mapping(data)
+
+        if (len(self) > 1) and validate:
+            first = self[0]
+            for da in self[1:]:
+                first._is_compatible(da)
+
+        self._check_all_different_ids(self._data_vars.values())
+
+        self.__itemattr = []
+        for key, value in self._data_vars.items():
+            self._set_name_attr(key, value)
+
+        if len(self.items) > 1:
+            self.plot = _DatasetPlotter(self)
 
     @staticmethod
     def _parse_items(items, n_items_data):
@@ -230,20 +245,13 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if isinstance(data, Mapping):
             if isinstance(data, Dataset):
                 return data
-            for da in data.values():
-                if not isinstance(da, DataArray):
-                    raise TypeError("Please provide List/Mapping of DataArrays")
-            Dataset._validate_item_names_and_keys(data)
+            data = Dataset._validate_item_names_and_keys(data)
             _ = Dataset._unique_item_names(data.values())
             return data
 
         if isinstance(data, DataArray):
             data = [data]
-        if not isinstance(data, Iterable):
-            raise TypeError("Please provide List/Mapping of DataArrays")
-        for da in data:
-            if not isinstance(da, DataArray):
-                raise TypeError("Please provide List/Mapping of DataArrays")
+
         item_names = Dataset._unique_item_names(data)
 
         data_map = {}
@@ -258,8 +266,10 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 da.name = key
             elif da.name != key:
                 warnings.warn(
-                    f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. This may lead to confusion!"
+                    f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. Item name will be replaced with key."
                 )
+                da.name == key
+        return data_map
 
     @staticmethod
     def _unique_item_names(das: Sequence[DataArray]):
@@ -270,24 +280,6 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             )
             # TODO: make a list of unique items names
         return item_names
-
-    def _init_from_DataArrays(self, data, validate=True):
-        """Initialize Dataset object with Iterable of DataArrays"""
-        self.data_vars = self._DataArrays_as_mapping(data)
-
-        if (len(self) > 1) and validate:
-            first = self[0]
-            for da in self[1:]:
-                first._is_compatible(da)
-
-        self._check_all_different_ids(self.data_vars.values())
-
-        self.__itemattr = []
-        for key, value in self.data_vars.items():
-            self._set_name_attr(key, value)
-
-        if len(self.items) > 1:
-            self.plot = _DatasetPlotter(self)
 
     @staticmethod
     def _check_all_different_ids(das):
@@ -311,46 +303,30 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def _check_already_present(self, new_da):
         """Is the DataArray already present in the Dataset?"""
-        for da in self.data_vars.values():
+        for da in self:
             self._id_of_DataArrays_equal(da, new_da)
 
-    def __init__(
-        self,
-        data: Union[Mapping[str, DataArray], Iterable[DataArray]],
-        time=None,
-        items=None,
-        geometry: _Geometry = None,
-        zn=None,
-        dims=None,
-    ):
-        try:
-            return self._init_from_DataArrays(data)
-        except TypeError:
-            # if not Iterable[DataArray] then let us create it...
-            dataarrays = self._create_dataarrays(
-                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
-            )
-            return self._init_from_DataArrays(dataarrays, validate=False)
+    # ---- end of init ---------
 
     @property
     def time(self):
-        return list(self.data_vars.values())[0].time
+        return list(self)[0].time
 
     @time.setter
     def time(self, new_time):
         new_time = du._parse_time(new_time)
         if len(self.time) != len(new_time):
             raise ValueError("Length of new time is wrong")
-        for da in self.data_vars.values():
+        for da in self:
             da.time = new_time
 
     @property
     def geometry(self):
-        return list(self.data_vars.values())[0].geometry
+        return list(self)[0].geometry
 
     @property
     def _zn(self):
-        return list(self.data_vars.values())[0]._zn
+        return list(self)[0]._zn
 
     def __repr__(self):
         if len(self) == 0:
@@ -373,10 +349,10 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return str.join("\n", out)
 
     def __len__(self):
-        return len(self.data_vars)
+        return len(self._data_vars)
 
     def __iter__(self):
-        yield from self.data_vars.values()
+        yield from self._data_vars.values()
 
     @property
     def names(self):
@@ -396,40 +372,43 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if len(self) > 0:
             self[0]._is_compatible(value)
 
+        item_name = value.name
+
         if isinstance(key, int):
             is_replacement = not insert
-            item_name = value.name
             if is_replacement:
                 key_str = self.names[key]
-                self.data_vars[key_str] = value
+                self._data_vars[key_str] = value
             else:
                 self._check_already_present(value)
-                item_names = [it.name for it in self.items]
-                if item_name in item_names:
+
+                if item_name in self.names:
                     raise ValueError(
-                        f"Item name {item_name} already in Dataset ({item_names})"
+                        f"Item name {item_name} already in Dataset ({self.names})"
                     )
-                all_keys = list(self.data_vars.keys())
-                if item_name in all_keys:
-                    raise ValueError(
-                        f"Item name {item_name} already in Dataset keys ({all_keys})"
-                    )
+                all_keys = list(self._data_vars.keys())
                 all_keys.insert(key, item_name)
 
                 data_vars = {}
                 for k in all_keys:
-                    if k in self.data_vars.keys():
-                        data_vars[k] = self.data_vars[k]
+                    if k in self._data_vars.keys():
+                        data_vars[k] = self._data_vars[k]
                     else:
                         data_vars[k] = value
-                self.data_vars = data_vars
+                self._data_vars = data_vars
 
             self._set_name_attr(item_name, value)
         else:
             is_replacement = key in self.names
+            if key != item_name:
+                # TODO: what would be best in this situation?
+                warnings.warn(
+                    f"key '{key}' and item name '{item_name}' mismatch! item name will be replaced with key!"
+                )
+                value.name = key
             if not is_replacement:
                 self._check_already_present(value)
-            self.data_vars[key] = value
+            self._data_vars[key] = value
             self._set_name_attr(key, value)
 
         if len(self) == 2 and not is_replacement:
@@ -463,6 +442,15 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         self.__delitem__(key)
 
+    def popitem(self):
+        """Pop first DataArray from Dataset
+
+        See also
+        --------
+        pop
+        """
+        return self.pop(0)
+
     def _set_name_attr(self, name: str, value: DataArray):
         name = du._to_safe_name(name)
         item_names = [du._to_safe_name(n) for n in self.names]
@@ -494,12 +482,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         key = self._key_to_str(key)
         if isinstance(key, str):
-            return self.data_vars[key]
+            return self._data_vars[key]
 
         if isinstance(key, list):
             data_vars = {}
             for v in key:
-                data_vars[v] = self.data_vars[v]
+                data_vars[v] = self._data_vars[v]
             return Dataset(data_vars)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
@@ -532,7 +520,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if isinstance(key, str):
             return key
         if isinstance(key, int):
-            return list(self.data_vars.keys())[key]
+            return list(self._data_vars.keys())[key]
         if isinstance(key, slice):
             s = key.indices(len(self))
             return self._key_to_str(list(range(*s)))
@@ -548,8 +536,24 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def __delitem__(self, key):
 
         key = self._key_to_str(key)
-        self.data_vars.__delitem__(key)
+        self._data_vars.__delitem__(key)
         self._del_name_attr(key)
+
+    def rename(self, mapper: Mapping[str, str], inplace=False):
+
+        if inplace:
+            ds = self
+        else:
+            ds = self.copy()
+
+        for old_name, new_name in mapper.items():
+            da = ds._data_vars.pop(old_name)
+            da.name = new_name
+            ds._data_vars[new_name] = da
+            self._del_name_attr(old_name)
+            self._set_name_attr(new_name, da)
+
+        return ds
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -647,27 +651,13 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def to_numpy(self):
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
 
+        Note: the output will be
+
         Returns
         -------
         np.ndarray
         """
         return np.stack(self.data)
-
-    def rename(self, mapper: Mapping[str, str], inplace=False):
-
-        if inplace:
-            ds = self
-        else:
-            ds = self.copy()
-
-        for old_name, new_name in mapper.items():
-            da = ds.data_vars.pop(old_name)
-            da.name = new_name
-            ds.data_vars[new_name] = da
-            self._del_name_attr(old_name)
-            self._set_name_attr(new_name, da)
-
-        return ds
 
     @classmethod
     def combine(cls, *datasets):
@@ -759,7 +749,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             raise ValueError("All timesteps must match")
         ds = self.copy() if copy else self
 
-        for key, value in other.data_vars.items():
+        for key, value in other._data_vars.items():
             if key != "Z coordinate":
                 ds[key] = value
 
@@ -852,8 +842,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def flipud(self):
         """Flip dataset updside down"""
-        self.data_vars = {
-            key: value.flipud() for (key, value) in self.data_vars.items()
+        self._data_vars = {
+            key: value.flipud() for (key, value) in self._data_vars.items()
         }
         return self
 
@@ -1391,7 +1381,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     @property
     def data(self) -> Sequence[np.ndarray]:
-        return [x.to_numpy() for x in self.data_vars.values()]
+        return [x.to_numpy() for x in self._data_vars.values()]
 
     @property
     def n_timesteps(self):
@@ -1401,11 +1391,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     @property
     def n_items(self):
         """Number of items"""
-        return len(self.data_vars)
+        return len(self._data_vars)
 
     @property
     def items(self):
-        return [x.item for x in self.data_vars.values()]
+        return [x.item for x in self._data_vars.values()]
 
     @property
     def ndim(self):
