@@ -5,21 +5,7 @@ from .geometry import _Geometry, BoundingBox
 from ..eum import EUMType, EUMUnit
 
 
-class GeometryGrid(_Geometry):
-    def __init__(
-        self,
-        projection=None,
-        origin=None,
-        orientation=None,
-    ) -> None:
-        super().__init__()
-
-        self._projstr = projection  # TODO Validation
-        self._origin = origin
-        self._orientation = orientation
-
-
-class Grid1D(GeometryGrid):
+class Grid1D:
     def __init__(
         self,
         x0=None,
@@ -30,7 +16,9 @@ class Grid1D(GeometryGrid):
         orientation=0.0,
     ):
         """Create equidistant 1D spatial geometry"""
-        super().__init__(projection=projection, origin=origin, orientation=orientation)
+        self._projection = projection
+        self._origin = origin
+        self._orientation = orientation
 
         if n is None:
             raise ValueError("n must be provided")
@@ -76,13 +64,18 @@ class Grid1D(GeometryGrid):
         return self._nx
 
 
-class Grid2D(GeometryGrid):
-    """2D grid"""
+class Grid2D:
+    """2D horizontal grid
+    Origin in the center of cell in lower-left corner
+    x and y axes are increasing and equidistant
+    """
 
     @property
     def x(self):
         """array of x-coordinates (single row)"""
-        return self._x + self._origin[0]  # TODO
+        if self._x is None:
+            self._x = self._create_axis(self._x0, self._dx, self._nx)
+        return self._x
 
     @property
     def x0(self):
@@ -107,12 +100,22 @@ class Grid2D(GeometryGrid):
     @property
     def y(self):
         """array of y-coordinates (single column)"""
-        return self._y + self._origin[1]  # TODO
+        if self._y is None:
+            self._y = self._create_axis(self.y0, self.dy, self.ny)
+        return self._y
 
     @property
     def y0(self):
         """center of lower end-point"""
         return self._y0
+
+    @property
+    def origin(self):
+        return (self._x0, self._y0)
+
+    @property
+    def projection_string(self):
+        return self._projection  # TODO
 
     @property
     def y1(self):
@@ -181,9 +184,7 @@ class Grid2D(GeometryGrid):
         shape=None,
         x0=None,
         y0=None,
-        projection=None,
-        origin=None,
-        orientation=0.0,
+        projection="LONG/LAT",
     ):
         """create 2d grid
 
@@ -202,11 +203,7 @@ class Grid2D(GeometryGrid):
         shape : (int, int), optional
             tuple with nx and ny describing number of points in each direction
             one of them can be None, in which case the value will be inferred
-        x0
-        y0
         projection_string
-        origin
-        orientation
 
         Examples
         --------
@@ -221,7 +218,8 @@ class Grid2D(GeometryGrid):
         >>> g = Grid2D(x, y)
 
         """
-        super().__init__(projection=projection, origin=origin, orientation=orientation)
+        self.orientation = 0.0
+        self._projection = projection
 
         self._x = None
         self._x0 = None
@@ -260,9 +258,6 @@ class Grid2D(GeometryGrid):
             self._create_from_nx_ny_dx_dy(x0, dx, shape[0], y0, dy, shape[1])
         else:
             raise ValueError("Please provide either bbox or both x and y")
-
-        if origin is None:
-            self._origin = (self.x0, self.y0)
 
     def _create_in_bbox(self, bbox, dxdy=None, shape=None):
         """create 2d grid in bounding box, specifying spacing or shape
@@ -334,12 +329,10 @@ class Grid2D(GeometryGrid):
         self._x0 = left + dx / 2
         self._dx = dx
         self._nx = nx
-        self._x = self._create_axis(self._x0, dx, nx)
 
         self._y0 = bottom + dy / 2
         self._dy = dy
         self._ny = ny
-        self._y = self._create_axis(self._y0, dy, ny)
 
     def _create_from_x_and_y(self, x, y):
 
@@ -352,14 +345,10 @@ class Grid2D(GeometryGrid):
         self._x0 = x[0]
         self._nx = len(x)
         self._dx = x[1] - x[0]
-        self._x = np.asarray(x)
 
         self._y0 = y[0]
         self._ny = len(y)
         self._dy = y[1] - y[0]
-        self._y = np.asarray(y)
-
-        self._xx, self._yy = None, None
 
     def _create_from_nx_ny_dx_dy(self, x0, dx, nx, y0, dy, ny):
         if nx is None:
@@ -455,14 +444,14 @@ class Grid2D(GeometryGrid):
                 x0=self.x0,
                 dx=self.dx,
                 n=self.nx,
-                projection=self.projection,
+                projection=self._projection,
             )
         else:
             return Grid1D(
                 x0=self.y0,
                 dx=self.dy,
                 n=self.ny,
-                projection=self.projection,
+                projection=self._projection,
             )
 
     def _to_element_table(self, index_base=0):
@@ -579,7 +568,3 @@ class Grid2D(GeometryGrid):
         )
         out.append(f"Number of grid points: {self.n}")
         return str.join("\n", out)
-
-
-class Grid3D(GeometryGrid):
-    pass

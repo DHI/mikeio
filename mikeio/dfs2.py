@@ -25,8 +25,8 @@ def _write_dfs2_header(filename, ds, title=""):
     factory = DfsFactory()
     _write_dfs2_spatial_axis(builder, factory, ds.geometry)
     proj = ds.geometry.projection_string
-    origin = ds.geometry._origin
-    orient = ds.geometry._orientation
+    origin = ds.geometry.origin
+    orient = ds.geometry.orientation
     proj = factory.CreateProjectionGeoOrigin(proj, *origin, orient)
     builder.SetGeographicalProjection(proj)
 
@@ -108,20 +108,33 @@ class Dfs2(_Dfs123):
         self._ny = None
         self._x0 = 0
         self._y0 = 0
+        self.geometry = None
 
         if filename:
             self._read_dfs2_header()
 
-            self.geometry = Grid2D(
-                dx=self._dx,
-                dy=self._dy,
-                shape=(self._nx, self._ny),
-                x0=self._x0,
-                y0=self._y0,
-                projection=self._projstr,
-                origin=[self._longitude, self._latitude],
-                orientation=self._orientation,
-            )
+            if self._orientation == 0.0:
+                if self._projstr == "LONG/LAT":
+                    self.geometry = Grid2D(
+                        dx=self._dx,
+                        dy=self._dy,
+                        shape=(self._nx, self._ny),
+                        x0=self._longitude,
+                        y0=self._latitude,
+                        projection=self._projstr,
+                    )
+                else:  # TODO make sense of projected coordinates
+                    self.geometry = Grid2D(
+                        dx=self._dx,
+                        dy=self._dy,
+                        shape=(self._nx, self._ny),
+                        x0=self._x0,
+                        y0=self._y0,
+                        projection=self._projstr,
+                    )
+            else:
+                pass
+                # self.geometry = RotatedGrid2D(shape=(self._nx, self._ny))
 
     def __repr__(self):
         out = ["<mikeio.Dfs2>"]

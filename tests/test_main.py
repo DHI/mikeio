@@ -23,12 +23,10 @@ def test_read_dfs1_generic_read():
 
 def test_read_dfs2_generic_read():
 
-    filename = r"tests/testdata/random.dfs2"
+    filename = "tests/testdata/gebco_sound.dfs2"
 
-    res = mikeio.read(filename, ["testing water level"])
-    data = res.data[0]
-    assert data[0, 88, 0] == 0
-    assert data.shape == (3, 100, 2)  # time, y, x
+    ds = mikeio.read(filename)
+    assert ds.geometry.nx == 216
 
 
 def test_read_dfsu_generic_read():
