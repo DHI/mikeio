@@ -509,9 +509,9 @@ def test_da_quantile_axis0(da2):
     # assert daq[3].to_numpy()[0, 0] == 0.2
 
     # assert daq.n_items == 2 * da2.n_items
-    # assert "Quantile 0.75, " in daq.iteminfos[1].name
-    # assert "Quantile 0.25, " in daq.iteminfos[2].name
-    # assert "Quantile 0.75, " in daq.iteminfos[3].name
+    # assert "Quantile 0.75, " in daq.items[1].name
+    # assert "Quantile 0.25, " in daq.items[2].name
+    # assert "Quantile 0.75, " in daq.items[3].name
 
 
 def test_write_dfs2(tmp_path):

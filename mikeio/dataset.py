@@ -54,8 +54,8 @@ class _DatasetPlotter:
         yval = self.ds[y].values.ravel()
         ax.scatter(xval, yval, **kwargs)
 
-        x = self.ds.iteminfos[x].name if isinstance(x, int) else x
-        y = self.ds.iteminfos[y].name if isinstance(y, int) else y
+        x = self.ds.items[x].name if isinstance(x, int) else x
+        y = self.ds.items[y].name if isinstance(y, int) else y
         ax.set_xlabel(x)
         ax.set_ylabel(y)
         return ax
@@ -286,7 +286,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         for key, value in self.data_vars.items():
             self._set_name_attr(key, value)
 
-        if len(self.iteminfos) > 1:
+        if len(self.items) > 1:
             self.plot = _DatasetPlotter(self)
 
     @staticmethod
@@ -367,7 +367,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             out.append(f"Number of items: {self.n_items}")
         else:
             out.append("Items:")
-            for i, item in enumerate(self.iteminfos):
+            for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
 
         return str.join("\n", out)
@@ -376,11 +376,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return len(self.data_vars)
 
     def __iter__(self):
-        yield from self.data_vars  # .values()
+        yield from self.data_vars.values()
 
-    def keys(self):
-        # should not be necessary
-        return self.data_vars.keys()
+    @property
+    def names(self):
+        return [da.name for da in self]
 
     def __setitem__(self, key, value):
         self.__set_or_insert_item(key, value, insert=False)
@@ -400,11 +400,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             is_replacement = not insert
             item_name = value.name
             if is_replacement:
-                key_str = list(self.keys())[key]
+                key_str = self.names[key]
                 self.data_vars[key_str] = value
             else:
                 self._check_already_present(value)
-                item_names = [it.name for it in self.iteminfos]
+                item_names = [it.name for it in self.items]
                 if item_name in item_names:
                     raise ValueError(
                         f"Item name {item_name} already in Dataset ({item_names})"
@@ -426,7 +426,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
             self._set_name_attr(item_name, value)
         else:
-            is_replacement = key in self.keys()
+            is_replacement = key in self.names
             if not is_replacement:
                 self._check_already_present(value)
             self.data_vars[key] = value
@@ -465,7 +465,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def _set_name_attr(self, name: str, value: DataArray):
         name = du._to_safe_name(name)
-        item_names = [du._to_safe_name(n) for n in self.keys()]
+        item_names = [du._to_safe_name(n) for n in self.names]
         if (name not in item_names) and hasattr(self, name):
             # oh-no the item_name matches the name of another attr
             pass
@@ -584,12 +584,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         try:
             data = [
                 self[x].to_numpy() + sign * other[y].to_numpy()
-                for x, y in zip(self.iteminfos, other.iteminfos)
+                for x, y in zip(self.items, other.items)
             ]
         except:
             raise ValueError("Could not add data in Dataset")
         time = self.time.copy()
-        items = deepcopy(self.iteminfos)
+        items = deepcopy(self.items)
         return Dataset(data, time, items)
 
     def _check_datasets_match(self, other):
@@ -598,13 +598,13 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 f"Number of items must match ({self.n_items} and {other.n_items})"
             )
         for j in range(self.n_items):
-            if self.iteminfos[j].type != other.iteminfos[j].type:
+            if self.items[j].type != other.items[j].type:
                 raise ValueError(
-                    f"Item types must match. Item {j}: {self.iteminfos[j].type} != {other.iteminfos[j].type}"
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
                 )
-            if self.iteminfos[j].unit != other.iteminfos[j].unit:
+            if self.items[j].unit != other.items[j].unit:
                 raise ValueError(
-                    f"Item units must match. Item {j}: {self.iteminfos[j].unit} != {other.iteminfos[j].unit}"
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
                 )
         if not np.all(self.time == other.time):
             raise ValueError("All timesteps must match")
@@ -613,28 +613,28 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def _add_value(self, value):
         try:
-            data = [value + self[x].to_numpy() for x in self.iteminfos]
+            data = [value + self[x].to_numpy() for x in self.items]
         except:
             raise ValueError(f"{value} could not be added to Dataset")
-        items = deepcopy(self.iteminfos)
+        items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(data, time, items)
 
     def _multiply_value(self, value):
         try:
-            data = [value * self[x].to_numpy() for x in self.iteminfos]
+            data = [value * self[x].to_numpy() for x in self.items]
         except:
             raise ValueError(f"{value} could not be multiplied to Dataset")
-        items = deepcopy(self.iteminfos)
+        items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(data, time, items)
 
     def describe(self, **kwargs):
         """Generate descriptive statistics by wrapping pandas describe()"""
         all_df = [
-            pd.DataFrame(
-                self.data[j].flatten(), columns=[self.iteminfos[j].name]
-            ).describe(**kwargs)
+            pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(
+                **kwargs
+            )
             for j in range(self.n_items)
         ]
         return pd.concat(all_df, axis=1)
@@ -747,8 +747,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def _append_items(self, other, copy=True):
         if isinstance(other, DataArray):
             other = other._to_dataset()
-        item_names = {item.name for item in self.iteminfos}
-        other_names = {item.name for item in other.iteminfos}
+        item_names = {item.name for item in self.items}
+        other_names = {item.name for item in other.items}
 
         overlap = other_names.intersection(item_names)
         if len(overlap) != 0:
@@ -816,7 +816,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             newdata[j][idx1, :] = ds.data[j]
             newdata[j][idx2, :] = other.data[j]
 
-        return Dataset(newdata, newtime, ds.iteminfos)
+        return Dataset(newdata, newtime, ds.items)
 
     def _check_all_items_match(self, other):
         if self.n_items != other.n_items:
@@ -824,17 +824,17 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 f"Number of items must match ({self.n_items} and {other.n_items})"
             )
         for j in range(self.n_items):
-            if self.iteminfos[j].name != other.iteminfos[j].name:
+            if self.items[j].name != other.items[j].name:
                 raise ValueError(
-                    f"Item names must match. Item {j}: {self.iteminfos[j].name} != {other.iteminfos[j].name}"
+                    f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}"
                 )
-            if self.iteminfos[j].type != other.iteminfos[j].type:
+            if self.items[j].type != other.items[j].type:
                 raise ValueError(
-                    f"Item types must match. Item {j}: {self.iteminfos[j].type} != {other.iteminfos[j].type}"
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
                 )
-            if self.iteminfos[j].unit != other.iteminfos[j].unit:
+            if self.items[j].unit != other.items[j].unit:
                 raise ValueError(
-                    f"Item units must match. Item {j}: {self.iteminfos[j].unit} != {other.iteminfos[j].unit}"
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
                 )
 
     def dropna(self):
@@ -892,12 +892,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         axis = du._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
             time = self.time[idx]
-            items = self.iteminfos
+            items = self.items
             geometry = self.geometry
             zn = self._zn[idx] if self._zn else None
         else:
             time = self.time
-            items = self.iteminfos
+            items = self.items
             geometry = None  # TODO
             if hasattr(self.geometry, "isel"):
                 spatial_axis = du._axis_to_spatial_axis(self.dims, axis)
@@ -936,7 +936,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             dataset with aggregated values
         """
 
-        items = self.iteminfos
+        items = self.items
         axis = du._parse_axis(self.shape, self.dims, axis)
         time = du._time_by_agg_axis(self.time, axis)
         keepdims = du._keepdims_by_axis(axis)
@@ -1008,7 +1008,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
-        items_in = self.iteminfos
+        items_in = self.items
         axis = du._parse_axis(self.shape, self.dims, axis)
         time = du._time_by_agg_axis(self.time, axis)
         keepdims = du._keepdims_by_axis(axis)
@@ -1197,7 +1197,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         Dataset
         """
 
-        items = self.iteminfos
+        items = self.items
 
         # TODO: remove this?
         if (items[0].name == "Z coordinate") and (
@@ -1280,7 +1280,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             for da in self.values()
         ]
 
-        return Dataset(data, t_out_index, self.iteminfos.copy())
+        return Dataset(data, t_out_index, self.items.copy())
 
     @staticmethod
     def _interpolate_item(
@@ -1327,9 +1327,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             )
 
         if unit_in_name:
-            names = [f"{item.name} ({item.unit.name})" for item in self.iteminfos]
+            names = [f"{item.name} ({item.unit.name})" for item in self.items]
         else:
-            names = [item.name for item in self.iteminfos]
+            names = [item.name for item in self.items]
 
         data = np.asarray(self.data).T
         df = pd.DataFrame(data, columns=names)
@@ -1343,7 +1343,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return df
 
     def _ipython_key_completions_(self):
-        return [x.name for x in self.iteminfos]
+        return [x.name for x in self.items]
 
     @staticmethod
     def create_empty_data(n_items=1, n_timesteps=1, n_elements=None, shape=None):
@@ -1404,7 +1404,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return len(self.data_vars)
 
     @property
-    def iteminfos(self):
+    def items(self):
         return [x.item for x in self.data_vars.values()]
 
     @property

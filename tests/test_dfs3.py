@@ -46,7 +46,7 @@ def test_read_write(tmpdir):
     ds = dfs.read()
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
     start_time = datetime(2012, 1, 1)
-    items = ds.iteminfos
+    items = ds.items
     data = ds.data
     title = "test dfs3"
     dfs = Dfs3()

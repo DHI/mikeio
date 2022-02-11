@@ -120,7 +120,7 @@ Apart from the common flexible file functionality, the Dfsu has the following *p
 
     mikeio.Dfsu.deletevalue
     mikeio.Dfsu.n_items
-    mikeio.Dfsu.iteminfos
+    mikeio.Dfsu.items
     mikeio.Dfsu.n_timesteps
     mikeio.Dfsu.start_time
     mikeio.Dfsu.end_time

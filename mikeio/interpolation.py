@@ -74,7 +74,8 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
         interp_data_vars = {}
 
-        for key, da in ds.items():
+        for da in ds:
+            key = da.name
             nt, ne = da.shape
             idatitem = np.empty(shape=(nt, ni))
             for step in range(nt):
@@ -101,7 +102,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     idat = []
     ni = len(elem_ids)
     for datitem in data:
-        nt, ne = datitem.shape
+        nt, _ = datitem.shape
         idatitem = np.empty(shape=(nt, ni))
         for step in range(nt):
             idatitem[step, :] = _interp_itemstep(datitem[step], elem_ids, weights)

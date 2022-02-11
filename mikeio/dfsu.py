@@ -32,7 +32,7 @@ def _write_dfsu(filename: str, data: Dataset):
 
     filename = str(filename)
 
-    items = data.iteminfos
+    items = data.items
 
     dt = (data.time[1] - data.time[0]).total_seconds()
     n_time_steps = len(data.time)
@@ -69,13 +69,13 @@ def _write_dfsu(filename: str, data: Dataset):
     if dfsu_filetype != DfsuFileType.Dfsu2D:
         builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
 
-    for item in data.iteminfos:
+    for item in data.items:
         builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
 
     dfs = builder.CreateFile(filename)
 
     for i in range(n_time_steps):
-        for item in range(len(data.iteminfos)):  # TODO for da in data
+        for item in range(len(data.items)):  # TODO for da in data
             d = data[item].to_numpy()[
                 i, :
             ]  # TODO make sure to_numpy does not make a copy, then this is inefficient
@@ -131,10 +131,10 @@ class _UnstructuredFile:
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         ):
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
-        if self.iteminfos is not None:
+        if self.items is not None:
             if self.n_items < 10:
                 out.append("Items:")
-                for i, item in enumerate(self.iteminfos):
+                for i, item in enumerate(self.items):
                     out.append(f"  {i}:  {item}")
             else:
                 out.append(f"Number of items: {self.n_items}")
@@ -649,10 +649,10 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
     @property
     def n_items(self):
         """Number of items"""
-        return len(self.iteminfos)
+        return len(self.items)
 
     @property
-    def iteminfos(self):
+    def items(self):
         """List of items"""
         return self._items
 
@@ -966,7 +966,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         filename = str(filename)
 
         if isinstance(data, Dataset):
-            items = data.iteminfos
+            items = data.items
             start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 if not data.is_equidistant:
@@ -1298,7 +1298,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data=interpolated_dataset,
             start_time=dataset.time[0].to_pydatetime(),
             dt=dataset.timestep,
-            items=self.iteminfos,
+            items=self.items,
             dx=grid.dx,
             dy=grid.dy,
             coordinate=[

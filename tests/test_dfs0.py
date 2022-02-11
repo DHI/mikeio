@@ -153,8 +153,8 @@ def test_read_units_write_new(tmpdir):
     newdfs = Dfs0(tmpfile)
     ds2 = newdfs.read()
 
-    assert ds2.iteminfos[0].type == ds.iteminfos[0].type
-    assert ds2.iteminfos[0].unit == ds.iteminfos[0].unit
+    assert ds2.items[0].type == ds.items[0].type
+    assert ds2.items[0].unit == ds.items[0].unit
 
 
 def test_read_start_end_time():
@@ -332,10 +332,10 @@ def test_write_from_data_frame(tmpdir):
 
     ds = mikeio.read(filename)
 
-    assert len(ds.iteminfos) == 5
-    assert ds.iteminfos[0].type == EUMType.Concentration
-    assert ds.iteminfos[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert ds.iteminfos[0].data_value_type == 0
+    assert len(ds.items) == 5
+    assert ds.items[0].type == EUMType.Concentration
+    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert ds.items[0].data_value_type == 0
 
 
 def test_write_from_data_frame_monkey_patched(tmpdir):
@@ -355,7 +355,7 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
 
     ds = mikeio.read(filename)
 
-    assert len(ds.iteminfos) == 5
+    assert len(ds.items) == 5
     assert ds[0].type == EUMType.Concentration
     assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"].to_numpy()[3])
@@ -381,7 +381,7 @@ def test_write_from_pandas_series_monkey_patched(tmpdir):
 
     ds = mikeio.read(filename)
 
-    assert len(ds.iteminfos) == 1
+    assert len(ds.items) == 1
     assert ds[0].type == EUMType.Concentration
     assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"].to_numpy()[3])
@@ -410,12 +410,12 @@ def test_write_from_data_frame_different_types(tmpdir):
 
     ds = mikeio.read(filename)
 
-    assert len(ds.iteminfos) == 2
-    assert ds.iteminfos[0].type == EUMType.Concentration
-    assert ds.iteminfos[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert len(ds.items) == 2
+    assert ds.items[0].type == EUMType.Concentration
+    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
 
-    assert ds.iteminfos[1].type == EUMType.Undefined
-    assert ds.iteminfos[1].unit == EUMUnit.undefined
+    assert ds.items[1].type == EUMType.Undefined
+    assert ds.items[1].unit == EUMUnit.undefined
 
 
 def test_read_dfs0_single_item():
@@ -469,10 +469,10 @@ def test_read_dfs0_single_item_read_by_name():
     data = res.data
 
     assert len(data) == 2
-    assert res.iteminfos[0].name == "NotFun"
-    assert res.iteminfos[0].type == EUMType.Water_Level
-    assert res.iteminfos[0].unit == EUMUnit.meter
-    assert repr(res.iteminfos[0].unit) == "meter"
+    assert res.items[0].name == "NotFun"
+    assert res.items[0].type == EUMType.Water_Level
+    assert res.items[0].unit == EUMUnit.meter
+    assert repr(res.items[0].unit) == "meter"
 
 
 def test_read_dfs0_to_dataframe():
@@ -554,7 +554,7 @@ def test_write_accumulated_datatype(tmpdir):
     )
 
     newdfs = Dfs0(filename)
-    assert newdfs.iteminfos[0].data_value_type == 3
+    assert newdfs.items[0].data_value_type == 3
 
 
 def test_write_default_datatype(tmpdir):
@@ -576,7 +576,7 @@ def test_write_default_datatype(tmpdir):
     )
 
     newdfs = Dfs0(filename)
-    assert newdfs.iteminfos[0].data_value_type == 0
+    assert newdfs.items[0].data_value_type == 0
 
 
 def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
@@ -606,12 +606,12 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
 
     ds = mikeio.read(filename)
 
-    assert len(ds.iteminfos) == 1
+    assert len(ds.items) == 1
     assert ds[0].type == EUMType.Concentration
     assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
-    assert ds.iteminfos[0].data_value_type == 3
+    assert ds.items[0].data_value_type == 3
 
 
 def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
@@ -640,9 +640,9 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
 
     ds = mikeio.read(filename)
 
-    assert len(ds.iteminfos) == 5
+    assert len(ds.items) == 5
     assert ds[0].type == EUMType.Concentration
     assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
-    assert ds.iteminfos[0].data_value_type == 3
+    assert ds.items[0].data_value_type == 3

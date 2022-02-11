@@ -685,8 +685,8 @@ def quantile(
 
     qvec = [q] if np.isscalar(q) else q
     qtxt = [f"Quantile {q}" for q in qvec]
-    core_iteminfos = [dfs_i.ItemInfo[i] for i in item_numbers]
-    items = _get_repeated_items(core_iteminfos, prefixes=qtxt)
+    core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
+    items = _get_repeated_items(core_items, prefixes=qtxt)
 
     if is_dfsu_3d:
         items.insert(0, dfs_i.ItemInfo[0])

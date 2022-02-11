@@ -270,7 +270,7 @@ class _Dfs123(TimeSeries):
             self._coordinate = coordinate
 
         if isinstance(data, Dataset):
-            self._items = data.iteminfos
+            self._items = data.items
             self._start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
@@ -421,7 +421,7 @@ class _Dfs123(TimeSeries):
         return self._n_items
 
     @property
-    def iteminfos(self):
+    def items(self):
         "List of items"
         return self._items
 
