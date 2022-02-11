@@ -700,15 +700,16 @@ def test_aggregations():
         ds.nanmin(axis=axis)
         ds.nanmax(axis=axis)
 
-    assert ds.mean(axis=None).shape == (1,)
-    assert ds.mean(axis=(1, 2)).shape == (1,)
-    assert ds.mean(axis=(0, 1)).shape == (1, 216)
-    assert ds.mean(axis=(0, 2)).shape == (1, 264)
+    assert ds.mean().shape == (264, 216)
+    assert ds.mean(axis="time").shape == (264, 216)
     assert ds.mean(axis="spatial").shape == (1,)
     assert ds.mean(axis="space").shape == (1,)
 
     with pytest.raises(ValueError, match="space"):
         ds.mean(axis="spaghetti")
+
+    dsm = ds.mean(axis="time")
+    assert dsm.geometry is not None
 
 
 def test_weighted_average(tmpdir):
@@ -913,7 +914,7 @@ def test_dfsu3d_dataset():
 
     assert len(dsagg) == 2  # Salinity, Temperature
 
-    assert dsagg[0].shape[0] == 1
+    assert dsagg[0].shape[0] == 17118
 
     assert dsagg.time[0] == ds.time[0]  # Time-averaged data index by start time
 

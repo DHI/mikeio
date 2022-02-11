@@ -1,5 +1,5 @@
 import warnings
-from typing import Optional, Sequence, Union
+from typing import Optional, Sequence, Union, Iterable
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -367,6 +367,9 @@ class DataArray(TimeSeries):
         # dims_no_time = tuple([d for d in dims if d != "time"])
         # shape_no_time = shape[1:] if ("time" in dims) else shape
 
+        if len(dims) == 1 and dims[0] == "time":
+            return None
+
         if isinstance(geometry, GeometryFMPointSpectrum):
             pass
         elif isinstance(geometry, GeometryFM):
@@ -621,6 +624,23 @@ class DataArray(TimeSeries):
     def to_dfs(self, filename) -> None:
         self._to_dataset().to_dfs(filename)
 
+    def squeeze(self) -> "DataArray":
+        """
+        Remove axes of length 1
+
+        Returns
+        -------
+        DataArray
+        """
+
+        data = np.squeeze(self.values)
+
+        dims = [d for s, d in zip(self.shape, self.dims) if s != 1]
+
+        return DataArray(
+            data=data, time=self.time, geometry=self.geometry, zn=self._zn, dims=dims
+        )
+
     def max(self, axis="time") -> "DataArray":
         """Max value along an axis
 
@@ -759,7 +779,10 @@ class DataArray(TimeSeries):
         axis = du._parse_axis(self.shape, self.dims, axis)
         time = du._time_by_agg_axis(self.time, axis)
 
-        dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
+        if isinstance(axis, Iterable):
+            dims = tuple([d for i, d in enumerate(self.dims) if i not in axis])
+        else:
+            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
 
         data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
