@@ -1,5 +1,5 @@
 import warnings
-from typing import Optional, Sequence, Union, Iterable
+from typing import Optional, Sequence, Tuple, Union, Iterable
 import numpy as np
 import pandas as pd
 from copy import deepcopy
@@ -823,6 +823,26 @@ class DataArray(TimeSeries):
         nanquantile : quantile with NaN values ignored
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+
+    def interp(
+        # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
+        self,
+        grid: Union[
+            Tuple[float, float], Sequence[Tuple[float, float]], Grid2D, GeometryFM
+        ],
+        **kwargs,
+    ) -> "DataArray":
+
+        if isinstance(grid, Grid2D):
+            interpolant = self.geometry.get_2d_interpolant(grid.xy, **kwargs)
+            dai = self.geometry.interp2d(
+                self.to_numpy(), *interpolant, shape=(grid.ny, grid.nx)
+            )
+            dai = DataArray(data=dai, time=self.time, geometry=grid, item=self.item)
+
+            return dai
+        else:
+            raise NotImplementedError()
 
     def isel(self, idx, axis=1):
         """

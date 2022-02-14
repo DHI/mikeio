@@ -1,3 +1,4 @@
+from typing import Union
 import warnings
 import numpy as np
 from collections import namedtuple
@@ -5,8 +6,10 @@ from scipy.spatial import cKDTree
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
+
 from ..eum import EUMType, EUMUnit
 from .geometry import _Geometry, BoundingBox
+from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
 from .FM_utils import _get_node_centered_data, _to_polygons
@@ -423,6 +426,32 @@ class GeometryFM(_Geometry):
             p = np.array((x, y)).T
         d, elem_id = self._tree2d.query(p, k=n)
         return elem_id, d
+
+    def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None) -> Grid2D:
+        """get a 2d grid that covers the domain by specifying spacing or shape
+
+        Parameters
+        ----------
+        dx : float or (float, float), optional
+            grid resolution in x-direction (or in x- and y-direction)
+        dy : float, optional
+            grid resolution in y-direction
+        shape : (int, int), optional
+            tuple with nx and ny describing number of points in each direction
+            one of them can be None, in which case the value will be inferred
+        buffer : float, optional
+            positive to make the area larger, default=0
+            can be set to a small negative value to avoid NaN
+            values all around the domain.
+
+        Returns
+        -------
+        <mikeio.Grid2D>
+            2d grid
+        """
+        nc = self._geometry2d.node_coordinates
+        bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
+        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.

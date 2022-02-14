@@ -5,7 +5,7 @@ from .geometry import _Geometry, BoundingBox
 from ..eum import EUMType, EUMUnit
 
 
-class Grid1D:
+class Grid1D(_Geometry):
     def __init__(
         self,
         x0=None,
@@ -17,6 +17,7 @@ class Grid1D:
     ):
         """Create equidistant 1D spatial geometry"""
         self._projection = projection
+        self._projstr = projection  # TODO handle other types than string
         self._origin = origin
         self._orientation = orientation
 
@@ -64,7 +65,7 @@ class Grid1D:
         return self._nx
 
 
-class Grid2D:
+class Grid2D(_Geometry):
     """2D horizontal grid
     Origin in the center of cell in lower-left corner
     x and y axes are increasing and equidistant
@@ -220,6 +221,7 @@ class Grid2D:
         """
         self.orientation = 0.0
         self._projection = projection
+        self._projstr = projection  # TODO handle other types than string
 
         self._x = None
         self._x0 = None
@@ -425,12 +427,6 @@ class Grid2D:
                 jj[j] = (np.abs(self.y - xyp[1])).argmin()
 
         return ii, jj
-
-    def plot(self):
-        xn = self._centers_to_nodes(self.x)
-        yn = self._centers_to_nodes(self.y)
-        xn = xn + self._origin[0]
-        yn = yn + self._origin[1]
 
     def isel(self, idx, axis):
 
