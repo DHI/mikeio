@@ -562,7 +562,7 @@ class DataArray(TimeSeries):
         if self.dims != other.dims:
             problems.append("Dimension names (dims) must be the same")
 
-        if raise_error:
+        if raise_error and len(problems) > 0:
             raise ValueError(", ".join(problems))
 
         return len(problems) == 0
