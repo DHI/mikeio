@@ -541,7 +541,7 @@ class DataArray(TimeSeries):
             problems.append("shape of data must be the same")
         if self.n_timesteps != other.n_timesteps:
             problems.append("Number of timesteps must be the same")
-        if self.start_time != self.start_time:
+        if self.start_time != other.start_time:
             problems.append("start_time must be the same")
         if type(self.geometry) != type(other.geometry):
             problems.append("The type of geometry must be the same")
@@ -563,7 +563,7 @@ class DataArray(TimeSeries):
             problems.append("Dimension names (dims) must be the same")
 
         if raise_error:
-            raise ValueError("".join(problems))
+            raise ValueError(", ".join(problems))
 
         return len(problems) == 0
 
@@ -825,6 +825,45 @@ class DataArray(TimeSeries):
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
     def interp(
+        # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
+        self,
+        *,
+        x: float,
+        y: float,
+        z: float = None,
+        n_nearest=3,
+        interpolant=None,
+        **kwargs,
+    ) -> "DataArray":
+
+        if z is not None:
+            raise NotImplementedError()
+
+        xy = [(x, y)]
+
+        if interpolant is None:
+            interpolant = self.geometry.get_2d_interpolant(
+                xy, n_nearest=n_nearest, **kwargs
+            )
+        dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
+        dai = DataArray(data=dai, time=self.time, geometry=None, item=self.item)
+
+        return dai
+
+    def sel(
+        # TODO time
+        self,
+        *,
+        x: float,
+        y: float,
+        z: float = None,
+    ) -> "DataArray":
+
+        idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+
+        return self.isel(idx, axis="space")
+
+    def interp_like(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         grid: Union[

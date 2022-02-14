@@ -203,7 +203,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if (len(self) > 1) and validate:
             first = self[0]
             for da in self[1:]:
-                first._is_compatible(da)
+                first._is_compatible(da, raise_error=True)
 
         self._check_all_different_ids(self._data_vars.values())
 
@@ -1282,6 +1282,37 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
         return Dataset(res)
+
+    def sel(
+        # TODO time
+        self,
+        *,
+        x: float,
+        y: float,
+        z: float = None,
+    ) -> "Dataset":
+
+        idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+
+        return self.isel(idx, axis="space")
+
+    def interp(
+        self,
+        *,
+        x: float,
+        y: float,
+        z: float = None,
+        n_nearest=3,
+        **kwargs,
+    ) -> "Dataset":
+
+        xy = [(x, y)]
+
+        interpolant = self.geometry.get_2d_interpolant(
+            xy, n_nearest=n_nearest, **kwargs
+        )
+        das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
+        return Dataset(das)
 
     def interp_time(
         self,

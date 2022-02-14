@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import mikeio
-from mikeio import Dataset, Dfs0, Dfsu, Mesh
+from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh
 from mikeio.custom_exceptions import InvalidGeometry
 from mikeio.eum import ItemInfo
 from pytest import approx
@@ -1298,3 +1298,17 @@ def test_dataset_write_dfsu(tmp_path):
 
     ds2 = mikeio.read(outfilename)
     assert ds2.n_timesteps == 2
+
+
+def test_dataset_interp():
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+    da = ds.Surface_elevation
+
+    x = 360000
+    y = 6184000
+
+    dai = da.interp(x=x, y=y)
+
+    assert isinstance(dai, DataArray)
+    assert dai.shape == (ds.n_timesteps,)
+    assert dai.name == da.name

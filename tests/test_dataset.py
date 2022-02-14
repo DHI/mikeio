@@ -1340,3 +1340,31 @@ def test_append_items_same_name_error():
 
     with pytest.raises(ValueError):
         ds1.append_items(ds2)
+
+
+def test_incompatible_data_not_allowed():
+
+    da1 = mikeio.read("tests/testdata/HD2D.dfsu")[0]
+    da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
+
+    with pytest.raises(ValueError) as excinfo:
+        Dataset([da1, da2])
+
+    assert "shape" in str(excinfo.value).lower()
+
+    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
+    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
+
+    with pytest.raises(ValueError) as excinfo:
+        Dataset([da1, da2])
+
+    assert "name" in str(excinfo.value).lower()
+
+    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
+    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
+    da2.name = "Foo"
+
+    with pytest.raises(ValueError) as excinfo:
+        Dataset([da1, da2])
+
+    assert "time" in str(excinfo.value).lower()

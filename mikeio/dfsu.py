@@ -34,7 +34,10 @@ def _write_dfsu(filename: str, data: Dataset):
 
     items = data.items
 
-    dt = (data.time[1] - data.time[0]).total_seconds()
+    if len(data.time) == 1:
+        dt = 1  # TODO is there any sensible default?
+    else:
+        dt = (data.time[1] - data.time[0]).total_seconds()
     n_time_steps = len(data.time)
 
     geometry = data.geometry
@@ -76,9 +79,10 @@ def _write_dfsu(filename: str, data: Dataset):
 
     for i in range(n_time_steps):
         for item in range(len(data.items)):  # TODO for da in data
-            d = data[item].to_numpy()[
-                i, :
-            ]  # TODO make sure to_numpy does not make a copy, then this is inefficient
+            if "time" in data.dims:
+                d = data[item].to_numpy()[i, :]
+            else:
+                d = data[item].to_numpy()
             d[np.isnan(d)] = data.deletevalue
             dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
     dfs.Close()
