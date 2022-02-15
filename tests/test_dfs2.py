@@ -4,6 +4,7 @@ import datetime
 import numpy as np
 import pandas as pd
 import pytest
+import xarray
 
 import mikeio
 
@@ -517,3 +518,19 @@ def test_spatial_aggregation_dfs2_to_dfs0(tmp_path):
 
     assert dsnew.n_timesteps == ds.n_timesteps
     assert dsnew.n_items == ds.n_items
+
+
+def test_to_xarray():
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    da = ds[0]
+    xr_da = da.to_xarray()
+    assert isinstance(xr_da, xarray.DataArray)
+
+
+def test_da_plot():
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+    da = ds[0]
+    da.plot()
+    da.plot.contour()
+    da.plot.contourf()
+    da.plot.hist()
