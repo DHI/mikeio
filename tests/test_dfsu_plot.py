@@ -188,7 +188,7 @@ def test_plot_dfsu_vertical_profile():
 
 def test_da_plot():
 
-    ds = mikeio.read("tests/testdata/Fakelake.dfsu")
+    ds = mikeio.read("tests/testdata/FakeLake.dfsu")
     da = ds[0]
     da.plot()
     da.plot.contour()
