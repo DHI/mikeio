@@ -5,6 +5,7 @@ import matplotlib as mpl
 
 mpl.use("Agg")
 from mikeio import Dfsu, Mesh
+import mikeio
 
 ##################################################
 # these tests will not run if matplotlib is not installed
@@ -183,3 +184,20 @@ def test_plot_dfsu_vertical_profile():
     _, ax = plt.subplots()
     dfs.plot_vertical_profile(data, ax=ax)
     assert True
+
+
+def test_da_plot():
+
+    ds = mikeio.read("tests/testdata/Fakelake.dfsu")
+    da = ds[0]
+    da.plot()
+    da.plot.contour()
+    da.plot.contourf()
+    da.plot.outline()
+
+    dam = da.max()
+    dam.plot.contour()
+    dam.plot.contourf()
+    dam.plot.outline()
+
+    da.max("space").plot()
