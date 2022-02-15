@@ -14,7 +14,7 @@ Facilitates common data processing workflows for MIKE files.
 *For res1d and xns11 files use the related package [MIKE IO 1D](https://github.com/DHI/mikeio1d)*
 
 ## Upcoming release: MIKE IO 1.0
-MIKE IO 1.0 is planned to be released during the summer of 2022 and it have a lot of benefits, but also require some changes to your code. More details in the [discussion page](https://github.com/DHI/mikeio/discussions/279).
+MIKE IO 1.0 is planned to be released during the summer of 2022 and it will have a lot of benefits to make working with dfs files easier, but it also requires some changes to your existing code. More details in the [discussion page](https://github.com/DHI/mikeio/discussions/279).
 
 ### Important changes
 * New class `mikeio.DataArray` with usefule properties and methods
