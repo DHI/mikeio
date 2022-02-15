@@ -255,6 +255,9 @@ class Dataset(TimeSeries):
 
     def __getitem__(self, key):
 
+        warnings.warn(
+            "Indexing in MIKE IO 1.0 will not return a numpy array, but a mikeio.DataArray. More info: https://github.com/DHI/mikeio#readme"
+        )
         if isinstance(key, slice):
             s = self.time.slice_indexer(key.start, key.stop)
             time_steps = list(range(s.start, s.stop))
