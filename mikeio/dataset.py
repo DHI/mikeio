@@ -526,7 +526,6 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             time_steps = list(range(s.start, s.stop))
             return self.isel(time_steps, axis=0)
 
-
     def remove(self, key: Union[int, str]):
         """Remove DataArray from Dataset
 
