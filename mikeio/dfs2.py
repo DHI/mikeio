@@ -99,8 +99,8 @@ class Dfs2(_Dfs123):
 
     _ndim = 2
 
-    def __init__(self, filename=None):
-        super(Dfs2, self).__init__(filename)
+    def __init__(self, filename=None, dtype=np.float64):
+        super(Dfs2, self).__init__(filename, dtype)
 
         self._dx = None
         self._dy = None

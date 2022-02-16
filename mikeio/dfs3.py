@@ -14,8 +14,8 @@ from .dfs import _Dfs123
 
 
 class Dfs3(_Dfs123):
-    def __init__(self, filename=None):
-        super(Dfs3, self).__init__(filename)
+    def __init__(self, filename=None, dtype=np.float64):
+        super(Dfs3, self).__init__(filename, dtype)
         if filename:
             self._read_dfs3_header()
 

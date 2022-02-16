@@ -510,6 +510,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def insert(self, key: int, value: DataArray):
         """Insert DataArray in a specific position
 
+
         Parameters
         ----------
         key : int
@@ -519,6 +520,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             and must have a unique item name
         """
         self.__set_or_insert_item(key, value, insert=True)
+
+        if isinstance(key, slice):
+            s = self.time.slice_indexer(key.start, key.stop)
+            time_steps = list(range(s.start, s.stop))
+            return self.isel(time_steps, axis=0)
+
 
     def remove(self, key: Union[int, str]):
         """Remove DataArray from Dataset

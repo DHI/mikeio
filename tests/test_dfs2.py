@@ -527,6 +527,7 @@ def test_to_xarray():
     assert isinstance(xr_da, xarray.DataArray)
 
 
+
 def test_da_plot():
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
     da = ds[0]
@@ -534,3 +535,11 @@ def test_da_plot():
     da.plot.contour()
     da.plot.contourf()
     da.plot.hist()
+
+def test_read_single_precision():
+
+    dfs = Dfs2("tests/testdata/random.dfs2", dtype=np.float32)
+    ds = dfs.read(items=0)
+
+    assert len(ds) == 1
+    assert ds[0].dtype == np.float32

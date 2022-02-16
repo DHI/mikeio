@@ -20,7 +20,7 @@ class _Dfs123(TimeSeries):
 
     show_progress = False
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, dtype=np.float64):
         self._filename = str(filename)
         self._projstr = None
         self._start_time = None
@@ -34,6 +34,7 @@ class _Dfs123(TimeSeries):
         self._timeseries_unit = TimeStepUnit.SECOND
         self._dt = None
         self.geometry = None
+        self._dtype = dtype
 
     def read(self, items=None, time_steps=None) -> Dataset:
         """
@@ -65,7 +66,9 @@ class _Dfs123(TimeSeries):
         else:
             shape = (nt, self._nz, self._ny, self._nx)
 
-        data_list = [np.ndarray(shape=shape) for item in range(n_items)]
+        data_list = [
+            np.ndarray(shape=shape, dtype=self._dtype) for item in range(n_items)
+        ]
 
         t_seconds = np.zeros(len(time_steps))
 

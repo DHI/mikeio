@@ -1,5 +1,6 @@
 import os
 import warnings
+import numpy as np
 
 from mikecore.eum import eumUnit
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -12,8 +13,8 @@ from .spatial.grid_geometry import Grid1D
 class Dfs1(_Dfs123):
     _ndim = 1
 
-    def __init__(self, filename=None):
-        super(Dfs1, self).__init__(filename)
+    def __init__(self, filename=None, dtype=np.float64):
+        super(Dfs1, self).__init__(filename, dtype)
 
         self._dx = None
         self._nx = None
