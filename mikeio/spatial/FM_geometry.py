@@ -44,7 +44,7 @@ class GeometryFM(_Geometry):
         node_coordinates,
         element_table,
         codes=None,
-        projection_string=None,
+        projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
@@ -75,7 +75,7 @@ class GeometryFM(_Geometry):
             node_coordinates=node_coordinates,
             codes=codes,
             node_ids=node_ids,
-            projection_string=projection_string,
+            projection_string=projection,
         )
 
         self._set_elements(
@@ -111,6 +111,17 @@ class GeometryFM(_Geometry):
         self._projstr = "LONG/LAT" if projection_string is None else projection_string
 
     def _set_elements(self, element_table, element_ids=None, dfsu_type=None):
+
+        for i, e in enumerate(element_table):
+
+            if not isinstance(e, np.ndarray):
+                e = np.array(e)
+                element_table[i] = e
+            if e.max() > (self.node_ids.max()):
+                raise ValueError(
+                    f"Element table has node # {e.max()}. Max node id: {self.node_ids.max()}"
+                )
+
         self._element_table = element_table
         if element_ids is None:
             element_ids = np.arange(len(element_table))
@@ -690,7 +701,7 @@ class GeometryFM(_Geometry):
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
-            projection_string=self.projection_string,
+            projection=self.projection_string,
             element_table=elem_tbl,
             element_ids=self.element_ids[elements],
         )
@@ -949,7 +960,7 @@ class GeometryFMLayered(GeometryFM):
         node_coordinates=None,
         element_table=None,
         codes=None,
-        projection_string=None,
+        projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
@@ -960,7 +971,7 @@ class GeometryFMLayered(GeometryFM):
             node_coordinates=node_coordinates,
             element_table=element_table,
             codes=codes,
-            projection_string=projection_string,
+            projection=projection,
             dfsu_type=dfsu_type,
             element_ids=element_ids,
             node_ids=node_ids,
@@ -1009,7 +1020,7 @@ class GeometryFMLayered(GeometryFM):
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
-            projection_string=self.projection_string,
+            projection=self.projection_string,
             element_table=elem_tbl,
             element_ids=self.element_ids[elem_ids],
         )
@@ -1125,13 +1136,13 @@ class GeometryFMLayered(GeometryFM):
             elmt1 = elementTable[i]
             elmt2 = elementTable[i + 1]
 
-            if elmt1.size != elmt2.size:
+            if len(elmt1) != len(elmt2):
                 # elements with different number of nodes can not be on top of each other,
                 # so elmt2 must be another column, and elmt1 must be a top element
                 topLayerElments.append(i)
                 continue
 
-            if elmt1.size % 2 != 0:
+            if len(elmt1) % 2 != 0:
                 raise Exception(
                     "In a layered mesh, each element must have an even number of elements (element index "
                     + i
@@ -1139,7 +1150,7 @@ class GeometryFMLayered(GeometryFM):
                 )
 
             # Number of nodes in a 2D element
-            elmt2DSize = int(elmt1.size / 2)
+            elmt2DSize = len(elmt1) // 2
 
             for j in range(elmt2DSize):
                 if elmt2DSize > 2:

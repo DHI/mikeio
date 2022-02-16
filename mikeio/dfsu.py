@@ -181,7 +181,7 @@ class _UnstructuredFile:
             node_coordinates=nc,
             element_table=el_table,
             codes=codes,
-            projection_string=msh.ProjectionString,
+            projection=msh.ProjectionString,
             dfsu_type=self._type,
             element_ids=el_ids,
             node_ids=node_ids,
@@ -215,7 +215,7 @@ class _UnstructuredFile:
                     node_coordinates=nc,
                     element_table=el_table,
                     codes=codes,
-                    projection_string=dfs.Projection.WKTString,
+                    projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
                     element_ids=el_ids,
                     node_ids=node_ids,
@@ -227,7 +227,7 @@ class _UnstructuredFile:
                     node_coordinates=nc,
                     element_table=el_table,
                     codes=codes,
-                    projection_string=dfs.Projection.WKTString,
+                    projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
                     element_ids=el_ids,
                     node_ids=node_ids,
@@ -1225,6 +1225,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         """
         if self.is_spectral:
             raise ValueError("Method not supported for spectral dfsu!")
+
+        # TODO replace with interp_like(grid2d)
 
         # Process 'filename' argument
         if filename is None:
