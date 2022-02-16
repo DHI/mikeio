@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Sequence, Union
 import warnings
 import numpy as np
 from collections import namedtuple
@@ -155,7 +155,7 @@ class GeometryFM(_Geometry):
         return self._nc
 
     @property
-    def n_nodes(self):
+    def n_nodes(self) -> int:
         """Number of nodes"""
         return None if self._node_ids is None else len(self._node_ids)
 
@@ -164,7 +164,7 @@ class GeometryFM(_Geometry):
         return self._node_ids
 
     @property
-    def n_elements(self):
+    def n_elements(self) -> int:
         """Number of elements"""
         return None if self._element_ids is None else len(self._element_ids)
 
@@ -194,7 +194,7 @@ class GeometryFM(_Geometry):
         return self._type.name if self._type else "Mesh"
 
     @property
-    def is_2d(self):
+    def is_2d(self) -> bool:
         """Type is either mesh or Dfsu2D (2 horizontal dimensions)"""
         return self._type in (
             DfsuFileType.Dfsu2D,
@@ -203,7 +203,7 @@ class GeometryFM(_Geometry):
         )
 
     @property
-    def is_layered(self):
+    def is_layered(self) -> bool:
         """Type is layered dfsu (3d, vertical profile or vertical column)"""
         return self._type in (
             DfsuFileType.DfsuVerticalColumn,
@@ -214,7 +214,7 @@ class GeometryFM(_Geometry):
         )
 
     @property
-    def is_spectral(self):
+    def is_spectral(self) -> bool:
         """Type is spectral dfsu (point, line or area spectrum)"""
         return self._type in (
             DfsuFileType.DfsuSpectral0D,
@@ -223,7 +223,7 @@ class GeometryFM(_Geometry):
         )
 
     @property
-    def is_tri_only(self):
+    def is_tri_only(self) -> bool:
         """Does the mesh consist of triangles only?"""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
@@ -543,7 +543,7 @@ class GeometryFM(_Geometry):
             self._boundary_polylines = self._get_boundary_polylines()
         return self._boundary_polylines
 
-    def contains(self, points):
+    def contains(self, points) -> Sequence[bool]:
         """test if a list of points are contained by mesh
 
         Parameters
@@ -655,8 +655,10 @@ class GeometryFM(_Geometry):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
-    def elements_to_geometry(self, elements, node_layers="all"):
-        """export elements to new flexible file geometry
+    def elements_to_geometry(
+        self, elements, node_layers="all"
+    ) -> Union["GeometryFM", "GeometryFMLayered"]:
+        """export a selection of elements to new flexible file geometry
 
         Parameters
         ----------
