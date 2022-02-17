@@ -32,8 +32,6 @@ def _write_dfsu(filename: str, data: Dataset):
 
     filename = str(filename)
 
-    items = data.items
-
     if len(data.time) == 1:
         dt = 1  # TODO is there any sensible default?
     else:
@@ -41,24 +39,20 @@ def _write_dfsu(filename: str, data: Dataset):
     n_time_steps = len(data.time)
 
     geometry = data.geometry
-
-    # TODO
-    if geometry.is_layered:
-        raise NotImplementedError()
     dfsu_filetype = DfsuFileType.Dfsu2D
+
+    if geometry.is_layered:
+        dfsu_filetype = geometry._type.value
 
     xn = geometry.node_coordinates[:, 0]
     yn = geometry.node_coordinates[:, 1]
     zn = geometry.node_coordinates[:, 2]
 
-    # element_table += 1
-    elem_table = []
-    for j in range(geometry.n_elements):
-        elem_nodes = geometry.element_table[j]
-        elem_nodes = [nd + 1 for nd in elem_nodes]
-        elem_table.append(np.array(elem_nodes))
+    elem_table = [np.array(e) + 1 for e in geometry.element_table]
 
     builder = DfsuBuilder.Create(dfsu_filetype)
+    if dfsu_filetype != DfsuFileType.Dfsu2D:
+        builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
 
     builder.SetNodes(xn, yn, zn, geometry.codes)
     builder.SetElements(elem_table)
@@ -78,11 +72,13 @@ def _write_dfsu(filename: str, data: Dataset):
     dfs = builder.CreateFile(filename)
 
     for i in range(n_time_steps):
-        for item in range(len(data.items)):  # TODO for da in data
+        if geometry.is_layered:
+            dfs.WriteItemTimeStepNext(0, data._zn[i].astype(np.float32))
+        for da in data:
             if "time" in data.dims:
-                d = data[item].to_numpy()[i, :]
+                d = da.to_numpy()[i, :]
             else:
-                d = data[item].to_numpy()
+                d = da.to_numpy()
             d[np.isnan(d)] = data.deletevalue
             dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
     dfs.Close()

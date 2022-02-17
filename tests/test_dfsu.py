@@ -1300,6 +1300,16 @@ def test_dataset_write_dfsu(tmp_path):
     assert ds2.n_timesteps == 2
 
 
+def test_dataset_write_dfsu3d(tmp_path):
+
+    outfilename = tmp_path / "oresund_sigma_z.dfsu"
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time_steps=[0, 1])
+    ds.to_dfs(outfilename)
+
+    ds2 = mikeio.read(outfilename)
+    assert ds2.n_timesteps == 2
+
+
 def test_dataset_interp():
     ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
     da = ds.Surface_elevation
