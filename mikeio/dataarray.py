@@ -786,9 +786,14 @@ class DataArray(TimeSeries):
 
         data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
-        if axis == 0:
+        if axis == 0:  # time
             geometry = self.geometry
-            zn = self._zn[0]  # TODO first, last, mean, or static?
+
+            if self._zn is not None:
+                zn = self._zn[0]  # TODO first, last, mean, or static?
+            else:
+                zn = None
+
         else:
             geometry = None
             zn = None
