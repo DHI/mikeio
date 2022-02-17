@@ -788,10 +788,18 @@ class DataArray(TimeSeries):
 
         if axis == 0:
             geometry = self.geometry
+            zn = self._zn[0]  # TODO first, last, mean, or static?
         else:
             geometry = None
+            zn = None
+
         return DataArray(
-            data=data, time=time, item=self.item, geometry=geometry, dims=dims
+            data=data,
+            time=time,
+            item=self.item,
+            geometry=geometry,
+            dims=dims,
+            zn=zn,
         )
 
     def quantile(self, q, *, axis="time", **kwargs):

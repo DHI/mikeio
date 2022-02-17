@@ -73,7 +73,11 @@ def _write_dfsu(filename: str, data: Dataset):
 
     for i in range(n_time_steps):
         if geometry.is_layered:
-            dfs.WriteItemTimeStepNext(0, data._zn[i].astype(np.float32))
+            if "time" in data.dims:
+                zn = data._zn[i]
+            else:
+                zn = data._zn
+            dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
         for da in data:
             if "time" in data.dims:
                 d = da.to_numpy()[i, :]

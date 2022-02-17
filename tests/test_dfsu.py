@@ -1310,6 +1310,20 @@ def test_dataset_write_dfsu3d(tmp_path):
     assert ds2.n_timesteps == 2
 
 
+def test_dataset_write_dfsu3d_max(tmp_path):
+
+    outfilename = tmp_path / "oresund_sigma_z.dfsu"
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    assert ds._zn is not None
+    ds_max = ds.max("time")
+    assert ds_max._zn is not None
+    ds_max.to_dfs(outfilename)
+
+    ds2 = mikeio.read(outfilename)
+    assert ds2.n_timesteps == 1
+    assert ds2.geometry.is_layered
+
+
 def test_dataset_interp():
     ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
     da = ds.Surface_elevation
