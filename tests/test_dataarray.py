@@ -110,6 +110,12 @@ def test_dataarray_init():
     assert da.ndim == 1
     assert da.dims == ("x",)
 
+    da = DataArray(data=data)
+    assert da.n_timesteps == 1
+    assert da.ndim == 1
+    assert da.dims == ("x",)
+    assert da.time[0] == pd.Timestamp(2018, 1, 1)
+
 
 def test_dataarray_init_2d():
     nt = 10

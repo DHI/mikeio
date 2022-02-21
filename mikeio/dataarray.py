@@ -258,7 +258,7 @@ class DataArray(TimeSeries):
         self,
         data,
         # *,
-        time: Union[pd.DatetimeIndex, str],
+        time: Union[pd.DatetimeIndex, str] = None,
         item: ItemInfo = None,
         geometry: _Geometry = None,
         zn=None,
