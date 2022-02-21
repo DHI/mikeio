@@ -66,7 +66,7 @@ def _parse_time(time, data_shape=None):
         time = [pd.Timestamp(2018, 1, 1)]
     if isinstance(time, str) or (not isinstance(time, Iterable)):
         time = [time]
-    
+
     if not isinstance(time, pd.DatetimeIndex):
         time = pd.DatetimeIndex(time)
 
@@ -75,7 +75,7 @@ def _parse_time(time, data_shape=None):
             raise ValueError(
                 f"Number of timesteps ({len(time)}) does not fit with data shape {data_shape}"
             )
-    
+
     if not time.is_monotonic_increasing:
         raise ValueError(
             "Time must be monotonic increasing (only equal or increasing) instances."
