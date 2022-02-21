@@ -58,8 +58,13 @@ def test_parse_time_list_Timestamp():
     assert len(time) == 3
     assert time[-1] == pd.Timestamp(2018, 1, 3)
 
+
 def test_parse_time_decreasing():
-    times = [pd.Timestamp(2018, 2, 1), pd.Timestamp(2018, 1, 1), pd.Timestamp(2018, 1, 15)]
+    times = [
+        pd.Timestamp(2018, 2, 1),
+        pd.Timestamp(2018, 1, 1),
+        pd.Timestamp(2018, 1, 15),
+    ]
 
     with pytest.raises(ValueError, match="must be monotonic increasing"):
         du._parse_time(times)
