@@ -5,6 +5,13 @@ import pandas as pd
 import mikeio.data_utils as du
 
 
+def test_parse_time_None():
+    time = du._parse_time(None)
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 1
+    assert time[0] == pd.Timestamp(2018, 1, 1)
+
+
 def test_parse_time_constant_str():
     time = du._parse_time("2018")
     assert isinstance(time, pd.DatetimeIndex)
