@@ -62,10 +62,12 @@ def test_overset_grid():
 
     el = [(0, 1, 2)]
 
-    g = GeometryFM(nc, el)
+    proj = "UTM-33"
+    g = GeometryFM(nc, el, projection=proj)
     grid = g.get_overset_grid(dx=0.5)
     assert grid.nx == 2
     assert grid.ny == 2
+    assert grid.projection_string == proj
 
 
 def test_area():

@@ -462,7 +462,7 @@ class GeometryFM(_Geometry):
         """
         nc = self._geometry2d.node_coordinates
         bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
-        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
+        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape, projection=self.projection)
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.
