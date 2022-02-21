@@ -208,8 +208,12 @@ def test_select_subset_isel():
     geometry = mikeio.Grid2D(shape=(30, 100), bbox=[0, 0, 1, 1])
 
     data = {
-        "Foo": mikeio.DataArray(data=d1, time=time, geometry=geometry, item=ItemInfo("Foo")),
-        "Bar": mikeio.DataArray(data=d2, time=time, geometry=geometry, item=ItemInfo("Bar")),
+        "Foo": mikeio.DataArray(
+            data=d1, time=time, geometry=geometry, item=ItemInfo("Foo")
+        ),
+        "Bar": mikeio.DataArray(
+            data=d2, time=time, geometry=geometry, item=ItemInfo("Bar")
+        ),
     }
 
     ds = mikeio.Dataset(data)
@@ -422,7 +426,9 @@ def test_create_undefined():
 
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
     data = {
-        "Item 1": mikeio.DataArray(d1, time, item=ItemInfo("Item 1")),  # TODO redundant name
+        "Item 1": mikeio.DataArray(
+            d1, time, item=ItemInfo("Item 1")
+        ),  # TODO redundant name
         "Item 2": mikeio.DataArray(d2, time, item=ItemInfo("Item 2")),
     }
 
@@ -1050,7 +1056,7 @@ def test_time_data_mismatch():
 def test_properties_dfs2():
     filename = "tests/testdata/gebco_sound.dfs2"
     ds = mikeio.read(filename)
-    
+
     assert ds.n_timesteps == 1
     assert ds.n_items == 1
     assert np.all(ds.shape == (1, 264, 216))
