@@ -1593,9 +1593,9 @@ class Mesh(_UnstructuredFile):
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
-    @wraps(GeometryFM.plot_boundary_nodes)
+    # @wraps(GeometryFM.plot.boundary_nodes)
     def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
-        return self.geometry.plot_boundary_nodes(boundary_names, figsize, ax)
+        return self.geometry.plot.boundary_nodes(boundary_names, figsize, ax)
 
     # @staticmethod
     # def _geometry_to_mesh(outfilename, geometry):

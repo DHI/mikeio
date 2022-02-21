@@ -101,7 +101,7 @@ def test_plot_mesh():
 
     g = GeometryFM(node_coordinates=nc, element_table=el, projection="LONG/LAT")
     assert g.n_elements == 2
-    g.plot_mesh()
+    g.plot.mesh()
 
 
 def test_layered():

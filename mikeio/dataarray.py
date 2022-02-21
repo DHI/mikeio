@@ -212,10 +212,10 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         return self._plot_FM_map(ax, **kwargs)
 
     def mesh(self, ax=None, figsize=None, **kwargs):
-        return self.da.geometry.plot_mesh(figsize=figsize, ax=ax, **kwargs)
+        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
 
     def outline(self, ax=None, figsize=None, **kwargs):
-        return self.da.geometry.plot_outline(figsize=figsize, ax=ax, **kwargs)
+        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax, **kwargs):
         if self.da.n_timesteps > 1:

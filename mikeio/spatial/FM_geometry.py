@@ -12,7 +12,7 @@ from .geometry import _Geometry, BoundingBox
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
-from .FM_utils import _get_node_centered_data, _to_polygons
+from .FM_utils import _get_node_centered_data, _to_polygons, _plot_map
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -36,6 +36,123 @@ class GeometryFMPointSpectrum(_Geometry):
     @property
     def ndim(self):
         return 0
+
+
+class _GeometryFMPlotter:
+    def __init__(self, geometry: "GeometryFM") -> None:
+        self.g = geometry
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._plot_FM_map(ax, **kwargs)
+
+    def contour(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = "contour"
+        return self._plot_FM_map(ax, **kwargs)
+
+    def contourf(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = "contourf"
+        return self._plot_FM_map(ax, **kwargs)
+
+    @staticmethod
+    def _get_ax(ax=None, figsize=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+        return ax
+
+    def _plot_FM_map(self, ax, **kwargs):
+
+        if "title" not in kwargs:
+            kwargs["title"] = "Bathymetry"
+
+        g = self.g._geometry2d
+
+        return _plot_map(
+            node_coordinates=g.node_coordinates,
+            element_table=g.element_table,
+            element_coordinates=g.element_coordinates,
+            boundary_polylines=g.boundary_polylines,
+            is_geo=g.is_geo,
+            z=None,
+            ax=ax,
+            **kwargs,
+        )
+
+    def mesh(self, title="Mesh", figsize=None, ax=None):
+        from matplotlib.collections import PatchCollection
+
+        ax = self._get_ax(ax=ax, figsize=figsize)
+        ax.set_aspect(self._plot_aspect())
+
+        patches = _to_polygons(
+            self.g._geometry2d.node_coordinates, self.g._geometry2d.element_table
+        )
+        fig_obj = PatchCollection(
+            patches, edgecolor="0.6", facecolor="none", linewidths=0.3
+        )
+        ax.add_collection(fig_obj)
+        self.outline(ax=ax)
+        ax.set_title(title)
+        return ax
+
+    def outline(self, title="Outline", figsize=None, ax=None):
+        ax = self._get_ax(ax=ax, figsize=figsize)
+        ax.set_aspect(self._plot_aspect())
+
+        linwid = 1.2
+        out_col = "0.4"
+        for exterior in self.g.boundary_polylines.exteriors:
+            ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
+        for interior in self.g.boundary_polylines.interiors:
+            ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
+        ax.set_title(title)
+        return ax
+
+    def boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
+        """
+        Plot mesh boundary nodes and their codes
+        """
+        import matplotlib.pyplot as plt
+
+        ax = self._get_ax(ax=ax, figsize=figsize)
+        ax.set_aspect(self._plot_aspect())
+
+        nc = self.g.node_coordinates
+        c = self.g.codes
+        valid_codes = list(set(self.g.codes))
+        boundary_codes = [code for code in valid_codes if code > 0]
+
+        if boundary_names is not None:
+            if len(boundary_codes) != len(boundary_names):
+                raise Exception(
+                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.g.boundary_codes)})"
+                )
+            user_defined_labels = dict(zip(boundary_codes, boundary_names))
+
+        for code in boundary_codes:
+            xn = nc[c == code, 0]
+            yn = nc[c == code, 1]
+            if boundary_names is None:
+                label = f"Code {code}"
+            else:
+                label = user_defined_labels[code]
+            plt.plot(xn, yn, ".", label=label)
+
+        plt.legend()
+        plt.title("Boundary nodes")
+        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
+        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+
+    def _plot_aspect(self):
+        if self.g.is_geo:
+            mean_lat = np.mean(self.g.node_coordinates[:, 1])
+            return 1.0 / np.cos(np.pi * mean_lat / 180)
+        else:
+            return "equal"
 
 
 class GeometryFM(_Geometry):
@@ -83,6 +200,8 @@ class GeometryFM(_Geometry):
             element_ids=element_ids,
             dfsu_type=dfsu_type,
         )
+
+        self.plot = _GeometryFMPlotter(self)
 
     def __repr__(self):
         out = []
@@ -856,85 +975,6 @@ class GeometryFM(_Geometry):
 
         return mp
 
-    def plot_mesh(self, title="Mesh", figsize=None, ax=None):
-        import matplotlib.pyplot as plt
-        from matplotlib.collections import PatchCollection
-
-        if ax is None:
-            _, ax = plt.subplots(figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
-
-        patches = _to_polygons(
-            self._geometry2d.node_coordinates, self._geometry2d.element_table
-        )
-        fig_obj = PatchCollection(
-            patches, edgecolor="0.6", facecolor="none", linewidths=0.3
-        )
-        ax.add_collection(fig_obj)
-        self.plot_outline(ax=ax)
-        ax.set_title(title)
-        return ax
-
-    def plot_outline(self, title="Outline", figsize=None, ax=None):
-        import matplotlib.pyplot as plt
-
-        if ax is None:
-            _, ax = plt.subplots(figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
-
-        linwid = 1.2
-        out_col = "0.4"
-        for exterior in self.boundary_polylines.exteriors:
-            ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-        for interior in self.boundary_polylines.interiors:
-            ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
-        ax.set_title(title)
-        return ax
-
-    def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
-        """
-        Plot mesh boundary nodes and their codes
-        """
-        import matplotlib.pyplot as plt
-
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
-
-        nc = self.node_coordinates
-        c = self.codes
-        valid_codes = list(set(self.codes))
-        boundary_codes = [code for code in valid_codes if code > 0]
-
-        if boundary_names is not None:
-            if len(boundary_codes) != len(boundary_names):
-                raise Exception(
-                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.boundary_codes)})"
-                )
-            user_defined_labels = dict(zip(boundary_codes, boundary_names))
-
-        for code in boundary_codes:
-            xn = nc[c == code, 0]
-            yn = nc[c == code, 1]
-            if boundary_names is None:
-                label = f"Code {code}"
-            else:
-                label = user_defined_labels[code]
-            plt.plot(xn, yn, ".", label=label)
-
-        plt.legend()
-        plt.title("Boundary nodes")
-        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
-        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
-
-    def _plot_aspect(self):
-        if self.is_geo:
-            mean_lat = np.mean(self.node_coordinates[:, 1])
-            return 1.0 / np.cos(np.pi * mean_lat / 180)
-        else:
-            return "equal"
-
-    # TODO
     def to_mesh(self, outfilename):
 
         builder = MeshBuilder()
