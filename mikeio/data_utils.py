@@ -60,15 +60,27 @@ def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value):
     return
 
 
-def _parse_time(time):
+def _parse_time(time, data_shape=None):
     """Allow anything that we can create a DatetimeIndex from"""
-    if isinstance(time, pd.DatetimeIndex):
-        return time
     if time is None:
         time = [pd.Timestamp(2018, 1, 1)]
     if isinstance(time, str) or (not isinstance(time, Iterable)):
         time = [time]
-    return pd.DatetimeIndex(time)
+    
+    if not isinstance(time, pd.DatetimeIndex):
+        time = pd.DatetimeIndex(time)
+
+    if data_shape is not None:
+        if (len(time) > 1) and data_shape[0] != len(time):
+            raise ValueError(
+                f"Number of timesteps ({len(time)}) does not fit with data shape {data_shape}"
+            )
+    
+    if not time.is_monotonic_increasing:
+        raise ValueError(
+            "Time must be monotonic increasing (only equal or increasing) instances."
+        )
+    return time
 
 
 def _parse_axis(data_shape, dims, axis) -> Union[int, Tuple[int]]:

@@ -266,11 +266,7 @@ class DataArray(TimeSeries):
     ):
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
-        self.time = du._parse_time(time)
-        if (len(self.time) > 1) and self._values.shape[0] != len(self.time):
-            raise ValueError(
-                f"Number of timesteps ({self.n_timesteps}) does not fit with data shape {self.values.shape}"
-            )
+        self.time = du._parse_time(time, self._values.shape)
         self.dims = self._parse_dims(dims, geometry)
         self.item = self._parse_item(item)
         self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
