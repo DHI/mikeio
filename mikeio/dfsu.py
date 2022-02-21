@@ -471,7 +471,13 @@ class _UnstructuredFile:
         """
         nc = self._geometry2d.node_coordinates
         bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
-        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape)
+        return Grid2D(
+            bbox=bbox,
+            dx=dx,
+            dy=dy,
+            shape=shape,
+            projection=self.geometry.projection_string,
+        )
 
     @wraps(GeometryFM.get_2d_interpolant)
     def get_2d_interpolant(
