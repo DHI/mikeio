@@ -833,6 +833,37 @@ class DataArray(TimeSeries):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
+    def sel(
+        self,
+        *,
+        time: Union[pd.DatetimeIndex, "DataArray"] = None,
+        x: float = None,
+        y: float = None,
+        z: float = None,
+        **kwargs,
+    ) -> "DataArray":
+
+        # select in space
+        if (x is not None) or (y is not None) or (z is not None):
+            idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+            da = self.isel(idx, axis="space")
+        else:
+            da = self.copy()
+
+        if "layer" in kwargs:
+            if isinstance(da.geometry, GeometryFMLayered):
+                idx = da.geometry.get_layer_elements(kwargs["layer"])
+                da = da.isel(idx, axis="space")
+            else:
+                raise ValueError("'layer' can only be selected from layered Dfsu data")
+
+        # select in time
+        if time is not None:
+            time = time.time if isinstance(time, DataArray) else time
+            da = da[time]
+
+        return da
+
     def interp(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
@@ -867,37 +898,6 @@ class DataArray(TimeSeries):
             da = da.interp_time(time)
 
         return da
-
-    def sel(
-        self,
-        *,
-        time: Union[pd.DatetimeIndex, "DataArray"] = None,
-        x: float = None,
-        y: float = None,
-        z: float = None,
-        **kwargs,
-    ) -> "DataArray":
-
-        # select in space
-        if (x is not None) or (y is not None) or (z is not None):
-            idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
-            ds = self.isel(idx, axis="space")
-        else:
-            ds = self.copy()
-
-        if "layer" in kwargs:
-            if isinstance(ds.geometry, GeometryFMLayered):
-                idx = ds.geometry.get_layer_elements(kwargs["layer"])
-                ds = ds.isel(idx, axis="space")
-            else:
-                raise ValueError("'layer' can only be selected from layered Dfsu data")
-
-        # select in time
-        if time is not None:
-            time = time.time if isinstance(time, DataArray) else time
-            ds = ds[time]
-
-        return ds
 
     def interp_time(
         self,
