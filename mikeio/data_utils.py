@@ -140,3 +140,36 @@ def _reshape_data_by_axis(data, orig_shape, axis):
         data = [d.reshape(shape) for d in data]
 
     return data
+
+
+def _parse_interp_time(old_time, new_time):
+    if isinstance(new_time, pd.DatetimeIndex):
+        t_out_index = new_time
+    elif hasattr(new_time, "time"):
+        t_out_index = new_time.time
+    else:
+        offset = pd.tseries.offsets.DateOffset(seconds=new_time)
+        t_out_index = pd.date_range(start=old_time[0], end=old_time[-1], freq=offset)
+
+    return t_out_index
+
+
+def _interpolate_time(
+    intime,
+    outtime,
+    data: np.array,
+    method: Union[str, int],
+    extrapolate: bool,
+    fill_value: float,
+):
+    from scipy.interpolate import interp1d
+
+    interpolator = interp1d(
+        intime,
+        data,
+        axis=0,
+        kind=method,
+        bounds_error=not extrapolate,
+        fill_value=fill_value,
+    )
+    return interpolator(outtime)

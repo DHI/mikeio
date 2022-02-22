@@ -1339,24 +1339,36 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def interp(
         self,
         *,
-        x: float,
-        y: float,
+        time: Union[pd.DatetimeIndex, "DataArray"] = None,
+        x: float = None,
+        y: float = None,
         z: float = None,
         n_nearest=3,
         **kwargs,
     ) -> "Dataset":
 
-        xy = [(x, y)]
+        # interp in space
+        if (x is not None) or (y is not None) or (z is not None):
+            xy = [(x, y)]
 
-        interpolant = self.geometry.get_2d_interpolant(
-            xy, n_nearest=n_nearest, **kwargs
-        )
-        das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
-        return Dataset(das)
+            interpolant = self.geometry.get_2d_interpolant(
+                xy, n_nearest=n_nearest, **kwargs
+            )
+            das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
+            ds = Dataset(das)
+        else:
+            ds = Dataset([da for da in self])
+
+        # select in time
+        if time is not None:
+            ds = ds.interp_time(time)
+
+        return ds
 
     def interp_time(
         self,
         dt: Union[float, pd.DatetimeIndex, "Dataset"],
+        *,
         method="linear",
         extrapolate=True,
         fill_value=np.nan,
@@ -1403,21 +1415,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
-        if isinstance(dt, pd.DatetimeIndex):
-            t_out_index = dt
-        elif isinstance(dt, Dataset):
-            t_out_index = dt.time
-        else:
-            offset = pd.tseries.offsets.DateOffset(seconds=dt)
-            t_out_index = pd.date_range(
-                start=self.time[0], end=self.time[-1], freq=offset
-            )
-
+        t_out_index = du._parse_interp_time(self.time, dt)
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
         data = [
-            self._interpolate_item(
+            du._interpolate_time(
                 t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
             )
             for da in self
@@ -1426,7 +1429,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         zn = (
             None
             if self._zn is None
-            else self._interpolate_item(
+            else du._interpolate_time(
                 t_in, t_out, self._zn, method, extrapolate, fill_value
             )
         )
@@ -1438,27 +1441,6 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             geometry=self.geometry,
             zn=zn,
         )
-
-    @staticmethod
-    def _interpolate_item(
-        intime,
-        outtime,
-        data: np.array,
-        method: Union[str, int],
-        extrapolate: bool,
-        fill_value: float,
-    ):
-        from scipy.interpolate import interp1d
-
-        interpolator = interp1d(
-            intime,
-            data,
-            axis=0,
-            kind=method,
-            bounds_error=not extrapolate,
-            fill_value=fill_value,
-        )
-        return interpolator(outtime)
 
     def to_dataframe(self, unit_in_name=False, round_time="ms"):
         """Convert Dataset to a Pandas DataFrame

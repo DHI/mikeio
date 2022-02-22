@@ -837,8 +837,9 @@ class DataArray(TimeSeries):
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         *,
-        x: float,
-        y: float,
+        time: Union[pd.DatetimeIndex, "DataArray"] = None,
+        x: float = None,
+        y: float = None,
         z: float = None,
         n_nearest=3,
         interpolant=None,
@@ -848,16 +849,24 @@ class DataArray(TimeSeries):
         if z is not None:
             raise NotImplementedError()
 
-        xy = [(x, y)]
+        # interp in space
+        if (x is not None) or (y is not None) or (z is not None):
+            xy = [(x, y)]
 
-        if interpolant is None:
-            interpolant = self.geometry.get_2d_interpolant(
-                xy, n_nearest=n_nearest, **kwargs
-            )
-        dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
-        dai = DataArray(data=dai, time=self.time, geometry=None, item=self.item)
+            if interpolant is None:
+                interpolant = self.geometry.get_2d_interpolant(
+                    xy, n_nearest=n_nearest, **kwargs
+                )
+            dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
+            da = DataArray(data=dai, time=self.time, geometry=None, item=self.item)
+        else:
+            da = self.copy()
 
-        return dai
+        # interp in time
+        if time is not None:
+            da = da.interp_time(time)
+
+        return da
 
     def sel(
         self,
@@ -889,6 +898,57 @@ class DataArray(TimeSeries):
             ds = ds[time]
 
         return ds
+
+    def interp_time(
+        self,
+        dt: Union[float, pd.DatetimeIndex, "DataArray"],
+        *,
+        method="linear",
+        extrapolate=True,
+        fill_value=np.nan,
+    ):
+        """Temporal interpolation
+
+        Wrapper of `scipy.interpolate.interp`
+
+        Parameters
+        ----------
+        dt: float or pd.DatetimeIndex or Dataset/DataArray
+            output timestep in seconds or new time axis
+        method: str or int, optional
+            Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
+        extrapolate: bool, optional
+            Default True. If False, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If True, out of bounds values are assigned fill_value
+        fill_value: float or array-like, optional
+            Default NaN. this value will be used to fill in for points outside of the time range.
+
+        Returns
+        -------
+        DataArray
+        """
+        t_out_index = du._parse_interp_time(self.time, dt)
+        t_in = self.time.values.astype(float)
+        t_out = t_out_index.values.astype(float)
+
+        data = du._interpolate_time(
+            t_in, t_out, self.to_numpy(), method, extrapolate, fill_value
+        )
+
+        zn = (
+            None
+            if self._zn is None
+            else du._interpolate_time(
+                t_in, t_out, self._zn, method, extrapolate, fill_value
+            )
+        )
+
+        return DataArray(
+            data,
+            t_out_index,
+            item=self.item.copy(),
+            geometry=self.geometry,
+            zn=zn,
+        )
 
     def interp_like(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
