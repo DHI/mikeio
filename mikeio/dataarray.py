@@ -949,7 +949,7 @@ class DataArray(TimeSeries):
 
         qdat = func(self.values, q=q, axis=axis, **kwargs)
 
-        geometry = deepcopy(self.geometry) if axis == 0 else None        
+        geometry = deepcopy(self.geometry) if axis == 0 else None
 
         dims = tuple(
             [d for i, d in enumerate(self.dims) if i != axis]
