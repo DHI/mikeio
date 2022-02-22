@@ -1326,7 +1326,7 @@ def test_dataset_write_dfsu3d_max(tmp_path):
 
 def test_dataset_interp():
     ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
-    da = ds.Surface_elevation
+    da: DataArray = ds.Surface_elevation
 
     x = 360000
     y = 6184000
@@ -1336,3 +1336,5 @@ def test_dataset_interp():
     assert isinstance(dai, DataArray)
     assert dai.shape == (ds.n_timesteps,)
     assert dai.name == da.name
+    assert dai.geometry.x == x
+    assert dai.geometry.y == y

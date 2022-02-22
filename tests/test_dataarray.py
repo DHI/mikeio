@@ -5,6 +5,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
+from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
 
 
 @pytest.fixture
@@ -325,7 +326,7 @@ def test_dataarray_dfsu3d_indexing():
 
     # indexing in space selecting a single item
     da = ds.Salinity[:, 0]
-    assert da.geometry is None
+    assert isinstance(da.geometry, GeometryPoint3D)
 
 
 def test_timestep(da1):

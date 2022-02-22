@@ -44,8 +44,33 @@ class _Geometry:
         raise NotImplementedError
 
 
-# do we need this?
-class GeometryPoint:
+class GeometryUndefined(_Geometry):
+    def __repr__(self):
+        return "GeometryUndefined()"
+
+
+class GeometryPoint2D(_Geometry):
+    def __init__(self, x: float, y: float):
+        self.x = x
+        self.y = y
+
+    def __repr__(self):
+        return f"GeometryPoint2D(x={self.x}, y={self.y})"
+
+    @property
+    def ndim(self):
+        return 0
+
+
+class GeometryPoint3D(_Geometry):
+    def __init__(self, x: float, y: float, z: float):
+        self.x = x
+        self.y = y
+        self.z = z
+
+    def __repr__(self):
+        return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
+
     @property
     def ndim(self):
         return 0

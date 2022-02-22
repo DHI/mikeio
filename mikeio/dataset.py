@@ -11,7 +11,12 @@ import mikeio.data_utils as du
 from mikeio.spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .base import TimeSeries
 from .dataarray import DataArray
-from .spatial.geometry import _Geometry
+from .spatial.geometry import (
+    _Geometry,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+)
 from .spatial.grid_geometry import Grid1D, Grid2D
 
 
@@ -33,8 +38,13 @@ class _DatasetPlotter:
     def __init__(self, ds: "Dataset") -> None:
         self.ds = ds
 
-    # def __call__(self, ax=None, figsize=None, **kwargs):
-    #     fig, ax = self._get_fig_ax(ax, figsize)
+    def __call__(self, ax=None, figsize=None, **kwargs):
+
+        if self.ds.dims == ("time",):
+            df = self.ds.to_dataframe()
+            df.plot(figsize=figsize, **kwargs)  # TODO ax
+
+        # fig, ax = self._get_fig_ax(ax, figsize)
 
     @staticmethod
     def _get_fig_ax(ax=None, figsize=None):
@@ -1499,7 +1509,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return data
 
     def to_dfs(self, filename):
-        if self.geometry is None:
+        if isinstance(
+            self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
+        ):
             if self.ndim == 1 and self.dims[0][0] == "t":
                 self.to_dfs0(filename)
             else:

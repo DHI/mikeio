@@ -6,7 +6,12 @@ from copy import deepcopy
 
 from .base import TimeSeries
 from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.geometry import _Geometry
+from .spatial.geometry import (
+    _Geometry,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+)
 from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
 from mikecore.DfsuFile import DfsuFileType
@@ -364,7 +369,11 @@ class DataArray(TimeSeries):
         # shape_no_time = shape[1:] if ("time" in dims) else shape
 
         if len(dims) == 1 and dims[0] == "time":
-            return None
+            if geometry is not None:
+                # assert geometry.ndim == 0
+                return geometry
+            else:
+                return GeometryUndefined()
 
         if isinstance(geometry, GeometryFMPointSpectrum):
             pass
@@ -472,7 +481,11 @@ class DataArray(TimeSeries):
                 else:
                     elements = np.atleast_1d(elements)
                 if len(elements) == 1:
-                    geometry = None
+                    coords = geometry.element_coordinates[elements].flatten()
+                    if geometry.is_layered:
+                        geometry = GeometryPoint3D(*coords)
+                    else:
+                        geometry = GeometryPoint2D(coords[0], coords[1])
                     zn = None
                     dims = tuple([d for d in dims if d != "element"])
                 else:
@@ -889,7 +902,11 @@ class DataArray(TimeSeries):
                     xy, n_nearest=n_nearest, **kwargs
                 )
             dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
-            da = DataArray(data=dai, time=self.time, geometry=None, item=self.item)
+            if z is None:
+                geometry = GeometryPoint2D(x=x, y=y)
+            else:
+                geometry = GeometryPoint3D(x=x, y=y, z=z)
+            da = DataArray(data=dai, time=self.time, geometry=geometry, item=self.item)
         else:
             da = self.copy()
 

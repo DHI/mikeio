@@ -8,7 +8,7 @@ from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
 
 from ..eum import EUMType, EUMUnit
-from .geometry import _Geometry, BoundingBox
+from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
@@ -774,8 +774,17 @@ class GeometryFM(_Geometry):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
-    def isel(self, idx=None, axis="elements"):
-        return self.elements_to_geometry(elements=idx, node_layers=None)
+    def isel(self, idx=None, axis="elements", simplify=True):
+
+        if np.isscalar(idx) == 1 and simplify:
+            coords = self.element_coordinates[idx].flatten()
+
+            if self.is_layered:
+                return GeometryPoint3D(*coords)
+            else:
+                return GeometryPoint2D(coords[0], coords[1])
+        else:
+            return self.elements_to_geometry(elements=idx, node_layers=None)
 
     def elements_to_geometry(
         self, elements, node_layers="all"
