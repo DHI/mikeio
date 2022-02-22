@@ -860,17 +860,35 @@ class DataArray(TimeSeries):
         return dai
 
     def sel(
-        # TODO time
         self,
         *,
-        x: float,
-        y: float,
+        time: Union[pd.DatetimeIndex, "DataArray"] = None,
+        x: float = None,
+        y: float = None,
         z: float = None,
+        **kwargs,
     ) -> "DataArray":
 
-        idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+        # select in space
+        if (x is not None) or (y is not None) or (z is not None):
+            idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+            ds = self.isel(idx, axis="space")
+        else:
+            ds = self.copy()
 
-        return self.isel(idx, axis="space")
+        if "layer" in kwargs:
+            if isinstance(ds.geometry, GeometryFMLayered):
+                idx = ds.geometry.get_layer_elements(kwargs["layer"])
+                ds = ds.isel(idx, axis="space")
+            else:
+                raise ValueError("'layer' can only be selected from layered Dfsu data")
+
+        # select in time
+        if time is not None:
+            time = time.time if isinstance(time, DataArray) else time
+            ds = ds[time]
+
+        return ds
 
     def interp_like(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
@@ -949,7 +967,7 @@ class DataArray(TimeSeries):
 
         qdat = func(self.values, q=q, axis=axis, **kwargs)
 
-        geometry = deepcopy(self.geometry) if axis == 0 else None        
+        geometry = deepcopy(self.geometry) if axis == 0 else None
 
         dims = tuple(
             [d for i, d in enumerate(self.dims) if i != axis]

@@ -8,7 +8,7 @@ from mikeio.eum import EUMType, ItemInfo
 import collections.abc
 
 import mikeio.data_utils as du
-from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .base import TimeSeries
 from .dataarray import DataArray
 from .spatial.geometry import _Geometry
@@ -962,6 +962,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         }
         return self
 
+    # ===== select =========
+
     def isel(self, idx, axis=1):
         """
         Select subset along an axis.
@@ -1027,6 +1029,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return Dataset(
             data=res, time=time, items=items, geometry=geometry, zn=zn, dims=dims
         )
+
+    # ===== aggregate =========
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs):
         """Aggregate along an axis
@@ -1302,17 +1306,35 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return Dataset(res)
 
     def sel(
-        # TODO time
         self,
         *,
-        x: float,
-        y: float,
+        time: Union[pd.DatetimeIndex, "Dataset"] = None,
+        x: float = None,
+        y: float = None,
         z: float = None,
+        **kwargs,
     ) -> "Dataset":
 
-        idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+        # select in space
+        if (x is not None) or (y is not None) or (z is not None):
+            idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+            ds = self.isel(idx, axis="space")
+        else:
+            ds = self.copy()
 
-        return self.isel(idx, axis="space")
+        if "layer" in kwargs:
+            if isinstance(ds.geometry, GeometryFMLayered):
+                idx = ds.geometry.get_layer_elements(kwargs["layer"])
+                ds = ds.isel(idx, axis="space")
+            else:
+                raise ValueError("'layer' can only be selected from layered Dfsu data")
+
+        # select in time
+        if time is not None:
+            time = time.time if isinstance(time, (DataArray, Dataset)) else time
+            ds = ds[time]
+
+        return ds
 
     def interp(
         self,
