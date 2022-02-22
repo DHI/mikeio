@@ -774,6 +774,9 @@ class GeometryFM(_Geometry):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
+    def isel(self, idx=None, axis="elements"):
+        return self.elements_to_geometry(elements=idx, node_layers=None)
+
     def elements_to_geometry(
         self, elements, node_layers="all"
     ) -> Union["GeometryFM", "GeometryFMLayered"]:
@@ -792,14 +795,8 @@ class GeometryFM(_Geometry):
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
+        elements = [elements] if np.isscalar(elements) else elements
         elements = np.sort(elements)  # make sure elements are sorted!
-
-        # extract information for selected elements
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elements, node_layers=node_layers
-        )
-        node_coords = self.node_coordinates[node_ids]
-        codes = self.codes[node_ids]
 
         # create new geometry
         new_type = self._type
@@ -812,6 +809,16 @@ class GeometryFM(_Geometry):
                 or self._type == DfsuFileType.Dfsu3DSigmaZ
             ) and n_layers == 1:
                 new_type = DfsuFileType.Dfsu2D
+
+            if n_layers == 1 and node_layers in ("all", None):
+                node_layers = "bottom"
+
+        # extract information for selected elements
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+            elements, node_layers=node_layers
+        )
+        node_coords = self.node_coordinates[node_ids]
+        codes = self.codes[node_ids]
 
         if self.is_layered and (new_type != DfsuFileType.Dfsu2D):
             GeometryClass = GeometryFMLayered
