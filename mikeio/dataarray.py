@@ -859,7 +859,7 @@ class DataArray(TimeSeries):
 
         # select in time
         if time is not None:
-            time = time.time if isinstance(time, DataArray) else time
+            time = time.time if isinstance(time, TimeSeries) else time
             da = da[time]
 
         return da

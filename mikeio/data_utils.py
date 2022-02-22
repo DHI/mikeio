@@ -2,6 +2,7 @@ from typing import Iterable, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 from datetime import datetime
+from .base import TimeSeries
 
 # from copy import deepcopy
 # from mikeio.eum import ItemInfo
@@ -145,7 +146,7 @@ def _reshape_data_by_axis(data, orig_shape, axis):
 def _parse_interp_time(old_time, new_time):
     if isinstance(new_time, pd.DatetimeIndex):
         t_out_index = new_time
-    elif hasattr(new_time, "time"):
+    elif isinstance(new_time, TimeSeries):
         t_out_index = new_time.time
     else:
         offset = pd.tseries.offsets.DateOffset(seconds=new_time)

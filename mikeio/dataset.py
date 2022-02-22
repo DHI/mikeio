@@ -1331,7 +1331,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         # select in time
         if time is not None:
-            time = time.time if isinstance(time, (DataArray, Dataset)) else time
+            time = time.time if isinstance(time, TimeSeries) else time
             ds = ds[time]
 
         return ds
@@ -1359,7 +1359,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         else:
             ds = Dataset([da for da in self])
 
-        # select in time
+        # interp in time
         if time is not None:
             ds = ds.interp_time(time)
 
