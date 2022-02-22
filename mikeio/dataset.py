@@ -214,6 +214,16 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if len(self.items) > 1:
             self.plot = _DatasetPlotter(self)
 
+        # since Dataset is MutableMapping it has values and keys by default
+        # but we delete those to avoid confusion
+        self.values = None
+        self.keys = None
+
+    # remove values and keys from dir to avoid confusion
+    def __dir__(self):
+        keys = sorted(list(super().__dir__()) + list(self.__dict__.keys()))
+        return set([d for d in keys if d not in ("values", "keys")])
+
     @staticmethod
     def _parse_items(items, n_items_data):
         if items is None:
@@ -658,6 +668,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         return ds
 
+    # ---- arithmetic ---------
+
     def __radd__(self, other):
         return self.__add__(other)
 
@@ -739,7 +751,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def describe(self, **kwargs):
         """Generate descriptive statistics by wrapping pandas describe()"""
         all_df = [
-            pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(
+            pd.DataFrame(self.data[j].ravel(), columns=[self.items[j].name]).describe(
                 **kwargs
             )
             for j in range(self.n_items)
@@ -944,7 +956,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return self.isel(idx, axis=0)
 
     def flipud(self):
-        """Flip dataset updside down"""
+        """Flip dataset upside down"""
         self._data_vars = {
             key: value.flipud() for (key, value) in self._data_vars.items()
         }
@@ -1383,24 +1395,38 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         t_out = t_out_index.values.astype(float)
 
         data = [
-            self._interpolate_item(t_in, t_out, da, method, extrapolate, fill_value)
-            for da in self.values()
+            self._interpolate_item(
+                t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
+            )
+            for da in self
         ]
 
-        return Dataset(data, t_out_index, self.items.copy())
+        zn = (
+            None
+            if self._zn is None
+            else self._interpolate_item(
+                t_in, t_out, self._zn, method, extrapolate, fill_value
+            )
+        )
+
+        return Dataset(
+            data,
+            t_out_index,
+            items=self.items.copy(),
+            geometry=self.geometry,
+            zn=zn,
+        )
 
     @staticmethod
     def _interpolate_item(
         intime,
         outtime,
-        dataarray: DataArray,
+        data: np.array,
         method: Union[str, int],
         extrapolate: bool,
         fill_value: float,
     ):
         from scipy.interpolate import interp1d
-
-        data = dataarray.to_numpy()
 
         interpolator = interp1d(
             intime,
