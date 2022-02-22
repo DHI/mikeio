@@ -17,7 +17,7 @@ def _plot_map(
     vmax=None,
     levels=None,
     n_refinements=0,
-    show_mesh=True,
+    show_mesh=False,
     show_outline=True,
     figsize=None,
     ax=None,
