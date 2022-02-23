@@ -2,7 +2,7 @@ from typing import Tuple
 import numpy as np
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
-from .geometry import _Geometry, BoundingBox
+from .geometry import _Geometry, GeometryUndefined, BoundingBox
 from ..eum import EUMType, EUMUnit
 
 
@@ -72,6 +72,14 @@ class Grid1D(_Geometry):
     @property
     def orientation(self) -> float:
         return self._orientation
+
+    def isel(self, idx, axis):
+
+        if not np.isscalar(idx):
+            # TODO: return reduced Grid1D
+            return None
+
+        return GeometryUndefined()
 
 
 class Grid2D(_Geometry):
@@ -440,6 +448,7 @@ class Grid2D(_Geometry):
     def isel(self, idx, axis):
 
         if not np.isscalar(idx):
+            # TODO: return reduced Grid2D
             return None
 
         if axis == 0:

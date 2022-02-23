@@ -503,6 +503,19 @@ class DataArray(TimeSeries):
             else:
                 # TODO: better handling of dfs1,2,3
                 key = space_key if (steps is None) else (steps, *space_key)
+                space_dims = tuple([d for d in self.dims if d != "time"])
+                time_offset = 1 if "time" in self.dims else 0
+                for j, k in enumerate(space_key):
+                    k = (
+                        list(range(*k.indices(self.shape[j + time_offset])))
+                        if isinstance(k, slice)
+                        else k
+                    )
+                    k = [k] if np.isscalar(k) else k
+                    if len(k) == 1:
+                        dims = tuple([d for d in dims if d != space_dims[j]])
+                        if hasattr(geometry, "isel"):
+                            geometry = geometry.isel(k[0], axis=j)
 
         data = self._values[key]  # .copy()
         return DataArray(
