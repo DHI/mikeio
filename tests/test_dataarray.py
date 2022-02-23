@@ -341,6 +341,15 @@ def test_dataarray_dfsu3d_indexing():
     assert isinstance(da.geometry, GeometryPoint3D)
 
 
+def test_dataarray_grid1d_indexing(da2):
+    da = da2
+    nt, nx = da.shape
+    assert da[0].shape == (nx,)
+    assert da[0, :].shape == (nx,)
+    assert da[:, -1].shape == (nt,)
+    assert da[:, :].shape == (nt, nx)
+
+
 def test_dataarray_grid2d_indexing(da_grid2d):
     da = da_grid2d
     nt, ny, nx = da.shape
