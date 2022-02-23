@@ -1,6 +1,7 @@
 import os
 import warnings
 from datetime import datetime, timedelta
+from h11 import Data
 import numpy as np
 import pandas as pd
 
@@ -20,6 +21,63 @@ from .dfsutil import _valid_item_numbers, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries
+
+
+def _write_dfs0(filename, dataset: Dataset, title=""):
+    filename = str(filename)
+
+    factory = DfsFactory()
+    builder = DfsBuilder.Create(title, "DFS", 0)
+    builder.SetDataType(1)
+    builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
+
+    system_start_time = dataset.time[0]
+
+    if dataset.is_equidistant:
+        dt = (dataset.time[1] - dataset.time[0]).total_seconds()
+        temporal_axis = factory.CreateTemporalEqCalendarAxis(
+            TimeStepUnit.SECOND, system_start_time, 0, dt
+        )
+    else:
+        temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
+            TimeStepUnit.SECOND, system_start_time
+        )
+
+    builder.SetTemporalAxis(temporal_axis)
+    builder.SetItemStatisticsType(StatType.RegularStat)
+
+    for da in dataset:
+        newitem = builder.CreateDynamicItemBuilder()
+        quantity = eumQuantity.Create(da.type, da.unit)
+        newitem.Set(
+            da.name,
+            quantity,
+            Dfs0._to_dfs_datatype(da.dtype.type),
+        )
+
+        # TODO set default on DataArray
+        if da.item.data_value_type is not None:
+            newitem.SetValueType(da.item.data_value_type)
+        else:
+            newitem.SetValueType(DataValueType.Instantaneous)
+
+        newitem.SetAxis(factory.CreateAxisEqD0())
+        builder.AddDynamicItem(newitem.GetDynamicItemInfo())
+
+    builder.CreateFile(filename)
+
+    dfs = builder.GetFile()
+
+    delete_value = dfs.FileInfo.DeleteValueFloat
+
+    t_seconds = (dataset.time - dataset.time[0]).total_seconds().values
+
+    data = np.array(dataset.data, order="F").astype(np.float64).T
+    data[np.isnan(data)] = delete_value
+    data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
+    rc = dfs.WriteDfs0DataDouble(data_to_write)
+
+    dfs.Close()
 
 
 class Dfs0(TimeSeries):

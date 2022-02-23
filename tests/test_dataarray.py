@@ -69,6 +69,17 @@ def da_time_space():
     return da
 
 
+def test_write_1d(da2, tmp_path):
+
+    outfilename = tmp_path / "grid1d.dfs1"
+
+    da2.to_dfs(outfilename)
+
+    ds = mikeio.read(outfilename)
+    assert ds.n_items == 1
+    assert isinstance(ds.geometry, mikeio.Grid1D)
+
+
 def test_data_2d_no_geometry_not_allowed():
 
     nt = 10
@@ -517,11 +528,11 @@ def test_da_sel_layer():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     da = mikeio.read(filename, items=0)[0]
     assert da.geometry.n_elements == 17118
-    assert da.geometry.is_layered 
+    assert da.geometry.is_layered
 
     da1 = da.sel(layer=-1)
     assert da1.geometry.n_elements == 3700
-    assert not da1.geometry.is_layered 
+    assert not da1.geometry.is_layered
 
 
 def test_da_quantile_axis0(da2):
