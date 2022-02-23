@@ -534,6 +534,12 @@ def test_da_sel_layer():
     assert da1.geometry.n_elements == 3700
     assert not da1.geometry.is_layered
 
+    da2 = da.sel(layer="top")
+    assert da2.geometry.n_elements == 3700
+    # assert 
+
+    da3 = da.sel(layer="bottom")
+    assert da3.geometry.n_elements == 3700
 
 def test_da_quantile_axis0(da2):
     assert da2.geometry.n == 7

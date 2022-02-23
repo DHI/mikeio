@@ -1272,11 +1272,11 @@ class GeometryFMLayered(GeometryFM):
         """
         if isinstance(layer, str):
             if layer in ("surface", "top"):
-                layer = -1
+                return self.top_elements
             elif layer in ("bottom"):
-                layer = 0
+                return self.bottom_elements
             else:
-                ValueError(
+                raise ValueError(
                     f"layer '{layer}' not recognized ('top', 'bottom' or integer)"
                 )
 
