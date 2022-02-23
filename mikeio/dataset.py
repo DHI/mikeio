@@ -1505,7 +1505,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
             if self.ndim == 1 and self.dims[0][0] == "t":
-                self.to_dfs0(filename)
+                self._to_dfs0(filename)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
@@ -1519,6 +1519,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             raise NotImplementedError(
                 "Writing this type of dataset is not yet implemented"
             )
+
+    def _to_dfs0(self, filename):
+        from .dfs0 import _write_dfs0
+
+        _write_dfs0(filename, self)
 
     def _to_dfs2(self, filename):
         # assumes Grid2D geometry

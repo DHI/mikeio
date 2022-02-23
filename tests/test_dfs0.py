@@ -646,3 +646,20 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
     assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
     assert ds.items[0].data_value_type == 3
+
+
+def test_read_write_eum(tmp_path):
+
+    ds = mikeio.read("tests/testdata/waterlevel_viken.dfs0")
+    assert ds["ST 2: WL (m)"].type == EUMType.Water_Level
+    assert ds["ST 2: WL (m)"].unit == EUMUnit.meter
+
+    outfilename = tmp_path / "same_same.dfs0"
+
+    ds.to_dfs(outfilename)
+
+    ds2 = mikeio.read(outfilename)
+    assert ds2["ST 2: WL (m)"].type == EUMType.Water_Level
+    assert ds2["ST 2: WL (m)"].unit == EUMUnit.meter
+
+
