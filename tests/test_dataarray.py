@@ -536,10 +536,11 @@ def test_da_sel_layer():
 
     da2 = da.sel(layer="top")
     assert da2.geometry.n_elements == 3700
-    # assert 
+    # assert
 
     da3 = da.sel(layer="bottom")
     assert da3.geometry.n_elements == 3700
+
 
 def test_da_quantile_axis0(da2):
     assert da2.geometry.n == 7
