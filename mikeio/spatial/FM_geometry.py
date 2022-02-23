@@ -1270,6 +1270,16 @@ class GeometryFMLayered(GeometryFM):
         np.array(int)
             element ids
         """
+        if isinstance(layer, str):
+            if layer in ("surface", "top"):
+                layer = -1
+            elif layer in ("bottom"):
+                layer = 0
+            else:
+                ValueError(
+                    f"layer '{layer}' not recognized ('top', 'bottom' or integer)"
+                )
+
         if not np.isscalar(layer):
             elem_ids = []
             for nn in layer:
