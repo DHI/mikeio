@@ -4,7 +4,6 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio.dataset import Dataset
 from mikeio.eum import EUMType, ItemInfo
 from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
 
@@ -340,6 +339,11 @@ def test_dataarray_dfsu3d_indexing():
     da = ds.Salinity[:, 0]
     assert isinstance(da.geometry, GeometryPoint3D)
 
+    # indexing in both time and space
+    da = ds.Salinity[0, 0]
+    assert isinstance(da.geometry, GeometryPoint3D)
+    assert da.shape == ()
+
 
 def test_dataarray_grid1d_indexing(da2):
     da = da2
@@ -348,6 +352,10 @@ def test_dataarray_grid1d_indexing(da2):
     assert da[0, :].shape == (nx,)
     assert da[:, -1].shape == (nt,)
     assert da[:, :].shape == (nt, nx)
+    assert da[0, 0].shape == ()
+
+    assert isinstance(da[:, :].geometry, mikeio.Grid1D)
+    assert isinstance(da[:, -1].geometry, GeometryUndefined)
 
 
 def test_dataarray_grid2d_indexing(da_grid2d):
@@ -360,6 +368,12 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert da[:, -1, 0].shape == (nt,)
     assert da[0, :, 4].shape == (ny,)
     assert da[0, -1, :].shape == (nx,)
+    assert da[0, 0, 0].shape == ()
+
+    assert isinstance(da[0, :, :].geometry, mikeio.Grid2D)
+    assert isinstance(da[0, 0, :].geometry, mikeio.Grid1D)
+    assert isinstance(da[:, :, 0].geometry, mikeio.Grid1D)
+    assert isinstance(da[:, -1, 0].geometry, GeometryUndefined)
 
 
 def test_timestep(da1):
@@ -587,7 +601,7 @@ def test_da_quantile_axis0(da2):
 
     # q as list
     daq = da2.quantile(q=[0.25, 0.75], axis=0)
-    assert isinstance(daq, Dataset)
+    assert isinstance(daq, mikeio.Dataset)
     assert daq.n_items == 2
     assert daq[0].to_numpy()[0] == 0.1
     assert daq[1].to_numpy()[0] == 0.1
