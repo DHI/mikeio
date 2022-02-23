@@ -661,5 +661,3 @@ def test_read_write_eum(tmp_path):
     ds2 = mikeio.read(outfilename)
     assert ds2["ST 2: WL (m)"].type == EUMType.Water_Level
     assert ds2["ST 2: WL (m)"].unit == EUMUnit.meter
-
-
