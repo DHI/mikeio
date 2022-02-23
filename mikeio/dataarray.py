@@ -1013,17 +1013,24 @@ class DataArray(TimeSeries):
         else:
             time = self.time
             item = self.item
-            geometry = None  # TODO
+            geometry = None
+            zn = None
             if hasattr(self.geometry, "isel"):
                 spatial_axis = du._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
-            zn = None  # TODO
+            if isinstance(geometry, GeometryFMLayered):
+                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
+                    idx, node_layers="all"
+                )
+                zn = self._zn[:, node_ids]
 
         x = np.take(self.values, idx, axis=axis)
 
-        dims = tuple(
-            [d for i, d in enumerate(self.dims) if i != axis]
-        )  # TODO we will need this in many places
+        if np.isscalar(idx) or len(idx) == 1:
+            # reduce dims only if singleton idx
+            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
+        else:
+            dims = self.dims
 
         return DataArray(
             data=x,
