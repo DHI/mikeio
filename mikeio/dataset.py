@@ -1501,6 +1501,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return data
 
     def to_dfs(self, filename):
+
+        filename = str(filename)
+
         if isinstance(
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):

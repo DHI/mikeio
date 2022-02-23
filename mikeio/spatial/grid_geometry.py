@@ -1,3 +1,4 @@
+from typing import Tuple
 import numpy as np
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -12,7 +13,7 @@ class Grid1D(_Geometry):
         dx=None,
         n=None,
         projection="NON-UTM",
-        origin=(0, 0),
+        origin: Tuple[float, float] = (0.0, 0.0),
         orientation=0.0,
     ):
         """Create equidistant 1D spatial geometry"""
@@ -40,7 +41,7 @@ class Grid1D(_Geometry):
         return str.join("\n", out)
 
     @property
-    def dx(self):
+    def dx(self) -> float:
         """grid spacing"""
         return self._dx
 
@@ -50,19 +51,27 @@ class Grid1D(_Geometry):
         return self._x
 
     @property
-    def x0(self):
+    def x0(self) -> float:
         """left end-point"""
         return self._x0
 
     @property
-    def x1(self):
+    def x1(self) -> float:
         """right end-point"""
         return self.x[-1]
 
     @property
-    def n(self):
+    def n(self) -> int:
         """number of grid points"""
         return self._nx
+
+    @property
+    def origin(self) -> Tuple[float, float]:
+        return self._origin
+
+    @property
+    def orientation(self) -> float:
+        return self._orientation
 
 
 class Grid2D(_Geometry):

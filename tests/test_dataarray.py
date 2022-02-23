@@ -69,6 +69,17 @@ def da_time_space():
     return da
 
 
+def test_write_1d(da2, tmp_path):
+
+    outfilename = tmp_path / "grid1d.dfs1"
+
+    da2.to_dfs(outfilename)
+
+    ds = mikeio.read(outfilename)
+    assert ds.n_items == 1
+    assert isinstance(ds.geometry, mikeio.Grid1D)
+
+
 def test_data_2d_no_geometry_not_allowed():
 
     nt = 10
