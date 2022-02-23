@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 
 import mikeio
+from mikeio.dataset import Dataset
 from mikeio.eum import EUMType, ItemInfo
 from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
 
@@ -526,25 +527,22 @@ def test_da_quantile_axis0(da2):
     assert daq.n_timesteps == 1
 
     daqs = da2.quantile(q=0.345, axis="space")
-    assert not isinstance(
-        daqs.geometry, mikeio.Grid1D
-    )  # it could be None, or maybe NullGeometry, but not mikeio.Grid1D
+    assert isinstance(
+        daqs.geometry, GeometryUndefined
+    )  # Aggregating over space doesn't create a well defined geometry
     assert isinstance(da2.geometry, mikeio.Grid1D)  # But this one is intact
     assert len(daqs.time) == 10
     assert daqs.ndim == 1
     assert daqs.dims[0][0] == "t"  # Because it's a mikeio.Grid1D, remember!
 
     # q as list
-    # daq = da2.quantile(q=[0.25, 0.75], axis=0)
-    # assert daq[0].to_numpy()[0, 0] == 0.1
-    # assert daq[1].to_numpy()[0, 0] == 0.1
-    # assert daq[2].to_numpy()[0, 0] == 0.2
-    # assert daq[3].to_numpy()[0, 0] == 0.2
+    daq = da2.quantile(q=[0.25, 0.75], axis=0)
+    assert isinstance(daq, Dataset)
+    assert daq.n_items == 2
+    assert daq[0].to_numpy()[0] == 0.1
+    assert daq[1].to_numpy()[0] == 0.1
 
-    # assert daq.n_items == 2 * da2.n_items
-    # assert "Quantile 0.75, " in daq.items[1].name
-    # assert "Quantile 0.25, " in daq.items[2].name
-    # assert "Quantile 0.75, " in daq.items[3].name
+    assert "Quantile 0.75, " in daq.items[1].name
 
 
 def test_write_dfs2(tmp_path):

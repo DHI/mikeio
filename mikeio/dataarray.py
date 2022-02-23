@@ -1036,20 +1036,28 @@ class DataArray(TimeSeries):
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
+        from mikeio import Dataset
+
         axis = du._parse_axis(self.shape, self.dims, axis)
         time = du._time_by_agg_axis(self.time, axis)
 
-        if not np.isscalar(q):
-            raise NotImplementedError()
+        if np.isscalar(q):
+            qdat = func(self.values, q=q, axis=axis, **kwargs)
 
-        qdat = func(self.values, q=q, axis=axis, **kwargs)
+            geometry = deepcopy(self.geometry) if axis == 0 else None
 
-        geometry = deepcopy(self.geometry) if axis == 0 else None
+            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
+            item = deepcopy(self.item)
+            return DataArray(qdat, time, item=item, geometry=geometry, dims=dims)
+        else:
+            res = []
+            for quantile in q:
+                qd = self._quantile(q=quantile, axis=axis, func=func)
+                newname = f"Quantile {quantile}, {self.name}"
+                qd.name = newname
+                res.append(qd)
 
-        dims = tuple(
-            [d for i, d in enumerate(self.dims) if i != axis]
-        )  # TODO we will need this in many places
-        return DataArray(qdat, time, item=self.item, geometry=geometry, dims=dims)
+            return Dataset(res)
 
     def __radd__(self, other):
         return self.__add__(other)

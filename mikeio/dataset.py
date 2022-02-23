@@ -1123,27 +1123,19 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
-        items_in = self.items
-        axis = du._parse_axis(self.shape, self.dims, axis)
-        time = du._time_by_agg_axis(self.time, axis)
-        keepdims = du._keepdims_by_axis(axis)
+        if np.isscalar(q):
+            res = [da._quantile(q=q, axis=axis, func=func) for da in self]
+        else:
+            res = []
 
-        qvec = [q] if np.isscalar(q) else q
-        qtxt = [f"Quantile {q}" for q in qvec]
-        itemsq = _repeat_items(items_in, qtxt)
+            for name, da in self._data_vars.items():
+                for quantile in q:
+                    qd = da._quantile(q=quantile, axis=axis, func=func)
+                    newname = f"Quantile {quantile}, {name}"
+                    qd.name = newname
+                    res.append(qd)
 
-        res = []
-        for item in items_in:
-            qdat = func(
-                self[item.name].to_numpy(), q=q, axis=axis, keepdims=keepdims, **kwargs
-            )
-            for j in range(len(qvec)):
-                qdat_item = qdat[j, ...] if len(qvec) > 1 else qdat
-                res.append(qdat_item)
-
-        res = du._reshape_data_by_axis(res, self.shape, axis)
-
-        return Dataset(res, time, itemsq)
+        return Dataset(res)
 
     def max(self, axis="time"):
         """Max value along an axis
