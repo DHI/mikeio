@@ -873,7 +873,12 @@ class DataArray(TimeSeries):
         # select in time
         if time is not None:
             time = time.time if isinstance(time, TimeSeries) else time
-            da = da[time]
+            if isinstance(time, int) or (
+                isinstance(time, Sequence) and isinstance(time[0], int)
+            ):
+                da = da.isel(time, axis="time")
+            else:
+                da = da[time]
 
         return da
 
@@ -1003,13 +1008,16 @@ class DataArray(TimeSeries):
             data with subset
 
         """
+        if idx is None or (not np.isscalar(idx) and len(idx) == 0):
+            return None
 
         axis = du._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
+            idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
             time = self.time[idx]
             item = self.item
             geometry = self.geometry
-            zn = self._zn[idx] if self._zn else None
+            zn = None if self._zn is None else self._zn[idx]
         else:
             time = self.time
             item = self.item
