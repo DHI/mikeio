@@ -447,6 +447,29 @@ def test_multiply_scalar(da1):
     assert np.all(da3.to_numpy() == da2.to_numpy())
 
 
+def test_multiply_two_dataarrays(da1):
+
+    da3 = da1 * da1
+    assert isinstance(da3, mikeio.DataArray)
+    assert da1.shape == da3.shape
+
+    da3 = da1 * da1.values
+    assert isinstance(da3, mikeio.DataArray)
+    assert da1.shape == da3.shape
+
+
+def test_multiply_two_dataarrays_broadcasting(da_grid2d):
+    da1 = da_grid2d
+    da2 = da1 * da1.values[0, 0, :]
+    assert isinstance(da2, mikeio.DataArray)
+    assert da1.shape == da2.shape
+
+    # nt,ny,nx * ny,nx
+    da3 = da1 * da1.max()
+    assert isinstance(da3, mikeio.DataArray)
+    assert da_grid2d.shape == da3.shape
+
+
 def test_add_two_dataarrays(da1):
 
     da3 = da1 + da1

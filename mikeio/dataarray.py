@@ -1110,8 +1110,8 @@ class DataArray(TimeSeries):
         return self.__mul__(other)
 
     def __mul__(self, other):
-        if isinstance(other, self.__class__):
-            raise ValueError("Multiplication is not possible for two DataArrays")
+        if hasattr(other, "shape") and hasattr(other, "ndim"):
+            return self._multiply_array(other)
         else:
             return self._multiply_value(other)
 
@@ -1146,6 +1146,28 @@ class DataArray(TimeSeries):
         except:
             raise ValueError(f"{value} could not be multiplied to DataArray")
         new_da = self.copy()
+
+        new_da.values = data
+
+        return new_da
+
+    def _multiply_array(self, other):
+        """Multiply DataArray with other DataArray/np.array, EUMType will be undefined"""
+        try:
+            data = (
+                self.values * other.values
+                if hasattr(other, "values")
+                else self.values * other
+            )
+        except:
+            raise ValueError(
+                f"array with shape {other.shape} could not be multiplied to DataArray"
+            )
+        new_da = self.copy()
+        other_name = other.name if hasattr(other, "name") else "array"
+        new_da.item = ItemInfo(
+            self.name + " * " + other_name, itemtype=EUMType.Undefined
+        )
 
         new_da.values = data
 
