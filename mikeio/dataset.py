@@ -1360,6 +1360,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         **kwargs,
     ) -> "Dataset":
 
+        if z is not None:
+            raise NotImplementedError()
+
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
             xy = [(x, y)]
