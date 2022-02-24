@@ -1110,10 +1110,14 @@ class DataArray(TimeSeries):
         return self.__mul__(other)
 
     def __mul__(self, other):
-        if hasattr(other, "shape") and hasattr(other, "ndim"):
-            return self._multiply_array(other)
-        else:
-            return self._multiply_value(other)
+        return self._apply_math_operation(other, np.multiply, "*")
+        # if hasattr(other, "shape") and hasattr(other, "ndim"):
+        #     return self._multiply_array(other)
+        # else:
+        #     return self._multiply_value(other)
+
+    def __truediv__(self, other):
+        return self._apply_math_operation(other, np.divide, "/")
 
     def _add_dataarray(self, other, sign=1.0):
         # self._check_datasets_match(other) # TODO
@@ -1137,6 +1141,25 @@ class DataArray(TimeSeries):
         new_da = self.copy()
 
         new_da.values = data
+
+        return new_da
+
+    def _apply_math_operation(self, other, func, txt="with"):
+        try:
+            other_values = other.values if hasattr(other, "values") else other
+            data = func(self.values, other_values)
+        except:
+            raise ValueError(f"Math operation could not be applied to DataArray")
+
+        new_da = self.copy()
+        new_da.values = data
+
+        if hasattr(other, "shape") and hasattr(other, "ndim"):
+            # TODO: exceptions +/- with same EUMtype
+            other_name = other.name if hasattr(other, "name") else "array"
+            new_da.item = ItemInfo(
+                f"{self.name} {txt} {other_name}", itemtype=EUMType.Undefined
+            )
 
         return new_da
 
