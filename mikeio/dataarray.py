@@ -1153,7 +1153,7 @@ class DataArray(TimeSeries):
 
         # TODO: check if geometry etc match if other is DataArray?
 
-        new_da = self.copy()   # TODO: alternatively: create new dataset (will validate)
+        new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
         new_da.values = data
 
         if not self._keep_EUM_after_math_operation(other, func):
