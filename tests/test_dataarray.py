@@ -477,6 +477,29 @@ def test_add_two_dataarrays(da1):
     assert da1.shape == da3.shape
 
 
+def test_unary_math_operations(da2):
+    assert np.all(da2.values > 0)
+
+    da3 = -da2
+    assert np.all(da3.values < 0)
+    assert isinstance(da3, mikeio.DataArray)
+
+    da4 = +da2
+    assert np.all(da4.values > 0)
+    assert np.all(da4.values == da2.values)
+    assert isinstance(da4, mikeio.DataArray)
+
+    da5 = abs(da3)
+    assert np.all(da5.values == da2.values)
+    assert isinstance(da5, mikeio.DataArray)
+
+
+def test_binary_math_operations(da1):
+    da2 = da1**2
+    assert np.all(da2.values == da1.values**2)
+    assert isinstance(da2, mikeio.DataArray)
+
+
 def test_dataarray_masking():
     filename = "tests/testdata/basin_3d.dfsu"
     da = mikeio.read(filename, items="U velocity")[0]

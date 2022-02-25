@@ -1096,7 +1096,7 @@ class DataArray(TimeSeries):
         return self._apply_math_operation(other, np.add, "+")
 
     def __rsub__(self, other):
-        return other + self.__neg__
+        return other + self.__neg__()
 
     def __sub__(self, other):
         return self._apply_math_operation(other, np.subtract, "-")
@@ -1124,9 +1124,6 @@ class DataArray(TimeSeries):
 
     def __pos__(self):
         return self._apply_unary_math_operation(np.positive)
-
-    def __inv__(self):
-        return self._apply_unary_math_operation(np.invert)
 
     def __abs__(self):
         return self._apply_unary_math_operation(np.abs)
