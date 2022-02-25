@@ -422,7 +422,7 @@ def test_add_scalar(da1):
     assert isinstance(da2, mikeio.DataArray)
     assert np.all(da2.to_numpy() - da1.to_numpy() == 10.0)
 
-    da3 = 10.0 + da1
+    da3 = 10.0 + da1  # __radd__
     assert isinstance(da3, mikeio.DataArray)
     assert np.all(da3.to_numpy() == da2.to_numpy())
 
@@ -432,7 +432,7 @@ def test_subtract_scalar(da1):
     assert isinstance(da2, mikeio.DataArray)
     assert np.all(da2.to_numpy() - da1.to_numpy() == -10.0)
 
-    da3 = 10.0 - da1
+    da3 = 10.0 - da1  # __rsub__
     assert isinstance(da3, mikeio.DataArray)
     assert da3.to_numpy()[-1] == -9.0
 
@@ -442,7 +442,7 @@ def test_multiply_scalar(da1):
     assert isinstance(da2, mikeio.DataArray)
     assert np.all(da2.to_numpy() / da1.to_numpy() == 2.0)
 
-    da3 = 2.0 * da1
+    da3 = 2.0 * da1  # __rmul__
     assert isinstance(da3, mikeio.DataArray)
     assert np.all(da3.to_numpy() == da2.to_numpy())
 
@@ -470,9 +470,21 @@ def test_multiply_two_dataarrays_broadcasting(da_grid2d):
     assert da_grid2d.shape == da3.shape
 
 
-def test_add_two_dataarrays(da1):
+def test_math_two_dataarrays(da1):
 
     da3 = da1 + da1
+    assert isinstance(da3, mikeio.DataArray)
+    assert da1.shape == da3.shape
+
+    da3 = da1 - da1
+    assert isinstance(da3, mikeio.DataArray)
+    assert da1.shape == da3.shape
+
+    da3 = da1 / da1
+    assert isinstance(da3, mikeio.DataArray)
+    assert da1.shape == da3.shape
+
+    da3 = da1 * da1
     assert isinstance(da3, mikeio.DataArray)
     assert da1.shape == da3.shape
 
