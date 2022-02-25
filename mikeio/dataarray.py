@@ -1087,75 +1087,76 @@ class DataArray(TimeSeries):
 
             return Dataset(res)
 
+    # ============= MATH operations ===========
+
     def __radd__(self, other):
         return self.__add__(other)
 
     def __add__(self, other):
-        if isinstance(other, self.__class__):
-            return self._add_dataarray(other)
-        else:
-            return self._add_value(other)
+        return self._apply_math_operation(other, np.add, "+")
 
     def __rsub__(self, other):
-        ds = self.__mul__(-1.0)
-        return other + ds
+        return other + self.__neg__
 
     def __sub__(self, other):
-        if isinstance(other, self.__class__):
-            return self._add_dataarray(other, sign=-1.0)
-        else:
-            return self._add_value(-other)
+        return self._apply_math_operation(other, np.subtract, "-")
 
     def __rmul__(self, other):
         return self.__mul__(other)
 
     def __mul__(self, other):
         return self._apply_math_operation(other, np.multiply, "*")
-        # if hasattr(other, "shape") and hasattr(other, "ndim"):
-        #     return self._multiply_array(other)
-        # else:
-        #     return self._multiply_value(other)
+
+    def __pow__(self, other):
+        return self._apply_math_operation(other, np.power, "**")
 
     def __truediv__(self, other):
         return self._apply_math_operation(other, np.divide, "/")
 
-    def _add_dataarray(self, other, sign=1.0):
-        # self._check_datasets_match(other) # TODO
+    def __floordiv__(self, other):
+        return self._apply_math_operation(other, np.floor_divide, "//")
+
+    def __mod__(self, other):
+        return self._apply_math_operation(other, np.mod, "%")
+
+    def __neg__(self):
+        return self._apply_unary_math_operation(np.negative)
+
+    def __pos__(self):
+        return self._apply_unary_math_operation(np.positive)
+
+    def __inv__(self):
+        return self._apply_unary_math_operation(np.invert)
+
+    def __abs__(self):
+        return self._apply_unary_math_operation(np.abs)
+
+    def _apply_unary_math_operation(self, func):
         try:
-            data = self.values + sign * other.values
+            data = func(self.values)
         except:
-            raise ValueError("Could not add data")
-
-        new_da = self.copy()
-
-        new_da.values = data
-
-        return new_da
-
-    def _add_value(self, value):
-        try:
-            data = value + self.values
-        except:
-            raise ValueError(f"{value} could not be added to DataArray")
-
-        new_da = self.copy()
-
-        new_da.values = data
-
-        return new_da
-
-    def _apply_math_operation(self, other, func, txt="with"):
-        try:
-            other_values = other.values if hasattr(other, "values") else other
-            data = func(self.values, other_values)
-        except:
+            # TODO: better except... TypeError etc
             raise ValueError(f"Math operation could not be applied to DataArray")
 
         new_da = self.copy()
         new_da.values = data
+        return new_da
 
-        if hasattr(other, "shape") and hasattr(other, "ndim"):
-            # TODO: exceptions +/- with same EUMtype
+    def _apply_math_operation(self, other, func, txt="with"):
+        """Apply a binary math operation with a scalar, an array or another DataArray"""
+        try:
+            other_values = other.values if hasattr(other, "values") else other
+            data = func(self.values, other_values)
+        except:
+            # TODO: better except... TypeError etc
+            raise ValueError(f"Math operation could not be applied to DataArray")
+
+        # TODO: check if geometry etc match if other is DataArray?
+
+        new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
+        new_da.values = data
+
+        if not self._keep_EUM_after_math_operation(other, func):
             other_name = other.name if hasattr(other, "name") else "array"
             new_da.item = ItemInfo(
                 f"{self.name} {txt} {other_name}", itemtype=EUMType.Undefined
@@ -1163,41 +1164,25 @@ class DataArray(TimeSeries):
 
         return new_da
 
-    def _multiply_value(self, value):
-        try:
-            data = value * self.values
-        except:
-            raise ValueError(f"{value} could not be multiplied to DataArray")
-        new_da = self.copy()
+    def _keep_EUM_after_math_operation(self, other, func):
+        """Does the math operation falsify the EUM?"""
+        if hasattr(other, "shape") and hasattr(other, "ndim"):
+            # other is array-like, so maybe we cannot keep EUM
+            if func == np.subtract or func == np.sum:
+                # +/-: we may want to keep EUM
+                if isinstance(other, DataArray):
+                    if self.type == other.type and self.unit == other.unit:
+                        return True
+                    else:
+                        return False
+                else:
+                    return True  # assume okay, since no EUM
+            return False
 
-        new_da.values = data
-
-        return new_da
-
-    def _multiply_array(self, other):
-        """Multiply DataArray with other DataArray/np.array, EUMType will be undefined"""
-        try:
-            data = (
-                self.values * other.values
-                if hasattr(other, "values")
-                else self.values * other
-            )
-        except:
-            raise ValueError(
-                f"array with shape {other.shape} could not be multiplied to DataArray"
-            )
-        new_da = self.copy()
-        other_name = other.name if hasattr(other, "name") else "array"
-        new_da.item = ItemInfo(
-            self.name + " * " + other_name, itemtype=EUMType.Undefined
-        )
-
-        new_da.values = data
-
-        return new_da
+        # other is likely scalar, okay to keep EUM
+        return True
 
     def copy(self):
-
         return deepcopy(self)
 
     @property
