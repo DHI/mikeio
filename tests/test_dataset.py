@@ -1366,3 +1366,44 @@ def test_incompatible_data_not_allowed():
         mikeio.Dataset([da1, da2])
 
     assert "time" in str(excinfo.value).lower()
+
+
+def test_xzy_selection():
+    # select in space via x,y,z coordinates test
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds = mikeio.read(filename)
+
+    dss_xzy = ds.sel(x=340000, y=15.75, z=0)
+
+    # check for point geometry after selection
+    assert type(dss_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
+
+
+def test_layer_selection():
+    # select layer test
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds = mikeio.read(filename)
+
+    dss_layer = ds.sel(layer=0)
+    # should not be layered after selection
+    assert type(dss_layer.geometry) == mikeio.spatial.FM_geometry.GeometryFM
+
+
+def test_time_selection():
+    # select time test
+    nt = 100
+    data = []
+    d = np.random.rand(nt)
+    data.append(d)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
+    items = [ItemInfo("Foo")]
+    ds = mikeio.Dataset(data, time, items)
+
+    # check for string input
+    dss_t = ds.sel(time="2000-01-05")
+    # and index based
+    dss_tix = ds.sel(time=80)
+
+    assert dss_t.shape == (24,)
+    assert len(dss_tix) == 1
+    
