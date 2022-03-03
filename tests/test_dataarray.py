@@ -507,8 +507,8 @@ def test_unary_math_operations(da2):
 
 
 def test_binary_math_operations(da1):
-    da2 = da1 ** 2
-    assert np.all(da2.values == da1.values ** 2)
+    da2 = da1**2
+    assert np.all(da2.values == da1.values**2)
     assert isinstance(da2, mikeio.DataArray)
 
 
