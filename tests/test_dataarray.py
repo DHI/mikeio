@@ -649,6 +649,39 @@ def test_da_sel_layer():
     assert da3.geometry.n_elements == 3700
 
 
+def test_da_sel_area_2d():
+    filename = "tests/testdata/FakeLake.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+
+    area = [-0.1, 0.15, 0.0, 0.2]
+    da1 = da.sel(area=area)
+    assert da1.geometry.n_elements == 14
+
+
+def test_da_sel_area_3d():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+    assert da.geometry.n_elements == 17118
+    assert da.geometry.n_layers == 9
+
+    area = [340000, 6140000, 360000, 6170000]
+    da1 = da.sel(area=area)
+    assert da1.geometry.n_elements == 4567
+    assert da1.geometry.n_layers == 6
+
+
+def test_da_sel_area_2dv():
+    filename = "tests/testdata/basin_2dv.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+    assert da.geometry.is_layered
+
+    # TODO
+    # area = [100, 10, 300, 30]
+    # da1 = da.sel(area=area)
+    # assert da1.geometry.n_elements == 128
+    # assert da1.geometry.is_layered
+
+
 def test_da_quantile_axis0(da2):
     assert da2.geometry.n == 7
     assert len(da2.time) == 10

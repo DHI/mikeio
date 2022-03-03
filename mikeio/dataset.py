@@ -1332,10 +1332,23 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         if "layer" in kwargs:
             if isinstance(ds.geometry, GeometryFMLayered):
-                idx = ds.geometry.get_layer_elements(kwargs["layer"])
+                layer = kwargs.pop("layer")
+                idx = ds.geometry.get_layer_elements(layer)
                 ds = ds.isel(idx, axis="space")
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
+
+        if "area" in kwargs:
+            if isinstance(ds.geometry, GeometryFM):
+                area = kwargs.pop("area")
+                idx = ds.geometry._elements_in_area(area)
+                ds = ds.isel(idx, axis="space")
+            else:
+                raise ValueError("'area' can only be selected from Dfsu data")
+
+        if len(kwargs) > 0:
+            args = ",".join(kwargs)
+            raise ValueError(f"Argument(s) '{args}' not recognized (layer, area).")
 
         # select in time
         if time is not None:

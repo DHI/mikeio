@@ -13,6 +13,7 @@ from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
 from .FM_utils import _get_node_centered_data, _to_polygons, _plot_map
+import mikeio.data_utils as du
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -785,6 +786,29 @@ class GeometryFM(_Geometry):
                 return GeometryPoint2D(coords[0], coords[1])
         else:
             return self.elements_to_geometry(elements=idx, node_layers=None)
+
+    def _elements_in_area(self, area):
+        """Find element ids of elements inside area"""
+        idx = self._2d_elements_in_area(area)
+        if self.is_layered:
+            idx = np.hstack(self.e2_e3_table[idx])
+        return idx
+
+    def _2d_elements_in_area(self, area):
+        """Find 2d element ids of elements inside area"""
+        if du._area_is_bbox(area):
+            x0, y0, x1, y1 = area
+            xc = self._geometry2d.element_coordinates[:, 0]
+            yc = self._geometry2d.element_coordinates[:, 1]
+            mask = (xc > x0) & (xc < x1) & (yc > y0) & (yc < y1)
+        elif du._area_is_polygon(area):
+            polygon = np.array(area)
+            xy = self._geometry2d.element_coordinates[:, :2]
+            mask = du._inside_polygon(polygon, xy)
+        else:
+            raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
+
+        return np.where(mask)[0]
 
     def elements_to_geometry(
         self, elements, node_layers="all"

@@ -878,10 +878,23 @@ class DataArray(TimeSeries):
 
         if "layer" in kwargs:
             if isinstance(da.geometry, GeometryFMLayered):
-                idx = da.geometry.get_layer_elements(kwargs["layer"])
+                layer = kwargs.pop("layer")
+                idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
+
+        if "area" in kwargs:
+            if isinstance(da.geometry, GeometryFM):
+                area = kwargs.pop("area")
+                idx = da.geometry._elements_in_area(area)
+                da = da.isel(idx, axis="space")
+            else:
+                raise ValueError("'area' can only be selected from Dfsu data")
+
+        if len(kwargs) > 0:
+            args = ",".join(kwargs)
+            raise ValueError(f"Argument(s) '{args}' not recognized (layer, area).")
 
         # select in time
         if time is not None:
