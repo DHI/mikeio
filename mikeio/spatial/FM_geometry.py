@@ -16,6 +16,7 @@ from .FM_utils import (
     _get_node_centered_data,
     _to_polygons,
     _plot_map,
+    _point_in_polygon,
 )
 import mikeio.data_utils as du
 
@@ -566,6 +567,42 @@ class GeometryFM(_Geometry):
             p = np.array((x, y)).T
         d, elem_id = self._tree2d.query(p, k=n)
         return elem_id, d
+
+    def _find_element_2d(self, coords: np.array):
+        xn = np.zeros(4, dtype=np.float64)
+        yn = np.zeros(4, dtype=np.float64)
+        coords = np.atleast_2d(coords)
+        nc = self._geometry2d.node_coordinates
+        ids = self._find_n_nearest_2d_elements(coords, n=1)[0]
+
+        for k in range(len(ids)):
+            # step 1: is nearest element = element containing point?
+            nodes = self._geometry2d.element_table[ids[k]]
+            nearest_inside = _point_in_polygon(
+                nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
+            )
+
+            # step 2: if not, then try with more points
+            if not nearest_inside:
+                many_nearest = self._find_n_nearest_2d_elements(coords[k], n=10)[0]
+                element_table = self._geometry2d.element_table[many_nearest]
+                lid = self._find_element_containing_point_2d(
+                    element_table, xn, yn, coords[k, 0], coords[k, 1]
+                )
+                ids[k] = many_nearest[lid] if lid > 0 else -1
+
+        return ids
+
+    def _find_element_containing_point_2d(
+        self, element_table, xn: np.array, yn: np.array, xp: float, yp: float
+    ):
+        for j, el in enumerate(element_table):
+            n_nodes = len(el)
+            xn[0:n_nodes] = self.node_coordinates[el, 0]
+            yn[0:n_nodes] = self.node_coordinates[el, 1]
+            if _point_in_polygon(xn[0:n_nodes], yn[0:n_nodes], xp, yp):
+                return j
+        return -1
 
     def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None) -> Grid2D:
         """get a 2d grid that covers the domain by specifying spacing or shape

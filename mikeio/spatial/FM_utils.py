@@ -1,5 +1,6 @@
 import numpy as np
 import warnings
+import numba  # TODO: should this be requirement or how to handle if not installed?
 
 
 def _plot_map(
@@ -504,3 +505,23 @@ def _cbar_extend(calc_data, vmin, vmax):
     else:
         extend = "neither"
     return extend
+
+
+@numba.jit(nopython=True)
+def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
+    # if xp < np.min(xn) or xp > np.max(xn) or yp < np.min(yn) or yp > np.max(yn):
+    #     # not inside bounding box? No need to look further
+    #     return False
+    for j in range(len(xn) - 1):
+        if not _point_on_left_side(xn[j], yn[j], xn[j + 1], yn[j + 1], xp, yp):
+            return False
+    if not _point_on_left_side(xn[-1], yn[-1], xn[0], yn[0], xp, yp):
+        return False
+    return True
+
+
+@numba.jit(nopython=True)
+def _point_on_left_side(
+    x1: float, y1: float, x2: float, y2: float, xp: float, yp: float
+) -> bool:
+    return (y2 - y1) * (xp - x1) + (-x2 + x1) * (yp - y1) <= 0

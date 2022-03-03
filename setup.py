@@ -27,7 +27,7 @@ setuptools.setup(
             "matplotlib",
             "jupyterlab",
         ],
-        "test": ["pytest", "matplotlib!=3.5.0", "xarray"],
+        "test": ["pytest", "matplotlib!=3.5.0", "xarray", "numba"],
         "notebooks": [
             "nbformat",
             "nbconvert",
