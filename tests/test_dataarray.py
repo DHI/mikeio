@@ -657,6 +657,10 @@ def test_da_sel_area_2d():
     da1 = da.sel(area=area)
     assert da1.geometry.n_elements == 14
 
+    area = (-0.1, 0.15, 0.0, 0.2)
+    da1 = da.sel(area=area)
+    assert da1.geometry.n_elements == 14
+
 
 def test_da_sel_area_3d():
     filename = "tests/testdata/oresund_sigma_z.dfsu"

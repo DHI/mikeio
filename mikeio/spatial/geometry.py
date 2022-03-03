@@ -43,6 +43,51 @@ class _Geometry:
     def coordinates(self):
         raise NotImplementedError
 
+    @staticmethod
+    def _area_is_bbox(area):
+        is_bbox = False
+        if area is not None:
+            if not np.isscalar(area):
+                area = np.array(area)
+                if (area.ndim == 1) & (len(area) == 4):
+                    if np.all(np.isreal(area)):
+                        is_bbox = True
+        return is_bbox
+
+    @staticmethod
+    def _area_is_polygon(area) -> bool:
+        if area is None:
+            return False
+        if np.isscalar(area):
+            return False
+        if not np.all(np.isreal(area)):
+            return False
+        polygon = np.array(area)
+        if polygon.ndim > 2:
+            return False
+
+        if polygon.ndim == 1:
+            if len(polygon) <= 5:
+                return False
+            if len(polygon) % 2 != 0:
+                return False
+
+        if polygon.ndim == 2:
+            if polygon.shape[0] < 3:
+                return False
+            if polygon.shape[1] != 2:
+                return False
+
+        return True
+
+    @staticmethod
+    def _inside_polygon(polygon, xy):
+        import matplotlib.path as mp
+
+        if polygon.ndim == 1:
+            polygon = np.column_stack((polygon[0::2], polygon[1::2]))
+        return mp.Path(polygon).contains_points(xy)
+
 
 class GeometryUndefined(_Geometry):
     def __repr__(self):
