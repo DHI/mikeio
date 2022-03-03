@@ -1406,4 +1406,3 @@ def test_time_selection():
 
     assert dss_t.shape == (24,)
     assert len(dss_tix) == 1
-    
