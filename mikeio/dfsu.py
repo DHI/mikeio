@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 from functools import wraps
 from tqdm import trange
 
-
 from mikecore.eum import eumUnit, eumQuantity
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
@@ -135,7 +134,7 @@ class _UnstructuredFile:
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         ):
             out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
-        if self.items is not None:
+        if hasattr(self, "items") and self.items is not None:
             if self.n_items < 10:
                 out.append("Items:")
                 for i, item in enumerate(self.items):
