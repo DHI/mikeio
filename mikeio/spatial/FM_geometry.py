@@ -12,7 +12,11 @@ from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
-from .FM_utils import _get_node_centered_data, _to_polygons, _plot_map
+from .FM_utils import (
+    _get_node_centered_data,
+    _to_polygons,
+    _plot_map,
+)
 import mikeio.data_utils as du
 
 
@@ -166,6 +170,7 @@ class GeometryFM(_Geometry):
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
+        validate=True,
     ) -> None:
         super().__init__()
 
@@ -200,6 +205,7 @@ class GeometryFM(_Geometry):
             element_table=element_table,
             element_ids=element_ids,
             dfsu_type=dfsu_type,
+            validate=validate,
         )
 
         self.plot = _GeometryFMPlotter(self)
@@ -230,17 +236,20 @@ class GeometryFM(_Geometry):
         self._node_ids = np.asarray(node_ids)
         self._projstr = "LONG/LAT" if projection_string is None else projection_string
 
-    def _set_elements(self, element_table, element_ids=None, dfsu_type=None):
+    def _set_elements(
+        self, element_table, element_ids=None, dfsu_type=None, validate=True
+    ):
 
-        for i, e in enumerate(element_table):
-
-            if not isinstance(e, np.ndarray):
-                e = np.array(e)
-                element_table[i] = e
-            if e.max() > (self.node_ids.max()):
-                raise ValueError(
-                    f"Element table has node # {e.max()}. Max node id: {self.node_ids.max()}"
-                )
+        if validate:
+            for i, e in enumerate(element_table):
+                # TODO: avoid looping through all elements (could be +1e6)!
+                if not isinstance(e, np.ndarray):
+                    e = np.asarray(e)
+                    element_table[i] = e
+                if e.max() > (self.node_ids.max()):
+                    raise ValueError(
+                        f"Element table has node # {e.max()}. Max node id: {self.node_ids.max()}"
+                    )
 
         self._element_table = element_table
         if element_ids is None:
@@ -259,12 +268,12 @@ class GeometryFM(_Geometry):
         new_node_ids = np.arange(self.n_nodes)
         new_element_ids = np.arange(self.n_elements)
         node_dict = dict(zip(self._node_ids, new_node_ids))
-        for j in range(self.n_elements):
-            elem_nodes = self._element_table[j]
-            new_elem_nodes = []
-            for idx in elem_nodes:
-                new_elem_nodes.append(node_dict[idx])
-            self._element_table[j] = new_elem_nodes
+        for eid in range(self.n_elements):
+            elem_nodes = self._element_table[eid]
+            new_elem_nodes = np.zeros_like(elem_nodes)
+            for jn, idx in enumerate(elem_nodes):
+                new_elem_nodes[jn] = node_dict[idx]
+            self._element_table[eid] = new_elem_nodes
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
@@ -936,31 +945,27 @@ class GeometryFM(_Geometry):
         list(list(int))
             element table with a list of nodes for each element
         """
-        nodes = []
-        elem_tbl = []
+        elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
         if (node_layers is None) or (node_layers == "all") or self.is_2d:
-            for j in elements:
-                elem_nodes = self.element_table[j]
-                elem_tbl.append(elem_nodes)
-                for node in elem_nodes:
-                    nodes.append(node)
+            for j, eid in enumerate(elements):
+                elem_tbl[j] = np.asarray(self.element_table[eid])
+
         else:
-            # 3D file
+            # 3D => 2D
             if (node_layers != "bottom") and (node_layers != "top"):
                 raise Exception("node_layers must be either all, bottom or top")
-            for j in elements:
-                elem_nodes = self.element_table[j]
+            for j, eid in enumerate(elements):
+                elem_nodes = np.asarray(self.element_table[eid])
                 nn = len(elem_nodes)
                 halfn = int(nn / 2)
                 if node_layers == "bottom":
                     elem_nodes = elem_nodes[:halfn]
                 if node_layers == "top":
                     elem_nodes = elem_nodes[halfn:]
-                elem_tbl.append(elem_nodes)
-                for node in elem_nodes:
-                    nodes.append(node)
+                elem_tbl[j] = elem_nodes
 
-        return np.unique(nodes), elem_tbl
+        nodes = np.unique(np.hstack(elem_tbl))
+        return nodes, elem_tbl
 
     def get_node_centered_data(self, data, extrapolate=True):
         """convert cell-centered data to node-centered by pseudo-laplacian method
@@ -1048,6 +1053,7 @@ class GeometryFMLayered(GeometryFM):
         node_ids=None,
         n_layers=None,
         n_sigma=None,
+        validate=True,
     ) -> None:
         super().__init__(
             node_coordinates=node_coordinates,
@@ -1057,6 +1063,7 @@ class GeometryFMLayered(GeometryFM):
             dfsu_type=dfsu_type,
             element_ids=element_ids,
             node_ids=node_ids,
+            validate=validate,
         )
         self._top_elems = None
         self._n_layers_column = None
@@ -1105,6 +1112,7 @@ class GeometryFMLayered(GeometryFM):
             projection=self.projection_string,
             element_table=elem_tbl,
             element_ids=self.element_ids[elem_ids],
+            validate=False,
         )
 
         geom._type = None  # DfsuFileType.Mesh
