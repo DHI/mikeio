@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 
-import mikeio.data_utils as du
+from mikeio.data_utils import DataUtilsMixin as du
 
 
 def test_parse_time_None():

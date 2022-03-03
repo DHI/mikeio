@@ -16,7 +16,7 @@ from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
 from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
-import mikeio.data_utils as du
+from .data_utils import DataUtilsMixin
 
 
 class _DataArrayPlotter:
@@ -255,7 +255,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         )
 
 
-class DataArray(TimeSeries):
+class DataArray(DataUtilsMixin, TimeSeries):
 
     deletevalue = 1.0e-35
 
@@ -271,7 +271,7 @@ class DataArray(TimeSeries):
     ):
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
-        self.time = du._parse_time(time, self._values.shape)
+        self.time = self._parse_time(time, self._values.shape)
         self.dims = self._parse_dims(dims, geometry)
         self.item = self._parse_item(item)
         self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
@@ -442,15 +442,15 @@ class DataArray(TimeSeries):
 
     def __setitem__(self, key, value):
         # TODO: use .values instead?
-        if du._is_boolean_mask(key):
+        if self._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
-            return du._set_by_boolean_mask(self._values, mask, value)
+            return self._set_by_boolean_mask(self._values, mask, value)
         self._values[key] = value
 
     def __getitem__(self, key) -> "DataArray":
-        if du._is_boolean_mask(key):
+        if self._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
-            return du._get_by_boolean_mask(self.values, mask)
+            return self._get_by_boolean_mask(self.values, mask)
 
         dims = self.dims
         if "time" in dims:
@@ -458,7 +458,7 @@ class DataArray(TimeSeries):
             space_key = key[1:] if isinstance(key, tuple) else None
 
             # select in time
-            steps = du._get_time_idx_list(self.time, steps)
+            steps = self._get_time_idx_list(self.time, steps)
             time = self.time[steps]
             if len(steps) == 1:
                 dims = tuple([d for d in dims if d != "time"])
@@ -798,8 +798,8 @@ class DataArray(TimeSeries):
             nanmax : Max values with NaN values removed
         """
 
-        axis = du._parse_axis(self.shape, self.dims, axis)
-        time = du._time_by_agg_axis(self.time, axis)
+        axis = self._parse_axis(self.shape, self.dims, axis)
+        time = self._time_by_agg_axis(self.time, axis)
 
         if isinstance(axis, Iterable):
             dims = tuple([d for i, d in enumerate(self.dims) if i not in axis])
@@ -974,18 +974,18 @@ class DataArray(TimeSeries):
         -------
         DataArray
         """
-        t_out_index = du._parse_interp_time(self.time, dt)
+        t_out_index = self._parse_interp_time(self.time, dt)
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
-        data = du._interpolate_time(
+        data = self._interpolate_time(
             t_in, t_out, self.to_numpy(), method, extrapolate, fill_value
         )
 
         zn = (
             None
             if self._zn is None
-            else du._interpolate_time(
+            else self._interpolate_time(
                 t_in, t_out, self._zn, method, extrapolate, fill_value
             )
         )
@@ -1037,7 +1037,7 @@ class DataArray(TimeSeries):
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             return None
 
-        axis = du._parse_axis(self.shape, self.dims, axis)
+        axis = self._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
             idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
             time = self.time[idx]
@@ -1050,7 +1050,7 @@ class DataArray(TimeSeries):
             geometry = None
             zn = None
             if hasattr(self.geometry, "isel"):
-                spatial_axis = du._axis_to_spatial_axis(self.dims, axis)
+                spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
             if isinstance(geometry, GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
@@ -1079,8 +1079,8 @@ class DataArray(TimeSeries):
 
         from mikeio import Dataset
 
-        axis = du._parse_axis(self.shape, self.dims, axis)
-        time = du._time_by_agg_axis(self.time, axis)
+        axis = self._parse_axis(self.shape, self.dims, axis)
+        time = self._time_by_agg_axis(self.time, axis)
 
         if np.isscalar(q):
             qdat = func(self.values, q=q, axis=axis, **kwargs)

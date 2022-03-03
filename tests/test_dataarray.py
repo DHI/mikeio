@@ -657,6 +657,10 @@ def test_da_sel_area_2d():
     da1 = da.sel(area=area)
     assert da1.geometry.n_elements == 14
 
+    area = (-0.1, 0.15, 0.0, 0.2)
+    da1 = da.sel(area=area)
+    assert da1.geometry.n_elements == 14
+
 
 def test_da_sel_area_3d():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
@@ -752,3 +756,39 @@ def test_write_dfs2_single_time_no_time_dim(tmp_path):
     fn = str(tmp_path / "test_2.dfs2")
 
     da.to_dfs(fn)
+
+
+def test_xzy_selection():
+    # select in space via x,y,z coordinates test
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds = mikeio.read(filename)
+
+    das_xzy = ds.Temperature.sel(x=340000, y=15.75, z=0)
+
+    # check for point geometry after selection
+    assert type(das_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
+
+
+def test_layer_selection():
+    # select layer test
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds = mikeio.read(filename)
+
+    das_layer = ds.Temperature.sel(layer=0)
+    # should not be layered after selection
+    assert type(das_layer.geometry) == mikeio.spatial.FM_geometry.GeometryFM
+
+
+def test_time_selection():
+    # select time test
+    nt = 100
+    data = []
+    d = np.random.rand(nt)
+    data.append(d)
+    time = pd.date_range("2000-1-2", freq="H", periods=nt)
+    items = [ItemInfo("Foo")]
+    ds = mikeio.Dataset(data, time, items)
+
+    das_t = ds.Foo.sel(time="2000-01-05")
+
+    assert das_t.shape == (24,)

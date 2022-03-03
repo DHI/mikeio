@@ -8,8 +8,8 @@ from copy import deepcopy
 from mikeio.eum import EUMType, ItemInfo
 import collections.abc
 
-import mikeio.data_utils as du
-from mikeio.spatial.FM_geometry import GeometryFM, GeometryFMLayered
+from .data_utils import DataUtilsMixin
+from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .base import TimeSeries
 from .dataarray import DataArray
 from .spatial.geometry import (
@@ -73,7 +73,7 @@ class _DatasetPlotter:
         return ax
 
 
-class Dataset(TimeSeries, collections.abc.MutableMapping):
+class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     deletevalue = 1.0e-35
 
@@ -252,7 +252,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                     item = ItemInfo(item)
                 elif not isinstance(item, ItemInfo):
                     raise TypeError(f"items of type: {type(item)} is not supported")
-                # TODO: item.name = du._to_safe_name(item.name)
+                # TODO: item.name = self._to_safe_name(item.name)
                 item_infos.append(item)
 
             item_names = [it.name for it in item_infos]
@@ -336,7 +336,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     @time.setter
     def time(self, new_time):
-        new_time = du._parse_time(new_time)
+        new_time = self._parse_time(new_time)
         if len(self.time) != len(new_time):
             raise ValueError("Length of new time is wrong")
         for da in self:
@@ -571,8 +571,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return self.pop(0)
 
     def _set_name_attr(self, name: str, value: DataArray):
-        name = du._to_safe_name(name)
-        item_names = [du._to_safe_name(n) for n in self.names]
+        name = self._to_safe_name(name)
+        item_names = [self._to_safe_name(n) for n in self.names]
         if (name not in item_names) and hasattr(self, name):
             # oh-no the item_name matches the name of another attr
             pass
@@ -582,7 +582,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             setattr(self, name, value)
 
     def _del_name_attr(self, name: str):
-        name = du._to_safe_name(name)
+        name = self._to_safe_name(name)
         if name in self.__itemattr:
             self.__itemattr.remove(name)
             delattr(self, name)
@@ -1009,7 +1009,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             return None
 
-        axis = du._parse_axis(self.shape, self.dims, axis)
+        axis = self._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
             idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
             time = self.time[idx]
@@ -1022,7 +1022,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             geometry = None
             zn = None
             if hasattr(self.geometry, "isel"):
-                spatial_axis = du._axis_to_spatial_axis(self.dims, axis)
+                spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
             if isinstance(geometry, GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
@@ -1444,12 +1444,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
-        t_out_index = du._parse_interp_time(self.time, dt)
+        t_out_index = self._parse_interp_time(self.time, dt)
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
         data = [
-            du._interpolate_time(
+            self._interpolate_time(
                 t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
             )
             for da in self
@@ -1458,7 +1458,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         zn = (
             None
             if self._zn is None
-            else du._interpolate_time(
+            else self._interpolate_time(
                 t_in, t_out, self._zn, method, extrapolate, fill_value
             )
         )
