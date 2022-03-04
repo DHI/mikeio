@@ -20,6 +20,7 @@ setuptools.setup(
             "black==22.1.0",
             "sphinx",
             "sphinx-book-theme",
+            "myst-parser",
             "shapely",
             "pyproj",
             "xarray",
