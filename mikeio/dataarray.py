@@ -271,12 +271,21 @@ class DataArray(DataUtilsMixin, TimeSeries):
     ):
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
-        self.time = self._parse_time(time, self._values.shape)
+        self.time = self._parse_time(time)
         self.dims = self._parse_dims(dims, geometry)
+
+        self._check_time_data_length(self.time)
+
         self.item = self._parse_item(item)
         self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self.plot = self._get_plotter_by_geometry()
+
+    def _check_time_data_length(self, time):
+        if "time" in self.dims and len(time) != self._values.shape[0]:
+            raise ValueError(
+                f"Number of timesteps ({len(time)}) does not fit with data shape {self.values.shape}"
+            )
 
     @staticmethod
     def _parse_data(data):

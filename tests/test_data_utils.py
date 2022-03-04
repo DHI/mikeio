@@ -68,3 +68,19 @@ def test_parse_time_decreasing():
 
     with pytest.raises(ValueError, match="must be monotonic increasing"):
         du._parse_time(times)
+
+
+def test_safe_name_noop():
+
+    good_name = "MSLP"
+
+    assert du._to_safe_name(good_name) == good_name
+
+
+def test_safe_name_bad():
+
+    # fmt: off
+    bad_name   = "MSLP., 1:st level\n 2nd chain"
+    safe_name  = "MSLP_1_st_level_2nd_chain"
+    assert du._to_safe_name(bad_name) == safe_name
+    # fmt : on

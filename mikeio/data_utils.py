@@ -1,3 +1,4 @@
+import re
 from typing import Iterable, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
@@ -12,10 +13,8 @@ class DataUtilsMixin:
     def _time_by_agg_axis(
         time: pd.DatetimeIndex, axis: Union[int, Sequence[int]]
     ) -> pd.DatetimeIndex:
-        """New DatetimeIndex after aggregating over axis"""
-        if axis == 0:
-            time = pd.DatetimeIndex([time[0]])
-        elif isinstance(axis, Sequence) and 0 in axis:
+        """New DatetimeIndex after aggregating over time axis"""
+        if axis == 0 or (isinstance(axis, Sequence) and 0 in axis):
             time = pd.DatetimeIndex([time[0]])
         else:
             time = time
@@ -42,27 +41,26 @@ class DataUtilsMixin:
         return steps
 
     @staticmethod
-    def _is_boolean_mask(x):
+    def _is_boolean_mask(x) -> bool:
         if hasattr(x, "dtype"):  # isinstance(x, (np.ndarray, DataArray)):
             return x.dtype == np.dtype("bool")
         return False
 
     @staticmethod
-    def _get_by_boolean_mask(data: np.ndarray, mask: np.ndarray):
+    def _get_by_boolean_mask(data: np.ndarray, mask: np.ndarray) -> np.ndarray:
         if data.shape != mask.shape:
             return data[np.broadcast_to(mask, data.shape)]
         return data[mask]
 
     @staticmethod
-    def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value):
+    def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value) -> None:
         if data.shape != mask.shape:
             data[np.broadcast_to(mask, data.shape)] = value
         else:
             data[mask] = value
-        return
 
     @staticmethod
-    def _parse_time(time, data_shape=None):
+    def _parse_time(time) -> pd.DatetimeIndex:
         """Allow anything that we can create a DatetimeIndex from"""
         if time is None:
             time = [pd.Timestamp(2018, 1, 1)]
@@ -70,19 +68,16 @@ class DataUtilsMixin:
             time = [time]
 
         if not isinstance(time, pd.DatetimeIndex):
-            time = pd.DatetimeIndex(time)
+            index = pd.DatetimeIndex(time)
+        else:
+            index = time
 
-        if data_shape is not None:
-            if (len(time) > 1) and data_shape[0] != len(time):
-                raise ValueError(
-                    f"Number of timesteps ({len(time)}) does not fit with data shape {data_shape}"
-                )
-
-        if not time.is_monotonic_increasing:
+        if not index.is_monotonic_increasing:
             raise ValueError(
                 "Time must be monotonic increasing (only equal or increasing) instances."
             )
-        return time
+
+        return index
 
     @staticmethod
     def _parse_axis(data_shape, dims, axis) -> Union[int, Tuple[int]]:
@@ -113,8 +108,9 @@ class DataUtilsMixin:
         return axis - int(dims[0] == "time")
 
     @staticmethod
-    def _to_safe_name(name):
-        return "".join([x if x.isalnum() else "_" for x in name])
+    def _to_safe_name(name: str) -> str:
+        tmp = re.sub("[^0-9a-zA-Z]", "_", name)
+        return re.sub("_+", "_", tmp)  # Collapse multiple underscores
 
     @staticmethod
     def _keepdims_by_axis(axis):
