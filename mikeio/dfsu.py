@@ -184,6 +184,7 @@ class _UnstructuredFile:
             dfsu_type=self._type,
             element_ids=el_ids,
             node_ids=node_ids,
+            validate=False,
         )
 
     def _read_dfsu_header(self, filename):
@@ -220,6 +221,7 @@ class _UnstructuredFile:
                     node_ids=node_ids,
                     n_layers=dfs.NumberOfLayers,
                     n_sigma=dfs.NumberOfSigmaLayers,
+                    validate=False,
                 )
             else:
                 self._geometry = GeometryFM(
@@ -230,6 +232,7 @@ class _UnstructuredFile:
                     dfsu_type=self._type,
                     element_ids=el_ids,
                     node_ids=node_ids,
+                    validate=False,
                 )
 
         # items
@@ -265,11 +268,11 @@ class _UnstructuredFile:
         return element_table, element_ids
 
     @staticmethod
-    def _offset_element_table_by(element_table, offset):
+    def _offset_element_table_by(element_table, offset, copy=True):
         offset = int(offset)
-        new_elem_table = element_table.copy()
+        new_elem_table = element_table.copy() if copy else element_table
         for j in range(len(element_table)):
-            new_elem_table[j] = np.array(element_table[j]) + offset
+            new_elem_table[j] = element_table[j] + offset
         return new_elem_table
 
     @staticmethod
