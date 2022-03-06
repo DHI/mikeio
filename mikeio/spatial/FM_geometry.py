@@ -211,12 +211,12 @@ class GeometryFM(_Geometry):
 
         self.plot = _GeometryFMPlotter(self)
 
-        try:
-            import numba
+        # try:
+        #     import numba
 
-            self._point_in_polygon = numba.njit(_point_in_polygon)
-        except ModuleNotFoundError:
-            self._point_in_polygon = _point_in_polygon
+        #     self._point_in_polygon = numba.njit(_point_in_polygon)
+        # except ModuleNotFoundError:
+        self._point_in_polygon = _point_in_polygon
 
     def __repr__(self):
         out = []
@@ -249,14 +249,17 @@ class GeometryFM(_Geometry):
     ):
 
         if validate:
+            max_node_id = self.node_ids.max()
             for i, e in enumerate(element_table):
                 # TODO: avoid looping through all elements (could be +1e6)!
                 if not isinstance(e, np.ndarray):
                     e = np.asarray(e)
                     element_table[i] = e
-                if e.max() > (self.node_ids.max()):
+
+                # NOTE: this check "e.max()" takes the most of the time when constructing a new FM_geometry
+                if e.max() > max_node_id:
                     raise ValueError(
-                        f"Element table has node # {e.max()}. Max node id: {self.node_ids.max()}"
+                        f"Element table has node # {e.max()}. Max node id: {max_node_id}"
                     )
 
         self._element_table = element_table
