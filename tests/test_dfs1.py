@@ -4,7 +4,6 @@ import os
 import numpy as np
 import pandas as pd
 import pytest
-from setuptools_scm import DEFAULT_VERSION_SCHEME
 
 import mikeio
 
