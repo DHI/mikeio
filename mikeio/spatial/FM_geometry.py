@@ -912,6 +912,7 @@ class GeometryFM(_Geometry):
             layers_used = self.layer_ids[elements]
             unique_layer_ids = np.unique(layers_used)
             n_layers = len(unique_layer_ids)
+
             if (
                 self._type == DfsuFileType.Dfsu3DSigma
                 or self._type == DfsuFileType.Dfsu3DSigmaZ
@@ -1411,10 +1412,10 @@ class GeometryFMLayered(GeometryFM):
         # layer_ids = 0, 1, 2...
         global_layer_ids = np.arange(self.n_layers)
         for j in range(n2d):
-            col = list(range(botid[j], topid[j] + 1))
+            col = np.arange(botid[j], topid[j] + 1)
 
             e2_to_e3.append(col)
-            for jj in col:
+            for _ in col:
                 index2d.append(j)
 
             n_local_layers = len(col)
