@@ -1,17 +1,17 @@
-from typing import List, Union
+from typing import Iterable, List, Union
 import numpy as np
 import pandas as pd
 from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
 from .custom_exceptions import ItemsError
 
-from mikecore.DfsFile import DfsDynamicItemInfo
+from mikecore.DfsFile import DfsDynamicItemInfo, DfsFileInfo
 
 
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
     items: Union[int, List[int], List[str]] = None,
     ignore_first: bool = False,
-) -> List[int]:
+) -> Iterable[int]:
     start_idx = 1 if ignore_first else 0
     n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
@@ -32,10 +32,13 @@ def _valid_item_numbers(
     if len(np.unique(items)) != len(items):
         raise ValueError("'items' must be unique")
 
+    assert isinstance(items, Iterable)
+    assert isinstance(items[0], int)
+
     return items
 
 
-def _valid_timesteps(dfsFileInfo, time_steps):
+def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps):
     # TODO: naming: time_steps or timesteps?
     n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
 

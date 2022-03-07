@@ -16,7 +16,7 @@ from mikecore.DfsFile import (
     TimeAxisType,
 )
 
-from .dfsutil import _valid_item_numbers, _get_item_info
+from .dfsutil import _valid_item_numbers, _get_item_info, _valid_timesteps
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries
@@ -182,6 +182,7 @@ class Dfs0(TimeSeries):
             time_steps = range(self._n_timesteps)
         else:
             sel_time_step_str = None
+            time_steps = _valid_timesteps(dfs.FileInfo, time_steps)
 
         dfs.Close()
 
