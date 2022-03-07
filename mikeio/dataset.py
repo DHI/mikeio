@@ -1324,13 +1324,20 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         z: float = None,
         **kwargs,
     ) -> "Dataset":
+        """
+        Examples
+        --------
+        ds.sel(layer='bottom')
+        ds.sel(x=1.0,y=55.0)
+        ds.sel(area=[1.,12., 2., 15.])
+        """
 
         # select in space
         if (x is not None) or (y is not None) or (z is not None):
             idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
             ds = self.isel(idx, axis="space")
         else:
-            ds = self.copy()
+            ds = self
 
         if "layer" in kwargs:
             if isinstance(ds.geometry, GeometryFMLayered):
