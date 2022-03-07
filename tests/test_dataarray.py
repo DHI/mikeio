@@ -662,6 +662,16 @@ def test_da_sel_area_2d():
     assert da1.geometry.n_elements == 14
 
 
+def test_da_sel_area_and_xy_not_ok():
+    filename = "tests/testdata/FakeLake.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+
+    area = [-0.1, 0.15, 0.0, 0.2]
+    with pytest.raises(ValueError) as excinfo:
+        da.sel(area=area, x=0.0, y=0.1)
+    assert "area" in str(excinfo.value)
+
+
 def test_da_sel_area_3d():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     da = mikeio.read(filename, items=0)[0]

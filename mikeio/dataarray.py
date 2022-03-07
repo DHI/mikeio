@@ -883,7 +883,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
             da = self.isel(idx, axis="space")
         else:
-            da = self.copy()
+            da = self
 
         if "layer" in kwargs:
             if isinstance(da.geometry, GeometryFMLayered):
