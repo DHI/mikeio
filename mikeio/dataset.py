@@ -5,9 +5,11 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 
-from mikeio.eum import EUMType, ItemInfo
 import collections.abc
 
+from mikecore.DfsFile import DfsSimpleType
+
+from .eum import EUMType, ItemInfo
 from .data_utils import DataUtilsMixin
 from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .base import TimeSeries
@@ -1527,7 +1529,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             data.append(dati.copy())
         return data
 
-    def to_dfs(self, filename):
+    def to_dfs(self, filename, **kwargs):
 
         filename = str(filename)
 
@@ -1535,7 +1537,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
             if self.ndim == 1 and self.dims[0][0] == "t":
-                self._to_dfs0(filename)
+                self._to_dfs0(filename, **kwargs)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
@@ -1550,10 +1552,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 "Writing this type of dataset is not yet implemented"
             )
 
-    def _to_dfs0(self, filename):
+    def _to_dfs0(self, filename, **kwargs):
         from .dfs0 import _write_dfs0
 
-        _write_dfs0(filename, self)
+        dtype = kwargs.get("dtype", DfsSimpleType.Float)
+
+        _write_dfs0(filename, self, dtype=dtype)
 
     def _to_dfs2(self, filename):
         # assumes Grid2D geometry

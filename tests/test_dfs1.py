@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import pytest
+from setuptools_scm import DEFAULT_VERSION_SCHEME
 
 import mikeio
 
@@ -182,6 +183,22 @@ def test_select_point_dfs1_to_dfs0(tmp_path):
     ds_0 = ds.isel(0, axis="space")
     assert ds_0.n_elements == 1
     ds_0.to_dfs(outfilename)
+
+    dsnew = mikeio.read(outfilename)
+
+    assert dsnew.n_timesteps == ds.n_timesteps
+
+
+def test_select_point_dfs1_to_dfs0_double(tmp_path):
+
+    outfilename = tmp_path / "vu_tide_hourly_p0_dbl.dfs0"
+
+    ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
+
+    assert ds.n_elements > 1
+    ds_0 = ds.isel(0, axis="space")
+    assert ds_0.n_elements == 1
+    ds_0.to_dfs(outfilename, dtype=np.float64)
 
     dsnew = mikeio.read(outfilename)
 

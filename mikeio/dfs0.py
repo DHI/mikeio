@@ -22,7 +22,7 @@ from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries
 
 
-def _write_dfs0(filename, dataset: Dataset, title=""):
+def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float):
     filename = str(filename)
 
     factory = DfsFactory()
@@ -45,14 +45,12 @@ def _write_dfs0(filename, dataset: Dataset, title=""):
     builder.SetTemporalAxis(temporal_axis)
     builder.SetItemStatisticsType(StatType.RegularStat)
 
+    dfs_dtype = Dfs0._to_dfs_datatype(dtype)
+
     for da in dataset:
         newitem = builder.CreateDynamicItemBuilder()
         quantity = eumQuantity.Create(da.type, da.unit)
-        newitem.Set(
-            da.name,
-            quantity,
-            Dfs0._to_dfs_datatype(da.dtype.type),
-        )
+        newitem.Set(da.name, quantity, dfs_dtype)
 
         # TODO set default on DataArray
         if da.item.data_value_type is not None:
