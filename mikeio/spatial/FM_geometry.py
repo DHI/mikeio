@@ -862,6 +862,74 @@ class GeometryFM(_Geometry):
         else:
             return self.elements_to_geometry(elements=idx, node_layers=None)
 
+    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layer=None):
+
+        # TODO: make separate "layered" implementation of this in sub class
+
+        if layer is not None:
+            if self.is_layered:
+                idx = self.get_layer_elements(layer)
+            else:
+                raise ValueError("'layer' can only be selected from layered Dfsu data")
+        else:
+            idx = self.element_ids
+
+        # select in space
+        if (
+            (coords is not None)
+            or (x is not None)
+            or (y is not None)
+            or (z is not None)
+        ):
+            if coords is not None:
+                coords = np.atleast_2d(coords)
+                xy = coords[:, :2]
+                z = coords[:, 2] if coords.shape[1] == 3 else None
+            else:
+                xy = np.vstack((x, y)).T
+            idx_2d = self._find_element_2d(coords=xy)
+            if self.is_layered:
+                if z is None:
+                    idx_3d = np.hstack(self.e2_e3_table[idx_2d])
+                else:
+                    idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
+                idx = np.intersect1d(idx, idx_3d)
+            else:
+                idx = np.intersect1d(idx, idx_2d)
+        elif area is not None:
+            idx_area = self._elements_in_area(area)
+            idx = np.intersect1d(idx, idx_area)
+        return idx
+
+    def _find_elem3d_from_elem2d(self, elem2d, z):
+        """Find 3d element ids from 2d element ids and z-values"""
+
+        # TODO: coordinate with _find_3d_from_2d_points()
+
+        elem2d = [elem2d] if np.isscalar(elem2d) else elem2d
+        elem2d = np.asarray(elem2d)
+        z_vec = np.full(elem2d.shape, fill_value=z) if np.isscalar(z) else z
+        elem3d = np.full_like(elem2d, fill_value=-1)
+        for j, e2 in enumerate(elem2d):
+            idx_3d = np.hstack(self.e2_e3_table[e2])
+            elem3d[j] = idx_3d[self._z_idx_in_column(idx_3d, z_vec[j])]
+
+            # z_col = self.element_coordinates[idx_3d, 2]
+            # elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest
+        return elem3d
+
+    def _z_idx_in_column(self, e3_col, z):
+        dz = self._dz[e3_col]
+        z_col = self.element_coordinates[e3_col, 2]
+        z_face = np.append(z_col - dz / 2, z_col[-1] + dz[-1] / 2)
+        if z < z_face[0] or z > z_face[-1]:
+            xy = tuple(self.element_coordinates[e3_col[0], :2])
+            raise ValueError(
+                f"z value '{z}' is outside water column [{z_face[0]},{z_face[-1]}] in point x,y={xy}"
+            )
+        idx = np.searchsorted(z_face, z) - 1
+        return idx
+
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
         idx = self._2d_elements_in_area(area)
@@ -1142,6 +1210,7 @@ class GeometryFMLayered(GeometryFM):
         self._e2_e3_table = None
         self._2d_ids = None
         self._layer_ids = None
+        self.__dz = None
 
     @property
     def geometry2d(self):
@@ -1439,7 +1508,7 @@ class GeometryFMLayered(GeometryFM):
 
         if (layer is None) and (z is None):
             # return top element
-            idx = self.top_elements[elem2d]
+            idx = self.top_elements[elem2d]  # TODO: return whole column instead
 
         elif layer is None:
             idx = np.zeros_like(elem2d)
@@ -1498,6 +1567,51 @@ class GeometryFMLayered(GeometryFM):
             x,y,z of each element
         """
         return self._calc_element_coordinates(elements, zn)
+
+    @property
+    def _dz(self):
+        """Height of each 3d element (using static zn information)"""
+        if self.__dz is None:
+            self.__dz = self._calc_dz()
+        return self.__dz
+
+    def _calc_dz(self, elements=None, zn=None):
+        """Height of 3d elements using static or dynamic zn information"""
+        if elements is None:
+            element_table = self.element_table
+        else:
+            element_table = self.element_table[elements]
+        n_elements = len(element_table)
+
+        if zn is None:
+            if elements is None:
+                zn = self.node_coordinates[:, 2]
+            else:
+                nodes = np.unique(np.hstack(element_table))
+                zn = self.node_coordinates[nodes, 2]
+
+        zn_is_2d = len(zn.shape) == 2
+        shape = (zn.shape[0], n_elements) if zn_is_2d else (n_elements,)
+        dz = np.full(shape=shape, fill_value=np.nan)
+
+        if zn_is_2d:
+            # dynamic zn
+            for j in range(n_elements):
+                nodes = element_table[j]
+                halfn = int(len(nodes) / 2)
+                z_bot = np.mean(zn[:, nodes[:halfn]], axis=1)
+                z_top = np.mean(zn[:, nodes[halfn:]], axis=1)
+                dz[:, j] = z_top - z_bot
+        else:
+            # static zn
+            for j in range(n_elements):
+                nodes = element_table[j]
+                halfn = int(len(nodes) / 2)
+                z_bot = np.mean(zn[nodes[:halfn]])
+                z_top = np.mean(zn[nodes[halfn:]])
+                dz[j] = z_top - z_bot
+
+        return dz
 
     # TODO: add methods for extracting layers etc
 
