@@ -880,8 +880,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         # select in space
         if (x is not None) or (y is not None) or (z is not None):
-            idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
-            da = self.isel(idx, axis="space")
+            if isinstance(self.geometry, Grid2D):  # TODO find out better way
+                i, j = self.geometry.find_index((x, y))
+                tmp = self.isel(idx=j[0], axis=1)
+                da = tmp.isel(idx=i[0], axis=1)
+            else:
+                idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+                da = self.isel(idx, axis="space")
         else:
             da = self
 
@@ -937,15 +942,21 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if (x is not None) or (y is not None) or (z is not None):
             xy = [(x, y)]
 
-            if interpolant is None:
-                interpolant = self.geometry.get_2d_interpolant(
-                    xy, n_nearest=n_nearest, **kwargs
-                )
-            dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
-            if z is None:
+            if isinstance(self.geometry, Grid2D):  # TODO DIY bilinear interpolation
+                xr_da = self.to_xarray()
+                dai = xr_da.interp(x=x, y=y).values
                 geometry = GeometryPoint2D(x=x, y=y)
-            else:
-                geometry = GeometryPoint3D(x=x, y=y, z=z)
+            elif isinstance(self.geometry, GeometryFM):
+                if interpolant is None:
+                    interpolant = self.geometry.get_2d_interpolant(
+                        xy, n_nearest=n_nearest, **kwargs
+                    )
+                dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
+                if z is None:
+                    geometry = GeometryPoint2D(x=x, y=y)
+                else:
+                    geometry = GeometryPoint3D(x=x, y=y, z=z)
+
             da = DataArray(data=dai, time=self.time, geometry=geometry, item=self.item)
         else:
             da = self.copy()

@@ -329,12 +329,19 @@ def test_write_some_time_step(tmpdir):
     assert dfs2.start_time.day == 2
 
 
-# TODO when we have the .sel method
-# def test_find_by_x_y():
+def test_find_by_x_y():
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+    da = ds.Elevation
+    da_point = da.sel(x=12.74792, y=55.865)
+    assert da_point.values[0] == pytest.approx(-43.0)
 
-#  ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
-#  assert ds.Elevation.sel(x=12.74792, y=55.865) == -43.0
+def test_interp_to_x_y():
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+
+    assert ds.Elevation.interp(x=12.74792, y=55.865).values[0] == pytest.approx(
+        -42.69764538978391
+    )
 
 
 def test_write_accumulated_datatype(tmpdir):
