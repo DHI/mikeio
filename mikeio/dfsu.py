@@ -114,8 +114,9 @@ class _UnstructuredFile:
 
     def __repr__(self):
         out = []
-        if self._type is not None:
-            out.append(self.type_name)
+        type_name = "Flexible Mesh" if self._type is None else self.type_name
+        out.append(type_name)
+
         if self._type is not DfsuFileType.DfsuSpectral0D:
             if self._type is not DfsuFileType.DfsuSpectral1D:
                 out.append(f"Number of elements: {self.n_elements}")
@@ -1554,6 +1555,7 @@ class Mesh(_UnstructuredFile):
         self._read_header(filename)
         self._n_timesteps = None
         self._type = None  # DfsuFileType.Mesh
+        self.plot = self.geometry.plot
 
     @property
     def zn(self):
