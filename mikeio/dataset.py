@@ -375,6 +375,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     @property
     def data(self) -> Sequence[np.ndarray]:
         """Data as list of numpy arrays"""
+        warnings.warn(
+            "property data is deprecated",
+            FutureWarning,
+        )
         return [x.to_numpy() for x in self]
 
     @property
@@ -1314,7 +1318,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         # select in space
         if (x is not None) or (y is not None) or (z is not None):
-            idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+            # idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+            idx = self.geometry.find_index(x=x, y=y, z=z)
             ds = self.isel(idx, axis="space")
         else:
             ds = self
