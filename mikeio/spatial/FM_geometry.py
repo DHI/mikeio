@@ -103,6 +103,7 @@ class _GeometryFMPlotter:
         ax.add_collection(fig_obj)
         self.outline(ax=ax)
         ax.set_title(title)
+        ax = self._set_plot_limits(ax)
         return ax
 
     def outline(self, title="Outline", figsize=None, ax=None):
@@ -115,7 +116,9 @@ class _GeometryFMPlotter:
             ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
         for interior in self.g.boundary_polylines.interiors:
             ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
-        ax.set_title(title)
+        if title is not None:
+            ax.set_title(title)
+        ax = self._set_plot_limits(ax)
         return ax
 
     def boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
@@ -150,8 +153,15 @@ class _GeometryFMPlotter:
 
         plt.legend()
         plt.title("Boundary nodes")
-        ax.set_xlim(nc[:, 0].min(), nc[:, 0].max())
-        ax.set_ylim(nc[:, 1].min(), nc[:, 1].max())
+        ax = self._set_plot_limits(ax)
+        return ax
+
+    def _set_plot_limits(self, ax):
+        bbox = Grid2D.xy_to_bbox(self.g.node_coordinates)
+        xybuf = 6e-3 * (bbox.right - bbox.left)
+        ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
+        ax.set_ylim(bbox.bottom - xybuf, bbox.top + xybuf)
+        return ax
 
     def _plot_aspect(self):
         if self.g.is_geo:
