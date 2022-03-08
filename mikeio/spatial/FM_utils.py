@@ -100,6 +100,9 @@ def _plot_map(
     if plot_type == "mesh_only" or plot_type == "outline_only":
         plot_data = False
 
+    if plot_type == "mesh_only":
+        show_mesh = True
+
     if cmap is None:
         cmap = cm.viridis
 
