@@ -1063,7 +1063,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             time = self.time
             item = self.item
-            geometry = None
+            geometry = GeometryUndefined()
             zn = None
             if hasattr(self.geometry, "isel"):
                 spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
