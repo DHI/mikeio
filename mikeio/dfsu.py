@@ -151,7 +151,13 @@ class _UnstructuredFile:
                 out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    def _read_header(self, filename):
+    def _read_header(self, input):
+        if isinstance(input, DfsuFile):
+            # input is a dfsu file object (already open)
+            self._read_dfsu_header(input)
+            return
+
+        filename = input
         if not os.path.isfile(filename):
             raise Exception(f"file {filename} does not exist!")
 
@@ -161,7 +167,8 @@ class _UnstructuredFile:
             self._read_mesh_header(filename)
 
         elif ext == ".dfsu":
-            self._read_dfsu_header(filename)
+            dfs = DfsuFile.Open(filename)
+            self._read_dfsu_header(dfs)
         else:
             raise Exception(f"Filetype {ext} not supported (mesh,dfsu)")
 
@@ -187,11 +194,10 @@ class _UnstructuredFile:
             validate=False,
         )
 
-    def _read_dfsu_header(self, filename):
+    def _read_dfsu_header(self, dfs):
         """
         Read header of dfsu file and set object properties
         """
-        dfs = DfsuFile.Open(filename)
         self._source = dfs
         self._type = DfsuFileType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
@@ -626,7 +632,7 @@ class _UnstructuredFile:
 
 
 class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
-    def __init__(self, filename, dtype=np.float64):
+    def __init__(self, filename, dfs=None, dtype=np.float64):
         """
         Create a Dfsu object
 
@@ -634,6 +640,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         ---------
         filename: str
             dfsu or mesh filename
+        dfs :
         dtype: np.dtype, optional
             default np.float64, valid options are np.float32, np.float64
         """
@@ -642,7 +649,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         super().__init__()
         self._filename = str(filename)
-        self._read_header(self._filename)
+        input = self._filename if dfs is None else dfs
+        self._read_header(input)
         self._dtype = dtype
 
         # show progress bar for large files

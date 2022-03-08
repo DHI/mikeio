@@ -9,31 +9,32 @@ from .dfsu_spectral import DfsuSpectral
 class Dfsu:
     def __new__(self, filename, *args, **kwargs):
         filename = str(filename)
-        type = self._get_DfsuFileType(filename)
+        type, dfs = self._get_DfsuFileType_n_Obj(filename)
 
         if self._type_is_spectral(type):
-            return DfsuSpectral(filename, *args, **kwargs)
+            return DfsuSpectral(filename, dfs, *args, **kwargs)
         elif self._type_is_2d_horizontal(type):
-            return Dfsu2DH(filename, *args, **kwargs)
+            return Dfsu2DH(filename, dfs, *args, **kwargs)
         elif self._type_is_2d_vertical(type):
-            return Dfsu2DV(filename, *args, **kwargs)
+            return Dfsu2DV(filename, dfs, *args, **kwargs)
         elif self._type_is_3d(type):
-            return Dfsu3D(filename, *args, **kwargs)
+            return Dfsu3D(filename, dfs, *args, **kwargs)
         else:
             raise ValueError(f"Type {type} is unsupported!")
 
     @staticmethod
-    def _get_DfsuFileType(filename: str):
+    def _get_DfsuFileType_n_Obj(filename: str):
         ext = os.path.splitext(filename)[-1]
         if "dfs" in ext:
             dfs = DfsuFile.Open(filename)
             type = DfsuFileType(dfs.DfsuFileType)
-            dfs.Close()
+            # dfs.Close()
         elif "mesh" in ext:
             type = None
+            dfs = None
         else:
             raise ValueError(f"{ext} is an unsupported extension")
-        return type
+        return type, dfs
 
     @staticmethod
     def _type_is_2d_horizontal(type):
