@@ -126,11 +126,12 @@ def test_plot_mesh_outline():
     assert True
 
 
-def test_plot_mesh_part():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
-    msh.plot(elements=list(range(0, 100)))
-    assert True
+# TODO: no longer supported?
+# def test_plot_mesh_part():
+#     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
+#     msh = Mesh(filename)
+#     msh.plot(elements=list(range(0, 100)))
+#     assert True
 
 
 def test_plot_mesh_ax():
