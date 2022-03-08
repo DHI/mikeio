@@ -101,7 +101,7 @@ def test_properties_area_freq_spectrum(dfsu_area_freq):
 
 def test_read_spectrum_pt(dfsu_pt):
     dfs = dfsu_pt
-    ds1 = dfs.read(time_steps=0)
+    ds1 = dfs.read(time=0)
     assert ds1.shape == (1, 16, 25)
     assert ds1[0].type == eum.EUMType.Wave_energy_density
     assert ds1[0].to_numpy().max() == pytest.approx(0.03205060)
@@ -175,7 +175,7 @@ def test_read_spectrum_dir_line(dfsu_line_dir):
     assert dfs.n_frequencies == 0
     assert dfs.frequencies is None
 
-    ds1 = dfs.read(time_steps=[0, 1])
+    ds1 = dfs.read(time=[0, 1])
     assert ds1.shape == (2, 10, 16)
     assert ds1.items[0].type == eum.EUMType.Frequency_integrated_spectral_density
     values = ds1[0].to_numpy()
@@ -225,7 +225,7 @@ def test_calc_Hm0_from_spectrum_area(dfsu_area):
 
 def test_plot_spectrum(dfsu_pt):
     dfs = dfsu_pt
-    ds = dfs.read(time_steps=0)
+    ds = dfs.read(time=0)
     spec = ds[0].to_numpy()[0]
     dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
     dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
@@ -236,7 +236,7 @@ def test_plot_spectrum(dfsu_pt):
 
 def test_plot_spectrum_sector(dfsu_area_sector):
     dfs = dfsu_area_sector
-    ds = dfs.read(time_steps=0)
+    ds = dfs.read(time=0)
     spec = ds[0].to_numpy()[0, 0]
     dfs.plot_spectrum(spec)
     dfs.plot_spectrum(spec, rmax=10, vmin=0)

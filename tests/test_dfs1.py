@@ -85,7 +85,7 @@ def test_read():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read([0])
+    ds = dfs.read(items=[0])
     data = ds.data[0]
     assert data.shape == (100, 3)  # time, x
 
@@ -95,7 +95,7 @@ def test_read_item_names():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(["testing water level"])
+    ds = dfs.read(items=["testing water level"])
     data = ds.data[0]
     assert data.shape == (100, 3)  # time, x
 
@@ -105,7 +105,7 @@ def test_read_time_steps():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(time_steps=[3, 5])
+    ds = dfs.read(time=[3, 5])
     data = ds.data[0]
     assert data.shape == (2, 3)  # time, x
 
@@ -116,7 +116,7 @@ def test_write_some_time_steps_new_file(tmpdir):
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(time_steps=[0, 1, 2, 3, 4, 5])
+    ds = dfs.read(time=[0, 1, 2, 3, 4, 5])
     data = ds.data[0]
     assert data.shape == (6, 3)  # time, x
 
@@ -143,7 +143,7 @@ def test_read_names_access():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    res = dfs.read([0])
+    res = dfs.read(items=[0])
     data = res.data
     item = data[0]
     time = res.time

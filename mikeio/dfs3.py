@@ -205,7 +205,7 @@ class Dfs3(_Dfs123):
         return data
 
     def read(
-        self, items=None, layers=None, coordinates=None, time_steps=None
+        self, items=None, layers=None, coordinates=None, time=None, time_steps=None
     ) -> Dataset:
         """Function: Read data from a dfs3 file
 
@@ -239,7 +239,14 @@ class Dfs3(_Dfs123):
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        time_steps = _valid_timesteps(dfs.FileInfo, time_steps)
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
+        time_steps = _valid_timesteps(dfs.FileInfo, time)
         nt = len(time_steps)
 
         # Determine the size of the grid

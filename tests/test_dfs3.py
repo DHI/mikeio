@@ -79,4 +79,4 @@ def test_dfs3_get_bottom_data():
 
 def test_read_dfs3_timesteps_data():
     dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
-    dfs.read(time_steps=[1])
+    dfs.read(time=[1])

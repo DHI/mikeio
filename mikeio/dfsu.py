@@ -713,7 +713,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         return data, shape
 
-    def read(self, items=None, time_steps=None, elements=None) -> Dataset:
+    def read(self, *, items=None, time=None, time_steps=None, elements=None) -> Dataset:
         """
         Read data from a dfsu file
 
@@ -762,7 +762,15 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         # (could have been replaced in the meantime)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        time_steps = _valid_timesteps(dfs, time_steps)
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
+
+        time_steps = _valid_timesteps(dfs, time)
 
         if elements is None:
             n_elems = self.n_elements

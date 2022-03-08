@@ -216,9 +216,7 @@ class Dfsu3D(DfsuLayered):
             elem3d = self.geometry.e2_e3_table[elem2d]
             return elem3d
 
-    def extract_surface_elevation_from_3d(
-        self, filename=None, time_steps=None, n_nearest=4
-    ):
+    def extract_surface_elevation_from_3d(self, filename=None, time=None, n_nearest=4):
         """
         Extract surface elevation from a 3d dfsu file (based on zn)
         to a new 2d dfsu file with a surface elevation item.
@@ -227,14 +225,14 @@ class Dfsu3D(DfsuLayered):
         ---------
         filename: str
             Output file name
-        time_steps: str, int or list[int], optional
+        time: str, int or list[int], optional
             Extract only selected time_steps
         n_nearest: int, optional
             number of points for spatial interpolation (inverse_distance), default=4
 
         Examples
         --------
-        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time_steps='2018-1-1,2018-2-1')
+        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time='2018-1-1,2018-2-1')
         """
         # validate input
         assert (
@@ -242,7 +240,7 @@ class Dfsu3D(DfsuLayered):
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         )
         assert n_nearest > 0
-        time_steps = _valid_timesteps(self._source, time_steps)
+        time_steps = _valid_timesteps(self._source, time)
 
         # make 2d nodes-to-elements interpolator
         top_el = self.top_elements

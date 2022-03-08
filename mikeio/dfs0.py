@@ -144,7 +144,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def read(self, items=None, time_steps=None) -> Dataset:
+    def read(self, items=None, time=None, time_steps=None) -> Dataset:
         """
         Read data from a dfs0 file.
 
@@ -160,6 +160,13 @@ class Dfs0(TimeSeries):
         Dataset
             A Dataset with data dimensions [t]
         """
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
 
         if not os.path.exists(self._filename):
             raise FileNotFoundError(f"File {self._filename} not found.")
@@ -174,13 +181,13 @@ class Dfs0(TimeSeries):
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
-            time_steps, str
+            time, str
         ):
-            sel_time_step_str = time_steps
+            sel_time_step_str = time
             time_steps = range(self._n_timesteps)
         else:
             sel_time_step_str = None
-            time_steps = _valid_timesteps(dfs.FileInfo, time_steps)
+            time_steps = _valid_timesteps(dfs.FileInfo, time)
 
         dfs.Close()
 

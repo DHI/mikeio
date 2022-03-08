@@ -36,7 +36,7 @@ class _Dfs123(TimeSeries):
         self.geometry = None
         self._dtype = dtype
 
-    def read(self, items=None, time_steps=None) -> Dataset:
+    def read(self, *, items=None, time=None, time_steps=None) -> Dataset:
         """
         Read data from a dfs file
 
@@ -44,19 +44,27 @@ class _Dfs123(TimeSeries):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: str, int or list[int], optional
-            Read only selected time_steps
+        time: str, int or list[int], optional
+            Read only selected times
 
         Returns
         -------
         Dataset
         """
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
+
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        time_steps = _valid_timesteps(self._dfs.FileInfo, time_steps)
+        time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps)
 
         if self._ndim == 1:
@@ -437,7 +445,7 @@ class _Dfs123(TimeSeries):
     def end_time(self):
         """File end time"""
         if self._end_time is None:
-            self._end_time = self.read([0]).time[-1].to_pydatetime()
+            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
 
         return self._end_time
 
