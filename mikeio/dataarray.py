@@ -819,14 +819,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         if axis == 0:  # time
             geometry = self.geometry
-
-            if self._zn is not None:
-                zn = self._zn[0]  # TODO first, last, mean, or static?
-            else:
-                zn = None
+            zn = None if self._zn is None else self._zn[0]
 
         else:
-            geometry = None
+            geometry = GeometryUndefined()
             zn = None
 
         return DataArray(
@@ -1104,12 +1100,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         if np.isscalar(q):
             qdat = func(self.values, q=q, axis=axis, **kwargs)
-
-            geometry = deepcopy(self.geometry) if axis == 0 else None
+            geometry = self.geometry if axis == 0 else GeometryUndefined()
+            zn = self._zn if axis == 0 else None
 
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
             item = deepcopy(self.item)
-            return DataArray(qdat, time, item=item, geometry=geometry, dims=dims)
+            return DataArray(qdat, time, item=item, geometry=geometry, dims=dims, zn=zn)
         else:
             res = []
             for quantile in q:
