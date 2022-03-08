@@ -444,7 +444,7 @@ def test_read_dfs0_temporal_subset():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
-    ds = dfs.read(time_steps=[1, 2])
+    ds = dfs.read(time=[1, 2])
 
     assert len(ds.time) == 2
     assert ds.time[0].strftime("%H") == "05"
@@ -455,7 +455,7 @@ def test_read_non_eq_dfs0__temporal_subset():
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
-    ds = dfs.read(time_steps="2017-10-27 01:00,2017-10-27 02:00")
+    ds = dfs.read(time="2017-10-27 01:00,2017-10-27 02:00")
 
     assert len(ds.time) == 7
 

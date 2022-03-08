@@ -78,7 +78,7 @@ def test_plot_dfsu_n_refinements():
 def test_plot_dfsu_shaded():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    ds = dfs.read(items="Surface elevation", time_steps=0)
+    ds = dfs.read(items="Surface elevation", time=0)
     elem40 = np.arange(40)
     wl_40 = ds.data[0][0, elem40]
     dfs.plot(wl_40, elements=elem40, plot_type="shaded", levels=5)
@@ -96,7 +96,7 @@ def test_plot_dfsu():
 def test_plot_dfsu_squeeze():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    data = dfs.read(items=0, time_steps=0)
+    data = dfs.read(items=0, time=0)
     dfs.plot(z=data)  # 1 item-dataset
     dfs.plot(z=data[0])  # 1 time-step-dataarray
     assert True

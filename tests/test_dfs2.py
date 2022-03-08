@@ -140,7 +140,7 @@ def test_write_single_item(tmpdir):
 def test_read(dfs2_random):
 
     dfs = dfs2_random
-    ds = dfs.read(["testing water level"])
+    ds = dfs.read(items=["testing water level"])
     data = ds.data[0]
     assert data[0, 88, 0] == 0
     assert np.isnan(data[0, 89, 0])
@@ -157,7 +157,7 @@ def test_read_temporal_subset_slice():
 
     filename = r"tests/testdata/eq.dfs2"
     dfs = Dfs2(filename)
-    ds = dfs.read(time_steps=slice("2000-01-01 00:00", "2000-01-01 12:00"))
+    ds = dfs.read(time=slice("2000-01-01 00:00", "2000-01-01 12:00"))
 
     assert len(ds.time) == 13
 
@@ -166,7 +166,7 @@ def test_read_numbered_access(dfs2_random_2items):
 
     dfs = dfs2_random_2items
 
-    res = dfs.read([1])
+    res = dfs.read(items=[1])
 
     assert np.isnan(res.data[0][0, 0, 0])
     assert res.time is not None
@@ -209,7 +209,7 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
 
     outfilename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
-    ds = dfs.read(["Untitled"])
+    ds = dfs.read(items=["Untitled"])
 
     dfs.write(outfilename, ds)
 
@@ -276,7 +276,7 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmpdir):
 def test_read_some_time_step(dfs2_random_2items):
 
     dfs = dfs2_random_2items
-    res = dfs.read(time_steps=[1, 2])
+    res = dfs.read(time=[1, 2])
 
     assert res.data[0].shape[0] == 2
     assert len(res.time) == 2
@@ -287,7 +287,7 @@ def test_interpolate_non_equidistant_data(tmpdir):
     filename = r"tests/testdata/eq.dfs2"
     dfs = Dfs2(filename)
 
-    ds = dfs.read(time_steps=[0, 2, 3, 6])  # non-equidistant dataset
+    ds = dfs.read(time=[0, 2, 3, 6])  # non-equidistant dataset
 
     assert not ds.is_equidistant
 
@@ -312,7 +312,7 @@ def test_write_some_time_step(tmpdir):
     filename = r"tests/testdata/waves.dfs2"
     dfs = Dfs2(filename)
 
-    ds = dfs.read(time_steps=[1, 2])
+    ds = dfs.read(time=[1, 2])
 
     assert ds.data[0].shape[0] == 2
     assert len(ds.time) == 2
@@ -329,12 +329,19 @@ def test_write_some_time_step(tmpdir):
     assert dfs2.start_time.day == 2
 
 
-# TODO when we have the .sel method
-# def test_find_by_x_y():
+def test_find_by_x_y():
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+    da = ds.Elevation
+    da_point = da.sel(x=12.74792, y=55.865)
+    assert da_point.values[0] == pytest.approx(-43.0)
 
-#  ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
-#  assert ds.Elevation.sel(x=12.74792, y=55.865) == -43.0
+def test_interp_to_x_y():
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+
+    assert ds.Elevation.interp(x=12.74792, y=55.865).values[0] == pytest.approx(
+        -42.69764538978391
+    )
 
 
 def test_write_accumulated_datatype(tmpdir):
@@ -440,7 +447,7 @@ def test_write_non_equidistant_data(tmpdir):
     filename = r"tests/testdata/eq.dfs2"
     dfs = Dfs2(filename)
 
-    ds = dfs.read(time_steps=[0, 2, 3, 6])  # non-equidistant dataset
+    ds = dfs.read(time=[0, 2, 3, 6])  # non-equidistant dataset
 
     assert not ds.is_equidistant
 
@@ -463,13 +470,13 @@ def test_incremental_write_from_dfs2(tmpdir):
 
     nt = dfs.n_timesteps
 
-    ds = dfs.read(time_steps=[0])
+    ds = dfs.read(time=[0])
 
     dfs_to_write = Dfs2()
     dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True)
 
     for i in range(1, nt):
-        ds = dfs.read(time_steps=[i])
+        ds = dfs.read(time=[i])
         dfs_to_write.append(ds)
 
     dfs_to_write.close()
@@ -489,13 +496,13 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
 
     nt = dfs.n_timesteps
 
-    ds = dfs.read(time_steps=[0])
+    ds = dfs.read(time=[0])
 
     dfs_to_write = Dfs2()
     with dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True) as f:
 
         for i in range(1, nt):
-            ds = dfs.read(time_steps=[i])
+            ds = dfs.read(time=[i])
             f.append(ds)
 
         # dfs_to_write.close() # called automagically by context manager

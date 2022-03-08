@@ -778,7 +778,7 @@ def test_aggregation_workflows(tmpdir):
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    ds = dfs.read(["Surface elevation", "Current speed"])
+    ds = dfs.read(items=["Surface elevation", "Current speed"])
     ds2 = ds.max(axis=1)
 
     outfilename = os.path.join(tmpdir.dirname, "max.dfs0")
@@ -818,7 +818,7 @@ def test_weighted_average(tmpdir):
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    ds = dfs.read(["Surface elevation", "Current speed"])
+    ds = dfs.read(items=["Surface elevation", "Current speed"])
 
     area = dfs.get_element_area()
     ds2 = ds.average(weights=area, axis=1)
@@ -1241,7 +1241,7 @@ def test_combine_by_time():
 
 
 def test_combine_by_time_2():
-    ds1 = mikeio.read("tests/testdata/tide1.dfs1", time_steps=range(0, 12))
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=range(0, 12))
     ds2 = mikeio.read("tests/testdata/tide2.dfs1")
     ds3 = mikeio.Dataset.combine(ds1, ds2)
 
@@ -1253,7 +1253,7 @@ def test_combine_by_time_2():
     for j in range(8):
         dsall.append(
             mikeio.read(
-                "tests/testdata/tide1.dfs1", time_steps=range(j * 12, 1 + (j + 1) * 12)
+                "tests/testdata/tide1.dfs1", time=range(j * 12, 1 + (j + 1) * 12)
             )
         )
     ds4 = mikeio.Dataset.combine(*dsall)
@@ -1301,8 +1301,8 @@ def test_to_numpy(ds2):
 
 def test_concat():
     filename = "tests/testdata/HD2D.dfsu"
-    ds1 = mikeio.read(filename, time_steps=[0, 1])
-    ds2 = mikeio.read(filename, time_steps=[2, 3])
+    ds1 = mikeio.read(filename, time=[0, 1])
+    ds2 = mikeio.read(filename, time=[2, 3])
     ds3 = ds1.concat(ds2)
     ds3.n_timesteps
 
