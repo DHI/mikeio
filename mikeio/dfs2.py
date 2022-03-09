@@ -1,5 +1,4 @@
 import os
-from h11 import Data
 import numpy as np
 import warnings
 from mikecore.eum import eumUnit, eumQuantity
