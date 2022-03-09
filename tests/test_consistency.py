@@ -72,12 +72,13 @@ def test_dfs1_interp_x():
     assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
 
 
-def test_dfs1_interp_like():
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
+# Nice to have...
+# def test_dfs1_interp_like():
+#    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
-    ds1 = ds.interp_like(ds.geometry)
-    assert ds1.dims == ("time", "x")
-    assert np.all(ds1[0].values == ds[0].values)
+# ds1 = ds.interp_like(ds.geometry)
+#    assert ds1.dims == ("time", "x")
+#    assert np.all(ds1[0].values == ds[0].values)
 
 
 def test_read_dfs2():
@@ -132,9 +133,9 @@ def test_sel_x_y_dfsu2d():
     y = 6145000
     dss = ds.sel(x=x, y=y)
 
-    assert dss.geometry.x == 349034.439173
-    assert dss.geometry.y == 6144868.611412
-    assert dss[0].values[0] == 0.179145
+    assert dss.geometry.x == pytest.approx(349034.439173)
+    assert dss.geometry.y == pytest.approx(6144868.611412)
+    assert dss[0].values[0] == pytest.approx(0.179145)
 
 
 def test_interp_x_y_dfsu2d():

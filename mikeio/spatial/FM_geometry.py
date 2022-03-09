@@ -614,7 +614,10 @@ class GeometryFM(_Geometry):
 
             # step 3: if not, then try with *many* more points
             if not element_found:
-                many_nearest, _ = self._find_n_nearest_2d_elements(coords[k:k, :], n=10)
+                # many_nearest, _ = self._find_n_nearest_2d_elements(coords[k:k, :], n=10)
+                many_nearest, _ = self._find_n_nearest_2d_elements(
+                    coords[k, :], n=10
+                )  # JAN fix
                 element_table = self._geometry2d.element_table[many_nearest]
                 lid = self._find_element_containing_point_2d(
                     element_table,
@@ -862,7 +865,7 @@ class GeometryFM(_Geometry):
 
     def isel(self, idx=None, axis="elements", simplify=True):
 
-        if np.isscalar(idx) == 1 and simplify:
+        if (np.isscalar(idx) or len(idx)) == 1 and simplify:
             coords = self.element_coordinates[idx].flatten()
 
             if self.is_layered:
