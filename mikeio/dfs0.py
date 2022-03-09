@@ -16,10 +16,65 @@ from mikecore.DfsFile import (
     TimeAxisType,
 )
 
-from .dfsutil import _valid_item_numbers, _get_item_info
+from .dfsutil import _valid_item_numbers, _get_item_info, _valid_timesteps
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries
+
+
+def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float):
+    filename = str(filename)
+
+    factory = DfsFactory()
+    builder = DfsBuilder.Create(title, "DFS", 0)
+    builder.SetDataType(1)
+    builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
+
+    system_start_time = dataset.time[0]
+
+    if dataset.is_equidistant:
+        dt = (dataset.time[1] - dataset.time[0]).total_seconds()
+        temporal_axis = factory.CreateTemporalEqCalendarAxis(
+            TimeStepUnit.SECOND, system_start_time, 0, dt
+        )
+    else:
+        temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
+            TimeStepUnit.SECOND, system_start_time
+        )
+
+    builder.SetTemporalAxis(temporal_axis)
+    builder.SetItemStatisticsType(StatType.RegularStat)
+
+    dfs_dtype = Dfs0._to_dfs_datatype(dtype)
+
+    for da in dataset:
+        newitem = builder.CreateDynamicItemBuilder()
+        quantity = eumQuantity.Create(da.type, da.unit)
+        newitem.Set(da.name, quantity, dfs_dtype)
+
+        # TODO set default on DataArray
+        if da.item.data_value_type is not None:
+            newitem.SetValueType(da.item.data_value_type)
+        else:
+            newitem.SetValueType(DataValueType.Instantaneous)
+
+        newitem.SetAxis(factory.CreateAxisEqD0())
+        builder.AddDynamicItem(newitem.GetDynamicItemInfo())
+
+    builder.CreateFile(filename)
+
+    dfs = builder.GetFile()
+
+    delete_value = dfs.FileInfo.DeleteValueFloat
+
+    t_seconds = (dataset.time - dataset.time[0]).total_seconds().values
+
+    data = np.array(dataset.data, order="F").astype(np.float64).T
+    data[np.isnan(data)] = delete_value
+    data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
+    rc = dfs.WriteDfs0DataDouble(data_to_write)
+
+    dfs.Close()
 
 
 class Dfs0(TimeSeries):
@@ -89,7 +144,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def read(self, items=None, time_steps=None):
+    def read(self, items=None, time=None, time_steps=None) -> Dataset:
         """
         Read data from a dfs0 file.
 
@@ -105,6 +160,13 @@ class Dfs0(TimeSeries):
         Dataset
             A Dataset with data dimensions [t]
         """
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
 
         if not os.path.exists(self._filename):
             raise FileNotFoundError(f"File {self._filename} not found.")
@@ -119,12 +181,13 @@ class Dfs0(TimeSeries):
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
-            time_steps, str
+            time, str
         ):
-            sel_time_step_str = time_steps
+            sel_time_step_str = time
             time_steps = range(self._n_timesteps)
         else:
             sel_time_step_str = None
+            time_steps = _valid_timesteps(dfs.FileInfo, time)
 
         dfs.Close()
 
@@ -344,7 +407,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def to_dataframe(self, unit_in_name=False, round_time="ms"):
+    def to_dataframe(self, unit_in_name=False, round_time="ms") -> pd.DataFrame:
         """
         Read data from the dfs0 file and return a Pandas DataFrame.
 

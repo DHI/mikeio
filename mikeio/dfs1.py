@@ -7,6 +7,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
 
 from .dfs import _Dfs123
+from .spatial.grid_geometry import Grid1D
 
 
 class Dfs1(_Dfs123):
@@ -21,6 +22,7 @@ class Dfs1(_Dfs123):
 
         if filename:
             self._read_dfs1_header()
+            self.geometry = Grid1D(x0=self._x0, dx=self._dx, n=self._nx)
 
     def __repr__(self):
         out = ["<mikeio.Dfs1>"]

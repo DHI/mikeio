@@ -356,9 +356,9 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 5
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
 
 
@@ -382,9 +382,9 @@ def test_write_from_pandas_series_monkey_patched(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 1
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
 
 
@@ -444,7 +444,7 @@ def test_read_dfs0_temporal_subset():
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
-    ds = dfs.read(time_steps=[1, 2])
+    ds = dfs.read(time=[1, 2])
 
     assert len(ds.time) == 2
     assert ds.time[0].strftime("%H") == "05"
@@ -455,7 +455,7 @@ def test_read_non_eq_dfs0__temporal_subset():
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
-    ds = dfs.read(time_steps="2017-10-27 01:00,2017-10-27 02:00")
+    ds = dfs.read(time="2017-10-27 01:00,2017-10-27 02:00")
 
     assert len(ds.time) == 7
 
@@ -607,9 +607,9 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 1
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
     assert ds.items[0].data_value_type == 3
 
@@ -641,8 +641,23 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 5
-    assert ds.items[0].type == EUMType.Concentration
-    assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"][3])
+    assert ds[0].type == EUMType.Concentration
+    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
+    assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
     assert ds.items[0].data_value_type == 3
+
+
+def test_read_write_eum(tmp_path):
+
+    ds = mikeio.read("tests/testdata/waterlevel_viken.dfs0")
+    assert ds["ST 2: WL (m)"].type == EUMType.Water_Level
+    assert ds["ST 2: WL (m)"].unit == EUMUnit.meter
+
+    outfilename = tmp_path / "same_same.dfs0"
+
+    ds.to_dfs(outfilename)
+
+    ds2 = mikeio.read(outfilename)
+    assert ds2["ST 2: WL (m)"].type == EUMType.Water_Level
+    assert ds2["ST 2: WL (m)"].unit == EUMUnit.meter

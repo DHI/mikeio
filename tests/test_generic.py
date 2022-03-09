@@ -72,14 +72,14 @@ def test_multiply_constant_single_item_name(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue_speed = org["Wind speed"][0, 0]
+    orgvalue_speed = org["Wind speed"].to_numpy()[0, 0]
     expected_speed = orgvalue_speed * 1.5
-    scaledvalue_speed = scaled["Wind speed"][0, 0]
+    scaledvalue_speed = scaled["Wind speed"].to_numpy()[0, 0]
     assert scaledvalue_speed == pytest.approx(expected_speed)
 
-    orgvalue_dir = org["Wind direction"][0, 0]
+    orgvalue_dir = org["Wind direction"].to_numpy()[0, 0]
     expected_dir = orgvalue_dir
-    scaledvalue_dir = scaled["Wind direction"][0, 0]
+    scaledvalue_dir = scaled["Wind direction"].to_numpy()[0, 0]
     assert scaledvalue_dir == pytest.approx(expected_dir)
 
 
@@ -93,13 +93,13 @@ def test_diff_itself(tmpdir):
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"][0][0, -1])
+    assert np.isnan(org["Elevation"].to_numpy()[0, -1, -1])
 
     diffed = mikeio.read(outfilename)
 
-    diffedvalue = diffed["Elevation"][0, 0, 0]
+    diffedvalue = diffed["Elevation"].to_numpy()[0, 0, 0]
     assert diffedvalue == pytest.approx(0.0)
-    assert np.isnan(diffed["Elevation"][0][0, -1])
+    assert np.isnan(diffed["Elevation"].to_numpy()[0, -1, -1])
 
 
 def test_sum_itself(tmpdir):
@@ -112,11 +112,9 @@ def test_sum_itself(tmpdir):
 
     org = mikeio.read(infilename_1)
 
-    assert np.isnan(org["Elevation"][0][0, -1])
-
     summed = mikeio.read(outfilename)
 
-    assert np.isnan(summed["Elevation"][0][0, -1])
+    assert np.isnan(summed["Elevation"].to_numpy()[0][-1, -1])
 
 
 def test_add_constant_delete_values_unchanged(tmpdir):
@@ -129,14 +127,14 @@ def test_add_constant_delete_values_unchanged(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org["Elevation"][0, 0, 0]
-    scaledvalue = scaled["Elevation"][0, 0, 0]
+    orgvalue = org["Elevation"].to_numpy()[0, 0, 0]
+    scaledvalue = scaled["Elevation"].to_numpy()[0, 0, 0]
     assert scaledvalue == pytest.approx(orgvalue - 2.1)
 
-    orgvalue = org["Elevation"][0, 100, 0]
+    orgvalue = org["Elevation"].to_numpy()[0, 100, 0]
     assert np.isnan(orgvalue)
 
-    scaledvalue = scaled["Elevation"][0, 100, 0]
+    scaledvalue = scaled["Elevation"].to_numpy()[0, 100, 0]
     assert np.isnan(scaledvalue)
 
 
@@ -153,14 +151,14 @@ def test_multiply_constant_delete_values_unchanged_2(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org[item_name][0, 0, 0]
-    scaledvalue = scaled[item_name][0, 0, 0]
+    orgvalue = org[item_name].to_numpy()[0, 0, 0]
+    scaledvalue = scaled[item_name].to_numpy()[0, 0, 0]
     assert scaledvalue == pytest.approx(orgvalue * 1000.0)
 
-    orgvalue = org[item_name][0, 10, 0]
+    orgvalue = org[item_name].to_numpy()[0, -11, 0]
     assert np.isnan(orgvalue)
 
-    scaledvalue = scaled[item_name][0, 10, 0]
+    scaledvalue = scaled[item_name].to_numpy()[0, -11, 0]
     assert np.isnan(scaledvalue)
 
 
@@ -421,26 +419,26 @@ def test_extract_items(tmpdir):
 
     extract(infile, outfile, items="Temperature")
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 2
-    assert extracted.items[0].name == "Z coordinate"
+    assert extracted.n_items == 1
+    assert extracted.items[0].name == "Temperature"
 
-    extract(infile, outfile, items=[0, 2])
+    extract(infile, outfile, items=[1])
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 2
-    assert extracted.items[1].name == "Salinity"
+    assert extracted.n_items == 1
+    assert extracted.items[0].name == "Salinity"
 
     extract(infile, outfile, items=range(0, 2))  # [0,1]
     extracted = mikeio.read(outfile)
     assert extracted.n_items == 2
-    assert extracted.items[1].name == "Temperature"
+    assert extracted.items[0].name == "Temperature"
 
-    extract(infile, outfile, items=["Salinity", 1])
+    extract(infile, outfile, items=["Salinity", 0])
     extracted = mikeio.read(outfile)
-    assert extracted.n_items == 3  # Z coordinate item is always included
+    assert extracted.n_items == 2
 
     with pytest.raises(Exception):
         # must be unique
-        extract(infile, outfile, items=["Salinity", 2])
+        extract(infile, outfile, items=["Salinity", 1])
 
     with pytest.raises(Exception):
         # no negative numbers
@@ -464,7 +462,7 @@ def test_time_average(tmpdir):
     assert org.time[0] == averaged.time[0]
     assert org.shape[1] == averaged.shape[1]
     assert averaged.shape[0] == 1
-    assert np.allclose(org.mean(axis=0)[0], averaged[0])
+    assert np.allclose(org.mean(axis=0)[0].to_numpy(), averaged[0].to_numpy())
 
 
 def test_time_average_dfsu_3d(tmpdir):
@@ -492,10 +490,10 @@ def test_time_average_deletevalues(tmpdir):
     assert all([a == b for a, b in zip(org.items, averaged.items)])
     assert org.time[0] == averaged.time[0]
     assert org.shape[1] == averaged.shape[1]
-    nan1 = np.isnan(org[0])
-    nan2 = np.isnan(averaged[0])
+    nan1 = np.isnan(org[0].to_numpy())
+    nan2 = np.isnan(averaged[0].to_numpy())
     assert np.all(nan1 == nan2)
-    assert np.allclose(org[0][~nan1], averaged[0][~nan2])
+    assert np.allclose(org[0].to_numpy()[~nan1], averaged[0].to_numpy()[~nan2])
 
 
 def test_quantile_dfsu(tmpdir):
@@ -507,7 +505,7 @@ def test_quantile_dfsu(tmpdir):
     org = mikeio.read(infilename).quantile(q=0.1, axis=0)
     q10 = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], q10[0])
+    assert np.allclose(org[0].to_numpy(), q10[0].to_numpy())
 
 
 def test_quantile_dfsu_buffer_size(tmpdir):
@@ -519,7 +517,7 @@ def test_quantile_dfsu_buffer_size(tmpdir):
     org = mikeio.read(infilename).quantile(q=0.1, axis=0)
     q10 = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], q10[0])
+    assert np.allclose(org[0].to_numpy(), q10[0].to_numpy())
 
 
 def test_quantile_dfs2(tmpdir):
@@ -531,7 +529,7 @@ def test_quantile_dfs2(tmpdir):
     org = mikeio.read(infilename).quantile(q=0.9, axis=0)
     q90 = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], q90[0])
+    assert np.allclose(org[0].to_numpy(), q90[0].to_numpy())
 
 
 def test_quantile_dfs0(tmpdir):
@@ -543,7 +541,7 @@ def test_quantile_dfs0(tmpdir):
     org = mikeio.read(infilename).quantile(q=[0.01, 0.5], axis=0)
     qnt = mikeio.read(outfilename)
 
-    assert np.allclose(org[0], qnt[0])
+    assert np.allclose(org[0].to_numpy(), qnt[0].to_numpy())
     # assert np.allclose(org[5], qnt[5])
 
 

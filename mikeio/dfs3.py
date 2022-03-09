@@ -1,4 +1,5 @@
 import os
+import warnings
 import numpy as np
 from datetime import datetime, timedelta
 from mikecore.eum import eumUnit, eumQuantity
@@ -204,7 +205,9 @@ class Dfs3(_Dfs123):
 
         return data
 
-    def read(self, items=None, layers=None, coordinates=None, time_steps=None):
+    def read(
+        self, items=None, layers=None, coordinates=None, time=None, time_steps=None
+    ) -> Dataset:
         """Function: Read data from a dfs3 file
 
         Usage:
@@ -237,7 +240,14 @@ class Dfs3(_Dfs123):
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        time_steps = _valid_timesteps(dfs.FileInfo, time_steps)
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
+        time_steps = _valid_timesteps(dfs.FileInfo, time)
         nt = len(time_steps)
 
         # Determine the size of the grid
@@ -289,7 +299,7 @@ class Dfs3(_Dfs123):
 
                     # DO a direct copy instead of eleement by elment
                     d = d.reshape(zNum, yNum, xNum)  # .swapaxes(0, 2).swapaxes(0, 1)
-                    d = np.flipud(d)
+                    d = np.flipud(d)  # TODO
                     d[d == deleteValue] = np.nan
                     if layers is None:
                         data_list[item][it_number, :, :, :] = d
@@ -434,7 +444,7 @@ class Dfs3(_Dfs123):
             for item in range(n_items):
                 d = data[item][i]
                 d[np.isnan(d)] = deletevalue
-                d = np.flipud(d)
+                d = np.flipud(d)  # TODO
                 # darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
                 darray = d.reshape(d.size, 1)[:, 0].astype(np.float32)
 

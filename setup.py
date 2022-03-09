@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="0.12.2",
+    version="1.0.dev0",
     install_requires=[
         "mikecore>=0.2.0",
         "numpy>=1.15.0.",  # first version with numpy.quantile
@@ -20,6 +20,7 @@ setuptools.setup(
             "black==22.1.0",
             "sphinx",
             "sphinx-book-theme",
+            "myst-parser",
             "shapely",
             "pyproj",
             "xarray",
@@ -27,7 +28,7 @@ setuptools.setup(
             "matplotlib",
             "jupyterlab",
         ],
-        "test": ["pytest", "matplotlib!=3.5.0"],
+        "test": ["pytest", "matplotlib!=3.5.0", "xarray", "numba"],
         "notebooks": [
             "nbformat",
             "nbconvert",
@@ -49,7 +50,7 @@ setuptools.setup(
     include_package_data=True,
     classifiers=[
         "License :: OSI Approved :: BSD License",
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",

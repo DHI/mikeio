@@ -5,6 +5,7 @@ import matplotlib as mpl
 
 mpl.use("Agg")
 from mikeio import Dfsu, Mesh
+import mikeio
 
 ##################################################
 # these tests will not run if matplotlib is not installed
@@ -77,9 +78,9 @@ def test_plot_dfsu_n_refinements():
 def test_plot_dfsu_shaded():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    ds = dfs.read(items="Surface elevation", time_steps=0)
+    da = dfs.read(items="Surface elevation", time=0)[0]
     elem40 = np.arange(40)
-    wl_40 = ds.data[0][0, elem40]
+    wl_40 = da.values[elem40]
     dfs.plot(wl_40, elements=elem40, plot_type="shaded", levels=5)
     assert True
 
@@ -95,9 +96,8 @@ def test_plot_dfsu():
 def test_plot_dfsu_squeeze():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    data = dfs.read(items=0, time_steps=0)
+    data = dfs.read(items=0, time=0)
     dfs.plot(z=data)  # 1 item-dataset
-    dfs.plot(z=data[0])  # 1 time-step-dataset
     assert True
 
 
@@ -125,11 +125,12 @@ def test_plot_mesh_outline():
     assert True
 
 
-def test_plot_mesh_part():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
-    msh.plot(elements=list(range(0, 100)))
-    assert True
+# TODO: no longer supported?
+# def test_plot_mesh_part():
+#     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
+#     msh = Mesh(filename)
+#     msh.plot(elements=list(range(0, 100)))
+#     assert True
 
 
 def test_plot_mesh_ax():
@@ -166,10 +167,10 @@ def test_plot_dfsu_vertical_profile():
     dfs = Dfsu(filename)
     time_step = 1
     item_number = 1
-    data = dfs.read()[item_number][time_step, :]
+    data = dfs.read()[item_number].to_numpy()[time_step, :]
     # defaults
     dfs.plot_vertical_profile(data)
-    dfs.plot_vertical_profile(data, time_step, 0, 20)
+    # dfs.plot_vertical_profile(data, time_step, 0, 20)
     dfs.plot_vertical_profile(
         data,
         title="txt",
@@ -183,3 +184,20 @@ def test_plot_dfsu_vertical_profile():
     _, ax = plt.subplots()
     dfs.plot_vertical_profile(data, ax=ax)
     assert True
+
+
+def test_da_plot():
+
+    ds = mikeio.read("tests/testdata/FakeLake.dfsu")
+    da = ds[0]
+    da.plot()
+    da.plot.contour()
+    da.plot.contourf()
+    da.plot.outline()
+
+    dam = da.max()
+    dam.plot.contour()
+    dam.plot.contourf()
+    dam.plot.outline()
+
+    da.max("space").plot()

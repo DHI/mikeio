@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = "MIKE IO"
-copyright = "2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard"
-author = "Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard"
+copyright = "2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,"
+author = "Henrik Andersson, Jesper Mariegaard, Marc Ridler"
 release = ""
 
 # -- General configuration ---------------------------------------------------
@@ -27,7 +27,12 @@ release = ""
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.autodoc", "sphinx.ext.napoleon", "sphinx.ext.autosummary"]
+extensions = [
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autosummary",
+    "myst_parser",
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]

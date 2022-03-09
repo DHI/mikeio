@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
+import mikeio
+
 from mikeio import Dfs1, Dataset
 from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
@@ -83,7 +85,7 @@ def test_read():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read([0])
+    ds = dfs.read(items=[0])
     data = ds.data[0]
     assert data.shape == (100, 3)  # time, x
 
@@ -93,7 +95,7 @@ def test_read_item_names():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(["testing water level"])
+    ds = dfs.read(items=["testing water level"])
     data = ds.data[0]
     assert data.shape == (100, 3)  # time, x
 
@@ -103,7 +105,7 @@ def test_read_time_steps():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(time_steps=[3, 5])
+    ds = dfs.read(time=[3, 5])
     data = ds.data[0]
     assert data.shape == (2, 3)  # time, x
 
@@ -114,7 +116,7 @@ def test_write_some_time_steps_new_file(tmpdir):
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    ds = dfs.read(time_steps=[0, 1, 2, 3, 4, 5])
+    ds = dfs.read(time=[0, 1, 2, 3, 4, 5])
     data = ds.data[0]
     assert data.shape == (6, 3)  # time, x
 
@@ -141,7 +143,7 @@ def test_read_names_access():
     filename = r"tests/testdata/random.dfs1"
     dfs = Dfs1(filename)
 
-    res = dfs.read([0])
+    res = dfs.read(items=[0])
     data = res.data
     item = data[0]
     time = res.time
@@ -154,9 +156,7 @@ def test_read_names_access():
 
 def test_read_start_end_time():
 
-    dfs0file = r"tests/testdata/random.dfs1"
-
-    dfs = Dfs1(dfs0file)
+    dfs = Dfs1("tests/testdata/random.dfs1")
     ds = dfs.read()
 
     assert dfs.start_time == ds.start_time
@@ -165,10 +165,40 @@ def test_read_start_end_time():
 
 def test_read_start_end_time_relative_time():
 
-    dfs0file = r"tests/testdata/physical_basin_wave_maker_signal.dfs1"
-
-    dfs = Dfs1(dfs0file)
+    dfs = Dfs1("tests/testdata/physical_basin_wave_maker_signal.dfs1")
     ds = dfs.read()
 
     assert dfs.start_time == ds.start_time
     assert dfs.end_time == ds.end_time
+
+
+def test_select_point_dfs1_to_dfs0(tmp_path):
+
+    outfilename = tmp_path / "vu_tide_hourly_p0.dfs0"
+
+    ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
+
+    assert ds.n_elements > 1
+    ds_0 = ds.isel(0, axis="space")
+    assert ds_0.n_elements == 1
+    ds_0.to_dfs(outfilename)
+
+    dsnew = mikeio.read(outfilename)
+
+    assert dsnew.n_timesteps == ds.n_timesteps
+
+
+def test_select_point_dfs1_to_dfs0_double(tmp_path):
+
+    outfilename = tmp_path / "vu_tide_hourly_p0_dbl.dfs0"
+
+    ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
+
+    assert ds.n_elements > 1
+    ds_0 = ds.isel(0, axis="space")
+    assert ds_0.n_elements == 1
+    ds_0.to_dfs(outfilename, dtype=np.float64)
+
+    dsnew = mikeio.read(outfilename)
+
+    assert dsnew.n_timesteps == ds.n_timesteps

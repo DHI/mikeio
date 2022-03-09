@@ -1,4 +1,3 @@
-.. _intro:
 
 Requirements
 ------------
@@ -15,9 +14,9 @@ Installation
 Getting started
 ---------------
     
-    >>>  from mikeio import Dfs0
-    >>>  dfs = Dfs0('simple.dfs0')
-    >>>  df = dfs.to_dataframe()
+    >>>  import
+    >>>  ds = mikeio.read('simple.dfs0')
+    >>>  df = ds.to_dataframe()
 
 Read more in the `getting started guide <getting_started.html>`_.
 

@@ -33,9 +33,10 @@ class _Dfs123(TimeSeries):
         self._override_coordinates = False
         self._timeseries_unit = TimeStepUnit.SECOND
         self._dt = None
+        self.geometry = None
         self._dtype = dtype
 
-    def read(self, items=None, time_steps=None):
+    def read(self, *, items=None, time=None, time_steps=None) -> Dataset:
         """
         Read data from a dfs file
 
@@ -43,20 +44,29 @@ class _Dfs123(TimeSeries):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: str, int or list[int], optional
-            Read only selected time_steps
+        time: str, int or list[int], optional
+            Read only selected times
 
         Returns
         -------
         Dataset
         """
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
+
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        time_steps = _valid_timesteps(self._dfs.FileInfo, time_steps)
+        time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps)
+        single_time_selected = np.isscalar(time) if time is not None else False
 
         if self._ndim == 1:
             shape = (nt, self._nx)
@@ -64,6 +74,9 @@ class _Dfs123(TimeSeries):
             shape = (nt, self._ny, self._nx)
         else:
             shape = (nt, self._nz, self._ny, self._nx)
+
+        if single_time_selected:
+            shape = shape[1:]
 
         data_list = [
             np.ndarray(shape=shape, dtype=self._dtype) for item in range(n_items)
@@ -83,9 +96,11 @@ class _Dfs123(TimeSeries):
 
                 if self._ndim == 2:
                     d = d.reshape(self._ny, self._nx)
-                    d = np.flipud(d)
 
-                data_list[item][i] = d
+                if single_time_selected:
+                    data_list[item] = d
+                else:
+                    data_list[item][i] = d
 
             t_seconds[i] = itemdata.Time
 
@@ -94,7 +109,7 @@ class _Dfs123(TimeSeries):
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
-        return Dataset(data_list, time, items)
+        return Dataset(data_list, time, items, geometry=self.geometry)
 
     def _read_header(self):
         dfs = self._dfs
@@ -153,14 +168,14 @@ class _Dfs123(TimeSeries):
         self._set_spatial_axis()
 
         if self._ndim == 1:
-            if not all(np.shape(d)[1] == self._nx for d in data):
+            if not all(np.shape(d)[1] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
 
         if self._ndim == 2:
-            if not all(np.shape(d)[1] == self._ny for d in data):
+            if not all(np.shape(d)[1] == self._ny for d in self._data):
                 raise DataDimensionMismatch()
 
-            if not all(np.shape(d)[2] == self._nx for d in data):
+            if not all(np.shape(d)[2] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
         if datetimes is not None:
             self._is_equidistant = False
@@ -199,12 +214,12 @@ class _Dfs123(TimeSeries):
         else:
             return self
 
-    def append(self, data):
+    def append(self, data: Dataset) -> None:
         """Append to a dfs file opened with `write(...,keep_open=True)`
 
         Parameters
         -----------
-        data: list[np.array]
+        data: Dataset
         """
 
         deletevalue = self._dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
@@ -212,7 +227,7 @@ class _Dfs123(TimeSeries):
         for i in trange(self._n_timesteps, disable=not self.show_progress):
             for item in range(self._n_items):
 
-                d = data[item][i]
+                d = data[item].to_numpy()[i]
                 d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 
@@ -221,7 +236,6 @@ class _Dfs123(TimeSeries):
 
                 if self._ndim == 2:
                     d = d.reshape(self.shape[1:])
-                    d = np.flipud(d)
                     darray = d.reshape(d.size, 1)[:, 0]
 
                 if self._is_equidistant:
@@ -258,6 +272,13 @@ class _Dfs123(TimeSeries):
                     self._longitude,
                     self._latitude,
                     self._orientation,
+                ]
+            elif isinstance(data, Dataset) and (data.geometry is not None):
+                self._coordinate = [
+                    data.geometry.projection_string,
+                    data.geometry.origin[0],
+                    data.geometry.origin[1],
+                    data.geometry.orientation,
                 ]
             else:
                 warnings.warn("No coordinate system provided")
@@ -431,7 +452,7 @@ class _Dfs123(TimeSeries):
     def end_time(self):
         """File end time"""
         if self._end_time is None:
-            self._end_time = self.read([0]).time[-1].to_pydatetime()
+            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
 
         return self._end_time
 

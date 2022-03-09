@@ -1,62 +1,32 @@
+from datetime import datetime
+from typing import Iterable, Sequence, Union, Mapping, Optional
 import warnings
-from typing import Iterable, Sequence, Union, List
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
 from copy import deepcopy
-from mikeio.eum import EUMType, ItemInfo
 
+import collections.abc
+
+from mikecore.DfsFile import DfsSimpleType
+
+from .eum import EUMType, ItemInfo
+from .data_utils import DataUtilsMixin
+from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
 from .base import TimeSeries
+from .dataarray import DataArray
+from .spatial.geometry import (
+    _Geometry,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+)
+from .spatial.grid_geometry import Grid1D, Grid2D
 
 
-def _parse_axis(data_shape, axis):
-    axis = 0 if axis == "time" else axis
-    if (axis == "spatial") or (axis == "space"):
-        if len(data_shape) == 1:
-            raise ValueError(
-                f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
-            )
-        axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
-    if axis is None:
-        axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
-    if isinstance(axis, str):
-        raise ValueError(
-            f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
-        )
-    return axis
-
-
-def _time_by_axis(time, axis):
-    # time: Dataset time axis;
-    if axis == 0:
-        time = pd.DatetimeIndex([time[0]])
-    elif isinstance(axis, Sequence) and 0 in axis:
-        time = pd.DatetimeIndex([time[0]])
-    else:
-        time = time
-
-    return time
-
-
-def _keepdims_by_axis(axis):
-    # keepdims: input to numpy aggregate function
-    if axis == 0:
-        keepdims = True
-    else:
-        keepdims = False
-    return keepdims
-
-
-def _items_except_Z_coordinate(items):
-    if items[0].name == "Z coordinate":
-        items = deepcopy(items)
-        items.pop(0)
-    return items
-
-
-def _get_repeated_items(
-    items_in: List[ItemInfo], prefixes: List[str]
-) -> List[ItemInfo]:
+def _repeat_items(
+    items_in: Sequence[ItemInfo], prefixes: Sequence[str]
+) -> Sequence[ItemInfo]:
+    """Rereat a list of items n times with different prefixes"""
     new_items = []
     for item_in in items_in:
         for prefix in prefixes:
@@ -67,25 +37,45 @@ def _get_repeated_items(
     return new_items
 
 
-def _reshape_data_by_axis(data, orig_shape, axis):
-    if isinstance(axis, int):
-        return data
-    if len(orig_shape) == len(axis):
-        shape = (1,)
-        data = [d.reshape(shape) for d in data]
-    if len(orig_shape) - len(axis) == 1:
-        # e.g. (0,2) for for dfs2
-        shape = [1] if (0 in axis) else [orig_shape[0]]
-        ndims = len(orig_shape)
-        for j in range(1, ndims):
-            if j not in axis:
-                shape.append(orig_shape[j])
-        data = [d.reshape(shape) for d in data]
+class _DatasetPlotter:
+    def __init__(self, ds: "Dataset") -> None:
+        self.ds = ds
 
-    return data
+    def __call__(self, ax=None, figsize=None, **kwargs):
+
+        if self.ds.dims == ("time",):
+            df = self.ds.to_dataframe()
+            df.plot(figsize=figsize, **kwargs)  # TODO ax
+
+        # fig, ax = self._get_fig_ax(ax, figsize)
+
+    @staticmethod
+    def _get_fig_ax(ax=None, figsize=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
+        else:
+            fig = plt.gcf()
+        return fig, ax
+
+    def scatter(self, x, y, ax=None, figsize=None, **kwargs):
+        _, ax = self._get_fig_ax(ax, figsize)
+        if "title" in kwargs:
+            title = kwargs.pop("title")
+            ax.set_title(title)
+        xval = self.ds[x].values.ravel()
+        yval = self.ds[y].values.ravel()
+        ax.scatter(xval, yval, **kwargs)
+
+        x = self.ds.items[x].name if isinstance(x, int) else x
+        y = self.ds.items[y].name if isinstance(y, int) else y
+        ax.set_xlabel(x)
+        ax.set_ylabel(y)
+        return ax
 
 
-class Dataset(TimeSeries):
+class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     deletevalue = 1.0e-35
 
@@ -164,68 +154,312 @@ class Dataset(TimeSeries):
 
     def __init__(
         self,
-        data: Union[List[np.ndarray], float],
-        time: Union[pd.DatetimeIndex, str],
-        items: Union[List[ItemInfo], List[EUMType], List[str]] = None,
+        data: Union[Mapping[str, DataArray], Iterable[DataArray]],
+        time=None,
+        items=None,
+        geometry: _Geometry = None,
+        zn=None,
+        dims=None,
     ):
-
-        item_infos: List[ItemInfo] = []
-
-        self._deletevalue = Dataset.deletevalue
-
-        if isinstance(time, str):
-            # default single-step time
-            time = pd.date_range(time, periods=1)
-
-        if np.isscalar(data) and isinstance(items, Sequence):
-            # create empty dataset
-            n_elements = data
-            n_items = len(items)
-            n_timesteps = len(time)
-            data = self.create_empty_data(
-                n_items=n_items, n_timesteps=n_timesteps, n_elements=n_elements
-            )
-        elif isinstance(data, Sequence) and hasattr(data[0], "shape"):
-            n_items = len(data)
-            n_timesteps = data[0].shape[0]
+        if self._is_DataArrays(data):
+            validate = True
         else:
-            raise TypeError(
-                f"data type '{type(data)}' not supported! data must be a list of numpy arrays"
+            data = self._create_dataarrays(
+                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )
+            validate = False
+        return self._init_from_DataArrays(data, validate=validate)
 
+    @staticmethod
+    def _is_DataArrays(data):
+        """Check if input is Sequence/Mapping of DataArrays"""
+        if isinstance(data, (Dataset, DataArray)):
+            return True
+        if isinstance(data, Mapping):
+            for da in data.values():
+                if not isinstance(da, DataArray):
+                    raise TypeError("Please provide List/Mapping of DataArrays")
+            return True
+        if isinstance(data, Iterable):
+            for da in data:
+                if not isinstance(da, DataArray):
+                    return False
+                    # raise TypeError("Please provide List/Mapping of DataArrays")
+            return True
+        return False
+
+    @staticmethod
+    def _create_dataarrays(
+        data: Sequence[np.ndarray],
+        time=None,
+        items=None,
+        geometry: _Geometry = None,
+        zn=None,
+        dims=None,
+    ):
+        if not isinstance(data, Iterable):
+            data = [data]
+        items = Dataset._parse_items(items, len(data))
+
+        # TODO: skip validation for all items after the first?
+        data_vars = {}
+        for dd, it in zip(data, items):
+            data_vars[it.name] = DataArray(
+                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
+            )
+        return data_vars
+
+    def _init_from_DataArrays(self, data, validate=True):
+        """Initialize Dataset object with Iterable of DataArrays"""
+        self._data_vars = self._DataArrays_as_mapping(data)
+
+        if (len(self) > 1) and validate:
+            first = self[0]
+            for da in self[1:]:
+                first._is_compatible(da, raise_error=True)
+
+        self._check_all_different_ids(self._data_vars.values())
+
+        self.__itemattr = []
+        for key, value in self._data_vars.items():
+            self._set_name_attr(key, value)
+
+        if len(self.items) > 1:
+            self.plot = _DatasetPlotter(self)
+
+        # since Dataset is MutableMapping it has values and keys by default
+        # but we delete those to avoid confusion
+        self.values = None
+        self.keys = None
+
+    # remove values and keys from dir to avoid confusion
+    def __dir__(self):
+        keys = sorted(list(super().__dir__()) + list(self.__dict__.keys()))
+        return set([d for d in keys if d not in ("values", "keys")])
+
+    @staticmethod
+    def _parse_items(items, n_items_data):
         if items is None:
             # default Undefined items
-            for j in range(n_items):
-                item_infos.append(ItemInfo(f"Item {j+1}"))
+            item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
         else:
-            for item in items:
-                if isinstance(item, EUMType) or isinstance(item, str):
-                    item_infos.append(ItemInfo(item))
-                elif isinstance(item, ItemInfo):
-                    item_infos.append(item)
-                else:
-                    raise ValueError(f"items of type: {type(item)} is not supported")
-
-            if len(items) != n_items:
+            if len(items) != n_items_data:
                 raise ValueError(
-                    f"Number of items in iteminfo {len(items)} doesn't match the data {n_items}."
+                    f"Number of items ({len(items)}) must match len of data ({n_items_data})"
                 )
 
-        if len(time) != n_timesteps:
+            item_infos = []
+            for item in items:
+                if isinstance(item, (EUMType, str)):
+                    item = ItemInfo(item)
+                elif not isinstance(item, ItemInfo):
+                    raise TypeError(f"items of type: {type(item)} is not supported")
+                # TODO: item.name = self._to_safe_name(item.name)
+                item_infos.append(item)
+
+            item_names = [it.name for it in item_infos]
+            if len(set(item_names)) != len(item_names):
+                raise ValueError(f"Item names must be unique ({item_names})!")
+
+        return item_infos
+
+    @staticmethod
+    def _DataArrays_as_mapping(data):
+        """Create dict of DataArrays if necessary"""
+        if isinstance(data, Mapping):
+            if isinstance(data, Dataset):
+                return data
+            data = Dataset._validate_item_names_and_keys(data)
+            _ = Dataset._unique_item_names(data.values())
+            return data
+
+        if isinstance(data, DataArray):
+            data = [data]
+
+        item_names = Dataset._unique_item_names(data)
+
+        data_map = {}
+        for n, da in zip(item_names, data):
+            data_map[n] = da
+        return data_map
+
+    @staticmethod
+    def _validate_item_names_and_keys(data_map: Mapping[str, DataArray]):
+        for key, da in data_map.items():
+            if da.name == "NoName":
+                da.name = key
+            elif da.name != key:
+                warnings.warn(
+                    f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. Item name will be replaced with key."
+                )
+                da.name == key
+        return data_map
+
+    @staticmethod
+    def _unique_item_names(das: Sequence[DataArray]):
+        item_names = [da.name for da in das]
+        if len(set(item_names)) != len(item_names):
             raise ValueError(
-                f"Number of timesteps in time {len(time)} doesn't match the data {n_timesteps}."
+                f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
+            )
+            # TODO: make a list of unique items names
+        return item_names
+
+    @staticmethod
+    def _check_all_different_ids(das):
+        """Are all the DataArrays different objects or are some referring to the same"""
+        for j, da1 in enumerate(das):
+            for k, da2 in enumerate(das):
+                if j != k:
+                    Dataset._id_of_DataArrays_equal(da1, da2)
+
+    @staticmethod
+    def _id_of_DataArrays_equal(da1, da2):
+        """Check if two DataArrays are actually the same object"""
+        if id(da1) == id(da2):
+            raise ValueError(
+                f"Cannot add the same object ({da1.name}) twice! Create a copy first."
+            )
+        if id(da1.values) == id(da2.values):
+            raise ValueError(
+                f"DataArrays {da1.name} and {da2.name} refer to the same data! Create a copy first."
             )
 
-        self.data = data
-        self.time = pd.DatetimeIndex(time)
+    def _check_already_present(self, new_da):
+        """Is the DataArray already present in the Dataset?"""
+        for da in self:
+            self._id_of_DataArrays_equal(da, new_da)
 
-        self._items = item_infos
+    # ---- end of init ---------
+
+    @property
+    def time(self):
+        return list(self)[0].time
+
+    @time.setter
+    def time(self, new_time):
+        new_time = self._parse_time(new_time)
+        if len(self.time) != len(new_time):
+            raise ValueError("Length of new time is wrong")
+        for da in self:
+            da.time = new_time
+
+    @property
+    def start_time(self):
+        """First time instance (as datetime)"""
+        return self.time[0].to_pydatetime()
+
+    @property
+    def end_time(self):
+        """Last time instance (as datetime)"""
+        return self.time[-1].to_pydatetime()
+
+    @property
+    def timestep(self):
+        """Time step in seconds if equidistant (and at
+        least two time instances); otherwise None
+        """
+        dt = None
+        if len(self.time) > 1:
+            if self.is_equidistant:
+                dt = (self.time[1] - self.time[0]).total_seconds()
+        return dt
+
+    @property
+    def is_equidistant(self):
+        """Is Dataset equidistant in time?"""
+        if len(self.time) < 3:
+            return True
+        return len(self.time.to_series().diff().dropna().unique()) == 1
+
+    @property
+    def data(self) -> Sequence[np.ndarray]:
+        """Data as list of numpy arrays"""
+        warnings.warn(
+            "property data is deprecated",
+            FutureWarning,
+        )
+        return [x.to_numpy() for x in self]
+
+    @property
+    def n_timesteps(self):
+        """Number of time steps"""
+        return len(self.time)
+
+    @property
+    def items(self):
+        """ItemInfo for each of the DataArrays as a list"""
+        return [x.item for x in self]
+
+    @property
+    def names(self):
+        """Name of each of the DataArrays as a list"""
+        return [da.name for da in self]
+
+    @property
+    def n_items(self):
+        """Number of items/DataArrays, equivalent to len()"""
+        return len(self._data_vars)
+
+    @property
+    def ndim(self):
+        """Number of data dimensions of each DataArray"""
+        return self[0].ndim
+
+    @property
+    def dims(self):
+        """Named data dimensions of each DataArray"""
+        return self[0].dims
+
+    @property
+    def shape(self):
+        """Shape of each DataArray"""
+        return self[0].shape
+
+    # TODO: remove this
+    @property
+    def n_elements(self):
+        """Number of spatial elements/points"""
+        n_elem = np.prod(self.shape)
+        if self.n_timesteps > 1:
+            n_elem = int(n_elem / self.n_timesteps)
+        return n_elem
+
+    @property
+    def deletevalue(self):
+        """File delete value"""
+        return self[0].deletevalue
+
+    @property
+    def geometry(self):
+        """Geometry of each DataArray"""
+        return list(self)[0].geometry
+
+    @property
+    def _zn(self):
+        return list(self)[0]._zn
 
     def __repr__(self):
+        if len(self) == 0:
+            return "Empty <mikeio.Dataset>"
 
         out = ["<mikeio.Dataset>"]
-        out.append(f"Dimensions: {self.shape}")
-        out.append(f"Time: {self.time[0]} - {self.time[-1]}")
+
+        gtxt = list(self)[0]._geometry_txt()
+        if gtxt:
+            out.append(gtxt)
+
+        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
+        dimsstr = ", ".join(dims)
+        out.append(f"Dimensions: ({dimsstr})")
+
+        timetxt = (
+            f"Time: {self.time[0]} (time-invariant)"
+            if self.n_timesteps == 1
+            else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
+        )
+        out.append(timetxt)
+
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
         if self.n_items > 10:
@@ -238,62 +472,220 @@ class Dataset(TimeSeries):
         return str.join("\n", out)
 
     def __len__(self):
-        return len(self.items)
+        return len(self._data_vars)
+
+    def __iter__(self):
+        yield from self._data_vars.values()
 
     def __setitem__(self, key, value):
+        self.__set_or_insert_item(key, value, insert=False)
+
+    def __set_or_insert_item(self, key, value, insert=False):
+        if not isinstance(value, DataArray):
+            try:
+                value = DataArray(value)
+                # TODO: warn that this is not the preferred way!
+            except:
+                raise ValueError("Input could not be interpreted as a DataArray")
+
+        if len(self) > 0:
+            self[0]._is_compatible(value)
+
+        item_name = value.name
 
         if isinstance(key, int):
-            self.data[key] = value
+            is_replacement = not insert
+            if is_replacement:
+                key_str = self.names[key]
+                self._data_vars[key_str] = value
+            else:
+                self._check_already_present(value)
 
-        elif isinstance(key, str):
-            item_lookup = {item.name: i for i, item in enumerate(self.items)}
-            key = item_lookup[key]
-            self.data[key] = value
+                if item_name in self.names:
+                    raise ValueError(
+                        f"Item name {item_name} already in Dataset ({self.names})"
+                    )
+                all_keys = list(self._data_vars.keys())
+                all_keys.insert(key, item_name)
+
+                data_vars = {}
+                for k in all_keys:
+                    if k in self._data_vars.keys():
+                        data_vars[k] = self._data_vars[k]
+                    else:
+                        data_vars[k] = value
+                self._data_vars = data_vars
+
+            self._set_name_attr(item_name, value)
         else:
+            is_replacement = key in self.names
+            if key != item_name:
+                # TODO: what would be best in this situation?
+                warnings.warn(
+                    f"key '{key}' and item name '{item_name}' mismatch! item name will be replaced with key!"
+                )
+                value.name = key
+            if not is_replacement:
+                self._check_already_present(value)
+            self._data_vars[key] = value
+            self._set_name_attr(key, value)
 
-            raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
+        if len(self) == 2 and not is_replacement:
+            # now big enough for a plotter
+            self.plot = _DatasetPlotter(self)
 
-    def __getitem__(self, key):
+    def insert(self, key: int, value: DataArray):
+        """Insert DataArray in a specific position
 
-        warnings.warn(
-            "Indexing in MIKE IO 1.0 will not return a numpy array, but a mikeio.DataArray. More info: https://github.com/DHI/mikeio#readme"
-        )
+
+        Parameters
+        ----------
+        key : int
+            index in Dataset where DataArray should be inserted
+        value : DataArray
+            DataArray to be inserted, must comform with with existing DataArrays
+            and must have a unique item name
+        """
+        self.__set_or_insert_item(key, value, insert=True)
+
         if isinstance(key, slice):
             s = self.time.slice_indexer(key.start, key.stop)
             time_steps = list(range(s.start, s.stop))
             return self.isel(time_steps, axis=0)
 
-        if isinstance(key, int):
-            return self.data[key]
+    def remove(self, key: Union[int, str]):
+        """Remove DataArray from Dataset
+
+        Parameters
+        ----------
+        key : int, str
+            index or name of DataArray to be remove from Dataset
+
+        See also
+        --------
+        pop
+        """
+        self.__delitem__(key)
+
+    def popitem(self):
+        """Pop first DataArray from Dataset
+
+        See also
+        --------
+        pop
+        """
+        return self.pop(0)
+
+    def _set_name_attr(self, name: str, value: DataArray):
+        name = self._to_safe_name(name)
+        item_names = [self._to_safe_name(n) for n in self.names]
+        if (name not in item_names) and hasattr(self, name):
+            # oh-no the item_name matches the name of another attr
+            pass
+        else:
+            if name not in self.__itemattr:
+                self.__itemattr.append(name)  # keep track of what we insert
+            setattr(self, name, value)
+
+    def _del_name_attr(self, name: str):
+        name = self._to_safe_name(name)
+        if name in self.__itemattr:
+            self.__itemattr.remove(name)
+            delattr(self, name)
+
+    def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
+
+        # select time steps
+        if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
+            time_steps = pd.Series(range(len(self.time)), index=self.time)[key]
+            time_steps = (
+                [time_steps] if np.isscalar(time_steps) else time_steps.to_numpy()
+            )
+            return self.isel(time_steps, axis=0)
+        if isinstance(key, slice):
+            if self._is_slice_time_slice(key):
+                try:
+                    s = self.time.slice_indexer(key.start, key.stop)
+                    time_steps = list(range(s.start, s.stop))
+                except:
+                    time_steps = list(range(*key.indices(len(self.time))))
+                return self.isel(time_steps, axis=0)
+
+        # select items
+        key = self._key_to_str(key)
+        if isinstance(key, str):
+            return self._data_vars[key]
+
+        if isinstance(key, Iterable):
+            data_vars = {}
+            for v in key:
+                data_vars[v] = self._data_vars[v]
+            return Dataset(data_vars)
+
+        raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
+
+    def _is_slice_time_slice(self, s):
+        if (s.start is None) and (s.stop is None):
+            return False
+        if s.start is not None:
+            if not self._is_key_time(s.start):
+                return False
+        if s.stop is not None:
+            if not self._is_key_time(s.stop):
+                return False
+        return True
+
+    def _is_key_time(self, key):
+        if isinstance(key, str) and key in self.names:
+            return False
+        if isinstance(key, str) and len(key) > 0 and key[0].isnumeric():
+            # TODO: try to parse with pandas
+            return True
+        if isinstance(key, (datetime, np.datetime64, pd.Timestamp)):
+            return True
+        return False
+
+    def _key_to_str(self, key):
 
         if isinstance(key, str):
-            item_lookup = {item.name: i for i, item in enumerate(self.items)}
-            key = item_lookup[key]
-            return self.data[key]
+            return key
+        if isinstance(key, int):
+            return list(self._data_vars.keys())[key]
+        if isinstance(key, slice):
+            s = key.indices(len(self))
+            return self._key_to_str(list(range(*s)))
+        if isinstance(key, Iterable):
+            keys = []
+            for k in key:
+                keys.append(self._key_to_str(k))
+            return keys
+        if hasattr(key, "name"):
+            return key.name
+        raise TypeError(f"indexing with type {type(key)} is not supported")
 
-        if isinstance(key, ItemInfo):
-            return self.__getitem__(key.name)
+    def __delitem__(self, key):
 
-        if isinstance(key, list):
-            data = []
-            items = []
+        key = self._key_to_str(key)
+        self._data_vars.__delitem__(key)
+        self._del_name_attr(key)
 
-            item_lookup = {item.name: i for i, item in enumerate(self.items)}
+    def rename(self, mapper: Mapping[str, str], inplace=False):
 
-            for v in key:
-                data_item = self.__getitem__(v)
-                if isinstance(v, str):
-                    i = item_lookup[v]
-                if isinstance(v, int):
-                    i = v
+        if inplace:
+            ds = self
+        else:
+            ds = self.copy()
 
-                item = self.items[i]
-                items.append(item)
-                data.append(data_item)
+        for old_name, new_name in mapper.items():
+            da = ds._data_vars.pop(old_name)
+            da.name = new_name
+            ds._data_vars[new_name] = da
+            self._del_name_attr(old_name)
+            self._set_name_attr(new_name, da)
 
-            return Dataset(data, self.time, items)
+        return ds
 
-        raise ValueError(f"indexing with a {type(key)} is not (yet) supported")
+    # ---- arithmetic ---------
 
     def __radd__(self, other):
         return self.__add__(other)
@@ -326,7 +718,10 @@ class Dataset(TimeSeries):
     def _add_dataset(self, other, sign=1.0):
         self._check_datasets_match(other)
         try:
-            data = [self[x] + sign * other[y] for x, y in zip(self.items, other.items)]
+            data = [
+                self[x].to_numpy() + sign * other[y].to_numpy()
+                for x, y in zip(self.items, other.items)
+            ]
         except:
             raise ValueError("Could not add data in Dataset")
         time = self.time.copy()
@@ -354,7 +749,7 @@ class Dataset(TimeSeries):
 
     def _add_value(self, value):
         try:
-            data = [value + self[x] for x in self.items]
+            data = [value + self[x].to_numpy() for x in self.items]
         except:
             raise ValueError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
@@ -363,7 +758,7 @@ class Dataset(TimeSeries):
 
     def _multiply_value(self, value):
         try:
-            data = [value * self[x] for x in self.items]
+            data = [value * self[x].to_numpy() for x in self.items]
         except:
             raise ValueError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)
@@ -373,7 +768,7 @@ class Dataset(TimeSeries):
     def describe(self, **kwargs):
         """Generate descriptive statistics by wrapping pandas describe()"""
         all_df = [
-            pd.DataFrame(self.data[j].flatten(), columns=[self.items[j].name]).describe(
+            pd.DataFrame(self.data[j].ravel(), columns=[self.items[j].name]).describe(
                 **kwargs
             )
             for j in range(self.n_items)
@@ -383,14 +778,12 @@ class Dataset(TimeSeries):
     def copy(self):
         """Returns a copy of this dataset."""
 
-        items = deepcopy(self.items)
-        data = [self[x].copy() for x in self.items]
-        time = self.time.copy()
-
-        return Dataset(data, time, items)
+        return deepcopy(self)
 
     def to_numpy(self):
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
+
+        Note: the output will be
 
         Returns
         -------
@@ -442,10 +835,15 @@ class Dataset(TimeSeries):
         """
 
         if isinstance(datasets[0], Iterable):
-            if isinstance(datasets[0][0], Dataset):
+            if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
                 datasets = datasets[0]
 
+        # if isinstance(datasets[0], DataArray):
+        #     ds = datasets[0]._to_dataset()
+        #     print("to dataset")
+        # else:
         ds = datasets[0].copy()
+
         for dsj in datasets[1:]:
             ds = ds._combine(dsj, copy=False)
         return ds
@@ -457,6 +855,10 @@ class Dataset(TimeSeries):
             ds = self._append_items(other, copy=copy)
         return ds
 
+    def append(self, other, inplace=False):
+        # TODO: require other da
+        return self.append_items(other, inplace)
+
     def append_items(self, other, inplace=False):
         """Append items from other Dataset to this Dataset"""
         if inplace:
@@ -465,9 +867,10 @@ class Dataset(TimeSeries):
             return self._append_items(other, copy=True)
 
     def _append_items(self, other, copy=True):
-
-        item_names = self._non_z_item_names
-        other_names = other._non_z_item_names
+        if isinstance(other, DataArray):
+            other = other._to_dataset()
+        item_names = {item.name for item in self.items}
+        other_names = {item.name for item in other.items}
 
         overlap = other_names.intersection(item_names)
         if len(overlap) != 0:
@@ -478,21 +881,19 @@ class Dataset(TimeSeries):
             raise ValueError("All timesteps must match")
         ds = self.copy() if copy else self
 
-        for j in range(other.n_items):
-            if other.items[j].name != "Z coordinate":  #
-                ds.items.append(other.items[j])
-                ds.data.append(other.data[j])
+        for key, value in other._data_vars.items():
+            if key != "Z coordinate":
+                ds[key] = value
+
         return ds
 
-    def concat(self, other, inplace=False):
+    def concat(self, other):
         """Concatenate this Dataset with data from other Dataset
 
         Parameters
         ---------
         other: Dataset
             Other dataset to concatenate with
-        inplace: bool, optional
-            Default is to return a new dataset
 
         Returns
         -------
@@ -511,12 +912,10 @@ class Dataset(TimeSeries):
         >>> ds3.n_timesteps
         4
         """
-        if inplace:
-            ds = self._concat_time(other, copy=False)
-            self.data = ds.data
-            self.time = ds.time
-        else:
-            return self._concat_time(other, copy=True)
+
+        ds = self._concat_time(other, copy=True)
+
+        return ds
 
     def _concat_time(self, other, copy=True):
         self._check_all_items_match(other)
@@ -532,11 +931,11 @@ class Dataset(TimeSeries):
         newdata = self.create_empty_data(
             n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
         )
+        idx1 = np.where(~df12["idx1"].isna())
+        idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            idx1 = np.where(~df12["idx1"].isna())
-            newdata[j][idx1, :] = ds.data[j]
             # if there is an overlap "other" data will be used!
-            idx2 = np.where(~df12["idx2"].isna())
+            newdata[j][idx1, :] = ds.data[j]
             newdata[j][idx2, :] = other.data[j]
 
         return Dataset(newdata, newtime, ds.items)
@@ -564,7 +963,7 @@ class Dataset(TimeSeries):
         """Remove time steps where all items are NaN"""
 
         # TODO consider all items
-        x = self[0]
+        x = self[0].to_numpy()
 
         # this seems overly complicated...
         axes = tuple(range(1, x.ndim))
@@ -574,10 +973,13 @@ class Dataset(TimeSeries):
         return self.isel(idx, axis=0)
 
     def flipud(self):
-        """Flip dataset updside down"""
-
-        self.data = [np.flip(self[x], axis=1) for x in self.items]
+        """Flip dataset upside down"""
+        self._data_vars = {
+            key: value.flipud() for (key, value) in self._data_vars.items()
+        }
         return self
+
+    # ===== select =========
 
     def isel(self, idx, axis=1):
         """
@@ -610,22 +1012,47 @@ class Dataset(TimeSeries):
         Shape: (3, 2)
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
+        if idx is None or (not np.isscalar(idx) and len(idx) == 0):
+            return None
 
-        axis = _parse_axis(self.shape, axis)
+        axis = self._parse_axis(self.shape, self.dims, axis)
         if axis == 0:
+            idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
             time = self.time[idx]
             items = self.items
+            geometry = self.geometry
+            zn = None if self._zn is None else self._zn[idx]
         else:
             time = self.time
-            items = _items_except_Z_coordinate(self.items)
+            items = self.items
+            geometry = None
+            zn = None
+            if hasattr(self.geometry, "isel"):
+                spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
+                geometry = self.geometry.isel(idx, axis=spatial_axis)
+            if isinstance(geometry, GeometryFMLayered):
+                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
+                    idx, node_layers="all"
+                )
+                zn = self._zn[:, node_ids]
 
         res = []
         for item in items:
-            x = np.take(self[item.name], idx, axis=axis)
+            x = np.take(self[item.name].to_numpy(), idx, axis=axis)
             res.append(x)
 
-        ds = Dataset(res, time, items)
-        return ds
+        if np.isscalar(idx):
+            # Selecting a single index, removes this dimension
+            dims = tuple(
+                [d for i, d in enumerate(self.dims) if i != axis]
+            )  # TODO we will need this in many places
+        else:
+            dims = self.dims  # multiple points, dims is intact
+        return Dataset(
+            data=res, time=time, items=items, geometry=geometry, zn=zn, dims=dims
+        )
+
+    # ===== aggregate =========
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs):
         """Aggregate along an axis
@@ -643,19 +1070,12 @@ class Dataset(TimeSeries):
             dataset with aggregated values
         """
 
-        items = _items_except_Z_coordinate(self.items)
-        axis = _parse_axis(self.shape, axis)
-        time = _time_by_axis(self.time, axis)
-        keepdims = _keepdims_by_axis(axis)
+        res = {
+            name: da.aggregate(axis=axis, func=func, **kwargs)
+            for name, da in self._data_vars.items()
+        }
 
-        res = [
-            func(self[item.name], axis=axis, keepdims=keepdims, **kwargs)
-            for item in items
-        ]
-
-        res = _reshape_data_by_axis(res, self.shape, axis)
-
-        return Dataset(res, time, items)
+        return Dataset(res)
 
     def quantile(self, q, *, axis="time", **kwargs):
         """Compute the q-th quantile of the data along the specified axis.
@@ -715,25 +1135,19 @@ class Dataset(TimeSeries):
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
-        items_in = _items_except_Z_coordinate(self.items)
-        axis = _parse_axis(self.shape, axis)
-        time = _time_by_axis(self.time, axis)
-        keepdims = _keepdims_by_axis(axis)
+        if np.isscalar(q):
+            res = [da._quantile(q=q, axis=axis, func=func) for da in self]
+        else:
+            res = []
 
-        qvec = [q] if np.isscalar(q) else q
-        qtxt = [f"Quantile {q}" for q in qvec]
-        itemsq = _get_repeated_items(items_in, qtxt)
+            for name, da in self._data_vars.items():
+                for quantile in q:
+                    qd = da._quantile(q=quantile, axis=axis, func=func)
+                    newname = f"Quantile {quantile}, {name}"
+                    qd.name = newname
+                    res.append(qd)
 
-        res = []
-        for item in items_in:
-            qdat = func(self[item.name], q=q, axis=axis, keepdims=keepdims, **kwargs)
-            for j in range(len(qvec)):
-                qdat_item = qdat[j, ...] if len(qvec) > 1 else qdat
-                res.append(qdat_item)
-
-        res = _reshape_data_by_axis(res, self.shape, axis)
-
-        return Dataset(res, time, itemsq)
+        return Dataset(res)
 
     def max(self, axis="time"):
         """Max value along an axis
@@ -873,26 +1287,6 @@ class Dataset(TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmean)
 
-    def head(self, n=5):
-        """Return the first n timesteps"""
-        nt = len(self.time)
-        n = min(n, nt)
-        time_steps = range(n)
-        return self.isel(time_steps, axis=0)
-
-    def tail(self, n=5):
-        """Return the last n timesteps"""
-        nt = len(self.time)
-        start = max(0, nt - n)
-        time_steps = range(start, nt)
-        return self.isel(time_steps, axis=0)
-
-    def thin(self, step):
-        """Return every n:th timesteps"""
-        nt = len(self.time)
-        time_steps = range(0, nt, step)
-        return self.isel(time_steps, axis=0)
-
     def squeeze(self):
         """
         Remove axes of length 1
@@ -901,23 +1295,108 @@ class Dataset(TimeSeries):
         -------
         Dataset
         """
+        res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        items = self.items
+        return Dataset(res)
 
-        if items[0].name == "Z coordinate":
-            items = deepcopy(items)
-            items.pop(0)
+    def sel(
+        self,
+        *,
+        time: Union[int, pd.DatetimeIndex, "Dataset"] = None,
+        x: float = None,
+        y: float = None,
+        z: float = None,
+        **kwargs,
+    ) -> "Dataset":
+        """
+        Examples
+        --------
+        ds.sel(layer='bottom')
+        ds.sel(x=1.0,y=55.0)
+        ds.sel(area=[1.,12., 2., 15.])
+        """
 
-        time = self.time
+        # select in space
+        if (x is not None) or (y is not None) or (z is not None):
+            # idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+            idx = self.geometry.find_index(x=x, y=y, z=z)
+            ds = self.isel(idx, axis="space")
+        else:
+            ds = self
 
-        res = [np.squeeze(self[item.name]) for item in items]
+        if "layer" in kwargs:
+            if isinstance(ds.geometry, GeometryFMLayered):
+                layer = kwargs.pop("layer")
+                idx = ds.geometry.get_layer_elements(layer)
+                ds = ds.isel(idx, axis="space")
+            else:
+                raise ValueError("'layer' can only be selected from layered Dfsu data")
 
-        ds = Dataset(res, time, items)
+        if "area" in kwargs:
+            if isinstance(ds.geometry, GeometryFM):
+                area = kwargs.pop("area")
+                idx = ds.geometry._elements_in_area(area)
+                ds = ds.isel(idx, axis="space")
+            else:
+                raise ValueError("'area' can only be selected from Dfsu data")
+
+        if len(kwargs) > 0:
+            args = ",".join(kwargs)
+            raise ValueError(f"Argument(s) '{args}' not recognized (layer, area).")
+
+        # select in time
+        if time is not None:
+            time = time.time if isinstance(time, TimeSeries) else time
+            if isinstance(time, int) or (
+                isinstance(time, Sequence) and isinstance(time[0], int)
+            ):
+                ds = ds.isel(time, axis="time")
+            else:
+                ds = ds[time]
+
+        return ds
+
+    def interp(
+        self,
+        *,
+        time: Union[pd.DatetimeIndex, "DataArray"] = None,
+        x: float = None,
+        y: float = None,
+        z: float = None,
+        n_nearest=3,
+        **kwargs,
+    ) -> "Dataset":
+
+        if z is not None:
+            raise NotImplementedError()
+
+        # interp in space
+        if (x is not None) or (y is not None) or (z is not None):
+            xy = [(x, y)]
+
+            if isinstance(
+                self.geometry, GeometryFM
+            ):  # TODO remove this when all geometries implements the same method
+                interpolant = self.geometry.get_2d_interpolant(
+                    xy, n_nearest=n_nearest, **kwargs
+                )
+                das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
+            else:
+                das = [da.interp(x=x, y=y) for da in self]
+            ds = Dataset(das)
+        else:
+            ds = Dataset([da for da in self])
+
+        # interp in time
+        if time is not None:
+            ds = ds.interp_time(time)
+
         return ds
 
     def interp_time(
         self,
         dt: Union[float, pd.DatetimeIndex, "Dataset"],
+        *,
         method="linear",
         extrapolate=True,
         fill_value=np.nan,
@@ -931,7 +1410,7 @@ class Dataset(TimeSeries):
         dt: float or pd.DatetimeIndex or Dataset
             output timestep in seconds
         method: str or int, optional
-            Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.
+            Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
         extrapolate: bool, optional
             Default True. If False, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If True, out of bounds values are assigned fill_value
         fill_value: float or array-like, optional
@@ -964,39 +1443,32 @@ class Dataset(TimeSeries):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
-        if isinstance(dt, pd.DatetimeIndex):
-            t_out_index = dt
-        elif isinstance(dt, Dataset):
-            t_out_index = dt.time
-        else:
-            offset = pd.tseries.offsets.DateOffset(seconds=dt)
-            t_out_index = pd.date_range(
-                start=self.time[0], end=self.time[-1], freq=offset
-            )
-
+        t_out_index = self._parse_interp_time(self.time, dt)
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
         data = [
-            self._interpolate_item(t_in, t_out, item, method, extrapolate, fill_value)
-            for item in self
+            self._interpolate_time(
+                t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
+            )
+            for da in self
         ]
 
-        return Dataset(data, t_out_index, self.items.copy())
-
-    @staticmethod
-    def _interpolate_item(intime, outtime, dataitem, method, extrapolate, fill_value):
-        from scipy.interpolate import interp1d
-
-        interpolator = interp1d(
-            intime,
-            dataitem,
-            axis=0,
-            kind=method,
-            bounds_error=not extrapolate,
-            fill_value=fill_value,
+        zn = (
+            None
+            if self._zn is None
+            else self._interpolate_time(
+                t_in, t_out, self._zn, method, extrapolate, fill_value
+            )
         )
-        return interpolator(outtime)
+
+        return Dataset(
+            data,
+            t_out_index,
+            items=self.items.copy(),
+            geometry=self.geometry,
+            zn=zn,
+        )
 
     def to_dataframe(self, unit_in_name=False, round_time="ms"):
         """Convert Dataset to a Pandas DataFrame
@@ -1010,6 +1482,7 @@ class Dataset(TimeSeries):
         -------
         pd.DataFrame
         """
+
         if len(self.data[0].shape) != 1:
             self = self.squeeze()
 
@@ -1050,76 +1523,52 @@ class Dataset(TimeSeries):
         dati = np.empty(shape=(n_timesteps, *shape))
         dati[:] = np.nan
         for _ in range(n_items):
-            data.append(dati)
+            data.append(dati.copy())
         return data
 
-    @property
-    def is_equidistant(self):
-        """Is Dataset equidistant in time?"""
-        if len(self.time) < 3:
-            return True
-        return len(self.time.to_series().diff().dropna().unique()) == 1
+    def to_dfs(self, filename, **kwargs):
 
-    @property
-    def start_time(self):
-        """First time instance (as datetime)"""
-        return self.time[0].to_pydatetime()
+        filename = str(filename)
 
-    @property
-    def end_time(self):
-        """Last time instance (as datetime)"""
-        return self.time[-1].to_pydatetime()
+        if isinstance(
+            self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
+        ):
+            if self.ndim == 1 and self.dims[0][0] == "t":
+                self._to_dfs0(filename, **kwargs)
+            else:
+                raise ValueError("Cannot write Dataset with no geometry to file!")
+        elif isinstance(self.geometry, Grid2D):
+            self._to_dfs2(filename)
 
-    @property
-    def timestep(self):
-        """Time step in seconds if equidistant (and at
-        least two time instances); otherwise None
-        """
-        dt = None
-        if len(self.time) > 1:
-            if self.is_equidistant:
-                dt = (self.time[1] - self.time[0]).total_seconds()
-        return dt
+        elif isinstance(self.geometry, Grid1D):
+            self._to_dfs1(filename)
+        elif isinstance(self.geometry, GeometryFM):
+            self._to_dfsu(filename)
+        else:
+            raise NotImplementedError(
+                "Writing this type of dataset is not yet implemented"
+            )
 
-    @property
-    def n_timesteps(self):
-        """Number of time steps"""
-        return len(self.time)
+    def _to_dfs0(self, filename, **kwargs):
+        from .dfs0 import _write_dfs0
 
-    @property
-    def n_items(self):
-        """Number of items"""
-        return len(self.items)
+        dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
-    @property
-    def items(self):
-        return self._items
+        _write_dfs0(filename, self, dtype=dtype)
 
-    @property
-    def shape(self):
-        """Shape of each item"""
-        return self.data[self._first_non_z_item].shape
+    def _to_dfs2(self, filename):
+        # assumes Grid2D geometry
+        from .dfs2 import write_dfs2
 
-    @property
-    def _first_non_z_item(self):
-        if len(self) > 1 and self.items[0].name == "Z coordinate":
-            return 1
-        return 0
+        write_dfs2(filename, self)
 
-    @property
-    def _non_z_item_names(self):
-        """Item names (Z coordinate excluded)"""
-        return {item.name for item in self.items[self._first_non_z_item :]}
+    def _to_dfs1(self, filename):
+        from .dfs1 import Dfs1
 
-    @property
-    def n_elements(self):
-        """Number of spatial elements/points"""
-        n_elem = np.prod(self.shape)
-        if self.n_timesteps > 1:
-            n_elem = int(n_elem / self.n_timesteps)
-        return n_elem
+        dfs = Dfs1()
+        dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry.x0)
 
-    @property
-    def deletevalue(self):
-        """File delete value"""
-        return self._deletevalue
+    def _to_dfsu(self, filename):
+        from .dfsu import _write_dfsu
+
+        _write_dfsu(filename, self)
