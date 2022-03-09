@@ -526,18 +526,6 @@ def test_dataarray_masking():
     assert da.min(axis=None).values == 0
 
 
-def test_daarray_squeeze():
-
-    filename = "tests/testdata/gebco_sound.dfs2"
-    ds = mikeio.read(filename)
-    da: mikeio.DataArray = ds.Elevation
-    assert da.shape == (1, 264, 216)
-
-    das = da.squeeze()
-    assert das.shape == (264, 216)
-    assert das.dims[0] == "y"
-
-
 def test_daarray_aggregation_dfs2():
 
     filename = "tests/testdata/gebco_sound.dfs2"
@@ -545,17 +533,12 @@ def test_daarray_aggregation_dfs2():
     da = ds.Elevation
 
     assert da.shape == (1, 264, 216)
-    assert da.dims[0] == "time"
 
-    dam = da.mean(axis="time")
+    dam = da.nanmean(axis=None)
+    assert np.isscalar(dam.values)  # TODO is this what we want
 
-    assert dam.shape == (264, 216)
-    assert dam.dims[0] != "time"
-
-    dasm = da.mean(axis="space")
-
+    dasm = da.nanmean(axis="space")
     assert dasm.shape == (1,)
-    assert dasm.dims[0] == "time"
 
 
 def test_daarray_aggregation():

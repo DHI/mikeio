@@ -40,6 +40,25 @@ class Grid1D(_Geometry):
         )
         return str.join("\n", out)
 
+    def find_index(self, x: float, **kwargs) -> int:
+
+        d = (self.x - x) ** 2
+        return np.argmin(d)
+
+    def get_spatial_interpolant(self, xy, **kwargs):
+
+        x = xy[0][0]  # TODO accept list of points
+        d = np.abs(self.x - x)
+        ids = np.argsort(d)[0:2]
+        weights = 1 - d[ids]
+
+        assert np.allclose(weights.sum(), 1.0)
+        assert len(ids) == 2
+        return ids, weights
+
+    def interp(self, data, ids, weights):
+        return np.dot(data[:, ids], weights)
+
     @property
     def dx(self) -> float:
         """grid spacing"""

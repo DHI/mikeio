@@ -38,7 +38,7 @@ from .spatial import Grid1D, Grid2D
 from .eum import ItemInfo, EUMType, EUMUnit
 
 
-def read(filename, *, items=None, time_steps=None, **kwargs) -> Dataset:
+def read(filename, *, items=None, time_steps=None, time=None, **kwargs) -> Dataset:
     """Read data from a dfs file
 
     Parameters
@@ -47,7 +47,7 @@ def read(filename, *, items=None, time_steps=None, **kwargs) -> Dataset:
         full path and file name to the dfs file.
     items: list[int] or list[str], optional
         Read only selected items, by number (0-based), or by name
-    time_steps: int or list[int], optional
+    time: int or list[int], optional
         Read only selected time_steps
 
     Returns
@@ -63,7 +63,7 @@ def read(filename, *, items=None, time_steps=None, **kwargs) -> Dataset:
 
     dfs = open(filename)
 
-    return dfs.read(items=items, time_steps=time_steps, **kwargs)
+    return dfs.read(items=items, time_steps=time_steps, time=time, **kwargs)
 
 
 def open(filename: str):

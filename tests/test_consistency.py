@@ -1,3 +1,5 @@
+import pytest
+
 import numpy as np
 import mikeio
 from mikeio.spatial.geometry import GeometryUndefined
@@ -31,7 +33,7 @@ def test_dfs1_isel_t():
     ds1 = ds.isel([0, 1], axis="t")
     assert ds1.dims == ("time", "x")
     assert isinstance(ds1.geometry, type(ds.geometry))
-    assert ds1[0][0, 8].values[0] == 0.203246
+    assert ds1[0].values[0, 8] == pytest.approx(0.203246)
 
 
 def test_dfs1_isel_x():
@@ -40,7 +42,7 @@ def test_dfs1_isel_x():
     ds1 = ds.isel(8, axis="x")
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(time=0).values[0] == 0.203246
+    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
 
 
 def test_dfs1_sel_t():
@@ -49,7 +51,7 @@ def test_dfs1_sel_t():
     ds1 = ds.sel(time=slice("2018", "2018-03-10"))
     assert ds1.dims == ("time", "x")
     assert isinstance(ds1.geometry, type(ds.geometry))
-    assert ds1[0][0, 8].values[0] == 0.203246
+    assert ds1[0].values[0, 8] == pytest.approx(0.203246)
 
 
 def test_dfs1_sel_x():
@@ -58,7 +60,7 @@ def test_dfs1_sel_x():
     ds1 = ds.sel(x=7.8)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(time=0).values[0] == 0.203246
+    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
 
 
 def test_dfs1_interp_x():
@@ -67,7 +69,7 @@ def test_dfs1_interp_x():
     ds1 = ds.interp(x=7.75)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(time=0).values[0] == 0.202022475
+    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
 
 
 def test_dfs1_interp_like():
@@ -97,6 +99,14 @@ def test_read_dfs2_single_time():
 
     assert ds.n_timesteps == 1
     assert "time" not in ds.dims
+
+    ds = mikeio.read(
+        "tests/testdata/consistency/oresundHD.dfs2",
+        time=[-1],  # time as array, forces time dimension to be kept
+    )
+
+    assert ds.n_timesteps == 1
+    assert "time" in ds.dims
 
 
 def test_interp_x_y_dfs2():
@@ -157,3 +167,11 @@ def test_read_dfsu2d_single_time():
 
     assert ds.n_timesteps == 1
     assert "time" not in ds.dims
+
+    ds = mikeio.read(
+        "tests/testdata/consistency/oresundHD.dfsu",
+        time=[-1],
+    )
+
+    assert ds.n_timesteps == 1
+    assert "time" in ds.dims

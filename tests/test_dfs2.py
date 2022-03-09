@@ -339,9 +339,13 @@ def test_find_by_x_y():
 def test_interp_to_x_y():
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
-    assert ds.Elevation.interp(x=12.74792, y=55.865).values[0] == pytest.approx(
-        -42.69764538978391
-    )
+    x = 12.74792
+    y = 55.865
+    dai = ds.Elevation.interp(x=x, y=y)
+    assert dai.values[0] == pytest.approx(-42.69764538978391)
+
+    assert dai.geometry.x == x
+    assert dai.geometry.y == y
 
 
 def test_write_accumulated_datatype(tmpdir):

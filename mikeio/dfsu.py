@@ -779,6 +779,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             )
             time = time_steps
 
+        single_time_selected = np.isscalar(time) if time is not None else False
         time_steps = _valid_timesteps(dfs, time)
 
         if elements is None:
@@ -824,6 +825,9 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         t_seconds = np.zeros(n_steps, dtype=float)
 
+        if single_time_selected:
+            data = data[0]
+
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
@@ -845,7 +849,10 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     else:
                         d = d[elements]
 
-                data_list[item][i, ...] = d
+                if single_time_selected:
+                    data_list[item] = d
+                else:
+                    data_list[item][i] = d
 
             t_seconds[i] = itemdata.Time
 
@@ -853,7 +860,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         dfs.Close()
 
-        dims = ("time", "element")
+        dims = ("time", "element") if not single_time_selected else ("element",)
 
         if self.is_spectral:
             # TODO add something like ("time", "freq", "dir", "element")

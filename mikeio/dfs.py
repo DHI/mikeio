@@ -66,6 +66,7 @@ class _Dfs123(TimeSeries):
 
         time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps)
+        single_time_selected = np.isscalar(time) if time is not None else False
 
         if self._ndim == 1:
             shape = (nt, self._nx)
@@ -73,6 +74,9 @@ class _Dfs123(TimeSeries):
             shape = (nt, self._ny, self._nx)
         else:
             shape = (nt, self._nz, self._ny, self._nx)
+
+        if single_time_selected:
+            shape = shape[1:]
 
         data_list = [
             np.ndarray(shape=shape, dtype=self._dtype) for item in range(n_items)
@@ -93,7 +97,10 @@ class _Dfs123(TimeSeries):
                 if self._ndim == 2:
                     d = d.reshape(self._ny, self._nx)
 
-                data_list[item][i] = d
+                if single_time_selected:
+                    data_list[item] = d
+                else:
+                    data_list[item][i] = d
 
             t_seconds[i] = itemdata.Time
 

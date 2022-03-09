@@ -1374,10 +1374,15 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         if (x is not None) or (y is not None) or (z is not None):
             xy = [(x, y)]
 
-            interpolant = self.geometry.get_2d_interpolant(
-                xy, n_nearest=n_nearest, **kwargs
-            )
-            das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
+            if isinstance(
+                self.geometry, GeometryFM
+            ):  # TODO remove this when all geometries implements the same method
+                interpolant = self.geometry.get_2d_interpolant(
+                    xy, n_nearest=n_nearest, **kwargs
+                )
+                das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
+            else:
+                das = [da.interp(x=x, y=y) for da in self]
             ds = Dataset(das)
         else:
             ds = Dataset([da for da in self])

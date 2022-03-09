@@ -942,6 +942,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 xr_da = self.to_xarray()
                 dai = xr_da.interp(x=x, y=y).values
                 geometry = GeometryPoint2D(x=x, y=y)
+            elif isinstance(self.geometry, Grid1D):
+                if interpolant is None:
+                    interpolant = self.geometry.get_spatial_interpolant(xy)
+                dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
+                geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM):
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
@@ -1024,7 +1029,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     ) -> "DataArray":
 
         if isinstance(grid, Grid2D):
-            interpolant = self.geometry.get_2d_interpolant(grid.xy, **kwargs)
+            interpolant = self.geometry.get_spatial_interpolant(grid.xy, **kwargs)
             dai = self.geometry.interp2d(
                 self.to_numpy(), *interpolant, shape=(grid.ny, grid.nx)
             )

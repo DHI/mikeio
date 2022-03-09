@@ -211,10 +211,11 @@ def test_read_single_time_step():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = Dfsu(filename)
 
-    ds = dfs.read(items=[0, 3], time=[1])
+    ds = dfs.read(items=[0, 3], time=1)
+    assert "time" not in ds.dims
 
-    assert len(ds.time) == 1
-    assert ds.data[0].shape[0] == 1
+    ds = dfs.read(items=[0, 3], time=[1])  # this forces time dimension to be kept
+    assert "time" in ds.dims
 
 
 def test_read_single_time_step_scalar():
@@ -225,7 +226,7 @@ def test_read_single_time_step_scalar():
     ds = dfs.read(items=[0, 3], time=1)
 
     assert len(ds.time) == 1
-    assert ds.data[0].shape[0] == 1
+    assert ds.data[0].shape[0] == dfs.n_elements
 
 
 def test_read_single_time_step_outside_bounds_fails():
@@ -961,15 +962,15 @@ def test_read_temporal_subset_string():
     assert dfs.n_timesteps == 9
 
     # start,end
-    ds = dfs.read(time="1985-08-06 00:00,1985-08-06 12:00")
+    ds = dfs.read(time=slice("1985-08-06 00:00", "1985-08-06 12:00"))
     assert len(ds.time) == 3
 
     # start,
-    ds = dfs.read(time="1985-08-06 12:00,")
+    ds = dfs.read(time=slice("1985-08-06 12:00", None))
     assert len(ds.time) == 7
 
     # ,end
-    ds = dfs.read(time=",1985-08-06 11:30")
+    ds = dfs.read(time=slice(None, "1985-08-06 11:30"))
     assert len(ds.time) == 2
 
     # start=end
@@ -1141,7 +1142,7 @@ def test_interp2d():
     assert dsi.shape == (nt, 20 * 10)
 
     with pytest.raises(Exception):
-        dfs.get_2d_interpolant(g.xy, n_nearest=0)
+        dfs.get_spatial_interpolant(g.xy, n_nearest=0)
 
 
 def test_interp2d_radius():
