@@ -1,4 +1,6 @@
 
+**The documentation is currently being updated to reflect the upcoming version of MIKE IO 1.0**
+
 Requirements
 ------------
 
