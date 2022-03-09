@@ -1,5 +1,3 @@
-.. _getting_started:
-
 Getting started
 ###############
 
@@ -16,11 +14,13 @@ Resources
 Dataset
 *******
 The `Dataset <dataset.html#mikeio.Dataset>`_ is the common MIKE IO data structure for data read from dfs files. 
-All `read()` methods in MIKE IO returns a Dataset with the three main properties:
+The  `mikeio.read()` method returns a Dataset with a DataArray for each item.
 
-* items - a list of `ItemInfo <eum.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
+The DataArray have all the relevant information, e.g:
+
+* item - an `ItemInfo <eum.html#mikeio.eum.ItemInfo>`_ with name, type and unit
 * time - a pandas.DateTimeIndex with the time instances of the data
-* data - a list of NumPy arrays---one for each item
+* values - a NumPy array
 
 Read more on the `Dataset page <dataset.html>`_.
 
