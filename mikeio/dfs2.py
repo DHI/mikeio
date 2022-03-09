@@ -1,33 +1,47 @@
 import os
+from h11 import Data
 import numpy as np
 import warnings
 from mikecore.eum import eumUnit, eumQuantity
-from mikecore.DfsFile import DfsSimpleType
+from mikecore.DfsFile import DfsSimpleType, DfsFile
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.Projections import Cartography
 
 from .dfs import _Dfs123
+from .dataset import Dataset
 from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
 
 
-def write_dfs2(filename, ds, title=""):
+def write_dfs2(filename: str, ds: Dataset, title="") -> None:
     dfs = _write_dfs2_header(filename, ds, title)
     _write_dfs2_data(dfs, ds)
-    # dfs = DfsFileFactory.Dfs2FileOpen(filename)
 
 
-def _write_dfs2_header(filename, ds, title=""):
+def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
     builder = DfsBuilder.Create(title, "MIKE IO", 1)
     builder.SetDataType(0)
 
+    geometry: Grid2D = ds.geometry
+
     factory = DfsFactory()
-    _write_dfs2_spatial_axis(builder, factory, ds.geometry)
-    proj = ds.geometry.projection_string
-    origin = ds.geometry.origin
-    orient = ds.geometry.orientation
-    proj = factory.CreateProjectionGeoOrigin(proj, *origin, orient)
+    _write_dfs2_spatial_axis(builder, factory, geometry)
+    proj = geometry.projection_string
+    origin = geometry.origin
+    orient = geometry.orientation
+
+    if geometry.is_geo:
+        proj = factory.CreateProjectionGeoOrigin(proj, *origin, orient)
+    else:
+        cart: Cartography = Cartography.CreateProjOrigin(proj, *origin, orient)
+        proj = factory.CreateProjectionGeoOrigin(
+            wktProjectionString=geometry.projection,
+            lon0=cart.LonOrigin,
+            lat0=cart.LatOrigin,
+            orientation=cart.Orientation,
+        )
+
     builder.SetGeographicalProjection(proj)
 
     timestep_unit = TimeStepUnit.SECOND
@@ -70,7 +84,7 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
     )
 
 
-def _write_dfs2_data(dfs, ds):
+def _write_dfs2_data(dfs: DfsFile, ds: Dataset) -> None:
 
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
     t_rel = 0
@@ -113,8 +127,8 @@ class Dfs2(_Dfs123):
         if filename:
             self._read_dfs2_header()
 
-            if self._orientation == 0.0:
-                if self._projstr == "LONG/LAT":
+            if self._projstr == "LONG/LAT":
+                if self._orientation == 0.0:
                     self.geometry = Grid2D(
                         dx=self._dx,
                         dy=self._dy,
@@ -123,18 +137,16 @@ class Dfs2(_Dfs123):
                         y0=self._latitude,
                         projection=self._projstr,
                     )
-                else:  # TODO make sense of projected coordinates
-                    self.geometry = Grid2D(
-                        dx=self._dx,
-                        dy=self._dy,
-                        shape=(self._nx, self._ny),
-                        x0=self._x0,
-                        y0=self._y0,
-                        projection=self._projstr,
-                    )
             else:
-                pass
-                # self.geometry = RotatedGrid2D(shape=(self._nx, self._ny))
+                # TODO handle rotated grid
+                self.geometry = Grid2D(
+                    dx=self._dx,
+                    dy=self._dy,
+                    shape=(self._nx, self._ny),
+                    x0=self._x0,
+                    y0=self._y0,
+                    projection=self._projstr,
+                )
 
     def __repr__(self):
         out = ["<mikeio.Dfs2>"]
