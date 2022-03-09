@@ -75,21 +75,10 @@ Items:
 
 ### Reading dfs0 file into Pandas DataFrame
 ```python
->>>  from mikeio import Dfs0
->>>  dfs = Dfs0('simple.dfs0')
->>>  ts = dfs.to_dataframe()
+>>>  ds = mikeio.read('simple.dfs0')
+>>>  ts = ds.to_dataframe()
 ```
 
-### Write simple timeseries
-```python
->>>  from datetime import datetime
->>>  import numpy as np
->>>  from mikeio import Dfs0
->>>  data = [np.random.random([100])]
->>>  dfs = Dfs0()
->>>  dfs.write('simple.dfs0', data, start_time=datetime(2017, 1, 1), dt=60)
-
-```
 ### Write timeseries from dataframe
 ```python
 import pandas as pd
@@ -108,15 +97,13 @@ For more examples on timeseries data see this [notebook](notebooks/Dfs0%20-%20Ti
 
 ### Read dfs2 data
 ```python
->>>  from mikeio import Dfs2
->>> dfs = Dfs2("random.dfs2")
->>> ds = dfs.read()
+>>> ds = mikeio.read("gebco_sound.dfs2") 
 >>> ds
 <mikeio.Dataset>
-Dimensions: (3, 100, 2)
-Time: 2012-01-01 00:00:00 - 2012-01-01 00:00:24
+Dimensions: (time:1, y:264, x:216)
+Time: 2020-05-15 11:04:52 (time-invariant)
 Items:
-  0:  testing water level <Water Level> (meter)
+  0:  Elevation <Total Water Depth> (meter)
 ```
 
 ### Create dfs2
@@ -127,13 +114,10 @@ Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of d
 ### Read dfsu files
 ```python
 >>>  import matplotlib.pyplot as plt
->>>  from mikeio import Dfsu
->>>  dfs = Dfsu("HD.dfsu")
->>>  ds = dfs.read()
->>>  idx = dfs.find_nearest_element(x=608000, y=6907000)
->>>  plt.plot(ds.time, ds.data[0][:,idx])
+>>>  ds = mikeio.read("HD.dfsu")
+>>>  ds_stn = ds.sel(x=608000, y=6907000)
+>>>  ds_stn.plot()
 ```
-![Timeseries](https://raw.githubusercontent.com/DHI/mikeio/main/images/dfsu_ts.png)
 
 ```python
 >>>  from mikeio import Mesh
@@ -179,32 +163,43 @@ MIKE IO is tested extensively. **95%** total test coverage.
 
 See detailed test coverage report below:
 ```
-File                           Covered  Missed  %
--------------------------------------------------
-mikeio\__init__.py               40      1    98%
-mikeio\aggregator.py            103      9    91%
-mikeio\bin\__init__.py            0      0   100%
-mikeio\custom_exceptions.py      19      1    95%
-mikeio\dataset.py               272      3    99%
-mikeio\dfs.py                   206      7    97%
-mikeio\dfs0.py                  239     15    94%
-mikeio\dfs1.py                   48      2    96%
-mikeio\dfs2.py                  100      2    98%
-mikeio\dfs3.py                  201     79    61%
-mikeio\dfsu.py                 1337     57    96%
-mikeio\dfsutil.py                76      4    95%
-mikeio\dotnet.py                 63      4    94%
-mikeio\eum.py                  1230      3    99%
-mikeio\generic.py               228      2    99%
-mikeio\helpers.py                13      0   100%
-mikeio\interpolation.py          54      1    98%
-mikeio\spatial.py               279      4    99%
-mikeio\xyz.py                    12      0   100%
--------------------------------------------------
-TOTAL                          5082    229    95%
+---------- coverage: platform linux, python 3.10.2-final-0 -----------
+Name                              Stmts   Miss  Cover
+-----------------------------------------------------
+mikeio/__init__.py                   38      3    92%
+mikeio/aggregator.py                 98      9    91%
+mikeio/base.py                       26      5    81%
+mikeio/custom_exceptions.py          25      6    76%
+mikeio/data_utils.py                111     24    78%
+mikeio/dataarray.py                 686    101    85%
+mikeio/dataset.py                   695     87    87%
+mikeio/dfs0.py                      278     26    91%
+mikeio/dfs1.py                       61      6    90%
+mikeio/dfs2.py                      186     37    80%
+mikeio/dfs3.py                      202     77    62%
+mikeio/dfs.py                       269     21    92%
+mikeio/dfsu.py                      735     56    92%
+mikeio/dfsu_factory.py               41      2    95%
+mikeio/dfsu_layered.py              142     19    87%
+mikeio/dfsu_spectral.py              97      8    92%
+mikeio/dfsutil.py                    89      5    94%
+mikeio/eum.py                      1297      4    99%
+mikeio/generic.py                   399      8    98%
+mikeio/helpers.py                    16      5    69%
+mikeio/interpolation.py              63      2    97%
+mikeio/pfs.py                        95      0   100%
+mikeio/spatial/FM_geometry.py       867     80    91%
+mikeio/spatial/FM_utils.py          231     19    92%
+mikeio/spatial/__init__.py            4      0   100%
+mikeio/spatial/crs.py                50     25    50%
+mikeio/spatial/geometry.py           88     34    61%
+mikeio/spatial/grid_geometry.py     334     16    95%
+mikeio/spatial/spatial.py           278    181    35%
+mikeio/xyz.py                        12      0   100%
+-----------------------------------------------------
+TOTAL                              7513    866    88%
 
-=================== 335 passed ==================
-
+================ 454 passed in 41.76s =================
 ```
 
 ## Cloud enabled
