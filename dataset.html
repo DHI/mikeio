@@ -164,9 +164,9 @@
         <!-- ipynb file if we had a myst markdown file -->
         
         <!-- Download raw file -->
-        <a class="dropdown-buttons" href="_sources/dataset.rst.txt"><button type="button"
+        <a class="dropdown-buttons" href="_sources/dataset.md.txt"><button type="button"
                 class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
-                data-placement="left">.rst</button></a>
+                data-placement="left">.md</button></a>
         <!-- Download PDF via print -->
         <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
                 onclick="printPdf(this)" data-toggle="tooltip" data-placement="left">.pdf</button>
@@ -219,6 +219,11 @@
    Dataset API
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#dataarray-api">
+   DataArray API
+  </a>
+ </li>
 </ul>
 
             </nav>
@@ -264,6 +269,11 @@
    Dataset API
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#dataarray-api">
+   DataArray API
+  </a>
+ </li>
 </ul>
 
                         </nav>
@@ -274,30 +284,29 @@
               <div>
                 
   <div class="section" id="dataset">
-<span id="id1"></span><h1>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h1>
-<p>The <a class="reference external" href="#mikeio.Dataset">Dataset</a> is the common MIKE IO data structure
+<h1>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h1>
+<p>The <span class="xref myst">Dataset</span> is the common MIKE IO data structure
 for data from dfs files.
-All <cite>read()</cite> methods in MIKE IO return a Dataset with three main properties:</p>
+The <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code> methods returns a Dataset as a container of DataArrays (Dfs items)</p>
+<p>Each DataArray have the following properties:</p>
 <ul class="simple">
-<li><p><strong>items</strong> - a list of <a class="reference external" href="eum.html#mikeio.eum.ItemInfo">ItemInfo</a> with name, type and unit of each item</p></li>
+<li><p><strong>item</strong> - an  <code class="docutils literal notranslate"><span class="pre">ItemInfo</span> <span class="pre">&lt;eum.html#mikeio.eum.ItemInfo&gt;</span></code> with name, type and unit</p></li>
 <li><p><strong>time</strong> - a pandas.DateTimeIndex with the time instances of the data</p></li>
-<li><p><strong>data</strong> - a list of NumPy arrays—one for each item</p></li>
+<li><p><strong>values</strong> - a NumPy array</p></li>
 </ul>
-<p>The j’th array data[j] in data corresponds to the j’th item
-and it’s first axis is the time axis.
-The number of consecutive axes depend on the data type.</p>
 <p>Use Dataset’s string representation to get an overview of the Dataset</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;testdata/HD2D.dfsu&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
 <span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (9, 884)</span>
-<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
+<span class="go">Geometry: Dfsu2D</span>
+<span class="go">Dimensions: (time:9, element:884)</span>
+<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)</span>
 <span class="go">Items:</span>
-<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
+<span class="go">  0:  Surface elevation &lt;Surface Elevation&gt; (meter)        </span>
+<span class="go">  1:  U velocity &lt;u velocity component&gt; (meter per sec)    </span>
+<span class="go">  2:  V velocity &lt;v velocity component&gt; (meter per sec)    </span>
+<span class="go">  3:  Current speed &lt;Current Speed&gt; (meter per sec)   </span>
 </pre></div>
 </div>
 <div class="section" id="selecting-items">
@@ -310,6 +319,14 @@ done with:</p>
 <li><p>ds[[0]] - returns a new Dataset with “itemA”</p></li>
 <li><p>ds[0] - returns the data of “itemA”</p></li>
 </ul>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">Surface_elevation</span>
+<span class="go">&lt;mikeio.DataArray&gt;</span>
+<span class="go">Name: Surface elevation</span>
+<span class="go">Geometry: Dfsu2D</span>
+<span class="go">Dimensions: (time:9, element:884)</span>
+<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)</span>
+</pre></div>
+</div>
 <p>Negative index e.g. ds[-1] can also be used to select from the end.
 Several items (“itemA” at 0 and “itemC” at 2) can be selected with the notation:</p>
 <ul class="simple">
@@ -320,7 +337,7 @@ Several items (“itemA” at 0 and “itemC” at 2) can be selected with the n
 </div>
 <div class="section" id="selecting-timesteps-or-elements">
 <h2>Selecting timesteps or elements<a class="headerlink" href="#selecting-timesteps-or-elements" title="Permalink to this headline">¶</a></h2>
-<p>The <a class="reference external" href="#mikeio.Dataset.isel">isel()</a> method can be used for selecting specific timesteps or elements across a Dataset.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">isel()</span> <span class="pre">&lt;#mikeio.Dataset.isel&gt;</span></code>_ method can be used for selecting specific timesteps or elements across a Dataset.</p>
 <ul class="simple">
 <li><p>ds.isel([0, 1], axis=0) - selects timestep 0 and 1</p></li>
 <li><p>ds.isel([3,78], axis=1) - selects element 3 and 78</p></li>
@@ -331,13 +348,14 @@ Several items (“itemA” at 0 and “itemC” at 2) can be selected with the n
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="p">[</span><span class="s2">&quot;1985-8-7&quot;</span><span class="p">:]</span>
 <span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (2, 884)</span>
-<span class="go">Time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00</span>
+<span class="go">Geometry: Dfsu2D</span>
+<span class="go">Dimensions: (time:2, element:884)</span>
+<span class="go">Time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)</span>
 <span class="go">Items:</span>
-<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
+<span class="go">  0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
+<span class="go">  1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
+<span class="go">  2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
+<span class="go">  3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 </pre></div>
 </div>
 </div>
@@ -362,23 +380,23 @@ Several items (“itemA” at 0 and “itemC” at 2) can be selected with the n
 <p>Dataset has several useful methods for working with data,
 including different ways of <em>selecting</em> data:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="#mikeio.Dataset.head">head()</a> - Return the first n timesteps</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.tail">tail()</a> - Return the last n timesteps</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.thin">thin()</a> - Return every n:th timesteps</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.isel">isel()</a> - Select subset along an axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">head()</span> <span class="pre">&lt;#mikeio.Dataset.head&gt;</span></code>_ - Return the first n timesteps</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tail()</span> <span class="pre">&lt;#mikeio.Dataset.tail&gt;</span></code>_ - Return the last n timesteps</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">thin()</span> <span class="pre">&lt;#mikeio.Dataset.thin&gt;</span></code>_ - Return every n:th timesteps</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">isel()</span> <span class="pre">&lt;#mikeio.Dataset.isel&gt;</span></code>_ - Select subset along an axis</p></li>
 </ul>
 <p><em>Aggregations</em> along an axis:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="#mikeio.Dataset.mean">mean()</a> - Mean value along an axis</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.nanmean">nanmean()</a> - Mean value along an axis (NaN removed)</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.max">max()</a> - Max value along an axis</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.nanmax">nanmax()</a> - Max value along an axis (NaN removed)</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.min">min()</a> - Min value along an axis</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.nanmin">nanmin()</a> - Min value along an axis (NaN removed)</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.average">average()</a> - Compute the weighted average along the specified axis.</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.aggregate">aggregate()</a> - Aggregate along an axis</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.quantile">quantile()</a> - Quantiles along an axis</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.nanquantile">nanquantile()</a> - Quantiles along an axis (NaN ignored)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mean()</span> <span class="pre">&lt;#mikeio.Dataset.mean&gt;</span></code>_ - Mean value along an axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nanmean()</span> <span class="pre">&lt;#mikeio.Dataset.nanmean&gt;</span></code>_ - Mean value along an axis (NaN removed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max()</span> <span class="pre">&lt;#mikeio.Dataset.max&gt;</span></code>_ - Max value along an axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nanmax()</span> <span class="pre">&lt;#mikeio.Dataset.nanmax&gt;</span></code>_ - Max value along an axis (NaN removed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">min()</span> <span class="pre">&lt;#mikeio.Dataset.min&gt;</span></code>_ - Min value along an axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nanmin()</span> <span class="pre">&lt;#mikeio.Dataset.nanmin&gt;</span></code>_ - Min value along an axis (NaN removed)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">average()</span> <span class="pre">&lt;#mikeio.Dataset.average&gt;</span></code>_ - Compute the weighted average along the specified axis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">aggregate()</span> <span class="pre">&lt;#mikeio.Dataset.aggregate&gt;</span></code>_ - Aggregate along an axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quantile()</span> <span class="pre">&lt;#mikeio.Dataset.quantile&gt;</span></code>_ - Quantiles along an axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nanquantile()</span> <span class="pre">&lt;#mikeio.Dataset.nanquantile&gt;</span></code>_ - Quantiles along an axis (NaN ignored)</p></li>
 </ul>
 <p><em>Mathematical operations</em> +, - and * with numerical values:</p>
 <ul class="simple">
@@ -393,26 +411,22 @@ including different ways of <em>selecting</em> data:</p>
 </ul>
 <p>Other methods that also return a Dataset:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="#mikeio.Dataset.interp_time">interp_time()</a> - Temporal interpolation (see <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb">Time interpolation notebook</a>)</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.dropna">dropna()</a> - Remove time steps where all items are NaN</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.squeeze">squeeze()</a> - Remove axes of length 1</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">interp_time()</span> <span class="pre">&lt;#mikeio.Dataset.interp_time&gt;</span></code>_ - Temporal interpolation (see <code class="docutils literal notranslate"><span class="pre">Time</span> <span class="pre">interpolation</span> <span class="pre">notebook</span> <span class="pre">&lt;https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb&gt;</span></code>_)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dropna()</span> <span class="pre">&lt;#mikeio.Dataset.dropna&gt;</span></code>_ - Remove time steps where all items are NaN</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">squeeze()</span> <span class="pre">&lt;#mikeio.Dataset.squeeze&gt;</span></code>_ - Remove axes of length 1</p></li>
 </ul>
 <p><em>Conversion</em> methods:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="#mikeio.Dataset.to_dataframe">to_dataframe()</a> - Convert Dataset to a Pandas DataFrame</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.to_dfs0">to_dfs0()</a> - Write Dataset to a Dfs0 file</p></li>
-</ul>
-<p><em>Combining datasets</em>:</p>
-<ul class="simple">
-<li><p><a class="reference external" href="#mikeio.Dataset.combine">Dataset.combine()</a> - Combine two or more datasets either along the time axis (concatenation) or along the item axis.</p></li>
-<li><p><a class="reference external" href="#mikeio.Dataset.concat">concat()</a> - Concatenate this Dataset with data from other Dataset, similar to Dataset.combine.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_dataframe()</span> <span class="pre">&lt;#mikeio.Dataset.to_dataframe&gt;</span></code>_ - Convert Dataset to a Pandas DataFrame</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_xarray()</span> <span class="pre">&lt;#mikeio.Dataset.to_xarray&gt;</span></code>_ - Convert Dataset to a xarray dataset (great for Dfs2)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_dfs()</span> <span class="pre">&lt;#mikeio.Dataset.to_dfs&gt;</span></code>_ - Write Dataset to a Dfs file</p></li>
 </ul>
 </div>
 <div class="section" id="dataset-api">
 <h2>Dataset API<a class="headerlink" href="#dataset-api" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Dataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="pre">mikeio.eum.ItemInfo</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="eum.html#mikeio.eum.EUMType" title="mikeio.eum.EUMType"><span class="pre">mikeio.eum.EUMType</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">mikeio.spatial.geometry._Geometry</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.aggregate">
 <span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis='time'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func=&lt;function</span> <span class="pre">nanmean&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.aggregate" title="Permalink to this definition">¶</a></dt>
@@ -473,6 +487,11 @@ including different ways of <em>selecting</em> data:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Remove</span> <span class="pre">all</span> <span class="pre">items</span> <span class="pre">from</span> <span class="pre">D.</span></span></span><a class="headerlink" href="#mikeio.Dataset.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.combine">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">datasets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.combine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Combine n Datasets either along items or time axis</p>
@@ -520,14 +539,11 @@ including different ways of <em>selecting</em> data:</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.concat">
-<span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.concat" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">concat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenate this Dataset with data from other Dataset</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – Other dataset to concatenate with</p></li>
-<li><p><strong>inplace</strong> (<em>bool</em><em>, </em><em>optional</em>) – Default is to return a new dataset</p></li>
-</ul>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – Other dataset to concatenate with</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>concatenated dataset</p>
@@ -556,12 +572,18 @@ including different ways of <em>selecting</em> data:</p>
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mikeio.Dataset.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data as list of numpy arrays</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dataset.deletevalue">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dataset.deletevalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dataset</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="mikeio.Dataset.data">
-<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#mikeio.Dataset.data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#id0" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data, potentially multivariate and multiple spatial dimensions</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
@@ -658,6 +680,12 @@ similar to a dictionary.</p>
 <dd><p>Generate descriptive statistics by wrapping pandas describe()</p>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.dims">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dims</span></span><a class="headerlink" href="#mikeio.Dataset.dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Named data dimensions of each DataArray</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.dropna">
 <span class="sig-name descname"><span class="pre">dropna</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.dropna" title="Permalink to this definition">¶</a></dt>
@@ -673,18 +701,38 @@ similar to a dictionary.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.flipud">
 <span class="sig-name descname"><span class="pre">flipud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.flipud" title="Permalink to this definition">¶</a></dt>
-<dd><p>Flip dataset updside down</p>
+<dd><p>Flip dataset upside down</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.geometry">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry</span></span><a class="headerlink" href="#mikeio.Dataset.geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Geometry of each DataArray</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.head">
-<span class="sig-name descname"><span class="pre">head</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.head" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the first n timesteps</p>
+<dt class="sig sig-object py" id="mikeio.Dataset.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">D[k]</span> <span class="pre">if</span> <span class="pre">k</span> <span class="pre">in</span> <span class="pre">D,</span> <span class="pre">else</span> <span class="pre">d.</span>&#160; <span class="pre">d</span> <span class="pre">defaults</span> <span class="pre">to</span> <span class="pre">None.</span></span></span><a class="headerlink" href="#mikeio.Dataset.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.insert">
+<span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert DataArray in a specific position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>int</em>) – index in Dataset where DataArray should be inserted</p></li>
+<li><p><strong>value</strong> (<a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray"><em>DataArray</em></a>) – DataArray to be inserted, must comform with with existing DataArrays
+and must have a unique item name</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.interp_time">
-<span class="sig-name descname"><span class="pre">interp_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.interp_time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interp_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.interp_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Temporal interpolation</p>
 <p>Wrapper of <cite>scipy.interpolate.interp</cite></p>
 <dl class="field-list simple">
@@ -766,6 +814,17 @@ similar to a dictionary.</p>
 </pre></div>
 </div>
 </dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="id1">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
+<dd><p>ItemInfo for each of the DataArrays as a list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">a</span> <span class="pre">set-like</span> <span class="pre">object</span> <span class="pre">providing</span> <span class="pre">a</span> <span class="pre">view</span> <span class="pre">on</span> <span class="pre">D's</span> <span class="pre">keys</span></span></span><a class="headerlink" href="#mikeio.Dataset.keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.max">
@@ -850,13 +909,19 @@ similar to a dictionary.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dataset.n_items">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dataset.n_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of items</p>
+<dd><p>Number of items/DataArrays, equivalent to len()</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dataset.n_timesteps">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dataset.n_timesteps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of time steps</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><a class="headerlink" href="#mikeio.Dataset.names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of each of the DataArrays as a list</p>
 </dd></dl>
 
 <dl class="py method">
@@ -940,6 +1005,28 @@ which must be between 0 and 1 inclusive.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dataset.ndim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ndim</span></span><a class="headerlink" href="#mikeio.Dataset.ndim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of data dimensions of each DataArray</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">v,</span> <span class="pre">remove</span> <span class="pre">specified</span> <span class="pre">key</span> <span class="pre">and</span> <span class="pre">return</span> <span class="pre">the</span> <span class="pre">corresponding</span> <span class="pre">value.</span></span></span><a class="headerlink" href="#mikeio.Dataset.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>If key is not found, d is returned if given, otherwise KeyError is raised.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.popitem">
+<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.popitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pop first DataArray from Dataset</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#mikeio.Dataset.pop" title="mikeio.Dataset.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a></p>
+</div>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.quantile">
 <span class="sig-name descname"><span class="pre">quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.quantile" title="Permalink to this definition">¶</a></dt>
@@ -975,10 +1062,39 @@ which must be between 0 and 1 inclusive.</p></li>
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove DataArray from Dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>int</em><em>, </em><em>str</em>) – index or name of DataArray to be remove from Dataset</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#mikeio.Dataset.pop" title="mikeio.Dataset.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.sel">
+<span class="sig-name descname"><span class="pre">sel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a></span></span><a class="headerlink" href="#mikeio.Dataset.sel" title="Permalink to this definition">¶</a></dt>
+<dd><p class="rubric">Examples</p>
+<p>ds.sel(layer=’bottom’)
+ds.sel(x=1.0,y=55.0)
+ds.sel(area=[1.,12., 2., 15.])</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.setdefault">
+<span class="sig-name descname"><span class="pre">setdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">D.get(k,d),</span> <span class="pre">also</span> <span class="pre">set</span> <span class="pre">D[k]=d</span> <span class="pre">if</span> <span class="pre">k</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">D</span></span></span><a class="headerlink" href="#mikeio.Dataset.setdefault" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dataset.shape">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#mikeio.Dataset.shape" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shape of each item</p>
+<dd><p>Shape of each DataArray</p>
 </dd></dl>
 
 <dl class="py method">
@@ -996,18 +1112,6 @@ which must be between 0 and 1 inclusive.</p></li>
 <dt class="sig sig-object py" id="mikeio.Dataset.start_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dataset.start_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>First time instance (as datetime)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.tail">
-<span class="sig-name descname"><span class="pre">tail</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.tail" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the last n timesteps</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.thin">
-<span class="sig-name descname"><span class="pre">thin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">step</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.thin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return every n:th timesteps</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1046,11 +1150,329 @@ least two time instances); otherwise None</p>
 <dt class="sig sig-object py" id="mikeio.Dataset.to_numpy">
 <span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_numpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stack data to a single ndarray with shape (n_items, n_timesteps, …)</p>
+<p>Note: the output will be</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <span class="optional">]</span><em class="sig-param"><span class="n"><span class="pre">**F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Update</span> <span class="pre">D</span> <span class="pre">from</span> <span class="pre">mapping/iterable</span> <span class="pre">E</span> <span class="pre">and</span> <span class="pre">F.</span></span></span><a class="headerlink" href="#mikeio.Dataset.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">an</span> <span class="pre">object</span> <span class="pre">providing</span> <span class="pre">a</span> <span class="pre">view</span> <span class="pre">on</span> <span class="pre">D's</span> <span class="pre">values</span></span></span><a class="headerlink" href="#mikeio.Dataset.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="dataarray-api">
+<h2>DataArray API<a class="headerlink" href="#dataarray-api" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.DataArray">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">DataArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="pre">mikeio.eum.ItemInfo</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geometry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">mikeio.spatial.geometry._Geometry</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dims</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.DataArray" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.aggregate">
+<span class="sig-name descname"><span class="pre">aggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis='time'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func=&lt;function</span> <span class="pre">nanmean&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.aggregate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregate along an axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
+<li><p><strong>func</strong> (<em>function</em><em>, </em><em>optional</em>) – default np.nanmean</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataarray with aggregated values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.DataArray.max" title="mikeio.DataArray.max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">max</span></code></a></dt><dd><p>Max values</p>
+</dd>
+<dt><a class="reference internal" href="#mikeio.DataArray.nanmax" title="mikeio.DataArray.nanmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmax</span></code></a></dt><dd><p>Max values with NaN values removed</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.DataArray.end_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.DataArray.end_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last time instance (as datetime)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.flipud">
+<span class="sig-name descname"><span class="pre">flipud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.flipud" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flip upside down</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.interp_time">
+<span class="sig-name descname"><span class="pre">interp_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.DataArray.interp_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporal interpolation</p>
+<p>Wrapper of <cite>scipy.interpolate.interp</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dt</strong> (<em>float</em><em> or </em><em>pd.DatetimeIndex</em><em> or </em><em>Dataset/DataArray</em>) – output timestep in seconds or new time axis</p></li>
+<li><p><strong>method</strong> (<em>str</em><em> or </em><em>int</em><em>, </em><em>optional</em>) – Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.</p></li>
+<li><p><strong>extrapolate</strong> (<em>bool</em><em>, </em><em>optional</em>) – Default True. If False, a ValueError is raised any time interpolation is attempted on a value outside of the range of x (where extrapolation is necessary). If True, out of bounds values are assigned fill_value</p></li>
+<li><p><strong>fill_value</strong> (<em>float</em><em> or </em><em>array-like</em><em>, </em><em>optional</em>) – Default NaN. this value will be used to fill in for points outside of the time range.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.DataArray.is_equidistant">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_equidistant</span></span><a class="headerlink" href="#mikeio.DataArray.is_equidistant" title="Permalink to this definition">¶</a></dt>
+<dd><p>Is Dataset equidistant in time?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.isel">
+<span class="sig-name descname"><span class="pre">isel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.DataArray.isel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select subset along an axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<em>int</em><em>, </em><em>scalar</em><em> or </em><em>array_like</em>) – </p></li>
+<li><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time”, by default 1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>data with subset</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.max">
+<span class="sig-name descname"><span class="pre">max</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max value along an axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with max values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.DataArray.nanmax" title="mikeio.DataArray.nanmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmax</span></code></a></dt><dd><p>Max values with NaN values removed</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.mean">
+<span class="sig-name descname"><span class="pre">mean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean value along an axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with mean values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.DataArray.nanmean" title="mikeio.DataArray.nanmean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmean</span></code></a></dt><dd><p>Mean values with NaN values removed</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.min">
+<span class="sig-name descname"><span class="pre">min</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Min value along an axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with min values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.DataArray.nanmin" title="mikeio.DataArray.nanmin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmin</span></code></a></dt><dd><p>Min values with NaN values removed</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.DataArray.n_timesteps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.DataArray.n_timesteps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of time steps</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.nanmax">
+<span class="sig-name descname"><span class="pre">nanmax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.nanmax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Max value along an axis (NaN removed)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with max values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.DataArray.nanmax" title="mikeio.DataArray.nanmax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmax</span></code></a></dt><dd><p>Max values with NaN values removed</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.nanmean">
+<span class="sig-name descname"><span class="pre">nanmean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.nanmean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mean value along an axis (NaN removed)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with mean values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.DataArray.mean" title="mikeio.DataArray.mean"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean</span></code></a></dt><dd><p>Mean values</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.nanmin">
+<span class="sig-name descname"><span class="pre">nanmin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.nanmin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Min value along an axis (NaN removed)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array with min values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.DataArray.nanmin" title="mikeio.DataArray.nanmin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanmin</span></code></a></dt><dd><p>Min values with NaN values removed</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.quantile">
+<span class="sig-name descname"><span class="pre">quantile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.DataArray.quantile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the q-th quantile of the data along the specified axis.</p>
+<p>Wrapping np.quantile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+which must be between 0 and 1 inclusive.</p></li>
+<li><p><strong>axis</strong> (<em>(</em><em>int</em><em>, </em><em>str</em><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>data with quantile values</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.25</span><span class="p">,</span><span class="mf">0.75</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="mf">0.01</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.99</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;space&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">nanquantile</span></code></dt><dd><p>quantile with NaN values ignored</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.squeeze">
+<span class="sig-name descname"><span class="pre">squeeze</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.squeeze" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove axes of length 1</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.DataArray.start_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.DataArray.start_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>First time instance (as datetime)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.DataArray.timestep">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.DataArray.timestep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Time step in seconds if equidistant (and at
+least two time instances); otherwise None</p>
 </dd></dl>
 
 </dd></dl>
@@ -1085,9 +1507,9 @@ least two time instances); otherwise None</p>
     <footer class="footer">
   <p>
     
-      By Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard<br/>
+      By Henrik Andersson, Jesper Mariegaard, Marc Ridler<br/>
     
-        &copy; Copyright 2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard.<br/>
+        &copy; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.<br/>
   </p>
 </footer>
 </main>

@@ -162,9 +162,9 @@
         <!-- ipynb file if we had a myst markdown file -->
         
         <!-- Download raw file -->
-        <a class="dropdown-buttons" href="_sources/intro.rst.txt"><button type="button"
+        <a class="dropdown-buttons" href="_sources/intro.md.txt"><button type="button"
                 class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
-                data-placement="left">.rst</button></a>
+                data-placement="left">.md</button></a>
         <!-- Download PDF via print -->
         <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
                 onclick="printPdf(this)" data-toggle="tooltip" data-placement="left">.pdf</button>
@@ -272,42 +272,42 @@
               <div>
                 
   <div class="section" id="requirements">
-<span id="intro"></span><h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
+<h1>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p>Windows or Linux operating system</p></li>
 <li><p>Python x64 3.7 - 3.10</p></li>
-<li><p>(Windows) <a class="reference external" href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads">VC++ redistributables</a> (already installed if you have MIKE)</p></li>
+<li><p>(Windows) <code class="docutils literal notranslate"><span class="pre">VC++</span> <span class="pre">redistributables</span> <span class="pre">&lt;https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads&gt;</span></code>_ (already installed if you have MIKE)</p></li>
 </ul>
 </div>
 <div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div><p>pip install mikeio</p>
-</div></blockquote>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install mikeio
+</pre></div>
+</div>
 </div>
 <div class="section" id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dfs0</span>
-<span class="gp">&gt;&gt;&gt; </span> <span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>&gt;&gt;&gt;  import
+&gt;&gt;&gt;  ds = mikeio.read(&#39;simple.dfs0&#39;)
+&gt;&gt;&gt;  df = ds.to_dataframe()
 </pre></div>
 </div>
-<p>Read more in the <a class="reference external" href="getting_started.html">getting started guide</a>.</p>
+<p>Read more in the <code class="docutils literal notranslate"><span class="pre">getting</span> <span class="pre">started</span> <span class="pre">guide</span> <span class="pre">&lt;getting_started.html&gt;</span></code>_.</p>
 </div>
 <div class="section" id="notebooks">
 <h1>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/">List of all notebooks</a></p>
+<p><code class="docutils literal notranslate"><span class="pre">List</span> <span class="pre">of</span> <span class="pre">all</span> <span class="pre">notebooks</span> <span class="pre">&lt;https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/&gt;</span></code>_</p>
 <ul class="simple">
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb">Dfs0</a></p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb">Dfsu basic</a></p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb">Create Dfs2 from netCDF</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dfs0</span> <span class="pre">&lt;https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb&gt;</span></code>_</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Dfsu</span> <span class="pre">basic</span> <span class="pre">&lt;https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb&gt;</span></code>_</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">Dfs2</span> <span class="pre">from</span> <span class="pre">netCDF</span> <span class="pre">&lt;https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb&gt;</span></code>_</p></li>
 </ul>
 </div>
 <div class="section" id="where-can-i-get-help">
 <h1>Where can I get help?<a class="headerlink" href="#where-can-i-get-help" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><p>New ideas and feature requests - <a class="reference external" href="http://github.com/DHI/mikeio/discussions">GitHub Discussions</a></p></li>
-<li><p>Bugs - <a class="reference external" href="http://github.com/DHI/mikeio/issues">GitHub Issues</a></p></li>
+<li><p>New ideas and feature requests - <code class="docutils literal notranslate"><span class="pre">GitHub</span> <span class="pre">Discussions</span> <span class="pre">&lt;http://github.com/DHI/mikeio/discussions&gt;</span></code>_</p></li>
+<li><p>Bugs - <code class="docutils literal notranslate"><span class="pre">GitHub</span> <span class="pre">Issues</span> <span class="pre">&lt;http://github.com/DHI/mikeio/issues&gt;</span></code>_</p></li>
 </ul>
 </div>
 
@@ -324,9 +324,9 @@
     <footer class="footer">
   <p>
     
-      By Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard<br/>
+      By Henrik Andersson, Jesper Mariegaard, Marc Ridler<br/>
     
-        &copy; Copyright 2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard.<br/>
+        &copy; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.<br/>
   </p>
 </footer>
 </main>

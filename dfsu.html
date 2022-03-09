@@ -429,7 +429,7 @@ same base class and have the same core functionality.</p>
 <td><p>Calculate the horizontal area of each element.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Mesh.elements_to_geometry" title="mikeio.Mesh.elements_to_geometry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.elements_to_geometry</span></code></a></p></td>
-<td><p>export elements to new flexible file geometry</p></td>
+<td><p>export a selection of elements to new flexible file geometry</p></td>
 </tr>
 </tbody>
 </table>
@@ -455,8 +455,8 @@ the Mesh object has the following methods and properties:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Mesh.write" title="mikeio.Mesh.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.write</span></code></a></p></td>
 <td><p>write mesh to file (will overwrite if file exists)</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Mesh.plot_boundary_nodes" title="mikeio.Mesh.plot_boundary_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.plot_boundary_nodes</span></code></a></p></td>
-<td><p>Plot mesh boundary nodes and their codes</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.plot_boundary_nodes</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Mesh.zn" title="mikeio.Mesh.zn"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.zn</span></code></a></p></td>
 <td><p>Static bathymetry values (depth) at nodes</p></td>
@@ -476,30 +476,6 @@ See the <a class="reference external" href="https://nbviewer.jupyter.org/github/
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.deletevalue" title="mikeio.Dfsu.deletevalue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.deletevalue</span></code></a></p></td>
-<td><p>File delete value</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.n_items" title="mikeio.Dfsu.n_items"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.n_items</span></code></a></p></td>
-<td><p>Number of items</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.items" title="mikeio.Dfsu.items"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.items</span></code></a></p></td>
-<td><p>List of items</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.n_timesteps" title="mikeio.Dfsu.n_timesteps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.n_timesteps</span></code></a></p></td>
-<td><p>Number of time steps</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.start_time" title="mikeio.Dfsu.start_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.start_time</span></code></a></p></td>
-<td><p>File start time</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.end_time" title="mikeio.Dfsu.end_time"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.end_time</span></code></a></p></td>
-<td><p>File end time</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.timestep" title="mikeio.Dfsu.timestep"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.timestep</span></code></a></p></td>
-<td><p>Time step size in seconds</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.is_2d" title="mikeio.Dfsu.is_2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.is_2d</span></code></a></p></td>
-<td><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p></td>
-</tr>
 </tbody>
 </table>
 <p>Apart from the common flexible file functionality, the Dfsu has the following <em>methods</em>:</p>
@@ -509,21 +485,6 @@ See the <a class="reference external" href="https://nbviewer.jupyter.org/github/
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.read" title="mikeio.Dfsu.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.read</span></code></a></p></td>
-<td><p>Read data from a dfsu file</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.write" title="mikeio.Dfsu.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.write</span></code></a></p></td>
-<td><p>Write a new dfsu file</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.write_header" title="mikeio.Dfsu.write_header"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.write_header</span></code></a></p></td>
-<td><p>Write the header of a new dfsu file (for writing huge files)</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.close" title="mikeio.Dfsu.close"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.close</span></code></a></p></td>
-<td><p>Finalize write for a dfsu file opened with <cite>write(...,keep_open=True)</cite></p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.extract_track" title="mikeio.Dfsu.extract_track"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.extract_track</span></code></a></p></td>
-<td><p>Extract track data from a dfsu file</p></td>
-</tr>
 </tbody>
 </table>
 <p>See the <a class="reference external" href="#mikeio.Dfsu">Dfsu API specification</a> below for a detailed description.
@@ -558,36 +519,6 @@ but the following values types exists:</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.n_layers" title="mikeio.Dfsu.n_layers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.n_layers</span></code></a></p></td>
-<td><p>Maximum number of layers</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.n_sigma_layers" title="mikeio.Dfsu.n_sigma_layers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.n_sigma_layers</span></code></a></p></td>
-<td><p>Number of sigma layers</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.n_z_layers" title="mikeio.Dfsu.n_z_layers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.n_z_layers</span></code></a></p></td>
-<td><p>Maximum number of z-layers</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.layer_ids" title="mikeio.Dfsu.layer_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.layer_ids</span></code></a></p></td>
-<td><p>The layer number (0=bottom, 1, 2, ...) for each 3d element</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.top_elements" title="mikeio.Dfsu.top_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.top_elements</span></code></a></p></td>
-<td><p>List of 3d element ids of surface layer</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.bottom_elements" title="mikeio.Dfsu.bottom_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.bottom_elements</span></code></a></p></td>
-<td><p>List of 3d element ids of bottom layer</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.n_layers_per_column" title="mikeio.Dfsu.n_layers_per_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.n_layers_per_column</span></code></a></p></td>
-<td><p>List of number of layers for each column</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.geometry2d" title="mikeio.Dfsu.geometry2d"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.geometry2d</span></code></a></p></td>
-<td><p>The 2d geometry for a 3d object</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.e2_e3_table" title="mikeio.Dfsu.e2_e3_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.e2_e3_table</span></code></a></p></td>
-<td><p>The 2d-to-3d element connectivity table for a 3d object</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.elem2d_ids" title="mikeio.Dfsu.elem2d_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.elem2d_ids</span></code></a></p></td>
-<td><p>The associated 2d element id for each 3d element</p></td>
-</tr>
 </tbody>
 </table>
 <p>Apart from the basic dfsu functionality, layered dfsu have the below additional <em>methods</em>:</p>
@@ -597,15 +528,6 @@ but the following values types exists:</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.get_layer_elements" title="mikeio.Dfsu.get_layer_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.get_layer_elements</span></code></a></p></td>
-<td><p>3d element ids for one (or more) specific layer(s)</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Dfsu.find_nearest_profile_elements" title="mikeio.Dfsu.find_nearest_profile_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.find_nearest_profile_elements</span></code></a></p></td>
-<td><p>Find 3d elements of profile nearest to (x,y) coordinates</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Dfsu.plot_vertical_profile" title="mikeio.Dfsu.plot_vertical_profile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Dfsu.plot_vertical_profile</span></code></a></p></td>
-<td><p>Plot unstructured vertical profile</p></td>
-</tr>
 </tbody>
 </table>
 <div class="admonition warning">
@@ -621,868 +543,8 @@ From release 0.10 all ids are 0-based.</p>
 <h2>Dfsu API<a class="headerlink" href="#dfsu-api" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Dfsu">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfsu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float64'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.append" title="Permalink to this definition">¶</a></dt>
-<dd><p>Append to a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>]</em>) – </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.bottom_elements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bottom_elements</span></span><a class="headerlink" href="#mikeio.Dfsu.bottom_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of 3d element ids of bottom layer</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.boundary_codes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_codes</span></span><a class="headerlink" href="#mikeio.Dfsu.boundary_codes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Unique list of boundary codes</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.boundary_polylines">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.Dfsu.boundary_polylines" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lists of closed polylines defining domain outline</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.calc_Hm0_from_spectrum">
-<span class="sig-name descname"><span class="pre">calc_Hm0_from_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.calc_Hm0_from_spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate significant wave height (Hm0) from spectrum</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spectrum</strong> (<em>np.ndarray</em>) – frequency or direction-frequency spectrum</p></li>
-<li><p><strong>tail</strong> (<em>bool</em><em>, </em><em>optional</em>) – Should a parametric spectral tail be added in the computations? by default True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>significant wave height values</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.calc_element_coordinates">
-<span class="sig-name descname"><span class="pre">calc_element_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.calc_element_coordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the coordinates of the center of each element.</p>
-<p>Only necessary for dynamic vertical coordinates,
-otherwise use the property <em>element_coordinates</em> instead</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>np.array</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – element ids of selected elements</p></li>
-<li><p><strong>zn</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – only the z-coodinates of the nodes</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">elem_ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_profile_elements</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Z coordinate&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">],</span> <span class="n">elements</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ec_dyn</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">calc_element_coordinates</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;Z coordinate&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,:])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;Temperature&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ec_dyn</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>x,y,z of each element</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.close" title="Permalink to this definition">¶</a></dt>
-<dd><p>Finalize write for a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.codes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codes</span></span><a class="headerlink" href="#mikeio.Dfsu.codes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.contains" title="Permalink to this definition">¶</a></dt>
-<dd><p>test if a list of points are contained by mesh</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>points</strong> (<em>array-like n-by-2</em>) – x,y-coordinates of n points to be tested</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>True for points inside, False otherwise</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>bool array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.deletevalue">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfsu.deletevalue" title="Permalink to this definition">¶</a></dt>
-<dd><p>File delete value</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.e2_e3_table">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e2_e3_table</span></span><a class="headerlink" href="#mikeio.Dfsu.e2_e3_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>The 2d-to-3d element connectivity table for a 3d object</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.elem2d_ids">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elem2d_ids</span></span><a class="headerlink" href="#mikeio.Dfsu.elem2d_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>The associated 2d element id for each 3d element</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.element_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.Dfsu.element_coordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Center coordinates of each element</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.element_table">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_table</span></span><a class="headerlink" href="#mikeio.Dfsu.element_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>Element to node connectivity</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.elements_to_geometry">
-<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.elements_to_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>export elements to new flexible file geometry</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – list of element ids</p></li>
-<li><p><strong>node_layers</strong> (<em>str</em><em>, </em><em>optional</em>) – for 3d files either ‘top’, ‘bottom’ layer nodes
-or ‘all’ can be selected, by default ‘all’</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>which can be used for further extraction or saved to file</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>UnstructuredGeometry</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.end_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.Dfsu.end_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>File end time</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.extract_surface_elevation_from_3d">
-<span class="sig-name descname"><span class="pre">extract_surface_elevation_from_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.extract_surface_elevation_from_3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract surface elevation from a 3d dfsu file (based on zn)
-to a new 2d dfsu file with a surface elevation item.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – Output file name</p></li>
-<li><p><strong>time_steps</strong> (<em>str</em><em>, </em><em>int</em><em> or </em><em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Extract only selected time_steps</p></li>
-<li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points for spatial interpolation (inverse_distance), default=4</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">extract_surface_elevation_from_3d</span><span class="p">(</span><span class="s1">&#39;ex_surf.dfsu&#39;</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="s1">&#39;2018-1-1,2018-2-1&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.extract_track">
-<span class="sig-name descname"><span class="pre">extract_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'nearest'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.extract_track" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extract track data from a dfsu file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>track</strong> (<em>str</em>) – with DatetimeIndex and (x, y) of track points as first two columns
-x,y coordinates must be in same coordinate system as dfsu</p></li>
-<li><p><strong>track</strong> – filename of csv or dfs0 file containing t,x,y</p></li>
-<li><p><strong>items</strong> (<em>list</em><em>[</em><em>int</em><em>] or </em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Extract only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Spatial interpolation method (‘nearest’ or ‘inverse_distance’)
-default=’nearest’</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dataset with data dimension t
-The first two items will be x- and y- coordinates of track</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfsu</span><span class="o">.</span><span class="n">extract_track</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">,</span><span class="s1">&#39;v&#39;</span><span class="p">])</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfsu</span><span class="o">.</span><span class="n">extract_track</span><span class="p">(</span><span class="s1">&#39;track_file.dfs0&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfsu</span><span class="o">.</span><span class="n">extract_track</span><span class="p">(</span><span class="s1">&#39;track_file.csv&#39;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.find_nearest_elements">
-<span class="sig-name descname"><span class="pre">find_nearest_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_distances</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.find_nearest_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find index of nearest elements (optionally for a list)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – X coordinate(s) (easting or longitude)</p></li>
-<li><p><strong>y</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – Y coordinate(s) (northing or latitude)</p></li>
-<li><p><strong>z</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Z coordinate(s)  (vertical coordinate, positive upwards)
-If not provided for a 3d file, the surface element is returned</p></li>
-<li><p><strong>layer</strong> (<em>int</em><em>, </em><em>optional</em>) – Search in a specific layer only (3D files only)
-Either z or layer (0-based) can be provided for a 3D file</p></li>
-<li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – return this many (horizontally) nearest points for
-each coordinate set, default=1</p></li>
-<li><p><strong>return_distances</strong> (<em>bool</em><em>, </em><em>optional</em>) – should the horizontal distances to each point be returned?
-default=False</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>np.array</em> – element ids of nearest element(s)</p></li>
-<li><p><em>np.array, optional</em> – horizontal distances</p></li>
-</ul>
-</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">return_distances</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">z</span><span class="o">=-</span><span class="mi">3</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xyz</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.find_nearest_profile_elements">
-<span class="sig-name descname"><span class="pre">find_nearest_profile_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.find_nearest_profile_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find 3d elements of profile nearest to (x,y) coordinates</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em>) – x-coordinate of point</p></li>
-<li><p><strong>y</strong> (<em>float</em>) – y-coordinate of point</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>element ids of vertical profile</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(int)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.geometry2d">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry2d</span></span><a class="headerlink" href="#mikeio.Dfsu.geometry2d" title="Permalink to this definition">¶</a></dt>
-<dd><p>The 2d geometry for a 3d object</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.get_2d_interpolant">
-<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_2d_interpolant" title="Permalink to this definition">¶</a></dt>
-<dd><p>IDW interpolant for list of coordinates</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xy</strong> (<em>array-like</em>) – x,y coordinates of new points</p></li>
-<li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – [description], by default 1</p></li>
-<li><p><strong>extrapolate</strong> (<em>bool</em><em>, </em><em>optional</em>) – allow , by default False</p></li>
-<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – power of inverse distance weighting, default=2</p></li>
-<li><p><strong>radius</strong> (<em>float</em><em>, </em><em>optional</em>) – an alternative to extrapolate=False,
-only include elements within radius</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>element ids and weights</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>(np.array, np.array)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.get_element_area">
-<span class="sig-name descname"><span class="pre">get_element_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_element_area" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the horizontal area of each element.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>areas in m2</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array(float)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.get_layer_elements">
-<span class="sig-name descname"><span class="pre">get_layer_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_layer_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>3d element ids for one (or more) specific layer(s)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>layer</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – layer between 0 (bottom) and n_layers-1 (top)
-(can also be negative counting from -1 at the top layer)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>element ids</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(int)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.get_node_centered_data">
-<span class="sig-name descname"><span class="pre">get_node_centered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_node_centered_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – cell-centered data</p></li>
-<li><p><strong>extrapolate</strong> (<em>bool</em><em>, </em><em>optional</em>) – allow the method to extrapolate, default:True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>node-centered data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(float)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.get_node_coords">
-<span class="sig-name descname"><span class="pre">get_node_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_node_coords" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the coordinates of each node.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<em>int</em>) – Get only nodes with specific code, e.g. land == 1</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>x,y,z of each node</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.get_overset_grid">
-<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.get_overset_grid" title="Permalink to this definition">¶</a></dt>
-<dd><p>get a 2d grid that covers the domain by specifying spacing or shape</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dx</strong> (<em>float</em><em> or </em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
-<li><p><strong>dy</strong> (<em>float</em><em>, </em><em>optional</em>) – grid resolution in y-direction</p></li>
-<li><p><strong>shape</strong> (<em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – tuple with nx and ny describing number of points in each direction
-one of them can be None, in which case the value will be inferred</p></li>
-<li><p><strong>buffer</strong> (<em>float</em><em>, </em><em>optional</em>) – positive to make the area larger, default=0
-can be set to a small negative value to avoid NaN
-values all around the domain.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>2d grid</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>&lt;mikeio.Grid2D&gt;</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.interp2d">
-<span class="sig-name descname"><span class="pre">interp2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elem_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.interp2d" title="Permalink to this definition">¶</a></dt>
-<dd><p>interp spatially in data (2d only)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>ndarray</em><em> or </em><em>list</em><em>(</em><em>ndarray</em><em>)</em>) – dfsu data</p></li>
-<li><p><strong>elem_ids</strong> (<em>ndarray</em><em>(</em><em>int</em><em>)</em>) – n sized array of 1 or more element ids used for interpolation</p></li>
-<li><p><strong>weights</strong> (<em>ndarray</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – weights with same size as elem_ids used for interpolation</p></li>
-<li><p><strong>shape</strong> (<em>tuple</em><em>, </em><em>optional</em>) – reshape output</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>spatially interped data</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray or list(ndarray)</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_overset_grid</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">40</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dsi</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">interp2d</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.is_2d">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><a class="headerlink" href="#mikeio.Dfsu.is_2d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.is_geo">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Dfsu.is_geo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Are coordinates geographical (LONG/LAT)?</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.is_layered">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.Dfsu.is_layered" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.is_local_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.Dfsu.is_local_coordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Are coordinates relative (NON-UTM)?</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.is_spectral">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.Dfsu.is_spectral" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.is_tri_only">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><a class="headerlink" href="#mikeio.Dfsu.is_tri_only" title="Permalink to this definition">¶</a></dt>
-<dd><p>Does the mesh consist of triangles only?</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfsu.items" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of items</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.layer_ids">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer_ids</span></span><a class="headerlink" href="#mikeio.Dfsu.layer_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>The layer number (0=bottom, 1, 2, …) for each 3d element</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.max_nodes_per_element">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.Dfsu.max_nodes_per_element" title="Permalink to this definition">¶</a></dt>
-<dd><p>The maximum number of nodes for an element</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_elements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.Dfsu.n_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of elements</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfsu.n_items" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of items</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_layers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers</span></span><a class="headerlink" href="#mikeio.Dfsu.n_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maximum number of layers</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_layers_per_column">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers_per_column</span></span><a class="headerlink" href="#mikeio.Dfsu.n_layers_per_column" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of number of layers for each column</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_nodes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.Dfsu.n_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of nodes</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_sigma_layers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sigma_layers</span></span><a class="headerlink" href="#mikeio.Dfsu.n_sigma_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of sigma layers</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_timesteps">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfsu.n_timesteps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of time steps</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.n_z_layers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_z_layers</span></span><a class="headerlink" href="#mikeio.Dfsu.n_z_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maximum number of z-layers</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.node_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_coordinates</span></span><a class="headerlink" href="#mikeio.Dfsu.node_coordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Coordinates (x,y,z) of all nodes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'patch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_refinements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_outline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot unstructured data and/or mesh, mesh outline</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<em>np.array</em><em> or </em><em>a Dataset with a single item</em><em>, </em><em>optional</em>) – value for each element to plot, default bathymetry</p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – list of element ids to be plotted</p></li>
-<li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘patch’ (default), ‘mesh_only’, ‘shaded’,
-‘contour’, ‘contourf’ or ‘outline_only’</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label (or title if contour plot)</p></li>
-<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default viridis</p></li>
-<li><p><strong>vmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>vmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>levels</strong> (<em>int</em><em>, </em><em>list</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – for contour plots: how many levels, default:10
-or a list of discrete levels e.g. [3.0, 4.5, 6.0]</p></li>
-<li><p><strong>show_mesh</strong> (<em>bool</em><em>, </em><em>optional</em>) – should the mesh be shown on the plot? default=True</p></li>
-<li><p><strong>show_outline</strong> (<em>bool</em><em>, </em><em>optional</em>) – should domain outline be shown on the plot? default=True</p></li>
-<li><p><strong>n_refinements</strong> (<em>int</em><em>, </em><em>optional</em>) – for ‘shaded’ and ‘contour’ plots (and if show_mesh=False)
-do this number of mesh refinements for smoother plotting</p></li>
-<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure</p></li>
-<li><p><strong>ax</strong> (<em>matplotlib.axes</em><em>, </em><em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
-<li><p><strong>add_colorbar</strong> (<em>bool</em>) – Add colorbar to plot, default True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>&lt;matplotlib.axes&gt;</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="c1"># bathymetry</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Surface elevation&quot;</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(1, 884)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">n_items</span>
-<span class="go">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">ds</span><span class="p">)</span> <span class="c1"># plot surface elevation</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.plot_spectrum">
-<span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'contourf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Reds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_as_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(7,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.plot_spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot spectrum in polar coordinates</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spectrum</strong> (<em>np.array</em>) – spectral values as 2d array with dimensions: directions, frequencies</p></li>
-<li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘contour’, ‘contourf’, ‘patch’, ‘shaded’,
-by default: ‘contourf’</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label (or title if contour plot)</p></li>
-<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default Reds</p></li>
-<li><p><strong>vmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default: 1e-5</p></li>
-<li><p><strong>vmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>r_as_periods</strong> (<em>bool</em><em>, </em><em>optional</em>) – show radial axis as periods instead of frequency, default: True</p></li>
-<li><p><strong>rmin</strong> (<em>float</em><em>, </em><em>optional</em>) – mininum frequency/period to be shown, default: None</p></li>
-<li><p><strong>rmax</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum frequency/period to be shown, default: None</p></li>
-<li><p><strong>levels</strong> (<em>int</em><em>, </em><em>list</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – for contour plots: how many levels, default:10
-or a list of discrete levels e.g. [0.03, 0.04, 0.05]</p></li>
-<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure, default (7, 7)</p></li>
-<li><p><strong>add_colorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Add colorbar to plot, default True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>&lt;matplotlib.axes&gt;</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;area_spectrum.dfsu&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Energy density&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="c1"># first timestep, element 0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;patch&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Wave spectrum T&lt;9s&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.plot_vertical_profile">
-<span class="sig-name descname"><span class="pre">plot_vertical_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.plot_vertical_profile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot unstructured vertical profile</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>np.array</em>) – value for each element to plot</p></li>
-<li><p><strong>timestep</strong> (<em>int</em><em>, </em><em>optional</em>) – the timestep that fits with the data to get correct vertical
-positions, default: use static vertical positions</p></li>
-<li><p><strong>cmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>cmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label</p></li>
-<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default viridis</p></li>
-<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure</p></li>
-<li><p><strong>ax</strong> (<em>matplotlib.axes</em><em>, </em><em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>&lt;matplotlib.axes&gt;</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.projection_string">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.Dfsu.projection_string" title="Permalink to this definition">¶</a></dt>
-<dd><p>The projection string</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read data from a dfsu file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<em>list</em><em>[</em><em>int</em><em>] or </em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>time_steps</strong> (<em>str</em><em>, </em><em>int</em><em> or </em><em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected time_steps</p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected element ids</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A Dataset with data dimensions [t,elements]</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (9, 884)</span>
-<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
-<span class="go">Items:</span>
-<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">time_steps</span><span class="o">=</span><span class="s2">&quot;1985-08-06 12:00,1985-08-07 00:00&quot;</span><span class="p">)</span>
-<span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (5, 884)</span>
-<span class="go">Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00</span>
-<span class="go">Items:</span>
-<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.start_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfsu.start_time" title="Permalink to this definition">¶</a></dt>
-<dd><p>File start time</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.timestep">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfsu.timestep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Time step size in seconds</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.to_2d_geometry">
-<span class="sig-name descname"><span class="pre">to_2d_geometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_2d_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>extract 2d geometry from 3d geometry</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>2d geometry (bottom nodes)</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>UnstructuredGeometry</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.to_dfs2">
-<span class="sig-name descname"><span class="pre">to_dfs2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pathlib.Path</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_dfs2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export Dfsu to Dfs2 file.</p>
-<p>Export Dfsu file to a Dfs2 file with a regular 2D grid.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x0</strong> (<em>float</em>) – X-coordinate of the bottom left corner of the 2D grid,
-must be in the same coordinate system as the parent Dfsu file.</p></li>
-<li><p><strong>y0</strong> (<em>float</em>) – Y-coordinate of the bottom left corner of the 2D grid,
-must be in the same coordinate system as the parent Dfsu file.</p></li>
-<li><p><strong>dx</strong> (<em>float</em>) – Grid resolution in the X direction in the units of CRS defined by <cite>epsg</cite>.</p></li>
-<li><p><strong>dy</strong> (<em>float</em>) – Grid resolution in the Y direction in the units of CRS defined by <cite>epsg</cite>.</p></li>
-<li><p><strong>nx</strong> (<em>int</em><em>, </em><em>optional</em>) – Grid size in the X direction. By default it is 20.</p></li>
-<li><p><strong>ny</strong> (<em>int</em><em>, </em><em>optional</em>) – Grid size in the Y direction. By default it is 20.</p></li>
-<li><p><strong>rotation</strong> (<em>float</em><em>, </em><em>optional</em>) – Grid clockwise rotation in degrees. Be default it is 0.</p></li>
-<li><p><strong>epsg</strong> (<em>int</em><em>, </em><em>optional</em>) – EPSG identificator of coordinate system
-in which the Dfs2 file will be created.
-If None (default), uses coordinate system of the parent Dfsu file.</p></li>
-<li><p><strong>interpolation_method</strong> (<em>str</em><em>, </em><em>optional</em>) – Interpolation method, by default it is ‘nearest’.</p></li>
-<li><p><strong>filename</strong> (<em>str</em><em> or </em><em>pathlib.Path</em><em>, </em><em>optional</em>) – Path to dfs2 file to be created.
-If None (default), creates a temporary dfs2 file
-in the system temporary directory.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>mikeio Dfs2 object pointing to the file located at <cite>filename</cite>.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="dfs123.html#mikeio.Dfs2" title="mikeio.Dfs2">Dfs2</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.to_mesh">
-<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_mesh" title="Permalink to this definition">¶</a></dt>
-<dd><p>write object to mesh file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>outfilename</strong> (<em>str</em>) – path to file to be written</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.to_shapely">
-<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.to_shapely" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export mesh as shapely MultiPolygon</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>polygons with mesh elements</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>shapely.geometry.MultiPolygon</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.top_elements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">top_elements</span></span><a class="headerlink" href="#mikeio.Dfsu.top_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of 3d element ids of surface layer</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.type_name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.Dfsu.type_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type name, e.g. Mesh, Dfsu2D</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfsu.valid_codes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_codes</span></span><a class="headerlink" href="#mikeio.Dfsu.valid_codes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Unique list of node codes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write a new dfsu file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
-<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>] or </em><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
-<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – start datetime, default is datetime.now()</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – The time step (in seconds)</p></li>
-<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – </p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
-<li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
-<li><p><strong>keep_open</strong> (<em>bool</em><em>, </em><em>optional</em>) – Keep file open for appending</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfsu.write_header">
-<span class="sig-name descname"><span class="pre">write_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu.write_header" title="Permalink to this definition">¶</a></dt>
-<dd><p>Write the header of a new dfsu file (for writing huge files)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
-<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime, default is datetime.now()</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The time step (in seconds)</p></li>
-<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
-<li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">msh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="s2">&quot;foo.mesh&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">n_elements</span> <span class="o">=</span> <span class="n">msh</span><span class="o">.</span><span class="n">n_elements</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="n">meshfilename</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">nt</span> <span class="o">=</span> <span class="mi">1000</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">n_items</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">ItemInfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">dfs</span><span class="o">.</span><span class="n">write_header</span><span class="p">(</span><span class="n">outfilename</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">nt</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="gp">&gt;&gt;&gt; </span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-<span class="gp">&gt;&gt;&gt; </span>            <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span>            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span>            <span class="n">f</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-</dd></dl>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfsu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="mesh-api">
@@ -1505,12 +567,6 @@ in the system temporary directory.</p></li>
 </pre></div>
 </div>
 <dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.bottom_elements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bottom_elements</span></span><a class="headerlink" href="#mikeio.Mesh.bottom_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of 3d element ids of bottom layer</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.boundary_codes">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_codes</span></span><a class="headerlink" href="#mikeio.Mesh.boundary_codes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unique list of boundary codes</p>
@@ -1520,26 +576,6 @@ in the system temporary directory.</p></li>
 <dt class="sig sig-object py" id="mikeio.Mesh.boundary_polylines">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.Mesh.boundary_polylines" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lists of closed polylines defining domain outline</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.calc_Hm0_from_spectrum">
-<span class="sig-name descname"><span class="pre">calc_Hm0_from_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.calc_Hm0_from_spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate significant wave height (Hm0) from spectrum</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spectrum</strong> (<em>np.ndarray</em>) – frequency or direction-frequency spectrum</p></li>
-<li><p><strong>tail</strong> (<em>bool</em><em>, </em><em>optional</em>) – Should a parametric spectral tail be added in the computations? by default True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>significant wave height values</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1557,12 +593,6 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">elem_ids</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_nearest_profile_elements</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Z coordinate&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">],</span> <span class="n">elements</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ec_dyn</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">calc_element_coordinates</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;Z coordinate&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,:])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ds</span><span class="p">[</span><span class="s1">&#39;Temperature&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="n">ec_dyn</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
-</pre></div>
-</div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>x,y,z of each element</p>
@@ -1581,7 +611,7 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.contains" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.Mesh.contains" title="Permalink to this definition">¶</a></dt>
 <dd><p>test if a list of points are contained by mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -1594,18 +624,6 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 <dd class="field-odd"><p>bool array</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.e2_e3_table">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e2_e3_table</span></span><a class="headerlink" href="#mikeio.Mesh.e2_e3_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>The 2d-to-3d element connectivity table for a 3d object</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.elem2d_ids">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elem2d_ids</span></span><a class="headerlink" href="#mikeio.Mesh.elem2d_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>The associated 2d element id for each 3d element</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1622,8 +640,8 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.elements_to_geometry">
-<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.elements_to_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>export elements to new flexible file geometry</p>
+<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFMLayered</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.Mesh.elements_to_geometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>export a selection of elements to new flexible file geometry</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -1685,32 +703,6 @@ default=False</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.find_nearest_profile_elements">
-<span class="sig-name descname"><span class="pre">find_nearest_profile_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.find_nearest_profile_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>Find 3d elements of profile nearest to (x,y) coordinates</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em>) – x-coordinate of point</p></li>
-<li><p><strong>y</strong> (<em>float</em>) – y-coordinate of point</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>element ids of vertical profile</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(int)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.geometry2d">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">geometry2d</span></span><a class="headerlink" href="#mikeio.Mesh.geometry2d" title="Permalink to this definition">¶</a></dt>
-<dd><p>The 2d geometry for a 3d object</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.get_2d_interpolant">
 <span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_2d_interpolant" title="Permalink to this definition">¶</a></dt>
 <dd><p>IDW interpolant for list of coordinates</p>
@@ -1744,24 +736,6 @@ only include elements within radius</p></li>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>np.array(float)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.get_layer_elements">
-<span class="sig-name descname"><span class="pre">get_layer_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_layer_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>3d element ids for one (or more) specific layer(s)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>layer</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – layer between 0 (bottom) and n_layers-1 (top)
-(can also be negative counting from -1 at the top layer)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>element ids</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(int)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1894,12 +868,6 @@ values all around the domain.</p></li>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.layer_ids">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer_ids</span></span><a class="headerlink" href="#mikeio.Mesh.layer_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>The layer number (0=bottom, 1, 2, …) for each 3d element</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.max_nodes_per_element">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.Mesh.max_nodes_per_element" title="Permalink to this definition">¶</a></dt>
 <dd><p>The maximum number of nodes for an element</p>
@@ -1912,33 +880,9 @@ values all around the domain.</p></li>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.n_layers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers</span></span><a class="headerlink" href="#mikeio.Mesh.n_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maximum number of layers</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.n_layers_per_column">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers_per_column</span></span><a class="headerlink" href="#mikeio.Mesh.n_layers_per_column" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of number of layers for each column</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.n_nodes">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.Mesh.n_nodes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Number of nodes</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.n_sigma_layers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sigma_layers</span></span><a class="headerlink" href="#mikeio.Mesh.n_sigma_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Number of sigma layers</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.n_z_layers">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_z_layers</span></span><a class="headerlink" href="#mikeio.Mesh.n_z_layers" title="Permalink to this definition">¶</a></dt>
-<dd><p>Maximum number of z-layers</p>
 </dd></dl>
 
 <dl class="py property">
@@ -1991,95 +935,10 @@ do this number of mesh refinements for smoother plotting</p></li>
 </div>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.plot_boundary_nodes">
-<span class="sig-name descname"><span class="pre">plot_boundary_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">boundary_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_boundary_nodes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot mesh boundary nodes and their codes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.plot_spectrum">
-<span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'contourf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Reds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_as_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(7,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot spectrum in polar coordinates</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>spectrum</strong> (<em>np.array</em>) – spectral values as 2d array with dimensions: directions, frequencies</p></li>
-<li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘contour’, ‘contourf’, ‘patch’, ‘shaded’,
-by default: ‘contourf’</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label (or title if contour plot)</p></li>
-<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default Reds</p></li>
-<li><p><strong>vmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default: 1e-5</p></li>
-<li><p><strong>vmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>r_as_periods</strong> (<em>bool</em><em>, </em><em>optional</em>) – show radial axis as periods instead of frequency, default: True</p></li>
-<li><p><strong>rmin</strong> (<em>float</em><em>, </em><em>optional</em>) – mininum frequency/period to be shown, default: None</p></li>
-<li><p><strong>rmax</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum frequency/period to be shown, default: None</p></li>
-<li><p><strong>levels</strong> (<em>int</em><em>, </em><em>list</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – for contour plots: how many levels, default:10
-or a list of discrete levels e.g. [0.03, 0.04, 0.05]</p></li>
-<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure, default (7, 7)</p></li>
-<li><p><strong>add_colorbar</strong> (<em>bool</em><em>, </em><em>optional</em>) – Add colorbar to plot, default True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>&lt;matplotlib.axes&gt;</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;area_spectrum.dfsu&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Energy density&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="c1"># first timestep, element 0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;patch&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Wave spectrum T&lt;9s&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.plot_vertical_profile">
-<span class="sig-name descname"><span class="pre">plot_vertical_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot_vertical_profile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot unstructured vertical profile</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>values</strong> (<em>np.array</em>) – value for each element to plot</p></li>
-<li><p><strong>timestep</strong> (<em>int</em><em>, </em><em>optional</em>) – the timestep that fits with the data to get correct vertical
-positions, default: use static vertical positions</p></li>
-<li><p><strong>cmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>cmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label</p></li>
-<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default viridis</p></li>
-<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure</p></li>
-<li><p><strong>ax</strong> (<em>matplotlib.axes</em><em>, </em><em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>&lt;matplotlib.axes&gt;</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.projection_string">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.Mesh.projection_string" title="Permalink to this definition">¶</a></dt>
 <dd><p>The projection string</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.to_2d_geometry">
-<span class="sig-name descname"><span class="pre">to_2d_geometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.to_2d_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>extract 2d geometry from 3d geometry</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>2d geometry (bottom nodes)</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>UnstructuredGeometry</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -2094,12 +953,6 @@ positions, default: use static vertical positions</p></li>
 <dd class="field-even"><p>shapely.geometry.MultiPolygon</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.top_elements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">top_elements</span></span><a class="headerlink" href="#mikeio.Mesh.top_elements" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of 3d element ids of surface layer</p>
 </dd></dl>
 
 <dl class="py property">
@@ -2166,9 +1019,9 @@ positions, default: use static vertical positions</p></li>
     <footer class="footer">
   <p>
     
-      By Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard<br/>
+      By Henrik Andersson, Jesper Mariegaard, Marc Ridler<br/>
     
-        &copy; Copyright 2021, Henrik Andersson, Marc Ridler, Jesper Mariegaard, Rasmus Halvgaard.<br/>
+        &copy; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.<br/>
   </p>
 </footer>
 </main>

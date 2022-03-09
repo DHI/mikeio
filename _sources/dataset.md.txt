@@ -1,35 +1,31 @@
-.. _dataset:
+# Dataset
 
-Dataset
-*******
-The `Dataset <#mikeio.Dataset>`_ is the common MIKE IO data structure 
+The [Dataset](#mikeio.Dataset>) is the common MIKE IO data structure 
 for data from dfs files. 
-All `read()` methods in MIKE IO return a Dataset with three main properties:
+The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs items)
 
-* **items** - a list of `ItemInfo <eum.html#mikeio.eum.ItemInfo>`_ with name, type and unit of each item
+Each DataArray have the following properties:
+* **item** - an  `ItemInfo <eum.html#mikeio.eum.ItemInfo>` with name, type and unit
 * **time** - a pandas.DateTimeIndex with the time instances of the data
-* **data** - a list of NumPy arrays---one for each item
-
-The j'th array data[j] in data corresponds to the j'th item 
-and it's first axis is the time axis. 
-The number of consecutive axes depend on the data type. 
+* **values** - a NumPy array
 
 Use Dataset's string representation to get an overview of the Dataset
 
 
-.. code-block:: python
-
-    >>> import mikeio
-    >>> ds = mikeio.read("testdata/HD2D.dfsu")
-    >>> ds
-    <mikeio.Dataset>
-    Dimensions: (9, 884)
-    Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-    Items:
-    0:  Surface elevation <Surface Elevation> (meter)
-    1:  U velocity <u velocity component> (meter per sec)
-    2:  V velocity <v velocity component> (meter per sec)
-    3:  Current speed <Current Speed> (meter per sec)
+```python
+>>> import mikeio
+>>> ds = mikeio.read("testdata/HD2D.dfsu")
+>>> ds
+<mikeio.Dataset>
+Geometry: Dfsu2D
+Dimensions: (time:9, element:884)
+Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+Items:
+  0:  Surface elevation <Surface Elevation> (meter)        
+  1:  U velocity <u velocity component> (meter per sec)    
+  2:  V velocity <v velocity component> (meter per sec)    
+  3:  Current speed <Current Speed> (meter per sec)   
+```
 
 Selecting items
 ---------------
@@ -40,6 +36,15 @@ done with:
 * ds["itemA"] - returns the data of "itemA"
 * ds[[0]] - returns a new Dataset with "itemA" 
 * ds[0] - returns the data of "itemA"
+
+```
+>>> ds.Surface_elevation
+<mikeio.DataArray>
+Name: Surface elevation
+Geometry: Dfsu2D
+Dimensions: (time:9, element:884)
+Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+```
 
 Negative index e.g. ds[-1] can also be used to select from the end. 
 Several items ("itemA" at 0 and "itemC" at 2) can be selected with the notation:
@@ -61,18 +66,18 @@ A date range can also be selected using the slice notation (similar to pandas Da
 
 * ds[start_time:end_time] - selects all time steps between start and end (either can be empty)
 
-.. code-block:: python
-
-    >>> ds["1985-8-7":]
-    <mikeio.Dataset>
-    Dimensions: (2, 884)
-    Time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00
-    Items:
-    0:  Surface elevation <Surface Elevation> (meter)
-    1:  U velocity <u velocity component> (meter per sec)
-    2:  V velocity <v velocity component> (meter per sec)
-    3:  Current speed <Current Speed> (meter per sec)
-
+```python
+>>> ds["1985-8-7":]
+<mikeio.Dataset>
+Geometry: Dfsu2D
+Dimensions: (time:2, element:884)
+Time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
+Items:
+  0:  Surface elevation <Surface Elevation> (meter)
+  1:  U velocity <u velocity component> (meter per sec)
+  2:  V velocity <v velocity component> (meter per sec)
+  3:  Current speed <Current Speed> (meter per sec)
+```
 
 Properties
 ----------
@@ -134,15 +139,23 @@ Other methods that also return a Dataset:
 *Conversion* methods:
 
 * `to_dataframe() <#mikeio.Dataset.to_dataframe>`_ - Convert Dataset to a Pandas DataFrame
-* `to_dfs0() <#mikeio.Dataset.to_dfs0>`_ - Write Dataset to a Dfs0 file
+* `to_xarray() <#mikeio.Dataset.to_xarray>`_ - Convert Dataset to a xarray dataset (great for Dfs2)
+* `to_dfs() <#mikeio.Dataset.to_dfs>`_ - Write Dataset to a Dfs file
 
-*Combining datasets*:
 
-* `Dataset.combine() <#mikeio.Dataset.combine>`_ - Combine two or more datasets either along the time axis (concatenation) or along the item axis.
-* `concat() <#mikeio.Dataset.concat>`_ - Concatenate this Dataset with data from other Dataset, similar to Dataset.combine.
 
 Dataset API
 -----------
+```{eval-rst}
 .. autoclass:: mikeio.Dataset
 	:members:
 	:inherited-members:
+```
+
+DataArray API
+-----------
+```{eval-rst}
+.. autoclass:: mikeio.DataArray
+	:members:
+	:inherited-members:
+```
