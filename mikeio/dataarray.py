@@ -1039,7 +1039,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             raise NotImplementedError()
 
-    def isel(self, idx, axis=1):
+    def isel(self, idx=None, axis=1, **kwargs):
         """
         Select subset along an axis.
 
@@ -1055,6 +1055,17 @@ class DataArray(DataUtilsMixin, TimeSeries):
             data with subset
 
         """
+        for dim in kwargs:
+            if dim in self.dims:
+                axis = dim
+                if idx is not None:
+                    raise NotImplementedError(
+                        "Selecting on multiple dimensions in the same call, not yet implemented"
+                    )
+                idx = kwargs[dim]
+            else:
+                raise ValueError(f"{dim} is not present in {self.dims}")
+
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             return None
 
