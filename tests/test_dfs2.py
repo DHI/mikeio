@@ -15,6 +15,7 @@ from mikeio.custom_exceptions import (
     DataDimensionMismatch,
     ItemsError,
 )
+from mikeio.spatial.grid_geometry import Grid2D
 
 
 @pytest.fixture
@@ -135,6 +136,44 @@ def test_write_single_item(tmpdir):
     assert pytest.approx(newdfs.latitude) == 55.0
     assert newdfs.dx == 100.0
     assert newdfs.dy == 200.0
+
+
+def test_write_projected(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "utm.dfs2")
+
+    nt = 100
+    ny = 2
+    nx = 3
+
+    shape = nt, ny, nx
+
+    d = np.random.random(shape)
+    d[10, :, :] = np.nan
+    d[11, :, :] = 0
+    d[12, :, :] = 1e-10
+    d[13, :, :] = 1e10
+
+    # >>> from pyproj import Proj
+    # >>> utm = Proj(32633)
+    # >>> utm(12.0, 55.0)
+    # east = 308124
+    # north = 6098907
+
+    x0 = 308124
+    y0 = 6098907
+
+    grid = Grid2D(shape=(nx, ny), x0=x0, y0=y0, dx=100, dy=100, projection="UTM-33")
+    da = mikeio.DataArray(
+        data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
+    )
+    da.to_dfs(filename)
+
+    ds = mikeio.read(filename)
+    assert ds.geometry.dx == 100
+    assert ds.geometry.dy == 100
+    assert ds.geometry.x0 == x0
+    assert ds.geometry.y0 == y0
 
 
 def test_read(dfs2_random):
