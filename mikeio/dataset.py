@@ -981,7 +981,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     # ===== select =========
 
-    def isel(self, idx, axis=1):
+    def isel(self, idx=None, axis=0, **kwargs):
         """
         Select subset along an axis.
 
@@ -1012,45 +1012,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Shape: (3, 2)
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
-        if idx is None or (not np.isscalar(idx) and len(idx) == 0):
-            return None
+        res = [da.isel(idx=idx, axis=axis, **kwargs) for da in self]
 
-        axis = self._parse_axis(self.shape, self.dims, axis)
-        if axis == 0:
-            idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
-            time = self.time[idx]
-            items = self.items
-            geometry = self.geometry
-            zn = None if self._zn is None else self._zn[idx]
-        else:
-            time = self.time
-            items = self.items
-            geometry = None
-            zn = None
-            if hasattr(self.geometry, "isel"):
-                spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
-                geometry = self.geometry.isel(idx, axis=spatial_axis)
-            if isinstance(geometry, GeometryFMLayered):
-                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
-                    idx, node_layers="all"
-                )
-                zn = self._zn[:, node_ids]
-
-        res = []
-        for item in items:
-            x = np.take(self[item.name].to_numpy(), idx, axis=axis)
-            res.append(x)
-
-        if np.isscalar(idx):
-            # Selecting a single index, removes this dimension
-            dims = tuple(
-                [d for i, d in enumerate(self.dims) if i != axis]
-            )  # TODO we will need this in many places
-        else:
-            dims = self.dims  # multiple points, dims is intact
-        return Dataset(
-            data=res, time=time, items=items, geometry=geometry, zn=zn, dims=dims
-        )
+        return Dataset(res)
 
     # ===== aggregate =========
 
