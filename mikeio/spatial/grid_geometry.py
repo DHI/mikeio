@@ -221,6 +221,8 @@ class Grid2D(_Geometry):
         shape=None,
         x0=None,
         y0=None,
+        nx=None,
+        ny=None,
         projection="LONG/LAT",
     ):
         """create 2d grid
@@ -244,6 +246,7 @@ class Grid2D(_Geometry):
 
         Examples
         --------
+        >>> g = Grid2D(dx=0.25, nx=5, ny=10)
         >>> g = Grid2D(dx=0.25, shape=(5,10))
 
         >>> g = Grid2D(bbox=[0,0,10,20], dx=0.25)
@@ -294,8 +297,12 @@ class Grid2D(_Geometry):
             self._create_from_x_and_y(x, y)
         elif (shape is not None) and (dx is not None):
             self._create_from_nx_ny_dx_dy(x0, dx, shape[0], y0, dy, shape[1])
+        elif (nx is not None) and (ny is not None):
+            self._create_from_nx_ny_dx_dy(x0=x0, dx=dx, nx=nx, y0=y0, dy=dy, ny=ny)
         else:
-            raise ValueError("Please provide either bbox or both x and y")
+            raise ValueError(
+                "Please provide either bbox or both x and y, or x0, dx, nx, y0, dy, ny"
+            )
 
     def _create_in_bbox(self, bbox, dxdy=None, shape=None):
         """create 2d grid in bounding box, specifying spacing or shape
