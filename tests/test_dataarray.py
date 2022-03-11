@@ -2,6 +2,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
+from xarray import DataArray
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
@@ -612,6 +613,26 @@ def test_da_isel_space(da_grid2d):
     da_sel = da_grid2d.isel(0, axis="t")
     assert da_sel.dims[0] == "y"
     assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
+    da_sel = da_grid2d.isel(y=0)
+    assert da_sel.dims[0] == "time"
+
+    da_sel = da_grid2d.isel(x=0)
+    assert da_sel.dims[0] == "time"
+    assert da_sel.dims[1] == "y"
+
+    da_sel = da_grid2d.isel(time=0)
+    assert da_sel.dims[0] == "y"
+    assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray):
+
+    with pytest.raises(ValueError) as excinfo:
+        da_grid2d.isel(layer=0)
+    assert "layer" in str(excinfo.value)
 
 
 def test_da_sel_layer():
