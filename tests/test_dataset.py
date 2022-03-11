@@ -735,6 +735,19 @@ def test_aggregations():
     assert dsm.geometry is not None
 
 
+def test_to_dfs_extension_validation(tmpdir):
+
+    outfilename = os.path.join(tmpdir, "not_gonna_happen.dfs2")
+
+    ds = mikeio.read(
+        "tests/testdata/HD2D.dfsu", items=["Surface elevation", "Current speed"]
+    )
+    with pytest.raises(ValueError) as excinfo:
+        ds.to_dfs(outfilename)
+
+    assert "dfsu" in str(excinfo.value)
+
+
 def test_weighted_average(tmpdir):
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)

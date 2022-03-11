@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import Iterable, Sequence, Union, Mapping, Optional
 import warnings
@@ -1490,6 +1491,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             data.append(dati.copy())
         return data
 
+    @staticmethod
+    def _validate_extension(filename, valid_extension):
+        _, ext = os.path.splitext(filename)
+        if ext != valid_extension:
+            raise ValueError(f"File extension must be {valid_extension}")
+
     def to_dfs(self, filename, **kwargs):
 
         filename = str(filename)
@@ -1498,15 +1505,19 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
             if self.ndim == 1 and self.dims[0][0] == "t":
+                self._validate_extension(filename, ".dfs0")
                 self._to_dfs0(filename, **kwargs)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
+            self._validate_extension(filename, ".dfs2")
             self._to_dfs2(filename)
 
         elif isinstance(self.geometry, Grid1D):
+            self._validate_extension(filename, ".dfs1")
             self._to_dfs1(filename)
         elif isinstance(self.geometry, GeometryFM):
+            self._validate_extension(filename, ".dfsu")
             self._to_dfsu(filename)
         else:
             raise NotImplementedError(
