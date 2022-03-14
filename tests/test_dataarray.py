@@ -48,7 +48,7 @@ def da_grid2d():
         data=np.zeros([nt, ny, nx]) + 0.1,
         time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
         item=ItemInfo("Foo"),
-        geometry=mikeio.Grid2D(x0=1000.0, dx=10.0, shape=(nx, ny), dy=1.0, y0=-10.0),
+        geometry=mikeio.Grid2D(x0=1000.0, dx=10.0, nx=nx, ny=ny, dy=1.0, y0=-10.0),
     )
 
     return da
@@ -240,7 +240,7 @@ def test_dataarray_init_grid2d():
     ny, nx = 7, 5
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     data = np.zeros([nt, ny, nx]) + 0.1
-    g = mikeio.Grid2D(dx=0.5, shape=(nx, ny))
+    g = mikeio.Grid2D(dx=0.5, nx=nx, ny=ny)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
     assert da.ndim == 3
     assert da.dims == ("time", "y", "x")
