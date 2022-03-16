@@ -1020,24 +1020,31 @@ class DataArray(DataUtilsMixin, TimeSeries):
         )
 
     def interp_like(
-        # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
-        grid: Union[
-            Tuple[float, float], Sequence[Tuple[float, float]], Grid2D, GeometryFM
-        ],
+        grid: Union[Grid2D, GeometryFM],
+        interpolant=None,
         **kwargs,
     ) -> "DataArray":
 
         if isinstance(grid, Grid2D):
-            interpolant = self.geometry.get_spatial_interpolant(grid.xy, **kwargs)
+            xy = grid.xy
+        elif isinstance(grid, GeometryFM):
+            xy = grid.element_coordinates[:, :2]
+        else:
+            raise NotImplementedError()
+        if interpolant is None:
+            interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+
+        if isinstance(grid, Grid2D):
             dai = self.geometry.interp2d(
                 self.to_numpy(), *interpolant, shape=(grid.ny, grid.nx)
             )
-            dai = DataArray(data=dai, time=self.time, geometry=grid, item=self.item)
-
-            return dai
         else:
-            raise NotImplementedError()
+            dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
+
+        dai = DataArray(data=dai, time=self.time, geometry=grid, item=self.item)
+
+        return dai
 
     def isel(self, idx=None, axis=1, **kwargs):
         """

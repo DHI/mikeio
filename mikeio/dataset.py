@@ -1358,6 +1358,25 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return ds
 
+    def interp_like(
+        self,
+        grid: Union[Grid2D, GeometryFM],
+        **kwargs,
+    ) -> "Dataset":
+
+        if isinstance(grid, Grid2D):
+            xy = grid.xy
+
+        elif isinstance(grid, GeometryFM):
+            xy = grid.element_coordinates[:, :2]
+        else:
+            raise NotImplementedError()
+
+        interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+        das = [da.interp_like(grid, interpolant=interpolant) for da in self]
+        ds = Dataset(das)
+        return ds
+
     def interp_time(
         self,
         dt: Union[float, pd.DatetimeIndex, "Dataset"],

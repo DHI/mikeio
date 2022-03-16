@@ -11,6 +11,9 @@ from mikeio.custom_exceptions import InvalidGeometry
 from mikeio.eum import ItemInfo
 from pytest import approx
 
+from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.spatial.grid_geometry import Grid2D
+
 
 def test_repr():
     filename = "tests/testdata/HD2D.dfsu"
@@ -1339,3 +1342,40 @@ def test_dataset_interp():
     assert dai.name == da.name
     assert dai.geometry.x == x
     assert dai.geometry.y == y
+
+
+def test_interp_like_grid():
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    ws = ds[0]
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+    ws_grid = ws.interp_like(grid)
+    assert ws_grid.n_timesteps == ds.n_timesteps
+    assert isinstance(ws_grid, DataArray)
+    assert isinstance(ws_grid.geometry, Grid2D)
+
+
+def test_interp_like_fm():
+    msh = Mesh("tests/testdata/north_sea_2.mesh")
+    geometry = msh.geometry
+    assert isinstance(geometry, GeometryFM)
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    ws = ds[0]
+    wsi = ws.interp_like(geometry)
+    assert isinstance(wsi, DataArray)
+    assert isinstance(wsi.geometry, GeometryFM)
+
+    wsi2 = ws.interp_like(geometry, n_nearest=5, extrapolate=True)
+    assert isinstance(wsi2, DataArray)
+    assert isinstance(wsi2.geometry, GeometryFM)
+
+
+def test_interp_like_fm_dataset():
+    msh = Mesh("tests/testdata/north_sea_2.mesh")
+    geometry = msh.geometry
+    assert isinstance(geometry, GeometryFM)
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    dsi = ds.interp_like(geometry)
+    assert isinstance(dsi, Dataset)
+    assert isinstance(dsi.geometry, GeometryFM)
