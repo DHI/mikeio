@@ -1399,6 +1399,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(grid, interpolant=interpolant) for da in self]
         ds = Dataset(das)
+
+        if hasattr(other, "time"):
+            ds = ds.interp_time(other.time)
+
         return ds
 
     def interp_time(

@@ -1014,7 +1014,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data,
             t_out_index,
-            item=self.item.copy(),
+            item=deepcopy(self.item),
             geometry=self.geometry,
             zn=zn,
         )
@@ -1061,6 +1061,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
             dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
 
         dai = DataArray(data=dai, time=self.time, geometry=grid, item=self.item)
+
+        if hasattr(other, "time"):
+            dai = dai.interp_time(other.time)
 
         return dai
 

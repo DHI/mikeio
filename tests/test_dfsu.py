@@ -1354,16 +1354,38 @@ def test_interp_like_grid():
     assert isinstance(ws_grid.geometry, Grid2D)
 
 
+def test_interp_like_dataarray(tmpdir):
+
+    outfilename = os.path.join(tmpdir, "interp.dfs2")
+
+    da = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")[0]
+    da2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time_steps=[0, 1])[0]
+
+    dai = da.interp_like(da2)
+    assert isinstance(dai, DataArray)
+    assert isinstance(dai.geometry, Grid2D)
+    assert dai.n_timesteps == da2.n_timesteps
+    assert dai.end_time == da2.end_time
+
+    dae = da.interp_like(da2, extrapolate=True)
+    assert isinstance(dae, DataArray)
+    assert isinstance(dae.geometry, Grid2D)
+    assert dae.n_timesteps == da2.n_timesteps
+    assert dae.end_time == da2.end_time
+
+
 def test_interp_like_dataset(tmpdir):
 
     outfilename = os.path.join(tmpdir, "interp.dfs2")
 
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
-    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time_steps=[0, 1])
 
     dsi = ds.interp_like(ds2)
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, Grid2D)
+    assert dsi.n_timesteps == ds2.n_timesteps
+    assert dsi.end_time == ds2.end_time
 
     outfilename = os.path.join(tmpdir, "interp.dfs2")
     dsi.to_dfs(outfilename)
