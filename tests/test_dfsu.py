@@ -1354,6 +1354,26 @@ def test_interp_like_grid():
     assert isinstance(ws_grid.geometry, Grid2D)
 
 
+def test_interp_like_dataset(tmpdir):
+
+    outfilename = os.path.join(tmpdir, "interp.dfs2")
+
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+
+    dsi = ds.interp_like(ds2)
+    assert isinstance(dsi, Dataset)
+    assert isinstance(dsi.geometry, Grid2D)
+
+    outfilename = os.path.join(tmpdir, "interp.dfs2")
+    dsi.to_dfs(outfilename)
+
+    dse = ds.interp_like(ds2, extrapolate=True)
+
+    outfilename = os.path.join(tmpdir, "extrap.dfs2")
+    dse.to_dfs(outfilename)
+
+
 def test_interp_like_fm():
     msh = Mesh("tests/testdata/north_sea_2.mesh")
     geometry = msh.geometry

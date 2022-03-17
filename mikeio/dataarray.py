@@ -1021,10 +1021,28 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     def interp_like(
         self,
-        grid: Union[Grid2D, GeometryFM],
+        other: Union["Dataset", "DataArray", Grid2D, GeometryFM],
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
+        """Interpolate in space (and in time) to other geometry (and time axis)
+
+        Parameters
+        ----------
+        other: Dataset, DataArray, Grid2D, GeometryFM
+        interpolant, optional
+            Reuse precalcuted index and weights
+
+        Returns
+        -------
+        DataArray
+            Interpolated dataarray
+        """
+
+        if hasattr(other, "geometry"):
+            grid = other.geometry
+        else:
+            grid = other
 
         if isinstance(grid, Grid2D):
             xy = grid.xy

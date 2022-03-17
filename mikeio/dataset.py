@@ -1360,9 +1360,33 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def interp_like(
         self,
-        grid: Union[Grid2D, GeometryFM],
+        other: Union["Dataset", DataArray, Grid2D, GeometryFM],
         **kwargs,
     ) -> "Dataset":
+        """Interpolate in space (and in time) to other geometry (and time axis)
+
+        Parameters
+        ----------
+        other: Dataset, DataArray, Grid2D, GeometryFM
+
+        Examples
+        --------
+        >>> ds = mikeio.read("HD.dfsu")
+        >>> ds2 = mikeio.read("wind.dfs2")
+        >>> dsi= ds.interp_like(ds2)
+        >>> dsi.to_dfs("HD_gridded.dfs2")
+        >>> dse= ds.interp_like(ds2, extrapolate=True)
+
+        Returns
+        -------
+        Dataset
+            Interpolated dataset
+        """
+
+        if hasattr(other, "geometry"):
+            grid = other.geometry
+        else:
+            grid = other
 
         if isinstance(grid, Grid2D):
             xy = grid.xy
