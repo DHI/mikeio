@@ -163,7 +163,7 @@ def test_write_projected(tmpdir):
     x0 = 308124
     y0 = 6098907
 
-    grid = Grid2D(shape=(nx, ny), x0=x0, y0=y0, dx=100, dy=100, projection="UTM-33")
+    grid = Grid2D(nx=nx, ny=ny, x0=x0, y0=y0, dx=100, dy=100, projection="UTM-33")
     da = mikeio.DataArray(
         data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
     )

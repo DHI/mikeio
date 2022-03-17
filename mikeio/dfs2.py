@@ -131,7 +131,8 @@ class Dfs2(_Dfs123):
                     self.geometry = Grid2D(
                         dx=self._dx,
                         dy=self._dy,
-                        shape=(self._nx, self._ny),
+                        nx=self._nx,
+                        ny=self._ny,
                         x0=self._longitude,
                         y0=self._latitude,
                         projection=self._projstr,
@@ -141,7 +142,8 @@ class Dfs2(_Dfs123):
                 self.geometry = Grid2D(
                     dx=self._dx,
                     dy=self._dy,
-                    shape=(self._nx, self._ny),
+                    nx=self._nx,
+                    ny=self._ny,
                     x0=self._x0,
                     y0=self._y0,
                     projection=self._projstr,

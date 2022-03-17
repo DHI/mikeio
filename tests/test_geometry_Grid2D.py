@@ -7,6 +7,20 @@ from mikeio import Mesh
 from mikeio import Grid2D
 
 
+def test_create_nx_ny():
+
+    g = Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=1440, ny=721)
+    assert g.nx == 1440
+
+
+def test_create_nx_missing_ny():
+
+    with pytest.raises(ValueError) as excinfo:
+        Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=100)
+
+    assert "ny" in str(excinfo.value)
+
+
 def test_x_y():
     x0 = 2.0
     x1 = 8.0
