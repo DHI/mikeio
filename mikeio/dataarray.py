@@ -1021,7 +1021,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     def interp_like(
         self,
-        other: Union["Dataset", "DataArray", Grid2D, GeometryFM],
+        other: Union["DataArray", Grid2D, GeometryFM],
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1031,7 +1031,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         ----------
         other: Dataset, DataArray, Grid2D, GeometryFM
         interpolant, optional
-            Reuse precalcuted index and weights
+            Reuse pre-calculated index and weights
 
         Returns
         -------
