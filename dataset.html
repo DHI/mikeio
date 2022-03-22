@@ -731,6 +731,41 @@ and must have a unique item name</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.interp_like">
+<span class="sig-name descname"><span class="pre">interp_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.grid_geometry.Grid2D</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a></span></span><a class="headerlink" href="#mikeio.Dataset.interp_like" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate in space (and in time) to other geometry (and time axis)</p>
+<dl class="simple">
+<dt>Note: currently only supports interpolation from dfsu-2d to</dt><dd><p>dfs2 or other dfsu-2d Datasets</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a><em>, </em><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray"><em>DataArray</em></a><em>, </em><em>Grid2D</em><em>, </em><em>GeometryFM</em><em>, </em><em>pd.DatetimeIndex</em>) – </p></li>
+<li><p><strong>kwargs</strong> (<em>additional kwargs are passed to interpolation method</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds2</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;wind.dfs2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsi</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">interp_like</span><span class="p">(</span><span class="n">ds2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsi</span><span class="o">.</span><span class="n">to_dfs</span><span class="p">(</span><span class="s2">&quot;HD_gridded.dfs2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dse</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">interp_like</span><span class="p">(</span><span class="n">ds2</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dst</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">interp_like</span><span class="p">(</span><span class="n">ds2</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interpolated Dataset</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.interp_time">
 <span class="sig-name descname"><span class="pre">interp_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.interp_time" title="Permalink to this definition">¶</a></dt>
 <dd><p>Temporal interpolation</p>
@@ -1218,6 +1253,40 @@ In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
 <dt class="sig sig-object py" id="mikeio.DataArray.flipud">
 <span class="sig-name descname"><span class="pre">flipud</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.flipud" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flip upside down</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.interp_like">
+<span class="sig-name descname"><span class="pre">interp_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.grid_geometry.Grid2D</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.interp_like" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate in space (and in time) to other geometry (and time axis)</p>
+<dl class="simple">
+<dt>Note: currently only supports interpolation from dfsu-2d to</dt><dd><p>dfs2 or other dfsu-2d DataArrays</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a><em>, </em><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray"><em>DataArray</em></a><em>, </em><em>Grid2D</em><em>, </em><em>GeometryFM</em><em>, </em><em>pd.DatetimeIndex</em>) – </p></li>
+<li><p><strong>interpolant</strong> – Reuse pre-calculated index and weights</p></li>
+<li><p><strong>optional</strong> – Reuse pre-calculated index and weights</p></li>
+<li><p><strong>kwargs</strong> (<em>additional kwargs are passed to interpolation method</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dai</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">interp_like</span><span class="p">(</span><span class="n">da2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dae</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">interp_like</span><span class="p">(</span><span class="n">da2</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dat</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">interp_like</span><span class="p">(</span><span class="n">da2</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Interpolated DataArray</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
