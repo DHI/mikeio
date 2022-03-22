@@ -170,6 +170,42 @@ def test_read_spectrum_line_elements(dfsu_line):
     assert np.all(ds1[0].to_numpy()[:, nodes, ...] == ds2[0].to_numpy())
 
 
+def test_spectrum_line_sel(dfsu_line):
+    ds1 = dfsu_line.read()
+    assert ds1.dims == ("time", "node", "frequency", "direction")
+
+    nodes = [3, 4, 5, 6]
+    ds2 = dfsu_line.read(elements=nodes)
+
+    ds3 = ds1.sel(node=nodes)
+    assert ds3.shape == ds2.shape
+
+
+def test_spectrum_line_isel(dfsu_line):
+    ds1 = dfsu_line.read()
+    assert ds1.dims == ("time", "node", "frequency", "direction")
+
+    nodes = [3, 4, 5, 6]
+    ds2 = dfsu_line.read(elements=nodes)
+
+    ds3 = ds1.isel(nodes, axis=1)
+    assert ds3.shape == ds2.shape
+
+    ds4 = ds1.isel(nodes, axis="node")
+    assert ds4.shape == ds2.shape
+
+
+def test_spectrum_line_getitem(dfsu_line):
+    ds1 = dfsu_line.read()
+    assert ds1.dims == ("time", "node", "frequency", "direction")
+
+    node = 3
+    ds2 = dfsu_line.read(elements=node)
+
+    ds3 = ds1[:, node]
+    assert ds3.shape == ds2.shape
+
+
 def test_read_spectrum_dir_line(dfsu_line_dir):
     dfs = dfsu_line_dir
     assert dfs.n_frequencies == 0
