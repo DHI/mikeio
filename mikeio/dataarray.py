@@ -1040,27 +1040,32 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
 
         if hasattr(other, "geometry"):
-            grid = other.geometry
+            geom = other.geometry
         else:
-            grid = other
+            geom = other
 
-        if isinstance(grid, Grid2D):
-            xy = grid.xy
-        elif isinstance(grid, GeometryFM):
-            xy = grid.element_coordinates[:, :2]
+        if isinstance(geom, Grid2D):
+            xy = geom.xy
+        elif isinstance(geom, GeometryFM):
+            xy = geom.element_coordinates[:, :2]
+            if geom.is_layered:
+                raise NotImplementedError(
+                    "Does not yet support layered flexible mesh data!"
+                )
         else:
             raise NotImplementedError()
+
         if interpolant is None:
             interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
 
-        if isinstance(grid, Grid2D):
+        if isinstance(geom, Grid2D):
             dai = self.geometry.interp2d(
-                self.to_numpy(), *interpolant, shape=(grid.ny, grid.nx)
+                self.to_numpy(), *interpolant, shape=(geom.ny, geom.nx)
             )
         else:
             dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
 
-        dai = DataArray(data=dai, time=self.time, geometry=grid, item=self.item)
+        dai = DataArray(data=dai, time=self.time, geometry=geom, item=self.item)
 
         if hasattr(other, "time"):
             dai = dai.interp_time(other.time)

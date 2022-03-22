@@ -1384,20 +1384,24 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
 
         if hasattr(other, "geometry"):
-            grid = other.geometry
+            geom = other.geometry
         else:
-            grid = other
+            geom = other
 
-        if isinstance(grid, Grid2D):
-            xy = grid.xy
+        if isinstance(geom, Grid2D):
+            xy = geom.xy
 
-        elif isinstance(grid, GeometryFM):
-            xy = grid.element_coordinates[:, :2]
+        elif isinstance(geom, GeometryFM):
+            xy = geom.element_coordinates[:, :2]
+            if geom.is_layered:
+                raise NotImplementedError(
+                    "Does not yet support layered flexible mesh data!"
+                )
         else:
             raise NotImplementedError()
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
-        das = [da.interp_like(grid, interpolant=interpolant) for da in self]
+        das = [da.interp_like(geom, interpolant=interpolant) for da in self]
         ds = Dataset(das)
 
         if hasattr(other, "time"):
