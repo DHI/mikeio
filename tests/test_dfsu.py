@@ -11,6 +11,9 @@ from mikeio.custom_exceptions import InvalidGeometry
 from mikeio.eum import ItemInfo
 from pytest import approx
 
+from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.spatial.grid_geometry import Grid2D
+
 
 def test_repr():
     filename = "tests/testdata/HD2D.dfsu"
@@ -1339,3 +1342,82 @@ def test_dataset_interp():
     assert dai.name == da.name
     assert dai.geometry.x == x
     assert dai.geometry.y == y
+
+
+def test_interp_like_grid():
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    ws = ds[0]
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+    ws_grid = ws.interp_like(grid)
+    assert ws_grid.n_timesteps == ds.n_timesteps
+    assert isinstance(ws_grid, DataArray)
+    assert isinstance(ws_grid.geometry, Grid2D)
+
+
+def test_interp_like_dataarray(tmpdir):
+
+    outfilename = os.path.join(tmpdir, "interp.dfs2")
+
+    da = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")[0]
+    da2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time_steps=[0, 1])[0]
+
+    dai = da.interp_like(da2)
+    assert isinstance(dai, DataArray)
+    assert isinstance(dai.geometry, Grid2D)
+    assert dai.n_timesteps == da2.n_timesteps
+    assert dai.end_time == da2.end_time
+
+    dae = da.interp_like(da2, extrapolate=True)
+    assert isinstance(dae, DataArray)
+    assert isinstance(dae.geometry, Grid2D)
+    assert dae.n_timesteps == da2.n_timesteps
+    assert dae.end_time == da2.end_time
+
+
+def test_interp_like_dataset(tmpdir):
+
+    outfilename = os.path.join(tmpdir, "interp.dfs2")
+
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time_steps=[0, 1])
+
+    dsi = ds.interp_like(ds2)
+    assert isinstance(dsi, Dataset)
+    assert isinstance(dsi.geometry, Grid2D)
+    assert dsi.n_timesteps == ds2.n_timesteps
+    assert dsi.end_time == ds2.end_time
+
+    outfilename = os.path.join(tmpdir, "interp.dfs2")
+    dsi.to_dfs(outfilename)
+
+    dse = ds.interp_like(ds2, extrapolate=True)
+
+    outfilename = os.path.join(tmpdir, "extrap.dfs2")
+    dse.to_dfs(outfilename)
+
+
+def test_interp_like_fm():
+    msh = Mesh("tests/testdata/north_sea_2.mesh")
+    geometry = msh.geometry
+    assert isinstance(geometry, GeometryFM)
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    ws = ds[0]
+    wsi = ws.interp_like(geometry)
+    assert isinstance(wsi, DataArray)
+    assert isinstance(wsi.geometry, GeometryFM)
+
+    wsi2 = ws.interp_like(geometry, n_nearest=5, extrapolate=True)
+    assert isinstance(wsi2, DataArray)
+    assert isinstance(wsi2.geometry, GeometryFM)
+
+
+def test_interp_like_fm_dataset():
+    msh = Mesh("tests/testdata/north_sea_2.mesh")
+    geometry = msh.geometry
+    assert isinstance(geometry, GeometryFM)
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    dsi = ds.interp_like(geometry)
+    assert isinstance(dsi, Dataset)
+    assert isinstance(dsi.geometry, GeometryFM)
