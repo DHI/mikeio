@@ -170,17 +170,6 @@ def test_read_spectrum_line_elements(dfsu_line):
     assert np.all(ds1[0].to_numpy()[:, nodes, ...] == ds2[0].to_numpy())
 
 
-def test_spectrum_line_sel(dfsu_line):
-    ds1 = dfsu_line.read()
-    assert ds1.dims == ("time", "node", "frequency", "direction")
-
-    nodes = [3, 4, 5, 6]
-    ds2 = dfsu_line.read(elements=nodes)
-
-    ds3 = ds1.sel(node=nodes)
-    assert ds3.shape == ds2.shape
-
-
 def test_spectrum_line_isel(dfsu_line):
     ds1 = dfsu_line.read()
     assert ds1.dims == ("time", "node", "frequency", "direction")
