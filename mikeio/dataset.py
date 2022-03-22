@@ -1365,9 +1365,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     ) -> "Dataset":
         """Interpolate in space (and in time) to other geometry (and time axis)
 
+        Note: currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d Datasets
+
         Parameters
         ----------
         other: Dataset, DataArray, Grid2D, GeometryFM
+        kwargs: additional kwargs are passed to interpolation method
 
         Examples
         --------
@@ -1380,7 +1384,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            Interpolated dataset
+            Interpolated Dataset
         """
 
         if hasattr(other, "geometry"):

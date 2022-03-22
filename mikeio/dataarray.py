@@ -1027,17 +1027,24 @@ class DataArray(DataUtilsMixin, TimeSeries):
     ) -> "DataArray":
         """Interpolate in space (and in time) to other geometry (and time axis)
 
+        Note: currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d DataArrays
+
         Parameters
         ----------
         other: Dataset, DataArray, Grid2D, GeometryFM
         interpolant, optional
             Reuse pre-calculated index and weights
+        kwargs: additional kwargs are passed to interpolation method
 
         Returns
         -------
         DataArray
-            Interpolated dataarray
+            Interpolated DataArray
         """
+
+        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+            raise NotImplementedError("Currently only supports 2d flexible mesh data!")
 
         if hasattr(other, "geometry"):
             geom = other.geometry
