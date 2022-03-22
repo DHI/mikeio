@@ -494,7 +494,12 @@ class GeometryFM(_Geometry):
         )
 
     def get_2d_interpolant(
-        self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
+        self,
+        xy,
+        n_nearest: int = 5,
+        extrapolate: bool = False,
+        p: int = 2,
+        radius: float = None,
     ):
         """IDW interpolant for list of coordinates
 
@@ -503,9 +508,9 @@ class GeometryFM(_Geometry):
         xy : array-like
             x,y coordinates of new points
         n_nearest : int, optional
-            [description], by default 1
+            number of nearest elements used for IDW, by default 5
         extrapolate : bool, optional
-            allow , by default False
+            allow extrapolation, by default False
         p : float, optional
             power of inverse distance weighting, default=2
         radius: float, optional

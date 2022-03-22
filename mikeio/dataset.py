@@ -1358,6 +1358,64 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return ds
 
+    def interp_like(
+        self,
+        other: Union["Dataset", DataArray, Grid2D, GeometryFM, pd.DatetimeIndex],
+        **kwargs,
+    ) -> "Dataset":
+        """Interpolate in space (and in time) to other geometry (and time axis)
+
+        Note: currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d Datasets
+
+        Parameters
+        ----------
+        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        kwargs: additional kwargs are passed to interpolation method
+
+        Examples
+        --------
+        >>> ds = mikeio.read("HD.dfsu")
+        >>> ds2 = mikeio.read("wind.dfs2")
+        >>> dsi = ds.interp_like(ds2)
+        >>> dsi.to_dfs("HD_gridded.dfs2")
+        >>> dse = ds.interp_like(ds2, extrapolate=True)
+        >>> dst = ds.interp_like(ds2.time)
+
+        Returns
+        -------
+        Dataset
+            Interpolated Dataset
+        """
+        if isinstance(other, pd.DatetimeIndex):
+            return self.interp_time(other, **kwargs)
+
+        if hasattr(other, "geometry"):
+            geom = other.geometry
+        else:
+            geom = other
+
+        if isinstance(geom, Grid2D):
+            xy = geom.xy
+
+        elif isinstance(geom, GeometryFM):
+            xy = geom.element_coordinates[:, :2]
+            if geom.is_layered:
+                raise NotImplementedError(
+                    "Does not yet support layered flexible mesh data!"
+                )
+        else:
+            raise NotImplementedError()
+
+        interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+        das = [da.interp_like(geom, interpolant=interpolant) for da in self]
+        ds = Dataset(das)
+
+        if hasattr(other, "time"):
+            ds = ds.interp_time(other.time)
+
+        return ds
+
     def interp_time(
         self,
         dt: Union[float, pd.DatetimeIndex, "Dataset"],
@@ -1412,6 +1470,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
+        # TODO: it would be more efficient to interp all data at once!
         data = [
             self._interpolate_time(
                 t_in, t_out, da.to_numpy(), method, extrapolate, fill_value

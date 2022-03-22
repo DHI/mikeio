@@ -1014,30 +1014,78 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data,
             t_out_index,
-            item=self.item.copy(),
+            item=deepcopy(self.item),
             geometry=self.geometry,
             zn=zn,
         )
 
     def interp_like(
-        # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
-        grid: Union[
-            Tuple[float, float], Sequence[Tuple[float, float]], Grid2D, GeometryFM
-        ],
+        other: Union["DataArray", Grid2D, GeometryFM, pd.DatetimeIndex],
+        interpolant=None,
         **kwargs,
     ) -> "DataArray":
+        """Interpolate in space (and in time) to other geometry (and time axis)
 
-        if isinstance(grid, Grid2D):
-            interpolant = self.geometry.get_spatial_interpolant(grid.xy, **kwargs)
-            dai = self.geometry.interp2d(
-                self.to_numpy(), *interpolant, shape=(grid.ny, grid.nx)
-            )
-            dai = DataArray(data=dai, time=self.time, geometry=grid, item=self.item)
+        Note: currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d DataArrays
 
-            return dai
+        Parameters
+        ----------
+        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        interpolant, optional
+            Reuse pre-calculated index and weights
+        kwargs: additional kwargs are passed to interpolation method
+
+        Examples
+        --------
+        >>> dai = da.interp_like(da2)
+        >>> dae = da.interp_like(da2, extrapolate=True)
+        >>> dat = da.interp_like(da2.time)
+
+        Returns
+        -------
+        DataArray
+            Interpolated DataArray
+        """
+        if isinstance(other, pd.DatetimeIndex):
+            return self.interp_time(other, **kwargs)
+
+        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+            raise NotImplementedError("Currently only supports 2d flexible mesh data!")
+
+        if hasattr(other, "geometry"):
+            geom = other.geometry
+        else:
+            geom = other
+
+        if isinstance(geom, Grid2D):
+            xy = geom.xy
+        elif isinstance(geom, GeometryFM):
+            xy = geom.element_coordinates[:, :2]
+            if geom.is_layered:
+                raise NotImplementedError(
+                    "Does not yet support layered flexible mesh data!"
+                )
         else:
             raise NotImplementedError()
+
+        if interpolant is None:
+            interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+
+        if isinstance(geom, Grid2D):
+            dai = self.geometry.interp2d(
+                self.to_numpy(), *interpolant, shape=(geom.ny, geom.nx)
+            )
+        else:
+            dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
+
+        dai = DataArray(data=dai, time=self.time, geometry=geom, item=self.item)
+
+        if hasattr(other, "time"):
+            dai = dai.interp_time(other.time)
+
+        return dai
 
     def isel(self, idx=None, axis=1, **kwargs):
         """
