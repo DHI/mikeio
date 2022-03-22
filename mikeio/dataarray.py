@@ -1021,7 +1021,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     def interp_like(
         self,
-        other: Union["DataArray", Grid2D, GeometryFM],
+        other: Union["DataArray", Grid2D, GeometryFM, pd.DatetimeIndex],
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1032,16 +1032,24 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM
+        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
         interpolant, optional
             Reuse pre-calculated index and weights
         kwargs: additional kwargs are passed to interpolation method
+
+        Examples
+        --------
+        >>> dai = da.interp_like(da2)
+        >>> dae = da.interp_like(da2, extrapolate=True)
+        >>> dat = da.interp_like(da2.time)
 
         Returns
         -------
         DataArray
             Interpolated DataArray
         """
+        if isinstance(other, pd.DatetimeIndex):
+            return self.interp_time(other, **kwargs)
 
         if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
             raise NotImplementedError("Currently only supports 2d flexible mesh data!")

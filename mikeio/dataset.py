@@ -1360,7 +1360,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def interp_like(
         self,
-        other: Union["Dataset", DataArray, Grid2D, GeometryFM],
+        other: Union["Dataset", DataArray, Grid2D, GeometryFM, pd.DatetimeIndex],
         **kwargs,
     ) -> "Dataset":
         """Interpolate in space (and in time) to other geometry (and time axis)
@@ -1370,22 +1370,25 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM
+        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
         kwargs: additional kwargs are passed to interpolation method
 
         Examples
         --------
         >>> ds = mikeio.read("HD.dfsu")
         >>> ds2 = mikeio.read("wind.dfs2")
-        >>> dsi= ds.interp_like(ds2)
+        >>> dsi = ds.interp_like(ds2)
         >>> dsi.to_dfs("HD_gridded.dfs2")
-        >>> dse= ds.interp_like(ds2, extrapolate=True)
+        >>> dse = ds.interp_like(ds2, extrapolate=True)
+        >>> dst = ds.interp_like(ds2.time)
 
         Returns
         -------
         Dataset
             Interpolated Dataset
         """
+        if isinstance(other, pd.DatetimeIndex):
+            return self.interp_time(other, **kwargs)
 
         if hasattr(other, "geometry"):
             geom = other.geometry
@@ -1467,6 +1470,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
+        # TODO: it would be more efficient to interp all data at once!
         data = [
             self._interpolate_time(
                 t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
