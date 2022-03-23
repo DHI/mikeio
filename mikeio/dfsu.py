@@ -699,29 +699,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             seconds=((self.n_timesteps - 1) * self.timestep)
         )
 
-    def _get_spectral_data_shape(self, n_steps: int, elements):
-
-        n_freq = self.n_frequencies
-        n_dir = self.n_directions
-        shape = (n_dir, n_freq)
-        if n_dir == 0:
-            shape = [n_freq]
-        elif n_freq == 0:
-            shape = [n_dir]
-        if self._type == DfsuFileType.DfsuSpectral0D:
-            data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
-        elif self._type == DfsuFileType.DfsuSpectral1D:
-            # node-based, FE-style
-            n_nodes = self.n_nodes if elements is None else len(elements)
-            data = np.ndarray(shape=(n_steps, n_nodes, *shape), dtype=self._dtype)
-            shape = (*shape, self.n_nodes)
-        else:
-            n_elems = self.n_elements if elements is None else len(elements)
-            data = np.ndarray(shape=(n_steps, n_elems, *shape), dtype=self._dtype)
-            shape = (*shape, self.n_elements)
-
-        return data, shape
-
     def read(self, *, items=None, time=None, time_steps=None, elements=None) -> Dataset:
         """
         Read data from a dfsu file
@@ -787,6 +764,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             n_nodes = self.n_nodes
             geometry = self.geometry
         else:
+            elements = [elements] if np.isscalar(elements) else elements
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
             if self.is_layered:  # and items[0].name == "Z coordinate":
@@ -800,7 +778,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if self.is_layered:
             # we need the zn item too
             item_numbers = [it + 1 for it in item_numbers]
-            if geometry.is_layered:
+            if hasattr(geometry, "is_layered") and geometry.is_layered:
                 item_numbers.insert(0, 0)
         n_items = len(item_numbers)
 
@@ -812,11 +790,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         item0_is_node_based = False
         for item in range(n_items):
             # Initialize an empty data block
-            if self.is_spectral:
-                data, shape = self._get_spectral_data_shape(n_steps, elements=elements)
-            elif (
-                geometry.is_layered and item == 0
-            ):  # and items[item].name == "Z coordinate":
+            if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
+                # and items[item].name == "Z coordinate":
                 item0_is_node_based = True
                 data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
             else:
@@ -836,16 +811,9 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 d = itemdata.Data
                 d[d == deletevalue] = np.nan
 
-                if self.is_spectral:
-                    d = np.reshape(d, newshape=shape)
-                    if self._type != DfsuFileType.DfsuSpectral0D:
-                        d = np.moveaxis(d, -1, 0)
-
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
                         d = d[node_ids]
-                    elif self.is_spectral:
-                        d = d[elements, ...]
                     else:
                         d = d[elements]
 
@@ -862,11 +830,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         dims = ("time", "element") if not single_time_selected else ("element",)
 
-        if self.is_spectral:
-            # TODO add something like ("time", "freq", "dir", "element")
-            dims = None
-
-        if geometry.is_layered:
+        if hasattr(geometry, "is_layered") and geometry.is_layered:
             return Dataset(
                 data_list[1:],  # skip zn item
                 time,
@@ -876,12 +840,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 dims=dims,
             )
         else:
-            if (self._type == DfsuFileType.DfsuSpectral1D) and (elements is not None):
-                # TODO: fix this
-                warnings.warn(
-                    "Geometry is not supported when reading specific nodes from a DfsuSpectral1D."
-                )
-                geometry = None
             return Dataset(data_list, time, items, geometry=geometry, dims=dims)
 
     def write_header(
