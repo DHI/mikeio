@@ -174,7 +174,7 @@ def test_spectrum_line_isel(dfsu_line):
     ds1 = dfsu_line.read()
     assert ds1.dims == ("time", "node", "frequency", "direction")
 
-    nodes = [3, 4, 5, 6]
+    nodes = [3, 4, 5]
     ds2 = dfsu_line.read(nodes=nodes)
 
     ds3 = ds1.isel(nodes, axis=1)
@@ -193,10 +193,10 @@ def test_spectrum_line_getitem(dfsu_line):
     da1 = dfsu_line.read()[0]
     assert da1.dims == ("time", "node", "frequency", "direction")
 
-    # nodes = [3, 4, 5, 6]
-    # da2 = dfsu_line.read(nodes=nodes)[0]
-    # da3 = da1[:, nodes]
-    # assert da3.shape == da2.shape
+    nodes = [3, 4, 5]
+    da2 = dfsu_line.read(nodes=nodes)[0]
+    da3 = da1[:, nodes]
+    assert da3.shape == da2.shape
 
     node = 3
     da2 = dfsu_line.read(nodes=node)[0]
