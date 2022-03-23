@@ -490,15 +490,23 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 else:
                     elements = np.atleast_1d(elements)
                 if len(elements) == 1:
-                    coords = geometry.element_coordinates[elements].flatten()
+                    if self.geometry._type == DfsuFileType.DfsuSpectral1D:
+                        coords = geometry.node_coordinates[elements].flatten()
+                        dims = tuple([d for d in dims if d != "node"])
+                    else:
+                        coords = geometry.element_coordinates[elements].flatten()
+                        dims = tuple([d for d in dims if d != "element"])
                     if geometry.is_layered:
                         geometry = GeometryPoint3D(*coords)
                     else:
                         geometry = GeometryPoint2D(coords[0], coords[1])
                     zn = None
-                    dims = tuple([d for d in dims if d != "element"])
+                    
                 else:
-                    geometry = self.geometry.elements_to_geometry(elements)
+                    if self.geometry._type == DfsuFileType.DfsuSpectral1D:
+                        geometry = self.geometry._nodes_to_geometry(elements)
+                    else:
+                        geometry = self.geometry.elements_to_geometry(elements)
 
                 if isinstance(self.geometry, GeometryFMLayered):
                     if isinstance(geometry, GeometryFMLayered):
