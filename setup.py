@@ -8,7 +8,7 @@ setuptools.setup(
     version="1.0.a1",
     install_requires=[
         "mikecore>=0.2.0",
-        "numpy>=1.15.0.",  # first version with numpy.quantile
+        "numpy>=1.15.0",  # first version with numpy.quantile
         "pandas>1.0",
         "scipy>1.0",
         "pyyaml",

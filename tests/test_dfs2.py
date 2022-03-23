@@ -227,6 +227,16 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert dfs.n_timesteps == 31
 
 
+def test_dir_wave_spectra_relative_time_axis():
+    ds = mikeio.read("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    assert ds.n_items == 1
+    assert ds.geometry.nx == 128
+    assert ds.geometry.ny == 37
+    assert ds.n_timesteps == 1
+    da = ds["Directional spectrum [1]"]
+    assert da.type == EUMType._3D_Surface_Elevation_Spectrum
+
+
 def test_properties_rotated(dfs2_gebco_rotate):
     dfs = dfs2_gebco_rotate
     assert dfs.x0 == 0
