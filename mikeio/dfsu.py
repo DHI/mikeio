@@ -713,14 +713,14 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         elif self._type == DfsuFileType.DfsuSpectral1D:
             # node-based, FE-style
             n_nodes = self.n_nodes if elements is None else len(elements)
-            if n_nodes==1:
+            if n_nodes == 1:
                 data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
             else:
                 data = np.ndarray(shape=(n_steps, n_nodes, *shape), dtype=self._dtype)
             shape = (*shape, self.n_nodes)
         else:
             n_elems = self.n_elements if elements is None else len(elements)
-            if n_elems==1:
+            if n_elems == 1:
                 data = np.ndarray(shape=(n_steps, *shape), dtype=self._dtype)
             else:
                 data = np.ndarray(shape=(n_steps, n_elems, *shape), dtype=self._dtype)
