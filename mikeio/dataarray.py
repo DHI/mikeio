@@ -501,7 +501,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                     else:
                         geometry = GeometryPoint2D(coords[0], coords[1])
                     zn = None
-                    
+
                 else:
                     if self.geometry._type == DfsuFileType.DfsuSpectral1D:
                         geometry = self.geometry._nodes_to_geometry(elements)

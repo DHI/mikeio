@@ -768,9 +768,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
             if self.is_layered:  # and items[0].name == "Z coordinate":
-                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
-                    elements
-                )
+                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(elements)
                 n_nodes = len(node_ids)
 
         item_numbers = _valid_item_numbers(
@@ -792,7 +790,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         item0_is_node_based = False
         for item in range(n_items):
             # Initialize an empty data block
-            if (geometry.is_layered and item == 0):  
+            if geometry.is_layered and item == 0:
                 # and items[item].name == "Z coordinate":
                 item0_is_node_based = True
                 data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
