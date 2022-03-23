@@ -204,6 +204,40 @@ def test_spectrum_line_getitem(dfsu_line):
     assert da3.shape == da2.shape
 
 
+def test_spectrum_area_isel(dfsu_area):
+    ds1 = dfsu_area.read()
+    assert ds1.dims == ("time", "element", "frequency", "direction")
+
+    elements = [7, 8, 9, 10, 11, 12]
+    ds2 = dfsu_area.read(elements=elements)
+
+    ds3 = ds1.isel(elements, axis=1)
+    assert ds3.shape == ds2.shape
+
+    ds4 = ds1.isel(elements, axis="element")
+    assert ds4.shape == ds2.shape
+
+    element = 3
+    ds5 = dfsu_area.read(elements=element)
+    ds6 = ds1.isel(element, axis=1)
+    assert ds6.shape == ds5.shape
+
+
+def test_spectrum_area_getitem(dfsu_area):
+    da1 = dfsu_area.read()[0]
+    assert da1.dims == ("time", "element", "frequency", "direction")
+
+    elements = [7, 8, 9, 10, 11, 12]
+    da2 = dfsu_area.read(elements=elements)[0]
+    # da3 = da1[:, elements]   # TODO: requires refactor of getitem
+    # assert da3.shape == da2.shape
+
+    element = 3
+    da2 = dfsu_area.read(elements=element)[0]
+    da3 = da1[:, element]
+    assert da3.shape == da2.shape
+
+
 def test_read_spectrum_dir_line(dfsu_line_dir):
     dfs = dfsu_line_dir
     assert dfs.n_frequencies == 0
