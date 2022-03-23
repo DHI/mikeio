@@ -778,7 +778,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if self.is_layered:
             # we need the zn item too
             item_numbers = [it + 1 for it in item_numbers]
-            if geometry.is_layered:
+            if hasattr(geometry, "is_layered") and geometry.is_layered:
                 item_numbers.insert(0, 0)
         n_items = len(item_numbers)
 
@@ -790,7 +790,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         item0_is_node_based = False
         for item in range(n_items):
             # Initialize an empty data block
-            if geometry.is_layered and item == 0:
+            if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
                 # and items[item].name == "Z coordinate":
                 item0_is_node_based = True
                 data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
@@ -830,7 +830,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         dims = ("time", "element") if not single_time_selected else ("element",)
 
-        if geometry.is_layered:
+        if hasattr(geometry, "is_layered") and geometry.is_layered:
             return Dataset(
                 data_list[1:],  # skip zn item
                 time,
