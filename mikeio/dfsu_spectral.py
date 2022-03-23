@@ -1,3 +1,4 @@
+from typing import Union
 import numpy as np
 import pandas as pd
 import warnings
@@ -372,12 +373,14 @@ class DfsuSpectral(_Dfsu):
 
         return ax
 
-    def calc_Hm0_from_spectrum(self, spectrum, tail=True):
+    def calc_Hm0_from_spectrum(
+        self, spectrum: Union[np.ndarray, DataArray], tail=True
+    ) -> np.ndarray:
         """Calculate significant wave height (Hm0) from spectrum
 
         Parameters
         ----------
-        spectrum : np.ndarray
+        spectrum : np.ndarray, DataArray
             frequency or direction-frequency spectrum
         tail : bool, optional
             Should a parametric spectral tail be added in the computations? by default True
@@ -390,9 +393,19 @@ class DfsuSpectral(_Dfsu):
         # if not self.is_spectral:
         #    raise ValueError("Method only supported for spectral dfsu!")
 
-        m0 = self._calc_m0_from_spectrum(
-            spectrum, self.frequencies, self.directions, tail, m0_only=True
-        )
+        if isinstance(spectrum, DataArray):
+            m0 = self._calc_m0_from_spectrum(
+                spectrum.to_numpy(),
+                self.frequencies,
+                self.directions,
+                tail,
+                m0_only=True,
+            )
+        else:
+
+            m0 = self._calc_m0_from_spectrum(
+                spectrum, self.frequencies, self.directions, tail, m0_only=True
+            )
         return 4 * np.sqrt(m0)
 
     @staticmethod

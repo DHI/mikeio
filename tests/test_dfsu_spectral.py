@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from mikeio import Dfsu, eum
 from mikecore.DfsuFile import DfsuFileType
 
+from mikeio.dfsu_spectral import DfsuSpectral
+
 
 @pytest.fixture
 def dfsu_pt():
@@ -265,13 +267,21 @@ def test_calc_frequency_bin_sizes(dfsu_line):
 
 
 def test_calc_Hm0_from_spectrum_line(dfsu_line):
-    dfs = dfsu_line
+    dfs: DfsuSpectral = dfsu_line
     assert dfs.n_elements == 9
     assert dfs.n_nodes == 10
     ds = dfs.read()
     assert ds.shape == (4, 10, 16, 25)
 
     Hm0 = dfs.calc_Hm0_from_spectrum(ds[0].to_numpy())
+    assert Hm0.shape == (4, 10)
+    assert np.all(~np.isnan(Hm0[:, 3:9]))
+    assert np.all(np.isnan(Hm0[:, :3]))  # outside domain
+    assert np.nanmin(Hm0) >= 0
+    assert np.nanmax(Hm0) == pytest.approx(2.719780549)
+
+    # DataArray works as well
+    Hm0 = dfs.calc_Hm0_from_spectrum(ds[0])
     assert Hm0.shape == (4, 10)
     assert np.all(~np.isnan(Hm0[:, 3:9]))
     assert np.all(np.isnan(Hm0[:, :3]))  # outside domain
