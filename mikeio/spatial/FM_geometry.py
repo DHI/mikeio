@@ -991,7 +991,10 @@ class GeometryFM(_Geometry):
         """
         assert not self.is_layered, "not supported for layered data"
 
-        nodes = [nodes] if np.isscalar(nodes) else nodes
+        nodes = np.atleast_1d(nodes)
+        if len(nodes) == 1:
+            xy = self.node_coordinates[nodes[0], :2]
+            return GeometryPoint2D(xy[0], xy[1])
 
         elements = []
         for j, el_nodes in enumerate(self.element_table):
