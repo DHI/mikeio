@@ -494,7 +494,12 @@ class GeometryFM(_Geometry):
         )
 
     def get_2d_interpolant(
-        self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
+        self,
+        xy,
+        n_nearest: int = 5,
+        extrapolate: bool = False,
+        p: int = 2,
+        radius: float = None,
     ):
         """IDW interpolant for list of coordinates
 
@@ -503,9 +508,9 @@ class GeometryFM(_Geometry):
         xy : array-like
             x,y coordinates of new points
         n_nearest : int, optional
-            [description], by default 1
+            number of nearest elements used for IDW, by default 5
         extrapolate : bool, optional
-            allow , by default False
+            allow extrapolation, by default False
         p : float, optional
             power of inverse distance weighting, default=2
         radius: float, optional
@@ -873,7 +878,10 @@ class GeometryFM(_Geometry):
             else:
                 return GeometryPoint2D(coords[0], coords[1])
         else:
-            return self.elements_to_geometry(elements=idx, node_layers=None)
+            if self._type == DfsuFileType.DfsuSpectral1D:
+                return self._nodes_to_geometry(nodes=idx)
+            else:
+                return self.elements_to_geometry(elements=idx, node_layers=None)
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layer=None):
 
@@ -966,6 +974,52 @@ class GeometryFM(_Geometry):
 
         return np.where(mask)[0]
 
+    def _nodes_to_geometry(self, nodes) -> "GeometryFM":
+        """export a selection of nodes to new flexible file geometry
+
+        Note: takes only the elements for which all nodes are selected
+
+        Parameters
+        ----------
+        nodes : list(int)
+            list of node ids
+
+        Returns
+        -------
+        UnstructuredGeometry
+            which can be used for further extraction or saved to file
+        """
+        assert not self.is_layered, "not supported for layered data"
+
+        nodes = np.atleast_1d(nodes)
+        if len(nodes) == 1:
+            xy = self.node_coordinates[nodes[0], :2]
+            return GeometryPoint2D(xy[0], xy[1])
+
+        elements = []
+        for j, el_nodes in enumerate(self.element_table):
+            if np.all(np.isin(el_nodes, nodes)):
+                elements.append(j)
+
+        assert len(elements) > 0, "no elements found"
+        elements = np.sort(elements)  # make sure elements are sorted!
+
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
+        node_coords = self.node_coordinates[node_ids]
+        codes = self.codes[node_ids]
+
+        geom = GeometryFM(
+            node_coordinates=node_coords,
+            codes=codes,
+            node_ids=node_ids,
+            projection=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=self.element_ids[elements],
+        )
+        geom._reindex()
+        geom._type = self._type
+        return geom
+
     def elements_to_geometry(
         self, elements, node_layers="all"
     ) -> Union["GeometryFM", "GeometryFMLayered"]:
@@ -984,7 +1038,14 @@ class GeometryFM(_Geometry):
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        elements = [elements] if np.isscalar(elements) else elements
+        elements = np.atleast_1d(elements)
+        if len(elements) == 1:
+            coords = self.element_coordinates[elements[0], :]
+            if self.is_layered:
+                return GeometryPoint3D(*coords)
+            else:
+                return GeometryPoint2D(coords[0], coords[1])
+
         elements = np.sort(elements)  # make sure elements are sorted!
 
         # create new geometry

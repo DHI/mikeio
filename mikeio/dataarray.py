@@ -490,15 +490,23 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 else:
                     elements = np.atleast_1d(elements)
                 if len(elements) == 1:
-                    coords = geometry.element_coordinates[elements].flatten()
+                    if self.geometry._type == DfsuFileType.DfsuSpectral1D:
+                        coords = geometry.node_coordinates[elements].flatten()
+                        dims = tuple([d for d in dims if d != "node"])
+                    else:
+                        coords = geometry.element_coordinates[elements].flatten()
+                        dims = tuple([d for d in dims if d != "element"])
                     if geometry.is_layered:
                         geometry = GeometryPoint3D(*coords)
                     else:
                         geometry = GeometryPoint2D(coords[0], coords[1])
                     zn = None
-                    dims = tuple([d for d in dims if d != "element"])
+
                 else:
-                    geometry = self.geometry.elements_to_geometry(elements)
+                    if self.geometry._type == DfsuFileType.DfsuSpectral1D:
+                        geometry = self.geometry._nodes_to_geometry(elements)
+                    else:
+                        geometry = self.geometry.elements_to_geometry(elements)
 
                 if isinstance(self.geometry, GeometryFMLayered):
                     if isinstance(geometry, GeometryFMLayered):
@@ -1014,32 +1022,80 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data,
             t_out_index,
-            item=self.item.copy(),
+            item=deepcopy(self.item),
             geometry=self.geometry,
             zn=zn,
         )
 
     def interp_like(
-        # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
-        grid: Union[
-            Tuple[float, float], Sequence[Tuple[float, float]], Grid2D, GeometryFM
-        ],
+        other: Union["DataArray", Grid2D, GeometryFM, pd.DatetimeIndex],
+        interpolant=None,
         **kwargs,
     ) -> "DataArray":
+        """Interpolate in space (and in time) to other geometry (and time axis)
 
-        if isinstance(grid, Grid2D):
-            interpolant = self.geometry.get_spatial_interpolant(grid.xy, **kwargs)
-            dai = self.geometry.interp2d(
-                self.to_numpy(), *interpolant, shape=(grid.ny, grid.nx)
-            )
-            dai = DataArray(data=dai, time=self.time, geometry=grid, item=self.item)
+        Note: currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d DataArrays
 
-            return dai
+        Parameters
+        ----------
+        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        interpolant, optional
+            Reuse pre-calculated index and weights
+        kwargs: additional kwargs are passed to interpolation method
+
+        Examples
+        --------
+        >>> dai = da.interp_like(da2)
+        >>> dae = da.interp_like(da2, extrapolate=True)
+        >>> dat = da.interp_like(da2.time)
+
+        Returns
+        -------
+        DataArray
+            Interpolated DataArray
+        """
+        if isinstance(other, pd.DatetimeIndex):
+            return self.interp_time(other, **kwargs)
+
+        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+            raise NotImplementedError("Currently only supports 2d flexible mesh data!")
+
+        if hasattr(other, "geometry"):
+            geom = other.geometry
+        else:
+            geom = other
+
+        if isinstance(geom, Grid2D):
+            xy = geom.xy
+        elif isinstance(geom, GeometryFM):
+            xy = geom.element_coordinates[:, :2]
+            if geom.is_layered:
+                raise NotImplementedError(
+                    "Does not yet support layered flexible mesh data!"
+                )
         else:
             raise NotImplementedError()
 
-    def isel(self, idx, axis=1):
+        if interpolant is None:
+            interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+
+        if isinstance(geom, Grid2D):
+            dai = self.geometry.interp2d(
+                self.to_numpy(), *interpolant, shape=(geom.ny, geom.nx)
+            )
+        else:
+            dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
+
+        dai = DataArray(data=dai, time=self.time, geometry=geom, item=self.item)
+
+        if hasattr(other, "time"):
+            dai = dai.interp_time(other.time)
+
+        return dai
+
+    def isel(self, idx=None, axis=1, **kwargs):
         """
         Select subset along an axis.
 
@@ -1055,6 +1111,19 @@ class DataArray(DataUtilsMixin, TimeSeries):
             data with subset
 
         """
+        for dim in kwargs:
+            if dim in self.dims:
+                axis = dim
+                if idx is not None:
+                    raise NotImplementedError(
+                        "Selecting on multiple dimensions in the same call, not yet implemented"
+                    )
+                idx = kwargs[dim]
+            else:
+                raise ValueError(f"{dim} is not present in {self.dims}")
+
+        single_index = np.isscalar(idx) or len(idx) == 1
+
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             return None
 
@@ -1079,9 +1148,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 )
                 zn = self._zn[:, node_ids]
 
-        x = np.take(self.values, idx, axis=axis)
+        if single_index:
+            x = np.take(self.values, int(idx), axis=axis)
+        else:
+            x = np.take(self.values, idx, axis=axis)
 
-        if np.isscalar(idx) or len(idx) == 1:
+        if single_index:
             # reduce dims only if singleton idx
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
         else:

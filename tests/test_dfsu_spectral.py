@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from mikeio import Dfsu, eum
 from mikecore.DfsuFile import DfsuFileType
 
+from mikeio.dfsu_spectral import DfsuSpectral
+
 
 @pytest.fixture
 def dfsu_pt():
@@ -165,9 +167,77 @@ def test_read_spectrum_line_elements(dfsu_line):
     ds1 = dfs.read()
 
     nodes = [3, 4, 5, 6]
-    ds2 = dfs.read(elements=nodes)
+    ds2 = dfs.read(nodes=nodes)
     assert ds2.shape[1] == len(nodes)
     assert np.all(ds1[0].to_numpy()[:, nodes, ...] == ds2[0].to_numpy())
+
+
+def test_spectrum_line_isel(dfsu_line):
+    ds1 = dfsu_line.read()
+    assert ds1.dims == ("time", "node", "frequency", "direction")
+
+    nodes = [3, 4, 5]
+    ds2 = dfsu_line.read(nodes=nodes)
+
+    ds3 = ds1.isel(nodes, axis=1)
+    assert ds3.shape == ds2.shape
+
+    ds4 = ds1.isel(nodes, axis="node")
+    assert ds4.shape == ds2.shape
+
+    node = 3
+    ds5 = dfsu_line.read(nodes=node)
+    ds6 = ds1.isel(node, axis=1)
+    assert ds6.shape == ds5.shape
+
+
+def test_spectrum_line_getitem(dfsu_line):
+    da1 = dfsu_line.read()[0]
+    assert da1.dims == ("time", "node", "frequency", "direction")
+
+    nodes = [3, 4, 5]
+    da2 = dfsu_line.read(nodes=nodes)[0]
+    # da3 = da1[:, nodes]   # TODO: requires refactor of getitem
+    # assert da3.shape == da2.shape
+
+    node = 3
+    da2 = dfsu_line.read(nodes=node)[0]
+    da3 = da1[:, node]
+    assert da3.shape == da2.shape
+
+
+def test_spectrum_area_isel(dfsu_area):
+    ds1 = dfsu_area.read()
+    assert ds1.dims == ("time", "element", "frequency", "direction")
+
+    elements = [7, 8, 9, 10, 11, 12]
+    ds2 = dfsu_area.read(elements=elements)
+
+    ds3 = ds1.isel(elements, axis=1)
+    assert ds3.shape == ds2.shape
+
+    ds4 = ds1.isel(elements, axis="element")
+    assert ds4.shape == ds2.shape
+
+    element = 3
+    ds5 = dfsu_area.read(elements=element)
+    ds6 = ds1.isel(element, axis=1)
+    assert ds6.shape == ds5.shape
+
+
+def test_spectrum_area_getitem(dfsu_area):
+    da1 = dfsu_area.read()[0]
+    assert da1.dims == ("time", "element", "frequency", "direction")
+
+    elements = [7, 8, 9, 10, 11, 12]
+    da2 = dfsu_area.read(elements=elements)[0]
+    # da3 = da1[:, elements]   # TODO: requires refactor of getitem
+    # assert da3.shape == da2.shape
+
+    element = 3
+    da2 = dfsu_area.read(elements=element)[0]
+    da3 = da1[:, element]
+    assert da3.shape == da2.shape
 
 
 def test_read_spectrum_dir_line(dfsu_line_dir):
@@ -197,13 +267,21 @@ def test_calc_frequency_bin_sizes(dfsu_line):
 
 
 def test_calc_Hm0_from_spectrum_line(dfsu_line):
-    dfs = dfsu_line
+    dfs: DfsuSpectral = dfsu_line
     assert dfs.n_elements == 9
     assert dfs.n_nodes == 10
     ds = dfs.read()
     assert ds.shape == (4, 10, 16, 25)
 
     Hm0 = dfs.calc_Hm0_from_spectrum(ds[0].to_numpy())
+    assert Hm0.shape == (4, 10)
+    assert np.all(~np.isnan(Hm0[:, 3:9]))
+    assert np.all(np.isnan(Hm0[:, :3]))  # outside domain
+    assert np.nanmin(Hm0) >= 0
+    assert np.nanmax(Hm0) == pytest.approx(2.719780549)
+
+    # DataArray works as well
+    Hm0 = dfs.calc_Hm0_from_spectrum(ds[0])
     assert Hm0.shape == (4, 10)
     assert np.all(~np.isnan(Hm0[:, 3:9]))
     assert np.all(np.isnan(Hm0[:, :3]))  # outside domain

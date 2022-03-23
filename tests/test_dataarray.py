@@ -2,6 +2,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
+from xarray import DataArray
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
@@ -47,7 +48,7 @@ def da_grid2d():
         data=np.zeros([nt, ny, nx]) + 0.1,
         time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
         item=ItemInfo("Foo"),
-        geometry=mikeio.Grid2D(x0=1000.0, dx=10.0, shape=(nx, ny), dy=1.0, y0=-10.0),
+        geometry=mikeio.Grid2D(x0=1000.0, dx=10.0, nx=nx, ny=ny, dy=1.0, y0=-10.0),
     )
 
     return da
@@ -239,7 +240,7 @@ def test_dataarray_init_grid2d():
     ny, nx = 7, 5
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     data = np.zeros([nt, ny, nx]) + 0.1
-    g = mikeio.Grid2D(dx=0.5, shape=(nx, ny))
+    g = mikeio.Grid2D(dx=0.5, nx=nx, ny=ny)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
     assert da.ndim == 3
     assert da.dims == ("time", "y", "x")
@@ -379,6 +380,12 @@ def test_dataarray_grid2d_indexing(da_grid2d):
 def test_timestep(da1):
 
     assert da1.timestep == 1.0
+
+
+def test_interp_time(da1):
+    da = mikeio.read("tests/testdata/HD2D.dfsu")[0]
+    dai = da.interp_time(dt=1800)
+    assert dai.timestep == 1800
 
 
 def test_dims_time(da1):
@@ -612,6 +619,26 @@ def test_da_isel_space(da_grid2d):
     da_sel = da_grid2d.isel(0, axis="t")
     assert da_sel.dims[0] == "y"
     assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
+    da_sel = da_grid2d.isel(y=0)
+    assert da_sel.dims[0] == "time"
+
+    da_sel = da_grid2d.isel(x=0)
+    assert da_sel.dims[0] == "time"
+    assert da_sel.dims[1] == "y"
+
+    da_sel = da_grid2d.isel(time=0)
+    assert da_sel.dims[0] == "y"
+    assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray):
+
+    with pytest.raises(ValueError) as excinfo:
+        da_grid2d.isel(layer=0)
+    assert "layer" in str(excinfo.value)
 
 
 def test_da_sel_layer():

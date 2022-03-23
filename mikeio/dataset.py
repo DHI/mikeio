@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from typing import Iterable, Sequence, Union, Mapping, Optional
 import warnings
@@ -981,7 +982,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     # ===== select =========
 
-    def isel(self, idx, axis=1):
+    def isel(self, idx=None, axis=0, **kwargs):
         """
         Select subset along an axis.
 
@@ -1012,45 +1013,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Shape: (3, 2)
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
-        if idx is None or (not np.isscalar(idx) and len(idx) == 0):
-            return None
+        res = [da.isel(idx=idx, axis=axis, **kwargs) for da in self]
 
-        axis = self._parse_axis(self.shape, self.dims, axis)
-        if axis == 0:
-            idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
-            time = self.time[idx]
-            items = self.items
-            geometry = self.geometry
-            zn = None if self._zn is None else self._zn[idx]
-        else:
-            time = self.time
-            items = self.items
-            geometry = None
-            zn = None
-            if hasattr(self.geometry, "isel"):
-                spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
-                geometry = self.geometry.isel(idx, axis=spatial_axis)
-            if isinstance(geometry, GeometryFMLayered):
-                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
-                    idx, node_layers="all"
-                )
-                zn = self._zn[:, node_ids]
-
-        res = []
-        for item in items:
-            x = np.take(self[item.name].to_numpy(), idx, axis=axis)
-            res.append(x)
-
-        if np.isscalar(idx):
-            # Selecting a single index, removes this dimension
-            dims = tuple(
-                [d for i, d in enumerate(self.dims) if i != axis]
-            )  # TODO we will need this in many places
-        else:
-            dims = self.dims  # multiple points, dims is intact
-        return Dataset(
-            data=res, time=time, items=items, geometry=geometry, zn=zn, dims=dims
-        )
+        return Dataset(res)
 
     # ===== aggregate =========
 
@@ -1393,6 +1358,64 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return ds
 
+    def interp_like(
+        self,
+        other: Union["Dataset", DataArray, Grid2D, GeometryFM, pd.DatetimeIndex],
+        **kwargs,
+    ) -> "Dataset":
+        """Interpolate in space (and in time) to other geometry (and time axis)
+
+        Note: currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d Datasets
+
+        Parameters
+        ----------
+        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        kwargs: additional kwargs are passed to interpolation method
+
+        Examples
+        --------
+        >>> ds = mikeio.read("HD.dfsu")
+        >>> ds2 = mikeio.read("wind.dfs2")
+        >>> dsi = ds.interp_like(ds2)
+        >>> dsi.to_dfs("HD_gridded.dfs2")
+        >>> dse = ds.interp_like(ds2, extrapolate=True)
+        >>> dst = ds.interp_like(ds2.time)
+
+        Returns
+        -------
+        Dataset
+            Interpolated Dataset
+        """
+        if isinstance(other, pd.DatetimeIndex):
+            return self.interp_time(other, **kwargs)
+
+        if hasattr(other, "geometry"):
+            geom = other.geometry
+        else:
+            geom = other
+
+        if isinstance(geom, Grid2D):
+            xy = geom.xy
+
+        elif isinstance(geom, GeometryFM):
+            xy = geom.element_coordinates[:, :2]
+            if geom.is_layered:
+                raise NotImplementedError(
+                    "Does not yet support layered flexible mesh data!"
+                )
+        else:
+            raise NotImplementedError()
+
+        interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+        das = [da.interp_like(geom, interpolant=interpolant) for da in self]
+        ds = Dataset(das)
+
+        if hasattr(other, "time"):
+            ds = ds.interp_time(other.time)
+
+        return ds
+
     def interp_time(
         self,
         dt: Union[float, pd.DatetimeIndex, "Dataset"],
@@ -1447,6 +1470,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
+        # TODO: it would be more efficient to interp all data at once!
         data = [
             self._interpolate_time(
                 t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
@@ -1526,6 +1550,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             data.append(dati.copy())
         return data
 
+    @staticmethod
+    def _validate_extension(filename, valid_extension):
+        _, ext = os.path.splitext(filename)
+        if ext != valid_extension:
+            raise ValueError(f"File extension must be {valid_extension}")
+
     def to_dfs(self, filename, **kwargs):
 
         filename = str(filename)
@@ -1534,15 +1564,19 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
             if self.ndim == 1 and self.dims[0][0] == "t":
+                self._validate_extension(filename, ".dfs0")
                 self._to_dfs0(filename, **kwargs)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
+            self._validate_extension(filename, ".dfs2")
             self._to_dfs2(filename)
 
         elif isinstance(self.geometry, Grid1D):
+            self._validate_extension(filename, ".dfs1")
             self._to_dfs1(filename)
         elif isinstance(self.geometry, GeometryFM):
+            self._validate_extension(filename, ".dfsu")
             self._to_dfsu(filename)
         else:
             raise NotImplementedError(

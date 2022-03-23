@@ -15,6 +15,7 @@ from mikeio.custom_exceptions import (
     DataDimensionMismatch,
     ItemsError,
 )
+from mikeio.spatial.grid_geometry import Grid2D
 
 
 @pytest.fixture
@@ -137,6 +138,44 @@ def test_write_single_item(tmpdir):
     assert newdfs.dy == 200.0
 
 
+def test_write_projected(tmpdir):
+
+    filename = os.path.join(tmpdir.dirname, "utm.dfs2")
+
+    nt = 100
+    ny = 2
+    nx = 3
+
+    shape = nt, ny, nx
+
+    d = np.random.random(shape)
+    d[10, :, :] = np.nan
+    d[11, :, :] = 0
+    d[12, :, :] = 1e-10
+    d[13, :, :] = 1e10
+
+    # >>> from pyproj import Proj
+    # >>> utm = Proj(32633)
+    # >>> utm(12.0, 55.0)
+    # east = 308124
+    # north = 6098907
+
+    x0 = 308124
+    y0 = 6098907
+
+    grid = Grid2D(nx=nx, ny=ny, x0=x0, y0=y0, dx=100, dy=100, projection="UTM-33")
+    da = mikeio.DataArray(
+        data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
+    )
+    da.to_dfs(filename)
+
+    ds = mikeio.read(filename)
+    assert ds.geometry.dx == 100
+    assert ds.geometry.dy == 100
+    assert ds.geometry.x0 == x0
+    assert ds.geometry.y0 == y0
+
+
 def test_read(dfs2_random):
 
     dfs = dfs2_random
@@ -186,6 +225,16 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert dfs.orientation == 0
     assert dfs.n_items == 1
     assert dfs.n_timesteps == 31
+
+
+def test_dir_wave_spectra_relative_time_axis():
+    ds = mikeio.read("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    assert ds.n_items == 1
+    assert ds.geometry.nx == 128
+    assert ds.geometry.ny == 37
+    assert ds.n_timesteps == 1
+    da = ds["Directional spectrum [1]"]
+    assert da.type == EUMType._3D_Surface_Elevation_Spectrum
 
 
 def test_properties_rotated(dfs2_gebco_rotate):

@@ -244,6 +244,11 @@ def test_select_subset_isel_axis_out_of_range_error(ds2):
         dss.isel(idx=0, axis="spatial")
 
 
+def test_isel_named_axis(ds2: mikeio.Dataset):
+    dss = ds2.isel(time=0)
+    assert len(dss.shape) == 1
+
+
 def test_select_temporal_subset_by_idx():
 
     nt = 100
@@ -728,6 +733,19 @@ def test_aggregations():
 
     dsm = ds.mean(axis="time")
     assert dsm.geometry is not None
+
+
+def test_to_dfs_extension_validation(tmpdir):
+
+    outfilename = os.path.join(tmpdir, "not_gonna_happen.dfs2")
+
+    ds = mikeio.read(
+        "tests/testdata/HD2D.dfsu", items=["Surface elevation", "Current speed"]
+    )
+    with pytest.raises(ValueError) as excinfo:
+        ds.to_dfs(outfilename)
+
+    assert "dfsu" in str(excinfo.value)
 
 
 def test_weighted_average(tmpdir):
@@ -1292,7 +1310,7 @@ def test_xzy_selection():
     dss_xzy = ds.sel(x=340000, y=15.75, z=0)
 
     # check for point geometry after selection
-    assert type(dss_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
+    assert isinstance(dss_xzy.geometry, mikeio.spatial.geometry.GeometryPoint3D)
 
 
 def test_layer_selection():

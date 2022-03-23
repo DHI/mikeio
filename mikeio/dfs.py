@@ -35,6 +35,8 @@ class _Dfs123(TimeSeries):
         self._dt = None
         self.geometry = None
         self._dtype = dtype
+        self._dfs = None
+        self._source = None
 
     def read(self, *, items=None, time=None, time_steps=None) -> Dataset:
         """
