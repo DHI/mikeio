@@ -1038,7 +1038,14 @@ class GeometryFM(_Geometry):
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        elements = [elements] if np.isscalar(elements) else elements
+        elements = np.atleast_1d(elements)
+        if len(elements) == 1:
+            coords = self.element_coordinates[elements[0], :]
+            if self.is_layered:
+                return GeometryPoint3D(*coords)
+            else:
+                return GeometryPoint2D(coords[0], coords[1])
+
         elements = np.sort(elements)  # make sure elements are sorted!
 
         # create new geometry
