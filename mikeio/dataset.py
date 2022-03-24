@@ -377,7 +377,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     def data(self) -> Sequence[np.ndarray]:
         """Data as list of numpy arrays"""
         warnings.warn(
-            "property data is deprecated",
+            "property data is deprecated, use to_numpy() instead",
             FutureWarning,
         )
         return [x.to_numpy() for x in self]
@@ -768,13 +768,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def describe(self, **kwargs):
         """Generate descriptive statistics by wrapping pandas describe()"""
-        all_df = [
-            pd.DataFrame(self.data[j].ravel(), columns=[self.items[j].name]).describe(
-                **kwargs
-            )
-            for j in range(self.n_items)
-        ]
-        return pd.concat(all_df, axis=1)
+        data = {x.name: x.to_numpy().ravel() for x in self}
+        df = pd.DataFrame(data).describe(**kwargs)
+
+        return df
 
     def copy(self):
         """Returns a copy of this dataset."""
@@ -784,13 +781,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     def to_numpy(self):
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
 
-        Note: the output will be
-
         Returns
         -------
         np.ndarray
         """
-        return np.stack(self.data)
+        return np.stack([x.to_numpy() for x in self])
 
     @classmethod
     def combine(cls, *datasets):
@@ -1494,34 +1489,36 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             zn=zn,
         )
 
-    def to_dataframe(self, unit_in_name=False, round_time="ms"):
+    def to_dataframe(
+        self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
+    ) -> pd.DataFrame:
         """Convert Dataset to a Pandas DataFrame
 
         Parameters
         ----------
         unit_in_name: bool, optional
-            include unit in column name, default False
+            include unit in column name, default False,
+        round_time: str, bool
+            round time to, default ms, use False to avoid rounding
 
         Returns
         -------
         pd.DataFrame
         """
 
-        if len(self.data[0].shape) != 1:
-            self = self.squeeze()
-
-        if len(self.data[0].shape) != 1:
+        if len(self.shape) != 1:
             raise ValueError(
                 "Only data with a single dimension can be converted to a dataframe. Hint: use `isel` to create a subset."
             )
 
         if unit_in_name:
-            names = [f"{item.name} ({item.unit.name})" for item in self.items]
+            data = {
+                f"{item.name} ({item.unit.name})": item.to_numpy().ravel()
+                for item in self
+            }
         else:
-            names = [item.name for item in self.items]
-
-        data = np.asarray(self.data).T
-        df = pd.DataFrame(data, columns=names)
+            data = {item.name: item.to_numpy().ravel() for item in self}
+        df = pd.DataFrame(data, index=self.time)
 
         if round_time:
             rounded_idx = pd.DatetimeIndex(self.time).round(round_time)
