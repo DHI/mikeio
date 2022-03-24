@@ -1132,11 +1132,14 @@ least two time instances); otherwise None</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.to_dataframe">
-<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_dataframe" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ms'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="headerlink" href="#mikeio.Dataset.to_dataframe" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert Dataset to a Pandas DataFrame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>unit_in_name</strong> (<em>bool</em><em>, </em><em>optional</em>) – include unit in column name, default False</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unit_in_name</strong> (<em>bool</em><em>, </em><em>optional</em>) – include unit in column name, default False,</p></li>
+<li><p><strong>round_time</strong> (<em>str</em><em>, </em><em>bool</em>) – round time to, default ms, use False to avoid rounding</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>pd.DataFrame</p>
@@ -1159,7 +1162,6 @@ least two time instances); otherwise None</p>
 <dt class="sig sig-object py" id="mikeio.Dataset.to_numpy">
 <span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.to_numpy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stack data to a single ndarray with shape (n_items, n_timesteps, …)</p>
-<p>Note: the output will be</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>np.ndarray</p>
