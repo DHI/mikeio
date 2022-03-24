@@ -3,6 +3,9 @@
 Dfsu and Mesh
 *************
 
+.. warning::
+    TODO Not updated to MIKE IO 1.0
+
 Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. 
 The .mesh file is an ASCII format for storing the flexible mesh geometry. 
 The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is 
