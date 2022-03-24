@@ -1,11 +1,10 @@
 
 ![logo](https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
 # MIKE IO: input/output of MIKE files in python
- ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg) 
-![Python package](https://github.com/DHI/mikeio/workflows/Python%20package/badge.svg) [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+ ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
+ [![Full test](https://github.com/DHI/mikeio/actions/workflows/full_test.yml/badge.svg)](https://github.com/DHI/mikeio/actions/workflows/full_test.yml)
+[![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
-
-[https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
@@ -34,7 +33,7 @@ MIKE IO 1.0 is planned to be released in May 2022 and it will have a lot of bene
 [More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
 
 ## Where can I get help?
-
+* Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 * New ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
 * Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
 * General help, FAQ - [Stackoverflow with the tag `mikeio`](https://stackoverflow.com/questions/tagged/mikeio)
@@ -49,115 +48,6 @@ Or development version:
 
 `pip install https://github.com/DHI/mikeio/archive/main.zip`
 
-
-## Examples
-
-### Reading data from dfs0, dfs1, dfs2, dfsu
-
-Generic `read` method to read values, if you need additional features such as coordinates, use specialised classes instead e.g. `Dfsu`
-
-```python
->>> import mikeio
->>> ds = mikeio.read("random.dfs0")
->>> ds
-<mikeio.Dataset>
-Dimensions: (1000,)
-Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
-Items:
-  0:  VarFun01 <Water Level> (meter)
-  1:  NotFun <Water Level> (meter)
->>> ds = mikeio.read("random.dfs1")
->>> ds
-<mikeio.Dataset>
-Dimensions: (100, 3)
-Time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48
-Items:
-  0:  testing water level <Water Level> (meter)
- ```
-
-### Reading dfs0 file into Pandas DataFrame
-```python
->>>  ds = mikeio.read('simple.dfs0')
->>>  ts = ds.to_dataframe()
-```
-
-### Write timeseries from dataframe
-```python
-import pandas as pd
-import mikeio
->>> df = pd.read_csv(
-...         "tests/testdata/co2-mm-mlo.csv",
-...         parse_dates=True,
-...         index_col="Date",
-...         na_values=-99.99,
-...     )
->>> df.to_dfs0("mauna_loa.dfs0")
-```
-
-For more examples on timeseries data see this [notebook](notebooks/Dfs0%20-%20Timeseries.ipynb)
-
-
-### Read dfs2 data
-```python
->>> ds = mikeio.read("gebco_sound.dfs2") 
->>> ds
-<mikeio.Dataset>
-Dimensions: (time:1, y:264, x:216)
-Time: 2020-05-15 11:04:52 (time-invariant)
-Items:
-  0:  Elevation <Total Water Depth> (meter)
-```
-
-### Create dfs2
-For a complete example of conversion from netcdf to dfs2 see this [notebook](notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb).
-
-Another [example](notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) of downloading meteorological forecast from the Global Forecasting System and converting it to a dfs2 ready to be used by a MIKE 21 model.
-
-### Read dfsu files
-```python
->>>  import matplotlib.pyplot as plt
->>>  ds = mikeio.read("HD.dfsu")
->>>  ds_stn = ds.sel(x=608000, y=6907000)
->>>  ds_stn.plot()
-```
-
-```python
->>>  from mikeio import Mesh
->>>  msh = Mesh("FakeLake.dfsu")
->>>  msh.plot()
-```
-![Mesh](https://raw.githubusercontent.com/DHI/mikeio/main/images/FakeLake.png)
-
-For more examples on working with dfsu and mesh see these notebooks:
-* [Basic dfsu](notebooks/Dfsu%20-%20Read.ipynb)
-* [3d dfsu](notebooks/Dfsu%20-%203D%20sigma-z.ipynb)
-* [Mesh](notebooks/Mesh.ipynb)
-* [Speed & direction](notebooks/Dfsu%20-%20Speed%20and%20direction.ipynb)
-* [Dfsu and mesh plotting](notebooks/Dfsu%20and%20Mesh%20-%20Plotting.ipynb)
-* [Export to netcdf](notebooks/Dfsu%20-%20Export%20to%20netcdf.ipynb)
-* [Export to shapefile](notebooks/Dfsu%20-%20Export%20to%20shapefile.ipynb)
-
-
-## Pfs
-
-Pfs is the format used for MIKE setup files (.m21fm, .m3fm, .sw etc.).
-
-There is experimental support for reading pfs files, but the API is likely to change.
-
-![pfs](images/pfs.gif)
-
-
-## Items, units
- Useful when creating a new dfs file
-```python
->>> from mikeio.eum import EUMType, EUMUnit
->>> EUMType.Temperature
-<EUMType.Temperature: 100006>
->>> EUMType.Temperature.units
-[degree Celsius, degree Fahrenheit, degree Kelvin]
->>> EUMUnit.degree_Kelvin
-degree Kelvin
-```
 
 ## Tested
 
