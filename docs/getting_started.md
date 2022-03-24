@@ -19,11 +19,11 @@ The DataArray have all the relevant information, e.g:
 * time - a pandas.DateTimeIndex with the time instances of the data
 * values - a NumPy array
 
-Read more on the `Dataset page <dataset.html>`_.
+Read more on the [Dataset page](dataset).
 
 
-Items, ItemInfo and EUM
-***********************
+## Items, ItemInfo and EUM
+
 The dfs items in MIKE IO are represented by the [ItemInfo class](eum.ItemInfo).
 An ItemInfo consists of:
 
