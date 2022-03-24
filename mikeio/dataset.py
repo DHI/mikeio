@@ -1505,10 +1505,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         -------
         pd.DataFrame
         """
-
         if len(self.shape) != 1:
             raise ValueError(
-                "Only data with a single dimension can be converted to a dataframe. Hint: use `isel` to create a subset."
+                "Only data with a single dimension can be converted to a dataframe. Hint: use `squeeze` to remove singleton dimensions or `isel` to create a subset."
             )
 
         if unit_in_name:

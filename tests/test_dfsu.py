@@ -361,19 +361,14 @@ def test_find_nearest_element_2d_and_distance():
 
 def test_dfsu_to_dfs0_via_dataframe(tmpdir):
     filename = "tests/testdata/HD2D.dfsu"
-    dfs = Dfsu(filename)
-    assert dfs.start_time.year == 1985
+    ds = mikeio.read(filename).sel(x=606200, y=6905480)
 
-    elem_id = dfs.find_nearest_elements(606200, 6905480)
-
-    ds = dfs.read(elements=[elem_id])
     df = ds.to_dataframe()
 
     outfilename = os.path.join(tmpdir, "out.dfs0")
     df.to_dfs0(outfilename)
 
-    dfs0 = Dfs0(outfilename)
-    newds = dfs0.read()
+    newds = mikeio.read(outfilename)
 
     assert newds[0].name == ds[0].name
     assert ds.time[0] == newds.time[0]
@@ -383,7 +378,6 @@ def test_dfsu_to_dfs0_via_dataframe(tmpdir):
 def test_dfsu_to_dfs0(tmpdir):
     filename = "tests/testdata/HD2D.dfsu"
     dfs = Dfsu(filename)
-    assert dfs.start_time.year == 1985
 
     elem_id = dfs.find_nearest_elements(606200, 6905480)
 
