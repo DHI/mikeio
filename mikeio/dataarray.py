@@ -889,7 +889,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 tmp = self.isel(idx=j[0], axis=1)
                 da = tmp.isel(idx=i[0], axis=1)
             else:
-                idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+                idx = self.geometry.find_index(x=x, y=y, z=z)
                 da = self.isel(idx, axis="space")
         else:
             da = self
