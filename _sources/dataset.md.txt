@@ -5,7 +5,7 @@ for data from dfs files.
 The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs items)
 
 Each DataArray have the following properties:
-* **item** - an  `ItemInfo <eum.html#mikeio.eum.ItemInfo>` with name, type and unit
+* **item** - an  `ItemInfo <#mikeio.eum.ItemInfo>` with name, type and unit
 * **time** - a pandas.DateTimeIndex with the time instances of the data
 * **values** - a NumPy array
 
@@ -149,7 +149,6 @@ Dataset API
 ```{eval-rst}
 .. autoclass:: mikeio.Dataset
 	:members:
-	:inherited-members:
 ```
 
 DataArray API
@@ -157,5 +156,4 @@ DataArray API
 ```{eval-rst}
 .. autoclass:: mikeio.DataArray
 	:members:
-	:inherited-members:
 ```

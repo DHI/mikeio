@@ -290,7 +290,7 @@ for data from dfs files.
 The <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code> methods returns a Dataset as a container of DataArrays (Dfs items)</p>
 <p>Each DataArray have the following properties:</p>
 <ul class="simple">
-<li><p><strong>item</strong> - an  <code class="docutils literal notranslate"><span class="pre">ItemInfo</span> <span class="pre">&lt;eum.html#mikeio.eum.ItemInfo&gt;</span></code> with name, type and unit</p></li>
+<li><p><strong>item</strong> - an  <code class="docutils literal notranslate"><span class="pre">ItemInfo</span> <span class="pre">&lt;#mikeio.eum.ItemInfo&gt;</span></code> with name, type and unit</p></li>
 <li><p><strong>time</strong> - a pandas.DateTimeIndex with the time instances of the data</p></li>
 <li><p><strong>values</strong> - a NumPy array</p></li>
 </ul>
@@ -485,11 +485,6 @@ including different ways of <em>selecting</em> data:</p>
 </pre></div>
 </div>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Remove</span> <span class="pre">all</span> <span class="pre">items</span> <span class="pre">from</span> <span class="pre">D.</span></span></span><a class="headerlink" href="#mikeio.Dataset.clear" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.combine">
@@ -711,11 +706,6 @@ similar to a dictionary.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">D[k]</span> <span class="pre">if</span> <span class="pre">k</span> <span class="pre">in</span> <span class="pre">D,</span> <span class="pre">else</span> <span class="pre">d.</span>&#160; <span class="pre">d</span> <span class="pre">defaults</span> <span class="pre">to</span> <span class="pre">None.</span></span></span><a class="headerlink" href="#mikeio.Dataset.get" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.insert">
 <span class="sig-name descname"><span class="pre">insert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.insert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert DataArray in a specific position</p>
@@ -732,7 +722,7 @@ and must have a unique item name</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.interp_like">
-<span class="sig-name descname"><span class="pre">interp_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.grid_geometry.Grid2D</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a></span></span><a class="headerlink" href="#mikeio.Dataset.interp_like" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interp_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dfs123.html#mikeio.Grid2D" title="mikeio.spatial.grid_geometry.Grid2D"><span class="pre">mikeio.spatial.grid_geometry.Grid2D</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a></span></span><a class="headerlink" href="#mikeio.Dataset.interp_like" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate in space (and in time) to other geometry (and time axis)</p>
 <dl class="simple">
 <dt>Note: currently only supports interpolation from dfsu-2d to</dt><dd><p>dfs2 or other dfsu-2d Datasets</p>
@@ -741,7 +731,7 @@ and must have a unique item name</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a><em>, </em><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray"><em>DataArray</em></a><em>, </em><em>Grid2D</em><em>, </em><em>GeometryFM</em><em>, </em><em>pd.DatetimeIndex</em>) – </p></li>
+<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a><em>, </em><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray"><em>DataArray</em></a><em>, </em><a class="reference internal" href="dfs123.html#mikeio.Grid2D" title="mikeio.Grid2D"><em>Grid2D</em></a><em>, </em><em>GeometryFM</em><em>, </em><em>pd.DatetimeIndex</em>) – </p></li>
 <li><p><strong>kwargs</strong> (<em>additional kwargs are passed to interpolation method</em>) – </p></li>
 </ul>
 </dd>
@@ -855,11 +845,6 @@ and must have a unique item name</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#id1" title="Permalink to this definition">¶</a></dt>
 <dd><p>ItemInfo for each of the DataArrays as a list</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.keys">
-<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">a</span> <span class="pre">set-like</span> <span class="pre">object</span> <span class="pre">providing</span> <span class="pre">a</span> <span class="pre">view</span> <span class="pre">on</span> <span class="pre">D's</span> <span class="pre">keys</span></span></span><a class="headerlink" href="#mikeio.Dataset.keys" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.max">
@@ -1047,18 +1032,12 @@ which must be between 0 and 1 inclusive.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.pop">
-<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">v,</span> <span class="pre">remove</span> <span class="pre">specified</span> <span class="pre">key</span> <span class="pre">and</span> <span class="pre">return</span> <span class="pre">the</span> <span class="pre">corresponding</span> <span class="pre">value.</span></span></span><a class="headerlink" href="#mikeio.Dataset.pop" title="Permalink to this definition">¶</a></dt>
-<dd><p>If key is not found, d is returned if given, otherwise KeyError is raised.</p>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.popitem">
 <span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dataset.popitem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pop first DataArray from Dataset</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#mikeio.Dataset.pop" title="mikeio.Dataset.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></p>
 </div>
 </dd></dl>
 
@@ -1108,7 +1087,7 @@ which must be between 0 and 1 inclusive.</p></li>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#mikeio.Dataset.pop" title="mikeio.Dataset.pop"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></a></p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></p>
 </div>
 </dd></dl>
 
@@ -1120,11 +1099,6 @@ which must be between 0 and 1 inclusive.</p></li>
 ds.sel(x=1.0,y=55.0)
 ds.sel(area=[1.,12., 2., 15.])</p>
 </dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.setdefault">
-<span class="sig-name descname"><span class="pre">setdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">D.get(k,d),</span> <span class="pre">also</span> <span class="pre">set</span> <span class="pre">D[k]=d</span> <span class="pre">if</span> <span class="pre">k</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">D</span></span></span><a class="headerlink" href="#mikeio.Dataset.setdefault" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dataset.shape">
@@ -1193,19 +1167,6 @@ least two time instances); otherwise None</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <span class="optional">]</span><em class="sig-param"><span class="n"><span class="pre">**F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Update</span> <span class="pre">D</span> <span class="pre">from</span> <span class="pre">mapping/iterable</span> <span class="pre">E</span> <span class="pre">and</span> <span class="pre">F.</span></span></span><a class="headerlink" href="#mikeio.Dataset.update" title="Permalink to this definition">¶</a></dt>
-<dd><p>If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
-If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
-In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.values">
-<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">an</span> <span class="pre">object</span> <span class="pre">providing</span> <span class="pre">a</span> <span class="pre">view</span> <span class="pre">on</span> <span class="pre">D's</span> <span class="pre">values</span></span></span><a class="headerlink" href="#mikeio.Dataset.values" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 </div>
@@ -1257,7 +1218,7 @@ In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.DataArray.interp_like">
-<span class="sig-name descname"><span class="pre">interp_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.grid_geometry.Grid2D</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.interp_like" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interp_like</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dfs123.html#mikeio.Grid2D" title="mikeio.spatial.grid_geometry.Grid2D"><span class="pre">mikeio.spatial.grid_geometry.Grid2D</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pandas.core.indexes.datetimes.DatetimeIndex</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolant</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">mikeio.dataarray.DataArray</span></a></span></span><a class="headerlink" href="#mikeio.DataArray.interp_like" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interpolate in space (and in time) to other geometry (and time axis)</p>
 <dl class="simple">
 <dt>Note: currently only supports interpolation from dfsu-2d to</dt><dd><p>dfs2 or other dfsu-2d DataArrays</p>
@@ -1266,7 +1227,7 @@ In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a><em>, </em><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray"><em>DataArray</em></a><em>, </em><em>Grid2D</em><em>, </em><em>GeometryFM</em><em>, </em><em>pd.DatetimeIndex</em>) – </p></li>
+<li><p><strong>other</strong> (<a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a><em>, </em><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray"><em>DataArray</em></a><em>, </em><a class="reference internal" href="dfs123.html#mikeio.Grid2D" title="mikeio.Grid2D"><em>Grid2D</em></a><em>, </em><em>GeometryFM</em><em>, </em><em>pd.DatetimeIndex</em>) – </p></li>
 <li><p><strong>interpolant</strong> – Reuse pre-calculated index and weights</p></li>
 <li><p><strong>optional</strong> – Reuse pre-calculated index and weights</p></li>
 <li><p><strong>kwargs</strong> (<em>additional kwargs are passed to interpolation method</em>) – </p></li>

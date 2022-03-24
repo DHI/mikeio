@@ -163,9 +163,9 @@
         <!-- ipynb file if we had a myst markdown file -->
         
         <!-- Download raw file -->
-        <a class="dropdown-buttons" href="_sources/generic.rst.txt"><button type="button"
+        <a class="dropdown-buttons" href="_sources/generic.md.txt"><button type="button"
                 class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
-                data-placement="left">.rst</button></a>
+                data-placement="left">.md</button></a>
         <!-- Download PDF via print -->
         <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
                 onclick="printPdf(this)" data-toggle="tooltip" data-placement="left">.pdf</button>
@@ -233,25 +233,20 @@
               <div>
                 
   <div class="section" id="generic">
-<span id="id1"></span><h1>Generic<a class="headerlink" href="#generic" title="Permalink to this headline">¶</a></h1>
-<p>MIKE IO has <a class="reference external" href="#module-mikeio.generic">generic dfs</a> functionality that works for all dfs files:</p>
+<h1>Generic<a class="headerlink" href="#generic" title="Permalink to this headline">¶</a></h1>
+<p>MIKE IO has generic dfs functionality that works for all dfs files:</p>
 <ul class="simple">
-<li><p><a class="reference external" href="#mikeio.read">read()</a> - Read all data to a Dataset</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.concat">concat()</a> - Concatenates files along the time axis</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.extract">extract()</a> - Extract timesteps and/or items to a new dfs file</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.diff">diff()</a> - Calculate difference between two dfs files</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.sum">sum()</a> - Calculate the sum of two dfs files</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.scale">scale()</a> - Apply scaling to any dfs file</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.avg_time">avg_time()</a> - Create a temporally averaged dfs file</p></li>
-<li><p><a class="reference external" href="#mikeio.generic.quantile">quantile()</a> - Create a dfs file with temporal quantiles</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">concat()</span></code> - Concatenates files along the time axis</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">extract()</span></code> - Extract timesteps and/or items to a new dfs file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">diff()</span></code>  - Calculate difference between two dfs files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sum()</span></code>  - Calculate the sum of two dfs files</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scale()</span></code>  - Apply scaling to any dfs file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">avg_time()</span></code>  - Create a temporally averaged dfs file</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">quantile()</span></code> - Create a dfs file with temporal quantiles</p></li>
 </ul>
-<p>All methods except read() create a new dfs file.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">generic</span>
-<span class="n">generic</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="s2">&quot;fileA.dfs2&quot;</span><span class="p">,</span> <span class="s2">&quot;fileB.dfs2&quot;</span><span class="p">],</span> <span class="s2">&quot;new_file.dfs2&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mikeio</span>
-<span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;new_file.dfs2&quot;</span><span class="p">)</span>
+<p>All methods in the generic module creates a new dfs file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">generic</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">generic</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="s2">&quot;fileA.dfs2&quot;</span><span class="p">,</span> <span class="s2">&quot;fileB.dfs2&quot;</span><span class="p">],</span> <span class="s2">&quot;new_file.dfs2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb">Generic notebook</a> for more examples.</p>
