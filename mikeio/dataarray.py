@@ -13,7 +13,12 @@ from .spatial.geometry import (
     GeometryUndefined,
 )
 from .spatial.grid_geometry import Grid1D, Grid2D
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
+from .spatial.FM_geometry import (
+    GeometryFM,
+    GeometryFMLayered,
+    GeometryFMPointSpectrum,
+    GeometryFMVerticalColumn,
+)
 from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
 from .data_utils import DataUtilsMixin
@@ -255,6 +260,30 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         )
 
 
+class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._lines(ax, **kwargs)
+
+    def _lines(self, ax=None, **kwargs):
+        if "title" in kwargs:
+            title = kwargs.pop("title")
+            ax.set_title(title)
+
+        data = self.da.to_numpy()
+        zn = self.da._zn
+        zee = self.da.geometry._calc_zee(zn)
+        values = self.da.geometry._interp_values(zn, data, zee)
+
+        ax.plot(zee.T, values.T, **kwargs)
+        ax.set_xlabel(self._label_txt())
+        ax.set_ylabel("z")
+        return ax
+
+
 class DataArray(DataUtilsMixin, TimeSeries):
 
     deletevalue = 1.0e-35
@@ -429,7 +458,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return zn
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFM):
+        if isinstance(self.geometry, GeometryFMVerticalColumn):
+            return _DataArrayPlotterFMVerticalColumn(self)
+        elif isinstance(self.geometry, GeometryFM):
             return _DataArrayPlotterFM(self)
         elif isinstance(self.geometry, Grid1D):
             return _DataArrayPlotterGrid1D(self)
