@@ -1,6 +1,7 @@
 from datetime import datetime
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import pytest
 from xarray import DataArray
 
@@ -13,7 +14,7 @@ from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
 def da1():
     nt = 10
     start = 10.0
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     da = mikeio.DataArray(
         data=np.arange(start, start + nt, dtype=float),
         time=time,
@@ -30,7 +31,7 @@ def da2():
 
     da = mikeio.DataArray(
         data=np.zeros([nt, nx]) + 0.1,
-        time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
+        time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
         item=ItemInfo("Foo"),
         geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
     )
@@ -46,9 +47,27 @@ def da_grid2d():
 
     da = mikeio.DataArray(
         data=np.zeros([nt, ny, nx]) + 0.1,
-        time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
+        time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
         item=ItemInfo("Foo"),
-        geometry=mikeio.Grid2D(x0=1000.0, dx=10.0, nx=nx, ny=ny, dy=1.0, y0=-10.0),
+        geometry=mikeio.Grid2D(x0=10.0, dx=0.1, nx=nx, ny=ny, dy=1.0, y0=-10.0),
+    )
+
+    return da
+
+
+@pytest.fixture
+def da_grid2d_proj():
+    nt = 10
+    nx = 7
+    ny = 14
+
+    da = mikeio.DataArray(
+        data=np.zeros([nt, ny, nx]) + 0.1,
+        time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+        item=ItemInfo("Foo"),
+        geometry=mikeio.Grid2D(
+            x0=1000, dx=100, nx=nx, ny=ny, dy=10, y0=2000, projection="UTM-32"
+        ),
     )
 
     return da
@@ -58,7 +77,7 @@ def da_grid2d():
 def da_time_space():
     nt = 10
     start = 10.0
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     da = mikeio.DataArray(
         data=np.zeros(shape=(nt, 2), dtype=float),
         time=time,
@@ -67,6 +86,31 @@ def da_time_space():
     )
 
     return da
+
+
+def test_verify_custom_dims():
+    nt = 10
+    nx = 7
+
+    with pytest.raises(ValueError) as excinfo:
+        da = mikeio.DataArray(
+            data=np.zeros([nt, nx]) + 0.1,
+            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+            item=ItemInfo("Foo"),
+            dims=("space", "ensemble"),  # no time!
+            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+        )
+    assert "time" in str(excinfo.value)
+
+    with pytest.raises(ValueError) as excinfo:
+        da = mikeio.DataArray(
+            data=np.zeros([nt, nx]) + 0.1,
+            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+            item=ItemInfo("Foo"),
+            dims=("time", "x", "ensemble"),  # inconsistent with data
+            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+        )
+    assert "number" in str(excinfo.value).lower()
 
 
 def test_write_1d(da2, tmp_path):
@@ -89,7 +133,7 @@ def test_data_2d_no_geometry_not_allowed():
     with pytest.warns(Warning) as w:
         mikeio.DataArray(
             data=np.zeros([nt, ny, nx]) + 0.1,
-            time=pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt),
+            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
             item=ItemInfo("Foo"),
         )
 
@@ -100,7 +144,7 @@ def test_dataarray_init():
     nt = 10
     start = 10.0
     data = np.arange(start, start + nt, dtype=float)
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     item = ItemInfo(name="Foo")
 
     da = mikeio.DataArray(data=data, time=time)
@@ -129,7 +173,7 @@ def test_dataarray_init():
 
 def test_dataarray_init_2d():
     nt = 10
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
 
     # 2d with time
     ny, nx = 5, 6
@@ -166,7 +210,7 @@ def test_dataarray_init_2d():
 
 def test_dataarray_init_5d():
     nt = 10
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
 
     # 5d with named dimensions
     dims = ("x", "y", "layer", "member", "season")
@@ -189,7 +233,7 @@ def test_dataarray_init_wrong_dim():
     nt = 10
     start = 10.0
     data = np.arange(start, start + nt, dtype=float)
-    time_long = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=(nt + 1))
+    time_long = pd.date_range(start="2000-01-01", freq="S", periods=(nt + 1))
     item = ItemInfo(name="Foo")
 
     with pytest.raises(ValueError):
@@ -202,7 +246,7 @@ def test_dataarray_init_wrong_dim():
 
     # time must be first dim
     dims = ("x", "y", "time")
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     with pytest.raises(ValueError):
         mikeio.DataArray(data=data2d, time=time, dims=dims)
 
@@ -215,7 +259,7 @@ def test_dataarray_init_wrong_dim():
 def test_dataarray_init_grid1d():
     nt = 10
     nx = 5
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     data = np.zeros([nt, nx]) + 0.1
     g = mikeio.Grid1D(n=nx, dx=1.0)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
@@ -238,7 +282,7 @@ def test_dataarray_init_grid1d():
 def test_dataarray_init_grid2d():
     nt = 10
     ny, nx = 7, 5
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     data = np.zeros([nt, ny, nx]) + 0.1
     g = mikeio.Grid2D(dx=0.5, nx=nx, ny=ny)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
@@ -260,7 +304,7 @@ def test_dataarray_init_grid2d():
 
 def test_dataarray_init_dfsu2d():
     nt = 10
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     filename = "tests/testdata/north_sea_2.mesh"
     dfs = mikeio.open(filename)
     g = dfs.geometry
@@ -289,7 +333,7 @@ def test_dataarray_init_dfsu2d():
 
 def test_dataarray_init_dfsu3d():
     nt = 10
-    time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     g = dfs.geometry
@@ -377,6 +421,21 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[:, -1, 0].geometry, GeometryUndefined)
 
 
+def test_plot_grid1d(da2):
+    # Not very functional tests, but at least it runs without errors
+    da2.plot(title="The TITLE")
+    da2.plot.line()
+    da2.plot.timeseries(figsize=(12, 4))
+
+    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
+    da2.plot.imshow(ax=ax1)
+    da2.plot.pcolormesh(ax=ax2)
+
+
+def test_plot_grid2d_proj(da_grid2d_proj):
+    da_grid2d_proj.plot()
+
+
 def test_timestep(da1):
 
     assert da1.timestep == 1.0
@@ -413,9 +472,9 @@ def test_plot(da1):
 
 def test_modify_values(da1):
 
-    # TODO: Now you are...
-    # with pytest.raises(TypeError):
-    #     da1[0] = 1.0  # you are not allowed to set individual values
+    assert all(~np.isnan(da1.values))
+    da1[0] = np.nan
+    assert any(np.isnan(da1.values))
 
     with pytest.raises(ValueError):
         da1.values = np.array([1.0])  # you can not set data to another shape
