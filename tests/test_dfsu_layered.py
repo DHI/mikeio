@@ -90,6 +90,32 @@ def test_read_dfsu3d_column():
     assert np.all(dscol1.values == dscol2.values)
 
 
+def test_read_column_interp_time_and_select_time():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    x, y = 333934.1, 6158101.5
+
+    dscol = dfs.read(x=x, y=y)
+    dscol_t = dscol.isel(time=0)
+
+    assert "time" not in dscol_t.dims
+
+    dscol_et = dscol.sel(time=dfs.end_time)
+
+    assert "time" not in dscol_et.dims
+
+    ds_15m = dscol.interp_time(dt=900)
+
+    da = ds_15m.Salinity
+
+    salinity_it = da.isel(time=0)  # single time-step
+    assert salinity_it.n_timesteps == 1
+
+    salinity_st = da.sel(time="1997-09-15 00:00")  # single time-step
+    # assert salinity_st.n_timesteps == 1
+
+
 def test_number_of_nodes_and_elements_sigma_z():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = Dfsu(filename)
