@@ -266,21 +266,54 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
     def __call__(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
-        return self._lines(ax, **kwargs)
+        return self.lines(ax, **kwargs)
 
-    def _lines(self, ax=None, **kwargs):
+    def lines(self, ax=None, figsize=None, extrapolate=True, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._lines(ax, extrapolate=extrapolate, **kwargs)
+
+    def _lines(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
+        import matplotlib.pyplot as plt
+
         if "title" in kwargs:
             title = kwargs.pop("title")
             ax.set_title(title)
 
-        data = self.da.to_numpy()
-        zn = self.da._zn
-        zee = self.da.geometry._calc_zee(zn)
-        values = self.da.geometry._interp_values(zn, data, zee)
+        if show_legend is None:
+            show_legend = len(self.da.time) < 10
 
-        ax.plot(zee.T, values.T, **kwargs)
+        values = self.da.to_numpy()
+        zn = self.da._zn
+        if extrapolate:
+            ze = self.da.geometry._calc_zee(zn)
+            values = self.da.geometry._interp_values(zn, values, ze)
+        else:
+            ze = self.da.geometry.calc_ze(zn)
+
+        ax.plot(values.T, ze.T, label=self.da.time, **kwargs)
+
         ax.set_xlabel(self._label_txt())
         ax.set_ylabel("z")
+
+        if show_legend:
+            plt.legend()
+
+        return ax
+
+    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+        ze = self.da.geometry.calc_ze()
+        pos = ax.pcolormesh(
+            self.da.time,
+            ze,
+            self.da.values.T,
+            shading="nearest",
+            **kwargs,
+        )
+        cbar = fig.colorbar(pos, label=self._label_txt())
+        ax.set_xlabel("time")
+        fig.autofmt_xdate()
+        ax.set_ylabel("z (static)")
         return ax
 
 
