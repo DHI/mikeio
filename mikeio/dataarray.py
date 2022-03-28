@@ -532,9 +532,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
             # select in time
             steps = self._get_time_idx_list(self.time, steps)
-            time = self.time[steps]
+            if len(steps) == 0:
+                raise IndexError("No timesteps found!")
             if len(steps) == 1:
                 dims = tuple([d for d in dims if d != "time"])
+            time = self.time[steps]
 
             key = (steps, *space_key) if isinstance(key, tuple) else steps
         else:
