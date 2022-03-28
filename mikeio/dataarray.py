@@ -939,7 +939,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def sel(
         self,
         *,
-        time: Union[pd.DatetimeIndex, "DataArray"] = None,
+        time: Union[str, pd.DatetimeIndex, "DataArray"] = None,
         x: float = None,
         y: float = None,
         z: float = None,
