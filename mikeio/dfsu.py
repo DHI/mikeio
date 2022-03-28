@@ -830,6 +830,12 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         dfs.Close()
 
         dims = ("time", "element") if not single_time_selected else ("element",)
+
+        if elements is not None and len(elements) == 1:
+            # squeeze point data
+            dims = tuple([d for d in dims if d != "element"])
+            data_list = [np.squeeze(d) for d in data_list]
+
         return Dataset(data_list, time, items, geometry=geometry, dims=dims)
 
     def _validate_elements_and_geometry_sel(self, elements, **kwargs):
