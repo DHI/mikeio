@@ -82,12 +82,17 @@ def test_read_dfsu3d_column():
 
     ds = dfs.read()  # all data in file
     dscol1 = ds.sel(x=x, y=y)
+    assert dscol1.geometry.n_layers == 4
+    assert dscol1.geometry.n_elements == 4
+    assert dscol1.geometry.n_nodes == 5 * 3
+    assert dscol1._zn.shape == (ds.n_timesteps, 5 * 3)
 
     dscol2 = dfs.read(x=x, y=y)
     assert dscol1.shape == dscol2.shape
     assert dscol1.dims == dscol2.dims
     assert dscol1.geometry._type == dscol2.geometry._type
     assert np.all(dscol1.values == dscol2.values)
+    assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
 
 
 def test_number_of_nodes_and_elements_sigma_z():
