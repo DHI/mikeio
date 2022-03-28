@@ -114,10 +114,19 @@ class DfsuLayered(_Dfsu):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: str, int or list[int], optional
+        time: str, int or list[int], optional
             Read only selected time_steps
+        area: list[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x, y, z: float, optional
+            Read only data for elements containing the (x,y,z) points(s),
+            by default None
+        layers: int, str, list[int], optional
+            Read only data for specific layers, by default None
         elements: list[int], optional
-            Read only selected element ids
+            Read only selected element ids, by default None
 
         Returns
         -------
@@ -135,7 +144,7 @@ class DfsuLayered(_Dfsu):
         1:  U velocity <u velocity component> (meter per sec)
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
-        >>> dfsu.read(time_steps="1985-08-06 12:00,1985-08-07 00:00")
+        >>> dfsu.read(time="1985-08-06 12:00,1985-08-07 00:00")
         <mikeio.Dataset>
         Dimensions: (5, 884)
         Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
@@ -169,7 +178,8 @@ class DfsuLayered(_Dfsu):
         self._validate_elements_and_geometry_sel(
             elements, area=area, layers=layers, x=x, y=y, z=z
         )
-        elements = self._parse_geometry_sel(area=area, layer=layers, x=x, y=y, z=z)
+        if elements is None:
+            elements = self._parse_geometry_sel(area=area, layer=layers, x=x, y=y, z=z)
 
         if elements is None:
             n_elems = self.n_elements
@@ -253,19 +263,6 @@ class DfsuLayered(_Dfsu):
             )
         else:
             return Dataset(data_list, time, items, geometry=geometry, dims=dims)
-
-    def _validate_elements_and_geometry_sel(self, elements, **kwargs):
-        used_kwargs = []
-        for kw, val in kwargs.items():
-            if val is not None:
-                used_kwargs.append(kw)
-
-        if elements is not None:
-            for kw in used_kwargs:
-                raise ValueError(f"Cannot select both {kw} and elements!")
-
-        if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
-            raise ValueError(f"Cannot select both x,y and area!")
 
     def _parse_geometry_sel(self, area, layer, x, y, z):
         elements = None
