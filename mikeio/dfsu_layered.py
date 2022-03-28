@@ -95,7 +95,17 @@ class DfsuLayered(_Dfsu):
         return self.geometry.get_layer_elements(layer)
 
     def read(
-        self, *, items=None, time=None, time_steps=None, elements=None, x=None, y=None
+        self,
+        *,
+        items=None,
+        time=None,
+        time_steps=None,
+        elements=None,
+        area=None,
+        x=None,
+        y=None,
+        z=None,
+        layers=None,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -155,6 +165,11 @@ class DfsuLayered(_Dfsu):
 
         single_time_selected = np.isscalar(time) if time is not None else False
         time_steps = _valid_timesteps(dfs, time)
+
+        self._validate_elements_and_geometry_sel(
+            elements, area=area, layers=layers, x=x, y=y, z=z
+        )
+        elements = self._parse_geometry_sel(area=area, layer=layers, x=x, y=y, z=z)
 
         if elements is None:
             n_elems = self.n_elements
@@ -238,6 +253,38 @@ class DfsuLayered(_Dfsu):
             )
         else:
             return Dataset(data_list, time, items, geometry=geometry, dims=dims)
+
+    def _validate_elements_and_geometry_sel(self, elements, **kwargs):
+        used_kwargs = []
+        for kw, val in kwargs.items():
+            if val is not None:
+                used_kwargs.append(kw)
+
+        if elements is not None:
+            for kw in used_kwargs:
+                raise ValueError(f"Cannot select both {kw} and elements!")
+                
+        if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
+            raise ValueError(f"Cannot select both x,y and area!")
+
+    def _parse_geometry_sel(self, area, layer, x, y, z):
+        elements = None
+        if layer is not None:
+            elements = self.geometry.get_layer_elements(layer)
+
+        if area is not None:
+            elements_a = self.geometry._elements_in_area(area)
+            elements = (
+                elements_a if layer is None else np.intersect1d(elements, elements_a)
+            )
+
+        if (x is not None) or (y is not None):
+            elements_xy = self.geometry.find_index(x=x, y=y, z=z)
+            elements = (
+                elements_xy if layer is None else np.intersect1d(elements, elements_xy)
+            )
+
+        return elements
 
 
 class Dfsu2DV(DfsuLayered):
