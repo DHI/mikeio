@@ -40,6 +40,56 @@ def test_read_returns_correct_items_sigma_z():
     assert ds.items[1].name == "Salinity"
 
 
+def test_read_layers():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read()  # all data in file
+    dstop1 = ds.sel(layer="top")
+
+    dstop2 = dfs.read(layers="top")
+    assert dstop1.shape == dstop2.shape
+    assert dstop1.dims == dstop2.dims
+    assert dstop1.geometry._type == dstop2.geometry._type
+    assert np.all(dstop1.values == dstop2.values)
+
+
+def test_read_dfsu3d_area():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    bbox = [350000, 6192000, 380000, 6198000]
+
+    ds = dfs.read()  # all data in file
+    assert ds.geometry.contains((350000, 6192000))
+
+    dsa1 = ds.sel(area=bbox)
+    assert not dsa1.geometry.contains((350000, 6192000))
+    assert dsa1.geometry.n_layers > 1
+
+    dsa2 = dfs.read(area=bbox)
+    assert dsa1.shape == dsa2.shape
+    assert dsa1.dims == dsa2.dims
+    assert dsa1.geometry._type == dsa2.geometry._type
+    assert np.all(dsa1.values == dsa2.values)
+
+
+def test_read_dfsu3d_column():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    (x, y) = (333934.1, 6158101.5)
+
+    ds = dfs.read()  # all data in file
+    dscol1 = ds.sel(x=x, y=y)
+
+    dscol2 = dfs.read(x=x, y=y)
+    assert dscol1.shape == dscol2.shape
+    assert dscol1.dims == dscol2.dims
+    assert dscol1.geometry._type == dscol2.geometry._type
+    assert np.all(dscol1.values == dscol2.values)
+
+
 def test_number_of_nodes_and_elements_sigma_z():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = Dfsu(filename)
