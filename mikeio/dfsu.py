@@ -779,7 +779,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
         if elements is None:
             elements = self._parse_geometry_sel(area=area, x=x, y=y)
-            
+
         if elements is None:
             geometry = self.geometry
             n_elems = geometry.n_elements
