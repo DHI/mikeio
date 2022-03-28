@@ -3,6 +3,8 @@ import numpy as np
 import pytest
 import mikeio
 from mikeio import Dfsu, Mesh
+from mikeio.spatial.FM_geometry import GeometryFMVerticalColumn
+from mikeio.spatial.geometry import GeometryPoint3D
 
 
 def test_read_simple_3d():
@@ -82,17 +84,41 @@ def test_read_dfsu3d_column():
 
     ds = dfs.read()  # all data in file
     dscol1 = ds.sel(x=x, y=y)
+    assert isinstance(dscol1.geometry, GeometryFMVerticalColumn)
     assert dscol1.geometry.n_layers == 4
     assert dscol1.geometry.n_elements == 4
     assert dscol1.geometry.n_nodes == 5 * 3
     assert dscol1._zn.shape == (ds.n_timesteps, 5 * 3)
 
     dscol2 = dfs.read(x=x, y=y)
+    assert isinstance(dscol2.geometry, GeometryFMVerticalColumn)
     assert dscol1.shape == dscol2.shape
     assert dscol1.dims == dscol2.dims
     assert dscol1.geometry._type == dscol2.geometry._type
     assert np.all(dscol1.values == dscol2.values)
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
+
+
+def test_read_dfsu3d_xyz():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    (x, y, z) = (333934.1, 6158101.5, -5)
+
+    ds = dfs.read()  # all data in file
+    dspt1 = ds.sel(x=x, y=y, z=z)
+    assert isinstance(dspt1.geometry, GeometryPoint3D)
+
+    dspt2 = dfs.read(x=x, y=y, z=z)
+    assert isinstance(dspt2.geometry, GeometryPoint3D)
+    assert dspt1.shape == dspt2.shape
+    assert dspt1.dims == dspt2.dims
+    assert np.all(dspt1.values == dspt2.values)
+
+    dspt3 = dfs.read(time=-1, x=x, y=y, z=z)
+    assert dspt3.dims == ()
+    assert dspt3[0].values == dspt1[0].values[-1]
+    # 20.531237
 
 
 def test_number_of_nodes_and_elements_sigma_z():
