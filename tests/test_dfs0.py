@@ -283,14 +283,14 @@ def test_read_dfs0_delete_value_conversion():
     dfs = Dfs0(dfs0file)
     ds = dfs.read()
 
-    assert np.isnan(ds.data[3][1])
+    assert np.isnan(ds[3].values[1])
 
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
     ds = dfs.read()
 
-    assert np.isnan(ds.data[0][2])
+    assert np.isnan(ds[0].values[2])
 
 
 def test_read_dfs0_small_value_not_delete_value(tmpdir):
@@ -311,7 +311,7 @@ def test_read_dfs0_small_value_not_delete_value(tmpdir):
     dfs = Dfs0(filename)
     ds = dfs.read()
 
-    assert not np.isnan(ds.data[0]).any()
+    assert not np.isnan(ds[0].to_numpy()).any()
 
 
 def test_write_from_data_frame(tmpdir):
@@ -425,7 +425,7 @@ def test_read_dfs0_single_item():
     dfs = Dfs0(dfs0file)
     ds = dfs.read([1])
 
-    assert len(ds.data) == 1
+    assert len(ds.to_numpy()) == 1
 
 
 def test_read_dfs0_single_item_named_access():
@@ -434,9 +434,8 @@ def test_read_dfs0_single_item_named_access():
 
     dfs = Dfs0(dfs0file)
     res = dfs.read(items=[1])
-    data = res.data
 
-    assert len(data) == 1
+    assert len(res.to_numpy()) == 1
 
 
 def test_read_dfs0_temporal_subset():
@@ -466,7 +465,7 @@ def test_read_dfs0_single_item_read_by_name():
 
     dfs = Dfs0(dfs0file)
     res = dfs.read(["NotFun", "VarFun01"])  # reversed order compare to original file
-    data = res.data
+    data = res.to_numpy()
 
     assert len(data) == 2
     assert res.items[0].name == "NotFun"
@@ -491,7 +490,7 @@ def test_read_dfs0_to_matrix():
     dfs = Dfs0(dfs0file)
     ds = dfs.read()
 
-    assert len(ds.data) == 2
+    assert len(ds.to_numpy()) == 2
 
 
 def test_write_data_with_missing_values(tmpdir):
@@ -502,21 +501,21 @@ def test_write_data_with_missing_values(tmpdir):
     ds = dfs.read()
 
     # Do something with the data
-    ds.data[0] = np.zeros_like(ds.data[0])
-    ds.data[1] = np.ones_like(ds.data[0])
+    ds[0].values = np.zeros_like(ds[0].values)
+    ds[1].values = np.ones_like(ds[0].values)
 
     # Add some NaNs
-    ds.data[1][0:10] = np.nan
+    ds[1].values[0:10] = np.nan
 
     # Overwrite the file
     dfs.write(tmpfile, ds)
 
     # Write operation does not modify the data
-    assert np.isnan(ds.data[1][1])
+    assert np.isnan(ds[1].values[1])
 
     moddfs = Dfs0(tmpfile)
     modified = moddfs.read()
-    assert np.isnan(modified.data[1][5])
+    assert np.isnan(modified[1].values[5])
 
 
 def test_read_relative_time_axis():

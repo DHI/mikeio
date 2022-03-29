@@ -11,7 +11,7 @@ def test_read_simple_3d():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     ds = mikeio.read(filename)
 
-    assert len(ds.data) == 3
+    assert ds.to_numpy().shape[0] == 3
     assert len(ds.items) == 3
 
     assert ds.items[0].name != "Z coordinate"
@@ -24,7 +24,7 @@ def test_read_simple_2dv():
 
     ds = dfs.read()
 
-    assert len(ds.data) == 3
+    assert ds.to_numpy().shape[0] == 3
     assert len(ds.items) == 3
 
     assert ds.items[0].name != "Z coordinate"
@@ -207,7 +207,7 @@ def test_read_and_select_single_element_dfsu_3d():
 
     selds = ds.isel(idx=1739, axis=1)
 
-    assert selds.data[0].shape == (3,)
+    assert selds[0].shape == (3,)
 
 
 def test_n_layers():

@@ -45,9 +45,8 @@ def test_read_write(tmpdir):
     dfs = Dfs3("tests/testdata/Grid1.dfs3")
     ds = dfs.read()
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
-    start_time = datetime(2012, 1, 1)
     items = ds.items
-    data = ds.data
+    data = ds.to_numpy()
     title = "test dfs3"
     dfs = Dfs3()
     dfs.write(

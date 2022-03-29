@@ -86,7 +86,7 @@ def test_read():
     dfs = Dfs1(filename)
 
     ds = dfs.read(items=[0])
-    data = ds.data[0]
+    data = ds[0].to_numpy()
     assert data.shape == (100, 3)  # time, x
 
 
@@ -96,7 +96,7 @@ def test_read_item_names():
     dfs = Dfs1(filename)
 
     ds = dfs.read(items=["testing water level"])
-    data = ds.data[0]
+    data = ds[0].to_numpy()
     assert data.shape == (100, 3)  # time, x
 
 
@@ -106,7 +106,7 @@ def test_read_time_steps():
     dfs = Dfs1(filename)
 
     ds = dfs.read(time=[3, 5])
-    data = ds.data[0]
+    data = ds[0].to_numpy()
     assert data.shape == (2, 3)  # time, x
 
 
@@ -117,7 +117,7 @@ def test_write_some_time_steps_new_file(tmpdir):
     dfs = Dfs1(filename)
 
     ds = dfs.read(time=[0, 1, 2, 3, 4, 5])
-    data = ds.data[0]
+    data = ds[0].to_numpy()
     assert data.shape == (6, 3)  # time, x
 
     dfs.write(outfilename, ds)
@@ -144,10 +144,9 @@ def test_read_names_access():
     dfs = Dfs1(filename)
 
     res = dfs.read(items=[0])
-    data = res.data
-    item = data[0]
+    item_data = res[0].to_numpy()
     time = res.time
-    assert item.shape == (100, 3)  # time, x
+    assert item_data.shape == (100, 3)  # time, x
     assert len(time) == 100
     assert res.items[0].name == "testing water level"
     assert res.items[0].type == EUMType.Water_Level

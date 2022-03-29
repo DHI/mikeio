@@ -69,7 +69,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
 
     t_seconds = (dataset.time - dataset.time[0]).total_seconds().values
 
-    data = np.array(dataset.data, order="F").astype(np.float64).T
+    data = np.array(dataset.to_numpy(), order="F").astype(np.float64).T
     data[np.isnan(data)] = delete_value
     data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
     rc = dfs.WriteDfs0DataDouble(data_to_write)
@@ -351,7 +351,7 @@ class Dfs0(TimeSeries):
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
             else:
                 datetimes = data.time
-            data = data.data
+            data = data.to_numpy()
         elif datetimes is not None:
             datetimes = pd.DatetimeIndex(datetimes, freq="infer")
 
