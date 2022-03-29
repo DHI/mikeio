@@ -121,6 +121,17 @@ def test_read_dfsu3d_xyz():
     # 20.531237
 
 
+def test_read_column_select_single_time_plot():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    x, y = 333934.1, 6158101.5
+
+    dsp = dfs.read(x=x, y=y)
+    sal_prof = dsp.Salinity.isel(time=0)
+    sal_prof.plot()
+
+
 def test_read_column_interp_time_and_select_time():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
