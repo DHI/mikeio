@@ -1,9 +1,7 @@
-from datetime import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import pytest
-from xarray import DataArray
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
@@ -421,13 +419,20 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[:, -1, 0].geometry, GeometryUndefined)
 
 
+def test_describe(da_grid2d):
+    df = da_grid2d.describe()
+    assert isinstance(df, pd.DataFrame)
+    assert len(df.columns) == 1
+    assert "max" in df.index
+
+
 def test_plot_grid1d(da2):
     # Not very functional tests, but at least it runs without errors
     da2.plot(title="The TITLE")
     da2.plot.line()
     da2.plot.timeseries(figsize=(12, 4))
 
-    fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
+    _, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
     da2.plot.imshow(ax=ax1)
     da2.plot.pcolormesh(ax=ax2)
 

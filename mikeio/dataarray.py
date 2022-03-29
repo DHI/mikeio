@@ -718,6 +718,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self.values = np.flip(self.values, axis=1)
         return self
 
+    def describe(self, **kwargs):
+        """Generate descriptive statistics by wrapping pandas describe()"""
+        data = {}
+        data[self.name] = self.to_numpy().ravel()
+        df = pd.DataFrame(data).describe(**kwargs)
+
+        return df
+
     def _to_dataset(self):
         """Create a single-item dataset"""
         from mikeio import Dataset
