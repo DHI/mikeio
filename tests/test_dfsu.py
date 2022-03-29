@@ -109,7 +109,7 @@ def test_read_returns_array_time_dimension_first():
 
     ds = dfs.read(items=[3])
 
-    assert ds.data[0].shape == (9, 884)
+    assert ds.shape == (9, 884)
 
 
 def test_read_selected_item_returns_correct_items():

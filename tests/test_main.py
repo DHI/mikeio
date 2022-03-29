@@ -7,7 +7,7 @@ def test_read_dfs0_generic_read():
     filename = r"tests/testdata/random.dfs0"
 
     res = mikeio.read(filename)
-    data = res.data
+    data = res.to_numpy()
 
     assert len(data) == 2
 

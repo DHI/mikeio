@@ -19,9 +19,9 @@ def test_add_constant(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org.data[0][0]
+    orgvalue = org[0].values[0]
     expected = orgvalue + 100.0
-    scaledvalue = scaled.data[0][0]
+    scaledvalue = scaled[0].values[0]
     assert scaledvalue == pytest.approx(expected)
 
 
@@ -35,9 +35,9 @@ def test_multiply_constant(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org.data[0][0]
+    orgvalue = org[0].values[0]
     expected = orgvalue * 1.5
-    scaledvalue = scaled.data[0][0]
+    scaledvalue = scaled[0].values[0]
     assert scaledvalue == pytest.approx(expected)
 
 
@@ -51,14 +51,14 @@ def test_multiply_constant_single_item_number(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue_speed = org.data[0][0][0]
+    orgvalue_speed = org[0].values[0][0]
     expected_speed = orgvalue_speed * 1.5
-    scaledvalue_speed = scaled.data[0][0][0]
+    scaledvalue_speed = scaled[0].values[0][0]
     assert scaledvalue_speed == pytest.approx(expected_speed)
 
-    orgvalue_dir = org.data[1][0][0]
+    orgvalue_dir = org[1].values[0, 0]
     expected_dir = orgvalue_dir
-    scaledvalue_dir = scaled.data[1][0][0]
+    scaledvalue_dir = scaled[1].values[0, 0]
     assert scaledvalue_dir == pytest.approx(expected_dir)
 
 
@@ -172,9 +172,9 @@ def test_linear_transform(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org.data[0][0]
+    orgvalue = org[0].values[0]
     expected = orgvalue * 1.5 - 20.0
-    scaledvalue = scaled.data[0][0]
+    scaledvalue = scaled[0].values[0]
     assert scaledvalue == pytest.approx(expected)
 
 
@@ -188,9 +188,9 @@ def test_linear_transform_dfsu(tmpdir):
 
     scaled = mikeio.read(outfilename)
 
-    orgvalue = org.data[0][0]
+    orgvalue = org[0].values[0]
     expected = orgvalue * 1.5 - 20.0
-    scaledvalue = scaled.data[0][0]
+    scaledvalue = scaled[0].values[0]
     assert scaledvalue == pytest.approx(expected)
 
 
@@ -205,9 +205,9 @@ def test_sum_dfsu(tmpdir):
 
     summed = mikeio.read(outfilename)
 
-    orgvalue = org.data[0][0]
+    orgvalue = org[0].values[0]
     expected = orgvalue * 2
-    scaledvalue = summed.data[0][0]
+    scaledvalue = summed[0].values[0]
     assert scaledvalue == pytest.approx(expected)
 
 
@@ -223,7 +223,7 @@ def test_diff_dfsu(tmpdir):
     diffed = mikeio.read(outfilename)
 
     expected = 0.0
-    scaledvalue = diffed.data[0][0]
+    scaledvalue = diffed[0].values[0]
     assert scaledvalue == pytest.approx(expected)
 
 
@@ -308,7 +308,7 @@ def test_concat_keep(tmpdir):
 
         # read outfile
         dso = mikeio.read(outfilename)
-        df_o = pd.DataFrame(dso.data[0], index=dso.time)
+        df_o = pd.DataFrame(dso[0].to_numpy(), index=dso.time)
 
         """ handle data (always keep two data in memory to compare in overlapping period) """
         # !!! checks below solely consider one item !!
@@ -317,7 +317,7 @@ def test_concat_keep(tmpdir):
 
             # just store current (=last) data in first loop. no check required
             if i == 0:
-                df_last = pd.DataFrame(dsi.data[0], index=dsi.time)
+                df_last = pd.DataFrame(dsi[0].to_numpy(), index=dsi.time)
             else:
                 # move previously last to first
                 df_first = df_last.copy()
