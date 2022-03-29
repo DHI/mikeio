@@ -162,14 +162,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         zn=None,
         dims=None,
     ):
-        if self._is_DataArrays(data):
-            validate = True
-        else:
+        if not self._is_DataArrays(data):
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )
-            validate = False
-        return self._init_from_DataArrays(data, validate=validate)
+        return self._init_from_DataArrays(data, validate=True)
 
     @staticmethod
     def _is_DataArrays(data):
@@ -931,8 +928,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
             # if there is an overlap "other" data will be used!
-            newdata[j][idx1, :] = ds.data[j]
-            newdata[j][idx2, :] = other.data[j]
+            newdata[j][idx1, :] = ds[j].to_numpy()
+            newdata[j][idx2, :] = other[j].to_numpy()
 
         return Dataset(newdata, newtime, ds.items)
 
