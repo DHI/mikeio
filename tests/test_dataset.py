@@ -221,7 +221,7 @@ def test_select_subset_isel():
     selds = ds.isel(10, axis=1)
 
     assert len(selds.items) == 2
-    assert len(selds.data) == 2
+    assert len(selds.to_numpy()) == 2
     assert selds["Foo"].shape == (100, 30)
     assert selds["Foo"].to_numpy()[0, 0] == 2.0
     assert selds["Bar"].to_numpy()[0, 0] == 3.0
@@ -412,7 +412,7 @@ def test_select_subset_isel_multiple_idxs():
     selds = ds.isel([10, 15], axis=1)
 
     assert len(selds.items) == 2
-    assert len(selds.data) == 2
+    assert len(selds.to_numpy()) == 2
     assert selds["Foo"].shape == (100, 2, 30)
 
 
@@ -440,7 +440,7 @@ def test_create_undefined():
     ds = mikeio.Dataset(data)
 
     assert len(ds.items) == 2
-    assert len(ds.data) == 2
+    assert len(ds.to_numpy()) == 2
     assert ds[0].name == "Item 1"
     assert ds[0].type == EUMType.Undefined
 
@@ -457,7 +457,7 @@ def test_create_named_undefined():
     ds = mikeio.Dataset(data=data, time=time, items=["Foo", "Bar"])
 
     assert len(ds.items) == 2
-    assert len(ds.data) == 2
+    assert len(ds.to_numpy()) == 2
     assert ds[1].name == "Bar"
     assert ds[1].type == EUMType.Undefined
 
@@ -519,7 +519,7 @@ def test_get_data():
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset(data, time, items)
 
-    assert ds.data[0].shape == (100, 100, 30)
+    assert ds.shape == (100, 100, 30)
 
 
 def test_interp_time():
@@ -550,7 +550,7 @@ def test_interp_time_to_other_dataset():
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds1 = mikeio.Dataset(data, time, items)
-    assert ds1.data[0].shape == (nt, 10, 3)
+    assert ds1.shape == (nt, 10, 3)
 
     ## mikeio.Dataset 2
     nt = 12
@@ -567,7 +567,7 @@ def test_interp_time_to_other_dataset():
     assert dsi.time[0] == ds2.time[0]
     assert dsi.time[-1] == ds2.time[-1]
     assert len(dsi.time) == len(ds2.time)
-    assert dsi.data[0].shape[0] == ds2.data[0].shape[0]
+    assert dsi[0].shape[0] == ds2[0].shape[0]
 
     # Accept dataset as argument
     dsi2 = ds1.interp_time(ds2)
@@ -582,7 +582,7 @@ def test_extrapolate():
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds1 = mikeio.Dataset(data, time, items)
-    assert ds1.data[0].shape == (nt, 10, 3)
+    assert ds1.shape == (nt, 10, 3)
 
     ## mikeio.Dataset 2 partly overlapping with mikeio.Dataset 1
     nt = 3
@@ -599,9 +599,9 @@ def test_extrapolate():
     assert dsi.time[0] == ds2.time[0]
     assert dsi.time[-1] == ds2.time[-1]
     assert len(dsi.time) == len(ds2.time)
-    assert dsi.data[0][0] == pytest.approx(0.0)
-    assert dsi.data[0][1] == pytest.approx(1.0)  # filled
-    assert dsi.data[0][2] == pytest.approx(1.0)  # filled
+    assert dsi[0].values[0] == pytest.approx(0.0)
+    assert dsi[0].values[1] == pytest.approx(1.0)  # filled
+    assert dsi[0].values[2] == pytest.approx(1.0)  # filled
 
 
 def test_extrapolate_not_allowed():
@@ -611,7 +611,7 @@ def test_extrapolate_not_allowed():
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds1 = mikeio.Dataset(data, time, items)
-    assert ds1.data[0].shape == (nt, 10, 3)
+    assert ds1.shape == (nt, 10, 3)
 
     ## mikeio.Dataset 2 partly overlapping with mikeio.Dataset 1
     nt = 3
@@ -829,7 +829,7 @@ def test_copy():
     ds = mikeio.Dataset(data, time, items)
 
     assert len(ds.items) == 2
-    assert len(ds.data) == 2
+    assert len(ds.to_numpy()) == 2
     assert ds[0].name == "Foo"
 
     ds2 = ds.copy()
@@ -855,7 +855,7 @@ def test_dropna():
     ds = mikeio.Dataset(data, time, items)
 
     assert len(ds.items) == 2
-    assert len(ds.data) == 2
+    assert len(ds.to_numpy()) == 2
 
     ds2 = ds.dropna()
 
