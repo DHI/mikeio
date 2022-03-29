@@ -322,7 +322,7 @@ def test_concat_keep(tmpdir):
                 # move previously last to first
                 df_first = df_last.copy()
                 # overwrite last with new / current data
-                df_last = pd.DataFrame(dsi.data[0], index=dsi.time)
+                df_last = pd.DataFrame(dsi[0].to_numpy(), index=dsi.time)
 
                 # find overlapping timesteps via merge
                 overlap_idx = pd.merge(
