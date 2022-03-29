@@ -190,8 +190,8 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_xlabel("Longitude [degrees]")
             ax.set_ylabel("Latitude [degrees]")
             mean_lat = np.mean(y)
-            # aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
-            # ax.set_aspect(aspect_ratio)
+            aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
+            ax.set_aspect(aspect_ratio)
         else:
             ax.set_xlabel("Easting [m]")
             ax.set_ylabel("Northing [m]")
