@@ -86,13 +86,14 @@ def test_write_inconsistent_shape(tmpdir):
     with pytest.raises(ValueError):
         Dataset(data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H"))
 
-    # d2 = np.random.random([nt, ny, nx])
-    # ds = Dataset(data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H"))
-    # ds[1]._values = np.random.random([nt, ny, nx + 1])
+    # trick Dataset to accept DataArrays of different shapes
+    d2 = np.random.random([nt, ny, nx])
+    ds = Dataset(data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H"))
+    ds[1]._values = np.random.random([nt, ny, nx + 1])
 
-    # dfs = Dfs2()
-    # with pytest.raises(DataDimensionMismatch):
-    #     dfs.write(filename=filename, data=data)
+    dfs = Dfs2()
+    with pytest.raises(ValueError):
+        dfs.write(filename=filename, data=ds)
 
 
 def test_write_single_item(tmpdir):
