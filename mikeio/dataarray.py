@@ -13,7 +13,12 @@ from .spatial.geometry import (
     GeometryUndefined,
 )
 from .spatial.grid_geometry import Grid1D, Grid2D
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
+from .spatial.FM_geometry import (
+    GeometryFM,
+    GeometryFMLayered,
+    GeometryFMPointSpectrum,
+    GeometryFMVerticalColumn,
+)
 from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
 from .data_utils import DataUtilsMixin
@@ -255,6 +260,63 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         )
 
 
+class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self.lines(ax, **kwargs)
+
+    def lines(self, ax=None, figsize=None, extrapolate=True, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._lines(ax, extrapolate=extrapolate, **kwargs)
+
+    def _lines(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
+        import matplotlib.pyplot as plt
+
+        if "title" in kwargs:
+            title = kwargs.pop("title")
+            ax.set_title(title)
+
+        if show_legend is None:
+            show_legend = len(self.da.time) < 10
+
+        values = self.da.to_numpy()
+        zn = self.da._zn
+        if extrapolate:
+            ze = self.da.geometry._calc_zee(zn)
+            values = self.da.geometry._interp_values(zn, values, ze)
+        else:
+            ze = self.da.geometry.calc_ze(zn)
+
+        ax.plot(values.T, ze.T, label=self.da.time, **kwargs)
+
+        ax.set_xlabel(self._label_txt())
+        ax.set_ylabel("z")
+
+        if show_legend:
+            plt.legend()
+
+        return ax
+
+    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+        fig, ax = self._get_fig_ax(ax, figsize)
+        ze = self.da.geometry.calc_ze()
+        pos = ax.pcolormesh(
+            self.da.time,
+            ze,
+            self.da.values.T,
+            shading="nearest",
+            **kwargs,
+        )
+        cbar = fig.colorbar(pos, label=self._label_txt())
+        ax.set_xlabel("time")
+        fig.autofmt_xdate()
+        ax.set_ylabel("z (static)")
+        return ax
+
+
 class DataArray(DataUtilsMixin, TimeSeries):
 
     deletevalue = 1.0e-35
@@ -429,7 +491,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return zn
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFM):
+        if isinstance(self.geometry, GeometryFMVerticalColumn):
+            return _DataArrayPlotterFMVerticalColumn(self)
+        elif isinstance(self.geometry, GeometryFM):
             return _DataArrayPlotterFM(self)
         elif isinstance(self.geometry, Grid1D):
             return _DataArrayPlotterGrid1D(self)
@@ -468,9 +532,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
             # select in time
             steps = self._get_time_idx_list(self.time, steps)
-            time = self.time[steps]
+            if len(steps) == 0:
+                raise IndexError("No timesteps found!")
             if len(steps) == 1:
                 dims = tuple([d for d in dims if d != "time"])
+            time = self.time[steps]
 
             key = (steps, *space_key) if isinstance(key, tuple) else steps
         else:
@@ -875,7 +941,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def sel(
         self,
         *,
-        time: Union[pd.DatetimeIndex, "DataArray"] = None,
+        time: Union[str, pd.DatetimeIndex, "DataArray"] = None,
         x: float = None,
         y: float = None,
         z: float = None,

@@ -49,7 +49,16 @@ class DfsuSpectral(_Dfsu):
         return read_shape, shape, tuple(dims)
 
     def read(
-        self, *, items=None, time=None, time_steps=None, elements=None, nodes=None
+        self,
+        *,
+        items=None,
+        time=None,
+        time_steps=None,
+        elements=None,
+        nodes=None,
+        area=None,
+        x=None,
+        y=None,
     ) -> Dataset:
         """
         Read data from a spectral dfsu file
@@ -60,6 +69,13 @@ class DfsuSpectral(_Dfsu):
             Read only selected items, by number (0-based), or by name
         time: str, int or list[int], optional
             Read only selected time_steps
+        area: list[float], optional
+            Read only data inside (horizontal) area (spectral area files
+            only) given as a bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x, y: float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
         elements: list[int], optional
             Read only selected element ids (spectral area files only)
         nodes: list[int], optional
@@ -104,6 +120,16 @@ class DfsuSpectral(_Dfsu):
 
         single_time_selected = np.isscalar(time) if time is not None else False
         time_steps = _valid_timesteps(dfs, time)
+
+        if self._type == DfsuFileType.DfsuSpectral2D:
+            self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
+            if elements is None:
+                elements = self._parse_geometry_sel(area=area, x=x, y=y)
+        else:
+            if (area is not None) or (x is not None) or (y is not None):
+                raise ValueError(
+                    f"Arguments area/x/y are not supported for {self._type}"
+                )
 
         geometry, pts = self._parse_elements_nodes(elements, nodes)
 
