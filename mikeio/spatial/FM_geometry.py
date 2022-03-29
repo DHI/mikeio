@@ -1723,8 +1723,11 @@ class GeometryFMVerticalColumn(GeometryFMLayered):
 
         ze = self.calc_ze(zn)
         dati = np.zeros_like(z)
-        for j in range(zn.shape[0]):
-            dati[j, :] = interp1d(ze[j, :], data[j, :], **opt)(z[j, :])
+        if zn.ndim == 1:
+            dati = interp1d(ze, data, **opt)(z)
+        elif zn.ndim == 2:
+            for j in range(zn.shape[0]):
+                dati[j, :] = interp1d(ze[j, :], data[j, :], **opt)(z[j, :])
         return dati
 
     @property
