@@ -294,7 +294,7 @@ class _Dfs123(TimeSeries):
             self._start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
-            self._data = data.data
+            self._data = data.to_numpy()
         else:
             self._data = data
 

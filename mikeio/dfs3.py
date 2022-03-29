@@ -27,7 +27,7 @@ class Dfs3(_Dfs123):
         for item_number in range(self.n_items):
             b = np.nan * np.ones(self.shape[2:])
             for ts in range(self.n_timesteps):
-                d = data.data[item_number][ts, ...]
+                d = data[item_number].values[ts, ...]
                 for layer in range(d.shape[0]):  # going from surface to bottom
                     y = d[layer, ...]
                     b[~np.isnan(y)] = y[~np.isnan(y)]
