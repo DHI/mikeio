@@ -4,11 +4,13 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Dfsu and Mesh &#8212; MIKE IO  documentation</title>
     
-  <link href="_static/css/theme.css" rel="stylesheet">
-  <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 
     
   <link rel="stylesheet"
@@ -18,20 +20,17 @@
   <link rel="preload" as="font" type="font/woff2" crossorigin
     href="_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
-    
-      
-
-    
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinx-book-theme.css?digest=84ace793992934648b4de8eed757e5a2" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=62ba249389abaaa9ffc34bf36a076bdc1d65ee18" type="text/css" />
     
-  <link rel="preload" as="script" href="_static/js/index.be7d3bbb2ef33a8344ce.js">
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx-book-theme.9d8b4a8b9bb19db25eeaddc40d639ba2.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=f31d14ad54b65d19161ba51d4ffff3a77ae00456"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="EUM and items" href="eum.html" />
@@ -43,7 +42,21 @@
     <!-- Google Analytics -->
     
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay overlay-navbar" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<!-- Checkboxes to toggle the in-page toc -->
+<input type="checkbox" class="sidebar-toggle" name="__page-toc" id="__page-toc" aria-label="Toggle in-page Table of Contents">
+<label class="overlay overlay-pagetoc" for="__page-toc">
+    <div class="visually-hidden">Toggle in-page Table of Contents</div>
+</label>
+<!-- Headers at the top -->
+<div class="announcement header-item noprint"></div>
+<div class="header header-item noprint"></div>
+
     
     <div class="container-fluid" id="banner"></div>
 
@@ -52,14 +65,10 @@
     <div class="container-xl">
       <div class="row">
           
-<!-- Checkboxes to toggle the left sidebar -->
-<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
-<label class="overlay" for="__navigation">
-    <div class="visually-hidden">Toggle navigation sidebar</div>
-</label>
-<div class="col-12 col-md-3 bd-sidebar site-navigation " id="site-navigation">
-    
-        <div class="navbar-brand-box">
+<!-- Sidebar -->
+<div class="bd-sidebar noprint" id="site-navigation">
+    <div class="bd-sidebar__content">
+        <div class="bd-sidebar__top"><div class="navbar-brand-box">
     <a class="navbar-brand text-wrap" href="index.html">
       
         <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
@@ -126,74 +135,135 @@
 </ul>
 
     </div>
-</nav> <!-- To handle the deprecated key -->
-
-<div class="navbar_extra_footer">
-  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
-</div>
-
-</div>
-
-
-          
-
-
-          
-<!-- This is an invisible pixel that we watch to see if we've scrolled. -->
-<div class="sbt-scroll-pixel-helper"></div>
-<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
-    
-    <div class="topbar container-xl fixed-top">
-    <div class="topbar-contents row">
-        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
-        <div class="col pl-md-4 topbar-main">
-            <div class="topbar-left">
-                
-                <label class="nav-toggle-button" for="__navigation">
-                    <div class="visually-hidden">Toggle navigation</div>
-                    <i class="fas fa-bars"></i>
-                </label>
-                
+</nav></div>
+        <div class="bd-sidebar__bottom">
+             <!-- To handle the deprecated key -->
+            
+            <div class="navbar_extra_footer">
+            Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
             </div>
             
-<div class="dropdown-buttons-trigger">
-    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
-            class="fas fa-download"></i></button>
+        </div>
+    </div>
+    <div id="rtd-footer-container"></div>
+</div>
 
-    <div class="dropdown-buttons">
-        <!-- ipynb file if we had a myst markdown file -->
+
+          
+
+
+          
+<!-- A tiny helper pixel to detect if we've scrolled -->
+<div class="sbt-scroll-pixel-helper"></div>
+<!-- Main content -->
+<div class="col py-0 content-container">
+    
+    <div class="header-article row sticky-top noprint">
         
-        <!-- Download raw file -->
-        <a class="dropdown-buttons" href="_sources/dfsu.rst.txt"><button type="button"
-                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
-                data-placement="left">.rst</button></a>
-        <!-- Download PDF via print -->
-        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
-                onclick="printPdf(this)" data-toggle="tooltip" data-placement="left">.pdf</button>
+
+
+
+<div class="col py-1 d-flex header-article-main">
+    <div class="header-article__left">
+        
+        <label for="__navigation"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="right"
+title="Toggle navigation"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-bars"></i>
+  </span>
+
+</label>
+
+        
+    </div>
+    <div class="header-article__right">
+<button onclick="toggleFullScreen()"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="bottom"
+title="Fullscreen mode"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+<div class="menu-dropdown menu-dropdown-download-buttons">
+  <button class="headerbtn menu-dropdown__trigger"
+      aria-label="Download this page">
+      <i class="fas fa-download"></i>
+  </button>
+  <div class="menu-dropdown__content">
+    <ul>
+      <li>
+        <a href="_sources/dfsu.rst.txt"
+   class="headerbtn"
+   data-toggle="tooltip"
+data-placement="left"
+title="Download source file"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="headerbtn__text-container">.rst</span>
+</a>
+
+      </li>
+      
+      <li>
+        
+<button onclick="printPdf(this)"
+  class="headerbtn"
+  data-toggle="tooltip"
+data-placement="left"
+title="Print to PDF"
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="headerbtn__text-container">.pdf</span>
+</button>
+
+      </li>
+      
+    </ul>
+  </div>
+</div>
+<label for="__page-toc"
+  class="headerbtn headerbtn-page-toc"
+  
+>
+  
+
+<span class="headerbtn__icon-container">
+  <i class="fas fa-list"></i>
+  </span>
+
+</label>
+
     </div>
 </div>
 
-            <!-- Source interaction buttons -->
-
-            <!-- Full screen (wrap in <a> to have style consistency -->
-
-<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
-        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
-        title="Fullscreen mode"><i
-            class="fas fa-expand"></i></button></a>
-
-            <!-- Launch buttons -->
-
-        </div>
-
-        <!-- Table of contents -->
-        <div class="d-none d-md-block col-md-2 bd-toc show noprint">
-            
-            <div class="tocsection onthispage pt-5 pb-3">
-                <i class="fas fa-list"></i> Contents
-            </div>
-            <nav id="bd-toc-nav" aria-label="Page">
-                <ul class="visible nav section-nav flex-column">
+<!-- Table of contents -->
+<div class="col-md-3 bd-toc show noprint">
+    <div class="tocsection onthispage pt-5 pb-3">
+        <i class="fas fa-list"></i> Contents
+    </div>
+    <nav id="bd-toc-nav" aria-label="Page">
+        <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#the-flexible-mesh">
    The flexible mesh
@@ -241,12 +311,11 @@
  </li>
 </ul>
 
-            </nav>
-        </div>
-    </div>
+    </nav>
 </div>
-    <div id="main-content" class="row">
-        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+    </div>
+    <div class="article row">
+        <div class="col pl-md-3 pl-lg-5 content-container">
             <!-- Table of contents that is only displayed when printing the page -->
             <div id="jb-print-docs-body" class="onlyprint">
                 <h1>Dfsu and Mesh</h1>
@@ -310,11 +379,12 @@
                     </div>
                 </div>
             </div>
-            
+            <main id="main-content" role="main">
+                
               <div>
                 
-  <div class="section" id="dfsu-and-mesh">
-<span id="dfsu"></span><h1>Dfsu and Mesh<a class="headerlink" href="#dfsu-and-mesh" title="Permalink to this headline">¶</a></h1>
+  <section id="dfsu-and-mesh">
+<span id="dfsu"></span><h1>Dfsu and Mesh<a class="headerlink" href="#dfsu-and-mesh" title="Permalink to this headline">#</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>TODO Not updated to MIKE IO 1.0</p>
@@ -324,8 +394,8 @@ The .mesh file is an ASCII format for storing the flexible mesh geometry.
 The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is
 available in a .dfsu file as static items.</p>
 <p>For a detailed description of the .mesh and .dfsu file specification see the <a class="reference external" href="https://manuals.mikepoweredbydhi.help/2021/General/FM_FileSpecification.pdf">flexible file format documentation</a>.</p>
-<div class="section" id="the-flexible-mesh">
-<h2>The flexible mesh<a class="headerlink" href="#the-flexible-mesh" title="Permalink to this headline">¶</a></h2>
+<section id="the-flexible-mesh">
+<h2>The flexible mesh<a class="headerlink" href="#the-flexible-mesh" title="Permalink to this headline">#</a></h2>
 <p>The mesh geometry in a .mesh or a .dfsu file consists of a number of nodes and a number of elements.</p>
 <p>Each node has:</p>
 <ul class="simple">
@@ -346,13 +416,13 @@ In MIKE IO, all ids are <strong>0-based</strong> following standard Python index
 That means, as an example, that when finding the element closest to a
 point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.</p>
 </div>
-</div>
-<div class="section" id="common-dfsu-and-mesh-properties">
-<h2>Common Dfsu and Mesh properties<a class="headerlink" href="#common-dfsu-and-mesh-properties" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="common-dfsu-and-mesh-properties">
+<h2>Common Dfsu and Mesh properties<a class="headerlink" href="#common-dfsu-and-mesh-properties" title="Permalink to this headline">#</a></h2>
 <p>MIKE IO has a <a class="reference external" href="#mikeio.Dfsu">Dfsu class</a> for handling .dfsu files
 and a <a class="reference external" href="#mikeio.Mesh">Mesh class</a> for handling .mesh files both they inherit from the
 same base class and have the same core functionality.</p>
-<table class="longtable table autosummary">
+<table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -399,10 +469,10 @@ same base class and have the same core functionality.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="common-dfsu-and-mesh-methods">
-<h2>Common Dfsu and Mesh methods<a class="headerlink" href="#common-dfsu-and-mesh-methods" title="Permalink to this headline">¶</a></h2>
-<table class="longtable table autosummary">
+</section>
+<section id="common-dfsu-and-mesh-methods">
+<h2>Common Dfsu and Mesh methods<a class="headerlink" href="#common-dfsu-and-mesh-methods" title="Permalink to this headline">#</a></h2>
+<table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -437,9 +507,9 @@ same base class and have the same core functionality.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="mesh-functionality">
-<h2>Mesh functionality<a class="headerlink" href="#mesh-functionality" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="mesh-functionality">
+<h2>Mesh functionality<a class="headerlink" href="#mesh-functionality" title="Permalink to this headline">#</a></h2>
 <p>The Mesh class is initialized with a mesh or a dfsu file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">msh</span> <span class="o">=</span> <span class="n">Mesh</span><span class="p">(</span><span class="s2">&quot;../tests/testdata/odense_rough.mesh&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">msh</span>
@@ -450,7 +520,7 @@ same base class and have the same core functionality.</p>
 </div>
 <p>Apart from the common flexible file functionality,
 the Mesh object has the following methods and properties:</p>
-<table class="longtable table autosummary">
+<table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -469,12 +539,12 @@ the Mesh object has the following methods and properties:</p>
 </table>
 <p>See the <a class="reference external" href="#mikeio.Mesh">Mesh API specification</a> below for a detailed description.
 See the <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Mesh.ipynb">Mesh Example notebook</a> for more Mesh operations (including shapely examples).</p>
-</div>
-<div class="section" id="dfsu-functionality">
-<h2>Dfsu functionality<a class="headerlink" href="#dfsu-functionality" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="dfsu-functionality">
+<h2>Dfsu functionality<a class="headerlink" href="#dfsu-functionality" title="Permalink to this headline">#</a></h2>
 <p>The Dfsu class is initialized with a mesh or a dfsu file.</p>
 <p>Apart from the common flexible file functionality, the Dfsu has the following <em>properties</em>:</p>
-<table class="longtable table autosummary">
+<table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -483,7 +553,7 @@ See the <a class="reference external" href="https://nbviewer.jupyter.org/github/
 </tbody>
 </table>
 <p>Apart from the common flexible file functionality, the Dfsu has the following <em>methods</em>:</p>
-<table class="longtable table autosummary">
+<table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -493,9 +563,9 @@ See the <a class="reference external" href="https://nbviewer.jupyter.org/github/
 </table>
 <p>See the <a class="reference external" href="#mikeio.Dfsu">Dfsu API specification</a> below for a detailed description.
 See the <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb">Dfsu Read Example notebook</a> for basic dfsu functionality.</p>
-</div>
-<div class="section" id="dfsu-types">
-<h2>Dfsu types<a class="headerlink" href="#dfsu-types" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="dfsu-types">
+<h2>Dfsu types<a class="headerlink" href="#dfsu-types" title="Permalink to this headline">#</a></h2>
 <p>The following dfsu file types are supported by MIKE IO.</p>
 <ul class="simple">
 <li><p>2D horizontal.</p></li>
@@ -512,12 +582,12 @@ but the following values types exists:</p>
 <li><p>Face value type, storing values on element faces. This is used e.g. for HD decoupling files, to store the discharge between elements.</p></li>
 <li><p>Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW.</p></li>
 </ul>
-</div>
-<div class="section" id="layered-dfsu-files">
-<h2>Layered dfsu files<a class="headerlink" href="#layered-dfsu-files" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="layered-dfsu-files">
+<h2>Layered dfsu files<a class="headerlink" href="#layered-dfsu-files" title="Permalink to this headline">#</a></h2>
 <p>There are three type of layered dfsu files: 3D dfsu, 2d vertical slices and 1d vertical profiles.</p>
 <p>Apart from the basic dfsu functionality, layered dfsu have the below additional <em>properties</em>:</p>
-<table class="longtable table autosummary">
+<table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -526,7 +596,7 @@ but the following values types exists:</p>
 </tbody>
 </table>
 <p>Apart from the basic dfsu functionality, layered dfsu have the below additional <em>methods</em>:</p>
-<table class="longtable table autosummary">
+<table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
 <col style="width: 90%" />
@@ -542,20 +612,20 @@ The bottom layer is 0.
 In previous versions of MIKE IO, layer ids was 1-based!
 From release 0.10 all ids are 0-based.</p>
 </div>
-</div>
-<div class="section" id="dfsu-api">
-<h2>Dfsu API<a class="headerlink" href="#dfsu-api" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="dfsu-api">
+<h2>Dfsu API<a class="headerlink" href="#dfsu-api" title="Permalink to this headline">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Dfsu">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfsu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfsu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfsu" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-</div>
-<div class="section" id="mesh-api">
-<h2>Mesh API<a class="headerlink" href="#mesh-api" title="Permalink to this headline">¶</a></h2>
+</section>
+<section id="mesh-api">
+<h2>Mesh API<a class="headerlink" href="#mesh-api" title="Permalink to this headline">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Mesh">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh" title="Permalink to this definition">#</a></dt>
 <dd><p>The Mesh class is initialized with a mesh or a dfsu file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -572,19 +642,19 @@ From release 0.10 all ids are 0-based.</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.boundary_codes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_codes</span></span><a class="headerlink" href="#mikeio.Mesh.boundary_codes" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_codes</span></span><a class="headerlink" href="#mikeio.Mesh.boundary_codes" title="Permalink to this definition">#</a></dt>
 <dd><p>Unique list of boundary codes</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.boundary_polylines">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.Mesh.boundary_polylines" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.Mesh.boundary_polylines" title="Permalink to this definition">#</a></dt>
 <dd><p>Lists of closed polylines defining domain outline</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.calc_element_coordinates">
-<span class="sig-name descname"><span class="pre">calc_element_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.calc_element_coordinates" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">calc_element_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.calc_element_coordinates" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculates the coordinates of the center of each element.</p>
 <p>Only necessary for dynamic vertical coordinates,
 otherwise use the property <em>element_coordinates</em> instead</p>
@@ -609,13 +679,13 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.codes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codes</span></span><a class="headerlink" href="#mikeio.Mesh.codes" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codes</span></span><a class="headerlink" href="#mikeio.Mesh.codes" title="Permalink to this definition">#</a></dt>
 <dd><p>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.Mesh.contains" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.Mesh.contains" title="Permalink to this definition">#</a></dt>
 <dd><p>test if a list of points are contained by mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -632,19 +702,19 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.element_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.element_coordinates" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.element_coordinates" title="Permalink to this definition">#</a></dt>
 <dd><p>Center coordinates of each element</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.element_table">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_table</span></span><a class="headerlink" href="#mikeio.Mesh.element_table" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_table</span></span><a class="headerlink" href="#mikeio.Mesh.element_table" title="Permalink to this definition">#</a></dt>
 <dd><p>Element to node connectivity</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.elements_to_geometry">
-<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFMLayered</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.Mesh.elements_to_geometry" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">mikeio.spatial.FM_geometry.GeometryFM</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">mikeio.spatial.FM_geometry.GeometryFMLayered</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.Mesh.elements_to_geometry" title="Permalink to this definition">#</a></dt>
 <dd><p>export a selection of elements to new flexible file geometry</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -665,7 +735,7 @@ or ‘all’ can be selected, by default ‘all’</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.find_nearest_elements">
-<span class="sig-name descname"><span class="pre">find_nearest_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_distances</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.find_nearest_elements" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">find_nearest_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_distances</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.find_nearest_elements" title="Permalink to this definition">#</a></dt>
 <dd><p>Find index of nearest elements (optionally for a list)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -708,7 +778,7 @@ default=False</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.get_2d_interpolant">
-<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_2d_interpolant" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_2d_interpolant" title="Permalink to this definition">#</a></dt>
 <dd><p>IDW interpolant for list of coordinates</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -732,7 +802,7 @@ only include elements within radius</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.get_element_area">
-<span class="sig-name descname"><span class="pre">get_element_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_element_area" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_element_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_element_area" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculate the horizontal area of each element.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -746,7 +816,7 @@ only include elements within radius</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.get_node_centered_data">
-<span class="sig-name descname"><span class="pre">get_node_centered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_node_centered_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_node_centered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_node_centered_data" title="Permalink to this definition">#</a></dt>
 <dd><p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -766,7 +836,7 @@ only include elements within radius</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.get_node_coords">
-<span class="sig-name descname"><span class="pre">get_node_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_node_coords" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_node_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_node_coords" title="Permalink to this definition">#</a></dt>
 <dd><p>Get the coordinates of each node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -783,7 +853,7 @@ only include elements within radius</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.get_overset_grid">
-<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_overset_grid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_overset_grid" title="Permalink to this definition">#</a></dt>
 <dd><p>get a 2d grid that covers the domain by specifying spacing or shape</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -808,7 +878,7 @@ values all around the domain.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.interp2d">
-<span class="sig-name descname"><span class="pre">interp2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elem_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.interp2d" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">interp2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elem_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.interp2d" title="Permalink to this definition">#</a></dt>
 <dd><p>interp spatially in data (2d only)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -837,67 +907,67 @@ values all around the domain.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.is_2d">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><a class="headerlink" href="#mikeio.Mesh.is_2d" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><a class="headerlink" href="#mikeio.Mesh.is_2d" title="Permalink to this definition">#</a></dt>
 <dd><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.is_geo">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Mesh.is_geo" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Mesh.is_geo" title="Permalink to this definition">#</a></dt>
 <dd><p>Are coordinates geographical (LONG/LAT)?</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.is_layered">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.Mesh.is_layered" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.Mesh.is_layered" title="Permalink to this definition">#</a></dt>
 <dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.is_local_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.is_local_coordinates" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.is_local_coordinates" title="Permalink to this definition">#</a></dt>
 <dd><p>Are coordinates relative (NON-UTM)?</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.is_spectral">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.Mesh.is_spectral" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.Mesh.is_spectral" title="Permalink to this definition">#</a></dt>
 <dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.is_tri_only">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><a class="headerlink" href="#mikeio.Mesh.is_tri_only" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><a class="headerlink" href="#mikeio.Mesh.is_tri_only" title="Permalink to this definition">#</a></dt>
 <dd><p>Does the mesh consist of triangles only?</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.max_nodes_per_element">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.Mesh.max_nodes_per_element" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.Mesh.max_nodes_per_element" title="Permalink to this definition">#</a></dt>
 <dd><p>The maximum number of nodes for an element</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.n_elements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.Mesh.n_elements" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.Mesh.n_elements" title="Permalink to this definition">#</a></dt>
 <dd><p>Number of elements</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.n_nodes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.Mesh.n_nodes" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.Mesh.n_nodes" title="Permalink to this definition">#</a></dt>
 <dd><p>Number of nodes</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.node_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.node_coordinates" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.node_coordinates" title="Permalink to this definition">#</a></dt>
 <dd><p>Coordinates (x,y,z) of all nodes</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'patch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_refinements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_outline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'patch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_refinements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_outline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot" title="Permalink to this definition">#</a></dt>
 <dd><p>Plot unstructured data and/or mesh, mesh outline</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -941,13 +1011,13 @@ do this number of mesh refinements for smoother plotting</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.projection_string">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.Mesh.projection_string" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.Mesh.projection_string" title="Permalink to this definition">#</a></dt>
 <dd><p>The projection string</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.to_shapely">
-<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.to_shapely" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.to_shapely" title="Permalink to this definition">#</a></dt>
 <dd><p>Export mesh as shapely MultiPolygon</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -961,19 +1031,19 @@ do this number of mesh refinements for smoother plotting</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.type_name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.Mesh.type_name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.Mesh.type_name" title="Permalink to this definition">#</a></dt>
 <dd><p>Type name, e.g. Mesh, Dfsu2D</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.valid_codes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_codes</span></span><a class="headerlink" href="#mikeio.Mesh.valid_codes" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_codes</span></span><a class="headerlink" href="#mikeio.Mesh.valid_codes" title="Permalink to this definition">#</a></dt>
 <dd><p>Unique list of node codes</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.write" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.write" title="Permalink to this definition">#</a></dt>
 <dd><p>write mesh to file (will overwrite if file exists)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -987,21 +1057,23 @@ do this number of mesh refinements for smoother plotting</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Mesh.zn">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zn</span></span><a class="headerlink" href="#mikeio.Mesh.zn" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">zn</span></span><a class="headerlink" href="#mikeio.Mesh.zn" title="Permalink to this definition">#</a></dt>
 <dd><p>Static bathymetry values (depth) at nodes</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
               </div>
               
-            
-                <!-- Previous / next buttons -->
-<div class='prev-next-area'> 
+            </main>
+            <footer class="footer-article noprint">
+                
+    <!-- Previous / next buttons -->
+<div class='prev-next-area'>
     <a class='left-prev' id="prev-link" href="dfs123.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
@@ -1017,24 +1089,28 @@ do this number of mesh refinements for smoother plotting</p></li>
     <i class="fas fa-angle-right"></i>
     </a>
 </div>
-            
+            </footer>
         </div>
     </div>
-    <footer class="footer">
-  <p>
+    <div class="footer-content row">
+        <footer class="col footer"><p>
+  
+    By Henrik Andersson, Jesper Mariegaard, Marc Ridler<br/>
+  
+      &copy; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.<br/>
+</p>
+        </footer>
+    </div>
     
-      By Henrik Andersson, Jesper Mariegaard, Marc Ridler<br/>
-    
-        &copy; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.<br/>
-  </p>
-</footer>
-</main>
+</div>
 
 
       </div>
     </div>
   
-  <script src="_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+
 
   </body>
 </html>
