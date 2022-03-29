@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="1.0.a1",
+    version="1.0.a2",
     install_requires=[
         "mikecore>=0.2.0",
         "numpy>=1.15.0",  # first version with numpy.quantile
@@ -18,7 +18,7 @@ setuptools.setup(
     extras_require={
         "dev": [
             "pytest",
-            "black==22.1.0",
+            "black==22.3.0",
             "sphinx",
             "sphinx-book-theme",
             "myst-parser",
