@@ -77,22 +77,22 @@ def test_write_inconsistent_shape(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
-    data = []
-
     nt = 100
     nx = 20
     ny = 5
     d1 = np.random.random([nt, ny, nx])
     d2 = np.random.random([nt, ny, nx + 1])
 
-    data = Dataset(
-        data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H")
-    )
+    with pytest.raises(ValueError):
+        Dataset(data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H"))
 
-    dfs = Dfs2()
+    # d2 = np.random.random([nt, ny, nx])
+    # ds = Dataset(data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H"))
+    # ds[1]._values = np.random.random([nt, ny, nx + 1])
 
-    with pytest.raises(DataDimensionMismatch):
-        dfs.write(filename=filename, data=data)
+    # dfs = Dfs2()
+    # with pytest.raises(DataDimensionMismatch):
+    #     dfs.write(filename=filename, data=data)
 
 
 def test_write_single_item(tmpdir):
@@ -363,7 +363,7 @@ def test_write_some_time_step(tmpdir):
 
     ds = dfs.read(time=[1, 2])
 
-    assert ds.data[0].shape[0] == 2
+    assert ds[0].to_numpy().shape[0] == 2
     assert len(ds.time) == 2
 
     assert dfs.timestep == 86400.0
