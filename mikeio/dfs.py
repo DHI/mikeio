@@ -20,7 +20,7 @@ class _Dfs123(TimeSeries):
 
     show_progress = False
 
-    def __init__(self, filename=None, dtype=np.float64):
+    def __init__(self, filename=None, dtype=np.float32):
         self._filename = str(filename)
         self._projstr = None
         self._start_time = None

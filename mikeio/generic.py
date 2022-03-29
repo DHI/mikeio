@@ -603,7 +603,7 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
         indata = indatatime.Data
         has_value = indata != deletevalue
         indata[~has_value] = np.nan
-        outdatalist.append(indata.astype(np.float64))
+        outdatalist.append(indata.astype(np.float32))
         step0 = np.zeros_like(indata, dtype=np.int32)
         step0[has_value] = 1
         steps_list.append(step0)
