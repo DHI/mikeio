@@ -66,26 +66,34 @@ def read(filename, *, items=None, time_steps=None, time=None, **kwargs) -> Datas
     return dfs.read(items=items, time_steps=time_steps, time=time, **kwargs)
 
 
-def open(filename: str):
+def open(filename: str, **kwargs):
+    """Open a dfs/mesh file
+
+    Examples
+    --------
+    >>> dfs = mikeio.open("wl.dfs1")
+    >>> dfs = mikeio.open("HD2D.dfsu")
+    >>> dfs = mikeio.open("HD2D.dfsu", dtype=np.float64)
+    """
     _, ext = os.path.splitext(filename)
 
     if ext == ".dfs0":
-        return Dfs0(filename)
+        return Dfs0(filename, **kwargs)
 
     elif ext == ".dfs1":
-        return Dfs1(filename)
+        return Dfs1(filename, **kwargs)
 
     elif ext == ".dfs2":
-        return Dfs2(filename)
+        return Dfs2(filename, **kwargs)
 
     elif ext == ".dfs3":
-        return Dfs3(filename)
+        return Dfs3(filename, **kwargs)
 
     elif ext == ".dfsu":
-        return Dfsu(filename)
+        return Dfsu(filename, **kwargs)
 
     elif ext == ".mesh":
-        return Mesh(filename)
+        return Mesh(filename, **kwargs)
 
     else:
         raise Exception(f"{ext} is an unsupported extension")

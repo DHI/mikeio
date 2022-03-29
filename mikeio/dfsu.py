@@ -633,7 +633,7 @@ class _UnstructuredFile:
 
 
 class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
-    def __init__(self, filename, dfs=None, dtype=np.float64):
+    def __init__(self, filename, dfs=None, dtype=np.float32):
         """
         Create a Dfsu object
 
@@ -643,7 +643,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             dfsu or mesh filename
         dfs :
         dtype: np.dtype, optional
-            default np.float64, valid options are np.float32, np.float64
+            default np.float32, valid options are np.float32, np.float64
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
