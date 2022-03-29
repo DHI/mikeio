@@ -122,10 +122,10 @@ class _UnstructuredFile:
                 out.append(f"Number of elements: {self.n_elements}")
             out.append(f"Number of nodes: {self.n_nodes}")
         if self.is_spectral:
-            if self.n_frequencies > 0:
-                out.append(f"Number of frequencies: {self.n_frequencies}")
             if self.n_directions > 0:
                 out.append(f"Number of directions: {self.n_directions}")
+            if self.n_frequencies > 0:
+                out.append(f"Number of frequencies: {self.n_frequencies}")
         if self.geometry.projection_string:
             out.append(f"Projection: {self.projection_string}")
         if self.is_layered:
@@ -699,7 +699,17 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             seconds=((self.n_timesteps - 1) * self.timestep)
         )
 
-    def read(self, *, items=None, time=None, time_steps=None, elements=None) -> Dataset:
+    def read(
+        self,
+        *,
+        items=None,
+        time=None,
+        time_steps=None,
+        elements=None,
+        area=None,
+        x=None,
+        y=None,
+    ) -> Dataset:
         """
         Read data from a dfsu file
 
@@ -707,10 +717,17 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time_steps: str, int or list[int], optional
+        time: str, int or list[int], optional
             Read only selected time_steps
+        area: list[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x, y: float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
         elements: list[int], optional
-            Read only selected element ids
+            Read only selected element ids, by default None
 
         Returns
         -------
@@ -759,27 +776,22 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         single_time_selected = np.isscalar(time) if time is not None else False
         time_steps = _valid_timesteps(dfs, time)
 
+        self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
         if elements is None:
-            n_elems = self.n_elements
-            n_nodes = self.n_nodes
+            elements = self._parse_geometry_sel(area=area, x=x, y=y)
+
+        if elements is None:
             geometry = self.geometry
+            n_elems = geometry.n_elements
         else:
             elements = [elements] if np.isscalar(elements) else elements
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
-            if self.is_layered:  # and items[0].name == "Z coordinate":
-                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(elements)
-                n_nodes = len(node_ids)
 
         item_numbers = _valid_item_numbers(
             dfs.ItemInfo, items, ignore_first=self.is_layered
         )
         items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
-        if self.is_layered:
-            # we need the zn item too
-            item_numbers = [it + 1 for it in item_numbers]
-            if hasattr(geometry, "is_layered") and geometry.is_layered:
-                item_numbers.insert(0, 0)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue
@@ -787,21 +799,13 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         data_list = []
 
         n_steps = len(time_steps)
-        item0_is_node_based = False
+        shape = (n_elems,) if single_time_selected else (n_steps, n_elems)
         for item in range(n_items):
             # Initialize an empty data block
-            if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
-                # and items[item].name == "Z coordinate":
-                item0_is_node_based = True
-                data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
-            else:
-                data = np.ndarray(shape=(n_steps, n_elems), dtype=self._dtype)
+            data = np.ndarray(shape=shape, dtype=self._dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(n_steps, dtype=float)
-
-        if single_time_selected:
-            data = data[0]
 
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
@@ -812,10 +816,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 d[d == deletevalue] = np.nan
 
                 if elements is not None:
-                    if item == 0 and item0_is_node_based:
-                        d = d[node_ids]
-                    else:
-                        d = d[elements]
+                    d = d[elements]
 
                 if single_time_selected:
                     data_list[item] = d
@@ -830,17 +831,36 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         dims = ("time", "element") if not single_time_selected else ("element",)
 
-        if hasattr(geometry, "is_layered") and geometry.is_layered:
-            return Dataset(
-                data_list[1:],  # skip zn item
-                time,
-                items,
-                geometry=geometry,
-                zn=data_list[0],
-                dims=dims,
-            )
-        else:
-            return Dataset(data_list, time, items, geometry=geometry, dims=dims)
+        if elements is not None and len(elements) == 1:
+            # squeeze point data
+            dims = tuple([d for d in dims if d != "element"])
+            data_list = [np.squeeze(d) for d in data_list]
+
+        return Dataset(data_list, time, items, geometry=geometry, dims=dims)
+
+    def _validate_elements_and_geometry_sel(self, elements, **kwargs):
+        used_kwargs = []
+        for kw, val in kwargs.items():
+            if val is not None:
+                used_kwargs.append(kw)
+
+        if elements is not None:
+            for kw in used_kwargs:
+                raise ValueError(f"Cannot select both {kw} and elements!")
+
+        if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
+            raise ValueError(f"Cannot select both x,y and area!")
+
+    def _parse_geometry_sel(self, area, x, y):
+        elements = None
+
+        if area is not None:
+            elements = self.geometry._elements_in_area(area)
+
+        if (x is not None) or (y is not None):
+            elements = self.geometry.find_index(x=x, y=y)
+
+        return elements
 
     def write_header(
         self,

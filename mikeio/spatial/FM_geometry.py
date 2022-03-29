@@ -1072,7 +1072,10 @@ class GeometryFM(_Geometry):
         codes = self.codes[node_ids]
 
         if self.is_layered and (new_type != DfsuFileType.Dfsu2D):
-            GeometryClass = GeometryFMLayered
+            if n_layers == len(elem_tbl):
+                GeometryClass = GeometryFMVerticalColumn
+            else:
+                GeometryClass = GeometryFMLayered
         else:
             GeometryClass = GeometryFM
 
@@ -1688,6 +1691,77 @@ class GeometryFMLayered(GeometryFM):
         return dz
 
     # TODO: add methods for extracting layers etc
+
+
+class GeometryFMVerticalColumn(GeometryFMLayered):
+    def calc_ze(self, zn=None):
+        if zn is None:
+            zn = self.node_coordinates[:, 2]
+        return self._calc_z_using_idx(zn, self._idx_e)
+
+    def calc_zf(self, zn=None):
+        if zn is None:
+            zn = self.node_coordinates[:, 2]
+        return self._calc_z_using_idx(zn, self._idx_f)
+
+    def _calc_zee(self, zn=None):
+        ze = self.calc_ze(zn)
+        zf = self.calc_zf(zn)
+        if ze.ndim == 1:
+            zee = np.insert(ze, 0, zf[0])
+            return np.append(zee, zf[-1])
+        else:
+            return np.hstack(
+                (zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1)))
+            )
+
+    def _interp_values(self, zn, data, z):
+        """Interpolate to other z values, allow linear extrapolation"""
+        from scipy.interpolate import interp1d
+
+        opt = {"kind": "linear", "bounds_error": False, "fill_value": "extrapolate"}
+
+        ze = self.calc_ze(zn)
+        dati = np.zeros_like(z)
+        if zn.ndim == 1:
+            dati = interp1d(ze, data, **opt)(z)
+        elif zn.ndim == 2:
+            for j in range(zn.shape[0]):
+                dati[j, :] = interp1d(ze[j, :], data[j, :], **opt)(z[j, :])
+        return dati
+
+    @property
+    def _idx_f(self):
+        nnodes_half = int(len(self.element_table[0]) / 2)
+        n_vfaces = self.n_elements + 1
+        idx_f = np.zeros((n_vfaces, nnodes_half), dtype=int)
+        idx_e = self._idx_e
+        idx_f[: self.n_elements, :] = idx_e[:, :nnodes_half]
+        idx_f[self.n_elements, :] = idx_e[-1, nnodes_half:]
+        return idx_f
+
+    @property
+    def _idx_e(self):
+        nnodes_per_elem = len(self.element_table[0])
+        idx_e = np.zeros((self.n_elements, nnodes_per_elem), dtype=int)
+
+        for j in range(self.n_elements):
+            nodes = self.element_table[j]
+            for i in range(nnodes_per_elem):
+                idx_e[j, i] = nodes[i]
+
+        return idx_e
+
+    def _calc_z_using_idx(self, zn, idx):
+        if zn.ndim == 1:
+            zf = zn[idx].mean(axis=1)
+        elif zn.ndim == 2:
+            n_steps = zn.shape[0]
+            zf = np.zeros((n_steps, idx.shape[0]))
+            for step in range(n_steps):
+                zf[step, :] = zn[step, idx].mean(axis=1)
+
+        return zf
 
 
 # class GeometryFMSpectral(GeometryFM):
