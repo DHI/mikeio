@@ -893,49 +893,6 @@ def test_e2_e3_table_2d_file():
     assert not hasattr(dfs, "e2_e3_table")
 
 
-# TODO - this is an interim test until Dfsu.to_dfs2 method is finalized
-def test_dfsu_to_dfs2(dfsu_hd2d, tmpdir):
-    # Create dfs2 file
-    dx = 25
-    dy = 25
-    nx = 100
-    ny = 100
-    filename = Path(tmpdir.dirname) / "test.dfs2"
-    dfs2 = dfsu_hd2d.to_dfs2(
-        x0=605900,
-        y0=6902400,
-        dx=dx,
-        dy=dy,
-        nx=nx,
-        ny=ny,
-        rotation=0,
-        epsg=None,
-        interpolation_method="nearest",
-        filename=filename,
-    )
-
-    # Make sure it was saved to the correct location
-    assert dfs2._filename == str(filename)
-
-    # Ensure all items are identical
-    for i, dfsu_item in enumerate(dfsu_hd2d.items):
-        for parameter in ["data_value_type", "name", "type", "unit"]:
-            assert getattr(dfsu_item, parameter) == getattr(dfs2.items[i], parameter)
-
-    # Check timesteps
-    assert dfs2.timestep == dfsu_hd2d.timestep
-    assert dfs2.start_time == dfsu_hd2d.start_time
-    assert dfs2.end_time == dfsu_hd2d.end_time
-
-    # Check grid
-    assert np.isclose(dfs2.dx, dx, atol=0.1, rtol=0)
-    assert np.isclose(dfs2.dy, dy, atol=0.1, rtol=0)
-    assert dfs2.shape == (dfsu_hd2d.n_timesteps, ny, nx)
-
-    # Make sure data was interpolated (not all values are nan's)
-    assert not np.all(np.isnan(dfs2.read().data))
-
-
 def test_dataset_write_dfsu(tmp_path):
 
     outfilename = tmp_path / "HD2D_start.dfsu"
