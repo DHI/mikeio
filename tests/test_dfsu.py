@@ -109,7 +109,7 @@ def test_read_returns_array_time_dimension_first():
 
     ds = dfs.read(items=[3])
 
-    assert ds.data[0].shape == (9, 884)
+    assert ds.shape == (9, 884)
 
 
 def test_read_selected_item_returns_correct_items():
@@ -142,7 +142,7 @@ def test_read_all_time_steps():
     ds = dfs.read(items=[0, 3])
 
     assert len(ds.time) == 9
-    assert ds.data[0].shape[0] == 9
+    assert ds[0].to_numpy().shape[0] == 9
 
 
 def test_read_item_range():
@@ -167,7 +167,7 @@ def test_read_all_time_steps_without_progressbar():
     ds = dfs.read(items=[0, 3])
 
     assert len(ds.time) == 9
-    assert ds.data[0].shape[0] == 9
+    assert ds[0].to_numpy().shape[0] == 9
 
 
 def test_read_single_time_step():
@@ -190,7 +190,7 @@ def test_read_single_time_step_scalar():
     ds = dfs.read(items=[0, 3], time=1)
 
     assert len(ds.time) == 1
-    assert ds.data[0].shape[0] == dfs.n_elements
+    assert ds[0].to_numpy().shape[0] == dfs.n_elements
 
 
 def test_read_single_time_step_outside_bounds_fails():
@@ -363,13 +363,13 @@ def test_read_and_select_single_element():
 
     ds = dfs.read()
 
-    assert ds.data[0].shape == (9, 884)
+    assert ds[0].to_numpy().shape == (9, 884)
 
     idx = dfs.find_nearest_elements(606200, 6905480)
 
     selds = ds.isel(idx=idx, axis=1)
 
-    assert selds.data[0].shape == (9,)
+    assert selds[0].to_numpy().shape == (9,)
 
 
 def test_is_2d():
@@ -583,7 +583,7 @@ def test_write_from_dfsu_default_items_numbered(tmpdir):
 
     ds = dfs.read(items=[0, 1])
 
-    dfs.write(outfilename, ds.data)
+    dfs.write(outfilename, ds.to_numpy())  # TODO: use ds.to_dfs() instead
 
     assert os.path.exists(outfilename)
 
@@ -801,7 +801,7 @@ def test_get_node_centered_data():
     dfs = Dfsu(filename)
     ds = dfs.read(items="Surface elevation")
     time_step = 0
-    wl_cc = ds.data[0][time_step, :]
+    wl_cc = ds[0].values[time_step, :]
     wl_nodes = dfs.get_node_centered_data(wl_cc)
 
     eid = 31
@@ -862,16 +862,16 @@ def test_extract_track():
     )
     track = dfs.extract_track(df)
 
-    assert track.data[2][23] == approx(3.6284972794399653)
-    assert sum(np.isnan(track.data[2])) == 26
-    assert np.all(track.data[1] == df.latitude.values)
+    assert track[2].values[23] == approx(3.6284972794399653)
+    assert sum(np.isnan(track[2].to_numpy())) == 26
+    assert np.all(track[1].to_numpy() == df.latitude.values)
 
     items = ["Sign. Wave Height", "Wind speed"]
     track2 = dfs.extract_track(csv_file, items=items)
-    assert track2.data[2][23] == approx(3.6284972794399653)
+    assert track2[2].values[23] == approx(3.6284972794399653)
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
-    assert track3.data[2][23] == approx(3.6469911492412463)
+    assert track3[2].values[23] == approx(3.6469911492412463)
 
 
 def test_extract_bad_track():

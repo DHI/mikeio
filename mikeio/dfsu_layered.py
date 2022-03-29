@@ -456,7 +456,7 @@ class Dfsu3D(DfsuLayered):
         node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
-        zn_surf = ds.data[0][:, node_ids_surf]  # surface
+        zn_surf = ds[0].values[:, node_ids_surf]  # surface
         surf2d = interp2d(zn_surf, node_ids, weights)
 
         # create output

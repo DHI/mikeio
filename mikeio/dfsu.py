@@ -990,7 +990,9 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 dt = (data.time[1] - data.time[0]).total_seconds()
             if data.geometry.is_layered:
                 zn_dynamic = data[0]._zn
-            data = data.data
+
+            # data needs to be a list so we can fit zn later
+            data = [x.to_numpy() for x in data]
 
         n_items = len(data)
         n_time_steps = 0
@@ -1246,8 +1248,8 @@ class Dfsu2DH(_Dfsu):
         elif isinstance(track, Dataset):
             times = track.time
             coords = np.zeros(shape=(len(times), 2))
-            coords[:, 0] = track.data[0].copy()
-            coords[:, 1] = track.data[1].copy()
+            coords[:, 0] = track[0].to_numpy().copy()
+            coords[:, 1] = track[1].to_numpy().copy()
         else:
             assert isinstance(track, pd.DataFrame)
             times = track.index
