@@ -135,10 +135,10 @@ def test_write_1d(da2, tmp_path):
 
 def test_data_0d(da0):
     assert da0.ndim == 1
-    assert da0.dims == ("time",) 
+    assert da0.dims == ("time",)
     assert "values" in repr(da0)
-    
-    da0 = da0.squeeze() 
+
+    da0 = da0.squeeze()
     assert da0.ndim == 0
     assert "values" in repr(da0)
 
