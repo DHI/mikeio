@@ -327,7 +327,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         # *,
         time: Union[pd.DatetimeIndex, str] = None,
         item: ItemInfo = None,
-        geometry: _Geometry = None,
+        geometry: _Geometry = GeometryUndefined(),
         zn=None,
         dims: Optional[Sequence[str]] = None,
     ):
@@ -431,7 +431,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @staticmethod
     def _parse_geometry(geometry, dims, shape):
-        if len(dims) > 1 and geometry is None:
+        if len(dims) > 1 and (
+            geometry is None or isinstance(geometry, GeometryUndefined)
+        ):
             # raise ValueError("Geometry is required for ndim >=1")
             warnings.warn("Geometry is required for ndim >=1")
 
@@ -525,90 +527,107 @@ class DataArray(DataUtilsMixin, TimeSeries):
             mask = key if isinstance(key, np.ndarray) else key.values
             return self._get_by_boolean_mask(self.values, mask)
 
+        da = self
         dims = self.dims
-        if "time" in dims:
-            steps = key[0] if isinstance(key, tuple) else key
-            space_key = key[1:] if isinstance(key, tuple) else None
 
-            # select in time
-            steps = self._get_time_idx_list(self.time, steps)
-            if len(steps) == 0:
-                raise IndexError("No timesteps found!")
-            if len(steps) == 1:
-                dims = tuple([d for d in dims if d != "time"])
-            time = self.time[steps]
+        key = [key] if isinstance(key, (slice, int, str)) else key
+        if len(key) > len(dims):
+            raise IndexError(
+                f"Key has more dimensions ({len(key)}) than DataArray ({len(dims)})!"
+            )
+        for j, k in enumerate(key):
+            if k != slice(None):
+                if dims[j] == "time":
+                    k = self._get_time_idx_list(self.time, k)
+                    if len(k) == 0:
+                        raise IndexError("No timesteps found!")
+                da = da.isel(k, axis=dims[j])
+        return da
 
-            key = (steps, *space_key) if isinstance(key, tuple) else steps
-        else:
-            time = self.time
-            steps = None
-            space_key = key
+        # dims = self.dims
+        # if "time" in dims:
+        #     steps = key[0] if isinstance(key, tuple) else key
+        #     space_key = key[1:] if isinstance(key, tuple) else None
 
-        # select in space
-        geometry = self.geometry
-        zn = self._zn
-        if space_key is not None:
-            if isinstance(self.geometry, GeometryFM):
-                # TODO: allow for selection of layers
-                elements = space_key[0] if isinstance(space_key, tuple) else space_key
-                if isinstance(elements, slice):
-                    elements = list(range(*elements.indices(self.geometry.n_elements)))
-                else:
-                    elements = np.atleast_1d(elements)
-                if len(elements) == 1:
-                    if self.geometry._type == DfsuFileType.DfsuSpectral1D:
-                        coords = geometry.node_coordinates[elements].flatten()
-                        dims = tuple([d for d in dims if d != "node"])
-                    else:
-                        coords = geometry.element_coordinates[elements].flatten()
-                        dims = tuple([d for d in dims if d != "element"])
-                    if geometry.is_layered:
-                        geometry = GeometryPoint3D(*coords)
-                    else:
-                        geometry = GeometryPoint2D(coords[0], coords[1])
-                    zn = None
+        #     # select in time
+        #     steps = self._get_time_idx_list(self.time, steps)
+        #     if len(steps) == 0:
+        #         raise IndexError("No timesteps found!")
+        #     if len(steps) == 1:
+        #         dims = tuple([d for d in dims if d != "time"])
+        #     time = self.time[steps]
 
-                else:
-                    if self.geometry._type == DfsuFileType.DfsuSpectral1D:
-                        geometry = self.geometry._nodes_to_geometry(elements)
-                    else:
-                        geometry = self.geometry.elements_to_geometry(elements)
+        #     key = (steps, *space_key) if isinstance(key, tuple) else steps
+        # else:
+        #     time = self.time
+        #     steps = None
+        #     space_key = key
 
-                if isinstance(self.geometry, GeometryFMLayered):
-                    if isinstance(geometry, GeometryFMLayered):
-                        nodes = self.geometry.element_table[elements]
-                        unodes = np.unique(np.hstack(nodes))
-                        zn = self._zn[:, unodes]
-                    else:
-                        zn = None
+        # # select in space
+        # geometry = self.geometry
+        # zn = self._zn
+        # if space_key is not None:
+        #     if isinstance(self.geometry, GeometryFM):
+        #         # TODO: allow for selection of layers
+        #         elements = space_key[0] if isinstance(space_key, tuple) else space_key
+        #         if isinstance(elements, slice):
+        #             elements = list(range(*elements.indices(self.geometry.n_elements)))
+        #         else:
+        #             elements = np.atleast_1d(elements)
+        #         if len(elements) == 1:
+        #             if self.geometry._type == DfsuFileType.DfsuSpectral1D:
+        #                 coords = geometry.node_coordinates[elements].flatten()
+        #                 dims = tuple([d for d in dims if d != "node"])
+        #             else:
+        #                 coords = geometry.element_coordinates[elements].flatten()
+        #                 dims = tuple([d for d in dims if d != "element"])
+        #             if geometry.is_layered:
+        #                 geometry = GeometryPoint3D(*coords)
+        #             else:
+        #                 geometry = GeometryPoint2D(coords[0], coords[1])
+        #             zn = None
 
-                key = elements if (steps is None) else (steps, elements)
-            else:
-                # TODO: better handling of dfs1,2,3
-                key = space_key if (steps is None) else (steps, *space_key)
-                space_dims = tuple([d for d in self.dims if d != "time"])
-                time_offset = 1 if "time" in self.dims else 0
-                for j, k in enumerate(space_key):
-                    k = (
-                        list(range(*k.indices(self.shape[j + time_offset])))
-                        if isinstance(k, slice)
-                        else k
-                    )
-                    k = [k] if np.isscalar(k) else k
-                    if len(k) == 1:
-                        dims = tuple([d for d in dims if d != space_dims[j]])
-                        if hasattr(geometry, "isel"):
-                            geometry = geometry.isel(k[0], axis=j)
+        #         else:
+        #             if self.geometry._type == DfsuFileType.DfsuSpectral1D:
+        #                 geometry = self.geometry._nodes_to_geometry(elements)
+        #             else:
+        #                 geometry = self.geometry.elements_to_geometry(elements)
 
-        data = self._values[key]  # .copy()
-        return DataArray(
-            data=np.squeeze(data),
-            time=time,
-            item=self.item,
-            geometry=geometry,
-            zn=zn,
-            dims=dims,
-        )
+        #         if isinstance(self.geometry, GeometryFMLayered):
+        #             if isinstance(geometry, GeometryFMLayered):
+        #                 nodes = self.geometry.element_table[elements]
+        #                 unodes = np.unique(np.hstack(nodes))
+        #                 zn = self._zn[:, unodes]
+        #             else:
+        #                 zn = None
+
+        #         key = elements if (steps is None) else (steps, elements)
+        #     else:
+        #         # TODO: better handling of dfs1,2,3
+        #         key = space_key if (steps is None) else (steps, *space_key)
+        #         space_dims = tuple([d for d in self.dims if d != "time"])
+        #         time_offset = 1 if "time" in self.dims else 0
+        #         for j, k in enumerate(space_key):
+        #             k = (
+        #                 list(range(*k.indices(self.shape[j + time_offset])))
+        #                 if isinstance(k, slice)
+        #                 else k
+        #             )
+        #             k = [k] if np.isscalar(k) else k
+        #             if len(k) == 1:
+        #                 dims = tuple([d for d in dims if d != space_dims[j]])
+        #                 if hasattr(geometry, "isel"):
+        #                     geometry = geometry.isel(k[0], axis=j)
+
+        # data = self._values[key]  # .copy()
+        # return DataArray(
+        #     data=np.squeeze(data),
+        #     time=time,
+        #     item=self.item,
+        #     geometry=geometry,
+        #     zn=zn,
+        #     dims=dims,
+        # )
 
     def to_xarray(self):
         import xarray as xr
@@ -1169,7 +1188,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         return dai
 
-    def isel(self, idx=None, axis=1, **kwargs):
+    def isel(self, idx=None, axis=0, **kwargs):
         """
         Select subset along an axis.
 
@@ -1177,7 +1196,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         ----------
         idx: int, scalar or array_like
         axis: (int, str, None), optional
-            axis number or "time", by default 1
+            axis number or "time", by default 0
 
         Returns
         -------
@@ -1196,14 +1215,18 @@ class DataArray(DataUtilsMixin, TimeSeries):
             else:
                 raise ValueError(f"{dim} is not present in {self.dims}")
 
-        single_index = np.isscalar(idx) or len(idx) == 1
+        axis = self._parse_axis(self.shape, self.dims, axis)
 
+        if isinstance(idx, slice):
+            idx = list(range(*idx.indices(self.shape[axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             return None
 
-        axis = self._parse_axis(self.shape, self.dims, axis)
-        if axis == 0:
-            idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
+        idx = np.atleast_1d(idx)
+        single_index = len(idx) == 1
+        idx = idx[0] if single_index else idx
+
+        if axis == 0 and self.dims[0] == "time":
             time = self.time[idx]
             item = self.item
             geometry = self.geometry
@@ -1223,15 +1246,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 zn = self._zn[:, node_ids]
 
         if single_index:
-            x = np.take(self.values, int(idx), axis=axis)
-        else:
-            x = np.take(self.values, idx, axis=axis)
-
-        if single_index:
             # reduce dims only if singleton idx
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
+            x = np.take(self.values, int(idx), axis=axis)
         else:
             dims = self.dims
+            x = np.take(self.values, idx, axis=axis)
 
         return DataArray(
             data=x,
