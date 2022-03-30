@@ -1448,26 +1448,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         out.append(timetxt)
 
     def _append_geometry_txt(self, out):
-        if isinstance(self.geometry, GeometryFM):
-            gtxt = f"geometry: {self.geometry.type_name}"
-            if self.geometry.is_layered:
-                n_z_layers = (
-                    "no"
-                    if self.geometry.n_z_layers is None
-                    else self.geometry.n_z_layers
-                )
-                gtxt += f" ({self.geometry.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
-            out.append(gtxt)
-        elif isinstance(self.geometry, Grid1D):
-            out.append(
-                f"geometry: Grid1D (n={self.geometry.n}, spacing={self.geometry.dx:.4g})"
-            )
-        elif isinstance(self.geometry, Grid2D):
-            out.append(
-                f"geometry: Grid2D (ny={self.geometry.ny}, nx={self.geometry.nx})"
-            )
-        elif isinstance(self.geometry, (GeometryPoint2D, GeometryPoint3D)):
-            out.append(f"geometry: {repr(self.geometry)}")
+        if self.geometry is None:
+            return
+        gtxt = self.geometry._one_line_str
+        if gtxt is not None:
+            out.append(f"geometry: {gtxt}")
 
     def _append_values_txt(self, out):
 

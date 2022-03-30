@@ -40,6 +40,10 @@ class Grid1D(_Geometry):
         )
         return str.join("\n", out)
 
+    @property
+    def _one_line_str(self) -> str:
+        return f"Grid1D (n={self.n}, dx={self.dx:.4g})"
+
     def find_index(self, x: float, **kwargs) -> int:
 
         d = (self.x - x) ** 2
@@ -600,3 +604,7 @@ class Grid2D(_Geometry):
         )
         out.append(f"Number of grid points: {self.n}")
         return str.join("\n", out)
+
+    @property
+    def _one_line_str(self) -> str:
+        return f"Grid2D (ny={self.ny}, nx={self.nx})"
