@@ -915,7 +915,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             newdata[j][idx1, :] = ds[j].to_numpy()
             newdata[j][idx2, :] = other[j].to_numpy()
 
-        return Dataset(newdata, newtime, ds.items)
+        return Dataset(newdata, newtime, ds.items, ds.geometry)
 
     def _check_all_items_match(self, other):
         if self.n_items != other.n_items:
