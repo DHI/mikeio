@@ -236,7 +236,12 @@ class GeometryFM(_Geometry):
         if self.n_elements:
             out.append(f"number of elements: {self.n_elements}")
         if self._n_layers:
-            out.append(f"number of layers: {self._n_layers}")
+            details = (
+                "sigma only"
+                if self.n_z_layers is None
+                else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
+            )
+            out.append(f"number of layers: {self._n_layers} ({details})")
         if self._projstr:
             out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
@@ -246,7 +251,7 @@ class GeometryFM(_Geometry):
         gtxt = f"{self.type_name}"
         if self.is_layered:
             n_z_layers = "no" if self.n_z_layers is None else self.n_z_layers
-            gtxt += f" ({self.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
+            gtxt += f" ({self.n_elements} elements, {self.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
         else:
             gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
         return gtxt
