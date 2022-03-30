@@ -604,7 +604,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data=np.squeeze(data),
             time=time,
-            item=self.item,
+            item=deepcopy(self.item),
             geometry=geometry,
             zn=zn,
             dims=dims,
@@ -751,7 +751,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
         dims = [d for s, d in zip(self.shape, self.dims) if s != 1]
 
         return DataArray(
-            data=data, time=self.time, geometry=self.geometry, zn=self._zn, dims=dims
+            data=data,
+            time=self.time,
+            item=self.item,
+            geometry=self.geometry,
+            zn=self._zn,
+            dims=dims,
         )
 
     def max(self, axis="time") -> "DataArray":
@@ -910,7 +915,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data=data,
             time=time,
-            item=self.item,
+            item=deepcopy(self.item),
             geometry=geometry,
             dims=dims,
             zn=zn,
@@ -1040,7 +1045,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 else:
                     geometry = GeometryPoint3D(x=x, y=y, z=z)
 
-            da = DataArray(data=dai, time=self.time, geometry=geometry, item=self.item)
+            da = DataArray(
+                data=dai, time=self.time, geometry=geometry, item=deepcopy(self.item)
+            )
         else:
             da = self.copy()
 
@@ -1162,7 +1169,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
 
-        dai = DataArray(data=dai, time=self.time, geometry=geom, item=self.item)
+        dai = DataArray(
+            data=dai, time=self.time, geometry=geom, item=deepcopy(self.item)
+        )
 
         if hasattr(other, "time"):
             dai = dai.interp_time(other.time)
@@ -1205,12 +1214,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if axis == 0:
             idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
             time = self.time[idx]
-            item = self.item
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[idx]
         else:
             time = self.time
-            item = self.item
             geometry = GeometryUndefined()
             zn = None
             if hasattr(self.geometry, "isel"):
@@ -1236,7 +1243,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data=x,
             time=time,
-            item=item,
+            item=deepcopy(self.item),
             geometry=geometry,
             zn=zn,
             dims=dims,
