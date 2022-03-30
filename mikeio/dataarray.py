@@ -1433,11 +1433,23 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def dtype(self):
         return self.values.dtype
 
-    def _geometry_txt(self):
-        gtxt = None
-        # TODO: grid geometry
+    def _append_dims_txt(self, out):
+        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
+        dimsstr = ", ".join(dims)
+        out.append(f"dims: ({dimsstr})")
+
+    def _append_time_txt(self, out):
+        noneq_txt = "" if self.is_equidistant else " non-equidistant"
+        timetxt = (
+            f"time: {self.time[0]} (time-invariant)"
+            if self.n_timesteps == 1
+            else f"time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps}{noneq_txt} records)"
+        )
+        out.append(timetxt)
+
+    def _append_geometry_txt(self, out):
         if isinstance(self.geometry, GeometryFM):
-            gtxt = f"Geometry: {self.geometry.type_name}"
+            gtxt = f"geometry: {self.geometry.type_name}"
             if self.geometry.is_layered:
                 n_z_layers = (
                     "no"
@@ -1445,32 +1457,39 @@ class DataArray(DataUtilsMixin, TimeSeries):
                     else self.geometry.n_z_layers
                 )
                 gtxt += f" ({self.geometry.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
+            out.append(gtxt)
+        elif isinstance(self.geometry, Grid1D):
+            out.append(
+                f"geometry: Grid1D (n={self.geometry.n}, spacing={self.geometry.dx:.4g})"
+            )
+        elif isinstance(self.geometry, Grid2D):
+            out.append(
+                f"geometry: Grid2D (ny={self.geometry.ny}, nx={self.geometry.nx})"
+            )
+        elif isinstance(self.geometry, (GeometryPoint2D, GeometryPoint3D)):
+            out.append(f"geometry: {repr(self.geometry)}")
 
-        return gtxt
+    def _append_values_txt(self, out):
+
+        if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
+            out.append(f"values: {self.values}")
+        elif self.ndim == 1 and len(self.values) < 5:
+            valtxt = ", ".join([f"{v:0.4g}" for v in self.values])
+            out.append(f"values: [{valtxt}]")
+        elif self.ndim == 1:
+            out.append(
+                f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
+            )
 
     def __repr__(self):
 
         out = ["<mikeio.DataArray>"]
         if self.name is not None:
-            out.append(f"Name: {self.name}")
-        gtxt = self._geometry_txt()
-        if gtxt:
-            out.append(gtxt)
-        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
-        dimsstr = ", ".join(dims)
-        out.append(f"Dimensions: ({dimsstr})")
+            out.append(f"name: {self.name}")
 
-        timetxt = (
-            f"Time: {self.time[0]} (time-invariant)"
-            if self.n_timesteps == 1
-            else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
-        )
-        out.append(timetxt)
-
-        if not self.is_equidistant:
-            out.append("-- Non-equidistant calendar axis --")
-
-        if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
-            out.append(f"Value: {self.values}")
+        self._append_dims_txt(out)
+        self._append_time_txt(out)
+        self._append_geometry_txt(out)
+        self._append_values_txt(out)
 
         return str.join("\n", out)

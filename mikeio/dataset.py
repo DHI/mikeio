@@ -443,27 +443,15 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         out = ["<mikeio.Dataset>"]
 
-        gtxt = list(self)[0]._geometry_txt()
-        if gtxt:
-            out.append(gtxt)
+        da = list(self)[0]
+        da._append_dims_txt(out)
+        da._append_time_txt(out)
+        da._append_geometry_txt(out)
 
-        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
-        dimsstr = ", ".join(dims)
-        out.append(f"Dimensions: ({dimsstr})")
-
-        timetxt = (
-            f"Time: {self.time[0]} (time-invariant)"
-            if self.n_timesteps == 1
-            else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
-        )
-        out.append(timetxt)
-
-        if not self.is_equidistant:
-            out.append("-- Non-equidistant calendar axis --")
         if self.n_items > 10:
-            out.append(f"Number of items: {self.n_items}")
+            out.append(f"number of items: {self.n_items}")
         else:
-            out.append("Items:")
+            out.append("items:")
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
 
