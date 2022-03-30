@@ -9,6 +9,17 @@ from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
 
 
 @pytest.fixture
+def da0():
+    time = "2000-01-01 00:00:00"
+    da = mikeio.DataArray(
+        data=np.array([7.0]),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+    return da
+
+
+@pytest.fixture
 def da1():
     nt = 10
     start = 10.0
@@ -120,6 +131,10 @@ def test_write_1d(da2, tmp_path):
     ds = mikeio.read(outfilename)
     assert ds.n_items == 1
     assert isinstance(ds.geometry, mikeio.Grid1D)
+
+
+def test_data_0d(da0):
+    assert True
 
 
 def test_data_2d_no_geometry_not_allowed():
@@ -466,7 +481,7 @@ def test_repr(da_time_space):
 
     text = repr(da_time_space)
     assert "DataArray" in text
-    assert "Dimensions: (time:10, x:2)" in text
+    assert "dims: (time:10, x:2)" in text
 
 
 def test_plot(da1):
