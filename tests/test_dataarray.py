@@ -137,10 +137,12 @@ def test_data_0d(da0):
     assert da0.ndim == 1
     assert da0.dims == ("time",)
     assert "values" in repr(da0)
+    assert "geometry" not in repr(da0)
 
     da0 = da0.squeeze()
     assert da0.ndim == 0
     assert "values" in repr(da0)
+    assert "geometry" not in repr(da0)
 
 
 def test_data_2d_no_geometry_not_allowed():
@@ -409,6 +411,11 @@ def test_dataarray_dfsu3d_indexing():
     assert da.shape == ()
 
 
+def test_dataarray_grid1d_repr(da2):
+    assert "Grid1D" in repr(da2)
+    assert "values" not in repr(da2)
+
+
 def test_dataarray_grid1d_indexing(da2):
     da = da2
     nt, nx = da.shape
@@ -420,6 +427,23 @@ def test_dataarray_grid1d_indexing(da2):
 
     assert isinstance(da[:, :].geometry, mikeio.Grid1D)
     assert isinstance(da[:, -1].geometry, GeometryUndefined)
+
+
+def test_dataarray_grid2d_repr(da_grid2d):
+    assert "Grid2D" in repr(da_grid2d)
+    assert "values" not in repr(da_grid2d)
+
+    da = da_grid2d[:, -1]
+    assert "Grid1D" in repr(da)
+    assert "values" not in repr(da)
+
+    da = da_grid2d[:, -1, 0]
+    assert "geometry" not in repr(da)
+    assert "values" in repr(da)
+
+    da = da_grid2d[0, 0, 0]
+    assert "geometry" not in repr(da)
+    assert "values" in repr(da)
 
 
 def test_dataarray_grid2d_indexing(da_grid2d):
