@@ -246,8 +246,7 @@ class GeometryFM(_Geometry):
             out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
 
-    @property
-    def _one_line_str(self) -> str:
+    def __str__(self) -> str:
         gtxt = f"{self.type_name}"
         if self.is_layered:
             n_z_layers = "no" if self.n_z_layers is None else self.n_z_layers

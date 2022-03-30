@@ -43,10 +43,6 @@ class _Geometry:
     def coordinates(self):
         raise NotImplementedError
 
-    @property
-    def _one_line_str(self) -> str:
-        return None
-
     @staticmethod
     def _area_is_bbox(area):
         is_bbox = False
@@ -107,10 +103,6 @@ class GeometryPoint2D(_Geometry):
         return f"GeometryPoint2D(x={self.x}, y={self.y})"
 
     @property
-    def _one_line_str(self) -> str:
-        return repr(self)
-
-    @property
     def ndim(self):
         return 0
 
@@ -123,10 +115,6 @@ class GeometryPoint3D(_Geometry):
 
     def __repr__(self):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
-
-    @property
-    def _one_line_str(self) -> str:
-        return repr(self)
 
     @property
     def ndim(self):

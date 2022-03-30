@@ -1433,29 +1433,26 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def dtype(self):
         return self.values.dtype
 
-    def _append_dims_txt(self, out):
+    def _dims_txt(self) -> str:
         dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
         dimsstr = ", ".join(dims)
-        out.append(f"dims: ({dimsstr})")
+        return f"dims: ({dimsstr})"
 
-    def _append_time_txt(self, out):
+    def _time_txt(self) -> str:
         noneq_txt = "" if self.is_equidistant else " non-equidistant"
         timetxt = (
             f"time: {self.time[0]} (time-invariant)"
             if self.n_timesteps == 1
             else f"time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps}{noneq_txt} records)"
         )
-        out.append(timetxt)
+        return timetxt
 
-    def _append_geometry_txt(self, out):
-        if self.geometry is None:
-            return
-        gtxt = self.geometry._one_line_str
-        if gtxt is not None:
-            out.append(f"geometry: {gtxt}")
+    def _geometry_txt(self) -> str:
+        return f"geometry: {self.geometry}"
 
-    def _append_values_txt(self, out):
+    def _values_txt(self) -> str:
 
+        out = []
         if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
             out.append(f"values: {self.values}")
         elif self.ndim == 1 and len(self.values) < 5:
@@ -1465,6 +1462,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             out.append(
                 f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
             )
+        return "\n".join(out)
 
     def __repr__(self):
 
@@ -1472,9 +1470,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if self.name is not None:
             out.append(f"name: {self.name}")
 
-        self._append_dims_txt(out)
-        self._append_time_txt(out)
-        self._append_geometry_txt(out)
-        self._append_values_txt(out)
+        rest = [
+            self._dims_txt(),
+            self._time_txt(),
+            self._geometry_txt(),
+            self._values_txt(),
+        ]
+        out = out + rest
 
-        return str.join("\n", out)
+        return "\n".join(out)
