@@ -91,7 +91,7 @@ class _Geometry:
 
 class GeometryUndefined(_Geometry):
     def __repr__(self):
-        return "GeometryUndefined"
+        return "GeometryUndefined()"
 
 
 class GeometryPoint2D(_Geometry):
