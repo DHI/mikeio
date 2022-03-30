@@ -442,6 +442,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             return "Empty <mikeio.Dataset>"
         da = self[0]
         out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]
+        out = [x for x in out if x is not None]
 
         if self.n_items > 10:
             out.append(f"number of items: {self.n_items}")

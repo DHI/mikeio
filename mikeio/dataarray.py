@@ -1445,21 +1445,18 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return timetxt
 
     def _geometry_txt(self) -> str:
-        return f"geometry: {self.geometry}"
+        if not isinstance(self.geometry, (GeometryUndefined, type(None))):
+            return f"geometry: {self.geometry}"
 
     def _values_txt(self) -> str:
 
-        out = []
         if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
-            out.append(f"values: {self.values}")
+            return f"values: {self.values}"
         elif self.ndim == 1 and len(self.values) < 5:
             valtxt = ", ".join([f"{v:0.4g}" for v in self.values])
-            out.append(f"values: [{valtxt}]")
+            return f"values: [{valtxt}]"
         elif self.ndim == 1:
-            out.append(
-                f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
-            )
-        return "\n".join(out)
+            return f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
 
     def __repr__(self):
 
@@ -1473,6 +1470,6 @@ class DataArray(DataUtilsMixin, TimeSeries):
             self._geometry_txt(),
             self._values_txt(),
         ]
-        out = out + rest
+        out = out + [x for x in rest if x is not None]
 
         return "\n".join(out)
