@@ -1463,4 +1463,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if not self.is_equidistant:
             out.append("-- Non-equidistant calendar axis --")
 
+        if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
+            out.append(f"Value: {self.values}")
+
         return str.join("\n", out)
