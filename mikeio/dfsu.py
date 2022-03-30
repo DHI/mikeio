@@ -119,35 +119,35 @@ class _UnstructuredFile:
 
         if self._type is not DfsuFileType.DfsuSpectral0D:
             if self._type is not DfsuFileType.DfsuSpectral1D:
-                out.append(f"Number of elements: {self.n_elements}")
-            out.append(f"Number of nodes: {self.n_nodes}")
+                out.append(f"number of elements: {self.n_elements}")
+            out.append(f"number of nodes: {self.n_nodes}")
         if self.is_spectral:
             if self.n_directions > 0:
-                out.append(f"Number of directions: {self.n_directions}")
+                out.append(f"number of directions: {self.n_directions}")
             if self.n_frequencies > 0:
-                out.append(f"Number of frequencies: {self.n_frequencies}")
+                out.append(f"number of frequencies: {self.n_frequencies}")
         if self.geometry.projection_string:
-            out.append(f"Projection: {self.projection_string}")
+            out.append(f"projection: {self.projection_string}")
         if self.is_layered:
-            out.append(f"Number of sigma layers: {self.n_sigma_layers}")
+            out.append(f"number of sigma layers: {self.n_sigma_layers}")
         if (
             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         ):
-            out.append(f"Max number of z layers: {self.n_layers - self.n_sigma_layers}")
+            out.append(f"max number of z layers: {self.n_layers - self.n_sigma_layers}")
         if hasattr(self, "items") and self.items is not None:
             if self.n_items < 10:
-                out.append("Items:")
+                out.append("items:")
                 for i, item in enumerate(self.items):
                     out.append(f"  {i}:  {item}")
             else:
-                out.append(f"Number of items: {self.n_items}")
+                out.append(f"number of items: {self.n_items}")
         if self._n_timesteps is not None:
             if self._n_timesteps == 1:
-                out.append(f"Time: time-invariant file (1 step) at {self._start_time}")
+                out.append(f"time: time-invariant file (1 step) at {self._start_time}")
             else:
                 out.append(
-                    f"Time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s"
+                    f"time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s"
                 )
                 out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)

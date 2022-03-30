@@ -32,17 +32,17 @@ class Dfs1(_Dfs123):
 
             if self._n_items is not None:
                 if self._n_items < 10:
-                    out.append("Items:")
+                    out.append("items:")
                     for i, item in enumerate(self.items):
                         out.append(f"  {i}:  {item}")
                 else:
-                    out.append(f"Number of items: {self._n_items}")
+                    out.append(f"number of items: {self._n_items}")
             if os.path.isfile(self._filename):
                 if self._n_timesteps == 1:
-                    out.append("Time: time-invariant file (1 step)")
+                    out.append("time: time-invariant file (1 step)")
                 else:
-                    out.append(f"Time: {self._n_timesteps} steps")
-                    out.append(f"Start time: {self._start_time}")
+                    out.append(f"time: {self._n_timesteps} steps")
+                    out.append(f"start time: {self._start_time}")
 
         return str.join("\n", out)
 

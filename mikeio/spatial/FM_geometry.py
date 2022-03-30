@@ -230,16 +230,30 @@ class GeometryFM(_Geometry):
 
     def __repr__(self):
         out = []
-        out.append("Flexible Mesh Geometry")
+        out.append("Flexible Mesh Geometry: " + self.type_name)
         if self.n_nodes:
-            out.append(f"Number of nodes: {self.n_nodes}")
+            out.append(f"number of nodes: {self.n_nodes}")
         if self.n_elements:
-            out.append(f"Number of elements: {self.n_elements}")
+            out.append(f"number of elements: {self.n_elements}")
         if self._n_layers:
-            out.append(f"Number of layers: {self._n_layers}")
+            details = (
+                "sigma only"
+                if self.n_z_layers is None
+                else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
+            )
+            out.append(f"number of layers: {self._n_layers} ({details})")
         if self._projstr:
-            out.append(f"Projection: {self.projection_string}")
+            out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
+
+    def __str__(self) -> str:
+        gtxt = f"{self.type_name}"
+        if self.is_layered:
+            n_z_layers = "no" if self.n_z_layers is None else self.n_z_layers
+            gtxt += f" ({self.n_elements} elements, {self.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
+        else:
+            gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
+        return gtxt
 
     # should projection string still be here?
     def _set_nodes(
