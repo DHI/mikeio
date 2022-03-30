@@ -24,7 +24,7 @@ def test_repr():
     text = repr(dfs)
 
     assert "Dfs1" in text
-    assert "Items" in text
+    assert "items" in text
     assert "dx" in text
 
 
