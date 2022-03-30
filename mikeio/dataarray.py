@@ -1371,10 +1371,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def name(self) -> Optional[str]:
-        if self.item.name:
-            return self.item.name
-        else:
-            return None
+        return self.item.name
 
     @name.setter
     def name(self, value):

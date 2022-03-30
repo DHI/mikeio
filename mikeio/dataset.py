@@ -431,22 +431,17 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     @property
     def geometry(self):
         """Geometry of each DataArray"""
-        return list(self)[0].geometry
+        return self[0].geometry
 
     @property
     def _zn(self):
-        return list(self)[0]._zn
+        return self[0]._zn
 
     def __repr__(self):
         if len(self) == 0:
             return "Empty <mikeio.Dataset>"
-
-        out = ["<mikeio.Dataset>"]
-
-        da = list(self)[0]
-        da._append_dims_txt(out)
-        da._append_time_txt(out)
-        da._append_geometry_txt(out)
+        da = self[0]
+        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]
 
         if self.n_items > 10:
             out.append(f"number of items: {self.n_items}")
