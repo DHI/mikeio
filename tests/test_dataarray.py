@@ -9,6 +9,17 @@ from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
 
 
 @pytest.fixture
+def da0():
+    time = "2000-01-01 00:00:00"
+    da = mikeio.DataArray(
+        data=np.array([7.0]),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+    return da
+
+
+@pytest.fixture
 def da1():
     nt = 10
     start = 10.0
@@ -120,6 +131,18 @@ def test_write_1d(da2, tmp_path):
     ds = mikeio.read(outfilename)
     assert ds.n_items == 1
     assert isinstance(ds.geometry, mikeio.Grid1D)
+
+
+def test_data_0d(da0):
+    assert da0.ndim == 1
+    assert da0.dims == ("time",)
+    assert "values" in repr(da0)
+    assert "geometry" not in repr(da0)
+
+    da0 = da0.squeeze()
+    assert da0.ndim == 0
+    assert "values" in repr(da0)
+    assert "geometry" not in repr(da0)
 
 
 def test_data_2d_no_geometry_not_allowed():
@@ -388,6 +411,11 @@ def test_dataarray_dfsu3d_indexing():
     assert da.shape == ()
 
 
+def test_dataarray_grid1d_repr(da2):
+    assert "Grid1D" in repr(da2)
+    assert "values" not in repr(da2)
+
+
 def test_dataarray_grid1d_indexing(da2):
     da = da2
     nt, nx = da.shape
@@ -399,6 +427,23 @@ def test_dataarray_grid1d_indexing(da2):
 
     assert isinstance(da[:, :].geometry, mikeio.Grid1D)
     assert isinstance(da[:, -1].geometry, GeometryUndefined)
+
+
+def test_dataarray_grid2d_repr(da_grid2d):
+    assert "Grid2D" in repr(da_grid2d)
+    assert "values" not in repr(da_grid2d)
+
+    da = da_grid2d[:, -1]
+    assert "Grid1D" in repr(da)
+    assert "values" not in repr(da)
+
+    da = da_grid2d[:, -1, 0]
+    assert "geometry" not in repr(da)
+    assert "values" in repr(da)
+
+    da = da_grid2d[0, 0, 0]
+    assert "geometry" not in repr(da)
+    assert "values" in repr(da)
 
 
 def test_dataarray_grid2d_indexing(da_grid2d):
@@ -466,7 +511,7 @@ def test_repr(da_time_space):
 
     text = repr(da_time_space)
     assert "DataArray" in text
-    assert "Dimensions: (time:10, x:2)" in text
+    assert "dims: (time:10, x:2)" in text
 
 
 def test_plot(da1):

@@ -282,7 +282,7 @@ def test_repr(dfs2_gebco):
     text = repr(dfs2_gebco)
 
     assert "Dfs2" in text
-    assert "Items" in text
+    assert "items" in text
     assert "dx" in text
 
 
@@ -301,7 +301,7 @@ def test_repr_time(dfs2_random):
     text = repr(dfs)
 
     assert "Dfs2" in text
-    assert "Items" in text
+    assert "items" in text
     assert "dx" in text
     assert "steps" in text
 
