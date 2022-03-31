@@ -918,9 +918,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         zn = None
         if self._zn is not None:
             zshape = (len(newtime), self._zn.shape[1])
-            newz = np.zeros(shape=zshape, dtype=self._zn.dtype)
-            newz[idx1, :] = self._zn.to_numpy()
-            newz[idx2, :] = other._zn.to_numpy()
+            zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
+            zn[idx1, :] = self._zn
+            zn[idx2, :] = other._zn
 
         return Dataset(
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
