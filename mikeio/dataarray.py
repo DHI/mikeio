@@ -604,7 +604,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data=np.squeeze(data),
             time=time,
-            item=self.item,
+            item=deepcopy(self.item),
             geometry=geometry,
             zn=zn,
             dims=dims,
@@ -751,7 +751,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
         dims = [d for s, d in zip(self.shape, self.dims) if s != 1]
 
         return DataArray(
-            data=data, time=self.time, geometry=self.geometry, zn=self._zn, dims=dims
+            data=data,
+            time=self.time,
+            item=self.item,
+            geometry=self.geometry,
+            zn=self._zn,
+            dims=dims,
         )
 
     def max(self, axis="time") -> "DataArray":
@@ -910,7 +915,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data=data,
             time=time,
-            item=self.item,
+            item=deepcopy(self.item),
             geometry=geometry,
             dims=dims,
             zn=zn,
@@ -1040,7 +1045,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 else:
                     geometry = GeometryPoint3D(x=x, y=y, z=z)
 
-            da = DataArray(data=dai, time=self.time, geometry=geometry, item=self.item)
+            da = DataArray(
+                data=dai, time=self.time, geometry=geometry, item=deepcopy(self.item)
+            )
         else:
             da = self.copy()
 
@@ -1162,7 +1169,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
 
-        dai = DataArray(data=dai, time=self.time, geometry=geom, item=self.item)
+        dai = DataArray(
+            data=dai, time=self.time, geometry=geom, item=deepcopy(self.item)
+        )
 
         if hasattr(other, "time"):
             dai = dai.interp_time(other.time)
@@ -1205,12 +1214,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if axis == 0:
             idx = idx[0] if (not np.isscalar(idx)) and (len(idx) == 1) else idx
             time = self.time[idx]
-            item = self.item
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[idx]
         else:
             time = self.time
-            item = self.item
             geometry = GeometryUndefined()
             zn = None
             if hasattr(self.geometry, "isel"):
@@ -1236,7 +1243,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data=x,
             time=time,
-            item=item,
+            item=deepcopy(self.item),
             geometry=geometry,
             zn=zn,
             dims=dims,
@@ -1364,10 +1371,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def name(self) -> Optional[str]:
-        if self.item.name:
-            return self.item.name
-        else:
-            return None
+        return self.item.name
 
     @name.setter
     def name(self, value):
@@ -1426,41 +1430,46 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def dtype(self):
         return self.values.dtype
 
-    def _geometry_txt(self):
-        gtxt = None
-        # TODO: grid geometry
-        if isinstance(self.geometry, GeometryFM):
-            gtxt = f"Geometry: {self.geometry.type_name}"
-            if self.geometry.is_layered:
-                n_z_layers = (
-                    "no"
-                    if self.geometry.n_z_layers is None
-                    else self.geometry.n_z_layers
-                )
-                gtxt += f" ({self.geometry.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
+    def _dims_txt(self) -> str:
+        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
+        dimsstr = ", ".join(dims)
+        return f"dims: ({dimsstr})"
 
-        return gtxt
+    def _time_txt(self) -> str:
+        noneq_txt = "" if self.is_equidistant else " non-equidistant"
+        timetxt = (
+            f"time: {self.time[0]} (time-invariant)"
+            if self.n_timesteps == 1
+            else f"time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps}{noneq_txt} records)"
+        )
+        return timetxt
+
+    def _geometry_txt(self) -> str:
+        if not isinstance(self.geometry, (GeometryUndefined, type(None))):
+            return f"geometry: {self.geometry}"
+
+    def _values_txt(self) -> str:
+
+        if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
+            return f"values: {self.values}"
+        elif self.ndim == 1 and len(self.values) < 5:
+            valtxt = ", ".join([f"{v:0.4g}" for v in self.values])
+            return f"values: [{valtxt}]"
+        elif self.ndim == 1:
+            return f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
 
     def __repr__(self):
 
         out = ["<mikeio.DataArray>"]
         if self.name is not None:
-            out.append(f"Name: {self.name}")
-        gtxt = self._geometry_txt()
-        if gtxt:
-            out.append(gtxt)
-        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
-        dimsstr = ", ".join(dims)
-        out.append(f"Dimensions: ({dimsstr})")
+            out.append(f"name: {self.name}")
 
-        timetxt = (
-            f"Time: {self.time[0]} (time-invariant)"
-            if self.n_timesteps == 1
-            else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
-        )
-        out.append(timetxt)
+        rest = [
+            self._dims_txt(),
+            self._time_txt(),
+            self._geometry_txt(),
+            self._values_txt(),
+        ]
+        out = out + [x for x in rest if x is not None]
 
-        if not self.is_equidistant:
-            out.append("-- Non-equidistant calendar axis --")
-
-        return str.join("\n", out)
+        return "\n".join(out)

@@ -431,39 +431,23 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     @property
     def geometry(self):
         """Geometry of each DataArray"""
-        return list(self)[0].geometry
+        return self[0].geometry
 
     @property
     def _zn(self):
-        return list(self)[0]._zn
+        return self[0]._zn
 
     def __repr__(self):
         if len(self) == 0:
             return "Empty <mikeio.Dataset>"
+        da = self[0]
+        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]
+        out = [x for x in out if x is not None]
 
-        out = ["<mikeio.Dataset>"]
-
-        gtxt = list(self)[0]._geometry_txt()
-        if gtxt:
-            out.append(gtxt)
-
-        dims = [f"{self.dims[i]}:{self.shape[i]}" for i in range(self.ndim)]
-        dimsstr = ", ".join(dims)
-        out.append(f"Dimensions: ({dimsstr})")
-
-        timetxt = (
-            f"Time: {self.time[0]} (time-invariant)"
-            if self.n_timesteps == 1
-            else f"Time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps} records)"
-        )
-        out.append(timetxt)
-
-        if not self.is_equidistant:
-            out.append("-- Non-equidistant calendar axis --")
         if self.n_items > 10:
-            out.append(f"Number of items: {self.n_items}")
+            out.append(f"number of items: {self.n_items}")
         else:
-            out.append("Items:")
+            out.append("items:")
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
 
