@@ -915,7 +915,16 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             newdata[j][idx1, :] = ds[j].to_numpy()
             newdata[j][idx2, :] = other[j].to_numpy()
 
-        return Dataset(newdata, newtime, ds.items, ds.geometry)
+        zn = None
+        if self._zn is not None:
+            zshape = (len(newtime), self._zn.shape[1])
+            newz = np.zeros(shape=zshape, dtype=self._zn.dtype)
+            newz[idx1, :] = self._zn.to_numpy()
+            newz[idx2, :] = other._zn.to_numpy()
+
+        return Dataset(
+            newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
+        )
 
     def _check_all_items_match(self, other):
         if self.n_items != other.n_items:
