@@ -96,7 +96,10 @@ TOTAL                              7513    866    88%
 
 ## Cloud enabled
 
-From MIKE IO v.0.7 it is now possible to run MIKE IO on Linux-based Cloud computing, e.g. [Google Colab](https://colab.research.google.com/).
+From MIKE IO v.0.7 it is possible to run MIKE IO in your favorite cloud notebook environment e.g. [Google Colab](https://colab.research.google.com/), [DeepNote](https://deepnote.com/), etc...
+
+![DeepNote](images/deepnote.png)
 
 ![Colab](images/colab.png)
+
 
