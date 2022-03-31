@@ -96,7 +96,7 @@ TOTAL                              7513    866    88%
 
 ## Cloud enabled
 
-From MIKE IO v.0.7 it is possible to run MIKE IO in your favorite cloud notebook environment e.g. [Google Colab](https://colab.research.google.com/), [DeepNote](https://deepnote.com/), etc...
+From MIKE IO v.0.7 it is possible to run MIKE IO in your favorite cloud notebook environment e.g. [Deepnote](https://deepnote.com/), [Google Colab](https://colab.research.google.com/), etc...
 
 ![DeepNote](images/deepnote.png)
 
