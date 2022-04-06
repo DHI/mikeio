@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from mikeio import Mesh
-from mikeio import Grid2D
+from mikeio import Grid2D, Grid1D
 
 
 def test_create_nx_ny():
@@ -19,6 +19,16 @@ def test_create_nx_missing_ny():
         Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=100)
 
     assert "ny" in str(excinfo.value)
+
+
+def test_grid1d_x():
+    x0 = 2.0
+    x1 = 8.0
+    nx = 4
+    x = np.linspace(x0, x1, nx)
+    g = Grid1D(x=x)
+    assert g.x0 == x0
+    assert g.x1 == x1
 
 
 def test_x_y():
