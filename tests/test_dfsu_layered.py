@@ -409,6 +409,22 @@ def test_extract_top_layer_to_2d(tmpdir):
     assert newdfs.is_2d
 
 
+def test_modify_values_in_layer(tmpdir):
+
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    selected_layer = 6  # Zero-based indexing!
+    layer_elem_ids = ds.geometry.get_layer_elements(layer=selected_layer)
+
+    ds.Salinity[:, layer_elem_ids] = 35.0  # Set values
+
+    outfilename = os.path.join(tmpdir, "oresund_modified.dfsu")
+
+    ds.to_dfs(outfilename)
+
+    ds_sel_layer = mikeio.read(outfilename, layers=selected_layer)
+    assert np.all(np.isclose(ds_sel_layer.Salinity.to_numpy(), 35.0))
+
+
 def test_to_mesh_3d(tmpdir):
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")

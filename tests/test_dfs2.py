@@ -567,6 +567,24 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
     assert dfs.end_time == newdfs.end_time
 
 
+def test_read_concat_write_dfs2(tmp_path):
+    outfilename = tmp_path / "waves_concat.dfs2"
+
+    ds1 = mikeio.read("tests/testdata/waves.dfs2", time_steps=[0, 1])
+    # ds2 = mikeio.read("tests/testdata/waves.dfs2", time_steps=2) # dont do this, it will not work!
+    ds2 = mikeio.read("tests/testdata/waves.dfs2", time_steps=[2])
+    dsc = ds1.concat(ds2)
+    assert dsc.n_timesteps == 3
+    assert dsc.end_time == ds2.end_time
+    assert isinstance(dsc.geometry, Grid2D)
+    dsc.to_dfs(outfilename)
+
+    dsnew = mikeio.read(outfilename)
+    assert isinstance(dsnew.geometry, Grid2D)
+    assert dsnew.n_timesteps == 3
+    assert dsnew.end_time == ds2.end_time
+
+
 def test_spatial_aggregation_dfs2_to_dfs0(tmp_path):
 
     outfilename = tmp_path / "waves_max.dfs0"

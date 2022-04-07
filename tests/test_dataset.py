@@ -1244,6 +1244,24 @@ def test_concat():
     assert ds3.n_timesteps == (ds1.n_timesteps + ds2.n_timesteps)
     assert ds3.start_time == ds1.start_time
     assert ds3.end_time == ds2.end_time
+    assert type(ds3.geometry) == type(ds1.geometry)
+    assert ds3.geometry.n_elements == ds1.geometry.n_elements
+
+
+def test_concat_dfsu3d():
+    filename = "tests/testdata/basin_3d.dfsu"
+    ds = mikeio.read(filename)
+    ds1 = mikeio.read(filename, time=[0, 1])
+    ds2 = mikeio.read(filename, time=[1, 2])
+    ds3 = ds1.concat(ds2)
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.start_time == ds.start_time
+    assert ds3.end_time == ds.end_time
+    assert type(ds3.geometry) == type(ds.geometry)
+    assert ds3.geometry.n_elements == ds1.geometry.n_elements
+    assert ds3._zn.shape == ds._zn.shape
+    assert np.all(ds3._zn == ds._zn)
 
 
 def test_append_items():
