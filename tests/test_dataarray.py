@@ -192,6 +192,19 @@ def test_dataarray_init():
     assert da.time[0] == pd.Timestamp(2018, 1, 1)
 
 
+def test_dataarray_init_item_none():
+
+    nt = 10
+    data = data = np.zeros([nt, 4]) + 0.1
+    time = time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+
+    da = mikeio.DataArray(data=data, time=time)
+    assert da.type == EUMType.Undefined
+
+    with pytest.raises(ValueError, "Item must be"):
+        mikeio.DataArray(data=data, time=time, item=3)
+
+
 def test_dataarray_init_2d():
     nt = 10
     time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
@@ -464,6 +477,107 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[:, -1, 0].geometry, GeometryUndefined)
 
 
+def test_da_isel_space(da_grid2d):
+    assert da_grid2d.geometry.nx == 7
+    assert da_grid2d.geometry.ny == 14
+    da_sel = da_grid2d.isel(0, axis="y")
+    assert da_sel.dims[0][0] == "t"
+    assert da_sel.dims[1] == "x"
+
+    da_sel = da_grid2d.isel(0, axis="x")
+    assert da_sel.dims[0][0] == "t"
+    assert da_sel.dims[1] == "y"
+
+    da_sel = da_grid2d.isel(0, axis="t")
+    assert da_sel.dims[0] == "y"
+    assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
+    da_sel = da_grid2d.isel(y=0)
+    assert da_sel.dims[0] == "time"
+
+    da_sel = da_grid2d.isel(x=0)
+    assert da_sel.dims[0] == "time"
+    assert da_sel.dims[1] == "y"
+
+    da_sel = da_grid2d.isel(time=0)
+    assert da_sel.dims[0] == "y"
+    assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray):
+
+    with pytest.raises(ValueError) as excinfo:
+        da_grid2d.isel(layer=0)
+    assert "layer" in str(excinfo.value)
+
+
+def test_da_sel_layer():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+    assert da.geometry.n_elements == 17118
+    assert da.geometry.is_layered
+
+    da1 = da.sel(layer=-1)
+    assert da1.geometry.n_elements == 3700
+    assert not da1.geometry.is_layered
+
+    da2 = da.sel(layer="top")
+    assert da2.geometry.n_elements == 3700
+    # assert
+
+    da3 = da.sel(layer="bottom")
+    assert da3.geometry.n_elements == 3700
+
+
+def test_da_sel_area_2d():
+    filename = "tests/testdata/FakeLake.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+
+    area = [-0.1, 0.15, 0.0, 0.2]
+    da1 = da.sel(area=area)
+    assert da1.geometry.n_elements == 14
+
+    area = (-0.1, 0.15, 0.0, 0.2)
+    da1 = da.sel(area=area)
+    assert da1.geometry.n_elements == 14
+
+
+def test_da_sel_area_and_xy_not_ok():
+    filename = "tests/testdata/FakeLake.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+
+    area = [-0.1, 0.15, 0.0, 0.2]
+    with pytest.raises(ValueError) as excinfo:
+        da.sel(area=area, x=0.0, y=0.1)
+    assert "area" in str(excinfo.value)
+
+
+def test_da_sel_area_3d():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+    assert da.geometry.n_elements == 17118
+    assert da.geometry.n_layers == 9
+
+    area = [340000, 6140000, 360000, 6170000]
+    da1 = da.sel(area=area)
+    assert da1.geometry.n_elements == 4567
+    assert da1.geometry.n_layers == 6
+
+
+def test_da_sel_area_2dv():
+    filename = "tests/testdata/basin_2dv.dfsu"
+    da = mikeio.read(filename, items=0)[0]
+    assert da.geometry.is_layered
+
+    # TODO
+    # area = [100, 10, 300, 30]
+    # da1 = da.sel(area=area)
+    # assert da1.geometry.n_elements == 128
+    # assert da1.geometry.is_layered
+
+
 def test_describe(da_grid2d):
     df = da_grid2d.describe()
     assert isinstance(df, pd.DataFrame)
@@ -631,10 +745,17 @@ def test_binary_math_operations(da1):
 def test_dataarray_masking():
     filename = "tests/testdata/basin_3d.dfsu"
     da = mikeio.read(filename, items="U velocity")[0]
+    assert da.shape == (3, 1740)
 
     mask = da < 0
     assert mask.shape == da.shape
     assert mask.dtype == "bool"
+    assert mask.shape == (3, 1740)
+
+    # get values using mask (other values will be np.nan)
+    da_mask = da[mask]
+    assert isinstance(da_mask, np.ndarray)
+    assert da_mask.shape == (2486,)
 
     # set values smaller than 0 to 0 using mask
     assert da.min(axis=None).values < 0
@@ -712,107 +833,6 @@ def test_daarray_aggregation_nan_versions():
     assert da_mean.geometry == da.geometry
     assert da_mean.start_time == da.start_time  # TODO is this consistent
     assert len(da_mean.time) == 1
-
-
-def test_da_isel_space(da_grid2d):
-    assert da_grid2d.geometry.nx == 7
-    assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel(0, axis="y")
-    assert da_sel.dims[0][0] == "t"
-    assert da_sel.dims[1] == "x"
-
-    da_sel = da_grid2d.isel(0, axis="x")
-    assert da_sel.dims[0][0] == "t"
-    assert da_sel.dims[1] == "y"
-
-    da_sel = da_grid2d.isel(0, axis="t")
-    assert da_sel.dims[0] == "y"
-    assert da_sel.dims[1] == "x"
-
-
-def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
-    da_sel = da_grid2d.isel(y=0)
-    assert da_sel.dims[0] == "time"
-
-    da_sel = da_grid2d.isel(x=0)
-    assert da_sel.dims[0] == "time"
-    assert da_sel.dims[1] == "y"
-
-    da_sel = da_grid2d.isel(time=0)
-    assert da_sel.dims[0] == "y"
-    assert da_sel.dims[1] == "x"
-
-
-def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray):
-
-    with pytest.raises(ValueError) as excinfo:
-        da_grid2d.isel(layer=0)
-    assert "layer" in str(excinfo.value)
-
-
-def test_da_sel_layer():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    da = mikeio.read(filename, items=0)[0]
-    assert da.geometry.n_elements == 17118
-    assert da.geometry.is_layered
-
-    da1 = da.sel(layer=-1)
-    assert da1.geometry.n_elements == 3700
-    assert not da1.geometry.is_layered
-
-    da2 = da.sel(layer="top")
-    assert da2.geometry.n_elements == 3700
-    # assert
-
-    da3 = da.sel(layer="bottom")
-    assert da3.geometry.n_elements == 3700
-
-
-def test_da_sel_area_2d():
-    filename = "tests/testdata/FakeLake.dfsu"
-    da = mikeio.read(filename, items=0)[0]
-
-    area = [-0.1, 0.15, 0.0, 0.2]
-    da1 = da.sel(area=area)
-    assert da1.geometry.n_elements == 14
-
-    area = (-0.1, 0.15, 0.0, 0.2)
-    da1 = da.sel(area=area)
-    assert da1.geometry.n_elements == 14
-
-
-def test_da_sel_area_and_xy_not_ok():
-    filename = "tests/testdata/FakeLake.dfsu"
-    da = mikeio.read(filename, items=0)[0]
-
-    area = [-0.1, 0.15, 0.0, 0.2]
-    with pytest.raises(ValueError) as excinfo:
-        da.sel(area=area, x=0.0, y=0.1)
-    assert "area" in str(excinfo.value)
-
-
-def test_da_sel_area_3d():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    da = mikeio.read(filename, items=0)[0]
-    assert da.geometry.n_elements == 17118
-    assert da.geometry.n_layers == 9
-
-    area = [340000, 6140000, 360000, 6170000]
-    da1 = da.sel(area=area)
-    assert da1.geometry.n_elements == 4567
-    assert da1.geometry.n_layers == 6
-
-
-def test_da_sel_area_2dv():
-    filename = "tests/testdata/basin_2dv.dfsu"
-    da = mikeio.read(filename, items=0)[0]
-    assert da.geometry.is_layered
-
-    # TODO
-    # area = [100, 10, 300, 30]
-    # da1 = da.sel(area=area)
-    # assert da1.geometry.n_elements == 128
-    # assert da1.geometry.is_layered
 
 
 def test_da_quantile_axis0(da2):
