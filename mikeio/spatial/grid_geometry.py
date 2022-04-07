@@ -99,7 +99,7 @@ class Grid1D(_Geometry):
 
         if not np.isscalar(idx):
             # TODO: return reduced Grid1D
-            return None
+            return GeometryUndefined()
 
         return GeometryUndefined()
 
@@ -470,7 +470,7 @@ class Grid2D(_Geometry):
 
         if not np.isscalar(idx):
             # TODO: return reduced Grid2D
-            return None
+            return GeometryUndefined()
 
         if axis == 0:
             # y is first axis! if we select an element from y-axis (axis 0),
