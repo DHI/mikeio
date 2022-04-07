@@ -138,6 +138,7 @@ def test_data_0d(da0):
     assert da0.dims == ("time",)
     assert "values" in repr(da0)
     assert "geometry" not in repr(da0)
+    assert "values" in repr(da0[:4])
 
     da0 = da0.squeeze()
     assert da0.ndim == 0
@@ -762,6 +763,10 @@ def test_math_two_dataarrays(da1):
     assert isinstance(da3, mikeio.DataArray)
     assert da1.shape == da3.shape
 
+    da3 = da1 // 23
+    assert isinstance(da3, mikeio.DataArray)
+    assert da1.shape == da3.shape
+
 
 def test_unary_math_operations(da2):
     assert np.all(da2.values > 0)
@@ -785,6 +790,9 @@ def test_binary_math_operations(da1):
     assert np.all(da2.values == da1.values**2)
     assert isinstance(da2, mikeio.DataArray)
 
+    da2 = da1 % 2
+    assert isinstance(da2, mikeio.DataArray)
+
 
 def test_dataarray_masking():
     filename = "tests/testdata/basin_3d.dfsu"
@@ -805,6 +813,21 @@ def test_dataarray_masking():
     assert da.min(axis=None).values < 0
     da[mask] = 0.0
     assert da.min(axis=None).values == 0
+
+    mask = da > 0
+    assert mask.dtype == "bool"
+
+    mask = da == 0
+    assert mask.dtype == "bool"
+
+    mask = da != 0
+    assert mask.dtype == "bool"
+
+    mask = da >= 0
+    assert mask.dtype == "bool"
+
+    mask = da <= 0
+    assert mask.dtype == "bool"
 
 
 def test_daarray_aggregation_dfs2():
