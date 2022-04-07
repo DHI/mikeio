@@ -489,6 +489,17 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[:, 2:5, 0:4].geometry, GeometryUndefined)
 
 
+def test_dataarray_grid2d_indexing_error(da_grid2d):
+    with pytest.raises(IndexError, match="Key has more dimensions"):
+        da_grid2d[0, :, :, 4]
+    with pytest.raises(IndexError):
+        da_grid2d[12]
+    with pytest.raises(IndexError):
+        da_grid2d[14:18]
+    with pytest.raises(IndexError):
+        da_grid2d[3, :, 100]
+
+
 def test_da_isel_space(da_grid2d):
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
@@ -505,6 +516,11 @@ def test_da_isel_space(da_grid2d):
     da_sel = da_grid2d.isel(0, axis="t")
     assert da_sel.dims[0] == "y"
     assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_empty(da_grid2d):
+    da_sel = da_grid2d.isel(slice(100, 200), axis="y")
+    assert da_sel is None
 
 
 def test_da_isel_space_multiple_elements(da_grid2d):
