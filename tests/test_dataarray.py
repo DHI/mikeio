@@ -201,7 +201,7 @@ def test_dataarray_init_item_none():
     da = mikeio.DataArray(data=data, time=time)
     assert da.type == EUMType.Undefined
 
-    with pytest.raises(ValueError, "Item must be"):
+    with pytest.raises(ValueError, match="Item must be"):
         mikeio.DataArray(data=data, time=time, item=3)
 
 
@@ -410,13 +410,21 @@ def test_dataarray_dfsu3d_indexing():
         ds.Salinity.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered
     )
 
-    # indexing in space selecting a single item
+    # indexing in time selecting a single record
     da = ds.Salinity[0, :]
     assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
 
-    # indexing in space selecting a single item
+    # indexing in space selecting a single element
     da = ds.Salinity[:, 0]
     assert isinstance(da.geometry, GeometryPoint3D)
+
+    # indexing in space selecting a multiple elements with slice
+    da = ds.Salinity[:, 0:45]
+    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
+
+    # indexing in space selecting a multiple elements with tuple
+    da = ds.Salinity[:, (3, 6, 12)]
+    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
 
     # indexing in both time and space
     da = ds.Salinity[0, 0]
@@ -461,12 +469,12 @@ def test_dataarray_grid2d_repr(da_grid2d):
 
 def test_dataarray_grid2d_indexing(da_grid2d):
     da = da_grid2d
-    nt, ny, nx = da.shape
+    nt, ny, nx = da.shape  # 10, 14, 7
     assert da[0].shape == (ny, nx)
     assert da[0, :, :].shape == (ny, nx)
-    assert da[:, 0, :].shape == (nt, nx)
-    assert da[:, :, 0].shape == (nt, ny)
-    assert da[:, -1, 0].shape == (nt,)
+    assert da[:, 0, 1:4].shape == (nt, 3)
+    assert da[5:, :, 0].shape == (5, ny)
+    assert da[0:5, -1, 0].shape == (5,)
     assert da[0, :, 4].shape == (ny,)
     assert da[0, -1, :].shape == (nx,)
     assert da[0, 0, 0].shape == ()
@@ -476,6 +484,10 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[:, :, 0].geometry, mikeio.Grid1D)
     assert isinstance(da[:, -1, 0].geometry, GeometryUndefined)
 
+    # TODO: slices in other than the time direction will give GeometryUndefined
+    assert isinstance(da[:, 2:5, 0].geometry, GeometryUndefined)
+    assert isinstance(da[:, 2:5, 0:4].geometry, GeometryUndefined)
+
 
 def test_da_isel_space(da_grid2d):
     assert da_grid2d.geometry.nx == 7
@@ -483,14 +495,30 @@ def test_da_isel_space(da_grid2d):
     da_sel = da_grid2d.isel(0, axis="y")
     assert da_sel.dims[0][0] == "t"
     assert da_sel.dims[1] == "x"
+    assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
     da_sel = da_grid2d.isel(0, axis="x")
     assert da_sel.dims[0][0] == "t"
     assert da_sel.dims[1] == "y"
+    assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
     da_sel = da_grid2d.isel(0, axis="t")
     assert da_sel.dims[0] == "y"
     assert da_sel.dims[1] == "x"
+
+
+def test_da_isel_space_multiple_elements(da_grid2d):
+    assert da_grid2d.geometry.nx == 7
+    assert da_grid2d.geometry.ny == 14
+    da_sel = da_grid2d.isel((0, 1, 2, 10), axis="y")
+    assert da_sel.dims == ("time", "y", "x")
+    assert da_sel.shape == (10, 4, 7)
+    assert isinstance(da_sel.geometry, GeometryUndefined)
+
+    da_sel = da_grid2d.isel(slice(None, 3), axis="x")
+    assert da_sel.dims == ("time", "y", "x")
+    assert da_sel.shape == (10, 14, 3)
+    assert isinstance(da_sel.geometry, GeometryUndefined)
 
 
 def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
