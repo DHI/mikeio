@@ -5,7 +5,7 @@ from mikeio import Dfsu, eum
 from mikecore.DfsuFile import DfsuFileType
 
 from mikeio.dfsu_spectral import DfsuSpectral
-from mikeio.spatial.geometry import GeometryPoint2D
+from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum
 
 
 @pytest.fixture
@@ -169,7 +169,7 @@ def test_read_area_spectrum_xy(dfsu_area):
 
     x, y = (2, 53)
     ds2 = dfs.read(x=x, y=y)
-    assert isinstance(ds2.geometry, GeometryPoint2D)
+    assert isinstance(ds2.geometry, GeometryFMPointSpectrum)
     assert ds2.dims == ("time", "frequency", "direction")
     assert ds2.shape == (3, 16, 25)
     # TODO: add more asserts
