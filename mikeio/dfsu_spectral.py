@@ -12,6 +12,26 @@ from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 
 
 class DfsuSpectral(_Dfsu):
+    @property
+    def n_frequencies(self):
+        """Number of frequencies"""
+        return 0 if self.frequencies is None else len(self.frequencies)
+
+    @property
+    def frequencies(self):
+        """Frequency axis"""
+        return self._frequencies
+
+    @property
+    def n_directions(self):
+        """Number of directions"""
+        return 0 if self.directions is None else len(self.directions)
+
+    @property
+    def directions(self):
+        """Directional axis"""
+        return self._directions
+
     def _get_spectral_data_shape(self, n_steps: int, elements):
         dims = [] if n_steps == 1 else ["time"]
         n_freq = self.n_frequencies
