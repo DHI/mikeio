@@ -24,18 +24,18 @@ from .spatial.geometry import (
 from .spatial.grid_geometry import Grid1D, Grid2D
 
 
-def _repeat_items(
-    items_in: Sequence[ItemInfo], prefixes: Sequence[str]
-) -> Sequence[ItemInfo]:
-    """Rereat a list of items n times with different prefixes"""
-    new_items = []
-    for item_in in items_in:
-        for prefix in prefixes:
-            item = deepcopy(item_in)
-            item.name = f"{prefix}, {item.name}"
-            new_items.append(item)
+# def _repeat_items(
+#     items_in: Sequence[ItemInfo], prefixes: Sequence[str]
+# ) -> Sequence[ItemInfo]:
+#     """Rereat a list of items n times with different prefixes"""
+#     new_items = []
+#     for item_in in items_in:
+#         for prefix in prefixes:
+#             item = deepcopy(item_in)
+#             item.name = f"{prefix}, {item.name}"
+#             new_items.append(item)
 
-    return new_items
+#     return new_items
 
 
 class _DatasetPlotter:
@@ -656,6 +656,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
 
         # select time steps
+        if (
+            isinstance(key, Iterable) and not isinstance(key, str)
+        ) and self._is_key_time(key[0]):
+            key = pd.DatetimeIndex(key)
         if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
             time_steps = pd.Series(range(len(self.time)), index=self.time)[key]
             time_steps = (
@@ -722,8 +726,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             if not isinstance(k, (str, int)):
                 warnings.warn(f"Key is a tuple containing illegal type {type(k)}")
                 return True
+        if len(set(key)) != len(key):
+            return True
         warnings.warn(
-            f"A tuple of item numbers/names was provided as index to Dataset. This can lead to ambigiuoty and it is recommended to use a list instead."
+            f"A tuple of item numbers/names was provided as index to Dataset. This can lead to ambiguity and it is recommended to use a list instead."
         )
         return False
 
