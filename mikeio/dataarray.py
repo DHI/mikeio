@@ -1,3 +1,4 @@
+from datetime import datetime
 import warnings
 from typing import Optional, Sequence, Tuple, Union, Iterable
 import numpy as np
@@ -667,12 +668,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         da = self
         dims = self.dims
-
-        key = [key] if isinstance(key, (slice, int, str)) else key
-        if len(key) > len(dims):
-            raise IndexError(
-                f"Key has more dimensions ({len(key)}) than DataArray ({len(dims)})!"
-            )
+        key = self._getitem_parse_key(key)
         for j, k in enumerate(key):
             if k != slice(None):
                 if dims[j] == "time":
@@ -682,6 +678,33 @@ class DataArray(DataUtilsMixin, TimeSeries):
                         raise IndexError("No timesteps found!")
                 da = da.isel(k, axis=dims[j])
         return da
+
+    def _getitem_parse_key(self, key):
+        if isinstance(key, tuple):
+            # is it multiindex or just a tuple of indexes for first axis?
+            # da[2,3,4] and da[(2,3,4)] both have the key=(2,3,4)
+            # how do we know if user wants step 2,3,4 or t=2,y=3,x=4 ?
+            all_idx_int = True
+            any_idx_after_0_time = False
+            for j, k in enumerate(key):
+                if not isinstance(k, int):
+                    all_idx_int = False
+                if j >= 1 and isinstance(k, (str, pd.Timestamp, datetime)):
+                    any_idx_after_0_time = True
+            if all_idx_int and (len(key) > self.ndim):
+                if np.all(np.diff(key) >= 1):
+                    # tuple with increasing list of indexes larger than the number of dims
+                    key = (list(key),)
+            if any_idx_after_0_time and self.dims[0][0] == "t":
+                # tuple of times, must refer to time axis
+                key = (list(key),)
+
+        key = key if isinstance(key, tuple) else (key,)
+        if len(key) > len(self.dims):
+            raise IndexError(
+                f"Key has more dimensions ({len(key)}) than DataArray ({len(self.dims)})!"
+            )
+        return key
 
     def __setitem__(self, key, value):
         if self._is_boolean_mask(key):
