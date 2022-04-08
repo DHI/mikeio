@@ -473,6 +473,7 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     nt, ny, nx = da.shape  # 10, 14, 7
     assert da[0].shape == (ny, nx)
     assert da[0, :, :].shape == (ny, nx)
+    assert da[0, [0,1,2,3], [2,4,6]].shape == (4, 3)
     assert da[:, 0, 1:4].shape == (nt, 3)
     assert da[5:, :, 0].shape == (5, ny)
     assert da[0:5, -1, 0].shape == (5,)
