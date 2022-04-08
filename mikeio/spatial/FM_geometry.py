@@ -22,7 +22,7 @@ import mikeio.data_utils as du
 
 
 class GeometryFMPointSpectrum(_Geometry):
-    def __init__(self) -> None:
+    def __init__(self, frequencies=None, directions=None) -> None:
         super().__init__()
         self.n_nodes = 0
         self.n_elements = 0
@@ -30,6 +30,9 @@ class GeometryFMPointSpectrum(_Geometry):
         self.is_layered = False
         self.is_2d = False
         self.is_spectral = True
+
+        self._frequencies = frequencies
+        self._directions = directions
 
     @property
     def type_name(self):
@@ -42,6 +45,26 @@ class GeometryFMPointSpectrum(_Geometry):
     @property
     def ndim(self):
         return 0
+
+    @property
+    def n_frequencies(self):
+        """Number of frequencies"""
+        return 0 if self.frequencies is None else len(self.frequencies)
+
+    @property
+    def frequencies(self):
+        """Frequency axis"""
+        return self._frequencies
+
+    @property
+    def n_directions(self):
+        """Number of directions"""
+        return 0 if self.directions is None else len(self.directions)
+
+    @property
+    def directions(self):
+        """Directional axis"""
+        return self._directions
 
 
 class _GeometryFMPlotter:
@@ -1778,48 +1801,100 @@ class GeometryFMVerticalColumn(GeometryFMLayered):
         return zf
 
 
-# class GeometryFMSpectral(GeometryFM):
-#     # TODO: add specialized classes: FrequencySpectrum, DirectionalSpectrum
-#     def __init__(
-#         self,
-#         frequencies=None,
-#         directions=None,
-#         node_coordinates=None,
-#         element_table=None,
-#         codes=None,
-#         projection_string=None,
-#         dfsu_type=None,
-#     ) -> None:
-#         super().__init__(
-#             node_coordinates=node_coordinates,
-#             element_table=element_table,
-#             codes=codes,
-#             projection_string=projection_string,
-#             dfsu_type=dfsu_type,
-#         )
-#         self._frequencies = frequencies
-#         self._directions = directions
-#         self._n_axis = 0 if (self.n_elements == 0) else 1
-#         self._n_axis = (
-#             self._n_axis + int(self.n_frequencies > 0) + int(self.n_directions > 0)
-#         )
+class GeometryFMAreaSpectrum(GeometryFM):
+    def __init__(
+        self,
+        node_coordinates,
+        element_table,
+        codes=None,
+        projection=None,
+        dfsu_type=None,
+        element_ids=None,
+        node_ids=None,
+        validate=True,
+        frequencies=None,
+        directions=None,
+    ) -> None:
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            validate=validate,
+        )
 
-#     @property
-#     def n_frequencies(self):
-#         """Number of frequencies"""
-#         return 0 if self.frequencies is None else len(self.frequencies)
+        self._frequencies = frequencies
+        self._directions = directions
 
-#     @property
-#     def frequencies(self):
-#         """Frequency axis"""
-#         return self._frequencies
+    def isel(self, idx=None, axis="elements", simplify=True):
 
-#     @property
-#     def n_directions(self):
-#         """Number of directions"""
-#         return 0 if self.directions is None else len(self.directions)
+        if (np.isscalar(idx) or len(idx)) == 1 and simplify:
+            coords = self.element_coordinates[idx].flatten()
+            return GeometryFMPointSpectrum(coords[0], coords[1])
+        else:
+            if self._type == DfsuFileType.DfsuSpectral1D:
+                return self._nodes_to_geometry(nodes=idx)
+            else:
+                return self.elements_to_geometry(elements=idx)
 
-#     @property
-#     def directions(self):
-#         """Directional axis"""
-#         return self._directions
+    def elements_to_geometry(
+        self, elements
+    ) -> Union["GeometryFMAreaSpectrum", GeometryFMPointSpectrum]:
+        """export a selection of elements to new flexible file geometry
+
+        Parameters
+        ----------
+        elements : list(int)
+            list of element ids
+
+        Returns
+        -------
+        GeometryFMAreaSpectrum or GeometryFMPointSpectrum
+            which can be used for further extraction or saved to file
+        """
+        elements = np.atleast_1d(elements)
+        if len(elements) == 1:
+            coords = self.element_coordinates[elements[0], :]
+            return GeometryFMPointSpectrum(coords[0], coords[1])
+
+        elements = np.sort(elements)  # make sure elements are sorted!
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
+        node_coords = self.node_coordinates[node_ids]
+        codes = self.codes[node_ids]
+
+        geom = GeometryFMAreaSpectrum(
+            node_coordinates=node_coords,
+            codes=codes,
+            node_ids=node_ids,
+            projection=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=self.element_ids[elements],
+            frequencies=self._frequencies,
+            directions=self._directions,
+        )
+        geom._reindex()
+        geom._type = self._type
+        return geom
+
+    @property
+    def n_frequencies(self):
+        """Number of frequencies"""
+        return 0 if self.frequencies is None else len(self.frequencies)
+
+    @property
+    def frequencies(self):
+        """Frequency axis"""
+        return self._frequencies
+
+    @property
+    def n_directions(self):
+        """Number of directions"""
+        return 0 if self.directions is None else len(self.directions)
+
+    @property
+    def directions(self):
+        """Directional axis"""
+        return self._directions
