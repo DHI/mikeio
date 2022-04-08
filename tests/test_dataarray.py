@@ -56,7 +56,7 @@ def da_grid2d():
 
     da = mikeio.DataArray(
         data=np.zeros([nt, ny, nx]) + 0.1,
-        time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+        time=pd.date_range(start="2000-01-01", freq="H", periods=nt),
         item=ItemInfo("Foo"),
         geometry=mikeio.Grid2D(x0=10.0, dx=0.1, nx=nx, ny=ny, dy=1.0, y0=-10.0),
     )
@@ -473,7 +473,7 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     nt, ny, nx = da.shape  # 10, 14, 7
     assert da[0].shape == (ny, nx)
     assert da[0, :, :].shape == (ny, nx)
-    assert da[0, [0,1,2,3], [2,4,6]].shape == (4, 3)
+    assert da[0, [0, 1, 2, 3], [2, 4, 6]].shape == (4, 3)
     assert da[:, 0, 1:4].shape == (nt, 3)
     assert da[5:, :, 0].shape == (5, ny)
     assert da[0:5, -1, 0].shape == (5,)
@@ -489,6 +489,32 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     # TODO: slices in other than the time direction will give GeometryUndefined
     assert isinstance(da[:, 2:5, 0].geometry, GeometryUndefined)
     assert isinstance(da[:, 2:5, 0:4].geometry, GeometryUndefined)
+
+
+def test_dataarray_getitem_time(da_grid2d):
+    da = da_grid2d
+    # time=pd.date_range("2000-01-01", freq="H", periods=10)
+    da_sel = da["2000-1-1"]
+    assert da_sel.n_timesteps == da.n_timesteps
+    assert da_sel.is_equidistant
+
+    da_sel = da["2000-1-1 02:00":"2000-1-1 05:00"]
+    assert da_sel.n_timesteps == 4
+    assert da_sel.is_equidistant
+
+    time = ["2000-1-1 02:00", "2000-1-1 04:00", "2000-1-1 06:00"]
+    da_sel = da[time]
+    assert da_sel.n_timesteps == 3
+    assert da_sel.is_equidistant
+
+    time = [da.time[0], da.time[1], da.time[3], da.time[7]]
+    da_sel = da[time]
+    assert da_sel.n_timesteps == 4
+    assert not da_sel.is_equidistant
+
+    da_sel = da[da.time[:5]]
+    assert da_sel.n_timesteps == 5
+    assert da_sel.is_equidistant
 
 
 def test_dataarray_grid2d_indexing_error(da_grid2d):
