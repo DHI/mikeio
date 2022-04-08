@@ -1,10 +1,8 @@
 import os
 import numpy as np
 import pandas as pd
-import pathlib
 import warnings
-import typing
-import tempfile
+
 from datetime import datetime, timedelta
 from functools import wraps
 from tqdm import trange
@@ -20,9 +18,13 @@ from .base import EquidistantTimeSeries
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
-from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
+from .spatial.FM_geometry import (
+    GeometryFM,
+    GeometryFMLayered,
+    GeometryFMPointSpectrum,
+    GeometryFMAreaSpectrum,
+)
 from .spatial.FM_utils import _plot_map
 from .spatial.grid_geometry import Grid2D
 
@@ -205,14 +207,12 @@ class _UnstructuredFile:
 
         if self.is_spectral:
             dir = dfs.Directions
-            self.directions = None if dir is None else dir * (180 / np.pi)
-            self.n_directions = dfs.NumberOfDirections
-            self.frequencies = dfs.Frequencies
-            self.n_frequencies = dfs.NumberOfFrequencies
+            self._directions = None if dir is None else dir * (180 / np.pi)
+            self._frequencies = dfs.Frequencies
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
-            self._geometry = GeometryFMPointSpectrum()  # GeometryFM()  # EMPTY
+            self._geometry = GeometryFMPointSpectrum(self.directions, self.frequencies)
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
             el_table, el_ids = self._get_elements_from_source(dfs)
@@ -228,6 +228,18 @@ class _UnstructuredFile:
                     node_ids=node_ids,
                     n_layers=dfs.NumberOfLayers,
                     n_sigma=dfs.NumberOfSigmaLayers,
+                    validate=False,
+                )
+            # elif self._type == DfsuFileType.DfsuSpectral1D:
+            elif self._type == DfsuFileType.DfsuSpectral2D:
+                self._geometry = GeometryFMAreaSpectrum(
+                    node_coordinates=nc,
+                    element_table=el_table,
+                    codes=codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=self._type,
+                    element_ids=el_ids,
+                    node_ids=node_ids,
                     validate=False,
                 )
             else:
