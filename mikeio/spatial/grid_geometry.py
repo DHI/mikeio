@@ -6,10 +6,17 @@ from .geometry import _Geometry, GeometryUndefined, BoundingBox
 from ..eum import EUMType, EUMUnit
 
 
+def _check_equidistant(x: np.ndarray) -> None:
+    d = np.diff(x)
+    if not np.allclose(d, d[0]):
+        raise NotImplementedError("values must be equidistant")
+
+
 class Grid1D(_Geometry):
     def __init__(
         self,
-        x0=None,
+        x=None,
+        x0=0.0,
         dx=None,
         n=None,
         projection="NON-UTM",
@@ -22,15 +29,23 @@ class Grid1D(_Geometry):
         self._origin = origin
         self._orientation = orientation
 
-        if n is None:
-            raise ValueError("n must be provided")
-        if dx is None:
-            raise ValueError("dx must be provided")
-        self._nx = n
-        self._dx = dx
-        self._x0 = 0 if x0 is None else x0
-        x1 = self._x0 + dx * (n - 1)
-        self._x = np.linspace(self._x0, x1, n)
+        if x is not None:
+            x = np.asarray(x)
+            _check_equidistant(x)
+            if x[0] > x[-1]:
+                raise ValueError("x values must be increasing")
+
+            self._x = x
+            self._nx = len(self._x)
+        else:
+            if n is None:
+                raise ValueError("n must be provided")
+            if dx is None:
+                raise ValueError("dx must be provided")
+            self._nx = n
+            self._dx = dx
+            x1 = x0 + dx * (n - 1)
+            self._x = np.linspace(x0, x1, n)
 
     def __repr__(self):
         out = []
@@ -75,7 +90,7 @@ class Grid1D(_Geometry):
     @property
     def x0(self) -> float:
         """left end-point"""
-        return self._x0
+        return self.x[0]
 
     @property
     def x1(self) -> float:
@@ -375,6 +390,9 @@ class Grid2D(_Geometry):
         self._ny = ny
 
     def _create_from_x_and_y(self, x, y):
+
+        _check_equidistant(x)
+        _check_equidistant(y)
 
         if x[0] > x[-1]:
             raise ValueError("x values must be increasing")

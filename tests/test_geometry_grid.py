@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from mikeio import Mesh
-from mikeio import Grid2D
+from mikeio import Grid2D, Grid1D
 
 
 def test_create_nx_ny():
@@ -19,6 +19,16 @@ def test_create_nx_missing_ny():
         Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=100)
 
     assert "ny" in str(excinfo.value)
+
+
+def test_grid1d_x():
+    x0 = 2.0
+    x1 = 8.0
+    nx = 4
+    x = np.linspace(x0, x1, nx)
+    g = Grid1D(x=x)
+    assert g.x0 == x0
+    assert g.x1 == x1
 
 
 def test_x_y():
@@ -52,6 +62,30 @@ def test_x_y():
     assert "<mikeio.Grid2D>" in text
 
 
+def test_non_equidistant_axis_grid1d_not_allowed():
+    x = [0.0, 1.0, 2.0, 2.9]
+
+    with pytest.raises(Exception) as excinfo:  # this could be allowed in the future
+        Grid1D(x=x)
+
+    assert "equidistant" in str(excinfo.value)
+
+
+def test_non_equidistant_axis_grid2d_not_allowed():
+    x = [0, 1]
+    y = [0.0, 1.0, 2.0, 2.9]
+
+    with pytest.raises(Exception) as excinfo:  # this could be allowed in the future
+        Grid2D(x=x, y=y)
+
+    assert "equidistant" in str(excinfo.value)
+
+    with pytest.raises(Exception) as excinfo:  # this could be allowed in the future
+        Grid2D(x=y, y=x)
+
+    assert "equidistant" in str(excinfo.value)
+
+
 def test_dx_dy_is_positive():
 
     with pytest.raises(ValueError) as excinfo:
@@ -63,6 +97,13 @@ def test_dx_dy_is_positive():
         Grid2D(shape=(2, 4), dx=1.0, dy=0.0)
 
     assert "positive" in str(excinfo.value).lower()
+
+
+def test_x_is_increasing():
+    with pytest.raises(ValueError) as excinfo:
+        Grid1D(x=[2.0, 1.0])
+
+    assert "increasing" in str(excinfo.value)
 
 
 def test_x_y_is_increasing():
