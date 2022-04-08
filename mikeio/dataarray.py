@@ -670,7 +670,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         dims = self.dims
         key = self._getitem_parse_key(key)
         for j, k in enumerate(key):
-            if k != slice(None):
+            if isinstance(k, Iterable) or k != slice(None):
                 if dims[j] == "time":
                     # getitem accepts fancy indexing only for time
                     k = self._get_time_idx_list(self.time, k)
