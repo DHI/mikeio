@@ -6,6 +6,12 @@ from .geometry import _Geometry, GeometryUndefined, BoundingBox
 from ..eum import EUMType, EUMUnit
 
 
+def _check_equidistant(x: np.ndarray) -> None:
+    d = np.diff(x)
+    if not np.allclose(d, d[0]):
+        raise NotImplementedError("values must be equidistant")
+
+
 class Grid1D(_Geometry):
     def __init__(
         self,
@@ -24,7 +30,13 @@ class Grid1D(_Geometry):
         self._orientation = orientation
 
         if x is not None:
-            self._x = np.array(x)
+            x = np.asarray(x)
+            _check_equidistant(x)
+            if x[0] > x[-1]:
+                raise ValueError("x values must be increasing")
+
+            self._x = x
+            self._nx = len(self._x)
         else:
             if n is None:
                 raise ValueError("n must be provided")
@@ -378,6 +390,9 @@ class Grid2D(_Geometry):
         self._ny = ny
 
     def _create_from_x_and_y(self, x, y):
+
+        _check_equidistant(x)
+        _check_equidistant(y)
 
         if x[0] > x[-1]:
             raise ValueError("x values must be increasing")
