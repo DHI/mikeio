@@ -671,6 +671,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                     time_steps = list(range(*key.indices(len(self.time))))
                 return self.isel(time_steps, axis=0)
 
+        if self._multi_indexing_attempted(key):
+            raise TypeError(
+                f"Indexing with key {key} failed. Dataset does not allow multi-indexing. Use isel() or sel() instead."
+            )
+
         # select items
         key = self._key_to_str(key)
         if isinstance(key, str):
@@ -705,8 +710,25 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             return True
         return False
 
-    def _key_to_str(self, key):
+    def _multi_indexing_attempted(self, key):
+        # find out if user is attempting ds[2, :, 1] or similar (not allowed)
+        # this is not bullet-proof, but a good estimate
+        if not isinstance(key, tuple):
+            return False
+        for k in key:
+            if isinstance(k, slice):
+                warnings.warn(f"Key is a tuple containing a slice")
+                return True
+            if not isinstance(k, (str, int)):
+                warnings.warn(f"Key is a tuple containing illegal type {type(k)}")
+                return True
+        warnings.warn(
+            f"A tuple of item numbers/names was provided as index to Dataset. This can lead to ambigiuoty and it is recommended to use a list instead."
+        )
+        return False
 
+    def _key_to_str(self, key):
+        """Translate item selection key to str (or List[str])"""
         if isinstance(key, str):
             return key
         if isinstance(key, int):
