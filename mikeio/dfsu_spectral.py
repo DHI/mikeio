@@ -9,6 +9,7 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from .dfsu import _Dfsu
 from .dataset import Dataset, DataArray
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
+from .spatial.FM_utils import _plot_spectrum
 
 
 class DfsuSpectral(_Dfsu):
@@ -300,124 +301,24 @@ class DfsuSpectral(_Dfsu):
         """
         if isinstance(spectrum, DataArray):
             spectrum = spectrum.to_numpy()
-        # TODO move this to specialized class e.g. DfsuSpectral
 
-        if self.n_directions == 0 or self.n_frequencies == 0:
-            raise ValueError("plot_spectrum() is only supported for spectral data")
-
-        import matplotlib.pyplot as plt
-
-        dirs = np.radians(self.directions)
-        freq = self.frequencies
-
-        inverse_r = r_as_periods
-        if inverse_r:
-            freq = 1.0 / np.flip(freq)
-            spectrum = np.fliplr(spectrum)
-
-        fig = plt.figure(figsize=figsize)
-        ax = plt.subplot(111, polar=True)
-        ax.set_theta_direction(-1)
-        ax.set_theta_zero_location("N")
-
-        ddir = dirs[1] - dirs[0]
-
-        def is_circular(dir):
-            dir_diff = np.mod(dir[0], 2 * np.pi) - np.mod(dir[-1] + ddir, 2 * np.pi)
-            return np.abs(dir_diff) < 1e-6
-
-        if is_circular(dirs):
-            # append last directional slice at the end
-            dirs = np.append(dirs, dirs[-1] + ddir)
-            spectrum = np.concatenate((spectrum, spectrum[0:1, :]), axis=0)
-
-        # up-sample directions
-        if plot_type in ("shaded", "contour", "contourf"):
-            # more smoother plotting
-            factor = 4
-            dir2 = np.linspace(dirs[0], dirs[-1], (len(dirs) - 1) * factor + 1)
-            spec2 = np.zeros(shape=(len(dir2), len(freq)))
-            for j in range(len(freq)):
-                spec2[:, j] = np.interp(dir2, dirs, spectrum[:, j])
-            dirs = dir2.copy()
-            spectrum = spec2.copy()
-
-        if vmin is None:
-            vmin = np.nanmin(spectrum)
-        if vmax is None:
-            vmax = np.nanmax(spectrum)
-        if levels is None:
-            levels = 10
-            n_levels = 10
-        if np.isscalar(levels):
-            n_levels = levels
-            levels = np.linspace(vmin, vmax, n_levels)
-
-        if plot_type != "shaded":
-            spectrum[spectrum < vmin] = np.nan
-
-        if plot_type == "contourf":
-            colorax = ax.contourf(
-                dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
-            )
-        elif plot_type == "contour":
-            colorax = ax.contour(
-                dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
-            )
-            # ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
-            if label is not None:
-                ax.set_title(label)
-
-        elif plot_type in ("patch", "shaded", "box"):
-            shading = "gouraud" if plot_type == "shaded" else "auto"
-            colorax = ax.pcolormesh(
-                dirs,
-                freq,
-                spectrum.T,
-                shading=shading,
-                cmap=cmap,
-                vmin=vmin,
-                vmax=vmax,
-            )
-            ax.grid("on")
-        else:
-            raise ValueError(
-                f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
-            )
-
-        # TODO: optional
-        ax.set_thetagrids(
-            [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
-            labels=["N", "N-E", "E", "S-E", "S", "S-W", "W", "N-W"],
+        return _plot_spectrum(
+            spectrum,
+            frequencies=self.frequencies,
+            directions=self.directions,
+            plot_type=plot_type,
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            r_as_periods=r_as_periods,
+            rmin=rmin,
+            rmax=rmax,
+            levels=levels,
+            figsize=figsize,
+            add_colorbar=add_colorbar,
         )
-
-        # if r_axis_as_periods:
-        #     Ts = [8, 6, 5, 4, 3.5, 3, 2.5, 2]
-        #     ax.set_rgrids(
-        #         1.0 / np.array(Ts),
-        #         labels=["8s", "6s", "5s", "4s", "3.5s", "3s", "2.5s", "2s"],
-        #     )
-        #     # , fontsize=12, angle=180)
-
-        # ax.grid(True, which='minor', axis='both', linestyle='-', color='0.8')
-        # ax.set_xticks(dfs.directions, minor=True);
-
-        if rmin is not None:
-            ax.set_rmin(rmin)
-        if rmax is not None:
-            ax.set_rmax(rmax)
-
-        if add_colorbar:
-            cbar = fig.colorbar(colorax)
-            if label is None:
-                label = "Energy Density [m*m/Hz/deg]"
-            cbar.set_label(label, rotation=270)
-            cbar.ax.get_yaxis().labelpad = 30
-
-        if title is not None:
-            ax.set_title(title)
-
-        return ax
 
     def calc_Hm0_from_spectrum(
         self, spectrum: Union[np.ndarray, DataArray], tail=True
@@ -436,9 +337,6 @@ class DfsuSpectral(_Dfsu):
         np.ndarray
             significant wave height values
         """
-        # if not self.is_spectral:
-        #    raise ValueError("Method only supported for spectral dfsu!")
-
         if isinstance(spectrum, DataArray):
             m0 = self._calc_m0_from_spectrum(
                 spectrum.to_numpy(),
