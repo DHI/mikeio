@@ -584,7 +584,6 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self.directions = geometry.directions
         self.n_directions = geometry.n_directions
 
-
     # ============= Basic properties/methods ===========
 
     @property
