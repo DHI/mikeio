@@ -9,7 +9,7 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from .dfsu import _Dfsu
 from .dataset import Dataset, DataArray
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .spectral_utils import plot_2dspectrum, _calc_m0_from_spectrum
+from .spectral_utils import plot_2dspectrum, calc_m0_from_spectrum
 
 
 class DfsuSpectral(_Dfsu):
@@ -338,16 +338,15 @@ class DfsuSpectral(_Dfsu):
             significant wave height values
         """
         if isinstance(spectrum, DataArray):
-            m0 = _calc_m0_from_spectrum(
+            m0 = calc_m0_from_spectrum(
                 spectrum.to_numpy(),
                 self.frequencies,
                 self.directions,
                 tail,
-                m0_only=True,
             )
         else:
 
-            m0 = _calc_m0_from_spectrum(
-                spectrum, self.frequencies, self.directions, tail, m0_only=True
+            m0 = calc_m0_from_spectrum(
+                spectrum, self.frequencies, self.directions, tail
             )
         return 4 * np.sqrt(m0)

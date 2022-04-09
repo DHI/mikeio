@@ -187,7 +187,7 @@ def plot_2dspectrum(
     return ax
 
 
-def _calc_m0_from_spectrum(spec, f, dir=None, tail=True, m0_only=False):
+def calc_m0_from_spectrum(spec, f, dir=None, tail=True):
     if f is None:
         raise ValueError(
             "Moments cannot be calculated because dfsu has no frequency axis"

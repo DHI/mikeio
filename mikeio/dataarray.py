@@ -24,7 +24,7 @@ from .spatial.FM_geometry import (
 )
 from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
-from .spectral_utils import plot_2dspectrum, _calc_m0_from_spectrum
+from .spectral_utils import plot_2dspectrum, calc_m0_from_spectrum
 from .data_utils import DataUtilsMixin
 
 
@@ -433,12 +433,11 @@ class _DataArraySpectrumToHm0:
 
     def __call__(self, tail=True):
         # TODO: if action_density
-        m0 = _calc_m0_from_spectrum(
+        m0 = calc_m0_from_spectrum(
             self.da.to_numpy(),
             self.da.frequencies,
             self.da.directions,
             tail,
-            m0_only=True,
         )
         Hm0 = 4 * np.sqrt(m0)
         dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
