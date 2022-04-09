@@ -33,8 +33,8 @@ class GeometryFMPointSpectrum(_Geometry):
 
         self._frequencies = frequencies
         self._directions = directions
-        self._x = x
-        self._y = y
+        self.x = x
+        self.y = y
 
     @property
     def type_name(self):
@@ -43,8 +43,8 @@ class GeometryFMPointSpectrum(_Geometry):
 
     def __repr__(self):
         txt = f"Point Spectrum Geometry (frequency:{self.n_frequencies}, direction:{self.n_directions}"
-        if self._x is not None:
-            txt = txt + f", x:{self._x:.5f}, y:{self._y:.5f}"
+        if self.x is not None:
+            txt = txt + f", x:{self.x:.5f}, y:{self.y:.5f}"
         return txt + ")"
 
     @property
