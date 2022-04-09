@@ -518,3 +518,102 @@ def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
     if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
         return False
     return True
+
+
+def _plot_vertical_profile(
+    node_coordinates,
+    element_table,
+    values,
+    zn=None,
+    cmin=None,
+    cmax=None,
+    label="",
+    **kwargs,
+):
+    """
+    Plot unstructured vertical profile
+
+    Parameters
+    ----------
+    values: np.array
+        value for each element to plot
+    timestep: int, optional
+        the timestep that fits with the data to get correct vertical
+        positions, default: use static vertical positions
+    cmin: real, optional
+        lower bound of values to be shown on plot, default:None
+    cmax: real, optional
+        upper bound of values to be shown on plot, default:None
+    title: str, optional
+        axes title
+    label: str, optional
+        colorbar label
+    cmap: matplotlib.cm.cmap, optional
+        colormap, default viridis
+    figsize: (float, float), optional
+        specify size of figure
+    ax: matplotlib.axes, optional
+        Adding to existing axis, instead of creating new fig
+
+    Returns
+    -------
+    <matplotlib.axes>
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import PolyCollection
+
+    nc = node_coordinates
+    x_coordinate = np.hypot(nc[:, 0], nc[:, 1])
+    z_coordinate = nc[:, 2]
+
+    elements = _Get_2DVertical_elements(element_table)
+
+    # plot in existing or new axes?
+    if "ax" in kwargs:
+        ax = kwargs["ax"]
+    else:
+        figsize = None
+        if "figsize" in kwargs:
+            figsize = kwargs["figsize"]
+        _, ax = plt.subplots(figsize=figsize)
+
+    yz = np.c_[x_coordinate, z_coordinate]
+    verts = yz[elements]
+
+    if "cmap" in kwargs:
+        cmap = kwargs["cmap"]
+    else:
+        cmap = "jet"
+    pc = PolyCollection(verts, cmap=cmap)
+
+    if cmin is None:
+        cmin = np.nanmin(values)
+    if cmax is None:
+        cmax = np.nanmax(values)
+    pc.set_clim(cmin, cmax)
+
+    plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
+    pc.set_array(values)
+
+    if "edge_color" in kwargs:
+        edge_color = kwargs["edge_color"]
+    else:
+        edge_color = None
+    pc.set_edgecolor(edge_color)
+
+    ax.add_collection(pc)
+    ax.autoscale()
+    ax.set_ylabel("z [m]")
+
+    if "title" in kwargs:
+        ax.set_title(kwargs["title"])
+
+    return ax
+
+
+def _Get_2DVertical_elements(element_table):
+    # if (type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
+    #     type == DfsuFileType.DfsuVerticalProfileSigma
+    # ):
+    elements = [list(element_table[i]) for i in range(len(list(element_table)))]
+    return np.asarray(elements)
