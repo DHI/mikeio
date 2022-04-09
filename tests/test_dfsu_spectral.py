@@ -262,8 +262,8 @@ def test_spectrum_area_getitem(dfsu_area):
 
     elements = [7, 8, 9, 10, 11, 12]
     da2 = dfsu_area.read(elements=elements)[0]
-    # da3 = da1[:, elements]   # TODO: requires refactor of getitem
-    # assert da3.shape == da2.shape
+    da3 = da1[:, elements]
+    assert da3.shape == da2.shape
 
     element = 3
     da2 = dfsu_area.read(elements=element)[0]
