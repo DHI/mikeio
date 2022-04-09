@@ -11,6 +11,7 @@ from .dataset import Dataset, DataArray
 from .spatial.FM_geometry import GeometryFMLayered
 from .custom_exceptions import InvalidGeometry
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
+from .spatial.FM_utils import _plot_vertical_profile
 from .interpolation import get_idw_interpolant, interp2d
 from .eum import ItemInfo, EUMType
 
@@ -300,9 +301,6 @@ class Dfsu2DV(DfsuLayered):
         ----------
         values: np.array
             value for each element to plot
-        timestep: int, optional
-            the timestep that fits with the data to get correct vertical
-            positions, default: use static vertical positions
         cmin: real, optional
             lower bound of values to be shown on plot, default:None
         cmax: real, optional
@@ -322,72 +320,24 @@ class Dfsu2DV(DfsuLayered):
         -------
         <matplotlib.axes>
         """
-        import matplotlib.pyplot as plt
-        from matplotlib.collections import PolyCollection
-
         if isinstance(values, DataArray):
             values = values.to_numpy()
+        if time_step is not None:
+            raise NotImplementedError(
+                "Deprecated functionality. Instead, read as DataArray da, then use da.plot()"
+            )
 
-        nc = self.node_coordinates
-        x_coordinate = np.hypot(nc[:, 0], nc[:, 1])
-        if time_step is None:
-            y_coordinate = nc[:, 2]
-        else:
-            raise NotImplementedError()  # TODO
-            # y_coordinate = self.read()[0].to_numpy()[time_step, :]
-
-        elements = self._Get_2DVertical_elements()
-
-        # plot in existing or new axes?
-        if "ax" in kwargs:
-            ax = kwargs["ax"]
-        else:
-            figsize = None
-            if "figsize" in kwargs:
-                figsize = kwargs["figsize"]
-            _, ax = plt.subplots(figsize=figsize)
-
-        yz = np.c_[x_coordinate, y_coordinate]
-        verts = yz[elements]
-
-        if "cmap" in kwargs:
-            cmap = kwargs["cmap"]
-        else:
-            cmap = "jet"
-        pc = PolyCollection(verts, cmap=cmap)
-
-        if cmin is None:
-            cmin = np.nanmin(values)
-        if cmax is None:
-            cmax = np.nanmax(values)
-        pc.set_clim(cmin, cmax)
-
-        plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
-        pc.set_array(values)
-
-        if "edge_color" in kwargs:
-            edge_color = kwargs["edge_color"]
-        else:
-            edge_color = None
-        pc.set_edgecolor(edge_color)
-
-        ax.add_collection(pc)
-        ax.autoscale()
-
-        if "title" in kwargs:
-            ax.set_title(kwargs["title"])
-
-        return ax
-
-    def _Get_2DVertical_elements(self):
-        if (self._type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
-            self._type == DfsuFileType.DfsuVerticalProfileSigma
-        ):
-            elements = [
-                list(self.geometry.element_table[i])
-                for i in range(len(list(self.geometry.element_table)))
-            ]
-            return np.asarray(elements)  # - 1
+        g = self.geometry
+        return _plot_vertical_profile(
+            node_coordinates=g.node_coordinates,
+            element_table=g.element_table,
+            values=values,
+            zn=None,
+            cmin=cmin,
+            cmax=cmax,
+            label=label,
+            **kwargs,
+        )
 
 
 class Dfsu3D(DfsuLayered):
