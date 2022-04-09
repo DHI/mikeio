@@ -170,7 +170,7 @@ def test_read_area_spectrum_xy(dfsu_area):
     x, y = (2, 53)
     ds2 = dfs.read(x=x, y=y)
     assert isinstance(ds2.geometry, GeometryFMPointSpectrum)
-    assert ds2.dims == ("time", "frequency", "direction")
+    assert ds2.dims == ("time", "direction", "frequency")
     assert ds2.shape == (3, 16, 25)
     # TODO: add more asserts
 
@@ -199,7 +199,7 @@ def test_read_spectrum_line_elements(dfsu_line):
 
 def test_spectrum_line_isel(dfsu_line):
     ds1 = dfsu_line.read()
-    assert ds1.dims == ("time", "node", "frequency", "direction")
+    assert ds1.dims == ("time", "node", "direction", "frequency")
 
     nodes = [3, 4, 5]
     ds2 = dfsu_line.read(nodes=nodes)
@@ -218,7 +218,7 @@ def test_spectrum_line_isel(dfsu_line):
 
 def test_spectrum_line_getitem(dfsu_line):
     da1 = dfsu_line.read()[0]
-    assert da1.dims == ("time", "node", "frequency", "direction")
+    assert da1.dims == ("time", "node", "direction", "frequency")
 
     nodes = [3, 4, 5]
     da2 = dfsu_line.read(nodes=nodes)[0]
@@ -233,7 +233,7 @@ def test_spectrum_line_getitem(dfsu_line):
 
 def test_spectrum_area_isel(dfsu_area):
     ds1 = dfsu_area.read()
-    assert ds1.dims == ("time", "element", "frequency", "direction")
+    assert ds1.dims == ("time", "element", "direction", "frequency")
 
     elements = [7, 8, 9, 10, 11, 12]
     ds2 = dfsu_area.read(elements=elements)
@@ -252,7 +252,7 @@ def test_spectrum_area_isel(dfsu_area):
 
 def test_spectrum_area_getitem(dfsu_area):
     da1 = dfsu_area.read()[0]
-    assert da1.dims == ("time", "element", "frequency", "direction")
+    assert da1.dims == ("time", "element", "direction", "frequency")
 
     elements = [7, 8, 9, 10, 11, 12]
     da2 = dfsu_area.read(elements=elements)[0]
