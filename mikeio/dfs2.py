@@ -133,8 +133,8 @@ class Dfs2(_Dfs123):
                         dy=self._dy,
                         nx=self._nx,
                         ny=self._ny,
-                        x0=self._longitude,
-                        y0=self._latitude,
+                        x0=self._x0 + self._longitude,
+                        y0=self._y0 + self._latitude,
                         projection=self._projstr,
                     )
             else:
