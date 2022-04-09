@@ -6,6 +6,7 @@ from mikecore.DfsuFile import DfsuFileType
 
 from mikeio.dfsu_spectral import DfsuSpectral
 from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum
+import mikeio.spectral_utils as spectral_utils
 
 
 @pytest.fixture
@@ -283,12 +284,12 @@ def test_read_spectrum_dir_line(dfsu_line_dir):
     assert ds2.shape == (4, 10, 16)
 
 
-# def test_calc_frequency_bin_sizes(dfsu_line):
-#     dfs = dfsu_line
-#     f = dfs.frequencies
-#     df = dfs._f_to_df(f)
-#     assert len(f) == len(df)
-#     assert df.max() < f.max()
+def test_calc_frequency_bin_sizes(dfsu_line):
+    dfs = dfsu_line
+    f = dfs.frequencies
+    df = spectral_utils._f_to_df(f)
+    assert len(f) == len(df)
+    assert df.max() < f.max()
 
 
 def test_calc_Hm0_from_spectrum_line(dfsu_line):
