@@ -704,3 +704,36 @@ def _plot_spectrum(
         ax.set_title(title)
 
     return ax
+
+
+def _calc_m0_from_spectrum(spec, f, dir=None, tail=True, m0_only=False):
+    if f is None:
+        raise ValueError(
+            "Moments cannot be calculated because dfsu has no frequency axis"
+        )
+    df = _f_to_df(f)
+
+    if dir is None:
+        ee = spec
+    else:
+        nd = len(dir)
+        dtheta = (dir[-1] - dir[0]) / (nd - 1)
+        ee = np.sum(spec, axis=-2) * dtheta
+
+    m0 = np.dot(ee, df)
+    if tail:
+        m0 = m0 + ee[..., -1] * f[-1] * 0.25
+    return m0
+
+
+def _f_to_df(f):
+    """Frequency bins for equidistant or logrithmic frequency axis"""
+    if np.isclose(np.diff(f).min(), np.diff(f).max()):
+        # equidistant frequency bins
+        return (f[1] - f[0]) * np.ones_like(f)
+    else:
+        # logarithmic frequency bins
+        freq_factor = f[1] / f[0]
+        fm1 = np.insert(f, 0, f[0] / freq_factor)
+        fp1 = np.append(f, f[-1] * freq_factor)
+        return 0.5 * (np.diff(fm1) + np.diff(fp1))
