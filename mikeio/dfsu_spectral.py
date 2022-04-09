@@ -11,6 +11,7 @@ from .dataset import Dataset, DataArray
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .spectral_utils import _plot_spectrum, _calc_m0_from_spectrum
 
+
 class DfsuSpectral(_Dfsu):
     @property
     def n_frequencies(self):

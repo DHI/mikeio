@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def _plot_spectrum(
     spectrum,
     frequencies,
