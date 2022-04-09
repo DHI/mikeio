@@ -374,6 +374,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self.plot = self._get_plotter_by_geometry()
+        self._set_spectral_attributes(geometry)
 
     @staticmethod
     def _parse_data(data):
@@ -574,6 +575,15 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return _DataArrayPlotterPointSpectrum(self)
         else:
             return _DataArrayPlotter(self)
+
+    def _set_spectral_attributes(self, geometry):
+        if not geometry.is_spectral:
+            return
+        self.frequencies = geometry.frequencies
+        self.n_frequencies = geometry.n_frequencies
+        self.directions = geometry.directions
+        self.n_directions = geometry.n_directions
+
 
     # ============= Basic properties/methods ===========
 
