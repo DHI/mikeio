@@ -62,10 +62,10 @@ class DfsuSpectral(_Dfsu):
                 read_shape = (n_steps, n_elems, *shape)
             shape = (*shape, self.n_elements)
 
-        if n_freq > 1:
-            dims.append("frequency")
         if n_dir > 1:
             dims.append("direction")
+        if n_freq > 1:
+            dims.append("frequency")
 
         return read_shape, shape, tuple(dims)
 
