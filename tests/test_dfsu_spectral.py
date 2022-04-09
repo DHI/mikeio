@@ -5,7 +5,7 @@ from mikeio import Dfsu, eum
 from mikecore.DfsuFile import DfsuFileType
 
 from mikeio.dfsu_spectral import DfsuSpectral
-from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum
+from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
 import mikeio.spectral_utils as spectral_utils
 
 
@@ -264,6 +264,43 @@ def test_spectrum_area_getitem(dfsu_area):
     da2 = dfsu_area.read(elements=element)[0]
     da3 = da1[:, element]
     assert da3.shape == da2.shape
+
+
+def test_spectrum_area_sel_xy(dfsu_area):
+    ds1 = dfsu_area.read()
+    assert ds1.dims == ("time", "element", "direction", "frequency")
+
+    element = 7
+    xy = ds1.geometry.element_coordinates[element, :2]
+    x, y = xy
+
+    ds2 = dfsu_area.read(elements=element)  # reference
+    assert ds2.geometry.x == x
+    assert ds2.geometry.y == y
+    assert isinstance(ds3.geometry, GeometryFMPointSpectrum)
+
+    ds3 = ds1.sel(x=x, y=y)
+    assert ds3.shape == ds2.shape
+    assert ds3.geometry.x == x
+    assert ds3.geometry.y == y
+    assert np.all(ds3.to_numpy().ravel() == ds2.to_numpy().ravel())
+    assert isinstance(ds3.geometry, GeometryFMPointSpectrum)
+
+
+def test_spectrum_area_sel_area(dfsu_area):
+    ds1 = dfsu_area.read()
+    assert ds1.dims == ("time", "element", "direction", "frequency")
+
+    bbox = [2.45, 52.2, 3, 52.4]
+    ds2 = dfsu_area.read(area=bbox)  # reference
+    assert isinstance(ds2.geometry, GeometryFMAreaSpectrum)
+    assert ds2.geometry.n_elements == 6
+
+    ds3 = ds1.sel(area=bbox)
+    assert ds3.shape == ds2.shape
+    assert ds3.geometry.n_elements == 6
+    assert np.all(ds3.to_numpy().ravel() == ds2.to_numpy().ravel())
+    assert isinstance(ds3.geometry, GeometryFMAreaSpectrum)
 
 
 def test_read_spectrum_dir_line(dfsu_line_dir):
