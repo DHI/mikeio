@@ -277,7 +277,7 @@ def test_spectrum_area_sel_xy(dfsu_area):
     ds2 = dfsu_area.read(elements=element)  # reference
     assert ds2.geometry.x == x
     assert ds2.geometry.y == y
-    assert isinstance(ds3.geometry, GeometryFMPointSpectrum)
+    assert isinstance(ds2.geometry, GeometryFMPointSpectrum)
 
     ds3 = ds1.sel(x=x, y=y)
     assert ds3.shape == ds2.shape
