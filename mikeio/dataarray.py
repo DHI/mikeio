@@ -17,8 +17,9 @@ from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import (
     GeometryFM,
     GeometryFMLayered,
-    GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
+    GeometryFMPointSpectrum,
+    GeometryFMLineSpectrum,
     GeometryFMAreaSpectrum,
 )
 from mikecore.DfsuFile import DfsuFileType
@@ -626,7 +627,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return _DataArrayPlotter(self)
 
     def _set_spectral_attributes(self, geometry):
-        if isinstance(geometry, (GeometryFMPointSpectrum, GeometryFMAreaSpectrum)):
+        if isinstance(
+            geometry,
+            (GeometryFMPointSpectrum, GeometryFMLineSpectrum, GeometryFMAreaSpectrum),
+        ):
             self.frequencies = geometry.frequencies
             self.n_frequencies = geometry.n_frequencies
             self.directions = geometry.directions

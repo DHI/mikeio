@@ -24,6 +24,7 @@ from .spatial.FM_geometry import (
     GeometryFMLayered,
     GeometryFMPointSpectrum,
     GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
 )
 from .spatial.FM_utils import _plot_map
 from .spatial.grid_geometry import Grid2D
@@ -232,7 +233,19 @@ class _UnstructuredFile:
                     n_sigma=dfs.NumberOfSigmaLayers,
                     validate=False,
                 )
-            # elif self._type == DfsuFileType.DfsuSpectral1D:
+            elif self._type == DfsuFileType.DfsuSpectral1D:
+                self._geometry = GeometryFMLineSpectrum(
+                    node_coordinates=nc,
+                    element_table=el_table,
+                    codes=codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=self._type,
+                    element_ids=el_ids,
+                    node_ids=node_ids,
+                    validate=False,
+                    frequencies=self.frequencies,
+                    directions=self.directions,
+                )
             elif self._type == DfsuFileType.DfsuSpectral2D:
                 self._geometry = GeometryFMAreaSpectrum(
                     node_coordinates=nc,
