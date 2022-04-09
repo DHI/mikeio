@@ -179,13 +179,18 @@ def test_read_area_spectrum_xy(dfsu_area):
 def test_read_area_spectrum_area(dfsu_area):
     dfs = dfsu_area
     ds1 = dfs.read()
+    assert ds1.n_frequencies == 25
+    assert ds1.n_directions == 16
 
     bbox = (2.5, 51.8, 3.0, 52.2)
     ds2 = dfs.read(area=bbox)
     assert ds2.dims == ds1.dims
     assert ds2.shape == (3, 4, 16, 25)
     assert ds1.geometry._type == ds2.geometry._type
-    # TODO: add more asserts
+    assert ds2.n_frequencies == 25
+    assert ds2.n_directions == 16
+    assert ds2[0].n_frequencies == 25
+    assert ds2[0].n_directions == 16
 
 
 def test_read_spectrum_line_elements(dfsu_line):
@@ -223,8 +228,8 @@ def test_spectrum_line_getitem(dfsu_line):
 
     nodes = [3, 4, 5]
     da2 = dfsu_line.read(nodes=nodes)[0]
-    # da3 = da1[:, nodes]   # TODO: requires refactor of getitem
-    # assert da3.shape == da2.shape
+    da3 = da1[:, nodes]
+    assert da3.shape == da2.shape
 
     node = 3
     da2 = dfsu_line.read(nodes=node)[0]
