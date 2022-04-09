@@ -692,10 +692,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return _DataArrayPlotter(self)
 
     def _set_spectral_attributes(self, geometry):
-        if isinstance(
-            geometry,
-            (GeometryFMPointSpectrum, GeometryFMLineSpectrum, GeometryFMAreaSpectrum),
-        ):
+        if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
             self.frequencies = geometry.frequencies
             self.n_frequencies = geometry.n_frequencies
             self.directions = geometry.directions
