@@ -19,9 +19,10 @@ from .spatial.FM_geometry import (
     GeometryFMLayered,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
 )
 from mikecore.DfsuFile import DfsuFileType
-from .spatial.FM_utils import _plot_map
+from .spatial.FM_utils import _plot_map, _plot_vertical_profile
 from .data_utils import DataUtilsMixin
 
 
@@ -318,6 +319,37 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         return ax
 
 
+class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._plot_transect(ax=ax, **kwargs)
+
+    def _plot_transect(self, **kwargs):
+        if "label" not in kwargs:
+            kwargs["label"] = self._label_txt()
+        if "title" not in kwargs:
+            kwargs["title"] = self.da.time[0]
+
+        values, zn = self._get_first_step_values()
+        g = self.da.geometry
+        _plot_vertical_profile(
+            node_coordinates=g.node_coordinates,
+            element_table=g.element_table,
+            values=values,
+            zn=zn,
+            **kwargs,
+        )
+
+    def _get_first_step_values(self):
+        if self.da.n_timesteps > 1:
+            return self.da.values[0], self.da._zn[0]
+        else:
+            return np.squeeze(self.da.values), np.squeeze(self.da._zn)
+
+
 class DataArray(DataUtilsMixin, TimeSeries):
 
     deletevalue = 1.0e-35
@@ -529,7 +561,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return len(problems) == 0
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFMVerticalColumn):
+        if isinstance(self.geometry, GeometryFMVerticalProfile):
+            return _DataArrayPlotterFMVerticalProfile(self)
+        elif isinstance(self.geometry, GeometryFMVerticalColumn):
             return _DataArrayPlotterFMVerticalColumn(self)
         elif isinstance(self.geometry, GeometryFM):
             return _DataArrayPlotterFM(self)
