@@ -222,8 +222,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         for key, value in self._data_vars.items():
             self._set_name_attr(key, value)
 
-        if len(self.items) > 1:
+        if len(self) > 1:
             self.plot = _DatasetPlotter(self)
+
+        if len(self) > 0:
+            self._set_spectral_attributes(self.geometry)
 
         # since Dataset is MutableMapping it has values and keys by default
         # but we delete those to avoid confusion
@@ -327,6 +330,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """Is the DataArray already present in the Dataset?"""
         for da in self:
             self._id_of_DataArrays_equal(da, new_da)
+
+    def _set_spectral_attributes(self, geometry):
+        if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
+            self.frequencies = geometry.frequencies
+            self.n_frequencies = geometry.n_frequencies
+            self.directions = geometry.directions
+            self.n_directions = geometry.n_directions
 
     # ============ end of init =============
 
