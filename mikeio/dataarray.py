@@ -21,7 +21,7 @@ from .spatial.FM_geometry import (
     GeometryFMVerticalColumn,
 )
 from mikecore.DfsuFile import DfsuFileType
-from .spatial.FM_utils import _plot_map
+from .spatial.FM_utils import _plot_map, _plot_spectrum
 from .data_utils import DataUtilsMixin
 
 
@@ -318,6 +318,37 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         return ax
 
 
+class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=(7, 7), **kwargs):
+        # ax = self._get_ax(ax, figsize)
+        return self._plot_full_spectrum(figsize=figsize, **kwargs)
+
+    def _plot_full_spectrum(self, **kwargs):
+        if self.da.n_timesteps > 1:
+            # select first step as default plotting behaviour
+            values = self.da.values[0]
+        else:
+            values = np.squeeze(self.da.values)
+
+        x = self.da.geometry._x
+        y = self.da.geometry._y
+        if "title" not in kwargs and x is not None and y is not None:
+            if np.abs(x) < 400 and np.abs(y) < 90:
+                kwargs["title"] = f"(x, y) = ({x:.5f}, {y:.5f})"
+            else:
+                kwargs["title"] = f"(x, y) = ({x:.1f}, {y:.1f})"
+
+        return _plot_spectrum(
+            values,
+            frequencies=self.da.geometry.frequencies,
+            directions=self.da.geometry.directions,
+            **kwargs,
+        )
+
+
 class DataArray(DataUtilsMixin, TimeSeries):
 
     deletevalue = 1.0e-35
@@ -379,10 +410,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
         if isinstance(geometry, GeometryFMPointSpectrum):
-            if ndim_no_time > 0:
+            if ndim_no_time == 1:
                 dims.append("frequency")
-            if ndim_no_time > 1:
+            if ndim_no_time == 2:
                 dims.append("direction")
+                dims.append("frequency")
         elif isinstance(geometry, GeometryFM):
             if geometry._type == DfsuFileType.DfsuSpectral1D:
                 if ndim_no_time > 0:
@@ -391,10 +423,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 if ndim_no_time > 0:
                     dims.append("element")
             if geometry.is_spectral:
-                if ndim_no_time > 1:
+                if ndim_no_time == 2:
                     dims.append("frequency")
-                if ndim_no_time > 2:
+                elif ndim_no_time == 3:
                     dims.append("direction")
+                    dims.append("frequency")
         elif isinstance(geometry, Grid1D):
             dims.append("x")
         elif isinstance(geometry, Grid2D):
@@ -537,6 +570,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return _DataArrayPlotterGrid1D(self)
         elif isinstance(self.geometry, Grid2D):
             return _DataArrayPlotterGrid2D(self)
+        elif isinstance(self.geometry, GeometryFMPointSpectrum):
+            return _DataArrayPlotterPointSpectrum(self)
         else:
             return _DataArrayPlotter(self)
 
