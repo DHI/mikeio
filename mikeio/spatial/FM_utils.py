@@ -535,11 +535,13 @@ def _plot_vertical_profile(
 
     Parameters
     ----------
+    node_coordinates: np.array
+    element_table: np.array[np.array]
     values: np.array
         value for each element to plot
-    timestep: int, optional
-        the timestep that fits with the data to get correct vertical
-        positions, default: use static vertical positions
+    zn: np.array, optional
+        dynamic vertical node positions, 
+        default: use static vertical positions
     cmin: real, optional
         lower bound of values to be shown on plot, default:None
     cmax: real, optional
@@ -563,8 +565,8 @@ def _plot_vertical_profile(
     from matplotlib.collections import PolyCollection
 
     nc = node_coordinates
-    x_coordinate = np.hypot(nc[:, 0], nc[:, 1])
-    z_coordinate = nc[:, 2]
+    x_coordinate = np.hypot(nc[:, 0] - nc[0, 0], nc[:, 1] - nc[0, 1])
+    z_coordinate = nc[:, 2] if zn is None else zn
 
     elements = _Get_2DVertical_elements(element_table)
 
