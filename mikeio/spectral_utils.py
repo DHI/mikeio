@@ -1,6 +1,7 @@
 import numpy as np
 
-def _plot_spectrum(
+
+def plot_2dspectrum(
     spectrum,
     frequencies,
     directions,
@@ -71,7 +72,7 @@ def _plot_spectrum(
     if (frequencies is None or len(frequencies) <= 1) and (
         directions is None or len(directions) <= 1
     ):
-        raise ValueError("plot_spectrum() is only supported for full spectral data")
+        raise ValueError("plot_2dspectrum() is only supported for full spectral data")
 
     dirs = np.radians(directions)
     freq = frequencies

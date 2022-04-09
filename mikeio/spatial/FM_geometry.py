@@ -18,7 +18,8 @@ from .FM_utils import (
     _plot_map,
     _point_in_polygon,
 )
-import mikeio.data_utils as du
+
+# import mikeio.data_utils as du
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -42,13 +43,14 @@ class GeometryFMPointSpectrum(_Geometry):
         return self._type.name
 
     def __repr__(self):
-        txt = f"Point Spectrum Geometry (frequency:{self.n_frequencies}, direction:{self.n_directions}"
+        txt = f"Point Spectrum Geometry(frequency:{self.n_frequencies}, direction:{self.n_directions}"
         if self.x is not None:
             txt = txt + f", x:{self.x:.5f}, y:{self.y:.5f}"
         return txt + ")"
 
     @property
     def ndim(self):
+        # TODO: 0, 1 or 2 ?
         return 0
 
     @property

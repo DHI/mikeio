@@ -9,7 +9,8 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from .dfsu import _Dfsu
 from .dataset import Dataset, DataArray
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .spectral_utils import _plot_spectrum, _calc_m0_from_spectrum
+from .spectral_utils import plot_2dspectrum, _calc_m0_from_spectrum
+
 
 class DfsuSpectral(_Dfsu):
     @property
@@ -301,7 +302,7 @@ class DfsuSpectral(_Dfsu):
         if isinstance(spectrum, DataArray):
             spectrum = spectrum.to_numpy()
 
-        return _plot_spectrum(
+        return plot_2dspectrum(
             spectrum,
             frequencies=self.frequencies,
             directions=self.directions,
