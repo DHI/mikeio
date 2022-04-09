@@ -540,7 +540,7 @@ def _plot_vertical_profile(
     values: np.array
         value for each element to plot
     zn: np.array, optional
-        dynamic vertical node positions, 
+        dynamic vertical node positions,
         default: use static vertical positions
     cmin: real, optional
         lower bound of values to be shown on plot, default:None
