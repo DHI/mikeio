@@ -23,7 +23,8 @@ from .spatial.FM_geometry import (
     GeometryFMAreaSpectrum,
 )
 from mikecore.DfsuFile import DfsuFileType
-from .spatial.FM_utils import _plot_map, _plot_spectrum, _calc_m0_from_spectrum
+from .spatial.FM_utils import _plot_map
+from .spectral_utils import _plot_spectrum, _calc_m0_from_spectrum
 from .data_utils import DataUtilsMixin
 
 
