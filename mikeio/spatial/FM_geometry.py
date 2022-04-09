@@ -1707,6 +1707,10 @@ class GeometryFMLayered(GeometryFM):
     # TODO: add methods for extracting layers etc
 
 
+class GeometryFMVerticalProfile(GeometryFMLayered):
+    pass
+
+
 class GeometryFMVerticalColumn(GeometryFMLayered):
     def calc_ze(self, zn=None):
         if zn is None:

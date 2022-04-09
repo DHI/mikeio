@@ -22,7 +22,12 @@ from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
 from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
+from .spatial.FM_geometry import (
+    GeometryFM,
+    GeometryFMLayered,
+    GeometryFMVerticalProfile,
+    GeometryFMPointSpectrum,
+)
 from .spatial.FM_utils import _plot_map
 from .spatial.grid_geometry import Grid2D
 
@@ -218,7 +223,14 @@ class _UnstructuredFile:
             el_table, el_ids = self._get_elements_from_source(dfs)
 
             if self.is_layered:
-                self._geometry = GeometryFMLayered(
+                geom_cls = GeometryFMLayered
+                if self._type in (
+                    DfsuFileType.DfsuVerticalProfileSigma,
+                    DfsuFileType.DfsuVerticalProfileSigmaZ,
+                ):
+                    geom_cls = GeometryFMVerticalProfile
+
+                self._geometry = geom_cls(
                     node_coordinates=nc,
                     element_table=el_table,
                     codes=codes,
