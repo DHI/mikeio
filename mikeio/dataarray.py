@@ -19,9 +19,10 @@ from .spatial.FM_geometry import (
     GeometryFMLayered,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
+    GeometryFMAreaSpectrum,
 )
 from mikecore.DfsuFile import DfsuFileType
-from .spatial.FM_utils import _plot_map, _plot_spectrum
+from .spatial.FM_utils import _plot_map, _plot_spectrum, _calc_m0_from_spectrum
 from .data_utils import DataUtilsMixin
 
 
@@ -327,14 +328,10 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         return self._plot_full_spectrum(figsize=figsize, **kwargs)
 
     def _plot_full_spectrum(self, **kwargs):
-        if self.da.n_timesteps > 1:
-            # select first step as default plotting behaviour
-            values = self.da.values[0]
-        else:
-            values = np.squeeze(self.da.values)
+        # select first step as default plotting behaviour
+        values = self._get_first_step_values()
 
-        x = self.da.geometry._x
-        y = self.da.geometry._y
+        x, y = self.da.geometry.x, self.da.geometry.y
         if "title" not in kwargs and x is not None and y is not None:
             if np.abs(x) < 400 and np.abs(y) < 90:
                 kwargs["title"] = f"(x, y) = ({x:.5f}, {y:.5f})"
@@ -346,6 +343,56 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
             frequencies=self.da.geometry.frequencies,
             directions=self.da.geometry.directions,
             **kwargs,
+        )
+
+    def _get_first_step_values(self):
+        if self.da.n_timesteps > 1:
+            return self.da.values[0]
+        else:
+            return np.squeeze(self.da.values)
+
+
+class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
+    def __init__(self, da: "DataArray") -> None:
+        if da.n_timesteps > 1:
+            Hm0 = da[0].to_Hm0()
+        else:
+            Hm0 = da.to_Hm0()
+        super().__init__(Hm0)
+
+
+class _DataArraySpectrumToHm0:
+    def __init__(self, da: "DataArray") -> None:
+        self.da = da
+
+    def __call__(self, tail=True):
+        m0 = _calc_m0_from_spectrum(
+            self.da.to_numpy(),
+            self.da.frequencies,
+            self.da.directions,
+            tail,
+            m0_only=True,
+        )
+        Hm0 = 4 * np.sqrt(m0)
+        dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
+        item = ItemInfo(EUMType.Significant_wave_height)
+        g = self.da.geometry
+        if isinstance(g, GeometryFMPointSpectrum):
+            geometry = GeometryPoint2D(x=g.x, y=g.y)
+        elif isinstance(g, GeometryFMAreaSpectrum):
+            geometry = GeometryFM(
+                node_coordinates=g.node_coordinates,
+                codes=g.codes,
+                node_ids=g.node_ids,
+                projection=g.projection_string,
+                element_table=g.element_table,
+                element_ids=g.element_ids,
+            )
+        else:
+            geometry = GeometryUndefined()
+
+        return DataArray(
+            data=Hm0, time=self.da.time, item=item, dims=dims, geometry=geometry
         )
 
 
@@ -373,8 +420,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self.item = self._parse_item(item)
         self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
-        self.plot = self._get_plotter_by_geometry()
         self._set_spectral_attributes(geometry)
+        self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
     def _parse_data(data):
@@ -565,25 +612,26 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def _get_plotter_by_geometry(self):
         if isinstance(self.geometry, GeometryFMVerticalColumn):
             return _DataArrayPlotterFMVerticalColumn(self)
+        elif isinstance(self.geometry, GeometryFMPointSpectrum):
+            return _DataArrayPlotterPointSpectrum(self)
+        elif isinstance(self.geometry, GeometryFMAreaSpectrum):
+            return _DataArrayPlotterAreaSpectrum(self)
         elif isinstance(self.geometry, GeometryFM):
             return _DataArrayPlotterFM(self)
         elif isinstance(self.geometry, Grid1D):
             return _DataArrayPlotterGrid1D(self)
         elif isinstance(self.geometry, Grid2D):
             return _DataArrayPlotterGrid2D(self)
-        elif isinstance(self.geometry, GeometryFMPointSpectrum):
-            return _DataArrayPlotterPointSpectrum(self)
         else:
             return _DataArrayPlotter(self)
 
     def _set_spectral_attributes(self, geometry):
-        if not geometry.is_spectral:
-            return
-        self.frequencies = geometry.frequencies
-        self.n_frequencies = geometry.n_frequencies
-        self.directions = geometry.directions
-        self.n_directions = geometry.n_directions
-
+        if isinstance(geometry, (GeometryFMPointSpectrum, GeometryFMAreaSpectrum)):
+            self.frequencies = geometry.frequencies
+            self.n_frequencies = geometry.n_frequencies
+            self.directions = geometry.directions
+            self.n_directions = geometry.n_directions
+            self.to_Hm0 = _DataArraySpectrumToHm0(self)
 
     # ============= Basic properties/methods ===========
 
