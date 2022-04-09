@@ -19,8 +19,6 @@ from .FM_utils import (
     _point_in_polygon,
 )
 
-# import mikeio.data_utils as du
-
 
 class GeometryFMPointSpectrum(_Geometry):
     def __init__(self, frequencies=None, directions=None, x=None, y=None) -> None:
