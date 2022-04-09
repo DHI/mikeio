@@ -22,7 +22,7 @@ import mikeio.data_utils as du
 
 
 class GeometryFMPointSpectrum(_Geometry):
-    def __init__(self, frequencies=None, directions=None) -> None:
+    def __init__(self, frequencies=None, directions=None, x=None, y=None) -> None:
         super().__init__()
         self.n_nodes = 0
         self.n_elements = 0
@@ -33,6 +33,8 @@ class GeometryFMPointSpectrum(_Geometry):
 
         self._frequencies = frequencies
         self._directions = directions
+        self._x = x
+        self._y = y
 
     @property
     def type_name(self):
@@ -40,7 +42,10 @@ class GeometryFMPointSpectrum(_Geometry):
         return self._type.name
 
     def __repr__(self):
-        return "Flexible Mesh Point Geometry (empty)"
+        txt = f"Point Spectrum Geometry (frequency:{self.n_frequencies}, direction:{self.n_directions}"
+        if self._x is not None:
+            txt = txt + f", x:{self._x:.5f}, y:{self._y:.5f}"
+        return txt + ")"
 
     @property
     def ndim(self):
@@ -1833,7 +1838,12 @@ class GeometryFMAreaSpectrum(GeometryFM):
 
         if (np.isscalar(idx) or len(idx)) == 1 and simplify:
             coords = self.element_coordinates[idx].flatten()
-            return GeometryFMPointSpectrum(coords[0], coords[1])
+            return GeometryFMPointSpectrum(
+                frequencies=self._frequencies,
+                directions=self._directions,
+                x=coords[0],
+                y=coords[1],
+            )
         else:
             if self._type == DfsuFileType.DfsuSpectral1D:
                 return self._nodes_to_geometry(nodes=idx)
@@ -1858,7 +1868,12 @@ class GeometryFMAreaSpectrum(GeometryFM):
         elements = np.atleast_1d(elements)
         if len(elements) == 1:
             coords = self.element_coordinates[elements[0], :]
-            return GeometryFMPointSpectrum(coords[0], coords[1])
+            return GeometryFMPointSpectrum(
+                frequencies=self._frequencies,
+                directions=self._directions,
+                x=coords[0],
+                y=coords[1],
+            )
 
         elements = np.sort(elements)  # make sure elements are sorted!
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
