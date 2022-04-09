@@ -36,7 +36,10 @@ class _DataArrayPlotter:
         fig, ax = self._get_fig_ax(ax, figsize)
 
         if self.da.ndim == 1:
-            return self._timeseries(self.da.values, fig, ax, **kwargs)
+            if self.da.dims[0][0] == "t":
+                return self._timeseries(self.da.values, fig, ax, **kwargs)
+            else:
+                return self._line_not_timeseries(self.da.values, ax, **kwargs)
 
         if self.da.ndim == 2:
             return ax.imshow(self.da.values, **kwargs)
@@ -73,7 +76,10 @@ class _DataArrayPlotter:
 
     def line(self, ax=None, figsize=None, **kwargs):
         fig, ax = self._get_fig_ax(ax, figsize)
-        return self._timeseries(self.da.values, fig, ax, **kwargs)
+        if self.da.dims[0][0] == "t":
+            return self._timeseries(self.da.values, fig, ax, **kwargs)
+        else:
+            return self._line_not_timeseries(self.da.values, ax, **kwargs)
 
     def _timeseries(self, values, fig, ax, **kwargs):
         if "title" in kwargs:
@@ -82,6 +88,14 @@ class _DataArrayPlotter:
         ax.plot(self.da.time, values, **kwargs)
         ax.set_xlabel("time")
         fig.autofmt_xdate()
+        ax.set_ylabel(self._label_txt())
+        return ax
+
+    def _line_not_timeseries(self, values, ax, **kwargs):
+        title = kwargs.pop("title") if "title" in kwargs else f"{self.da.time[0]}"
+        ax.set_title(title)
+        ax.plot(values, **kwargs)
+        ax.set_xlabel(self.da.dims[0])
         ax.set_ylabel(self._label_txt())
         return ax
 
@@ -214,6 +228,11 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         ax = self._get_ax(ax, figsize)
         return self._plot_FM_map(ax, **kwargs)
 
+    def patch(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = "patch"
+        return self._plot_FM_map(ax, **kwargs)
+
     def contour(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
@@ -331,6 +350,18 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         else:
             raise ValueError("Spectrum could not be plotted")
 
+    def patch(self, **kwargs):
+        kwargs["plot_type"] = "patch"
+        return self._plot_2dspectrum(**kwargs)
+
+    def contour(self, **kwargs):
+        kwargs["plot_type"] = "contour"
+        return self._plot_2dspectrum(**kwargs)
+
+    def contourf(self, **kwargs):
+        kwargs["plot_type"] = "contourf"
+        return self._plot_2dspectrum(**kwargs)
+
     def _plot_freqspectrum(self, ax=None, figsize=None, **kwargs):
         ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)
         ax.set_xlabel("frequency [Hz]")
@@ -362,7 +393,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def _plot_2dspectrum(self, **kwargs):
         values = self._get_first_step_values()
 
-        if kwargs["figsize"] is None:
+        if "figsize" not in kwargs or kwargs["figsize"] is None:
             kwargs["figsize"] = (7, 7)
         if "label" not in kwargs:
             kwargs["label"] = self._label_txt()
