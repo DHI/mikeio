@@ -24,7 +24,7 @@ from .spatial.FM_geometry import (
 )
 from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
-from .spectral_utils import _plot_spectrum, _calc_m0_from_spectrum
+from .spectral_utils import plot_2dspectrum, _calc_m0_from_spectrum
 from .data_utils import DataUtilsMixin
 
 
@@ -87,6 +87,12 @@ class _DataArrayPlotter:
 
     def _label_txt(self):
         return f"{self.da.name} [{self.da.unit.name}]"
+
+    def _get_first_step_values(self):
+        if self.da.n_timesteps > 1:
+            return self.da.values[0]
+        else:
+            return np.squeeze(self.da.values)
 
 
 class _DataArrayPlotterGrid1D(_DataArrayPlotter):
@@ -172,13 +178,6 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         self._set_aspect_and_labels(ax, self.da.geometry.is_geo, yn)
         return ax
 
-    def _get_first_step_values(self):
-        if self.da.n_timesteps > 1:
-            # select first step as default plotting behaviour
-            return self.da.values[0]
-        else:
-            return np.squeeze(self.da.values)
-
     def _get_x_y(self):
         x = self.da.geometry.x
         y = self.da.geometry.y
@@ -232,20 +231,16 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax, **kwargs):
-        if self.da.n_timesteps > 1:
-            # select first step as default plotting behaviour
-            values = self.da.values[0]
-        else:
-            values = np.squeeze(self.da.values)
+        values = self._get_first_step_values()
 
         title = f"{self.da.time[0]}"
-        if self.da.geometry.is_2d:
-            geometry = self.da.geometry
-        else:
+        if self.da.geometry.is_layered:
             # select surface as default plotting for 3d files
             values = values[self.da.geometry.top_elements]
             geometry = self.da.geometry.geometry2d
             title = "Surface, " + title
+        else:
+            geometry = self.da.geometry
 
         if "label" not in kwargs:
             kwargs["label"] = self._label_txt()
@@ -325,33 +320,71 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
 
-    def __call__(self, ax=None, figsize=(7, 7), **kwargs):
+    def __call__(self, ax=None, figsize=None, **kwargs):
         # ax = self._get_ax(ax, figsize)
-        return self._plot_full_spectrum(figsize=figsize, **kwargs)
+        if self.da.n_frequencies > 0 and self.da.n_directions > 0:
+            return self._plot_2dspectrum(figsize=figsize, **kwargs)
+        elif self.da.n_frequencies == 0:
+            return self._plot_dirspectrum(ax=ax, figsize=figsize, **kwargs)
+        elif self.da.n_directions == 0:
+            return self._plot_freqspectrum(ax=ax, figsize=figsize, **kwargs)
+        else:
+            raise ValueError("Spectrum could not be plotted")
 
-    def _plot_full_spectrum(self, **kwargs):
-        # select first step as default plotting behaviour
+    def _plot_freqspectrum(self, ax=None, figsize=None, **kwargs):
+        ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)
+        ax.set_xlabel("frequency [Hz]")
+        ax.set_ylabel("directionally integrated energy [m*m*s]")
+        return ax
+
+    def _plot_dirspectrum(self, ax=None, figsize=None, **kwargs):
+        ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)
+        ax.set_xlabel("directions [degrees]")
+        ax.set_ylabel("directional spectral energy [m*m*s]")
+        ax.set_xticks(self.da.directions[::2])
+        return ax
+
+    def _plot_1dspectrum(self, x_values, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        y_values = self._get_first_step_values()
+
+        if "linestyle" not in kwargs:
+            kwargs["linestyle"] = "-"
+        if "marker" not in kwargs:
+            kwargs["marker"] = "."
+
+        title = kwargs.pop("title") if "title" in kwargs else self._get_title()
+        ax.set_title(title)
+
+        ax.plot(x_values, y_values, **kwargs)
+        return ax
+
+    def _plot_2dspectrum(self, **kwargs):
         values = self._get_first_step_values()
 
-        x, y = self.da.geometry.x, self.da.geometry.y
-        if "title" not in kwargs and x is not None and y is not None:
-            if np.abs(x) < 400 and np.abs(y) < 90:
-                kwargs["title"] = f"(x, y) = ({x:.5f}, {y:.5f})"
-            else:
-                kwargs["title"] = f"(x, y) = ({x:.1f}, {y:.1f})"
+        if kwargs["figsize"] is None:
+            kwargs["figsize"] = (7, 7)
+        if "label" not in kwargs:
+            kwargs["label"] = self._label_txt()
+        if "title" not in kwargs:
+            kwargs["title"] = self._get_title()
 
-        return _plot_spectrum(
+        return plot_2dspectrum(
             values,
             frequencies=self.da.geometry.frequencies,
             directions=self.da.geometry.directions,
             **kwargs,
         )
 
-    def _get_first_step_values(self):
-        if self.da.n_timesteps > 1:
-            return self.da.values[0]
-        else:
-            return np.squeeze(self.da.values)
+    def _get_title(self):
+        txt = f"{self.da.time[0]}"
+        x, y = self.da.geometry.x, self.da.geometry.y
+        if x is not None and y is not None:
+            if np.abs(x) < 400 and np.abs(y) < 90:
+                txt = txt + f", (x, y) = ({x:.5f}, {y:.5f})"
+            else:
+                txt = txt + f", (x, y) = ({x:.1f}, {y:.1f})"
+        return txt
 
 
 class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
@@ -368,6 +401,7 @@ class _DataArraySpectrumToHm0:
         self.da = da
 
     def __call__(self, tail=True):
+        # TODO: if action_density
         m0 = _calc_m0_from_spectrum(
             self.da.to_numpy(),
             self.da.frequencies,
