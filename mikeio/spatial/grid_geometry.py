@@ -504,12 +504,7 @@ class Grid2D(_Geometry):
     def _bbox_to_index(self, bbox):
         assert len(bbox) == 4, "area most be a bounding box of coordinates"
         x0, y0, x1, y1 = bbox
-        if (
-            x0 > self.x1
-            or y0 > self.y1
-            or x1 < self.x0
-            or y1 < self.y0
-        ):
+        if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
             warnings.warn("No elements in bbox")
             return None, None
 
@@ -555,6 +550,15 @@ class Grid2D(_Geometry):
         else:
             nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])
             return Grid1D(x=self.y, projection=self.projection, node_coordinates=nc)
+
+    def _index_to_geometry(self, ii, jj):
+        di = np.diff(ii)
+        dj = np.diff(jj)
+        if (np.any(di < 1) or not np.allclose(di, di[0])) or (np.any(dj < 1) or not np.allclose(dj, dj[0])):
+            warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
+            return GeometryUndefined()
+        else:
+            return Grid2D(x=self.x[ii], y=self.x[jj], projection=self.projection)
 
     def _to_element_table(self, index_base=0):
 
