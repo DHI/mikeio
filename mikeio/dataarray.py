@@ -795,13 +795,15 @@ class DataArray(DataUtilsMixin, TimeSeries):
     ) -> "DataArray":
 
         # TODO: delegate select in space to geometry
+        t_ax = 1 if self.dims[0][0] == "t" else 0
 
         # select in space
         if (x is not None) or (y is not None) or (z is not None):
             if isinstance(self.geometry, Grid2D):  # TODO find out better way
                 i, j = self.geometry.find_index((x, y))
-                tmp = self.isel(idx=j[0], axis=1)
-                da = tmp.isel(idx=i[0], axis=1)
+                tmp = self.isel(idx=j[0], axis=(0 + t_ax))
+                sp_axis = 0 if len(j) == 1 else 1
+                da = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
             else:
                 idx = self.geometry.find_index(x=x, y=y, z=z)
                 da = self.isel(idx, axis="space")
@@ -817,10 +819,15 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
         if "area" in kwargs:
+            area = kwargs.pop("area")
             if isinstance(da.geometry, GeometryFM):
-                area = kwargs.pop("area")
                 idx = da.geometry._elements_in_area(area)
                 da = da.isel(idx, axis="space")
+            elif isinstance(da.geometry, Grid2D):
+                ii, jj = self.geometry.find_index(area=area)
+                tmp = self.isel(idx=jj, axis=(0 + t_ax))
+                sp_axis = 0 if len(jj) == 1 else 1
+                da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
             else:
                 raise ValueError("'area' can only be selected from Dfsu data")
 
