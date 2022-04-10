@@ -554,7 +554,9 @@ class Grid2D(_Geometry):
     def _index_to_geometry(self, ii, jj):
         di = np.diff(ii)
         dj = np.diff(jj)
-        if (np.any(di < 1) or not np.allclose(di, di[0])) or (np.any(dj < 1) or not np.allclose(dj, dj[0])):
+        if (np.any(di < 1) or not np.allclose(di, di[0])) or (
+            np.any(dj < 1) or not np.allclose(dj, dj[0])
+        ):
             warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
             return GeometryUndefined()
         else:
