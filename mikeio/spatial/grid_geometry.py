@@ -512,9 +512,13 @@ class Grid2D(_Geometry):
     def isel(self, idx, axis):
 
         if not np.isscalar(idx):
-            x = self.x if axis == 1 else self.x[idx]
-            y = self.y if axis == 0 else self.y[idx]
-            return Grid2D(x=x, y=y, projection=self.projection)
+            d = np.diff(idx)
+            if np.any(d < 1) or not np.allclose(d, d[0]):
+                return GeometryUndefined()
+            else:
+                x = self.x if axis == 0 else self.x[idx]
+                y = self.y if axis == 1 else self.y[idx]
+                return Grid2D(x=x, y=y, projection=self.projection)
 
         if axis == 0:
             # y is first axis! if we select an element from y-axis (axis 0),
