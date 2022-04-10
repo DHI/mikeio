@@ -800,7 +800,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
         # select in space
         if (x is not None) or (y is not None) or (z is not None):
             if isinstance(self.geometry, Grid2D):  # TODO find out better way
-                i, j = self.geometry.find_index((x, y))
+                xy = np.column_stack((x, y))
+                if len(xy) > 1:
+                    raise NotImplementedError(
+                        "Grid2D does not support multiple point sel()"
+                    )
+                i, j = self.geometry.find_index(xy=xy)
+                if i == -1 or j == -1:
+                    return None
                 tmp = self.isel(idx=j[0], axis=(0 + t_ax))
                 sp_axis = 0 if len(j) == 1 else 1
                 da = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
