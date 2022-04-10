@@ -603,7 +603,29 @@ def test_da_sel_layer():
     assert da3.geometry.n_elements == 3700
 
 
-def test_da_sel_area_2d():
+def test_da_sel_xy_grid2d(da_grid2d):
+    # Grid2D(x0=10.0, dx=0.1, nx=7, ny=14, dy=1.0, y0=-10.0),
+    da = da_grid2d
+    da1 = da.sel(x=10.4, y=0.0)
+    assert isinstance(da1.geometry, GeometryPoint2D)
+    assert da1.geometry.x == 10.4
+    assert da1.geometry.y == 0.0
+    assert np.all(da1.to_numpy() == da.to_numpy()[:, 10, 4])
+
+    da2 = da.sel(x=100.4, y=0.0)
+
+
+def test_da_sel_multi_xy_grid2d(da_grid2d):
+    # Grid2D(x0=10.0, dx=0.1, nx=7, ny=14, dy=1.0, y0=-10.0),
+    da = da_grid2d
+    xx = [10.3, 10.5, 10.4]
+    yy = [-1.0, 1.0, -9.0]
+    # TODO: not implemented:
+    # da1 = da.sel(x=xx, y=yy)
+    # assert da1.shape == (10, 3)
+
+
+def test_da_sel_area_dfsu2d():
     filename = "tests/testdata/FakeLake.dfsu"
     da = mikeio.read(filename, items=0)[0]
 
@@ -614,6 +636,25 @@ def test_da_sel_area_2d():
     area = (-0.1, 0.15, 0.0, 0.2)
     da1 = da.sel(area=area)
     assert da1.geometry.n_elements == 14
+
+
+def test_da_sel_area_grid2d():
+    filename = "tests/testdata/gebco_sound.dfs2"
+    da = mikeio.read(filename, items=0)[0]
+    assert da.dims == ("time", "y", "x")
+
+    bbox = [12.4, 55.2, 22.0, 55.6]
+
+    da1 = da.sel(area=bbox)
+    assert da1.geometry.nx == 168
+    assert da1.geometry.ny == 96
+
+    das = da.squeeze()
+    assert das.dims == ("y", "x")
+
+    da = das.sel(area=bbox)
+    assert da1.geometry.nx == 168
+    assert da1.geometry.ny == 96
 
 
 def test_da_sel_area_and_xy_not_ok():
