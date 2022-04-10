@@ -202,6 +202,20 @@ def test_read_temporal_subset_slice():
     assert len(ds.time) == 13
 
 
+def test_read_area_subset():
+
+    filename = r"tests/testdata/eq.dfs2"
+
+    bbox = [10, 4, 12, 7]
+    ds = mikeio.read(filename, area=bbox)
+    assert ds.shape == (25, 4, 3)
+
+    g = ds.geometry
+    assert g.ny == 4
+    assert g.nx == 3
+    assert isinstance(g, Grid2D)
+
+
 def test_read_numbered_access(dfs2_random_2items):
 
     dfs = dfs2_random_2items
