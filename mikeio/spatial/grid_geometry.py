@@ -743,8 +743,8 @@ class Grid3D(_Geometry):
             # z is the first axis! return x-y Grid2D
             # TODO: origin, how to pass self.z[idx]?
             return Grid2D(
-                x=self.x,
-                y=self.y,
+                x=self.x + self._origin[0],
+                y=self.y + self._origin[1],
                 projection=self._projection,
             )
         elif axis == 1:
@@ -753,7 +753,7 @@ class Grid3D(_Geometry):
             return Grid2D(
                 x=self.x,
                 y=self.z,
-                projection=self._projection,
+                # projection=self._projection,
             )
         else:
             # x is the last axis! return y-z Grid2D
@@ -761,7 +761,7 @@ class Grid3D(_Geometry):
             return Grid2D(
                 x=self.y,
                 y=self.z,
-                projection=self._projection,
+                # projection=self._projection,
             )
 
     def __repr__(self):
