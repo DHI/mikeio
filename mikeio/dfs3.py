@@ -7,6 +7,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import DfsSimpleType, DataValueType
 from mikecore.DfsBuilder import DfsBuilder
+import pandas as pd
 
 from mikeio.spatial.geometry import GeometryUndefined
 
@@ -14,7 +15,7 @@ from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .dfs import _Dfs123
-from .spatial.grid_geometry import Grid3D
+from .spatial.grid_geometry import Grid2D, Grid3D
 
 
 class Dfs3(_Dfs123):
@@ -292,44 +293,28 @@ class Dfs3(_Dfs123):
         nt = len(time_steps)
 
         # Determine the size of the grid
-        axis = dfs.ItemInfo[0].SpatialAxis
-        zNum = axis.ZCount
-        yNum = axis.YCount
-        xNum = axis.XCount
+        zNum = self.geometry.nz
+        yNum = self.geometry.ny
+        xNum = self.geometry.nx
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         data_list = []
 
         if coordinates is None:
-            if layers is None:
-                geometry = self.geometry
-            else:
-                g = self.geometry
-                geometry = Grid3D(
-                    x=g.x,
-                    y=g.y,
-                    z=g.z[layers],
-                    origin=g._origin,
-                    projection=g.projection,
-                )
+            layers = None if layers is None else np.atleast_1d(layers)
+            geometry = self._geometry_for_layers(layers, self.geometry)
 
-            # if nt is 0, then the dfs is 'static' and must be handled differently
-            if nt != 0:
-                for item in range(n_items):
-                    if layers is None:
-                        # Initialize an empty data block
-                        data = np.ndarray(shape=(nt, zNum, yNum, xNum), dtype=float)
-                        data_list.append(data)
-                    else:
-                        data = np.ndarray(
-                            shape=(nt, len(layers), yNum, xNum), dtype=float
-                        )
-                        data_list.append(data)
-
-            else:
+            if nt == 0:
+                # if nt is 0, then the dfs is 'static' and must be handled differently
                 raise ValueError(
                     "Static dfs3 files (with no time steps) are not supported."
                 )
+            else:
+                nz = zNum if layers is None else len(layers)
+                shape = (nt, nz, yNum, xNum) if nz > 1 else (nt, yNum, xNum)
+                for item in range(n_items):
+                    data = np.ndarray(shape=shape, dtype=float)
+                    data_list.append(data)
 
         else:
             geometry = GeometryUndefined()
@@ -340,23 +325,22 @@ class Dfs3(_Dfs123):
                 data_list.append(data)
 
         t_seconds = np.zeros(nt, dtype=float)
-        startTime = dfs.FileInfo.TimeAxis.StartDateTime
 
         if coordinates is None:
             for it_number, it in enumerate(time_steps):
                 for item in range(n_items):
                     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
-
-                    src = itemdata.Data
-                    # d = to_numpy(src)
-                    d = src
+                    d = itemdata.Data
 
                     # DO a direct copy instead of eleement by elment
                     d = d.reshape(zNum, yNum, xNum)  # .swapaxes(0, 2).swapaxes(0, 1)
                     d = np.flipud(d)  # TODO
                     d[d == deleteValue] = np.nan
+
                     if layers is None:
                         data_list[item][it_number, :, :, :] = d
+                    elif len(layers) == 1:
+                        data_list[item][it_number, :, :] = d[layers[0], :, :]
                     else:
                         for l in range(len(layers)):
                             data_list[item][it_number, l, :, :] = d[layers[l], :, :]
@@ -376,14 +360,33 @@ class Dfs3(_Dfs123):
 
                 t_seconds[it] = itemdata.Time
 
-        start_time = dfs.FileInfo.TimeAxis.StartDateTime
-        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
-
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
-
         dfs.Close()
 
-        return Dataset(data_list, time, items, geometry=geometry)
+        # start_time = dfs.FileInfo.TimeAxis.StartDateTime
+        # time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
+        return Dataset(data_list, time=time, items=items, geometry=geometry)
+
+    @staticmethod
+    def _geometry_for_layers(layers, geometry):
+        if layers is not None:
+            g = geometry
+            if len(layers) == 1:
+                geometry = Grid2D(
+                    x=g.x + g._origin[0],
+                    y=g.y + g._origin[1],
+                    projection=g.projection,
+                )
+            else:
+                geometry = Grid3D(
+                    x=g.x,
+                    y=g.y,
+                    z=g.z[layers],
+                    origin=g._origin,
+                    projection=g.projection,
+                )
+        return geometry
 
     def write(
         self,
