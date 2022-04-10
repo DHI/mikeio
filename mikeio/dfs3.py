@@ -36,6 +36,28 @@ class Dfs3(_Dfs123):
                 projection=self._projstr,
             )
 
+    def __repr__(self):
+        out = ["<mikeio.Dfs3>"]
+
+        if os.path.isfile(self._filename):
+            out.append(f"geometry: {self.geometry}")
+
+            if self._n_items is not None:
+                if self._n_items < 10:
+                    out.append("items:")
+                    for i, item in enumerate(self.items):
+                        out.append(f"  {i}:  {item}")
+                else:
+                    out.append(f"number of items: {self._n_items}")
+
+                if self._n_timesteps == 1:
+                    out.append("time: time-invariant file (1 step)")
+                else:
+                    out.append(f"time: {self._n_timesteps} steps")
+                    out.append(f"start time: {self._start_time}")
+
+        return str.join("\n", out)
+
     def get_bottom_values(self):
         bottom2D = []
         data = self.read()
