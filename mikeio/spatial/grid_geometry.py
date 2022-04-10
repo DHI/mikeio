@@ -504,12 +504,7 @@ class Grid2D(_Geometry):
     def _bbox_to_index(self, bbox):
         assert len(bbox) == 4, "area most be a bounding box of coordinates"
         x0, y0, x1, y1 = bbox
-        if (
-            x0 > self.x1
-            or y0 > self.y1
-            or x1 < self.x0
-            or y1 < self.y0
-        ):
+        if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
             warnings.warn("No elements in bbox")
             return None, None
 
