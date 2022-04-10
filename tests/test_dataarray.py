@@ -5,7 +5,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
-from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
+from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D, GeometryUndefined
 
 
 @pytest.fixture
@@ -456,15 +456,15 @@ def test_dataarray_grid2d_repr(da_grid2d):
     assert "values" not in repr(da_grid2d)
 
     da = da_grid2d[:, -1]
-    assert "Grid1D" in repr(da)
+    assert "geometry: Grid1D" in repr(da)
     assert "values" not in repr(da)
 
     da = da_grid2d[:, -1, 0]
-    assert "geometry" not in repr(da)
+    assert "geometry: GeometryPoint2D" in repr(da)
     assert "values" in repr(da)
 
     da = da_grid2d[0, 0, 0]
-    assert "geometry" not in repr(da)
+    assert "geometry: GeometryPoint2D" in repr(da)
     assert "values" in repr(da)
 
 
@@ -484,11 +484,11 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[0, :, :].geometry, mikeio.Grid2D)
     assert isinstance(da[0, 0, :].geometry, mikeio.Grid1D)
     assert isinstance(da[:, :, 0].geometry, mikeio.Grid1D)
-    assert isinstance(da[:, -1, 0].geometry, GeometryUndefined)
+    assert isinstance(da[:, -1, 0].geometry, GeometryPoint2D)
 
     # TODO: slices in other than the time direction will give GeometryUndefined
-    assert isinstance(da[:, 2:5, 0].geometry, GeometryUndefined)
-    assert isinstance(da[:, 2:5, 0:4].geometry, GeometryUndefined)
+    assert isinstance(da[:, 2:5, 0].geometry, mikeio.Grid1D)
+    assert isinstance(da[:, 2:5, 0:4].geometry, mikeio.Grid2D)
 
 
 def test_dataarray_getitem_time(da_grid2d):
