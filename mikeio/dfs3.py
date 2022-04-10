@@ -8,10 +8,13 @@ from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import DfsSimpleType, DataValueType
 from mikecore.DfsBuilder import DfsBuilder
 
+from mikeio.spatial.geometry import GeometryUndefined
+
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .dfs import _Dfs123
+from .spatial.grid_geometry import Grid3D
 
 
 class Dfs3(_Dfs123):
@@ -19,6 +22,19 @@ class Dfs3(_Dfs123):
         super(Dfs3, self).__init__(filename, dtype)
         if filename:
             self._read_dfs3_header()
+            self.geometry = Grid3D(
+                x0=self._x0,
+                dx=self._dx,
+                nx=self._nx,
+                y0=self._y0,
+                dy=self._dy,
+                ny=self._ny,
+                z0=self._z0,
+                dz=self._dz,
+                nz=self._nz,
+                origin=(self._longitude, self._latitude),
+                projection=self._projstr,
+            )
 
     def get_bottom_values(self):
         bottom2D = []
@@ -43,6 +59,9 @@ class Dfs3(_Dfs123):
 
         self.source = self._dfs
         self._dfs
+        self._x0 = self._dfs.SpatialAxis.X0
+        self._y0 = self._dfs.SpatialAxis.Y0
+        self._z0 = self._dfs.SpatialAxis.Z0
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._dz = self._dfs.SpatialAxis.Dz
@@ -260,6 +279,18 @@ class Dfs3(_Dfs123):
         data_list = []
 
         if coordinates is None:
+            if layers is None:
+                geometry = self.geometry
+            else:
+                g = self.geometry
+                geometry = Grid3D(
+                    x=g.x,
+                    y=g.y,
+                    z=g.z[layers],
+                    origin=g._origin,
+                    projection=g.projection,
+                )
+
             # if nt is 0, then the dfs is 'static' and must be handled differently
             if nt != 0:
                 for item in range(n_items):
@@ -279,6 +310,7 @@ class Dfs3(_Dfs123):
                 )
 
         else:
+            geometry = GeometryUndefined()
             ncoordinates = len(coordinates)
             for item in range(n_items):
                 # Initialize an empty data block
@@ -329,7 +361,7 @@ class Dfs3(_Dfs123):
 
         dfs.Close()
 
-        return Dataset(data_list, time, items)
+        return Dataset(data_list, time, items, geometry=geometry)
 
     def write(
         self,
