@@ -503,29 +503,21 @@ class Grid2D(_Geometry):
 
     def _bbox_to_index(self, bbox):
         assert len(bbox) == 4, "area most be a bounding box of coordinates"
+        x0, y0, x1, y1 = bbox
         if (
-            bbox[0] > self.x1
-            or bbox[1] > self.y1
-            or bbox[2] < self.x0
-            or bbox[3] < self.y0
+            x0 > self.x1
+            or y0 > self.y1
+            or x1 < self.x0
+            or y1 < self.y0
         ):
             warnings.warn("No elements in bbox")
             return None, None
 
-        # lower left corner
-        i1 = (np.abs(self.x - bbox[0])).argmin()
-        i1 = 0 if bbox[0] < self.x0 else i1
-        j1 = (np.abs(self.y - bbox[1])).argmin()
-        j1 = 0 if bbox[1] < self.y0 else j1
+        mask = (self.x >= x0) & (self.x <= x1)
+        ii = np.where(mask)[0]
+        mask = (self.y >= y0) & (self.y <= y1)
+        jj = np.where(mask)[0]
 
-        # upper right corner
-        i2 = (np.abs(self.x - bbox[2])).argmin()
-        i2 = (self.nx - 1) if bbox[2] > self.x1 else i2
-        j2 = (np.abs(self.y - bbox[3])).argmin()
-        j2 = (self.ny - 1) if bbox[3] > self.y1 else j2
-
-        ii = list(range(i1, i2))
-        jj = list(range(j1, j2))
         return ii, jj
 
     def _xy_to_index(self, xy):
