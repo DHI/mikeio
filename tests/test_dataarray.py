@@ -562,7 +562,7 @@ def test_da_isel_space_multiple_elements(da_grid2d):
     da_sel = da_grid2d.isel(slice(None, 3), axis="x")
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 14, 3)
-    assert isinstance(da_sel.geometry, GeometryUndefined)
+    assert isinstance(da_sel.geometry, mikeio.Grid2D)
 
 
 def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
