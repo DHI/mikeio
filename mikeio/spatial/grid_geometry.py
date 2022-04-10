@@ -1,4 +1,5 @@
 from typing import Tuple
+import warnings
 import numpy as np
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -479,7 +480,7 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def find_index(self, xy):
+    def find_index(self, xy=None, area=None):
         """Find nearest index (i,j) of point(s)
            -1 is returned if point is outside grid
 
@@ -487,13 +488,41 @@ class Grid2D(_Geometry):
         ----------
         xy : array(float)
             xy-coordinate of points given as n-by-2 array
+        area : array(float)
+            xy-coordinates of bounding box
 
         Returns
         -------
         array(int), array(int)
             i- and j-index of nearest cell
         """
+        if xy is not None:
+            return self._xy_to_index(xy)
+        elif area is not None:
+            return self._bbox_to_index(area)
 
+    def _bbox_to_index(self, bbox):
+        assert len(bbox) == 4, "area most be a bounding box of coordinates"
+        if (
+            bbox[0] > self.x1
+            or bbox[1] > self.y1
+            or bbox[2] < self.x0
+            or bbox[3] < self.y0
+        ):
+            warnings.warn("No elements in bbox")
+            return None, None
+        i1, j1 = self._xy_to_index(bbox[:2])
+        i1, j1 = max(i1[0], 0), max(j1[0], 0)
+
+        i2, j2 = self._xy_to_index(bbox[2:])
+        i2 = (self.nx - 1) if i2[0] == -1 else i2[0]
+        j2 = (self.ny - 1) if j2[0] == -1 else j2[0]
+
+        ii = list(range(i1, i2))
+        jj = list(range(j1, j2))
+        return ii, jj
+
+    def _xy_to_index(self, xy):
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
         x = xy[:, 0]
