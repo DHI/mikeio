@@ -369,7 +369,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 raise ValueError(
                     f"time missing from named dimensions {dims}! (number of timesteps: {self.n_timesteps})"
                 )
-            return dims
+            return tuple(dims)
 
     @staticmethod
     def _guess_dims(ndim, shape, n_timesteps, geometry):
