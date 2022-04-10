@@ -511,12 +511,18 @@ class Grid2D(_Geometry):
         ):
             warnings.warn("No elements in bbox")
             return None, None
-        i1, j1 = self._xy_to_index(bbox[:2])
-        i1, j1 = max(i1[0], 0), max(j1[0], 0)
 
-        i2, j2 = self._xy_to_index(bbox[2:])
-        i2 = (self.nx - 1) if i2[0] == -1 else i2[0]
-        j2 = (self.ny - 1) if j2[0] == -1 else j2[0]
+        # lower left corner
+        i1 = (np.abs(self.x - bbox[0])).argmin()
+        i1 = 0 if bbox[0] < self.x0 else i1
+        j1 = (np.abs(self.y - bbox[1])).argmin()
+        j1 = 0 if bbox[1] < self.y0 else j1
+
+        # upper right corner
+        i2 = (np.abs(self.x - bbox[2])).argmin()
+        i2 = (self.nx - 1) if bbox[2] > self.x1 else i2
+        j2 = (np.abs(self.y - bbox[3])).argmin()
+        j2 = (self.ny - 1) if bbox[3] > self.y1 else j2
 
         ii = list(range(i1, i2))
         jj = list(range(j1, j2))
