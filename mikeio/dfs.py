@@ -5,6 +5,8 @@ import warnings
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
+
+from mikeio.spatial.geometry import GeometryUndefined
 from .dataset import Dataset
 from .base import TimeSeries
 
@@ -33,7 +35,7 @@ class _Dfs123(TimeSeries):
         self._override_coordinates = False
         self._timeseries_unit = TimeStepUnit.SECOND
         self._dt = None
-        self.geometry = None
+        self.geometry = GeometryUndefined()
         self._dtype = dtype
         self._dfs = None
         self._source = None
