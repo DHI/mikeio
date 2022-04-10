@@ -656,7 +656,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             item=self.item,
             geometry=self.geometry,
             zn=self._zn,
-            dims=dims,
+            dims=tuple(dims),
         )
 
     # ============= Select/interp ===========
