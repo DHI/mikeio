@@ -34,7 +34,7 @@ from .dfsu import Mesh
 from .pfs import Pfs
 from .xyz import read_xyz
 from .dataset import Dataset, DataArray
-from .spatial.grid_geometry import Grid1D, Grid2D
+from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .eum import ItemInfo, EUMType, EUMUnit
 
 
