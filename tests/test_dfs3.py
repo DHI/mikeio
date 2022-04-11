@@ -2,21 +2,121 @@ import os
 from shutil import copyfile
 from datetime import datetime
 import numpy as np
-from mikeio.dfs3 import Dfs3
+
+import mikeio
 from mikeio.eum import EUMType, ItemInfo
+from mikeio.spatial.geometry import GeometryUndefined
+from mikeio.spatial.grid_geometry import Grid2D, Grid3D
 
 
-def test_read_dfs3():
-    dfs = Dfs3("tests/testdata/Grid1.dfs3")
-    ds = dfs.read()
+def test_dfs3_repr():
+    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
+    assert "<mikeio.Dfs3>" in repr(dfs)
+    assert "geometry: Grid3D" in repr(dfs)
+
+
+def test_dfs3_projection():
+    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
+    assert dfs.projection_string == "LONG/LAT"
+    assert dfs.dx == 0.25
+    assert dfs.dy == 0.25
+    assert dfs.dz == 1.0
+
+
+def test_dfs3_geometry():
+    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
+    assert isinstance(dfs.geometry, Grid3D)
+    assert dfs.geometry.nx == 21
+    assert dfs.geometry.ny == 17
+    assert dfs.geometry.nz == 34
+
+
+def test_dfs3_read():
+    ds = mikeio.read("tests/testdata/Grid1.dfs3")
     assert ds.n_items == 2
     assert ds.n_timesteps == 30
     da = ds[0]
     assert da.shape == (30, 10, 10, 10)  # t  # z  # y  # x
+    assert da.dims == ("time", "z", "y", "x")
     assert da.name == "Item 1"
 
 
-def test_write_single_item(tmpdir):
+def test_dfs3_read_time():
+    fn = "tests/testdata/test_dfs3.dfs3"
+    ds = mikeio.read(fn, time="2020-12-30 00:00")
+    assert ds.n_timesteps == 1
+    assert isinstance(ds.geometry, Grid3D)
+
+    ds = mikeio.read(fn, time=-1)
+    assert ds.n_timesteps == 1
+    assert isinstance(ds.geometry, Grid3D)
+
+
+def test_dfs3_read_1_layer():
+    fn = "tests/testdata/test_dfs3.dfs3"
+    ds = mikeio.read(fn, layers=-1)
+    assert ds.shape == (2, 17, 21)
+    assert isinstance(ds.geometry, Grid2D)
+
+    ds = mikeio.read(fn, layers=[0])
+    assert ds.shape == (2, 17, 21)
+    assert isinstance(ds.geometry, Grid2D)
+
+
+def test_dfs3_read_multiple_layers():
+    fn = "tests/testdata/test_dfs3.dfs3"
+    ds = mikeio.read(fn, layers=(0, 1, 2, 3))
+    assert ds.geometry.nz == 4
+    assert isinstance(ds.geometry, Grid3D)
+
+    ds = mikeio.read(fn, layers=[1, 5, -3])
+    assert isinstance(ds.geometry, GeometryUndefined)
+    assert ds.shape == (2, 3, 17, 21)
+
+
+def test_dfs3_read_1_point():
+    fn = "tests/testdata/test_dfs3.dfs3"
+    pt = [[20, 3, 30]]
+    ds = mikeio.read(fn, coordinates=pt)
+    assert ds.shape == (2, 1)
+    assert isinstance(ds.geometry, GeometryUndefined)
+
+    # as tuple (of list)
+    ds = mikeio.read(fn, coordinates=tuple(pt))
+    assert ds.shape == (2, 1)
+    assert isinstance(ds.geometry, GeometryUndefined)
+
+    # as array (of list)
+    ds = mikeio.read(fn, coordinates=np.array(pt))
+    assert ds.shape == (2, 1)
+    assert isinstance(ds.geometry, GeometryUndefined)
+
+
+def test_dfs3_read_multiple_points():
+    fn = "tests/testdata/test_dfs3.dfs3"
+    pts = [[20, 3, 30], [0, -1, 4], [-1, 0, -5]]
+    ds = mikeio.read(fn, coordinates=pts)
+    assert ds.shape == (2, 3)
+    assert isinstance(ds.geometry, GeometryUndefined)
+
+
+# TODO: not working
+# def test_dfs3_read_slice():
+#     fn = "tests/testdata/test_dfs3.dfs3"
+#     dfs = mikeio.open(fn)
+#     data = dfs.read_slice(
+#         lower_left_xy=[2, 2], upper_right_xy=[3, 4], layers=[21, 22, 23]
+#     )
+#     # assert ds.shape == (2, 3)
+
+
+def test_dfs3_get_bottom_data():
+    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
+    data_bottom = dfs.get_bottom_values()
+    assert len(data_bottom) > 0
+
+
+def test_dfs3_write_single_item(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple.dfs3")
     start_time = datetime(2012, 1, 1)
     items = [ItemInfo(EUMType.Relative_moisture_content)]
@@ -26,7 +126,7 @@ def test_write_single_item(tmpdir):
     d[:, 0, 0, 0] = 0.0
     data.append(d)
     title = "test dfs3"
-    dfs = Dfs3()
+    dfs = mikeio.Dfs3()
     dfs.write(
         filename=outfilename,
         data=data,
@@ -41,14 +141,14 @@ def test_write_single_item(tmpdir):
     )
 
 
-def test_read_write(tmpdir):
-    dfs = Dfs3("tests/testdata/Grid1.dfs3")
+def test_dfs3_read_write(tmpdir):
+    dfs = mikeio.open("tests/testdata/Grid1.dfs3")
     ds = dfs.read()
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
     items = ds.items
     data = ds.to_numpy()
     title = "test dfs3"
-    dfs = Dfs3()
+    dfs = mikeio.Dfs3()
     dfs.write(
         filename=outfilename,
         data=data,
@@ -60,22 +160,3 @@ def test_read_write(tmpdir):
         dy=0.1,
         title=title,
     )
-
-
-def test_dfs3_projection():
-    dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
-    assert dfs.projection_string == "LONG/LAT"
-    assert dfs.dx == 0.25
-    assert dfs.dy == 0.25
-    assert dfs.dz == 1.0
-
-
-def test_dfs3_get_bottom_data():
-    dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
-    data_bottom = dfs.get_bottom_values()
-    assert len(data_bottom) > 0
-
-
-def test_read_dfs3_timesteps_data():
-    dfs = Dfs3("tests/testdata/test_dfs3.dfs3")
-    dfs.read(time=[1])
