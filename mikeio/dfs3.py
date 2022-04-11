@@ -146,7 +146,6 @@ class Dfs3(_Dfs123):
 
     def read_slice(
         self,
-        dfs3file,
         lower_left_xy,
         upper_right_xy,
         items=None,
@@ -184,22 +183,19 @@ class Dfs3(_Dfs123):
             3) layer counts from the bottom
         """
 
-        data = self.read(dfs3file, items=items, layers=layers)
+        # TODO: not working
 
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
+        data = self.read(items=items, layers=layers).to_numpy()
 
         # Determine the size of the grid
-        axis = dfs.ItemInfo[0].SpatialAxis
-        dx = axis.Dx
-        dy = axis.Dy
-        x0 = axis.X0
-        y0 = axis.Y0
-        yNum = axis.YCount
-        xNum = axis.XCount
+        dx = self.geometry.dx
+        dy = self.geometry.dy
+        x0 = self.geometry.x[0]
+        y0 = self.geometry.y[0]
+        ny = self.geometry.ny
+        nx = self.geometry.nx
 
-        top_left_y = y0 + (yNum + 1) * dy
-
-        dfs.Close()
+        top_left_y = y0 + (ny + 1) * dy
 
         # SLICE all the Data
 
@@ -229,16 +225,16 @@ class Dfs3(_Dfs123):
             raise IndexError("upper_right_y_index < 0.")
             upper_right_y_index = 0
 
-        if lower_left_y_index > yNum - 1:
+        if lower_left_y_index > ny - 1:
             raise IndexError("lower_left_y_index > yNum - 1")
-            lower_left_y_index = yNum - 1
+            lower_left_y_index = ny - 1
 
-        if upper_right_x_index > xNum - 1:
+        if upper_right_x_index > nx - 1:
             raise IndexError("upper_right_x_index > xNum - 1")
-            upper_right_x_index = xNum - 1
+            upper_right_x_index = nx - 1
 
-        for i in range(len(data[0])):
-            data[0][i] = data[0][i][
+        for i in range(len(data)):
+            data[i] = data[i][
                 upper_right_y_index:lower_left_y_index,
                 lower_left_x_index:upper_right_x_index,
                 :,
@@ -379,13 +375,20 @@ class Dfs3(_Dfs123):
                     projection=g.projection,
                 )
             else:
-                geometry = Grid3D(
-                    x=g.x,
-                    y=g.y,
-                    z=g.z[layers],
-                    origin=g._origin,
-                    projection=g.projection,
-                )
+                d = np.diff(g.z[layers])
+                if np.any(d < 1) or not np.allclose(d, d[0]):
+                    warnings.warn(
+                        "Extracting non-equidistant layers! Cannot use Grid3D."
+                    )
+                    geometry = GeometryUndefined()
+                else:
+                    geometry = Grid3D(
+                        x=g.x,
+                        y=g.y,
+                        z=g.z[layers],
+                        origin=g._origin,
+                        projection=g.projection,
+                    )
         return geometry
 
     def write(
