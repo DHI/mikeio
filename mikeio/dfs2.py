@@ -202,7 +202,9 @@ class Dfs2(_Dfs123):
             Read only selected items, by number (0-based), or by name
         time: str, int or list[int], optional
             Read only selected times
-        area:
+        area: array[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper) coordinates
 
         Returns
         -------
