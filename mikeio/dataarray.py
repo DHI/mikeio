@@ -836,7 +836,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 sp_axis = 0 if len(jj) == 1 else 1
                 da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
             else:
-                raise ValueError("'area' can only be selected from Dfsu data")
+                raise ValueError(
+                    "'area' can only be selected from Grid2D or flexible mesh data"
+                )
 
         if len(kwargs) > 0:
             args = ",".join(kwargs)
