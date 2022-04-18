@@ -1500,9 +1500,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             ]
         except:
             raise ValueError("Could not add data in Dataset")
-        time = self.time.copy()
-        items = deepcopy(self.items)
-        return Dataset(data, time, items)
+        newds = self.copy()
+        for j in range(len(self)):
+            newds[j].values = data[j]
+        return newds
 
     def _check_datasets_match(self, other):
         if self.n_items != other.n_items:
@@ -1530,7 +1531,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             raise ValueError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
-        return Dataset(data, time, items)
+        return Dataset(
+            data, time=time, items=items, geometry=self.geometry, zn=self._zn
+        )
 
     def _multiply_value(self, value) -> "Dataset":
         try:
@@ -1539,7 +1542,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             raise ValueError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
-        return Dataset(data, time, items)
+        return Dataset(
+            data, time=time, items=items, geometry=self.geometry, zn=self._zn
+        )
 
     # ===============================================
 
