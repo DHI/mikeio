@@ -6,11 +6,14 @@ from mikecore.DfsFile import DfsSimpleType, DfsFile
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.Projections import Cartography
+import pandas as pd
+from tqdm import tqdm
 
 from .dfs import _Dfs123
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
+from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 
 
 def write_dfs2(filename: str, ds: Dataset, title="") -> None:
@@ -133,8 +136,8 @@ class Dfs2(_Dfs123):
                         dy=self._dy,
                         nx=self._nx,
                         ny=self._ny,
-                        x0=self._longitude,
-                        y0=self._latitude,
+                        x0=self._x0 + self._longitude,
+                        y0=self._y0 + self._latitude,
                         projection=self._projstr,
                     )
             else:
@@ -188,6 +191,85 @@ class Dfs2(_Dfs123):
             self._is_equidistant = False
 
         self._read_header()
+
+    def read(self, *, items=None, time=None, area=None, time_steps=None) -> Dataset:
+        """
+        Read data from a dfs2 file
+
+        Parameters
+        ---------
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time: str, int or list[int], optional
+            Read only selected times
+        area: array[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper) coordinates
+
+        Returns
+        -------
+        Dataset
+        """
+        if time_steps is not None:
+            warnings.warn(
+                FutureWarning(
+                    "time_steps have been renamed to time, and will be removed in a future release"
+                )
+            )
+            time = time_steps
+
+        self._open()
+
+        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
+        n_items = len(item_numbers)
+        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
+
+        time_steps = _valid_timesteps(self._dfs.FileInfo, time)
+        nt = len(time_steps)
+        single_time_selected = np.isscalar(time) if time is not None else False
+
+        if area is not None:
+            take_subset = True
+            ii, jj = self.geometry.find_index(area=area)
+            shape = (nt, len(jj), len(ii))
+            geometry = self.geometry._index_to_geometry(ii, jj)
+        else:
+            take_subset = False
+            shape = (nt, self._ny, self._nx)
+            geometry = self.geometry
+
+        if single_time_selected:
+            shape = shape[1:]
+
+        data_list = [
+            np.ndarray(shape=shape, dtype=self._dtype) for item in range(n_items)
+        ]
+
+        t_seconds = np.zeros(len(time_steps))
+
+        for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
+            for item in range(n_items):
+
+                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
+                d = itemdata.Data
+
+                d[d == self.deletevalue] = np.nan
+                d = d.reshape(self._ny, self._nx)
+
+                if take_subset:
+                    d = np.take(np.take(d, jj, axis=0), ii, axis=-1)
+
+                if single_time_selected:
+                    data_list[item] = d
+                else:
+                    data_list[item][i] = d
+
+            t_seconds[i] = itemdata.Time
+
+        self._dfs.Close()
+
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        return Dataset(data_list, time=time, items=items, geometry=geometry)
 
     def find_nearest_elements(
         self,
