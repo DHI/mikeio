@@ -1,14 +1,21 @@
 from typing import Tuple
+import warnings
 import numpy as np
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
-from .geometry import _Geometry, GeometryUndefined, BoundingBox
+from .geometry import (
+    _Geometry,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+    BoundingBox,
+)
 from ..eum import EUMType, EUMUnit
 
 
 def _check_equidistant(x: np.ndarray) -> None:
     d = np.diff(x)
-    if not np.allclose(d, d[0]):
+    if len(d) > 0 and not np.allclose(d, d[0]):
         raise NotImplementedError("values must be equidistant")
 
 
@@ -22,6 +29,7 @@ class Grid1D(_Geometry):
         projection="NON-UTM",
         origin: Tuple[float, float] = (0.0, 0.0),
         orientation=0.0,
+        node_coordinates=None,
     ):
         """Create equidistant 1D spatial geometry"""
         self._projection = projection
@@ -32,20 +40,23 @@ class Grid1D(_Geometry):
         if x is not None:
             x = np.asarray(x)
             _check_equidistant(x)
-            if x[0] > x[-1]:
+            if len(x) > 1 and x[0] > x[-1]:
                 raise ValueError("x values must be increasing")
 
             self._x = x
-            self._nx = len(self._x)
+            self._dx = x[1] - x[0] if len(x) > 1 else 1.0
         else:
             if n is None:
                 raise ValueError("n must be provided")
             if dx is None:
                 raise ValueError("dx must be provided")
-            self._nx = n
             self._dx = dx
             x1 = x0 + dx * (n - 1)
             self._x = np.linspace(x0, x1, n)
+
+        if node_coordinates is not None and len(node_coordinates) != self.n:
+            raise ValueError("Length of node_coordinates must be n")
+        self._nc = node_coordinates
 
     def __repr__(self):
         out = []
@@ -100,7 +111,7 @@ class Grid1D(_Geometry):
     @property
     def n(self) -> int:
         """number of grid points"""
-        return self._nx
+        return len(self._x)
 
     @property
     def origin(self) -> Tuple[float, float]:
@@ -110,13 +121,26 @@ class Grid1D(_Geometry):
     def orientation(self) -> float:
         return self._orientation
 
-    def isel(self, idx, axis):
+    def isel(self, idx, axis=0):
 
         if not np.isscalar(idx):
-            # TODO: return reduced Grid1D
-            return GeometryUndefined()
+            nc = None if self._nc is None else self._nc[idx, :]
+            return Grid1D(
+                x=self.x[idx],
+                projection=self.projection,
+                origin=self.origin,
+                orientation=self.orientation,
+                node_coordinates=nc,
+            )
 
-        return GeometryUndefined()
+        if self._nc is None:
+            return GeometryUndefined()
+        else:
+            coords = self._nc[idx, :]
+            if len(coords) == 3:
+                return GeometryPoint3D(*coords)
+            else:
+                return GeometryPoint2D(*coords)
 
 
 class Grid2D(_Geometry):
@@ -270,6 +294,8 @@ class Grid2D(_Geometry):
         >>> g = Grid2D(x, y)
 
         """
+        # TODO: remove shape argument or issue warning
+
         self.orientation = 0.0
         self._projection = projection
         self._projstr = projection  # TODO handle other types than string
@@ -394,19 +420,19 @@ class Grid2D(_Geometry):
         _check_equidistant(x)
         _check_equidistant(y)
 
-        if x[0] > x[-1]:
+        if len(x) > 1 and x[0] > x[-1]:
             raise ValueError("x values must be increasing")
 
-        if y[0] > y[-1]:
+        if len(y) > 1 and y[0] > y[-1]:
             raise ValueError("y values must be increasing")
 
         self._x0 = x[0]
         self._nx = len(x)
-        self._dx = x[1] - x[0]
+        self._dx = x[1] - x[0] if len(x) > 1 else 1.0
 
         self._y0 = y[0]
         self._ny = len(y)
-        self._dy = y[1] - y[0]
+        self._dy = y[1] - y[0] if len(y) > 1 else 1.0
 
     def _create_from_nx_ny_dx_dy(self, x0, dx, nx, y0, dy, ny):
         if nx is None:
@@ -454,7 +480,7 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def find_index(self, xy):
+    def find_index(self, xy=None, area=None):
         """Find nearest index (i,j) of point(s)
            -1 is returned if point is outside grid
 
@@ -462,13 +488,34 @@ class Grid2D(_Geometry):
         ----------
         xy : array(float)
             xy-coordinate of points given as n-by-2 array
+        area : array(float)
+            xy-coordinates of bounding box
 
         Returns
         -------
         array(int), array(int)
             i- and j-index of nearest cell
         """
+        if xy is not None:
+            return self._xy_to_index(xy)
+        elif area is not None:
+            return self._bbox_to_index(area)
 
+    def _bbox_to_index(self, bbox):
+        assert len(bbox) == 4, "area most be a bounding box of coordinates"
+        x0, y0, x1, y1 = bbox
+        if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
+            warnings.warn("No elements in bbox")
+            return None, None
+
+        mask = (self.x >= x0) & (self.x <= x1)
+        ii = np.where(mask)[0]
+        mask = (self.y >= y0) & (self.y <= y1)
+        jj = np.where(mask)[0]
+
+        return ii, jj
+
+    def _xy_to_index(self, xy):
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
         x = xy[:, 0]
@@ -487,25 +534,33 @@ class Grid2D(_Geometry):
     def isel(self, idx, axis):
 
         if not np.isscalar(idx):
-            # TODO: return reduced Grid2D
-            return GeometryUndefined()
+            d = np.diff(idx)
+            if np.any(d < 1) or not np.allclose(d, d[0]):
+                return GeometryUndefined()
+            else:
+                x = self.x if axis == 0 else self.x[idx]
+                y = self.y if axis == 1 else self.y[idx]
+                return Grid2D(x=x, y=y, projection=self.projection)
 
         if axis == 0:
             # y is first axis! if we select an element from y-axis (axis 0),
             # we return a "copy" of the x-axis
-            return Grid1D(
-                x0=self.x0,
-                dx=self.dx,
-                n=self.nx,
-                projection=self._projection,
-            )
+            nc = np.column_stack([self.x, self.y[idx] * np.ones_like(self.x)])
+            return Grid1D(x=self.x, projection=self.projection, node_coordinates=nc)
         else:
-            return Grid1D(
-                x0=self.y0,
-                dx=self.dy,
-                n=self.ny,
-                projection=self._projection,
-            )
+            nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])
+            return Grid1D(x=self.y, projection=self.projection, node_coordinates=nc)
+
+    def _index_to_geometry(self, ii, jj):
+        di = np.diff(ii)
+        dj = np.diff(jj)
+        if (np.any(di < 1) or not np.allclose(di, di[0])) or (
+            np.any(dj < 1) or not np.allclose(dj, dj[0])
+        ):
+            warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
+            return GeometryUndefined()
+        else:
+            return Grid2D(x=self.x[ii], y=self.x[jj], projection=self.projection)
 
     def _to_element_table(self, index_base=0):
 

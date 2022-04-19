@@ -821,11 +821,27 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ds.sel(area=[1., 12., 2., 15.])
         """
 
+        # TODO: delegate select in space to geometry
+        t_ax = 1 if self.dims[0][0] == "t" else 0
+
         # select in space
         if (x is not None) or (y is not None) or (z is not None):
-            # idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
-            idx = self.geometry.find_index(x=x, y=y, z=z)
-            ds = self.isel(idx, axis="space")
+            if isinstance(self.geometry, Grid2D):  # TODO find out better way
+                xy = np.column_stack((x, y))
+                if len(xy) > 1:
+                    raise NotImplementedError(
+                        "Grid2D does not support multiple point sel()"
+                    )
+                i, j = self.geometry.find_index(xy=xy)
+                if i == -1 or j == -1:
+                    return None
+                tmp = self.isel(idx=j[0], axis=(0 + t_ax))
+                sp_axis = 0 if len(j) == 1 else 1
+                ds = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
+            else:
+                # idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+                idx = self.geometry.find_index(x=x, y=y, z=z)
+                ds = self.isel(idx, axis="space")
         else:
             ds = self
 
@@ -838,12 +854,19 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
         if "area" in kwargs:
+            area = kwargs.pop("area")
             if isinstance(ds.geometry, GeometryFM):
-                area = kwargs.pop("area")
                 idx = ds.geometry._elements_in_area(area)
                 ds = ds.isel(idx, axis="space")
+            elif isinstance(ds.geometry, Grid2D):
+                ii, jj = self.geometry.find_index(area=area)
+                tmp = self.isel(idx=jj, axis=(0 + t_ax))
+                sp_axis = 0 if len(jj) == 1 else 1
+                ds = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
             else:
-                raise ValueError("'area' can only be selected from Dfsu data")
+                raise ValueError(
+                    "'area' can only be selected from Grid2D or flexible mesh data"
+                )
 
         if len(kwargs) > 0:
             args = ",".join(kwargs)
