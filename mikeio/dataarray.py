@@ -423,8 +423,9 @@ class _DataArrayPlotterLineSpectrum(_DataArrayPlotter):
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
-            Hm0 = da.to_Hm0()        
+            Hm0 = da.to_Hm0()
         super().__init__(Hm0)
+
 
 class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
     def __init__(self, da: "DataArray") -> None:
@@ -454,7 +455,7 @@ class _DataArraySpectrumToHm0:
         if isinstance(g, GeometryFMPointSpectrum):
             geometry = GeometryPoint2D(x=g.x, y=g.y)
         elif isinstance(g, GeometryFMLineSpectrum):
-            geometry = Grid1D(n=g.n_nodes, dx=1.0)
+            geometry = Grid1D(n=g.n_nodes, dx=1.0, node_coordinates=g.node_coordinates)
         elif isinstance(g, GeometryFMAreaSpectrum):
             geometry = GeometryFM(
                 node_coordinates=g.node_coordinates,
