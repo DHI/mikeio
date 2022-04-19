@@ -423,8 +423,9 @@ class _DataArrayPlotterLineSpectrum(_DataArrayPlotter):
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
-            Hm0 = da.to_Hm0()        
+            Hm0 = da.to_Hm0()
         super().__init__(Hm0)
+
 
 class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
     def __init__(self, da: "DataArray") -> None:
