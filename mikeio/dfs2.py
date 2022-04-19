@@ -112,7 +112,7 @@ class Dfs2(_Dfs123):
 
     _ndim = 2
 
-    def __init__(self, filename=None, dtype=np.float64):
+    def __init__(self, filename=None, dtype=np.float32):
         super(Dfs2, self).__init__(filename, dtype)
 
         self._dx = None

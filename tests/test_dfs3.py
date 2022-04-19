@@ -74,48 +74,6 @@ def test_dfs3_read_multiple_layers():
     assert ds.shape == (2, 3, 17, 21)
 
 
-def test_dfs3_read_1_point():
-    fn = "tests/testdata/test_dfs3.dfs3"
-    pt = [[20, 3, 30]]
-    ds = mikeio.read(fn, coordinates=pt)
-    assert ds.shape == (2, 1)
-    assert isinstance(ds.geometry, GeometryUndefined)
-
-    # as tuple (of list)
-    ds = mikeio.read(fn, coordinates=tuple(pt))
-    assert ds.shape == (2, 1)
-    assert isinstance(ds.geometry, GeometryUndefined)
-
-    # as array (of list)
-    ds = mikeio.read(fn, coordinates=np.array(pt))
-    assert ds.shape == (2, 1)
-    assert isinstance(ds.geometry, GeometryUndefined)
-
-
-def test_dfs3_read_multiple_points():
-    fn = "tests/testdata/test_dfs3.dfs3"
-    pts = [[20, 3, 30], [0, -1, 4], [-1, 0, -5]]
-    ds = mikeio.read(fn, coordinates=pts)
-    assert ds.shape == (2, 3)
-    assert isinstance(ds.geometry, GeometryUndefined)
-
-
-# TODO: not working
-# def test_dfs3_read_slice():
-#     fn = "tests/testdata/test_dfs3.dfs3"
-#     dfs = mikeio.open(fn)
-#     data = dfs.read_slice(
-#         lower_left_xy=[2, 2], upper_right_xy=[3, 4], layers=[21, 22, 23]
-#     )
-#     # assert ds.shape == (2, 3)
-
-
-def test_dfs3_get_bottom_data():
-    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
-    data_bottom = dfs.get_bottom_values()
-    assert len(data_bottom) > 0
-
-
 def test_dfs3_write_single_item(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "simple.dfs3")
     start_time = datetime(2012, 1, 1)
@@ -141,7 +99,7 @@ def test_dfs3_write_single_item(tmpdir):
     )
 
 
-def test_dfs3_read_write(tmpdir):
+def test_dfs3_read_write_deprecated(tmpdir):
     dfs = mikeio.open("tests/testdata/Grid1.dfs3")
     ds = dfs.read()
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
@@ -159,4 +117,15 @@ def test_dfs3_read_write(tmpdir):
         dx=0.1,
         dy=0.1,
         title=title,
+    )
+
+
+def test_dfs3_read_write(tmpdir):
+    dfs = mikeio.open("tests/testdata/Grid1.dfs3")
+    ds = dfs.read()
+    outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
+    dfs = mikeio.Dfs3()
+    dfs.write(
+        filename=outfilename,
+        data=ds,
     )

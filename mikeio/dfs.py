@@ -167,6 +167,10 @@ class _Dfs123(TimeSeries):
         elif self._ndim == 2:
             self._ny = shape[1]
             self._nx = shape[2]
+        elif self._ndim == 3:
+            self._nz = shape[1]
+            self._ny = shape[2]
+            self._nx = shape[3]
 
         self._factory = DfsFactory()
         self._set_spatial_axis()
@@ -198,20 +202,12 @@ class _Dfs123(TimeSeries):
                 d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 
-                if self._ndim == 1:
-                    darray = d
-
-                if self._ndim == 2:
-                    d = d.reshape(self.shape[1:])
-                    d = np.flipud(d)
-                    darray = d.reshape(d.size, 1)[:, 0]
-
                 if self._is_equidistant:
-                    dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                    dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
                 else:
                     t = datetimes[i]
                     relt = (t - self._start_time).total_seconds()
-                    dfs.WriteItemTimeStepNext(relt, darray.astype(np.float32))
+                    dfs.WriteItemTimeStepNext(relt, d.astype(np.float32))
 
         if not keep_open:
             dfs.Close()
