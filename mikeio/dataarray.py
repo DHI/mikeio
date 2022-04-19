@@ -137,7 +137,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
             **kwargs,
         )
         cbar = fig.colorbar(pos, label=self._label_txt())
-        ax.set_xlabel("x")
+        ax.set_xlabel(self.da.geometry._axis_name)
         ax.set_ylabel("time")
         return ax
 
@@ -146,7 +146,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
             title = kwargs.pop("title")
             ax.set_title(title)
         ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
-        ax.set_xlabel("x")
+        ax.set_xlabel(self.da.geometry._axis_name)
         ax.set_ylabel(self._label_txt())
         return ax
 
@@ -418,7 +418,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         return txt
 
 
-class _DataArrayPlotterLineSpectrum(_DataArrayPlotter):
+class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
     def __init__(self, da: "DataArray") -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
@@ -455,7 +455,12 @@ class _DataArraySpectrumToHm0:
         if isinstance(g, GeometryFMPointSpectrum):
             geometry = GeometryPoint2D(x=g.x, y=g.y)
         elif isinstance(g, GeometryFMLineSpectrum):
-            geometry = Grid1D(n=g.n_nodes, dx=1.0, node_coordinates=g.node_coordinates)
+            geometry = Grid1D(
+                n=g.n_nodes,
+                dx=1.0,
+                node_coordinates=g.node_coordinates,
+                axis_name="node",
+            )
         elif isinstance(g, GeometryFMAreaSpectrum):
             geometry = GeometryFM(
                 node_coordinates=g.node_coordinates,
