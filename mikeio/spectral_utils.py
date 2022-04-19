@@ -189,9 +189,9 @@ def plot_2dspectrum(
 
 def calc_m0_from_spectrum(spec, f, dir=None, tail=True):
     if f is None:
-        raise ValueError(
-            "Moments cannot be calculated because dfsu has no frequency axis"
-        )
+        nd = len(dir)
+        dtheta = (dir[-1] - dir[0]) / (nd - 1)
+        return np.sum(spec, axis=-1) * dtheta * np.pi / 180.0
     df = _f_to_df(f)
 
     if dir is None:
