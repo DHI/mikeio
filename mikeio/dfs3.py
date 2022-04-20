@@ -31,20 +31,23 @@ def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
 
     factory = DfsFactory()
     _write_dfs3_spatial_axis(builder, factory, geometry)
-    proj = geometry.projection_string
-    origin = geometry._origin
+    origin = geometry._origin  # Origin in geographical coordinates
     orient = geometry._orientation
 
-    if geometry.is_geo:
-        proj = factory.CreateProjectionGeoOrigin(proj, *origin, orient)
-    else:
-        cart: Cartography = Cartography.CreateProjOrigin(proj, *origin, orient)
-        proj = factory.CreateProjectionGeoOrigin(
-            wktProjectionString=geometry.projection,
-            lon0=cart.LonOrigin,
-            lat0=cart.LatOrigin,
-            orientation=cart.Orientation,
-        )
+    # if geometry.is_geo:
+    proj = factory.CreateProjectionGeoOrigin(
+        geometry.projection_string, *origin, orient
+    )
+    # else:
+    #    cart: Cartography = Cartography.CreateProjOrigin(
+    #        geometry.projection_string, *origin, orient
+    #    )
+    #    proj = factory.CreateProjectionGeoOrigin(
+    #        wktProjectionString=geometry.projection,
+    #        lon0=cart.LonOrigin,
+    #        lat0=cart.LatOrigin,
+    #        orientation=cart.Orientation,
+    #    )
 
     builder.SetGeographicalProjection(proj)
 
@@ -148,6 +151,7 @@ class Dfs3(_Dfs123):
                 nz=self._nz,
                 origin=(self._longitude, self._latitude),
                 projection=self._projstr,
+                orientation=self._orientation,
             )
 
     def __repr__(self):

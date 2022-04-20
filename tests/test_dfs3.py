@@ -122,11 +122,14 @@ def test_dfs3_read_write(tmpdir):
 
 def test_read_rotated_grid():
     ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
-    assert pytest.approx(ds.geometry._orientation) == 17
+    assert (
+        pytest.approx(ds.geometry._orientation) == 18.1246891021729
+    )  # North to Y rotation != Grid rotation
 
 
 def test_dfs3_to_dfs(tmpdir):
-    ds = mikeio.read("tests/testdata/Grid1.dfs3")
+    ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
+    # ds = mikeio.read("tests/testdata/Grid1.dfs3")
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
     ds.to_dfs(outfilename)
 
