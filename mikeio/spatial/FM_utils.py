@@ -1,5 +1,6 @@
 import numpy as np
 import warnings
+from .utils import _relative_cumulative_distance
 
 
 def _plot_map(
@@ -528,6 +529,7 @@ def _plot_vertical_profile(
     cmin=None,
     cmax=None,
     label="",
+    add_colorbar=True,
     **kwargs,
 ):
     """
@@ -552,6 +554,10 @@ def _plot_vertical_profile(
         colorbar label
     cmap: matplotlib.cm.cmap, optional
         colormap, default viridis
+    edge_color: str, optional
+        color of mesh lines, default: None
+    add_colorbar: bool, optional
+        Add colorbar to plot, default True
     figsize: (float, float), optional
         specify size of figure
     ax: matplotlib.axes, optional
@@ -565,7 +571,8 @@ def _plot_vertical_profile(
     from matplotlib.collections import PolyCollection
 
     nc = node_coordinates
-    x_coordinate = np.hypot(nc[:, 0] - nc[0, 0], nc[:, 1] - nc[0, 1])
+    s_coordinate = _relative_cumulative_distance(nc)
+    # np.hypot(nc[:, 0] - nc[0, 0], nc[:, 1] - nc[0, 1])
     z_coordinate = nc[:, 2] if zn is None else zn
 
     elements = _Get_2DVertical_elements(element_table)
@@ -579,8 +586,8 @@ def _plot_vertical_profile(
             figsize = kwargs["figsize"]
         _, ax = plt.subplots(figsize=figsize)
 
-    yz = np.c_[x_coordinate, z_coordinate]
-    verts = yz[elements]
+    sz = np.c_[s_coordinate, z_coordinate]
+    verts = sz[elements]
 
     if "cmap" in kwargs:
         cmap = kwargs["cmap"]
@@ -594,7 +601,8 @@ def _plot_vertical_profile(
         cmax = np.nanmax(values)
     pc.set_clim(cmin, cmax)
 
-    plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
+    if add_colorbar:
+        plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
     pc.set_array(values)
 
     if "edge_color" in kwargs:
@@ -605,6 +613,7 @@ def _plot_vertical_profile(
 
     ax.add_collection(pc)
     ax.autoscale()
+    ax.set_xlabel("relative distance [m]")
     ax.set_ylabel("z [m]")
 
     if "title" in kwargs:
