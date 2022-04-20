@@ -8,7 +8,7 @@ from scipy.spatial import cKDTree
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from .dfsu import _Dfsu
 from .dataset import Dataset, DataArray
-from .spatial.FM_geometry import GeometryFMLayered
+from .spatial.FM_geometry import GeometryFM3D
 from .custom_exceptions import InvalidGeometry
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .spatial.FM_utils import _plot_vertical_profile
@@ -17,7 +17,7 @@ from .eum import ItemInfo, EUMType
 
 
 class DfsuLayered(_Dfsu):
-    @wraps(GeometryFMLayered.to_2d_geometry)
+    @wraps(GeometryFM3D.to_2d_geometry)
     def to_2d_geometry(self):
         return self.geometry2d
 
@@ -89,7 +89,7 @@ class DfsuLayered(_Dfsu):
             return None
         return self.geometry.bottom_elements
 
-    @wraps(GeometryFMLayered.get_layer_elements)
+    @wraps(GeometryFM3D.get_layer_elements)
     def get_layer_elements(self, layer):
         if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot get_layer_elements")

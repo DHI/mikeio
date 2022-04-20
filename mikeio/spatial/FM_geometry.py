@@ -1068,7 +1068,7 @@ class GeometryFM(_Geometry):
 
     def elements_to_geometry(
         self, elements, node_layers="all"
-    ) -> Union["GeometryFM", "GeometryFMLayered"]:
+    ) -> Union["GeometryFM", "GeometryFM3D"]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
@@ -1121,7 +1121,7 @@ class GeometryFM(_Geometry):
             if n_layers == len(elem_tbl):
                 GeometryClass = GeometryFMVerticalColumn
             else:
-                GeometryClass = GeometryFMLayered
+                GeometryClass = GeometryFM3D
         else:
             GeometryClass = GeometryFM
 
@@ -1298,8 +1298,10 @@ class GeometryFM(_Geometry):
 # class GeometryFMHorizontal(GeometryFM):
 #     pass
 
+class _GeometryFMLayered(GeometryFM):
+    pass
 
-class GeometryFMLayered(GeometryFM):
+class GeometryFM3D(_GeometryFMLayered):
     def __init__(
         self,
         node_coordinates=None,
@@ -1739,7 +1741,7 @@ class GeometryFMLayered(GeometryFM):
     # TODO: add methods for extracting layers etc
 
 
-class GeometryFMVerticalProfile(GeometryFMLayered):
+class GeometryFMVerticalProfile(GeometryFM3D):
     def __init__(
         self,
         node_coordinates=None,
@@ -1807,7 +1809,7 @@ class GeometryFMVerticalProfile(GeometryFMLayered):
         return self.relative_element_distance[idx]
 
 
-class GeometryFMVerticalColumn(GeometryFMLayered):
+class GeometryFMVerticalColumn(GeometryFM3D):
     def calc_ze(self, zn=None):
         if zn is None:
             zn = self.node_coordinates[:, 2]

@@ -12,7 +12,7 @@ from mikecore.DfsFile import DfsSimpleType
 
 from .eum import EUMType, ItemInfo
 from .data_utils import DataUtilsMixin
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
+from .spatial.FM_geometry import GeometryFM, GeometryFM3D
 from .base import TimeSeries
 from .dataarray import DataArray
 from .spatial.geometry import (
@@ -836,7 +836,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             ds = self
 
         if "layer" in kwargs:
-            if isinstance(ds.geometry, GeometryFMLayered):
+            if isinstance(ds.geometry, GeometryFM3D):
                 layer = kwargs.pop("layer")
                 idx = ds.geometry.get_layer_elements(layer)
                 ds = ds.isel(idx, axis="space")

@@ -16,7 +16,7 @@ from .spatial.geometry import (
 from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import (
     GeometryFM,
-    GeometryFMLayered,
+    GeometryFM3D,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
@@ -511,7 +511,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     @staticmethod
     def _parse_zn(zn, geometry, n_timesteps):
         if zn is not None:
-            if isinstance(geometry, GeometryFMLayered):
+            if isinstance(geometry, GeometryFM3D):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
                     raise ValueError(
@@ -795,7 +795,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if hasattr(self.geometry, "isel"):
                 spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
-            if isinstance(geometry, GeometryFMLayered):
+            if isinstance(geometry, GeometryFM3D):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
@@ -852,7 +852,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             da = self
 
         if "layer" in kwargs:
-            if isinstance(da.geometry, GeometryFMLayered):
+            if isinstance(da.geometry, GeometryFM3D):
                 layer = kwargs.pop("layer")
                 idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")
