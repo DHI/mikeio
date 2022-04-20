@@ -2,6 +2,7 @@ import os
 from shutil import copyfile
 from datetime import datetime
 import numpy as np
+import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
@@ -99,9 +100,8 @@ def test_dfs3_write_single_item(tmpdir):
     )
 
 
-def test_dfs3_read_write_deprecated(tmpdir):
-    dfs = mikeio.open("tests/testdata/Grid1.dfs3")
-    ds = dfs.read()
+def test_dfs3_read_write(tmpdir):
+    ds = mikeio.read("tests/testdata/Grid1.dfs3")
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
     items = ds.items
     data = ds.to_numpy()
@@ -120,12 +120,16 @@ def test_dfs3_read_write_deprecated(tmpdir):
     )
 
 
-def test_dfs3_read_write(tmpdir):
-    dfs = mikeio.open("tests/testdata/Grid1.dfs3")
-    ds = dfs.read()
+def test_read_rotated_grid():
+    ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
+    assert pytest.approx(ds.geometry._orientation) == 17
+
+
+def test_dfs3_to_dfs(tmpdir):
+    ds = mikeio.read("tests/testdata/Grid1.dfs3")
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
-    dfs = mikeio.Dfs3()
-    dfs.write(
-        filename=outfilename,
-        data=ds,
-    )
+    ds.to_dfs(outfilename)
+
+    dsnew = mikeio.read(outfilename)
+
+    assert ds.n_items == dsnew.n_items

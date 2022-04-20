@@ -4,17 +4,116 @@ import numpy as np
 from mikecore.eum import eumUnit, eumQuantity
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsFactory import DfsFactory
-from mikecore.DfsFile import DfsSimpleType, DataValueType
+from mikecore.DfsFile import DfsSimpleType, DataValueType, DfsFile
 from mikecore.DfsBuilder import DfsBuilder
+from mikecore.Projections import Cartography
 import pandas as pd
 
-from mikeio.spatial.geometry import GeometryUndefined
 
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .dfs import _Dfs123
 from .spatial.grid_geometry import Grid2D, Grid3D
+from .spatial.geometry import GeometryUndefined
+
+
+def write_dfs3(filename: str, ds: Dataset, title="") -> None:
+    dfs = _write_dfs3_header(filename, ds, title)
+    _write_dfs3_data(dfs, ds)
+
+
+def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
+    builder = DfsBuilder.Create(title, "MIKE IO", 1)
+    builder.SetDataType(0)
+
+    geometry: Grid3D = ds.geometry
+
+    factory = DfsFactory()
+    _write_dfs3_spatial_axis(builder, factory, geometry)
+    proj = geometry.projection_string
+    origin = geometry._origin
+    orient = geometry._orientation
+
+    if geometry.is_geo:
+        proj = factory.CreateProjectionGeoOrigin(proj, *origin, orient)
+    else:
+        cart: Cartography = Cartography.CreateProjOrigin(proj, *origin, orient)
+        proj = factory.CreateProjectionGeoOrigin(
+            wktProjectionString=geometry.projection,
+            lon0=cart.LonOrigin,
+            lat0=cart.LatOrigin,
+            orientation=cart.Orientation,
+        )
+
+    builder.SetGeographicalProjection(proj)
+
+    timestep_unit = TimeStepUnit.SECOND
+    dt = ds.timestep or 1.0  # It can not be None
+    if ds.is_equidistant:
+        time_axis = factory.CreateTemporalEqCalendarAxis(
+            timestep_unit, ds.time[0], 0, dt
+        )
+    else:
+        time_axis = factory.CreateTemporalNonEqCalendarAxis(timestep_unit, ds.time[0])
+    builder.SetTemporalAxis(time_axis)
+
+    for item in ds.items:
+        builder.AddCreateDynamicItem(
+            item.name,
+            eumQuantity.Create(item.type, item.unit),
+            DfsSimpleType.Float,
+            item.data_value_type,
+        )
+
+    try:
+        builder.CreateFile(filename)
+    except IOError:
+        print("cannot create dfs file: ", filename)
+
+    return builder.GetFile()
+
+
+def _write_dfs3_spatial_axis(builder, factory, geometry: Grid3D):
+    builder.SetSpatialAxis(
+        factory.CreateAxisEqD3(
+            eumUnit.eumUmeter,
+            geometry.nx,
+            geometry.x[0],
+            geometry.dx,
+            geometry.ny,
+            geometry.y[0],
+            geometry.dy,
+            geometry.nz,
+            geometry.z[0],
+            geometry.dz,
+        )
+    )
+
+
+def _write_dfs3_data(dfs: DfsFile, ds: Dataset) -> None:
+
+    deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
+    t_rel = 0
+    for i in range(ds.n_timesteps):
+        for item in range(ds.n_items):
+
+            if "time" not in ds.dims:
+                d = ds[item].values
+            else:
+                d = ds[item].values[i]
+            d = d.copy()  # to avoid modifying the input
+            d[np.isnan(d)] = deletevalue
+
+            d = d.reshape(ds.shape[-3:])  # spatial axes
+            darray = d.flatten()
+
+            if not ds.is_equidistant:
+                t_rel = (ds.time[i] - ds.time[0]).total_seconds()
+
+            dfs.WriteItemTimeStepNext(t_rel, darray.astype(np.float32))
+
+    dfs.Close()
 
 
 class Dfs3(_Dfs123):
