@@ -12,11 +12,13 @@ from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
+from .utils import _relative_cumulative_distance
 from .FM_utils import (
     _get_node_centered_data,
     _to_polygons,
     _plot_map,
     _point_in_polygon,
+    _plot_vertical_profile,
 )
 import mikeio.data_utils as du
 
@@ -169,6 +171,36 @@ class _GeometryFMPlotter:
             return 1.0 / np.cos(np.pi * mean_lat / 180)
         else:
             return "equal"
+
+
+class _GeometryFMVerticalProfilePlotter:
+    def __init__(self, geometry: "GeometryFM") -> None:
+        self.g = geometry
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+        x = self.g.node_coordinates[:, 0]
+        y = self.g.node_coordinates[:, 1]
+        ax.plot(x, y, **kwargs)
+        return ax
+
+    def mesh(self, title="Mesh", edge_color="0.5", **kwargs):
+
+        v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
+        return _plot_vertical_profile(
+            node_coordinates=self.g.node_coordinates,
+            element_table=self.g.element_table,
+            values=v,
+            title=title,
+            add_colorbar=False,
+            edge_color=edge_color,
+            cmin=0.0,
+            cmax=1.0,
+            **kwargs,
+        )
 
 
 class GeometryFM(_Geometry):
@@ -1708,7 +1740,71 @@ class GeometryFMLayered(GeometryFM):
 
 
 class GeometryFMVerticalProfile(GeometryFMLayered):
-    pass
+    def __init__(
+        self,
+        node_coordinates=None,
+        element_table=None,
+        codes=None,
+        projection=None,
+        dfsu_type=None,
+        element_ids=None,
+        node_ids=None,
+        n_layers=None,
+        n_sigma=None,
+        validate=True,
+    ) -> None:
+        super().__init__(
+            node_coordinates,
+            element_table,
+            codes,
+            projection,
+            dfsu_type,
+            element_ids,
+            node_ids,
+            n_layers,
+            n_sigma,
+            validate,
+        )
+        self.plot = _GeometryFMVerticalProfilePlotter(self)
+        # self._rel_node_dist = None
+        self._rel_elem_dist = None
+
+    # @property
+    # def relative_node_distance(self):
+    #     if self._rel_node_dist is None:
+    #         nc = self.node_coordinates
+    #         self._rel_node_dist = _relative_cumulative_distance(nc, is_geo=self.is_geo)
+    #     return self._rel_node_dist
+
+    @property
+    def relative_element_distance(self):
+        if self._rel_elem_dist is None:
+            ec = self.element_coordinates
+            nc0 = self.node_coordinates[0, :2]
+            self._rel_elem_dist = _relative_cumulative_distance(
+                ec, nc0, is_geo=self.is_geo
+            )
+        return self._rel_elem_dist
+
+    def get_nearest_relative_distance(self, coords) -> float:
+        """For a point near a transect, find the nearest relative distance
+        for showing position on transect plot.
+
+        Parameters
+        ----------
+        coords : [float, float]
+            x,y-coordinate of point
+
+        Returns
+        -------
+        float
+            relative distance in meters from start of transect
+        """
+        xe = self.element_coordinates[:, 0]
+        ye = self.element_coordinates[:, 1]
+        dd2 = np.square(xe - coords[0]) + np.square(ye - coords[1])
+        idx = np.argmin(dd2)
+        return self.relative_element_distance[idx]
 
 
 class GeometryFMVerticalColumn(GeometryFMLayered):
@@ -1780,50 +1876,3 @@ class GeometryFMVerticalColumn(GeometryFMLayered):
                 zf[step, :] = zn[step, idx].mean(axis=1)
 
         return zf
-
-
-# class GeometryFMSpectral(GeometryFM):
-#     # TODO: add specialized classes: FrequencySpectrum, DirectionalSpectrum
-#     def __init__(
-#         self,
-#         frequencies=None,
-#         directions=None,
-#         node_coordinates=None,
-#         element_table=None,
-#         codes=None,
-#         projection_string=None,
-#         dfsu_type=None,
-#     ) -> None:
-#         super().__init__(
-#             node_coordinates=node_coordinates,
-#             element_table=element_table,
-#             codes=codes,
-#             projection_string=projection_string,
-#             dfsu_type=dfsu_type,
-#         )
-#         self._frequencies = frequencies
-#         self._directions = directions
-#         self._n_axis = 0 if (self.n_elements == 0) else 1
-#         self._n_axis = (
-#             self._n_axis + int(self.n_frequencies > 0) + int(self.n_directions > 0)
-#         )
-
-#     @property
-#     def n_frequencies(self):
-#         """Number of frequencies"""
-#         return 0 if self.frequencies is None else len(self.frequencies)
-
-#     @property
-#     def frequencies(self):
-#         """Frequency axis"""
-#         return self._frequencies
-
-#     @property
-#     def n_directions(self):
-#         """Number of directions"""
-#         return 0 if self.directions is None else len(self.directions)
-
-#     @property
-#     def directions(self):
-#         """Directional axis"""
-#         return self._directions
