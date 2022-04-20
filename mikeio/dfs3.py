@@ -232,6 +232,10 @@ class Dfs3(_Dfs123):
 
         data_list = []
 
+        if layers == "top":
+            layers = -1
+        # if layers == "bottom":
+        #    return NotImplementedError()
         layers = None if layers is None else np.atleast_1d(layers)
         geometry = self._geometry_for_layers(layers, self.geometry)
 
@@ -254,7 +258,10 @@ class Dfs3(_Dfs123):
                 if layers is None:
                     data_list[item][it_number, :, :, :] = d
                 elif len(layers) == 1:
-                    data_list[item][it_number, :, :] = d[layers[0], :, :]
+                    if layers == "bottom":
+                        data_list[item][it_number, :, :] = self._get_bottom_values(d)
+                    else:
+                        data_list[item][it_number, :, :] = d[layers[0], :, :]
                 else:
                     for l in range(len(layers)):
                         data_list[item][it_number, l, :, :] = d[layers[l], :, :]
@@ -382,6 +389,19 @@ class Dfs3(_Dfs123):
                 self._dz,
             )
         )
+
+    @staticmethod
+    def _get_bottom_values(data):
+
+        assert len(data.shape) == 3
+        b = np.empty_like(data[0])
+        b[:] = np.nan
+        data = np.flipud(data)
+        for layer in range(data.shape[0]):  # going from surface to bottom
+            y = data[layer, ...]
+            b[~np.isnan(y)] = y[~np.isnan(y)]
+
+        return b  # Fake it
 
     @staticmethod
     def _geometry_for_layers(layers, geometry):

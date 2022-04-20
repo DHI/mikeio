@@ -59,6 +59,10 @@ def test_dfs3_read_1_layer():
     assert ds.shape == (2, 17, 21)
     assert isinstance(ds.geometry, Grid2D)
 
+    ds = mikeio.read(fn, layers="top")
+    assert ds.shape == (2, 17, 21)
+    assert isinstance(ds.geometry, Grid2D)
+
     ds = mikeio.read(fn, layers=[0])
     assert ds.shape == (2, 17, 21)
     assert isinstance(ds.geometry, Grid2D)
@@ -136,3 +140,16 @@ def test_dfs3_to_dfs(tmpdir):
     dsnew = mikeio.read(outfilename)
 
     assert ds.n_items == dsnew.n_items
+
+
+def test_read_top_layer():
+    ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3", layers="top")
+    assert "z" not in ds.dims
+    assert isinstance(ds.geometry, Grid2D)
+
+
+def test_read_bottom_layer():
+    ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3", layers="bottom")
+    assert "z" not in ds.dims
+    assert isinstance(ds.geometry, Grid2D)
+    assert pytest.approx(ds[0].to_numpy()[0, 58, 52]) == 0.05738005042076111
