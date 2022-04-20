@@ -5,7 +5,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
-from mikeio.spatial.geometry import GeometryPoint3D, GeometryUndefined
+from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D, GeometryUndefined
 
 
 @pytest.fixture
@@ -456,15 +456,15 @@ def test_dataarray_grid2d_repr(da_grid2d):
     assert "values" not in repr(da_grid2d)
 
     da = da_grid2d[:, -1]
-    assert "Grid1D" in repr(da)
+    assert "geometry: Grid1D" in repr(da)
     assert "values" not in repr(da)
 
     da = da_grid2d[:, -1, 0]
-    assert "geometry" not in repr(da)
+    assert "geometry: GeometryPoint2D" in repr(da)
     assert "values" in repr(da)
 
     da = da_grid2d[0, 0, 0]
-    assert "geometry" not in repr(da)
+    assert "geometry: GeometryPoint2D" in repr(da)
     assert "values" in repr(da)
 
 
@@ -484,11 +484,11 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[0, :, :].geometry, mikeio.Grid2D)
     assert isinstance(da[0, 0, :].geometry, mikeio.Grid1D)
     assert isinstance(da[:, :, 0].geometry, mikeio.Grid1D)
-    assert isinstance(da[:, -1, 0].geometry, GeometryUndefined)
+    assert isinstance(da[:, -1, 0].geometry, GeometryPoint2D)
 
     # TODO: slices in other than the time direction will give GeometryUndefined
-    assert isinstance(da[:, 2:5, 0].geometry, GeometryUndefined)
-    assert isinstance(da[:, 2:5, 0:4].geometry, GeometryUndefined)
+    assert isinstance(da[:, 2:5, 0].geometry, mikeio.Grid1D)
+    assert isinstance(da[:, 2:5, 0:4].geometry, mikeio.Grid2D)
 
 
 def test_dataarray_grid3d_indexing():
@@ -590,7 +590,7 @@ def test_da_isel_space_multiple_elements(da_grid2d):
     da_sel = da_grid2d.isel(slice(None, 3), axis="x")
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 14, 3)
-    assert isinstance(da_sel.geometry, GeometryUndefined)
+    assert isinstance(da_sel.geometry, mikeio.Grid2D)
 
 
 def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
@@ -631,7 +631,29 @@ def test_da_sel_layer():
     assert da3.geometry.n_elements == 3700
 
 
-def test_da_sel_area_2d():
+def test_da_sel_xy_grid2d(da_grid2d):
+    # Grid2D(x0=10.0, dx=0.1, nx=7, ny=14, dy=1.0, y0=-10.0),
+    da = da_grid2d
+    da1 = da.sel(x=10.4, y=0.0)
+    assert isinstance(da1.geometry, GeometryPoint2D)
+    assert da1.geometry.x == 10.4
+    assert da1.geometry.y == 0.0
+    assert np.all(da1.to_numpy() == da.to_numpy()[:, 10, 4])
+
+    da2 = da.sel(x=100.4, y=0.0)
+
+
+def test_da_sel_multi_xy_grid2d(da_grid2d):
+    # Grid2D(x0=10.0, dx=0.1, nx=7, ny=14, dy=1.0, y0=-10.0),
+    da = da_grid2d
+    xx = [10.3, 10.5, 10.4]
+    yy = [-1.0, 1.0, -9.0]
+    # TODO: not implemented:
+    # da1 = da.sel(x=xx, y=yy)
+    # assert da1.shape == (10, 3)
+
+
+def test_da_sel_area_dfsu2d():
     filename = "tests/testdata/FakeLake.dfsu"
     da = mikeio.read(filename, items=0)[0]
 
@@ -642,6 +664,25 @@ def test_da_sel_area_2d():
     area = (-0.1, 0.15, 0.0, 0.2)
     da1 = da.sel(area=area)
     assert da1.geometry.n_elements == 14
+
+
+def test_da_sel_area_grid2d():
+    filename = "tests/testdata/gebco_sound.dfs2"
+    da = mikeio.read(filename, items=0)[0]
+    assert da.dims == ("time", "y", "x")
+
+    bbox = [12.4, 55.2, 22.0, 55.6]
+
+    da1 = da.sel(area=bbox)
+    assert da1.geometry.nx == 168
+    assert da1.geometry.ny == 96
+
+    das = da.squeeze()
+    assert das.dims == ("y", "x")
+
+    da = das.sel(area=bbox)
+    assert da1.geometry.nx == 168
+    assert da1.geometry.ny == 96
 
 
 def test_da_sel_area_and_xy_not_ok():

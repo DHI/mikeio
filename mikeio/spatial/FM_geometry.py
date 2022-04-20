@@ -978,7 +978,7 @@ class GeometryFM(_Geometry):
             x0, y0, x1, y1 = area
             xc = self._geometry2d.element_coordinates[:, 0]
             yc = self._geometry2d.element_coordinates[:, 1]
-            mask = (xc > x0) & (xc < x1) & (yc > y0) & (yc < y1)
+            mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
         elif self._area_is_polygon(area):
             polygon = np.array(area)
             xy = self._geometry2d.element_coordinates[:, :2]

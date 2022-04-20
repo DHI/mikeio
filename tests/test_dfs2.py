@@ -15,6 +15,7 @@ from mikeio.custom_exceptions import (
     DataDimensionMismatch,
     ItemsError,
 )
+from mikeio.spatial.geometry import GeometryPoint2D
 from mikeio.spatial.grid_geometry import Grid2D
 
 
@@ -202,6 +203,29 @@ def test_read_temporal_subset_slice():
     assert len(ds.time) == 13
 
 
+def test_read_area_subset():
+
+    filename = r"tests/testdata/eq.dfs2"
+    bbox = [10, 4, 12, 7]
+
+    ds = mikeio.read(filename, area=bbox)
+    assert ds.shape == (25, 4, 3)
+
+    g = ds.geometry
+    assert g.ny == 4
+    assert g.nx == 3
+    assert isinstance(g, Grid2D)
+
+    ds1 = mikeio.read(filename)
+    ds2 = ds1.sel(area=bbox)
+    assert ds2.shape == (25, 4, 3)
+    assert ds2[0].values[4, 2, 1] == ds[0].values[4, 2, 1]
+
+    da2 = ds1[0].sel(area=bbox)
+    assert da2.shape == (25, 4, 3)
+    assert da2.values[4, 2, 1] == ds[0].values[4, 2, 1]
+
+
 def test_read_numbered_access(dfs2_random_2items):
 
     dfs = dfs2_random_2items
@@ -381,9 +405,21 @@ def test_write_some_time_step(tmpdir):
 
 def test_find_by_x_y():
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+
+    ds_point = ds.sel(x=12.74792, y=55.865)
+    assert ds_point[0].values[0] == pytest.approx(-43.0)
+    assert isinstance(ds_point.geometry, GeometryPoint2D)
+
     da = ds.Elevation
     da_point = da.sel(x=12.74792, y=55.865)
     assert da_point.values[0] == pytest.approx(-43.0)
+    assert isinstance(da_point.geometry, GeometryPoint2D)
+    assert da_point.geometry.x == ds_point.geometry.x
+
+    xx = [12.74, 12.39]
+    yy = [55.78, 54.98]
+    with pytest.raises(NotImplementedError):
+        da.sel(x=xx, y=yy)
 
 
 def test_interp_to_x_y():
