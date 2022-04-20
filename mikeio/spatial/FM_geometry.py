@@ -1298,10 +1298,8 @@ class GeometryFM(_Geometry):
 # class GeometryFMHorizontal(GeometryFM):
 #     pass
 
-class _GeometryFMLayered(GeometryFM):
-    pass
 
-class GeometryFM3D(_GeometryFMLayered):
+class _GeometryFMLayered(GeometryFM):
     def __init__(
         self,
         node_coordinates=None,
@@ -1336,87 +1334,6 @@ class GeometryFM3D(_GeometryFMLayered):
         self._2d_ids = None
         self._layer_ids = None
         self.__dz = None
-
-    @property
-    def geometry2d(self):
-        """The 2d geometry for a 3d object"""
-        return self._geometry2d
-
-    def to_2d_geometry(self):
-        """extract 2d geometry from 3d geometry
-
-        Returns
-        -------
-        UnstructuredGeometry
-            2d geometry (bottom nodes)
-        """
-        if self.is_2d:
-            return self
-
-        # extract information for selected elements
-        elem_ids = self.bottom_elements
-        if self._type == DfsuFileType.Dfsu3DSigmaZ:
-            # for z-layers nodes will not match on neighboring elements!
-            elem_ids = self.top_elements
-
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elem_ids, node_layers="bottom"
-        )
-        node_coords = self.node_coordinates[node_ids]
-        codes = self.codes[node_ids]
-
-        # create new geometry
-        geom = GeometryFM(
-            node_coordinates=node_coords,
-            codes=codes,
-            node_ids=node_ids,
-            projection=self.projection_string,
-            element_table=elem_tbl,
-            element_ids=self.element_ids[elem_ids],
-            validate=False,
-        )
-
-        geom._type = None  # DfsuFileType.Mesh
-        geom._reindex()
-
-        # Fix z-coordinate for sigma-z:
-        if self._type == DfsuFileType.Dfsu3DSigmaZ:
-            zn = geom.node_coordinates[:, 2].copy()
-            for j, elem_nodes in enumerate(geom.element_table):
-                elem_nodes3d = self.element_table[self.bottom_elements[j]]
-                for jn in range(len(elem_nodes)):
-                    znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
-                    zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
-            geom.node_coordinates[:, 2] = zn
-
-        return geom
-
-    @property
-    def e2_e3_table(self):
-        """The 2d-to-3d element connectivity table for a 3d object"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot return e2_e3_table")
-            return None
-        if self._e2_e3_table is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._e2_e3_table
-
-    @property
-    def elem2d_ids(self):
-        """The associated 2d element id for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-            # or return self._2d_ids ??
-
-        if self._2d_ids is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._2d_ids
 
     @property
     def layer_ids(self):
@@ -1594,6 +1511,33 @@ class GeometryFM3D(_GeometryFMLayered):
 
         return self.element_ids[self.layer_ids == layer]
 
+    @property
+    def e2_e3_table(self):
+        """The 2d-to-3d element connectivity table for a 3d object"""
+        if self.n_layers is None:
+            print("Object has no layers: cannot return e2_e3_table")
+            return None
+        if self._e2_e3_table is None:
+            res = self._get_2d_to_3d_association()
+            self._e2_e3_table = res[0]
+            self._2d_ids = res[1]
+            self._layer_ids = res[2]
+        return self._e2_e3_table
+
+    @property
+    def elem2d_ids(self):
+        """The associated 2d element id for each 3d element"""
+        if self.n_layers is None:
+            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
+            # or return self._2d_ids ??
+
+        if self._2d_ids is None:
+            res = self._get_2d_to_3d_association()
+            self._e2_e3_table = res[0]
+            self._2d_ids = res[1]
+            self._layer_ids = res[2]
+        return self._2d_ids
+
     def _get_2d_to_3d_association(self):
         e2_to_e3 = (
             []
@@ -1741,7 +1685,63 @@ class GeometryFM3D(_GeometryFMLayered):
     # TODO: add methods for extracting layers etc
 
 
-class GeometryFMVerticalProfile(GeometryFM3D):
+class GeometryFM3D(_GeometryFMLayered):
+    @property
+    def geometry2d(self):
+        """The 2d geometry for a 3d object"""
+        return self._geometry2d
+
+    def to_2d_geometry(self):
+        """extract 2d geometry from 3d geometry
+
+        Returns
+        -------
+        UnstructuredGeometry
+            2d geometry (bottom nodes)
+        """
+        if self.is_2d:
+            return self
+
+        # extract information for selected elements
+        elem_ids = self.bottom_elements
+        if self._type == DfsuFileType.Dfsu3DSigmaZ:
+            # for z-layers nodes will not match on neighboring elements!
+            elem_ids = self.top_elements
+
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+            elem_ids, node_layers="bottom"
+        )
+        node_coords = self.node_coordinates[node_ids]
+        codes = self.codes[node_ids]
+
+        # create new geometry
+        geom = GeometryFM(
+            node_coordinates=node_coords,
+            codes=codes,
+            node_ids=node_ids,
+            projection=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=self.element_ids[elem_ids],
+            validate=False,
+        )
+
+        geom._type = None  # DfsuFileType.Mesh
+        geom._reindex()
+
+        # Fix z-coordinate for sigma-z:
+        if self._type == DfsuFileType.Dfsu3DSigmaZ:
+            zn = geom.node_coordinates[:, 2].copy()
+            for j, elem_nodes in enumerate(geom.element_table):
+                elem_nodes3d = self.element_table[self.bottom_elements[j]]
+                for jn in range(len(elem_nodes)):
+                    znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
+                    zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
+            geom.node_coordinates[:, 2] = zn
+
+        return geom
+
+
+class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
         self,
         node_coordinates=None,
@@ -1770,6 +1770,21 @@ class GeometryFMVerticalProfile(GeometryFM3D):
         self.plot = _GeometryFMVerticalProfilePlotter(self)
         # self._rel_node_dist = None
         self._rel_elem_dist = None
+
+        # remove inherited but unsupported methods
+        self.interp2d = None
+
+    @property
+    def boundary_polylines(self):
+        raise AttributeError(
+            "GeometryFMVerticalProfile has no boundary_polylines property"
+        )
+
+    # remove unsupported methods from dir to avoid confusion
+    def __dir__(self):
+        unsupported = ("boundary_polylines", "interp2d")
+        keys = sorted(list(super().__dir__()) + list(self.__dict__.keys()))
+        return set([d for d in keys if d not in unsupported])
 
     # @property
     # def relative_node_distance(self):

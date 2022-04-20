@@ -15,6 +15,7 @@ from .spatial.geometry import (
 )
 from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import (
+    _GeometryFMLayered,
     GeometryFM,
     GeometryFM3D,
     GeometryFMPointSpectrum,
@@ -511,7 +512,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     @staticmethod
     def _parse_zn(zn, geometry, n_timesteps):
         if zn is not None:
-            if isinstance(geometry, GeometryFM3D):
+            if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
                     raise ValueError(
