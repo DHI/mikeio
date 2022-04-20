@@ -1298,8 +1298,10 @@ class GeometryFM(_Geometry):
 # class GeometryFMHorizontal(GeometryFM):
 #     pass
 
+
 class _GeometryFMLayered(GeometryFM):
     pass
+
 
 class GeometryFM3D(_GeometryFMLayered):
     def __init__(
