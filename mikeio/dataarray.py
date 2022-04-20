@@ -335,7 +335,7 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
 
         values, zn = self._get_first_step_values()
         g = self.da.geometry
-        _plot_vertical_profile(
+        return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             values=values,
