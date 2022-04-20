@@ -401,7 +401,7 @@ class Dfs3(_Dfs123):
             y = data[layer, ...]
             b[~np.isnan(y)] = y[~np.isnan(y)]
 
-        return b  # Fake it
+        return b
 
     @property
     def dx(self):

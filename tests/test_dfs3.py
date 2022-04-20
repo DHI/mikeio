@@ -153,3 +153,13 @@ def test_read_bottom_layer():
     assert "z" not in ds.dims
     assert isinstance(ds.geometry, Grid2D)
     assert pytest.approx(ds[0].to_numpy()[0, 58, 52]) == 0.05738005042076111
+
+
+def test_sel_bottom_layer():
+    dsall = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
+    with pytest.raises(NotImplementedError) as excinfo:
+        dsall.sel(layer="bottom")  # TODO layers vs layer
+    assert "mikeio.read" in str(excinfo.value)
+    # assert "z" not in ds.dims
+    # assert isinstance(ds.geometry, Grid2D)
+    # assert pytest.approx(ds[0].to_numpy()[0, 58, 52]) == 0.05738005042076111
