@@ -237,7 +237,7 @@ class Dfs3(_Dfs123):
         # if layers == "bottom":
         #    return NotImplementedError()
         layers = None if layers is None else np.atleast_1d(layers)
-        geometry = self._geometry_for_layers(layers, self.geometry)
+        geometry = self.geometry._geometry_for_layers(layers)
 
         nz = zNum if layers is None else len(layers)
         shape = (nt, nz, yNum, xNum) if nz > 1 else (nt, yNum, xNum)
@@ -402,33 +402,6 @@ class Dfs3(_Dfs123):
             b[~np.isnan(y)] = y[~np.isnan(y)]
 
         return b  # Fake it
-
-    @staticmethod
-    def _geometry_for_layers(layers, geometry):
-        if layers is not None:
-            g = geometry
-            if len(layers) == 1:
-                geometry = Grid2D(
-                    x=g.x + g._origin[0],
-                    y=g.y + g._origin[1],
-                    projection=g.projection,
-                )
-            else:
-                d = np.diff(g.z[layers])
-                if np.any(d < 1) or not np.allclose(d, d[0]):
-                    warnings.warn(
-                        "Extracting non-equidistant layers! Cannot use Grid3D."
-                    )
-                    geometry = GeometryUndefined()
-                else:
-                    geometry = Grid3D(
-                        x=g.x,
-                        y=g.y,
-                        z=g.z[layers],
-                        origin=g._origin,
-                        projection=g.projection,
-                    )
-        return geometry
 
     @property
     def dx(self):

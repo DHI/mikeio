@@ -1,7 +1,9 @@
-from typing import Tuple
+from typing import Tuple, Union
+import warnings
 import numpy as np
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
+from torch import ge
 from .geometry import _Geometry, GeometryUndefined, BoundingBox
 from ..eum import EUMType, EUMUnit
 
@@ -780,3 +782,29 @@ class Grid3D(_Geometry):
 
     def __str__(self):
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"
+
+    def _geometry_for_layers(self, layers) -> Union[Grid2D, "Grid3D"]:
+        if layers is None:
+            return self
+
+        g = self
+        if len(layers) == 1:
+            geometry = Grid2D(
+                x=g.x + g._origin[0],
+                y=g.y + g._origin[1],
+                projection=g.projection,
+            )
+        else:
+            d = np.diff(g.z[layers])
+            if np.any(d < 1) or not np.allclose(d, d[0]):
+                warnings.warn("Extracting non-equidistant layers! Cannot use Grid3D.")
+                geometry = GeometryUndefined()
+            else:
+                geometry = Grid3D(
+                    x=g.x,
+                    y=g.y,
+                    z=g.z[layers],
+                    origin=g._origin,
+                    projection=g.projection,
+                )
+        return geometry
