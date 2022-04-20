@@ -24,18 +24,18 @@ from .spatial.geometry import (
 from .spatial.grid_geometry import Grid1D, Grid2D
 
 
-def _repeat_items(
-    items_in: Sequence[ItemInfo], prefixes: Sequence[str]
-) -> Sequence[ItemInfo]:
-    """Rereat a list of items n times with different prefixes"""
-    new_items = []
-    for item_in in items_in:
-        for prefix in prefixes:
-            item = deepcopy(item_in)
-            item.name = f"{prefix}, {item.name}"
-            new_items.append(item)
+# def _repeat_items(
+#     items_in: Sequence[ItemInfo], prefixes: Sequence[str]
+# ) -> Sequence[ItemInfo]:
+#     """Rereat a list of items n times with different prefixes"""
+#     new_items = []
+#     for item_in in items_in:
+#         for prefix in prefixes:
+#             item = deepcopy(item_in)
+#             item.name = f"{prefix}, {item.name}"
+#             new_items.append(item)
 
-    return new_items
+#     return new_items
 
 
 class _DatasetPlotter:
@@ -328,10 +328,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         for da in self:
             self._id_of_DataArrays_equal(da, new_da)
 
-    # ---- end of init ---------
+    # ============ end of init =============
+
+    # ============= Basic properties/methods ===========
 
     @property
-    def time(self):
+    def time(self) -> pd.DatetimeIndex:
         return list(self)[0].time
 
     @time.setter
@@ -345,26 +347,27 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     @property
     def start_time(self):
         """First time instance (as datetime)"""
+        # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()
 
     @property
     def end_time(self):
         """Last time instance (as datetime)"""
+        # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
 
     @property
-    def timestep(self):
+    def timestep(self) -> Optional[float]:
         """Time step in seconds if equidistant (and at
         least two time instances); otherwise None
         """
         dt = None
-        if len(self.time) > 1:
-            if self.is_equidistant:
-                dt = (self.time[1] - self.time[0]).total_seconds()
+        if len(self.time) > 1 and self.is_equidistant:
+            dt = (self.time[1] - self.time[0]).total_seconds()
         return dt
 
     @property
-    def is_equidistant(self):
+    def is_equidistant(self) -> bool:
         """Is Dataset equidistant in time?"""
         if len(self.time) < 3:
             return True
@@ -379,8 +382,17 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         )
         return [x.to_numpy() for x in self]
 
+    def to_numpy(self) -> np.ndarray:
+        """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
+
+        Returns
+        -------
+        np.ndarray
+        """
+        return np.stack([x.to_numpy() for x in self])
+
     @property
-    def n_timesteps(self):
+    def n_timesteps(self) -> int:
         """Number of time steps"""
         return len(self.time)
 
@@ -390,17 +402,20 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return [x.item for x in self]
 
     @property
-    def names(self):
-        """Name of each of the DataArrays as a list"""
-        return [da.name for da in self]
-
-    @property
-    def n_items(self):
+    def n_items(self) -> int:
         """Number of items/DataArrays, equivalent to len()"""
         return len(self._data_vars)
 
     @property
-    def ndim(self):
+    def names(self):
+        """Name of each of the DataArrays as a list"""
+        return [da.name for da in self]
+
+    def _ipython_key_completions_(self):
+        return [x.name for x in self.items]
+
+    @property
+    def ndim(self) -> int:
         """Number of data dimensions of each DataArray"""
         return self[0].ndim
 
@@ -414,15 +429,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """Shape of each DataArray"""
         return self[0].shape
 
-    # TODO: remove this
-    @property
-    def n_elements(self):
-        """Number of spatial elements/points"""
-        n_elem = np.prod(self.shape)
-        if self.n_timesteps > 1:
-            n_elem = int(n_elem / self.n_timesteps)
-        return n_elem
-
     @property
     def deletevalue(self):
         """File delete value"""
@@ -434,24 +440,80 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return self[0].geometry
 
     @property
-    def _zn(self):
+    def _zn(self) -> np.ndarray:
         return self[0]._zn
 
-    def __repr__(self):
-        if len(self) == 0:
-            return "Empty <mikeio.Dataset>"
-        da = self[0]
-        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]
-        out = [x for x in out if x is not None]
+    # TODO: remove this
+    @property
+    def n_elements(self) -> int:
+        """Number of spatial elements/points"""
+        n_elem = np.prod(self.shape)
+        if self.n_timesteps > 1:
+            n_elem = int(n_elem / self.n_timesteps)
+        return n_elem
 
-        if self.n_items > 10:
-            out.append(f"number of items: {self.n_items}")
-        else:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
+    def describe(self, **kwargs) -> pd.DataFrame:
+        """Generate descriptive statistics by wrapping pandas describe()"""
+        data = {x.name: x.to_numpy().ravel() for x in self}
+        df = pd.DataFrame(data).describe(**kwargs)
 
-        return str.join("\n", out)
+        return df
+
+    def copy(self) -> "Dataset":
+        """Returns a copy of this dataset."""
+
+        return deepcopy(self)
+
+    def dropna(self) -> "Dataset":
+        """Remove time steps where all items are NaN"""
+
+        # TODO consider all items
+        x = self[0].to_numpy()
+
+        # this seems overly complicated...
+        axes = tuple(range(1, x.ndim))
+        idx = np.where(~np.isnan(x).all(axis=axes))
+        idx = list(idx[0])
+
+        return self.isel(idx, axis=0)
+
+    def flipud(self) -> "Dataset":
+        """Flip dataset upside down"""
+        self._data_vars = {
+            key: value.flipud() for (key, value) in self._data_vars.items()
+        }
+        return self
+
+    def squeeze(self) -> "Dataset":
+        """
+        Remove axes of length 1
+
+        Returns
+        -------
+        Dataset
+        """
+        res = {name: da.squeeze() for name, da in self._data_vars.items()}
+
+        return Dataset(res)
+
+    # TODO: delete this?
+    @staticmethod
+    def create_empty_data(n_items=1, n_timesteps=1, n_elements=None, shape=None):
+        data = []
+        if shape is None:
+            if n_elements is None:
+                raise ValueError("n_elements and shape cannot both be None")
+            else:
+                shape = n_elements
+        if np.isscalar(shape):
+            shape = [shape]
+        dati = np.empty(shape=(n_timesteps, *shape))
+        dati[:] = np.nan
+        for _ in range(n_items):
+            data.append(dati.copy())
+        return data
+
+    # ============= Dataset is (almost) a MutableMapping ===========
 
     def __len__(self):
         return len(self._data_vars)
@@ -558,6 +620,22 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.pop(0)
 
+    def rename(self, mapper: Mapping[str, str], inplace=False):
+        # TODO: docstring
+        if inplace:
+            ds = self
+        else:
+            ds = self.copy()
+
+        for old_name, new_name in mapper.items():
+            da = ds._data_vars.pop(old_name)
+            da.name = new_name
+            ds._data_vars[new_name] = da
+            self._del_name_attr(old_name)
+            self._set_name_attr(new_name, da)
+
+        return ds
+
     def _set_name_attr(self, name: str, value: DataArray):
         name = self._to_safe_name(name)
         item_names = [self._to_safe_name(n) for n in self.names]
@@ -578,6 +656,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
 
         # select time steps
+        if (
+            isinstance(key, Iterable) and not isinstance(key, str)
+        ) and self._is_key_time(key[0]):
+            key = pd.DatetimeIndex(key)
         if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
             time_steps = pd.Series(range(len(self.time)), index=self.time)[key]
             time_steps = (
@@ -592,6 +674,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 except:
                     time_steps = list(range(*key.indices(len(self.time))))
                 return self.isel(time_steps, axis=0)
+
+        if self._multi_indexing_attempted(key):
+            raise TypeError(
+                f"Indexing with key {key} failed. Dataset does not allow multi-indexing. Use isel() or sel() instead."
+            )
 
         # select items
         key = self._key_to_str(key)
@@ -627,8 +714,27 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             return True
         return False
 
-    def _key_to_str(self, key):
+    def _multi_indexing_attempted(self, key):
+        # find out if user is attempting ds[2, :, 1] or similar (not allowed)
+        # this is not bullet-proof, but a good estimate
+        if not isinstance(key, tuple):
+            return False
+        for k in key:
+            if isinstance(k, slice):
+                warnings.warn(f"Key is a tuple containing a slice")
+                return True
+            if not isinstance(k, (str, int)):
+                warnings.warn(f"Key is a tuple containing illegal type {type(k)}")
+                return True
+        if len(set(key)) != len(key):
+            return True
+        warnings.warn(
+            f"A tuple of item numbers/names was provided as index to Dataset. This can lead to ambiguity and it is recommended to use a list instead."
+        )
+        return False
 
+    def _key_to_str(self, key):
+        """Translate item selection key to str (or List[str])"""
         if isinstance(key, str):
             return key
         if isinstance(key, int):
@@ -651,321 +757,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self._data_vars.__delitem__(key)
         self._del_name_attr(key)
 
-    def rename(self, mapper: Mapping[str, str], inplace=False):
-
-        if inplace:
-            ds = self
-        else:
-            ds = self.copy()
-
-        for old_name, new_name in mapper.items():
-            da = ds._data_vars.pop(old_name)
-            da.name = new_name
-            ds._data_vars[new_name] = da
-            self._del_name_attr(old_name)
-            self._set_name_attr(new_name, da)
-
-        return ds
-
-    # ---- arithmetic ---------
-
-    def __radd__(self, other):
-        return self.__add__(other)
-
-    def __add__(self, other):
-        if isinstance(other, self.__class__):
-            return self._add_dataset(other)
-        else:
-            return self._add_value(other)
-
-    def __rsub__(self, other):
-        ds = self.__mul__(-1.0)
-        return other + ds
-
-    def __sub__(self, other):
-        if isinstance(other, self.__class__):
-            return self._add_dataset(other, sign=-1.0)
-        else:
-            return self._add_value(-other)
-
-    def __rmul__(self, other):
-        return self.__mul__(other)
-
-    def __mul__(self, other):
-        if isinstance(other, self.__class__):
-            raise ValueError("Multiplication is not possible for two Datasets")
-        else:
-            return self._multiply_value(other)
-
-    def _add_dataset(self, other, sign=1.0):
-        self._check_datasets_match(other)
-        try:
-            data = [
-                self[x].to_numpy() + sign * other[y].to_numpy()
-                for x, y in zip(self.items, other.items)
-            ]
-        except:
-            raise ValueError("Could not add data in Dataset")
-        time = self.time.copy()
-        items = deepcopy(self.items)
-        return Dataset(data, time, items)
-
-    def _check_datasets_match(self, other):
-        if self.n_items != other.n_items:
-            raise ValueError(
-                f"Number of items must match ({self.n_items} and {other.n_items})"
-            )
-        for j in range(self.n_items):
-            if self.items[j].type != other.items[j].type:
-                raise ValueError(
-                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
-                )
-            if self.items[j].unit != other.items[j].unit:
-                raise ValueError(
-                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
-                )
-        if not np.all(self.time == other.time):
-            raise ValueError("All timesteps must match")
-        if self.shape != other.shape:
-            raise ValueError("shape must match")
-
-    def _add_value(self, value):
-        try:
-            data = [value + self[x].to_numpy() for x in self.items]
-        except:
-            raise ValueError(f"{value} could not be added to Dataset")
-        items = deepcopy(self.items)
-        time = self.time.copy()
-        return Dataset(data, time, items)
-
-    def _multiply_value(self, value):
-        try:
-            data = [value * self[x].to_numpy() for x in self.items]
-        except:
-            raise ValueError(f"{value} could not be multiplied to Dataset")
-        items = deepcopy(self.items)
-        time = self.time.copy()
-        return Dataset(data, time, items)
-
-    def describe(self, **kwargs):
-        """Generate descriptive statistics by wrapping pandas describe()"""
-        data = {x.name: x.to_numpy().ravel() for x in self}
-        df = pd.DataFrame(data).describe(**kwargs)
-
-        return df
-
-    def copy(self):
-        """Returns a copy of this dataset."""
-
-        return deepcopy(self)
-
-    def to_numpy(self):
-        """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
-
-        Returns
-        -------
-        np.ndarray
-        """
-        return np.stack([x.to_numpy() for x in self])
-
-    @classmethod
-    def combine(cls, *datasets):
-        """Combine n Datasets either along items or time axis
-
-        Parameters
-        ----------
-            *datasets: datasets to combine
-
-        Returns
-        -------
-        Dataset
-            a combined dataset
-
-        Examples
-        --------
-        >>> import mikeio
-        >>> from mikeio import Dataset
-        >>> ds1 = mikeio.read("HD2D.dfsu", items=0)
-        >>> ds1
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        >>> ds2 = mikeio.read("HD2D.dfsu", items=[2,3])
-        >>> ds2
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  V velocity <v velocity component> (meter per sec)
-        1:  Current speed <Current Speed> (meter per sec)
-        >>> ds3 = Dataset.combine(ds1,ds2)
-        >>> ds3
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  V velocity <v velocity component> (meter per sec)
-        2:  Current speed <Current Speed> (meter per sec)
-        """
-
-        if isinstance(datasets[0], Iterable):
-            if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
-                datasets = datasets[0]
-
-        # if isinstance(datasets[0], DataArray):
-        #     ds = datasets[0]._to_dataset()
-        #     print("to dataset")
-        # else:
-        ds = datasets[0].copy()
-
-        for dsj in datasets[1:]:
-            ds = ds._combine(dsj, copy=False)
-        return ds
-
-    def _combine(self, other, copy=True):
-        try:
-            ds = self._concat_time(other, copy=copy)
-        except ValueError:
-            ds = self._append_items(other, copy=copy)
-        return ds
-
-    def append(self, other, inplace=False):
-        # TODO: require other da
-        return self.append_items(other, inplace)
-
-    def append_items(self, other, inplace=False):
-        """Append items from other Dataset to this Dataset"""
-        if inplace:
-            self._append_items(other, copy=False)
-        else:
-            return self._append_items(other, copy=True)
-
-    def _append_items(self, other, copy=True):
-        if isinstance(other, DataArray):
-            other = other._to_dataset()
-        item_names = {item.name for item in self.items}
-        other_names = {item.name for item in other.items}
-
-        overlap = other_names.intersection(item_names)
-        if len(overlap) != 0:
-            raise ValueError("Can not append items, names are not unique")
-
-        if not np.all(self.time == other.time):
-            # if not: create common time?
-            raise ValueError("All timesteps must match")
-        ds = self.copy() if copy else self
-
-        for key, value in other._data_vars.items():
-            if key != "Z coordinate":
-                ds[key] = value
-
-        return ds
-
-    def concat(self, other):
-        """Concatenate this Dataset with data from other Dataset
-
-        Parameters
-        ---------
-        other: Dataset
-            Other dataset to concatenate with
-
-        Returns
-        -------
-        Dataset
-            concatenated dataset
-
-
-        Examples
-        --------
-        >>> import mikeio
-        >>> ds1 = mikeio.read("HD2D.dfsu", time_steps=[0,1])
-        >>> ds2 = mikeio.read("HD2D.dfsu", time_steps=[2,3])
-        >>> ds1.n_timesteps
-        2
-        >>> ds3 = ds1.concat(ds2)
-        >>> ds3.n_timesteps
-        4
-        """
-
-        ds = self._concat_time(other, copy=True)
-
-        return ds
-
-    def _concat_time(self, other, copy=True):
-        self._check_all_items_match(other)
-        if not np.all(self.shape[1:] == other.shape[1:]):
-            raise ValueError("Shape of the datasets must match (except time dimension)")
-        ds = self.copy() if copy else self
-
-        s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
-        s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
-        df12 = pd.concat([s1, s2], axis=1)
-
-        newtime = df12.index
-        newdata = self.create_empty_data(
-            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
-        )
-        idx1 = np.where(~df12["idx1"].isna())
-        idx2 = np.where(~df12["idx2"].isna())
-        for j in range(ds.n_items):
-            # if there is an overlap "other" data will be used!
-            newdata[j][idx1, :] = ds[j].to_numpy()
-            newdata[j][idx2, :] = other[j].to_numpy()
-
-        zn = None
-        if self._zn is not None:
-            zshape = (len(newtime), self._zn.shape[1])
-            zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
-            zn[idx1, :] = self._zn
-            zn[idx2, :] = other._zn
-
-        return Dataset(
-            newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
-        )
-
-    def _check_all_items_match(self, other):
-        if self.n_items != other.n_items:
-            raise ValueError(
-                f"Number of items must match ({self.n_items} and {other.n_items})"
-            )
-        for j in range(self.n_items):
-            if self.items[j].name != other.items[j].name:
-                raise ValueError(
-                    f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}"
-                )
-            if self.items[j].type != other.items[j].type:
-                raise ValueError(
-                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
-                )
-            if self.items[j].unit != other.items[j].unit:
-                raise ValueError(
-                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
-                )
-
-    def dropna(self):
-        """Remove time steps where all items are NaN"""
-
-        # TODO consider all items
-        x = self[0].to_numpy()
-
-        # this seems overly complicated...
-        axes = tuple(range(1, x.ndim))
-        idx = np.where(~np.isnan(x).all(axis=axes))
-        idx = list(idx[0])
-
-        return self.isel(idx, axis=0)
-
-    def flipud(self):
-        """Flip dataset upside down"""
-        self._data_vars = {
-            key: value.flipud() for (key, value) in self._data_vars.items()
-        }
-        return self
-
-    # ===== select =========
+    # ============ select/interp =============
 
     def isel(self, idx=None, axis=0, **kwargs):
         """
@@ -1002,253 +794,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return Dataset(res)
 
-    # ===== aggregate =========
-
-    def aggregate(self, axis="time", func=np.nanmean, **kwargs):
-        """Aggregate along an axis
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-        func: function, optional
-            default np.nanmean
-
-        Returns
-        -------
-        Dataset
-            dataset with aggregated values
-        """
-
-        res = {
-            name: da.aggregate(axis=axis, func=func, **kwargs)
-            for name, da in self._data_vars.items()
-        }
-
-        return Dataset(res)
-
-    def quantile(self, q, *, axis="time", **kwargs):
-        """Compute the q-th quantile of the data along the specified axis.
-
-        Wrapping np.quantile
-
-        Parameters
-        ----------
-        q: array_like of float
-            Quantile or sequence of quantiles to compute,
-            which must be between 0 and 1 inclusive.
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with quantile values
-
-        Examples
-        --------
-        >>> ds.quantile(q=[0.25,0.75])
-        >>> ds.quantile(q=0.5)
-        >>> ds.quantile(q=[0.01,0.5,0.99], axis="space")
-
-        See Also
-        --------
-        nanquantile : quantile with NaN values ignored
-        """
-        return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
-
-    def nanquantile(self, q, *, axis="time", **kwargs):
-        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
-
-        Wrapping np.nanquantile
-
-        Parameters
-        ----------
-        q: array_like of float
-            Quantile or sequence of quantiles to compute,
-            which must be between 0 and 1 inclusive.
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Examples
-        --------
-        >>> ds.nanquantile(q=[0.25,0.75])
-        >>> ds.nanquantile(q=0.5)
-        >>> ds.nanquantile(q=[0.01,0.5,0.99], axis="space")
-
-        Returns
-        -------
-        Dataset
-            dataset with quantile values
-        """
-        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
-
-    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
-
-        if np.isscalar(q):
-            res = [da._quantile(q=q, axis=axis, func=func) for da in self]
-        else:
-            res = []
-
-            for name, da in self._data_vars.items():
-                for quantile in q:
-                    qd = da._quantile(q=quantile, axis=axis, func=func)
-                    newname = f"Quantile {quantile}, {name}"
-                    qd.name = newname
-                    res.append(qd)
-
-        return Dataset(res)
-
-    def max(self, axis="time"):
-        """Max value along an axis
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with max value
-
-        See Also
-        --------
-            nanmax : Max values with NaN values removed
-        """
-        return self.aggregate(axis=axis, func=np.max)
-
-    def min(self, axis="time"):
-        """Min value along an axis
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with max value
-
-        See Also
-        --------
-            nanmin : Min values with NaN values removed
-        """
-        return self.aggregate(axis=axis, func=np.min)
-
-    def mean(self, axis="time"):
-        """Mean value along an axis
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with mean value
-
-        See Also
-        --------
-            nanmean : Mean values with NaN values removed
-            average: Weighted average
-        """
-        return self.aggregate(axis=axis, func=np.mean)
-
-    def average(self, weights, axis="time"):
-        """
-        Compute the weighted average along the specified axis.
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with weighted average value
-
-        See Also
-        --------
-            nanmean : Mean values with NaN values removed
-            aggregate: Weighted average
-
-        Examples
-        --------
-        >>> dfs = Dfsu("HD2D.dfsu")
-        >>> ds = dfs.read(["Current speed"])
-        >>> area = dfs.get_element_area()
-        >>> ds2 = ds.average(axis="space", weights=area)
-        """
-
-        def func(x, axis, keepdims):
-            if keepdims:
-                raise NotImplementedError()
-
-            return np.average(x, weights=weights, axis=axis)
-
-        return self.aggregate(axis=axis, func=func)
-
-    def nanmax(self, axis="time"):
-        """Max value along an axis (NaN removed)
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with max value
-        """
-        return self.aggregate(axis=axis, func=np.nanmax)
-
-    def nanmin(self, axis="time"):
-        """Min value along an axis (NaN removed)
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with max value
-        """
-        return self.aggregate(axis=axis, func=np.nanmin)
-
-    def nanmean(self, axis="time"):
-        """Mean value along an axis (NaN removed)
-
-        Parameters
-        ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
-
-        Returns
-        -------
-        Dataset
-            dataset with mean value
-        """
-        return self.aggregate(axis=axis, func=np.nanmean)
-
-    def squeeze(self):
-        """
-        Remove axes of length 1
-
-        Returns
-        -------
-        Dataset
-        """
-        res = {name: da.squeeze() for name, da in self._data_vars.items()}
-
-        return Dataset(res)
-
     def sel(
         self,
         *,
@@ -1262,15 +807,31 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Examples
         --------
         ds.sel(layer='bottom')
-        ds.sel(x=1.0,y=55.0)
-        ds.sel(area=[1.,12., 2., 15.])
+        ds.sel(x=1.0, y=55.0)
+        ds.sel(area=[1., 12., 2., 15.])
         """
+
+        # TODO: delegate select in space to geometry
+        t_ax = 1 if self.dims[0][0] == "t" else 0
 
         # select in space
         if (x is not None) or (y is not None) or (z is not None):
-            # idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
-            idx = self.geometry.find_index(x=x, y=y, z=z)
-            ds = self.isel(idx, axis="space")
+            if isinstance(self.geometry, Grid2D):  # TODO find out better way
+                xy = np.column_stack((x, y))
+                if len(xy) > 1:
+                    raise NotImplementedError(
+                        "Grid2D does not support multiple point sel()"
+                    )
+                i, j = self.geometry.find_index(xy=xy)
+                if i == -1 or j == -1:
+                    return None
+                tmp = self.isel(idx=j[0], axis=(0 + t_ax))
+                sp_axis = 0 if len(j) == 1 else 1
+                ds = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
+            else:
+                # idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
+                idx = self.geometry.find_index(x=x, y=y, z=z)
+                ds = self.isel(idx, axis="space")
         else:
             ds = self
 
@@ -1283,12 +844,19 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
         if "area" in kwargs:
+            area = kwargs.pop("area")
             if isinstance(ds.geometry, GeometryFM):
-                area = kwargs.pop("area")
                 idx = ds.geometry._elements_in_area(area)
                 ds = ds.isel(idx, axis="space")
+            elif isinstance(ds.geometry, Grid2D):
+                ii, jj = self.geometry.find_index(area=area)
+                tmp = self.isel(idx=jj, axis=(0 + t_ax))
+                sp_axis = 0 if len(jj) == 1 else 1
+                ds = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
             else:
-                raise ValueError("'area' can only be selected from Dfsu data")
+                raise ValueError(
+                    "'area' can only be selected from Grid2D or flexible mesh data"
+                )
 
         if len(kwargs) > 0:
             args = ",".join(kwargs)
@@ -1408,7 +976,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         method="linear",
         extrapolate=True,
         fill_value=np.nan,
-    ):
+    ) -> "Dataset":
         """Temporal interpolation
 
         Wrapper of `scipy.interpolate.interp`
@@ -1479,6 +1047,502 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             zn=zn,
         )
 
+    # ============= Combine/concat ===========
+
+    @classmethod
+    def combine(cls, *datasets):
+        """Combine n Datasets either along items or time axis
+
+        Parameters
+        ----------
+            *datasets: datasets to combine
+
+        Returns
+        -------
+        Dataset
+            a combined dataset
+
+        Examples
+        --------
+        >>> import mikeio
+        >>> from mikeio import Dataset
+        >>> ds1 = mikeio.read("HD2D.dfsu", items=0)
+        >>> ds1
+        <mikeio.Dataset>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        >>> ds2 = mikeio.read("HD2D.dfsu", items=[2,3])
+        >>> ds2
+        <mikeio.Dataset>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  V velocity <v velocity component> (meter per sec)
+        1:  Current speed <Current Speed> (meter per sec)
+        >>> ds3 = Dataset.combine(ds1,ds2)
+        >>> ds3
+        <mikeio.Dataset>
+        Dimensions: (9, 884)
+        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
+        Items:
+        0:  Surface elevation <Surface Elevation> (meter)
+        1:  V velocity <v velocity component> (meter per sec)
+        2:  Current speed <Current Speed> (meter per sec)
+        """
+
+        if isinstance(datasets[0], Iterable):
+            if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
+                datasets = datasets[0]
+
+        # if isinstance(datasets[0], DataArray):
+        #     ds = datasets[0]._to_dataset()
+        #     print("to dataset")
+        # else:
+        ds = datasets[0].copy()
+
+        for dsj in datasets[1:]:
+            ds = ds._combine(dsj, copy=False)
+        return ds
+
+    def _combine(self, other, copy=True):
+        try:
+            ds = self._concat_time(other, copy=copy)
+        except ValueError:
+            ds = self._append_items(other, copy=copy)
+        return ds
+
+    def append(self, other, inplace=False):
+        # TODO: require other da
+        return self.append_items(other, inplace)
+
+    def append_items(self, other, inplace=False):
+        """Append items from other Dataset to this Dataset"""
+        if inplace:
+            self._append_items(other, copy=False)
+        else:
+            return self._append_items(other, copy=True)
+
+    def _append_items(self, other, copy=True):
+        if isinstance(other, DataArray):
+            other = other._to_dataset()
+        item_names = {item.name for item in self.items}
+        other_names = {item.name for item in other.items}
+
+        overlap = other_names.intersection(item_names)
+        if len(overlap) != 0:
+            raise ValueError("Can not append items, names are not unique")
+
+        if not np.all(self.time == other.time):
+            # if not: create common time?
+            raise ValueError("All timesteps must match")
+        ds = self.copy() if copy else self
+
+        for key, value in other._data_vars.items():
+            if key != "Z coordinate":
+                ds[key] = value
+
+        return ds
+
+    def concat(self, other) -> "Dataset":
+        """Concatenate this Dataset with data from other Dataset
+
+        Parameters
+        ---------
+        other: Dataset
+            Other dataset to concatenate with
+
+        Returns
+        -------
+        Dataset
+            concatenated dataset
+
+
+        Examples
+        --------
+        >>> import mikeio
+        >>> ds1 = mikeio.read("HD2D.dfsu", time_steps=[0,1])
+        >>> ds2 = mikeio.read("HD2D.dfsu", time_steps=[2,3])
+        >>> ds1.n_timesteps
+        2
+        >>> ds3 = ds1.concat(ds2)
+        >>> ds3.n_timesteps
+        4
+        """
+
+        ds = self._concat_time(other, copy=True)
+
+        return ds
+
+    def _concat_time(self, other, copy=True) -> "Dataset":
+        self._check_all_items_match(other)
+        if not np.all(self.shape[1:] == other.shape[1:]):
+            raise ValueError("Shape of the datasets must match (except time dimension)")
+        ds = self.copy() if copy else self
+
+        s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
+        s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
+        df12 = pd.concat([s1, s2], axis=1)
+
+        newtime = df12.index
+        newdata = self.create_empty_data(
+            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
+        )
+        idx1 = np.where(~df12["idx1"].isna())
+        idx2 = np.where(~df12["idx2"].isna())
+        for j in range(ds.n_items):
+            # if there is an overlap "other" data will be used!
+            newdata[j][idx1, :] = ds[j].to_numpy()
+            newdata[j][idx2, :] = other[j].to_numpy()
+
+        zn = None
+        if self._zn is not None:
+            zshape = (len(newtime), self._zn.shape[1])
+            zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
+            zn[idx1, :] = self._zn
+            zn[idx2, :] = other._zn
+
+        return Dataset(
+            newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
+        )
+
+    def _check_all_items_match(self, other):
+        if self.n_items != other.n_items:
+            raise ValueError(
+                f"Number of items must match ({self.n_items} and {other.n_items})"
+            )
+        for j in range(self.n_items):
+            if self.items[j].name != other.items[j].name:
+                raise ValueError(
+                    f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}"
+                )
+            if self.items[j].type != other.items[j].type:
+                raise ValueError(
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                )
+            if self.items[j].unit != other.items[j].unit:
+                raise ValueError(
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                )
+
+    # ============ aggregate =============
+
+    def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "Dataset":
+        """Aggregate along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+        func: function, optional
+            default np.nanmean
+
+        Returns
+        -------
+        Dataset
+            dataset with aggregated values
+        """
+
+        res = {
+            name: da.aggregate(axis=axis, func=func, **kwargs)
+            for name, da in self._data_vars.items()
+        }
+
+        return Dataset(res)
+
+    def quantile(self, q, *, axis="time", **kwargs) -> "Dataset":
+        """Compute the q-th quantile of the data along the specified axis.
+
+        Wrapping np.quantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with quantile values
+
+        Examples
+        --------
+        >>> ds.quantile(q=[0.25,0.75])
+        >>> ds.quantile(q=0.5)
+        >>> ds.quantile(q=[0.01,0.5,0.99], axis="space")
+
+        See Also
+        --------
+        nanquantile : quantile with NaN values ignored
+        """
+        return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+
+    def nanquantile(self, q, *, axis="time", **kwargs) -> "Dataset":
+        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
+
+        Wrapping np.nanquantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Examples
+        --------
+        >>> ds.nanquantile(q=[0.25,0.75])
+        >>> ds.nanquantile(q=0.5)
+        >>> ds.nanquantile(q=[0.01,0.5,0.99], axis="space")
+
+        Returns
+        -------
+        Dataset
+            dataset with quantile values
+        """
+        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
+
+    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> "Dataset":
+
+        if np.isscalar(q):
+            res = [da._quantile(q=q, axis=axis, func=func) for da in self]
+        else:
+            res = []
+
+            for name, da in self._data_vars.items():
+                for quantile in q:
+                    qd = da._quantile(q=quantile, axis=axis, func=func)
+                    newname = f"Quantile {quantile}, {name}"
+                    qd.name = newname
+                    res.append(qd)
+
+        return Dataset(res)
+
+    def max(self, axis="time") -> "Dataset":
+        """Max value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+
+        See Also
+        --------
+            nanmax : Max values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.max)
+
+    def min(self, axis="time") -> "Dataset":
+        """Min value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+
+        See Also
+        --------
+            nanmin : Min values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.min)
+
+    def mean(self, axis="time") -> "Dataset":
+        """Mean value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with mean value
+
+        See Also
+        --------
+            nanmean : Mean values with NaN values removed
+            average: Weighted average
+        """
+        return self.aggregate(axis=axis, func=np.mean)
+
+    def average(self, weights, axis="time") -> "Dataset":
+        """
+        Compute the weighted average along the specified axis.
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with weighted average value
+
+        See Also
+        --------
+            nanmean : Mean values with NaN values removed
+            aggregate: Weighted average
+
+        Examples
+        --------
+        >>> dfs = Dfsu("HD2D.dfsu")
+        >>> ds = dfs.read(["Current speed"])
+        >>> area = dfs.get_element_area()
+        >>> ds2 = ds.average(axis="space", weights=area)
+        """
+
+        def func(x, axis, keepdims):
+            if keepdims:
+                raise NotImplementedError()
+
+            return np.average(x, weights=weights, axis=axis)
+
+        return self.aggregate(axis=axis, func=func)
+
+    def nanmax(self, axis="time") -> "Dataset":
+        """Max value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+        """
+        return self.aggregate(axis=axis, func=np.nanmax)
+
+    def nanmin(self, axis="time") -> "Dataset":
+        """Min value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with max value
+        """
+        return self.aggregate(axis=axis, func=np.nanmin)
+
+    def nanmean(self, axis="time") -> "Dataset":
+        """Mean value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with mean value
+        """
+        return self.aggregate(axis=axis, func=np.nanmean)
+
+    # ============ arithmetic/Math =============
+
+    def __radd__(self, other) -> "Dataset":
+        return self.__add__(other)
+
+    def __add__(self, other) -> "Dataset":
+        if isinstance(other, self.__class__):
+            return self._add_dataset(other)
+        else:
+            return self._add_value(other)
+
+    def __rsub__(self, other) -> "Dataset":
+        ds = self.__mul__(-1.0)
+        return other + ds
+
+    def __sub__(self, other) -> "Dataset":
+        if isinstance(other, self.__class__):
+            return self._add_dataset(other, sign=-1.0)
+        else:
+            return self._add_value(-other)
+
+    def __rmul__(self, other) -> "Dataset":
+        return self.__mul__(other)
+
+    def __mul__(self, other) -> "Dataset":
+        if isinstance(other, self.__class__):
+            raise ValueError("Multiplication is not possible for two Datasets")
+        else:
+            return self._multiply_value(other)
+
+    def _add_dataset(self, other, sign=1.0) -> "Dataset":
+        self._check_datasets_match(other)
+        try:
+            data = [
+                self[x].to_numpy() + sign * other[y].to_numpy()
+                for x, y in zip(self.items, other.items)
+            ]
+        except:
+            raise ValueError("Could not add data in Dataset")
+        time = self.time.copy()
+        items = deepcopy(self.items)
+        return Dataset(data, time, items)
+
+    def _check_datasets_match(self, other):
+        if self.n_items != other.n_items:
+            raise ValueError(
+                f"Number of items must match ({self.n_items} and {other.n_items})"
+            )
+        for j in range(self.n_items):
+            if self.items[j].type != other.items[j].type:
+                raise ValueError(
+                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                )
+            if self.items[j].unit != other.items[j].unit:
+                raise ValueError(
+                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                )
+        if not np.all(self.time == other.time):
+            raise ValueError("All timesteps must match")
+        if self.shape != other.shape:
+            raise ValueError("shape must match")
+
+    def _add_value(self, value) -> "Dataset":
+        try:
+            data = [value + self[x].to_numpy() for x in self.items]
+        except:
+            raise ValueError(f"{value} could not be added to Dataset")
+        items = deepcopy(self.items)
+        time = self.time.copy()
+        return Dataset(data, time, items)
+
+    def _multiply_value(self, value) -> "Dataset":
+        try:
+            data = [value * self[x].to_numpy() for x in self.items]
+        except:
+            raise ValueError(f"{value} could not be multiplied to Dataset")
+        items = deepcopy(self.items)
+        time = self.time.copy()
+        return Dataset(data, time, items)
+
+    # ===============================================
+
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
     ) -> pd.DataFrame:
@@ -1517,31 +1581,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return df
 
-    def _ipython_key_completions_(self):
-        return [x.name for x in self.items]
-
-    @staticmethod
-    def create_empty_data(n_items=1, n_timesteps=1, n_elements=None, shape=None):
-        data = []
-        if shape is None:
-            if n_elements is None:
-                raise ValueError("n_elements and shape cannot both be None")
-            else:
-                shape = n_elements
-        if np.isscalar(shape):
-            shape = [shape]
-        dati = np.empty(shape=(n_timesteps, *shape))
-        dati[:] = np.nan
-        for _ in range(n_items):
-            data.append(dati.copy())
-        return data
-
-    @staticmethod
-    def _validate_extension(filename, valid_extension):
-        _, ext = os.path.splitext(filename)
-        if ext != valid_extension:
-            raise ValueError(f"File extension must be {valid_extension}")
-
     def to_dfs(self, filename, **kwargs):
 
         filename = str(filename)
@@ -1569,6 +1608,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 "Writing this type of dataset is not yet implemented"
             )
 
+    @staticmethod
+    def _validate_extension(filename, valid_extension):
+        _, ext = os.path.splitext(filename)
+        if ext != valid_extension:
+            raise ValueError(f"File extension must be {valid_extension}")
+
     def _to_dfs0(self, filename, **kwargs):
         from .dfs0 import _write_dfs0
 
@@ -1592,3 +1637,21 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         from .dfsu import _write_dfsu
 
         _write_dfsu(filename, self)
+
+    # ===============================================
+
+    def __repr__(self) -> str:
+        if len(self) == 0:
+            return "Empty <mikeio.Dataset>"
+        da = self[0]
+        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]
+        out = [x for x in out if x is not None]
+
+        if self.n_items > 10:
+            out.append(f"number of items: {self.n_items}")
+        else:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+
+        return str.join("\n", out)
