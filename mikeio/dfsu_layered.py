@@ -333,6 +333,7 @@ class Dfsu2DV(DfsuLayered):
             element_table=g.element_table,
             values=values,
             zn=None,
+            is_geo=g.is_geo,
             cmin=cmin,
             cmax=cmax,
             label=label,

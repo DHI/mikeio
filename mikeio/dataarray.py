@@ -341,6 +341,7 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
             element_table=g.element_table,
             values=values,
             zn=zn,
+            is_geo=g.is_geo,
             **kwargs,
         )
 

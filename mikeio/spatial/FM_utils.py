@@ -526,6 +526,7 @@ def _plot_vertical_profile(
     element_table,
     values,
     zn=None,
+    is_geo=False,
     cmin=None,
     cmax=None,
     label="",
@@ -544,6 +545,9 @@ def _plot_vertical_profile(
     zn: np.array, optional
         dynamic vertical node positions,
         default: use static vertical positions
+    is_geo: bool, optional
+        are coordinates geographical (for calculating
+        relative distance in meters), default: False
     cmin: real, optional
         lower bound of values to be shown on plot, default:None
     cmax: real, optional
@@ -571,8 +575,7 @@ def _plot_vertical_profile(
     from matplotlib.collections import PolyCollection
 
     nc = node_coordinates
-    s_coordinate = _relative_cumulative_distance(nc)
-    # np.hypot(nc[:, 0] - nc[0, 0], nc[:, 1] - nc[0, 1])
+    s_coordinate = _relative_cumulative_distance(nc, is_geo=is_geo)
     z_coordinate = nc[:, 2] if zn is None else zn
 
     elements = _Get_2DVertical_elements(element_table)

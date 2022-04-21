@@ -194,6 +194,7 @@ class _GeometryFMVerticalProfilePlotter:
             node_coordinates=self.g.node_coordinates,
             element_table=self.g.element_table,
             values=v,
+            is_geo=self.g.is_geo,
             title=title,
             add_colorbar=False,
             edge_color=edge_color,
