@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+import matplotlib.pyplot as plt
+
 import mikeio
 from mikeio.spatial.FM_geometry import GeometryFMVerticalProfile
 from mikeio.spatial.geometry import GeometryPoint3D
@@ -21,6 +23,20 @@ def test_open_transect(vslice):
     assert dfs.n_sigma_layers == 4
     assert dfs.n_z_layers == 5
     assert dfs.n_timesteps == 3
+
+
+def test_transect_geometry_properties(vslice):
+    g = vslice.geometry
+    assert isinstance(g, GeometryFMVerticalProfile)
+    assert len(g.top_elements) == 99
+    assert len(g.bottom_elements) == 99
+    assert len(g.e2_e3_table) == 99
+    assert len(g.relative_element_distance) == 441
+    d1 = g.get_nearest_relative_distance([3.55e05, 6.145e06])
+    assert d1 == pytest.approx(5462.3273)
+
+    with pytest.raises(AttributeError, match="no boundary_polylines property"):
+        g.boundary_polylines
 
 
 def test_read_transect(vslice):
@@ -81,5 +97,22 @@ def test_sel_time_transect(vslice):
 def test_plot_transect(vslice):
     da = vslice.read().Salinity
     da.plot()
-    da.plot(cmin=0)
-    da.plot(cmax=0)
+    da.plot(cmin=0, cmax=1)
+    da.plot(label="l", title="t", add_colorbar=False)
+    da.plot(cmap="Blues", edge_color="0.9")
+
+    # the old way
+    vals = da.isel(time=0).to_numpy()
+    vslice.plot_vertical_profile(vals, label="l", figsize=(3, 3))
+    vslice.plot_vertical_profile(vals, title="t", add_colorbar=False)
+    vslice.plot_vertical_profile(vals, cmax=12, cmap="Reds")
+
+    plt.close("all")
+
+
+def test_plot_transect_geometry(vslice):
+    g = vslice.geometry
+    g.plot()
+    g.plot.mesh()
+
+    plt.close("all")
