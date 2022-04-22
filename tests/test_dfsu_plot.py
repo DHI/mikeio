@@ -185,8 +185,11 @@ def test_plot_dfsu_vertical_profile():
     dfs.plot_vertical_profile(data, ax=ax)
     assert True
 
+    plt.close("all")
+
 
 def test_da_plot():
+    import matplotlib.pyplot as plt
 
     ds = mikeio.read("tests/testdata/FakeLake.dfsu")
     da = ds[0]
@@ -201,3 +204,5 @@ def test_da_plot():
     dam.plot.outline()
 
     da.max("space").plot()
+
+    plt.close("all")

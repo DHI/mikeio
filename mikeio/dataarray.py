@@ -15,13 +15,17 @@ from .spatial.geometry import (
 )
 from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import (
+    _GeometryFMLayered,
     GeometryFM,
-    GeometryFMLayered,
-    GeometryFMVerticalColumn,
+    GeometryFM3D,
     GeometryFMPointSpectrum,
+    GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
     GeometryFMLineSpectrum,
     GeometryFMAreaSpectrum,
 )
+from mikecore.DfsuFile import DfsuFileType
+from .spatial.FM_utils import _plot_map, _plot_vertical_profile
 from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
 from .spectral_utils import plot_2dspectrum, calc_m0_from_spectrum
@@ -335,6 +339,38 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         return ax
 
 
+class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._plot_transect(ax=ax, **kwargs)
+
+    def _plot_transect(self, **kwargs):
+        if "label" not in kwargs:
+            kwargs["label"] = self._label_txt()
+        if "title" not in kwargs:
+            kwargs["title"] = self.da.time[0]
+
+        values, zn = self._get_first_step_values()
+        g = self.da.geometry
+        return _plot_vertical_profile(
+            node_coordinates=g.node_coordinates,
+            element_table=g.element_table,
+            values=values,
+            zn=zn,
+            is_geo=g.is_geo,
+            **kwargs,
+        )
+
+    def _get_first_step_values(self):
+        if self.da.n_timesteps > 1:
+            return self.da.values[0], self.da._zn[0]
+        else:
+            return np.squeeze(self.da.values), np.squeeze(self.da._zn)
+
+
 class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
@@ -642,7 +678,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     @staticmethod
     def _parse_zn(zn, geometry, n_timesteps):
         if zn is not None:
-            if isinstance(geometry, GeometryFMLayered):
+            if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
                     raise ValueError(
@@ -692,7 +728,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return len(problems) == 0
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFMVerticalColumn):
+        if isinstance(self.geometry, GeometryFMVerticalProfile):
+            return _DataArrayPlotterFMVerticalProfile(self)
+        elif isinstance(self.geometry, GeometryFMVerticalColumn):
             return _DataArrayPlotterFMVerticalColumn(self)
         elif isinstance(self.geometry, GeometryFMPointSpectrum):
             return _DataArrayPlotterPointSpectrum(self)
@@ -938,7 +976,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if hasattr(self.geometry, "isel"):
                 spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
-            if isinstance(geometry, GeometryFMLayered):
+            if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
@@ -989,13 +1027,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 sp_axis = 0 if len(j) == 1 else 1
                 da = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
             else:
-                idx = self.geometry.find_index(x=x, y=y, z=z)
+                if isinstance(self.geometry, _GeometryFMLayered):
+                    idx = self.geometry.find_index(x=x, y=y, z=z)
+                else:
+                    idx = self.geometry.find_index(x=x, y=y)
                 da = self.isel(idx, axis="space")
         else:
             da = self
 
         if "layer" in kwargs:
-            if isinstance(da.geometry, GeometryFMLayered):
+            if isinstance(da.geometry, _GeometryFMLayered):
                 layer = kwargs.pop("layer")
                 idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")

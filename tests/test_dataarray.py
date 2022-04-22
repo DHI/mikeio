@@ -407,13 +407,11 @@ def test_dataarray_dfsu3d_indexing():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    assert isinstance(
-        ds.Salinity.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered
-    )
+    assert isinstance(ds.Salinity.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
 
     # indexing in time selecting a single record
     da = ds.Salinity[0, :]
-    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
+    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
 
     # indexing in space selecting a single element
     da = ds.Salinity[:, 0]
@@ -421,11 +419,11 @@ def test_dataarray_dfsu3d_indexing():
 
     # indexing in space selecting a multiple elements with slice
     da = ds.Salinity[:, 0:45]
-    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
+    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
 
     # indexing in space selecting a multiple elements with tuple
     da = ds.Salinity[:, (3, 6, 12)]
-    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFMLayered)
+    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
 
     # indexing in both time and space
     da = ds.Salinity[0, 0]
@@ -735,6 +733,8 @@ def test_plot_grid1d(da2):
     _, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)
     da2.plot.imshow(ax=ax1)
     da2.plot.pcolormesh(ax=ax2)
+
+    plt.close("all")
 
 
 def test_plot_grid2d_proj(da_grid2d_proj):
