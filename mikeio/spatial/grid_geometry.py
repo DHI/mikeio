@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Union
 import warnings
 import numpy as np
 from mikecore.eum import eumQuantity
@@ -682,3 +682,185 @@ class Grid2D(_Geometry):
 
     def __str__(self) -> str:
         return f"Grid2D (ny={self.ny}, nx={self.nx})"
+
+
+class Grid3D(_Geometry):
+    """3D  grid
+    Origin in the center of cell in lower-left corner
+    x, y and z axes are increasing and equidistant
+    """
+
+    def __init__(
+        self,
+        x=None,
+        x0=0.0,
+        dx=None,
+        nx=None,
+        y=None,
+        y0=0.0,
+        dy=None,
+        ny=None,
+        z=None,
+        z0=0.0,
+        dz=None,
+        nz=None,
+        projection="NON-UTM",
+        origin: Tuple[float, float] = (0.0, 0.0),
+        orientation=0.0,
+    ) -> None:
+
+        super().__init__()
+        self._x = self._parse_axis("x", x, x0, dx, nx)
+        self._y = self._parse_axis("y", y, y0, dy, ny)
+        self._z = self._parse_axis("z", z, z0, dz, nz)
+
+        self._projection = projection
+        self._projstr = projection  # TODO handle other types than string
+        self._origin = origin
+        self._orientation = orientation
+
+    @staticmethod
+    def _parse_axis(name, x, x0, dx, nx):
+        if x is not None:
+            x = np.asarray(x)
+            _check_equidistant(x)
+            if len(x) > 1 and x[0] > x[-1]:
+                raise ValueError("{name} values must be increasing")
+        else:
+            if nx is None:
+                raise ValueError(f"n{name} must be provided")
+            if dx is None:
+                raise ValueError(f"d{name} must be provided")
+            x1 = x0 + dx * (nx - 1)
+            x = np.linspace(x0, x1, nx)
+        return x
+
+    @property
+    def x(self):
+        """array of x-axis node coordinates"""
+        return self._x
+
+    @property
+    def dx(self) -> float:
+        """x-axis grid spacing"""
+        x = self.x
+        return x[1] - x[0] if len(x) > 1 else 1.0
+
+    @property
+    def nx(self):
+        """number of x-axis nodes"""
+        return len(self.x)
+
+    @property
+    def y(self):
+        """array of y-axis node coordinates"""
+        return self._y
+
+    @property
+    def dy(self) -> float:
+        """y-axis grid spacing"""
+        y = self.y
+        return y[1] - y[0] if len(y) > 1 else 1.0
+
+    @property
+    def ny(self):
+        """number of y-axis nodes"""
+        return len(self.y)
+
+    @property
+    def z(self):
+        """array of z-axis node coordinates"""
+        return self._z
+
+    @property
+    def dz(self) -> float:
+        """z-axis grid spacing"""
+        z = self.z
+        return z[1] - z[0] if len(z) > 1 else 1.0
+
+    @property
+    def nz(self):
+        """number of z-axis nodes"""
+        return len(self.z)
+
+    def find_index(self, coords):
+        pass
+
+    def isel(self, idx, axis):
+        if not np.isscalar(idx):
+            d = np.diff(idx)
+            if np.any(d < 1) or not np.allclose(d, d[0]):
+                return GeometryUndefined()
+            else:
+                x = self.x[idx] if axis == 2 else self.x
+                y = self.y[idx] if axis == 1 else self.y
+                z = self.z[idx] if axis == 0 else self.z
+                return Grid3D(x=x, y=y, z=z, projection=self.projection)
+
+        if axis == 0:
+            # z is the first axis! return x-y Grid2D
+            # TODO: origin, how to pass self.z[idx]?
+            return Grid2D(
+                x=self.x + self._origin[0],
+                y=self.y + self._origin[1],
+                projection=self._projection,
+            )
+        elif axis == 1:
+            # y is the second axis! return x-z Grid2D
+            # TODO: origin, how to pass self.y[idx]?
+            return Grid2D(
+                x=self.x,
+                y=self.z,
+                # projection=self._projection,
+            )
+        else:
+            # x is the last axis! return y-z Grid2D
+            # TODO: origin, how to pass self.x[idx]?
+            return Grid2D(
+                x=self.y,
+                y=self.z,
+                # projection=self._projection,
+            )
+
+    def __repr__(self):
+        out = []
+        out.append("<mikeio.Grid3D>")
+        out.append(
+            f"x-axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}"
+        )
+        out.append(
+            f"y-axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}"
+        )
+        out.append(
+            f"z-axis: nz={self.nz} points from z0={self.z[0]:g} to z1={self.z[-1]:g} with dz={self.dz:g}"
+        )
+        return str.join("\n", out)
+
+    def __str__(self):
+        return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"
+
+    def _geometry_for_layers(self, layers) -> Union[Grid2D, "Grid3D"]:
+        if layers is None:
+            return self
+
+        g = self
+        if len(layers) == 1:
+            geometry = Grid2D(
+                x=g.x + g._origin[0],
+                y=g.y + g._origin[1],
+                projection=g.projection,
+            )
+        else:
+            d = np.diff(g.z[layers])
+            if np.any(d < 1) or not np.allclose(d, d[0]):
+                warnings.warn("Extracting non-equidistant layers! Cannot use Grid3D.")
+                geometry = GeometryUndefined()
+            else:
+                geometry = Grid3D(
+                    x=g.x,
+                    y=g.y,
+                    z=g.z[layers],
+                    origin=g._origin,
+                    projection=g.projection,
+                )
+        return geometry

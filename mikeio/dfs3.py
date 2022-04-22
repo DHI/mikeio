@@ -1,39 +1,180 @@
 import os
 import warnings
 import numpy as np
-from datetime import datetime, timedelta
 from mikecore.eum import eumUnit, eumQuantity
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsFactory import DfsFactory
-from mikecore.DfsFile import DfsSimpleType, DataValueType
+from mikecore.DfsFile import DfsSimpleType, DataValueType, DfsFile
 from mikecore.DfsBuilder import DfsBuilder
+from mikecore.Projections import Cartography
+import pandas as pd
+
 
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .dfs import _Dfs123
+from .spatial.grid_geometry import Grid2D, Grid3D
+from .spatial.geometry import GeometryUndefined
+
+
+def write_dfs3(filename: str, ds: Dataset, title="") -> None:
+    dfs = _write_dfs3_header(filename, ds, title)
+    _write_dfs3_data(dfs, ds)
+
+
+def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
+    builder = DfsBuilder.Create(title, "MIKE IO", 1)
+    builder.SetDataType(0)
+
+    geometry: Grid3D = ds.geometry
+
+    factory = DfsFactory()
+    _write_dfs3_spatial_axis(builder, factory, geometry)
+    origin = geometry._origin  # Origin in geographical coordinates
+    orient = geometry._orientation
+
+    # if geometry.is_geo:
+    proj = factory.CreateProjectionGeoOrigin(
+        geometry.projection_string, *origin, orient
+    )
+    # else:
+    #    cart: Cartography = Cartography.CreateProjOrigin(
+    #        geometry.projection_string, *origin, orient
+    #    )
+    #    proj = factory.CreateProjectionGeoOrigin(
+    #        wktProjectionString=geometry.projection,
+    #        lon0=cart.LonOrigin,
+    #        lat0=cart.LatOrigin,
+    #        orientation=cart.Orientation,
+    #    )
+
+    builder.SetGeographicalProjection(proj)
+
+    timestep_unit = TimeStepUnit.SECOND
+    dt = ds.timestep or 1.0  # It can not be None
+    if ds.is_equidistant:
+        time_axis = factory.CreateTemporalEqCalendarAxis(
+            timestep_unit, ds.time[0], 0, dt
+        )
+    else:
+        time_axis = factory.CreateTemporalNonEqCalendarAxis(timestep_unit, ds.time[0])
+    builder.SetTemporalAxis(time_axis)
+
+    for item in ds.items:
+        builder.AddCreateDynamicItem(
+            item.name,
+            eumQuantity.Create(item.type, item.unit),
+            DfsSimpleType.Float,
+            item.data_value_type,
+        )
+
+    try:
+        builder.CreateFile(filename)
+    except IOError:
+        print("cannot create dfs file: ", filename)
+
+    return builder.GetFile()
+
+
+def _write_dfs3_spatial_axis(builder, factory, geometry: Grid3D):
+    builder.SetSpatialAxis(
+        factory.CreateAxisEqD3(
+            eumUnit.eumUmeter,
+            geometry.nx,
+            geometry.x[0],
+            geometry.dx,
+            geometry.ny,
+            geometry.y[0],
+            geometry.dy,
+            geometry.nz,
+            geometry.z[0],
+            geometry.dz,
+        )
+    )
+
+
+def _write_dfs3_data(dfs: DfsFile, ds: Dataset) -> None:
+
+    deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
+    t_rel = 0
+    for i in range(ds.n_timesteps):
+        for item in range(ds.n_items):
+
+            if "time" not in ds.dims:
+                d = ds[item].values
+            else:
+                d = ds[item].values[i]
+            d = d.copy()  # to avoid modifying the input
+            d[np.isnan(d)] = deletevalue
+
+            d = d.reshape(ds.shape[-3:])  # spatial axes
+            darray = d.flatten()
+
+            if not ds.is_equidistant:
+                t_rel = (ds.time[i] - ds.time[0]).total_seconds()
+
+            dfs.WriteItemTimeStepNext(t_rel, darray.astype(np.float32))
+
+    dfs.Close()
 
 
 class Dfs3(_Dfs123):
+
+    _ndim = 3
+
     def __init__(self, filename=None, dtype=np.float32):
         super(Dfs3, self).__init__(filename, dtype)
+
+        self._dx = None
+        self._dy = None
+        self._dz = None
+        self._nx = None
+        self._ny = None
+        self._nz = None
+        self._x0 = 0
+        self._y0 = 0
+        self._z0 = 0
+        self.geometry = None
+
         if filename:
             self._read_dfs3_header()
+            self.geometry = Grid3D(
+                x0=self._x0,
+                dx=self._dx,
+                nx=self._nx,
+                y0=self._y0,
+                dy=self._dy,
+                ny=self._ny,
+                z0=self._z0,
+                dz=self._dz,
+                nz=self._nz,
+                origin=(self._longitude, self._latitude),
+                projection=self._projstr,
+                orientation=self._orientation,
+            )
 
-    def get_bottom_values(self):
-        bottom2D = []
-        data = self.read()
-        bottom_data = np.nan * np.ones(shape=(self.shape[0],) + self.shape[2:])
-        for item_number in range(self.n_items):
-            b = np.nan * np.ones(self.shape[2:])
-            for ts in range(self.n_timesteps):
-                d = data[item_number].values[ts, ...]
-                for layer in range(d.shape[0]):  # going from surface to bottom
-                    y = d[layer, ...]
-                    b[~np.isnan(y)] = y[~np.isnan(y)]
-                bottom_data[ts, ...] = np.flipud(b)
-            bottom2D.append(bottom_data)
-        return bottom2D
+    def __repr__(self):
+        out = ["<mikeio.Dfs3>"]
+
+        if os.path.isfile(self._filename):
+            out.append(f"geometry: {self.geometry}")
+
+            if self._n_items is not None:
+                if self._n_items < 10:
+                    out.append("items:")
+                    for i, item in enumerate(self.items):
+                        out.append(f"  {i}:  {item}")
+                else:
+                    out.append(f"number of items: {self._n_items}")
+
+                if self._n_timesteps == 1:
+                    out.append("time: time-invariant file (1 step)")
+                else:
+                    out.append(f"time: {self._n_timesteps} steps")
+                    out.append(f"start time: {self._start_time}")
+
+        return str.join("\n", out)
 
     def _read_dfs3_header(self):
         if not os.path.isfile(self._filename):
@@ -42,7 +183,10 @@ class Dfs3(_Dfs123):
         self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
 
         self.source = self._dfs
-        self._dfs
+
+        self._x0 = self._dfs.SpatialAxis.X0
+        self._y0 = self._dfs.SpatialAxis.Y0
+        self._z0 = self._dfs.SpatialAxis.Z0
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._dz = self._dfs.SpatialAxis.Dz
@@ -51,188 +195,18 @@ class Dfs3(_Dfs123):
         self._nz = self._dfs.SpatialAxis.ZCount
         self._read_header()
 
-    def __calculate_index(self, nx, ny, nz, x, y, z):
-        """Calculates the position in the dfs3 data array based on the
-        number of x,y,z layers (nx,ny,nz) at the specified x,y,z position.
-
-        Error checking is done here to see if the x,y,z coordinates are out of range.
-        """
-        if x >= nx:
-            raise IndexError("x coordinate is off the grid: ", x)
-        if y >= ny:
-            raise IndexError("y coordinate is off the grid: ", y)
-        if z >= nz:
-            raise IndexError("z coordinate is off the grid: ", z)
-
-        return y * nx + x + z * nx * ny
-
-    def grid_coordinates(self, dfs3file):
-        """Function: Returns the Grid information
-        Usage:
-            [X0, Y0, dx, dy, nx, ny, nz, nt] = grid_coordinates( filename )
-        dfs3file
-            a full path and filename to the dfs3 file
-
-        Returns:
-
-            X0, Y0:
-                bottom left coordinates
-            dx, dy:
-                grid size in x and y directions
-            nx, ny, nz:
-                number of grid elements in the x, y and z direction
-            nt:
-                number of time steps
-        """
-
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
-
-        # Determine the size of the grid
-        axis = dfs.ItemInfo[0].SpatialAxis
-        dx = axis.Dx
-        dy = axis.Dy
-        x0 = axis.X0
-        y0 = axis.Y0
-        yNum = axis.YCount
-        xNum = axis.XCount
-        zNum = axis.ZCount
-        nt = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
-        dfs.Close()
-
-        return x0, y0, dx, dy, xNum, yNum, zNum, nt
-
-    def read_slice(
-        self,
-        dfs3file,
-        lower_left_xy,
-        upper_right_xy,
-        items=None,
-        layers=None,
-        conservative=True,
-    ):
-        """Function: Read data from a dfs3 file within the locations chosen
-
-
-        Usage:
-            [data,time,name] = read( filename, lower_left_xy, upper_right_xy, items, conservative)
-        dfs3file
-            a full path and filename to the dfs3 file
-        lower_left_xy
-            list or array of size two with the X and the Y coordinate (same projection as the dfs3)
-        upper_right_xy
-            list or array of size two with the X and the Y coordinate (same projection as the dfs3)
-        items
-            list of indices (base 0) to read from
-        layers
-            list of layers to read
-        conservative
-            Default is true. Only include the grids within the given bounds (don't return those grids on the boarder)
-
-        Returns
-            1) the data contained in a dfs3 file in a list of numpy matrices
-            2) time index
-            3) name of the items
-
-        NOTE
-            Returns data ( y, x, z, nt)
-
-            1) If coordinates is selected, then only return data at those coordinates
-            2) coordinates specified overules layers.
-            3) layer counts from the bottom
-        """
-
-        data = self.read(dfs3file, items=items, layers=layers)
-
-        dfs = DfsFileFactory.DfsGenericOpen(dfs3file)
-
-        # Determine the size of the grid
-        axis = dfs.ItemInfo[0].SpatialAxis
-        dx = axis.Dx
-        dy = axis.Dy
-        x0 = axis.X0
-        y0 = axis.Y0
-        yNum = axis.YCount
-        xNum = axis.XCount
-
-        top_left_y = y0 + (yNum + 1) * dy
-
-        dfs.Close()
-
-        # SLICE all the Data
-
-        lower_left_x_index = (lower_left_xy[0] - x0) / dx
-        lower_left_y_index = (top_left_y - lower_left_xy[1]) / dy
-
-        upper_right_x_index = (upper_right_xy[0] - x0) / dx
-        upper_right_y_index = (top_left_y - upper_right_xy[1]) / dy
-
-        if conservative:
-            lower_left_x_index = int(np.ceil(lower_left_x_index))
-            upper_right_x_index = int(np.floor(upper_right_x_index))
-            lower_left_y_index = int(np.floor(lower_left_y_index))
-            upper_right_y_index = int(np.ceil(upper_right_y_index))
-
-        else:
-            lower_left_x_index = int(np.floor(lower_left_x_index))
-            upper_right_x_index = int(np.ceil(upper_right_x_index))
-            lower_left_y_index = int(np.ceil(lower_left_y_index))
-            upper_right_y_index = int(np.floor(upper_right_y_index))
-
-        if lower_left_x_index < 0:
-            raise IndexError("lower_left_x_index < 0.")
-            lower_left_x_index = 0
-
-        if upper_right_y_index < 0:
-            raise IndexError("upper_right_y_index < 0.")
-            upper_right_y_index = 0
-
-        if lower_left_y_index > yNum - 1:
-            raise IndexError("lower_left_y_index > yNum - 1")
-            lower_left_y_index = yNum - 1
-
-        if upper_right_x_index > xNum - 1:
-            raise IndexError("upper_right_x_index > xNum - 1")
-            upper_right_x_index = xNum - 1
-
-        for i in range(len(data[0])):
-            data[0][i] = data[0][i][
-                upper_right_y_index:lower_left_y_index,
-                lower_left_x_index:upper_right_x_index,
-                :,
-                :,
-            ]
-
-        return data
-
     def read(
-        self, items=None, layers=None, coordinates=None, time=None, time_steps=None
+        self,
+        *,
+        items=None,
+        time=None,
+        time_steps=None,
+        area=None,
+        layers=None,
     ) -> Dataset:
-        """Function: Read data from a dfs3 file
 
-        Usage:
-            [data,time,name] = read( filename, items, layers=None, coordinates=None)
-
-        items
-            list of indices (base 0) to read from. If None then all the items.
-        layers
-            list of layer indices (base 0) to read
-        coordinates
-            list of list (x,y,layer) integers ( 0,0 at Bottom Left of Grid !! )
-            example coordinates = [[2,5,1], [11,41,2]]
-
-        Returns
-            1) the data contained in a dfs3 file in a list of numpy matrices
-            2) time index
-            3) name of the items
-
-        NOTE
-            Returns Dataset with data (t, z, y, x)
-
-            1) If coordinates is selected, then only return data at those coordinates
-            2) coordinates specified overules layers.
-            3) layer counts from the bottom
-        """
+        if area is not None:
+            return NotImplementedError("area subsetting is not yet implemented")
 
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
@@ -251,206 +225,183 @@ class Dfs3(_Dfs123):
         nt = len(time_steps)
 
         # Determine the size of the grid
-        axis = dfs.ItemInfo[0].SpatialAxis
-        zNum = axis.ZCount
-        yNum = axis.YCount
-        xNum = axis.XCount
+        zNum = self.geometry.nz
+        yNum = self.geometry.ny
+        xNum = self.geometry.nx
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         data_list = []
 
-        if coordinates is None:
-            # if nt is 0, then the dfs is 'static' and must be handled differently
-            if nt != 0:
-                for item in range(n_items):
-                    if layers is None:
-                        # Initialize an empty data block
-                        data = np.ndarray(shape=(nt, zNum, yNum, xNum), dtype=float)
-                        data_list.append(data)
-                    else:
-                        data = np.ndarray(
-                            shape=(nt, len(layers), yNum, xNum), dtype=float
-                        )
-                        data_list.append(data)
+        if layers == "top":
+            layers = -1
+        # if layers == "bottom":
+        #    return NotImplementedError()
+        layers = None if layers is None else np.atleast_1d(layers)
+        geometry = self.geometry._geometry_for_layers(layers)
 
-            else:
-                raise ValueError(
-                    "Static dfs3 files (with no time steps) are not supported."
-                )
-
-        else:
-            ncoordinates = len(coordinates)
-            for item in range(n_items):
-                # Initialize an empty data block
-                data = np.ndarray(shape=(nt, ncoordinates), dtype=float)
-                data_list.append(data)
+        nz = zNum if layers is None else len(layers)
+        shape = (nt, nz, yNum, xNum) if nz > 1 else (nt, yNum, xNum)
+        for item in range(n_items):
+            data = np.ndarray(shape=shape, dtype=float)
+            data_list.append(data)
 
         t_seconds = np.zeros(nt, dtype=float)
-        startTime = dfs.FileInfo.TimeAxis.StartDateTime
 
-        if coordinates is None:
-            for it_number, it in enumerate(time_steps):
-                for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
+        for it_number, it in enumerate(time_steps):
+            for item in range(n_items):
+                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
+                d = itemdata.Data
 
-                    src = itemdata.Data
-                    # d = to_numpy(src)
-                    d = src
+                d = d.reshape(zNum, yNum, xNum)
+                d[d == deleteValue] = np.nan
 
-                    # DO a direct copy instead of eleement by elment
-                    d = d.reshape(zNum, yNum, xNum)  # .swapaxes(0, 2).swapaxes(0, 1)
-                    d = np.flipud(d)  # TODO
-                    d[d == deleteValue] = np.nan
-                    if layers is None:
-                        data_list[item][it_number, :, :, :] = d
+                if layers is None:
+                    data_list[item][it_number, :, :, :] = d
+                elif len(layers) == 1:
+                    if layers == "bottom":
+                        data_list[item][it_number, :, :] = self._get_bottom_values(d)
                     else:
-                        for l in range(len(layers)):
-                            data_list[item][it_number, l, :, :] = d[layers[l], :, :]
+                        data_list[item][it_number, :, :] = d[layers[0], :, :]
+                else:
+                    for l in range(len(layers)):
+                        data_list[item][it_number, l, :, :] = d[layers[l], :, :]
 
-                t_seconds[it_number] = itemdata.Time
-        else:
-            indices = [
-                self.__calculate_index(xNum, yNum, zNum, x, y, z)
-                for x, y, z in coordinates
-            ]
-            for it in range(nt):
-                for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                    d = np.array([itemdata.Data[i] for i in indices])
-                    d[d == deleteValue] = np.nan
-                    data_list[item][it, :] = d
-
-                t_seconds[it] = itemdata.Time
-
-        start_time = dfs.FileInfo.TimeAxis.StartDateTime
-        time = [start_time + timedelta(seconds=tsec) for tsec in t_seconds]
-
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
+            t_seconds[it_number] = itemdata.Time
 
         dfs.Close()
 
-        return Dataset(data_list, time, items)
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
+        return Dataset(data_list, time=time, items=items, geometry=geometry)
 
     def write(
         self,
         filename,
         data,
         start_time=None,
-        dt=1,
+        dt=None,
+        datetimes=None,
         items=None,
-        dx=1.0,
-        dy=1.0,
-        dz=1.0,
-        x0=0,
-        y0=0,
+        dx=None,
+        dy=None,
+        dz=None,
         coordinate=None,
-        timeseries_unit=TimeStepUnit.SECOND,
         title=None,
     ):
         """
-        Write a dfs3 file
+        Create a dfs3 file
 
         Parameters
         ----------
 
         filename: str
             Location to write the dfs3 file
-        data: list[np.array]
-            list of matrices, one for each item. Matrix dimension: time, z, y, x
-        start_time: datetime, optional
+        data: list[np.array] or Dataset
+            list of matrices, one for each item. Matrix dimension: time, y, x
+        start_time: datetime, optional, deprecated
             start date of type datetime.
-        timeseries_unit: Timestep, optional
-            TimeStep default TimeStep.SECOND
         dt: float, optional
-            The time step. Therefore dt of 5.5 with timeseries_unit of TimeStep.MINUTE
-            means 5 mins and 30 seconds. Default 1
+            The time step in seconds.
+        datetimes: datetime, optional, deprecated
+            The list of datetimes for the case of non-equisstant Timeaxis.
         items: list[ItemInfo], optional
             List of ItemInfo corresponding to a variable types (ie. Water Level).
-        coordinate:
-            ['UTM-33', 12.4387, 55.2257, 327]  for UTM, Long, Lat, North to Y orientation. Note: long, lat in decimal degrees
-        x0: float, optional
-            Lower right position
-        y0: float, optional
-            Lower right position
         dx: float, optional
             length of each grid in the x direction (projection units)
         dy: float, optional
             length of each grid in the y direction (projection units)
         dz: float, optional
             length of each grid in the z direction (projection units)
-
+        coordinate:
+            list of [projection, origin_x, origin_y, orientation]
+            e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         title: str, optional
-            title of the dfs2 file. Default is blank.
+            title of the dfs3 file. Default is blank.
+        keep_open: bool, optional
+            Keep file open for appending
         """
 
-        if title is None:
-            title = "dfs3 file"
-
-        n_time_steps = np.shape(data[0])[0]
-        number_z = np.shape(data[0])[1]
-        number_y = np.shape(data[0])[2]
-        number_x = np.shape(data[0])[3]
-
-        n_items = len(data)
-
-        system_start_time = start_time
-
-        # Create an empty dfs3 file object
-        factory = DfsFactory()
-        builder = DfsBuilder(title, "mikeio", 0)
-
-        # Set up the header
-        builder.SetDataType(1)
-        builder.SetGeographicalProjection(
-            factory.CreateProjectionGeoOrigin(*coordinate)
-        )
-        builder.SetTemporalAxis(
-            factory.CreateTemporalEqCalendarAxis(
-                timeseries_unit, system_start_time, 0, dt
+        if start_time:
+            warnings.warn(
+                "setting start_time is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
             )
+
+        if datetimes:
+            warnings.warn(
+                "setting datetimes is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if items:
+            warnings.warn(
+                "setting items is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        if isinstance(data, list):
+            warnings.warn(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
+                FutureWarning,
+            )
+
+        filename = str(filename)
+
+        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        if not self._dx:
+            self._dx = 1
+        if dx:
+            self._dx = dx
+
+        if not self._dy:
+            self._dy = 1
+        if dy:
+            self._dy = dy
+
+        if not self._dz:
+            self._dz = 1
+        if dz:
+            self._dz = dz
+
+        self._write(
+            filename,
+            data,
+            start_time,
+            dt,
+            datetimes,
+            items,
+            coordinate,
+            title,
         )
-        builder.SetSpatialAxis(
-            factory.CreateAxisEqD3(
+
+    def _set_spatial_axis(self):
+        self._builder.SetSpatialAxis(
+            self._factory.CreateAxisEqD3(
                 eumUnit.eumUmeter,
-                number_x,
-                x0,
-                dx,
-                number_y,
-                y0,
-                dy,
-                number_z,
-                0,
-                dz,
+                self._nx,
+                self._x0,
+                self._dx,
+                self._ny,
+                self._y0,
+                self._dy,
+                self._nz,
+                self._z0,
+                self._dz,
             )
         )
 
-        for i in range(n_items):
-            builder.AddCreateDynamicItem(
-                items[i].name,
-                eumQuantity.Create(items[i].type, items[i].unit),
-                DfsSimpleType.Float,
-                DataValueType.Instantaneous,
-            )
+    @staticmethod
+    def _get_bottom_values(data):
 
-        try:
-            builder.CreateFile(filename)
-        except IOError:
-            print("cannot create dfs3 file: ", filename)
+        assert len(data.shape) == 3
+        b = np.empty_like(data[0])
+        b[:] = np.nan
+        data = np.flipud(data)
+        for layer in range(data.shape[0]):  # going from surface to bottom
+            y = data[layer, ...]
+            b[~np.isnan(y)] = y[~np.isnan(y)]
 
-        dfs = builder.GetFile()
-        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
-
-        for i in range(n_time_steps):
-            for item in range(n_items):
-                d = data[item][i]
-                d[np.isnan(d)] = deletevalue
-                d = np.flipud(d)  # TODO
-                # darray = to_dotnet_float_array(d.reshape(d.size, 1)[:, 0])
-                darray = d.reshape(d.size, 1)[:, 0].astype(np.float32)
-
-                dfs.WriteItemTimeStepNext(0, darray)
-
-        dfs.Close()
+        return b
 
     @property
     def dx(self):

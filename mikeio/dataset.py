@@ -21,7 +21,7 @@ from .spatial.geometry import (
     GeometryPoint3D,
     GeometryUndefined,
 )
-from .spatial.grid_geometry import Grid1D, Grid2D
+from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
 
 # def _repeat_items(
@@ -852,10 +852,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             ds = self
 
         if "layer" in kwargs:
+            layer = kwargs.pop("layer")
             if isinstance(ds.geometry, _GeometryFMLayered):
-                layer = kwargs.pop("layer")
                 idx = ds.geometry.get_layer_elements(layer)
                 ds = ds.isel(idx, axis="space")
+            elif isinstance(ds.geometry, Grid3D):
+                raise NotImplementedError(
+                    f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
+                )
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
@@ -1612,6 +1616,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         elif isinstance(self.geometry, Grid2D):
             self._validate_extension(filename, ".dfs2")
             self._to_dfs2(filename)
+        elif isinstance(self.geometry, Grid3D):
+            self._validate_extension(filename, ".dfs3")
+            self._to_dfs3(filename)
 
         elif isinstance(self.geometry, Grid1D):
             self._validate_extension(filename, ".dfs1")
@@ -1642,6 +1649,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         from .dfs2 import write_dfs2
 
         write_dfs2(filename, self)
+
+    def _to_dfs3(self, filename):
+        # assumes Grid3D geometry
+        from .dfs3 import write_dfs3
+
+        write_dfs3(filename, self)
 
     def _to_dfs1(self, filename):
         from .dfs1 import Dfs1

@@ -13,7 +13,7 @@ from .spatial.geometry import (
     GeometryPoint3D,
     GeometryUndefined,
 )
-from .spatial.grid_geometry import Grid1D, Grid2D
+from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .spatial.FM_geometry import (
     _GeometryFMLayered,
     GeometryFM,
@@ -1036,10 +1036,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
             da = self
 
         if "layer" in kwargs:
+            layer = kwargs.pop("layer")
             if isinstance(da.geometry, _GeometryFMLayered):
-                layer = kwargs.pop("layer")
                 idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")
+            elif isinstance(da.geometry, Grid3D):
+                layer = kwargs.pop("layer")
+                raise NotImplementedError(
+                    f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
+                )
+
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
