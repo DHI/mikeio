@@ -1392,7 +1392,9 @@ class _GeometryFMLayered(GeometryFM):
             idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)
         elif layer is None:
-            raise ValueError("At least one selection argument (x,y,z,coords,area,layer) needs to be provided!")
+            raise ValueError(
+                "At least one selection argument (x,y,z,coords,area,layer) needs to be provided!"
+            )
         return idx
 
     @staticmethod
