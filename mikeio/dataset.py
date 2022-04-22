@@ -859,7 +859,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             elif isinstance(ds.geometry, Grid3D):
                 raise NotImplementedError(
                     f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
-                )            
+                )
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
