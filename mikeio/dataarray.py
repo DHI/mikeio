@@ -1041,11 +1041,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")
             elif isinstance(da.geometry, Grid3D):
-                layer = kwargs.pop("layer")
                 raise NotImplementedError(
                     f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
                 )
-
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
