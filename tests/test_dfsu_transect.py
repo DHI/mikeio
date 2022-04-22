@@ -15,6 +15,14 @@ def vslice():
     return mikeio.open(filename)
 
 
+@pytest.fixture
+def vslice_geo():
+    # sigma, z vertical profile (=transect)
+    # in LONG/LAT, non-straight
+    filename = "tests/testdata/kalundborg_transect.dfsu"
+    return mikeio.open(filename)
+
+
 def test_open_transect(vslice):
     dfs = vslice
     assert dfs._type == DfsuFileType.DfsuVerticalProfileSigmaZ
@@ -37,6 +45,20 @@ def test_transect_geometry_properties(vslice):
 
     with pytest.raises(AttributeError, match="no boundary_polylines property"):
         g.boundary_polylines
+
+
+def test_transect_geometry_properties_geo(vslice_geo):
+    g = vslice_geo.geometry
+    ec = g.element_coordinates
+    x, y = ec[:, 0], ec[:, 1]
+    d0 = np.hypot(x - x[0], y - y[0])  # relative, in degrees
+    assert d0.max() < 2
+
+    d = g.relative_element_distance  # in meters and cummulative
+    assert d.max() > 38000
+
+    d1 = g.get_nearest_relative_distance([10.77, 55.62])
+    assert d1 == pytest.approx(25673.318)
 
 
 def test_read_transect(vslice):
