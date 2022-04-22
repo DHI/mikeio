@@ -797,7 +797,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if hasattr(self.geometry, "isel"):
                 spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
-            if isinstance(geometry, GeometryFM3D):
+            if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
@@ -848,13 +848,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 sp_axis = 0 if len(j) == 1 else 1
                 da = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
             else:
-                idx = self.geometry.find_index(x=x, y=y, z=z)
+                if isinstance(self.geometry, _GeometryFMLayered):
+                    idx = self.geometry.find_index(x=x, y=y, z=z)
+                else:
+                    idx = self.geometry.find_index(x=x, y=y)
                 da = self.isel(idx, axis="space")
         else:
             da = self
 
         if "layer" in kwargs:
-            if isinstance(da.geometry, GeometryFM3D):
+            if isinstance(da.geometry, _GeometryFMLayered):
                 layer = kwargs.pop("layer")
                 idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")

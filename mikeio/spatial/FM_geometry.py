@@ -930,44 +930,23 @@ class GeometryFM(_Geometry):
             else:
                 return self.elements_to_geometry(elements=idx, node_layers=None)
 
-    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layer=None):
+    def find_index(self, x=None, y=None, coords=None, area=None):
 
-        # TODO: make separate "layered" implementation of this in sub class
-
-        if layer is not None:
-            if self.is_layered:
-                idx = self.get_layer_elements(layer)
-            else:
-                raise ValueError("'layer' can only be selected from layered Dfsu data")
-        else:
-            idx = self.element_ids
-
-        # select in space
-        if (
-            (coords is not None)
-            or (x is not None)
-            or (y is not None)
-            or (z is not None)
-        ):
+        if (coords is not None) or (x is not None) or (y is not None):
+            if area is not None:
+                raise ValueError(
+                    "Coordinates and area cannot be provided at the same time!"
+                )
             if coords is not None:
                 coords = np.atleast_2d(coords)
                 xy = coords[:, :2]
-                z = coords[:, 2] if coords.shape[1] == 3 else None
             else:
                 xy = np.vstack((x, y)).T
-            idx_2d = self._find_element_2d(coords=xy)
-            if self.is_layered:
-                if z is None:
-                    idx_3d = np.hstack(self.e2_e3_table[idx_2d])
-                else:
-                    idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
-                idx = np.intersect1d(idx, idx_3d)
-            else:
-                idx = np.intersect1d(idx, idx_2d)
+            return self._find_element_2d(coords=xy)
         elif area is not None:
-            idx_area = self._elements_in_area(area)
-            idx = np.intersect1d(idx, idx_area)
-        return idx
+            return self._elements_in_area(area)
+        else:
+            raise ValueError("Provide either coordinates or area")
 
     def _find_elem3d_from_elem2d(self, elem2d, z):
         """Find 3d element ids from 2d element ids and z-values"""
@@ -1122,7 +1101,7 @@ class GeometryFM(_Geometry):
             if n_layers == len(elem_tbl):
                 GeometryClass = GeometryFMVerticalColumn
             else:
-                GeometryClass = GeometryFM3D
+                GeometryClass = self.__class__
         else:
             GeometryClass = GeometryFM
 
@@ -1377,6 +1356,44 @@ class _GeometryFMLayered(GeometryFM):
             # TODO: check 0-based, 1-based...
             self._top_elems = self._findTopLayerElements(self.element_table)
         return self._top_elems
+
+    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layer=None):
+
+        if layer is not None:
+            idx = self.get_layer_elements(layer)
+        else:
+            idx = self.element_ids
+
+        # select in space
+        if (
+            (coords is not None)
+            or (x is not None)
+            or (y is not None)
+            or (z is not None)
+        ):
+            if area is not None:
+                raise ValueError(
+                    "Coordinates and area cannot be provided at the same time!"
+                )
+            if coords is not None:
+                coords = np.atleast_2d(coords)
+                xy = coords[:, :2]
+                z = coords[:, 2] if coords.shape[1] == 3 else None
+            else:
+                xy = np.vstack((x, y)).T
+            idx_2d = self._find_element_2d(coords=xy)
+
+            if z is None:
+                idx_3d = np.hstack(self.e2_e3_table[idx_2d])
+            else:
+                idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
+            idx = np.intersect1d(idx, idx_3d)
+        elif area is not None:
+            idx_area = self._elements_in_area(area)
+            idx = np.intersect1d(idx, idx_area)
+        elif layer is None:
+            raise ValueError("At least one selection argument (x,y,z,coords,area,layer) needs to be provided!")
+        return idx
 
     @staticmethod
     def _findTopLayerElements(elementTable):
@@ -1823,6 +1840,47 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         dd2 = np.square(xe - coords[0]) + np.square(ye - coords[1])
         idx = np.argmin(dd2)
         return self.relative_element_distance[idx]
+
+    def find_index(self, x=None, y=None, z=None, coords=None, layer=None):
+
+        if layer is not None:
+            idx = self.get_layer_elements(layer)
+        else:
+            idx = self.element_ids
+
+        # select in space
+        if (
+            (coords is not None)
+            or (x is not None)
+            or (y is not None)
+            or (z is not None)
+        ):
+            if coords is not None:
+                coords = np.atleast_2d(coords)
+                xy = coords[:, :2]
+                z = coords[:, 2] if coords.shape[1] == 3 else None
+            else:
+                xy = np.vstack((x, y)).T
+
+            idx_2d = self._find_nearest_element_2d(coords=xy)
+
+            if z is None:
+                idx_3d = np.hstack(self.e2_e3_table[idx_2d])
+            else:
+                idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
+            idx = np.intersect1d(idx, idx_3d)
+
+        return idx
+
+    def _find_nearest_element_2d(self, coords):
+        ec2d = self.element_coordinates[self.top_elements, :2]
+        xe, ye = ec2d[:, 0], ec2d[:, 1]
+        coords = np.atleast_2d(coords)
+        idx = np.zeros(len(coords), dtype=int)
+        for j, pt in enumerate(coords):
+            x, y = pt[0:2]
+            idx[j] = np.argmin((xe - x) ** 2 + (ye - y) ** 2)
+        return idx
 
 
 class GeometryFMVerticalColumn(GeometryFM3D):
