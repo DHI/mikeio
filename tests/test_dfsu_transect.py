@@ -110,10 +110,10 @@ def test_sel_time_transect(vslice):
     assert da2.shape == (441,)
 
 
-# TODO
-# def test_sel_xy_transect(vslice):
-#     da = vslice.read()[0]
-#     da2 = da.sel(x = 0, y = 10)
+def test_sel_xyz_transect(vslice_geo):
+    da = vslice_geo.read().Temperature
+    da2 = da.sel(x=10.8, y=55.6, z=-3)
+    assert type(da2.geometry) == GeometryPoint3D
 
 
 def test_plot_transect(vslice):
