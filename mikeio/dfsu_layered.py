@@ -17,14 +17,6 @@ from .eum import ItemInfo, EUMType
 
 
 class DfsuLayered(_Dfsu):
-    @wraps(GeometryFM3D.to_2d_geometry)
-    def to_2d_geometry(self):
-        return self.geometry2d
-
-    @property
-    def geometry2d(self):
-        """The 2d geometry for a 3d object"""
-        return self._geometry2d
 
     @property
     def n_layers(self):
@@ -342,6 +334,15 @@ class Dfsu2DV(DfsuLayered):
 
 
 class Dfsu3D(DfsuLayered):
+    @wraps(GeometryFM3D.to_2d_geometry)
+    def to_2d_geometry(self):
+        return self.geometry2d
+
+    @property
+    def geometry2d(self):
+        """The 2d geometry for a 3d object"""
+        return self._geometry2d
+
     def find_nearest_profile_elements(self, x, y):
         """Find 3d elements of profile nearest to (x,y) coordinates
 
