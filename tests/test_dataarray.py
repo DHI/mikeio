@@ -489,6 +489,34 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[:, 2:5, 0:4].geometry, mikeio.Grid2D)
 
 
+def test_dataarray_grid3d_indexing():
+    da = mikeio.read("tests/testdata/test_dfs3.dfs3")[0]
+    nt, nz, ny, nx = da.shape  # 2, 34, 17, 21
+    assert da[0].shape == (nz, ny, nx)
+    assert da[0, :, :].shape == (nz, ny, nx)
+    assert da[0, [0, 1, 2, 3], [2, 4, 6]].shape == (4, 3, nx)
+    assert da[:, 0, 1:4].shape == (nt, 3, nx)
+    assert da[:, -1, 0].shape == (nt, nx)
+    assert da[:, :, -1, 0].shape == (nt, nz)
+    assert da[0, :, 4].shape == (nz, nx)
+    assert da[0, -1, :].shape == (ny, nx)
+    assert da[0, 0, 0, 0].shape == ()
+
+    assert isinstance(da[0, ::5, ::5, ::5].geometry, mikeio.Grid3D)
+    assert isinstance(da[0, :, :].geometry, mikeio.Grid3D)
+    assert isinstance(da[0, 0, :].geometry, mikeio.Grid2D)
+    assert isinstance(da[:, :, 0].geometry, mikeio.Grid2D)
+    assert isinstance(da[:, :, :, -1].geometry, mikeio.Grid2D)
+    assert isinstance(da[:, -1, 0].geometry, mikeio.Grid1D)
+
+    # with multi-index along one dimension
+    assert isinstance(da[:, 2:5, 0, :].geometry, mikeio.Grid2D)
+
+    # TODO: wait for merge of https://github.com/DHI/mikeio/pull/311
+    # assert isinstance(da[:, 1, ::3, :].geometry, mikeio.Grid2D)
+    # assert isinstance(da[:, 1, -3, 4:].geometry, mikeio.Grid2D)
+
+
 def test_dataarray_getitem_time(da_grid2d):
     da = da_grid2d
     # time=pd.date_range("2000-01-01", freq="H", periods=10)
