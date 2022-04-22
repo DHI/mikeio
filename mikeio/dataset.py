@@ -852,16 +852,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             ds = self
 
         if "layer" in kwargs:
+            layer = kwargs.pop("layer")
             if isinstance(ds.geometry, _GeometryFMLayered):
-                layer = kwargs.pop("layer")
                 idx = ds.geometry.get_layer_elements(layer)
                 ds = ds.isel(idx, axis="space")
             elif isinstance(ds.geometry, Grid3D):
-                layer = kwargs.pop("layer")
                 raise NotImplementedError(
                     f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
-                )
-
+                )            
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
