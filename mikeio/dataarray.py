@@ -15,13 +15,20 @@ from .spatial.geometry import (
 )
 from .spatial.grid_geometry import Grid1D, Grid2D
 from .spatial.FM_geometry import (
+    _GeometryFMLayered,
     GeometryFM,
-    GeometryFMLayered,
+    GeometryFM3D,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
+    GeometryFMLineSpectrum,
+    GeometryFMAreaSpectrum,
 )
 from mikecore.DfsuFile import DfsuFileType
+from .spatial.FM_utils import _plot_map, _plot_vertical_profile
+from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map
+from .spectral_utils import plot_2dspectrum, calc_m0_from_spectrum
 from .data_utils import DataUtilsMixin
 
 
@@ -33,7 +40,10 @@ class _DataArrayPlotter:
         fig, ax = self._get_fig_ax(ax, figsize)
 
         if self.da.ndim == 1:
-            return self._timeseries(self.da.values, fig, ax, **kwargs)
+            if self.da.dims[0][0] == "t":
+                return self._timeseries(self.da.values, fig, ax, **kwargs)
+            else:
+                return self._line_not_timeseries(self.da.values, ax, **kwargs)
 
         if self.da.ndim == 2:
             return ax.imshow(self.da.values, **kwargs)
@@ -70,7 +80,10 @@ class _DataArrayPlotter:
 
     def line(self, ax=None, figsize=None, **kwargs):
         fig, ax = self._get_fig_ax(ax, figsize)
-        return self._timeseries(self.da.values, fig, ax, **kwargs)
+        if self.da.dims[0][0] == "t":
+            return self._timeseries(self.da.values, fig, ax, **kwargs)
+        else:
+            return self._line_not_timeseries(self.da.values, ax, **kwargs)
 
     def _timeseries(self, values, fig, ax, **kwargs):
         if "title" in kwargs:
@@ -82,8 +95,22 @@ class _DataArrayPlotter:
         ax.set_ylabel(self._label_txt())
         return ax
 
+    def _line_not_timeseries(self, values, ax, **kwargs):
+        title = kwargs.pop("title") if "title" in kwargs else f"{self.da.time[0]}"
+        ax.set_title(title)
+        ax.plot(values, **kwargs)
+        ax.set_xlabel(self.da.dims[0])
+        ax.set_ylabel(self._label_txt())
+        return ax
+
     def _label_txt(self):
         return f"{self.da.name} [{self.da.unit.name}]"
+
+    def _get_first_step_values(self):
+        if self.da.n_timesteps > 1:
+            return self.da.values[0]
+        else:
+            return np.squeeze(self.da.values)
 
 
 class _DataArrayPlotterGrid1D(_DataArrayPlotter):
@@ -114,7 +141,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
             **kwargs,
         )
         cbar = fig.colorbar(pos, label=self._label_txt())
-        ax.set_xlabel("x")
+        ax.set_xlabel(self.da.geometry._axis_name)
         ax.set_ylabel("time")
         return ax
 
@@ -123,7 +150,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
             title = kwargs.pop("title")
             ax.set_title(title)
         ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
-        ax.set_xlabel("x")
+        ax.set_xlabel(self.da.geometry._axis_name)
         ax.set_ylabel(self._label_txt())
         return ax
 
@@ -169,13 +196,6 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         self._set_aspect_and_labels(ax, self.da.geometry.is_geo, yn)
         return ax
 
-    def _get_first_step_values(self):
-        if self.da.n_timesteps > 1:
-            # select first step as default plotting behaviour
-            return self.da.values[0]
-        else:
-            return np.squeeze(self.da.values)
-
     def _get_x_y(self):
         x = self.da.geometry.x
         y = self.da.geometry.y
@@ -212,6 +232,11 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         ax = self._get_ax(ax, figsize)
         return self._plot_FM_map(ax, **kwargs)
 
+    def patch(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = "patch"
+        return self._plot_FM_map(ax, **kwargs)
+
     def contour(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
@@ -229,20 +254,16 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax, **kwargs):
-        if self.da.n_timesteps > 1:
-            # select first step as default plotting behaviour
-            values = self.da.values[0]
-        else:
-            values = np.squeeze(self.da.values)
+        values = self._get_first_step_values()
 
         title = f"{self.da.time[0]}"
-        if self.da.geometry.is_2d:
-            geometry = self.da.geometry
-        else:
+        if self.da.geometry.is_layered:
             # select surface as default plotting for 3d files
             values = values[self.da.geometry.top_elements]
             geometry = self.da.geometry.geometry2d
             title = "Surface, " + title
+        else:
+            geometry = self.da.geometry
 
         if "label" not in kwargs:
             kwargs["label"] = self._label_txt()
@@ -318,6 +339,181 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         return ax
 
 
+class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        return self._plot_transect(ax=ax, **kwargs)
+
+    def _plot_transect(self, **kwargs):
+        if "label" not in kwargs:
+            kwargs["label"] = self._label_txt()
+        if "title" not in kwargs:
+            kwargs["title"] = self.da.time[0]
+
+        values, zn = self._get_first_step_values()
+        g = self.da.geometry
+        return _plot_vertical_profile(
+            node_coordinates=g.node_coordinates,
+            element_table=g.element_table,
+            values=values,
+            zn=zn,
+            is_geo=g.is_geo,
+            **kwargs,
+        )
+
+    def _get_first_step_values(self):
+        if self.da.n_timesteps > 1:
+            return self.da.values[0], self.da._zn[0]
+        else:
+            return np.squeeze(self.da.values), np.squeeze(self.da._zn)
+
+
+class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
+    def __init__(self, da: "DataArray") -> None:
+        super().__init__(da)
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        # ax = self._get_ax(ax, figsize)
+        if self.da.n_frequencies > 0 and self.da.n_directions > 0:
+            return self._plot_2dspectrum(figsize=figsize, **kwargs)
+        elif self.da.n_frequencies == 0:
+            return self._plot_dirspectrum(ax=ax, figsize=figsize, **kwargs)
+        elif self.da.n_directions == 0:
+            return self._plot_freqspectrum(ax=ax, figsize=figsize, **kwargs)
+        else:
+            raise ValueError("Spectrum could not be plotted")
+
+    def patch(self, **kwargs):
+        kwargs["plot_type"] = "patch"
+        return self._plot_2dspectrum(**kwargs)
+
+    def contour(self, **kwargs):
+        kwargs["plot_type"] = "contour"
+        return self._plot_2dspectrum(**kwargs)
+
+    def contourf(self, **kwargs):
+        kwargs["plot_type"] = "contourf"
+        return self._plot_2dspectrum(**kwargs)
+
+    def _plot_freqspectrum(self, ax=None, figsize=None, **kwargs):
+        ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)
+        ax.set_xlabel("frequency [Hz]")
+        ax.set_ylabel("directionally integrated energy [m*m*s]")
+        return ax
+
+    def _plot_dirspectrum(self, ax=None, figsize=None, **kwargs):
+        ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)
+        ax.set_xlabel("directions [degrees]")
+        ax.set_ylabel("directional spectral energy [m*m*s]")
+        ax.set_xticks(self.da.directions[::2])
+        return ax
+
+    def _plot_1dspectrum(self, x_values, ax=None, figsize=None, **kwargs):
+        ax = self._get_ax(ax, figsize)
+        y_values = self._get_first_step_values()
+
+        if "linestyle" not in kwargs:
+            kwargs["linestyle"] = "-"
+        if "marker" not in kwargs:
+            kwargs["marker"] = "."
+
+        title = kwargs.pop("title") if "title" in kwargs else self._get_title()
+        ax.set_title(title)
+
+        ax.plot(x_values, y_values, **kwargs)
+        return ax
+
+    def _plot_2dspectrum(self, **kwargs):
+        values = self._get_first_step_values()
+
+        if "figsize" not in kwargs or kwargs["figsize"] is None:
+            kwargs["figsize"] = (7, 7)
+        if "label" not in kwargs:
+            kwargs["label"] = self._label_txt()
+        if "title" not in kwargs:
+            kwargs["title"] = self._get_title()
+
+        return plot_2dspectrum(
+            values,
+            frequencies=self.da.geometry.frequencies,
+            directions=self.da.geometry.directions,
+            **kwargs,
+        )
+
+    def _get_title(self):
+        txt = f"{self.da.time[0]}"
+        x, y = self.da.geometry.x, self.da.geometry.y
+        if x is not None and y is not None:
+            if np.abs(x) < 400 and np.abs(y) < 90:
+                txt = txt + f", (x, y) = ({x:.5f}, {y:.5f})"
+            else:
+                txt = txt + f", (x, y) = ({x:.1f}, {y:.1f})"
+        return txt
+
+
+class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
+    def __init__(self, da: "DataArray") -> None:
+        if da.n_timesteps > 1:
+            Hm0 = da[0].to_Hm0()
+        else:
+            Hm0 = da.to_Hm0()
+        super().__init__(Hm0)
+
+
+class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
+    def __init__(self, da: "DataArray") -> None:
+        if da.n_timesteps > 1:
+            Hm0 = da[0].to_Hm0()
+        else:
+            Hm0 = da.to_Hm0()
+        super().__init__(Hm0)
+
+
+class _DataArraySpectrumToHm0:
+    def __init__(self, da: "DataArray") -> None:
+        self.da = da
+
+    def __call__(self, tail=True):
+        # TODO: if action_density
+        m0 = calc_m0_from_spectrum(
+            self.da.to_numpy(),
+            self.da.frequencies,
+            self.da.directions,
+            tail,
+        )
+        Hm0 = 4 * np.sqrt(m0)
+        dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
+        item = ItemInfo(EUMType.Significant_wave_height)
+        g = self.da.geometry
+        if isinstance(g, GeometryFMPointSpectrum):
+            geometry = GeometryPoint2D(x=g.x, y=g.y)
+        elif isinstance(g, GeometryFMLineSpectrum):
+            geometry = Grid1D(
+                n=g.n_nodes,
+                dx=1.0,
+                node_coordinates=g.node_coordinates,
+                axis_name="node",
+            )
+        elif isinstance(g, GeometryFMAreaSpectrum):
+            geometry = GeometryFM(
+                node_coordinates=g.node_coordinates,
+                codes=g.codes,
+                node_ids=g.node_ids,
+                projection=g.projection_string,
+                element_table=g.element_table,
+                element_ids=g.element_ids,
+            )
+        else:
+            geometry = GeometryUndefined()
+
+        return DataArray(
+            data=Hm0, time=self.da.time, item=item, dims=dims, geometry=geometry
+        )
+
+
 class DataArray(DataUtilsMixin, TimeSeries):
 
     deletevalue = 1.0e-35
@@ -342,6 +538,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self.item = self._parse_item(item)
         self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
+        self._set_spectral_attributes(geometry)
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
@@ -379,10 +576,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
         if isinstance(geometry, GeometryFMPointSpectrum):
-            if ndim_no_time > 0:
+            if ndim_no_time == 1:
                 dims.append("frequency")
-            if ndim_no_time > 1:
+            if ndim_no_time == 2:
                 dims.append("direction")
+                dims.append("frequency")
         elif isinstance(geometry, GeometryFM):
             if geometry._type == DfsuFileType.DfsuSpectral1D:
                 if ndim_no_time > 0:
@@ -391,10 +589,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 if ndim_no_time > 0:
                     dims.append("element")
             if geometry.is_spectral:
-                if ndim_no_time > 1:
+                if ndim_no_time == 2:
                     dims.append("frequency")
-                if ndim_no_time > 2:
+                elif ndim_no_time == 3:
                     dims.append("direction")
+                    dims.append("frequency")
         elif isinstance(geometry, Grid1D):
             dims.append("x")
         elif isinstance(geometry, Grid2D):
@@ -479,7 +678,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     @staticmethod
     def _parse_zn(zn, geometry, n_timesteps):
         if zn is not None:
-            if isinstance(geometry, GeometryFMLayered):
+            if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
                     raise ValueError(
@@ -529,8 +728,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return len(problems) == 0
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFMVerticalColumn):
+        if isinstance(self.geometry, GeometryFMVerticalProfile):
+            return _DataArrayPlotterFMVerticalProfile(self)
+        elif isinstance(self.geometry, GeometryFMVerticalColumn):
             return _DataArrayPlotterFMVerticalColumn(self)
+        elif isinstance(self.geometry, GeometryFMPointSpectrum):
+            return _DataArrayPlotterPointSpectrum(self)
+        elif isinstance(self.geometry, GeometryFMLineSpectrum):
+            return _DataArrayPlotterLineSpectrum(self)
+        elif isinstance(self.geometry, GeometryFMAreaSpectrum):
+            return _DataArrayPlotterAreaSpectrum(self)
         elif isinstance(self.geometry, GeometryFM):
             return _DataArrayPlotterFM(self)
         elif isinstance(self.geometry, Grid1D):
@@ -539,6 +746,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return _DataArrayPlotterGrid2D(self)
         else:
             return _DataArrayPlotter(self)
+
+    def _set_spectral_attributes(self, geometry):
+        if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
+            self.frequencies = geometry.frequencies
+            self.n_frequencies = geometry.n_frequencies
+            self.directions = geometry.directions
+            self.n_directions = geometry.n_directions
+            self.to_Hm0 = _DataArraySpectrumToHm0(self)
 
     # ============= Basic properties/methods ===========
 
@@ -761,7 +976,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if hasattr(self.geometry, "isel"):
                 spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
-            if isinstance(geometry, GeometryFMLayered):
+            if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
@@ -812,13 +1027,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 sp_axis = 0 if len(j) == 1 else 1
                 da = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
             else:
-                idx = self.geometry.find_index(x=x, y=y, z=z)
+                if isinstance(self.geometry, _GeometryFMLayered):
+                    idx = self.geometry.find_index(x=x, y=y, z=z)
+                else:
+                    idx = self.geometry.find_index(x=x, y=y)
                 da = self.isel(idx, axis="space")
         else:
             da = self
 
         if "layer" in kwargs:
-            if isinstance(da.geometry, GeometryFMLayered):
+            if isinstance(da.geometry, _GeometryFMLayered):
                 layer = kwargs.pop("layer")
                 idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")

@@ -1,10 +1,8 @@
 import os
 import numpy as np
 import pandas as pd
-import pathlib
 import warnings
-import typing
-import tempfile
+
 from datetime import datetime, timedelta
 from functools import wraps
 from tqdm import trange
@@ -20,9 +18,17 @@ from .base import EquidistantTimeSeries
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
-from .dfs2 import Dfs2
 from .eum import ItemInfo, EUMType, EUMUnit
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered, GeometryFMPointSpectrum
+from .spatial.FM_geometry import (
+    GeometryFM,
+    GeometryFM3D,
+    GeometryFMVerticalProfile,
+    GeometryFMPointSpectrum,
+    _GeometryFMLayered,
+    GeometryFMPointSpectrum,
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
+)
 from .spatial.FM_utils import _plot_map
 from .spatial.grid_geometry import Grid2D
 
@@ -205,20 +211,27 @@ class _UnstructuredFile:
 
         if self.is_spectral:
             dir = dfs.Directions
-            self.directions = None if dir is None else dir * (180 / np.pi)
-            self.n_directions = dfs.NumberOfDirections
-            self.frequencies = dfs.Frequencies
-            self.n_frequencies = dfs.NumberOfFrequencies
+            self._directions = None if dir is None else dir * (180 / np.pi)
+            self._frequencies = dfs.Frequencies
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
-            self._geometry = GeometryFMPointSpectrum()  # GeometryFM()  # EMPTY
+            self._geometry = GeometryFMPointSpectrum(
+                frequencies=self.frequencies, directions=self.directions
+            )
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
             el_table, el_ids = self._get_elements_from_source(dfs)
 
             if self.is_layered:
-                self._geometry = GeometryFMLayered(
+                geom_cls = GeometryFM3D
+                if self._type in (
+                    DfsuFileType.DfsuVerticalProfileSigma,
+                    DfsuFileType.DfsuVerticalProfileSigmaZ,
+                ):
+                    geom_cls = GeometryFMVerticalProfile
+
+                self._geometry = geom_cls(
                     node_coordinates=nc,
                     element_table=el_table,
                     codes=codes,
@@ -229,6 +242,32 @@ class _UnstructuredFile:
                     n_layers=dfs.NumberOfLayers,
                     n_sigma=dfs.NumberOfSigmaLayers,
                     validate=False,
+                )
+            elif self._type == DfsuFileType.DfsuSpectral1D:
+                self._geometry = GeometryFMLineSpectrum(
+                    node_coordinates=nc,
+                    element_table=el_table,
+                    codes=codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=self._type,
+                    element_ids=el_ids,
+                    node_ids=node_ids,
+                    validate=False,
+                    frequencies=self.frequencies,
+                    directions=self.directions,
+                )
+            elif self._type == DfsuFileType.DfsuSpectral2D:
+                self._geometry = GeometryFMAreaSpectrum(
+                    node_coordinates=nc,
+                    element_table=el_table,
+                    codes=codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=self._type,
+                    element_ids=el_ids,
+                    node_ids=node_ids,
+                    validate=False,
+                    frequencies=self.frequencies,
+                    directions=self.directions,
                 )
             else:
                 self._geometry = GeometryFM(
@@ -448,7 +487,7 @@ class _UnstructuredFile:
         """Center coordinates of each element"""
         return self.geometry.element_coordinates
 
-    @wraps(GeometryFMLayered.calc_element_coordinates)
+    @wraps(GeometryFM3D.calc_element_coordinates)
     def calc_element_coordinates(self, elements=None, zn=None):
         return self.geometry.calc_element_coordinates(elements, zn)
 

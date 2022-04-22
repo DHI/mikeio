@@ -91,7 +91,11 @@ class DataUtilsMixin:
                 raise ValueError(
                     f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
                 )
-            axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
+            if "frequency" in dims or "directions" in dims:
+                space_name = "node" if "node" in dims else "element"
+                return dims.index(space_name)
+            else:
+                axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
         if axis is None:
             axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
 

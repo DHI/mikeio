@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from mikeio.spatial.FM_geometry import GeometryFM, GeometryFMLayered
+from mikeio.spatial.FM_geometry import GeometryFM, GeometryFM3D
 
 
 def test_basic():
@@ -120,7 +120,7 @@ def test_layered():
 
     el = [(0, 1, 2, 3, 4, 5), (3, 4, 5, 6, 7, 8)]
 
-    g = GeometryFMLayered(
+    g = GeometryFM3D(
         node_coordinates=nc,
         element_table=el,
         projection="LONG/LAT",
