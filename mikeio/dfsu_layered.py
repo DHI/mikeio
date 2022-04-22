@@ -17,7 +17,6 @@ from .eum import ItemInfo, EUMType
 
 
 class DfsuLayered(_Dfsu):
-
     @property
     def n_layers(self):
         """Maximum number of layers"""
