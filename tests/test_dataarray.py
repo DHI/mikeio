@@ -706,6 +706,8 @@ def test_plot_grid1d(da2):
     da2.plot.imshow(ax=ax1)
     da2.plot.pcolormesh(ax=ax2)
 
+    plt.close("all")
+
 
 def test_plot_grid2d_proj(da_grid2d_proj):
     da_grid2d_proj.plot()
