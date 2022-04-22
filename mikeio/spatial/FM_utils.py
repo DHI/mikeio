@@ -1,5 +1,6 @@
 import numpy as np
 import warnings
+from .utils import _relative_cumulative_distance
 
 
 def _plot_map(
@@ -518,3 +519,115 @@ def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
     if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
         return False
     return True
+
+
+def _plot_vertical_profile(
+    node_coordinates,
+    element_table,
+    values,
+    zn=None,
+    is_geo=False,
+    cmin=None,
+    cmax=None,
+    label="",
+    add_colorbar=True,
+    **kwargs,
+):
+    """
+    Plot unstructured vertical profile
+
+    Parameters
+    ----------
+    node_coordinates: np.array
+    element_table: np.array[np.array]
+    values: np.array
+        value for each element to plot
+    zn: np.array, optional
+        dynamic vertical node positions,
+        default: use static vertical positions
+    is_geo: bool, optional
+        are coordinates geographical (for calculating
+        relative distance in meters), default: False
+    cmin: real, optional
+        lower bound of values to be shown on plot, default:None
+    cmax: real, optional
+        upper bound of values to be shown on plot, default:None
+    title: str, optional
+        axes title
+    label: str, optional
+        colorbar label
+    cmap: matplotlib.cm.cmap, optional
+        colormap, default viridis
+    edge_color: str, optional
+        color of mesh lines, default: None
+    add_colorbar: bool, optional
+        Add colorbar to plot, default True
+    figsize: (float, float), optional
+        specify size of figure
+    ax: matplotlib.axes, optional
+        Adding to existing axis, instead of creating new fig
+
+    Returns
+    -------
+    <matplotlib.axes>
+    """
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import PolyCollection
+
+    nc = node_coordinates
+    s_coordinate = _relative_cumulative_distance(nc, is_geo=is_geo)
+    z_coordinate = nc[:, 2] if zn is None else zn
+
+    elements = _Get_2DVertical_elements(element_table)
+
+    # plot in existing or new axes?
+    if "ax" in kwargs:
+        ax = kwargs["ax"]
+    else:
+        figsize = None
+        if "figsize" in kwargs:
+            figsize = kwargs["figsize"]
+        _, ax = plt.subplots(figsize=figsize)
+
+    sz = np.c_[s_coordinate, z_coordinate]
+    verts = sz[elements]
+
+    if "cmap" in kwargs:
+        cmap = kwargs["cmap"]
+    else:
+        cmap = "jet"
+    pc = PolyCollection(verts, cmap=cmap)
+
+    if cmin is None:
+        cmin = np.nanmin(values)
+    if cmax is None:
+        cmax = np.nanmax(values)
+    pc.set_clim(cmin, cmax)
+
+    if add_colorbar:
+        plt.colorbar(pc, ax=ax, label=label, orientation="vertical")
+    pc.set_array(values)
+
+    if "edge_color" in kwargs:
+        edge_color = kwargs["edge_color"]
+    else:
+        edge_color = None
+    pc.set_edgecolor(edge_color)
+
+    ax.add_collection(pc)
+    ax.autoscale()
+    ax.set_xlabel("relative distance [m]")
+    ax.set_ylabel("z [m]")
+
+    if "title" in kwargs:
+        ax.set_title(kwargs["title"])
+
+    return ax
+
+
+def _Get_2DVertical_elements(element_table):
+    # if (type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
+    #     type == DfsuFileType.DfsuVerticalProfileSigma
+    # ):
+    elements = [list(element_table[i]) for i in range(len(list(element_table)))]
+    return np.asarray(elements)

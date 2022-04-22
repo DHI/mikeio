@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import datetime
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
@@ -649,6 +650,8 @@ def test_da_plot():
     da.plot.contour()
     da.plot.contourf()
     da.plot.hist()
+
+    plt.close("all")
 
 
 def test_read_single_precision():

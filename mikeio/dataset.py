@@ -12,7 +12,7 @@ from mikecore.DfsFile import DfsSimpleType
 
 from .eum import EUMType, ItemInfo
 from .data_utils import DataUtilsMixin
-from .spatial.FM_geometry import GeometryFM, GeometryFMLayered
+from .spatial.FM_geometry import _GeometryFMLayered, GeometryFM, GeometryFM3D
 from .base import TimeSeries
 from .dataarray import DataArray
 from .spatial.geometry import (
@@ -47,7 +47,10 @@ class _DatasetPlotter:
         if self.ds.dims == ("time",):
             df = self.ds.to_dataframe()
             df.plot(figsize=figsize, **kwargs)  # TODO ax
-
+        else:
+            raise ValueError(
+                "Could not plot Dataset. Try plotting one of its DataArrays instead..."
+            )
         # fig, ax = self._get_fig_ax(ax, figsize)
 
     @staticmethod
@@ -840,13 +843,16 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 ds = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
             else:
                 # idx = self.geometry.find_nearest_elements(x=x, y=y, z=z)
-                idx = self.geometry.find_index(x=x, y=y, z=z)
+                if isinstance(self.geometry, _GeometryFMLayered):
+                    idx = self.geometry.find_index(x=x, y=y, z=z)
+                else:
+                    idx = self.geometry.find_index(x=x, y=y)
                 ds = self.isel(idx, axis="space")
         else:
             ds = self
 
         if "layer" in kwargs:
-            if isinstance(ds.geometry, GeometryFMLayered):
+            if isinstance(ds.geometry, _GeometryFMLayered):
                 layer = kwargs.pop("layer")
                 idx = ds.geometry.get_layer_elements(layer)
                 ds = ds.isel(idx, axis="space")

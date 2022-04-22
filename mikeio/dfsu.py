@@ -21,7 +21,10 @@ from .dfs0 import Dfs0
 from .eum import ItemInfo, EUMType, EUMUnit
 from .spatial.FM_geometry import (
     GeometryFM,
-    GeometryFMLayered,
+    GeometryFM3D,
+    GeometryFMVerticalProfile,
+    GeometryFMPointSpectrum,
+    _GeometryFMLayered,
     GeometryFMPointSpectrum,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
@@ -221,7 +224,14 @@ class _UnstructuredFile:
             el_table, el_ids = self._get_elements_from_source(dfs)
 
             if self.is_layered:
-                self._geometry = GeometryFMLayered(
+                geom_cls = GeometryFM3D
+                if self._type in (
+                    DfsuFileType.DfsuVerticalProfileSigma,
+                    DfsuFileType.DfsuVerticalProfileSigmaZ,
+                ):
+                    geom_cls = GeometryFMVerticalProfile
+
+                self._geometry = geom_cls(
                     node_coordinates=nc,
                     element_table=el_table,
                     codes=codes,
@@ -477,7 +487,7 @@ class _UnstructuredFile:
         """Center coordinates of each element"""
         return self.geometry.element_coordinates
 
-    @wraps(GeometryFMLayered.calc_element_coordinates)
+    @wraps(GeometryFM3D.calc_element_coordinates)
     def calc_element_coordinates(self, elements=None, zn=None):
         return self.geometry.calc_element_coordinates(elements, zn)
 
