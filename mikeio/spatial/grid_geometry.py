@@ -30,6 +30,7 @@ class Grid1D(_Geometry):
         origin: Tuple[float, float] = (0.0, 0.0),
         orientation=0.0,
         node_coordinates=None,
+        axis_name="x",
     ):
         """Create equidistant 1D spatial geometry"""
         self._projection = projection
@@ -57,6 +58,8 @@ class Grid1D(_Geometry):
         if node_coordinates is not None and len(node_coordinates) != self.n:
             raise ValueError("Length of node_coordinates must be n")
         self._nc = node_coordinates
+
+        self._axis_name = axis_name
 
     def __repr__(self):
         out = []
