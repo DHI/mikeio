@@ -492,7 +492,7 @@ class _DataArraySpectrumToHm0:
             geometry = GeometryPoint2D(x=g.x, y=g.y)
         elif isinstance(g, GeometryFMLineSpectrum):
             geometry = Grid1D(
-                n=g.n_nodes,
+                nx=g.n_nodes,
                 dx=1.0,
                 node_coordinates=g.node_coordinates,
                 axis_name="node",
