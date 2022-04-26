@@ -488,13 +488,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             axes = tuple(range(1, x.ndim))
             idx = np.where(~np.isnan(x).all(axis=axes))
             idx = list(idx[0])
-            if i == 0 :
+            if i == 0:
                 all_index = idx
             else:
                 all_index = list(np.intersect1d(all_index, idx))
 
         return self.isel(all_index, axis=0)
-
 
     def flipud(self) -> "Dataset":
         """Flip dataset upside down"""
