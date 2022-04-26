@@ -480,15 +480,21 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     def dropna(self) -> "Dataset":
         """Remove time steps where all items are NaN"""
 
-        # TODO consider all items
-        x = self[0].to_numpy()
+        all_index = []
+        for i in range(self.n_items):
+            x = self[i].to_numpy()
 
-        # this seems overly complicated...
-        axes = tuple(range(1, x.ndim))
-        idx = np.where(~np.isnan(x).all(axis=axes))
-        idx = list(idx[0])
+            # this seems overly complicated...
+            axes = tuple(range(1, x.ndim))
+            idx = np.where(~np.isnan(x).all(axis=axes))
+            idx = list(idx[0])
+            if i == 0 :
+                all_index = idx
+            else:
+                all_index = list(np.intersect1d(all_index, idx))
 
-        return self.isel(idx, axis=0)
+        return self.isel(all_index, axis=0)
+
 
     def flipud(self) -> "Dataset":
         """Flip dataset upside down"""
