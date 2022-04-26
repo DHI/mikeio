@@ -146,7 +146,175 @@ class Grid1D(_Geometry):
                 return GeometryPoint2D(*coords)
 
 
-class Grid2D(_Geometry):
+class Grid2D:
+    def __new__(cls, *args, **kwargs):
+        if "orientation" in kwargs and kwargs["orientation"] != 0.0:
+            return Grid2DRotated(*args, **kwargs)
+        else:
+            return Grid2DHorizontal(*args, **kwargs)
+
+
+class _Grid2D(_Geometry):
+    def __init__(
+        self,
+        x=None,
+        x0=0.0,
+        dx=None,
+        nx=None,
+        y=None,
+        y0=0.0,
+        dy=None,
+        ny=None,
+        projection="NON-UTM",
+        origin: Tuple[float, float] = (0.0, 0.0),
+        orientation=0.0,
+        axis_names=("x", "y"),
+    ):
+        """Create equidistant 1D spatial geometry"""
+        self._projection = projection
+        self._projstr = projection  # TODO handle other types than string
+        self._origin = origin
+        self._orientation = orientation
+
+        if x is not None:
+            x = np.asarray(x)
+            _check_equidistant(x)
+            if len(x) > 1 and x[0] > x[-1]:
+                raise ValueError("x values must be increasing")
+
+            self._x = x
+            self._dx = x[1] - x[0] if len(x) > 1 else 1.0
+        else:
+            if nx is None:
+                raise ValueError("nx must be provided")
+            if dx is None:
+                raise ValueError("dx must be provided")
+            self._dx = dx
+            x1 = x0 + dx * (nx - 1)
+            self._x = np.linspace(x0, x1, nx)
+
+        if y is not None:
+            y = np.asarray(y)
+            _check_equidistant(y)
+            if len(y) > 1 and y[0] > y[-1]:
+                raise ValueError("y values must be increasing")
+
+            self._y = y
+            self._dy = y[1] - y[0] if len(y) > 1 else 1.0
+        else:
+            if ny is None:
+                raise ValueError("ny must be provided")
+            if dx is None:
+                dy = dx
+            self._dy = dy
+            y1 = y0 + dy * (ny - 1)
+            self._y = np.linspace(y0, y1, ny)
+
+        self._axis_names = axis_names
+
+    def __repr__(self):
+        out = []
+        out.append("<mikeio.Grid2D>")
+        out.append(
+            f"axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
+        )
+        out.append(
+            f"axis: ny={self.ny} points from y0={self.y0:g} to y1={self.y1:g} with dy={self.dy:g}"
+        )
+        return str.join("\n", out)
+
+    def __str__(self):
+        return f"Grid2D (ny={self.ny}, nx={self.nx})"
+
+    def find_index(self, x: float, y: float, **kwargs) -> Tuple[int, int]:
+
+        dist_x = (self.x - x) ** 2
+        idx_x = np.argmin(dist_x)
+        dist_y = (self.y - y) ** 2
+        idx_y = np.argmin(dist_y)
+        return idx_x, idx_y
+
+    def get_spatial_interpolant(self, coords, **kwargs):
+
+        coords = np.atleast_2d(coords)
+        x, y = coords[0, 0], coords[0, 1]  # TODO accept list of points
+        dist_x = np.abs(self.x - x)
+        ids = np.argsort(dist_x)[0:2]
+        weights_x = 1 - dist_x[ids]
+
+        dist_y = np.abs(self.y - y)
+        ids = np.argsort(dist_y)[0:2]
+        weights_y = 1 - dist_y[ids]
+
+        # WORK IN PROGRESS!
+
+        # assert np.allclose(weights_x.sum(), 1.0)
+        # assert len(ids) == 2
+        # return ids, weights_x
+
+    def interp(self, data, ids, weights):
+        return np.dot(data[:, ids], weights)
+
+    @property
+    def dx(self) -> float:
+        """x grid spacing"""
+        return self._dx
+
+    @property
+    def dy(self) -> float:
+        """y grid spacing"""
+        return self._dy
+
+    @property
+    def x(self):
+        """array of x coordinates (element center)"""
+        return self._x
+
+    @property
+    def y(self):
+        """array of y coordinates (element center)"""
+        return self._y
+
+    @property
+    def x0(self) -> float:
+        """x starting point"""
+        return self.x[0]
+
+    @property
+    def y0(self) -> float:
+        """y starting point"""
+        return self.y[0]
+
+    @property
+    def x1(self) -> float:
+        """x end-point"""
+        return self.x[-1]
+
+    @property
+    def y1(self) -> float:
+        """y end-point"""
+        return self.y[-1]
+
+    @property
+    def nx(self) -> int:
+        """number of x grid points"""
+        return len(self._x)
+
+    @property
+    def ny(self) -> int:
+        """number of y grid points"""
+        return len(self._y)
+
+    @property
+    def origin(self) -> Tuple[float, float]:
+        return self._origin
+
+    @property
+    def orientation(self) -> float:
+        return self._orientation
+
+
+class Grid2DHorizontal(_Geometry):
     """2D horizontal grid
     Origin in the center of cell in lower-left corner
     x and y axes are increasing and equidistant
@@ -220,28 +388,29 @@ class Grid2D(_Geometry):
         return self._nx * self._ny
 
     @property
-    def xx(self):
+    def _xx(self):
         """2d array of all x-coordinates"""
-        if self._xx is None:
+        if self.__xx is None:
             self._create_meshgrid(self.x, self.y)
-        return self._xx
+        return self.__xx
 
     @property
-    def yy(self):
+    def _yy(self):
         """2d array of all y-coordinates"""
-        if self._yy is None:
+        if self.__yy is None:
             self._create_meshgrid(self.x, self.y)
-        return self._yy
+        return self.__yy
 
     @property
     def xy(self):
         """n-by-2 array of x- and y-coordinates"""
-        xcol = self.xx.reshape(-1, 1)
-        ycol = self.yy.reshape(-1, 1)
+        xcol = self._xx.reshape(-1, 1)
+        ycol = self._yy.reshape(-1, 1)
         return np.column_stack([xcol, ycol])
 
     @property
     def coordinates(self):
+        # TODO: remove this?
         """n-by-2 array of x- and y-coordinates"""
         return self.xy
 
@@ -313,8 +482,8 @@ class Grid2D(_Geometry):
         self._dy = None
         self._ny = None
 
-        self._xx = None
-        self._yy = None
+        self.__xx = None
+        self.__yy = None
 
         dxdy = dx
         if dy is not None:
@@ -455,12 +624,12 @@ class Grid2D(_Geometry):
         self._ny = ny
 
     def _create_axis(self, x0, dx, nx):
-        self._xx, self._yy = None, None
+        self.__xx, self.__yy = None, None
         x1 = x0 + dx * (nx - 1)
         return np.linspace(x0, x1, nx)
 
     def _create_meshgrid(self, x, y):
-        self._xx, self._yy = np.meshgrid(x, y)
+        self.__xx, self.__yy = np.meshgrid(x, y)
 
     def contains(self, xy):
         """test if a list of points are inside grid
@@ -656,18 +825,6 @@ class Grid2D(_Geometry):
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
-    @staticmethod
-    def xy_to_bbox(xy, buffer=None):
-        """return bounding box for list of coordinates"""
-        if buffer is None:
-            buffer = 0
-
-        left = xy[:, 0].min() - buffer
-        bottom = xy[:, 1].min() - buffer
-        right = xy[:, 0].max() + buffer
-        top = xy[:, 1].max() + buffer
-        return BoundingBox(left, bottom, right, top)
-
     def __repr__(self):
         out = []
         out.append("<mikeio.Grid2D>")
@@ -681,7 +838,12 @@ class Grid2D(_Geometry):
         return str.join("\n", out)
 
     def __str__(self) -> str:
-        return f"Grid2D (ny={self.ny}, nx={self.nx})"
+        return f"Grid2DHorizontal (ny={self.ny}, nx={self.nx})"
+
+
+class Grid2DRotated(_Grid2D):
+    def __str__(self) -> str:
+        return f"Grid2DRotated (ny={self.ny}, nx={self.nx})"
 
 
 class Grid3D(_Geometry):
