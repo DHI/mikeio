@@ -12,7 +12,7 @@ from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
-from .utils import _relative_cumulative_distance
+from .utils import _relative_cumulative_distance, xy_to_bbox
 from .FM_utils import (
     _get_node_centered_data,
     _to_polygons,
@@ -186,7 +186,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _set_plot_limits(self, ax):
-        bbox = Grid2D.xy_to_bbox(self.g.node_coordinates)
+        bbox = xy_to_bbox(self.g.node_coordinates)
         xybuf = 6e-3 * (bbox.right - bbox.left)
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
         ax.set_ylim(bbox.bottom - xybuf, bbox.top + xybuf)
@@ -748,7 +748,7 @@ class GeometryFM(_Geometry):
             2d grid
         """
         nc = self._geometry2d.node_coordinates
-        bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
+        bbox = xy_to_bbox(nc, buffer=buffer)
         return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape, projection=self.projection)
 
     def get_element_area(self):

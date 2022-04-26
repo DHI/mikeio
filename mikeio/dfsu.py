@@ -14,6 +14,8 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from mikecore.MeshFile import MeshFile
 from mikecore.MeshBuilder import MeshBuilder
 
+from mikeio.spatial.utils import xy_to_bbox
+
 from .base import EquidistantTimeSeries
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset, DataArray
@@ -518,7 +520,7 @@ class _UnstructuredFile:
             2d grid
         """
         nc = self._geometry2d.node_coordinates
-        bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
+        bbox = xy_to_bbox(nc, buffer=buffer)
         return Grid2D(
             bbox=bbox,
             dx=dx,
