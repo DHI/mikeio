@@ -35,9 +35,12 @@ class DataUtilsMixin:
             steps = slice(steps, steps)
         if isinstance(steps, slice):
             try:
-                s = time.slice_indexer(steps.start, steps.stop)
+                s = time.slice_indexer(
+                    steps.start,
+                    steps.stop,
+                )
                 steps = list(range(s.start, s.stop))
-            except:
+            except TypeError:
                 steps = list(range(*steps.indices(len(time))))
         elif isinstance(steps, int):
             steps = [steps]
@@ -154,7 +157,8 @@ class DataUtilsMixin:
         elif isinstance(new_time, TimeSeries):
             t_out_index = new_time.time
         else:
-            offset = pd.tseries.offsets.DateOffset(seconds=new_time)
+            # offset = pd.tseries.offsets.DateOffset(seconds=new_time) # This seems identical, but doesn't work with slicing
+            offset = pd.Timedelta(seconds=new_time)
             t_out_index = pd.date_range(
                 start=old_time[0], end=old_time[-1], freq=offset
             )
