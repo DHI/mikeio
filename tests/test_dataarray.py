@@ -1104,3 +1104,7 @@ def test_time_selection():
     das_t = ds.Foo.sel(time="2000-01-05")
 
     assert das_t.shape == (24,)
+
+    with pytest.raises(IndexError):
+        # not in time
+        ds.sel(time="1997-09-15 00:00")
