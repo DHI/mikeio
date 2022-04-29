@@ -188,6 +188,7 @@ class Grid2D(_Geometry):
         origin: Tuple[float, float] = (0.0, 0.0),
         orientation=0.0,
         axis_names=("x", "y"),
+        is_spectral=False,
     ):
         """Create equidistant 1D spatial geometry"""
         self._projstr = projection  # TODO handle other types than string
@@ -196,17 +197,31 @@ class Grid2D(_Geometry):
         self.__xx = None
         self.__yy = None
 
-        self.is_spectral = False
         self._axis_names = axis_names
+        self.is_spectral = is_spectral
+        self._x_logarithmic = False
 
         if bbox is not None:
             if (x0 != 0.0) or (y0 != 0.0):
                 raise ValueError("x0,y0 cannot be provided together with bbox")
             self._create_in_bbox(bbox, dx=dx, dy=dy, nx=nx, ny=ny)
         else:
-            self._x = _parse_grid_axis("x", x, x0, dx, nx)
+            self._x_local = _parse_grid_axis("x", x, x0, dx, nx)
             dy = dx if dy is None else dy
-            self._y = _parse_grid_axis("y", y, y0, dy, ny)
+            self._y_local = _parse_grid_axis("y", y, y0, dy, ny)
+
+        if self.is_spectral:
+            self._x_logarithmic = self.dx > 1.0
+            f = (
+                self.logarithmic_f(self.nx, self.x0, self.dx)
+                if self._x_logarithmic
+                else self._x_local
+            )
+            self._x_local = f
+
+    @property
+    def _is_rotated(self):
+        return np.abs(self._orientation) > 1e-5
 
     def _create_in_bbox(self, bbox, dx=None, dy=None, nx=None, ny=None):
         """create 2d grid in bounding box, specifying spacing or shape
@@ -249,8 +264,8 @@ class Grid2D(_Geometry):
             dx, dy = dx
         dy = dx if dy is None else dy
 
-        self._x = self._create_in_bbox_1d("x", left, right, dx, nx)
-        self._y = self._create_in_bbox_1d("y", bottom, top, dy, ny)
+        self._x_local = self._create_in_bbox_1d("x", left, right, dx, nx)
+        self._y_local = self._create_in_bbox_1d("y", bottom, top, dy, ny)
 
     @staticmethod
     def _parse_bbox(bbox):
@@ -327,15 +342,41 @@ class Grid2D(_Geometry):
     @property
     def x(self):
         """array of x coordinates (element center)"""
-        return self._x
+        if self._is_rotated or self.is_spectral:
+            return self._x_local
+        else:
+            return self._x_local + self._origin[0]
+
+    @staticmethod
+    def logarithmic_f(n=25, f0=0.055, freq_factor=1.1):
+        """Generate logarithmic frequency axis
+
+        Parameters
+        ----------
+        n : int, optional
+            number of frequencies, by default 25
+        f0 : float, optional
+            Minimum frequency, by default 0.055
+        freq_factor : float, optional
+            Frequency factor, by default 1.1
+
+        Returns
+        -------
+        np.ndarray
+            array of logarithmic distributed discrete frequencies
+        """
+        logf0 = np.log(f0)
+        logdf = np.log(f0 * freq_factor) - logf0
+        logf = logf0 + logdf * np.arange(n)
+        return np.exp(logf)
 
     @property
     def y(self):
         """array of y coordinates (element center)"""
-        return self._y
+        return self._y_local if self._is_rotated else self._y_local + self._origin[1]
 
     @property
-    def x0(self) -> float:
+    def x0(self):
         """x starting point"""
         return self.x[0]
 
@@ -377,7 +418,7 @@ class Grid2D(_Geometry):
         """bounding box (left, bottom, right, top)
         Note: not the same as the cell center values (x0,y0,x1,y1)!
         """
-        if np.abs(self.orientation) != 0.0:
+        if self._is_rotated:
             raise NotImplementedError("Only available if orientation = 0")
         if self.is_spectral:
             raise NotImplementedError("Not available for spectral Grid2D")
