@@ -1253,6 +1253,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         return dai
 
+    @staticmethod
+    def concat(dataarrays: Sequence["DataArray"], keep="last") -> "DataArray":
+        from mikeio import Dataset
+
+        datasets = [Dataset([da]) for da in dataarrays]
+
+        ds = Dataset.concat(datasets, keep=keep)
+
+        return ds[0]
+
     # ============= Aggregation methods ===========
 
     def max(self, axis="time") -> "DataArray":

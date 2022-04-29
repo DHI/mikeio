@@ -1131,7 +1131,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return ds
 
     @staticmethod
-    def concat(datasets: Sequence["Dataset"]) -> "Dataset":
+    def concat(datasets: Sequence["Dataset"], keep="last") -> "Dataset":
         """Concatenate Datasets along the time axis
 
         Parameters
@@ -1142,8 +1142,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         -------
         Dataset
             concatenated dataset
-
-
+        keep: str
+            TODO Yet to be implemented, default: last
         Examples
         --------
         >>> import mikeio
@@ -1155,6 +1155,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         >>> ds3.n_timesteps
         4
         """
+
+        if keep != "last":
+            raise NotImplementedError(
+                "Last values is the only available option at the moment."
+            )
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
             ds = ds._concat_time(dsj, copy=False)
