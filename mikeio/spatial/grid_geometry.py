@@ -198,8 +198,6 @@ class Grid2D(_Geometry):
         self.__yy = None
 
         self._axis_names = axis_names
-        self.is_spectral = is_spectral
-        self._x_logarithmic = False
 
         if bbox is not None:
             if (x0 != 0.0) or (y0 != 0.0):
@@ -210,7 +208,21 @@ class Grid2D(_Geometry):
             dy = dx if dy is None else dy
             self._y_local = _parse_grid_axis("y", y, y0, dy, ny)
 
-        if self.is_spectral:
+        self._x_logarithmic = False
+        self._is_spectral = is_spectral
+
+    @property
+    def is_spectral(self):
+        return self._is_spectral
+
+    @is_spectral.setter
+    def is_spectral(self, value):
+        if self._is_spectral and (not value) and self._x_logarithmic:
+            raise ValueError(
+                "is_spectral cannot be unset when frequency axis is logarithmic!"
+            )
+        if (not self._is_spectral) and value:
+            self._is_spectral = True
             self._x_logarithmic = self.dx > 1.0
             f = (
                 self.logarithmic_f(self.nx, self.x0, self.dx)
