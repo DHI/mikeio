@@ -241,7 +241,7 @@ def test_select_subset_isel():
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
 
-    geometry = mikeio.Grid2D(shape=(30, 100), bbox=[0, 0, 1, 1])
+    geometry = mikeio.Grid2D(nx=30, ny=100, bbox=[0, 0, 1, 1])
 
     data = {
         "Foo": mikeio.DataArray(
