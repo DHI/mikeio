@@ -170,7 +170,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         pos = ax.contour(x, y, values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
-        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
+        self._set_aspect_and_labels(ax, self.da.geometry, y)
         return ax
 
     def contourf(self, ax=None, figsize=None, **kwargs):
@@ -181,7 +181,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
         pos = ax.contourf(x, y, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
-        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
+        self._set_aspect_and_labels(ax, self.da.geometry, y)
         return ax
 
     def pcolormesh(self, ax=None, figsize=None, **kwargs):
@@ -192,26 +192,31 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
         pos = ax.pcolormesh(xn, yn, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
-        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, yn)
+        self._set_aspect_and_labels(ax, self.da.geometry, yn)
         return ax
 
     def _get_x_y(self):
         x = self.da.geometry.x
         y = self.da.geometry.y
-        # x = x + self.da.geometry._origin[0] # TODO WTF?
-        # y = y + self.da.geometry._origin[1] # TODO
         return x, y
 
     def _get_xn_yn(self):
         xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
         yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
-        # xn = xn + self.da.geometry._origin[0] # TODO
-        # yn = yn + self.da.geometry._origin[1] # TODO
         return xn, yn
 
     @staticmethod
-    def _set_aspect_and_labels(ax, is_geo, y):
-        if is_geo:
+    def _set_aspect_and_labels(ax, geometry, y):
+        if geometry.is_spectral:
+            ax.set_xlabel("Frequency [Hz]")
+            ax.set_ylabel("Directions [degree]")
+        elif geometry._is_rotated:
+            ax.set_xlabel("[m]")
+            ax.set_ylabel("[m]")
+        elif geometry.projection == "NON-UTM":
+            ax.set_xlabel("[m]")
+            ax.set_ylabel("[m]")
+        elif geometry.is_geo:
             ax.set_xlabel("Longitude [degrees]")
             ax.set_ylabel("Latitude [degrees]")
             mean_lat = np.mean(y)
