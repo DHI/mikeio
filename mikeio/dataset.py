@@ -81,8 +81,6 @@ class _DatasetPlotter:
 
 class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
-    deletevalue = 1.0e-35
-
     """Dataset
 
     Attributes
