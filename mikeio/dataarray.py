@@ -17,7 +17,6 @@ from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .spatial.FM_geometry import (
     _GeometryFMLayered,
     GeometryFM,
-    GeometryFM3D,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
@@ -666,7 +665,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 ), "data shape does not match number of elements"
         elif isinstance(geometry, Grid1D):
             assert (
-                shape[axis] == geometry.n
+                shape[axis] == geometry.nx
             ), "data shape does not match number of grid points"
         elif isinstance(geometry, Grid2D):
             assert shape[axis] == geometry.ny, "data shape does not match ny"
