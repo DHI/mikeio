@@ -262,7 +262,7 @@ def test_dir_wave_spectra_relative_time_axis():
 
 def test_properties_rotated():
     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
-    with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"): 
+    with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"):
         Dfs2(filepath)
     # assert dfs.x0 == 0
     # assert dfs.y0 == 0
