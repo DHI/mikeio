@@ -725,7 +725,9 @@ class GeometryFM(_Geometry):
                 return j
         return -1
 
-    def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None) -> Grid2D:
+    def get_overset_grid(
+        self, dx=None, dy=None, nx=None, ny=None, buffer=None
+    ) -> Grid2D:
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
@@ -734,9 +736,12 @@ class GeometryFM(_Geometry):
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
             grid resolution in y-direction
-        shape : (int, int), optional
-            tuple with nx and ny describing number of points in each direction
-            one of them can be None, in which case the value will be inferred
+        nx : int, optional
+            number of points in x-direction, by default None,
+            (the value will be inferred)
+        ny : int, optional
+            number of points in y-direction, by default None,
+            (the value will be inferred)
         buffer : float, optional
             positive to make the area larger, default=0
             can be set to a small negative value to avoid NaN
@@ -749,7 +754,7 @@ class GeometryFM(_Geometry):
         """
         nc = self._geometry2d.node_coordinates
         bbox = xy_to_bbox(nc, buffer=buffer)
-        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape, projection=self.projection)
+        return Grid2D(bbox=bbox, dx=dx, dy=dy, nx=nx, ny=ny, projection=self.projection)
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.
