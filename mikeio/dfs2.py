@@ -77,10 +77,10 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
         factory.CreateAxisEqD2(
             eumUnit.eumUmeter,
             geometry.nx,
-            geometry.x0,
+            geometry._x_local[0],
             geometry.dx,
             geometry.ny,
-            geometry.y0,
+            geometry._y_local[0],
             geometry.dy,
         )
     )
@@ -154,7 +154,7 @@ class Dfs2(_Dfs123):
                     projectionString=self._projstr,
                     lonOrigin=self._longitude,
                     latOrigin=self._latitude,
-                    orientation=self.orientation,
+                    orientation=self._orientation,
                 )
                 origin_projected = np.round(cart.Geo2Proj(lon, lat), 7)
                 orientation_projected = cart.OrientationProj
