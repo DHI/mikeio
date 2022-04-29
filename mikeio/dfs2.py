@@ -115,7 +115,7 @@ class Dfs2(_Dfs123):
 
     _ndim = 2
 
-    def __init__(self, filename=None, dtype=np.float32):
+    def __init__(self, filename=None, dtype=np.float32, type="horizontal"):
         super(Dfs2, self).__init__(filename, dtype)
 
         self._dx = None
@@ -128,20 +128,37 @@ class Dfs2(_Dfs123):
 
         if filename:
             self._read_dfs2_header()
+            is_spectral = type == "spectral"
 
             if self._projstr == "LONG/LAT":
-                if self._orientation == 0.0:
+                if np.abs(self._orientation) < 1e-6:
+                    origin = self._longitude, self._latitude
                     self.geometry = Grid2D(
                         dx=self._dx,
                         dy=self._dy,
                         nx=self._nx,
                         ny=self._ny,
-                        x0=self._x0 + self._longitude,
-                        y0=self._y0 + self._latitude,
+                        x0=self._x0,
+                        y0=self._y0,
+                        origin=origin,
                         projection=self._projstr,
+                        is_spectral=is_spectral,
+                    )
+                else:
+                    raise ValueError(
+                        "LONG/LAT files with non-zero orientation are not supported"
                     )
             else:
-                # TODO handle rotated grid
+                lon, lat = self._longitude, self._latitude
+                cart = Cartography.CreateGeoOrigin(
+                    projectionString=self._projstr,
+                    lonOrigin=self._longitude,
+                    latOrigin=self._latitude,
+                    orientation=self.orientation,
+                )
+                origin_projected = np.round(cart.Geo2Proj(lon, lat), 7)
+                orientation_projected = cart.OrientationProj
+
                 self.geometry = Grid2D(
                     dx=self._dx,
                     dy=self._dy,
@@ -149,7 +166,10 @@ class Dfs2(_Dfs123):
                     ny=self._ny,
                     x0=self._x0,
                     y0=self._y0,
+                    orientation=orientation_projected,
+                    origin=origin_projected,
                     projection=self._projstr,
+                    is_spectral=is_spectral,
                 )
 
     def __repr__(self):
