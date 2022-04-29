@@ -26,7 +26,6 @@ from .spatial.FM_geometry import (
     GeometryFM3D,
     GeometryFMVerticalProfile,
     GeometryFMPointSpectrum,
-    _GeometryFMLayered,
     GeometryFMPointSpectrum,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
@@ -497,18 +496,21 @@ class _UnstructuredFile:
     def contains(self, points):
         return self.geometry.contains(points)
 
-    def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None):
+    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=None):
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
         ----------
-        dx : float or (float, float), optional
+        dx : float, optional
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
             grid resolution in y-direction
-        shape : (int, int), optional
-            tuple with nx and ny describing number of points in each direction
-            one of them can be None, in which case the value will be inferred
+        nx : int, optional
+            number of points in x-direction,
+            by default None (the value will be inferred)
+        ny : int, optional
+            number of points in y-direction,
+            by default None (the value will be inferred)
         buffer : float, optional
             positive to make the area larger, default=0
             can be set to a small negative value to avoid NaN
@@ -525,7 +527,8 @@ class _UnstructuredFile:
             bbox=bbox,
             dx=dx,
             dy=dy,
-            shape=shape,
+            nx=nx,
+            ny=ny,
             projection=self.geometry.projection_string,
         )
 
