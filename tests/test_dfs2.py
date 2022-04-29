@@ -668,20 +668,21 @@ def dfs2_props_to_list(d):
     lat = d._dfs.FileInfo.Projection.Latitude
     rot = d._dfs.FileInfo.Projection.Orientation
     res = [
-        # d.x0,
-        # d.y0,
+        d.x0,
+        d.y0,
         d.dx,
         d.dy,
         d.nx,
         d.ny,
         d._projstr,
-        # lon,
-        # lat,
-        # rot,
+        lon,
+        lat,
+        rot,
         d._n_timesteps,
         d._start_time,
         d._dfs.FileInfo.TimeAxis.TimeAxisType,
         d._n_items,
+        # d._deletevalue,
     ]
 
     for item in d.items:
@@ -700,7 +701,7 @@ def test_read_write_header_unchanged(tmpdir):
         "M3WFM_sponge_local_coordinates.dfs2",
         "BW_Ronne_Layout1998_rotated.dfs2",
         "hd_vertical_slice.dfs2",
-        # "dir_wave_analysis_spectra.dfs2",  # write fails: Projection string cannot be null or empty
+        "dir_wave_analysis_spectra.dfs2",
         "pt_spectra.dfs2",
     ]
 
@@ -714,4 +715,4 @@ def test_read_write_header_unchanged(tmpdir):
         dfsB = mikeio.open(filename_out)
         props_B = dfs2_props_to_list(dfsB)
         for pA, pB in zip(props_A, props_B):
-            assert pA == pB
+            assert pytest.approx(pA == pB, abs=1e-14)
