@@ -180,7 +180,7 @@ def test_read(dfs2_random):
 
     dfs = dfs2_random
     ds = dfs.read(items=["testing water level"])
-    data = ds.data[0]
+    data = ds[0].to_numpy()
     assert data[0, 88, 0] == 0
     assert np.isnan(data[0, 89, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
@@ -230,7 +230,7 @@ def test_read_numbered_access(dfs2_random_2items):
 
     res = dfs.read(items=[1])
 
-    assert np.isnan(res.data[0][0, 0, 0])
+    assert np.isnan(res[0].to_numpy()[0, 0, 0])
     assert res.time is not None
     assert res.items[0].name == "Untitled"
 
@@ -338,7 +338,7 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmpdir):
 
     ds = dfs.read()
 
-    ds.data[0] = ds.data[0] + 10.0
+    ds[0] = ds[0] + 10.0
 
     dfs.write(outfilename, ds)
 
@@ -352,7 +352,7 @@ def test_read_some_time_step(dfs2_random_2items):
     dfs = dfs2_random_2items
     res = dfs.read(time=[1, 2])
 
-    assert res.data[0].shape[0] == 2
+    assert res[0].to_numpy().shape[0] == 2
     assert len(res.time) == 2
 
 
