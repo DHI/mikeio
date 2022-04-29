@@ -795,7 +795,7 @@ def test_elements_to_geometry():
     assert not hasattr(geom, "n_layers")
     assert geom.n_elements == len(elements)
 
-    elements = dfs.get_layer_elements(layer=[-2,-1])
+    elements = dfs.get_layer_elements(layer=[-2, -1])
     with pytest.raises(Exception):
         geom = dfs.elements_to_geometry(elements, node_layers="center")
 
