@@ -577,4 +577,3 @@ def dataframe_to_dfs0(
 pd.DataFrame.to_dfs0 = dataframe_to_dfs0
 
 pd.Series.to_dfs0 = series_to_dfs0
-
