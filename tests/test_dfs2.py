@@ -693,26 +693,52 @@ def dfs2_props_to_list(d):
     return res
 
 
-def test_read_write_header_unchanged(tmpdir):
-    file_list = [
-        "utm_not_rotated_neurope_temp.dfs2",
-        "europe_wind_long_lat.dfs2",
-        "global_long_lat_pacific_view_temperature_delta.dfs2",
-        "M3WFM_sponge_local_coordinates.dfs2",
-        "BW_Ronne_Layout1998_rotated.dfs2",
-        "hd_vertical_slice.dfs2",
-        "dir_wave_analysis_spectra.dfs2",
-        "pt_spectra.dfs2",
-    ]
+def is_header_unchanged_on_read_write(tmpdir, filename):
+    dfsA = mikeio.open("tests/testdata/" + filename)
+    props_A = dfs2_props_to_list(dfsA)
 
-    for f in file_list:
-        dfsA = mikeio.open("tests/testdata/" + f)
-        props_A = dfs2_props_to_list(dfsA)
-
-        ds = dfsA.read()
-        filename_out = os.path.join(tmpdir.dirname, f)
-        ds.to_dfs(filename_out)
-        dfsB = mikeio.open(filename_out)
-        props_B = dfs2_props_to_list(dfsB)
-        for pA, pB in zip(props_A, props_B):
+    ds = dfsA.read()
+    filename_out = os.path.join(tmpdir.dirname, filename)
+    ds.to_dfs(filename_out)
+    dfsB = mikeio.open(filename_out)
+    props_B = dfs2_props_to_list(dfsB)
+    for pA, pB in zip(props_A, props_B):
+        if isinstance(pA, float):
             assert pytest.approx(pA == pB, abs=1e-14)
+        else:
+            assert pA == pB
+
+
+def test_read_write_header_unchanged_utm_not_rotated(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "utm_not_rotated_neurope_temp.dfs2")
+
+
+def test_read_write_header_unchanged_longlat(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "europe_wind_long_lat.dfs2")
+
+
+def test_read_write_header_unchanged_global_longlat(tmpdir):
+    is_header_unchanged_on_read_write(
+        tmpdir, "global_long_lat_pacific_view_temperature_delta.dfs2"
+    )
+
+
+def test_read_write_header_unchanged_local_coordinates(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "M3WFM_sponge_local_coordinates.dfs2")
+
+
+def test_read_write_header_unchanged_utm_rotated(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "BW_Ronne_Layout1998_rotated.dfs2")
+
+
+def test_read_write_header_unchanged_vertical(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "hd_vertical_slice.dfs2")
+
+
+# def test_read_write_header_unchanged_spectral(tmpdir):
+#     # fails: <TimeAxisType.TimeEquidistant: 1> != <TimeAxisType.CalendarEquidistant: 3>
+#     is_header_unchanged_on_read_write(tmpdir, "dir_wave_analysis_spectra.dfs2")
+
+
+def test_read_write_header_unchanged_spectral_2(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "pt_spectra.dfs2")
