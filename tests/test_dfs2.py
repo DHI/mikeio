@@ -132,8 +132,8 @@ def test_write_single_item(tmpdir):
 
     newdfs = Dfs2(filename)
     assert newdfs.projection_string == "UTM-33"
-    assert pytest.approx(newdfs.longitude) == 12.0
-    assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.longitude == 12.0
+    assert newdfs.latitude == 55.0
     assert newdfs.dx == 100.0
     assert newdfs.dy == 200.0
 
@@ -525,8 +525,8 @@ def test_write_NonEqCalendarAxis(tmpdir):
 
     newdfs = Dfs2(filename)
     assert newdfs.projection_string == "UTM-33"
-    assert pytest.approx(newdfs.longitude) == 12.0
-    assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.longitude == 12.0
+    assert newdfs.latitude == 55.0
     assert newdfs.dx == 100.0
     assert newdfs.dy == 200.0
     assert newdfs._is_equidistant == False
