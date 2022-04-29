@@ -19,13 +19,36 @@ def _check_equidistant(x: np.ndarray) -> None:
         raise NotImplementedError("values must be equidistant")
 
 
+def _parse_grid_axis(name, x, x0, dx, nx):
+    if x is not None:
+        x = np.asarray(x)
+        _check_equidistant(x)
+        if len(x) > 1 and x[0] > x[-1]:
+            raise ValueError("{name} values must be increasing")
+    else:
+        if nx is None:
+            raise ValueError(f"n{name} must be provided")
+        if dx is None:
+            raise ValueError(f"d{name} must be provided")
+        if dx <= 0:
+            raise ValueError(f"d{name} must be positive")
+        x1 = x0 + dx * (nx - 1)
+        x = np.linspace(x0, x1, nx)
+    return x
+
+
 class Grid1D(_Geometry):
+    """1D grid (node-based)
+    axis is increasing and equidistant
+    """
+
     def __init__(
         self,
         x=None,
+        *,
         x0=0.0,
         dx=None,
-        n=None,
+        nx=None,
         projection="NON-UTM",
         origin: Tuple[float, float] = (0.0, 0.0),
         orientation=0.0,
@@ -33,7 +56,6 @@ class Grid1D(_Geometry):
         axis_name="x",
     ):
         """Create equidistant 1D spatial geometry"""
-        self._projection = projection
         self._projstr = projection  # TODO handle other types than string
         self._origin = origin
         self._orientation = orientation
@@ -45,17 +67,15 @@ class Grid1D(_Geometry):
                 raise ValueError("x values must be increasing")
 
             self._x = x
-            self._dx = x[1] - x[0] if len(x) > 1 else 1.0
         else:
-            if n is None:
+            if nx is None:
                 raise ValueError("n must be provided")
             if dx is None:
                 raise ValueError("dx must be provided")
-            self._dx = dx
-            x1 = x0 + dx * (n - 1)
-            self._x = np.linspace(x0, x1, n)
+            x1 = x0 + dx * (nx - 1)
+            self._x = np.linspace(x0, x1, nx)
 
-        if node_coordinates is not None and len(node_coordinates) != self.n:
+        if node_coordinates is not None and len(node_coordinates) != self.nx:
             raise ValueError("Length of node_coordinates must be n")
         self._nc = node_coordinates
 
@@ -65,12 +85,12 @@ class Grid1D(_Geometry):
         out = []
         out.append("<mikeio.Grid1D>")
         out.append(
-            f"axis: nx={self.n} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
+            f"axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
         )
         return str.join("\n", out)
 
     def __str__(self):
-        return f"Grid1D (n={self.n}, dx={self.dx:.4g})"
+        return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
 
     def find_index(self, x: float, **kwargs) -> int:
 
@@ -94,7 +114,7 @@ class Grid1D(_Geometry):
     @property
     def dx(self) -> float:
         """grid spacing"""
-        return self._dx
+        return self.x[1] - self.x[0] if len(self.x) > 1 else 1.0
 
     @property
     def x(self):
@@ -112,7 +132,7 @@ class Grid1D(_Geometry):
         return self.x[-1]
 
     @property
-    def n(self) -> int:
+    def nx(self) -> int:
         """number of grid points"""
         return len(self._x)
 
@@ -146,17 +166,15 @@ class Grid1D(_Geometry):
                 return GeometryPoint2D(*coords)
 
 
-class Grid2D:
-    def __new__(cls, *args, **kwargs):
-        if "orientation" in kwargs and kwargs["orientation"] != 0.0:
-            return Grid2DRotated(*args, **kwargs)
-        else:
-            return Grid2DHorizontal(*args, **kwargs)
+class Grid2D(_Geometry):
+    """2D grid
+    Origin in the center of cell in lower-left corner
+    x and y axes are increasing and equidistant
+    """
 
-
-class _Grid2D(_Geometry):
     def __init__(
         self,
+        *,
         x=None,
         x0=0.0,
         dx=None,
@@ -165,52 +183,114 @@ class _Grid2D(_Geometry):
         y0=0.0,
         dy=None,
         ny=None,
+        bbox=None,
         projection="NON-UTM",
         origin: Tuple[float, float] = (0.0, 0.0),
         orientation=0.0,
         axis_names=("x", "y"),
     ):
         """Create equidistant 1D spatial geometry"""
-        self._projection = projection
         self._projstr = projection  # TODO handle other types than string
         self._origin = origin
         self._orientation = orientation
+        self.__xx = None
+        self.__yy = None
 
-        if x is not None:
-            x = np.asarray(x)
-            _check_equidistant(x)
-            if len(x) > 1 and x[0] > x[-1]:
-                raise ValueError("x values must be increasing")
-
-            self._x = x
-            self._dx = x[1] - x[0] if len(x) > 1 else 1.0
-        else:
-            if nx is None:
-                raise ValueError("nx must be provided")
-            if dx is None:
-                raise ValueError("dx must be provided")
-            self._dx = dx
-            x1 = x0 + dx * (nx - 1)
-            self._x = np.linspace(x0, x1, nx)
-
-        if y is not None:
-            y = np.asarray(y)
-            _check_equidistant(y)
-            if len(y) > 1 and y[0] > y[-1]:
-                raise ValueError("y values must be increasing")
-
-            self._y = y
-            self._dy = y[1] - y[0] if len(y) > 1 else 1.0
-        else:
-            if ny is None:
-                raise ValueError("ny must be provided")
-            if dx is None:
-                dy = dx
-            self._dy = dy
-            y1 = y0 + dy * (ny - 1)
-            self._y = np.linspace(y0, y1, ny)
-
+        self.is_spectral = False
         self._axis_names = axis_names
+
+        if bbox is not None:
+            if (x0 != 0.0) or (y0 != 0.0):
+                raise ValueError("x0,y0 cannot be provided together with bbox")
+            self._create_in_bbox(bbox, dx=dx, dy=dy, nx=nx, ny=ny)
+        else:
+            self._x = _parse_grid_axis("x", x, x0, dx, nx)
+            dy = dx if dy is None else dy
+            self._y = _parse_grid_axis("y", y, y0, dy, ny)
+
+    def _create_in_bbox(self, bbox, dx=None, dy=None, nx=None, ny=None):
+        """create 2d grid in bounding box, specifying spacing or shape
+
+        Parameters
+        ----------
+        bbox : array(float)
+            [left, bottom, right, top] =
+            [x0-dx/2, y0-dy/2, x1+dx/2, y1+dy/2]
+        dx : float, optional
+            grid resolution in x-direction,
+            will overwrite left and right if given
+        dy : float, optional
+            grid resolution in y-direction,
+            will overwrite bottom and top if given
+        nx : int, optional
+            number of points in x-direction can be None,
+            in which case the value will be inferred
+        ny : int, optional
+            number of points in y-direction can be None,
+            in which case the value will be inferred
+        """
+        left, bottom, right, top = self._parse_bbox(bbox)
+
+        xr = right - left  # dx too large
+        yr = top - bottom  # dy too large
+
+        if (dx is None and dy is None) and (nx is None and ny is None):
+            if xr <= yr:
+                nx = 10
+                ny = int(np.ceil(nx * yr / xr))
+            else:
+                ny = 10
+                nx = int(np.ceil(ny * xr / yr))
+        if nx is None and ny is not None:
+            nx = int(np.ceil(ny * xr / yr))
+        if ny is None and nx is not None:
+            ny = int(np.ceil(nx * yr / xr))
+        if isinstance(dx, tuple):
+            dx, dy = dx
+        dy = dx if dy is None else dy
+
+        self._x = self._create_in_bbox_1d("x", left, right, dx, nx)
+        self._y = self._create_in_bbox_1d("y", bottom, top, dy, ny)
+
+    @staticmethod
+    def _parse_bbox(bbox):
+        left = bbox[0]
+        bottom = bbox[1]
+        right = bbox[2]
+        top = bbox[3]
+
+        if left > right:
+            raise (
+                ValueError(
+                    f"Invalid x axis, left: {left} must be smaller than right: {right}"
+                )
+            )
+
+        if bottom > top:
+            raise (
+                ValueError(
+                    f"Invalid y axis, bottom: {bottom} must be smaller than top: {top}"
+                )
+            )
+        return left, bottom, right, top
+
+    @staticmethod
+    def _create_in_bbox_1d(axname, left, right, dx=None, nx=None):
+        xr = right - left
+        if dx is not None:
+            nx = int(np.ceil(xr / dx))
+
+            # overwrite left and right! to make dx fit
+            xcenter = left + xr / 2
+            left = xcenter - dx * nx / 2
+            right = xcenter + dx * nx / 2
+        elif nx is not None:
+            dx = xr / nx
+        else:
+            raise ValueError(f"Provide either d{axname} or n{axname}")
+        x0 = left + dx / 2
+        x1 = right - dx / 2
+        return np.linspace(x0, x1, nx)
 
     def __repr__(self):
         out = []
@@ -234,36 +314,15 @@ class _Grid2D(_Geometry):
         idx_y = np.argmin(dist_y)
         return idx_x, idx_y
 
-    def get_spatial_interpolant(self, coords, **kwargs):
-
-        coords = np.atleast_2d(coords)
-        x, y = coords[0, 0], coords[0, 1]  # TODO accept list of points
-        dist_x = np.abs(self.x - x)
-        ids = np.argsort(dist_x)[0:2]
-        weights_x = 1 - dist_x[ids]
-
-        dist_y = np.abs(self.y - y)
-        ids = np.argsort(dist_y)[0:2]
-        weights_y = 1 - dist_y[ids]
-
-        # WORK IN PROGRESS!
-
-        # assert np.allclose(weights_x.sum(), 1.0)
-        # assert len(ids) == 2
-        # return ids, weights_x
-
-    def interp(self, data, ids, weights):
-        return np.dot(data[:, ids], weights)
-
     @property
     def dx(self) -> float:
         """x grid spacing"""
-        return self._dx
+        return self.x[1] - self.x[0] if self.nx > 1 else 1.0
 
     @property
     def dy(self) -> float:
         """y grid spacing"""
-        return self._dy
+        return self.y[1] - self.y[0] if self.ny > 1 else 1.0
 
     @property
     def x(self):
@@ -298,12 +357,12 @@ class _Grid2D(_Geometry):
     @property
     def nx(self) -> int:
         """number of x grid points"""
-        return len(self._x)
+        return len(self.x)
 
     @property
     def ny(self) -> int:
         """number of y grid points"""
-        return len(self._y)
+        return len(self.y)
 
     @property
     def origin(self) -> Tuple[float, float]:
@@ -313,79 +372,20 @@ class _Grid2D(_Geometry):
     def orientation(self) -> float:
         return self._orientation
 
-
-class Grid2DHorizontal(_Geometry):
-    """2D horizontal grid
-    Origin in the center of cell in lower-left corner
-    x and y axes are increasing and equidistant
-    """
-
     @property
-    def x(self):
-        """array of x-coordinates (single row)"""
-        if self._x is None:
-            self._x = self._create_axis(self._x0, self._dx, self._nx)
-        return self._x
-
-    @property
-    def x0(self):
-        """center of left end-point"""
-        return self._x0
-
-    @property
-    def x1(self):
-        """center of right end-point"""
-        return self.x[-1]
-
-    @property
-    def dx(self):
-        """x-spacing"""
-        return self._dx
-
-    @property
-    def nx(self):
-        """number of points in x-direction"""
-        return self._nx
-
-    @property
-    def y(self):
-        """array of y-coordinates (single column)"""
-        if self._y is None:
-            self._y = self._create_axis(self.y0, self.dy, self.ny)
-        return self._y
-
-    @property
-    def y0(self):
-        """center of lower end-point"""
-        return self._y0
-
-    @property
-    def origin(self):
-        return (self._x0, self._y0)
-
-    @property
-    def projection_string(self):
-        return self._projection  # TODO
-
-    @property
-    def y1(self):
-        """center of upper end-point"""
-        return self.y[-1]
-
-    @property
-    def dy(self):
-        """y-spacing"""
-        return self._dy
-
-    @property
-    def ny(self):
-        """number of cells in y-direction"""
-        return self._ny
-
-    @property
-    def n(self):
-        """total number of grid points"""
-        return self._nx * self._ny
+    def bbox(self):
+        """bounding box (left, bottom, right, top)
+        Note: not the same as the cell center values (x0,y0,x1,y1)!
+        """
+        if np.abs(self.orientation) != 0.0:
+            raise NotImplementedError("Only available if orientation = 0")
+        if self.is_spectral:
+            raise NotImplementedError("Not available for spectral Grid2D")
+        left = self.x0 - self.dx / 2
+        bottom = self.y0 - self.dy / 2
+        right = self.x1 + self.dx / 2
+        top = self.y1 + self.dy / 2
+        return BoundingBox(left, bottom, right, top)
 
     @property
     def _xx(self):
@@ -401,6 +401,9 @@ class Grid2DHorizontal(_Geometry):
             self._create_meshgrid(self.x, self.y)
         return self.__yy
 
+    def _create_meshgrid(self, x, y):
+        self.__xx, self.__yy = np.meshgrid(x, y)
+
     @property
     def xy(self):
         """n-by-2 array of x- and y-coordinates"""
@@ -413,223 +416,6 @@ class Grid2DHorizontal(_Geometry):
         # TODO: remove this?
         """n-by-2 array of x- and y-coordinates"""
         return self.xy
-
-    @property
-    def bbox(self):
-        """bounding box (left, bottom, right, top)
-        Note: not the same as the cell center values (x0,y0,x1,y1)!
-        """
-        left = self.x0 - self.dx / 2
-        bottom = self.y0 - self.dy / 2
-        right = self.x1 + self.dx / 2
-        top = self.y1 + self.dy / 2
-        return BoundingBox(left, bottom, right, top)
-
-    def __init__(
-        self,
-        x=None,
-        y=None,
-        bbox=None,
-        dx=None,
-        dy=None,
-        shape=None,
-        x0=None,
-        y0=None,
-        nx=None,
-        ny=None,
-        projection="LONG/LAT",
-    ):
-        """create 2d grid
-
-        Parameters
-        ----------
-        x : array-like, optional
-            1d array of x-coordinates (cell centers)
-        y : array-like, optional
-            1d array of y-coordinates (cell centers)
-        bbox : array(float), optional
-            [x0, y0, x1, y1]
-        dx : float or (float, float), optional
-            grid resolution in x-direction (or in x- and y-direction)
-        dy : float, optional
-            grid resolution in y-direction
-        projection: str, optional
-            default 'LONG/LAT'
-
-        Examples
-        --------
-        >>> g = Grid2D(dx=0.25, nx=5, ny=10)
-        >>> g = Grid2D(bbox=[0,0,10,20], dx=0.25)
-        >>> g = Grid2D(bbox=[0,0,10,20], nx==5, ny=10)
-        >>> x = np.linspace(0.0, 1000.0, 201)
-        >>> y = [0, 2.0]
-        >>> g = Grid2D(x, y)
-
-        """
-        # TODO: remove shape argument or issue warning
-
-        self.orientation = 0.0
-        self._projection = projection
-        self._projstr = projection  # TODO handle other types than string
-
-        self._x = None
-        self._x0 = None
-        self._dx = None
-        self._nx = None
-
-        self._y = None
-        self._y0 = None
-        self._dy = None
-        self._ny = None
-
-        self.__xx = None
-        self.__yy = None
-
-        dxdy = dx
-        if dy is not None:
-            if not np.isscalar(dx):
-                dx = dx[0]
-
-            if dx <= 0.0:
-                raise ValueError("dx must be a positive number")
-            if dy <= 0.0:
-                raise ValueError("dy must be a positive number")
-            dxdy = (dx, dy)
-
-        if (x is not None) and (len(x) == 4):
-            # first positional argument 'x' is probably bbox
-            if (y is None) or ((dxdy is not None) or (shape is not None)):
-                bbox, x = x, bbox
-
-        if bbox is not None:
-            self._create_in_bbox(bbox, dxdy, shape)
-        elif (x is not None) and (y is not None):
-            self._create_from_x_and_y(x, y)
-        elif (nx is not None) and (ny is not None):
-            self._create_from_nx_ny_dx_dy(x0=x0, dx=dx, nx=nx, y0=y0, dy=dy, ny=ny)
-        else:
-            raise ValueError(
-                "Please provide either bbox or both x and y, or x0, dx, nx, y0, dy, ny"
-            )
-
-    def _create_in_bbox(self, bbox, dxdy=None, shape=None):
-        """create 2d grid in bounding box, specifying spacing or shape
-
-        Parameters
-        ----------
-        bbox : array(float)
-            [x0, y0, x1, y1]
-        dxdy : float or (float, float), optional
-            grid resolution in x- and y-direction
-        shape : (int, int), optional
-            tuple with nx and ny describing number of points in each direction
-            one of them can be None, in which case the value will be inferred
-        """
-        left = bbox[0]
-        bottom = bbox[1]
-        right = bbox[2]
-        top = bbox[3]
-
-        if left > right:
-            raise (
-                ValueError(
-                    f"Invalid x axis, left: {left} must be smaller than right: {right}"
-                )
-            )
-
-        if bottom > top:
-            raise (
-                ValueError(
-                    f"Invalid y axis, bottom: {bottom} must be smaller than top: {top}"
-                )
-            )
-
-        xr = right - left  # dx too large
-        yr = top - bottom  # dy too large
-
-        if (dxdy is None) and (shape is None):
-            if xr <= yr:
-                nx = 10
-                ny = int(np.ceil(nx * yr / xr))
-            else:
-                ny = 10
-                nx = int(np.ceil(ny * xr / yr))
-            dx = xr / nx
-            dy = yr / ny
-        else:
-            if shape is not None:
-                if len(shape) != 2:
-                    raise ValueError("shape must be (nx,ny)")
-                nx, ny = shape
-                if (nx is None) and (ny is None):
-                    raise ValueError("nx and ny cannot both be None")
-                if nx is None:
-                    nx = int(np.ceil(ny * xr / yr))
-                if ny is None:
-                    ny = int(np.ceil(nx * yr / xr))
-                dx = xr / nx
-                dy = yr / ny
-            elif dxdy is not None:
-                if np.isscalar(dxdy):
-                    dy = dx = dxdy
-                else:
-                    dx, dy = dxdy
-                nx = int(np.ceil(xr / dx))
-                ny = int(np.ceil(yr / dy))
-            else:
-                raise ValueError("dxdy and shape cannot both be provided! Chose one.")
-
-        self._x0 = left + dx / 2
-        self._dx = dx
-        self._nx = nx
-
-        self._y0 = bottom + dy / 2
-        self._dy = dy
-        self._ny = ny
-
-    def _create_from_x_and_y(self, x, y):
-
-        _check_equidistant(x)
-        _check_equidistant(y)
-
-        if len(x) > 1 and x[0] > x[-1]:
-            raise ValueError("x values must be increasing")
-
-        if len(y) > 1 and y[0] > y[-1]:
-            raise ValueError("y values must be increasing")
-
-        self._x0 = x[0]
-        self._nx = len(x)
-        self._dx = x[1] - x[0] if len(x) > 1 else 1.0
-
-        self._y0 = y[0]
-        self._ny = len(y)
-        self._dy = y[1] - y[0] if len(y) > 1 else 1.0
-
-    def _create_from_nx_ny_dx_dy(self, x0, dx, nx, y0, dy, ny):
-        if nx is None:
-            raise ValueError("nx must be provided")
-        if dx is None:
-            raise ValueError("dx must be provided")
-        self._x0 = 0 if x0 is None else x0
-        self._x = self._create_axis(self._x0, dx, nx)
-        self._dx = dx
-        self._nx = nx
-
-        if ny is None:
-            raise ValueError("ny must be provided")
-        self._y0 = 0 if y0 is None else y0
-        self._dy = dx if dy is None else dy
-        self._y = self._create_axis(self._y0, self._dy, ny)
-        self._ny = ny
-
-    def _create_axis(self, x0, dx, nx):
-        self.__xx, self.__yy = None, None
-        x1 = x0 + dx * (nx - 1)
-        return np.linspace(x0, x1, nx)
-
-    def _create_meshgrid(self, x, y):
-        self.__xx, self.__yy = np.meshgrid(x, y)
 
     def contains(self, xy):
         """test if a list of points are inside grid
@@ -768,9 +554,9 @@ class Grid2DHorizontal(_Geometry):
         array(float)
             2d array with x,y-coordinates, length=(nx+1)*(ny+1)
         """
-        xn = Grid2D._centers_to_nodes(self.x)
-        yn = Grid2D._centers_to_nodes(self.y)
-        gn = Grid2D(xn, yn)
+        xn = self._centers_to_nodes(self.x)
+        yn = self._centers_to_nodes(self.y)
+        gn = Grid2D(x=xn, y=yn)
         return gn.xy
 
     def to_mesh(self, outfilename, projection=None, z=None):
@@ -790,23 +576,24 @@ class Grid2DHorizontal(_Geometry):
             projection = "LONG/LAT"
 
         # get node based grid
-        xn = Grid2D._centers_to_nodes(self.x)
-        yn = Grid2D._centers_to_nodes(self.y)
-        gn = Grid2D(xn, yn)
+        xn = self._centers_to_nodes(self.x)
+        yn = self._centers_to_nodes(self.y)
+        gn = Grid2D(x=xn, y=yn)
 
         x = gn.xy[:, 0]
         y = gn.xy[:, 1]
+        n = gn.nx * gn.ny
         if z is None:
-            z = np.zeros(gn.n)
+            z = np.zeros(n)
         else:
             if np.isscalar(z):
-                z = z * np.ones(gn.n)
+                z = z * np.ones(n)
             else:
-                if len(z) != gn.n:
+                if len(z) != n:
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
                     )
-        codes = np.zeros(gn.n, dtype=int)
+        codes = np.zeros(n, dtype=int)
         codes[y == gn.bbox.top] = 5  # north
         codes[x == gn.bbox.right] = 4  # east
         codes[y == gn.bbox.bottom] = 3  # south
@@ -825,26 +612,6 @@ class Grid2DHorizontal(_Geometry):
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
-    def __repr__(self):
-        out = []
-        out.append("<mikeio.Grid2D>")
-        out.append(
-            f"x-axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
-        )
-        out.append(
-            f"y-axis: ny={self.ny} points from y0={self.y0:g} to y1={self.y1:g} with dy={self.dy:g}"
-        )
-        out.append(f"Number of grid points: {self.n}")
-        return str.join("\n", out)
-
-    def __str__(self) -> str:
-        return f"Grid2DHorizontal (ny={self.ny}, nx={self.nx})"
-
-
-class Grid2DRotated(_Grid2D):
-    def __str__(self) -> str:
-        return f"Grid2DRotated (ny={self.ny}, nx={self.nx})"
-
 
 class Grid3D(_Geometry):
     """3D  grid
@@ -854,6 +621,7 @@ class Grid3D(_Geometry):
 
     def __init__(
         self,
+        *,
         x=None,
         x0=0.0,
         dx=None,
@@ -872,30 +640,13 @@ class Grid3D(_Geometry):
     ) -> None:
 
         super().__init__()
-        self._x = self._parse_axis("x", x, x0, dx, nx)
-        self._y = self._parse_axis("y", y, y0, dy, ny)
-        self._z = self._parse_axis("z", z, z0, dz, nz)
+        self._x = _parse_grid_axis("x", x, x0, dx, nx)
+        self._y = _parse_grid_axis("y", y, y0, dy, ny)
+        self._z = _parse_grid_axis("z", z, z0, dz, nz)
 
-        self._projection = projection
         self._projstr = projection  # TODO handle other types than string
         self._origin = origin
         self._orientation = orientation
-
-    @staticmethod
-    def _parse_axis(name, x, x0, dx, nx):
-        if x is not None:
-            x = np.asarray(x)
-            _check_equidistant(x)
-            if len(x) > 1 and x[0] > x[-1]:
-                raise ValueError("{name} values must be increasing")
-        else:
-            if nx is None:
-                raise ValueError(f"n{name} must be provided")
-            if dx is None:
-                raise ValueError(f"d{name} must be provided")
-            x1 = x0 + dx * (nx - 1)
-            x = np.linspace(x0, x1, nx)
-        return x
 
     @property
     def x(self):
@@ -965,7 +716,7 @@ class Grid3D(_Geometry):
             return Grid2D(
                 x=self.x + self._origin[0],
                 y=self.y + self._origin[1],
-                projection=self._projection,
+                projection=self.projection,
             )
         elif axis == 1:
             # y is the second axis! return x-z Grid2D
