@@ -12,7 +12,7 @@ from mikecore.DfsFile import DfsSimpleType
 
 from .eum import EUMType, ItemInfo
 from .data_utils import DataUtilsMixin
-from .spatial.FM_geometry import _GeometryFMLayered, GeometryFM, GeometryFM3D
+from .spatial.FM_geometry import GeometryFM
 from .base import TimeSeries
 from .dataarray import DataArray
 from .spatial.geometry import (
