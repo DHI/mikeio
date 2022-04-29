@@ -12,10 +12,7 @@ import mikeio
 from mikeio.dataset import Dataset
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
-from mikeio.custom_exceptions import (
-    DataDimensionMismatch,
-    ItemsError,
-)
+from mikeio.custom_exceptions import ItemsError
 from mikeio.spatial.geometry import GeometryPoint2D
 from mikeio.spatial.grid_geometry import Grid2D
 
@@ -44,10 +41,10 @@ def dfs2_gebco():
     return Dfs2(filepath)
 
 
-@pytest.fixture
-def dfs2_gebco_rotate():
-    filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
-    return Dfs2(filepath)
+# @pytest.fixture
+# def dfs2_gebco_rotate():
+#     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
+#     return Dfs2(filepath)
 
 
 def test_simple_write(tmp_path):
@@ -263,19 +260,21 @@ def test_dir_wave_spectra_relative_time_axis():
     assert da.type == EUMType._3D_Surface_Elevation_Spectrum
 
 
-def test_properties_rotated(dfs2_gebco_rotate):
-    dfs = dfs2_gebco_rotate
-    assert dfs.x0 == 0
-    assert dfs.y0 == 0
-    assert dfs.dx == pytest.approx(0.00416667)
-    assert dfs.dy == pytest.approx(0.00416667)
-    assert dfs.nx == 140
-    assert dfs.ny == 150
-    assert dfs.longitude == pytest.approx(12.2854167)
-    assert dfs.latitude == pytest.approx(55.3270833)
-    assert dfs.orientation == 45
-    assert dfs.n_items == 1
-    assert dfs.n_timesteps == 1
+def test_properties_rotated():
+    filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
+    with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"): 
+        Dfs2(filepath)
+    # assert dfs.x0 == 0
+    # assert dfs.y0 == 0
+    # assert dfs.dx == pytest.approx(0.00416667)
+    # assert dfs.dy == pytest.approx(0.00416667)
+    # assert dfs.nx == 140
+    # assert dfs.ny == 150
+    # assert dfs.longitude == pytest.approx(12.2854167)
+    # assert dfs.latitude == pytest.approx(55.3270833)
+    # assert dfs.orientation == 45
+    # assert dfs.n_items == 1
+    # assert dfs.n_timesteps == 1
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
@@ -661,3 +660,58 @@ def test_read_single_precision():
 
     assert len(ds) == 1
     assert ds[0].dtype == np.float32
+
+
+def dfs2_props_to_list(d):
+
+    lon = d._dfs.FileInfo.Projection.Longitude
+    lat = d._dfs.FileInfo.Projection.Latitude
+    rot = d._dfs.FileInfo.Projection.Orientation
+    res = [
+        # d.x0,
+        # d.y0,
+        d.dx,
+        d.dy,
+        d.nx,
+        d.ny,
+        d._projstr,
+        # lon,
+        # lat,
+        # rot,
+        d._n_timesteps,
+        d._start_time,
+        d._dfs.FileInfo.TimeAxis.TimeAxisType,
+        d._n_items,
+    ]
+
+    for item in d.items:
+        res.append(item.type)
+        res.append(item.unit)
+        res.append(item.name)
+
+    return res
+
+
+def test_read_write_header_unchanged(tmpdir):
+    file_list = [
+        "utm_not_rotated_neurope_temp.dfs2",
+        "europe_wind_long_lat.dfs2",
+        "global_long_lat_pacific_view_temperature_delta.dfs2",
+        "M3WFM_sponge_local_coordinates.dfs2",
+        "BW_Ronne_Layout1998_rotated.dfs2",
+        "hd_vertical_slice.dfs2",
+        # "dir_wave_analysis_spectra.dfs2",  # write fails: Projection string cannot be null or empty
+        "pt_spectra.dfs2",
+    ]
+
+    for f in file_list:
+        dfsA = mikeio.open("tests/testdata/" + f)
+        props_A = dfs2_props_to_list(dfsA)
+
+        ds = dfsA.read()
+        filename_out = os.path.join(tmpdir.dirname, f)
+        ds.to_dfs(filename_out)
+        dfsB = mikeio.open(filename_out)
+        props_B = dfs2_props_to_list(dfsB)
+        for pA, pB in zip(props_A, props_B):
+            assert pA == pB
