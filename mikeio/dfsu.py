@@ -658,7 +658,7 @@ class _UnstructuredFile:
             element_table=geometry.element_table,
             element_coordinates=geometry.element_coordinates,
             boundary_polylines=self.boundary_polylines,
-            is_geo=geometry.is_geo,
+            projection=geometry.projection,
             z=z,
             plot_type=plot_type,
             title=title,

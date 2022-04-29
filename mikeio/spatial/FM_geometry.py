@@ -17,6 +17,7 @@ from .FM_utils import (
     _get_node_centered_data,
     _to_polygons,
     _plot_map,
+    _set_xy_label_by_projection,
     _point_in_polygon,
     _plot_vertical_profile,
 )
@@ -111,7 +112,7 @@ class _GeometryFMPlotter:
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
             boundary_polylines=g.boundary_polylines,
-            is_geo=g.is_geo,
+            projection=g.projection,
             z=None,
             ax=ax,
             **kwargs,
@@ -133,6 +134,7 @@ class _GeometryFMPlotter:
         self.outline(ax=ax)
         ax.set_title(title)
         ax = self._set_plot_limits(ax)
+        _set_xy_label_by_projection(ax, self.g.projection)
         return ax
 
     def outline(self, title="Outline", figsize=None, ax=None):
