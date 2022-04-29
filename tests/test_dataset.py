@@ -1188,10 +1188,10 @@ def test_non_equidistant():
     assert not ds.is_equidistant
 
 
-def test_combine_by_time():
+def test_concat_by_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset
-    ds3 = mikeio.Dataset.combine(ds1, ds2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
 
     assert isinstance(ds3, mikeio.Dataset)
     assert len(ds1) == len(ds2) == len(ds3)
@@ -1202,7 +1202,7 @@ def test_combine_by_time():
     assert ds3.n_timesteps == 145
     assert ds3.is_equidistant
 
-    ds4 = mikeio.Dataset.combine([ds1, ds2])
+    ds4 = mikeio.Dataset.concat([ds1, ds2])
 
     assert isinstance(ds4, mikeio.Dataset)
     assert len(ds1) == len(ds2) == len(ds4)
@@ -1210,15 +1210,15 @@ def test_combine_by_time():
     assert ds4.end_time == ds2.end_time
 
 
-def test_combine_by_time_2():
+def test_concat_by_time_2():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=range(0, 12))
     ds2 = mikeio.read("tests/testdata/tide2.dfs1")
-    ds3 = mikeio.Dataset.combine(ds1, ds2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
 
     assert ds3.n_timesteps == 109
     assert not ds3.is_equidistant
 
-    # create combined datasets in 8 chunks of 6 hours
+    # create concatd datasets in 8 chunks of 6 hours
     dsall = []
     for j in range(8):
         dsall.append(
@@ -1226,33 +1226,33 @@ def test_combine_by_time_2():
                 "tests/testdata/tide1.dfs1", time=range(j * 12, 1 + (j + 1) * 12)
             )
         )
-    ds4 = mikeio.Dataset.combine(*dsall)
+    ds4 = mikeio.Dataset.concat(dsall)
     assert len(dsall) == 8
     assert ds4.n_timesteps == 97
     assert ds4.is_equidistant
 
 
-def test_combine_by_item():
+def test_merge_by_item():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide1.dfs1")
     old_name = ds2[0].name
     new_name = old_name + " v2"
     # ds2[0].name = ds2[0].name + " v2"
     ds2.rename({old_name: new_name}, inplace=True)
-    ds3 = mikeio.Dataset.combine(ds1, ds2)
+    ds3 = mikeio.Dataset.merge([ds1, ds2])
 
     assert isinstance(ds3, mikeio.Dataset)
     assert ds3.n_items == 2
     assert ds3[1].name == ds1[0].name + " v2"
 
 
-def test_combine_by_item_dfsu_3d():
+def test_merge_by_item_dfsu_3d():
     ds1 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[0])
     assert ds1.n_items == 1
     ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[1])
     assert ds2.n_items == 1
 
-    ds3 = mikeio.Dataset.combine(ds1, ds2)
+    ds3 = mikeio.Dataset.merge([ds1, ds2])
 
     assert isinstance(ds3, mikeio.Dataset)
     itemnames = [x.name for x in ds3.items]
@@ -1273,7 +1273,7 @@ def test_concat():
     filename = "tests/testdata/HD2D.dfsu"
     ds1 = mikeio.read(filename, time=[0, 1])
     ds2 = mikeio.read(filename, time=[2, 3])
-    ds3 = ds1.concat(ds2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
     ds3.n_timesteps
 
     assert ds1.n_items == ds2.n_items == ds3.n_items
@@ -1289,7 +1289,7 @@ def test_concat_dfsu3d():
     ds = mikeio.read(filename)
     ds1 = mikeio.read(filename, time=[0, 1])
     ds2 = mikeio.read(filename, time=[1, 2])
-    ds3 = ds1.concat(ds2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
 
     assert ds1.n_items == ds2.n_items == ds3.n_items
     assert ds3.start_time == ds.start_time

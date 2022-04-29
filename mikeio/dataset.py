@@ -1071,46 +1071,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @classmethod
     def combine(cls, *datasets):
-        """Combine n Datasets either along items or time axis
 
-        Parameters
-        ----------
-            *datasets: datasets to combine
-
-        Returns
-        -------
-        Dataset
-            a combined dataset
-
-        Examples
-        --------
-        >>> import mikeio
-        >>> from mikeio import Dataset
-        >>> ds1 = mikeio.read("HD2D.dfsu", items=0)
-        >>> ds1
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        >>> ds2 = mikeio.read("HD2D.dfsu", items=[2,3])
-        >>> ds2
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  V velocity <v velocity component> (meter per sec)
-        1:  Current speed <Current Speed> (meter per sec)
-        >>> ds3 = Dataset.combine(ds1,ds2)
-        >>> ds3
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  V velocity <v velocity component> (meter per sec)
-        2:  Current speed <Current Speed> (meter per sec)
-        """
+        warnings.warn(
+            "Dataset.combine is been deprecated, use Dataset.concat or Dataset.merge instead",
+            FutureWarning,
+        )
 
         if isinstance(datasets[0], Iterable):
             if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
@@ -1165,13 +1130,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return ds
 
-    def concat(self, other) -> "Dataset":
-        """Concatenate this Dataset with data from other Dataset
+    @staticmethod
+    def concat(datasets: Sequence["Dataset"]) -> "Dataset":
+        """Concatenate Datasets along the time axis
 
         Parameters
         ---------
-        other: Dataset
-            Other dataset to concatenate with
+        datasets: sequence of Datasets
 
         Returns
         -------
@@ -1186,12 +1151,33 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         >>> ds2 = mikeio.read("HD2D.dfsu", time_steps=[2,3])
         >>> ds1.n_timesteps
         2
-        >>> ds3 = ds1.concat(ds2)
+        >>> ds3 = Dataset.concat([ds1,ds2])
         >>> ds3.n_timesteps
         4
         """
+        ds = datasets[0].copy()
+        for dsj in datasets[1:]:
+            ds = ds._concat_time(dsj, copy=False)
 
-        ds = self._concat_time(other, copy=True)
+        return ds
+
+    @staticmethod
+    def merge(datasets: Sequence["Dataset"]) -> "Dataset":
+        """Merge Datasets along the item dimension
+
+        Parameters
+        ---------
+        datasets: sequence of Datasets
+
+        Returns
+        -------
+        Dataset
+            merged dataset
+
+        """
+        ds = datasets[0].copy()
+        for dsj in datasets[1:]:
+            ds = ds._append_items(dsj, copy=False)
 
         return ds
 
