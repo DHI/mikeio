@@ -146,7 +146,7 @@ class Dfs2(_Dfs123):
                     )
                 else:
                     raise ValueError(
-                        "LONG/LAT files with non-zero orientation are not supported"
+                        "LONG/LAT with non-zero orientation is not supported"
                     )
             else:
                 lon, lat = self._longitude, self._latitude
