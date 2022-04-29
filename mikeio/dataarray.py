@@ -288,13 +288,13 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
     def __call__(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
-        return self.lines(ax, **kwargs)
+        return self.line(ax, **kwargs)
 
-    def lines(self, ax=None, figsize=None, extrapolate=True, **kwargs):
+    def line(self, ax=None, figsize=None, extrapolate=True, **kwargs):
         ax = self._get_ax(ax, figsize)
-        return self._lines(ax, extrapolate=extrapolate, **kwargs)
+        return self._line(ax, extrapolate=extrapolate, **kwargs)
 
-    def _lines(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
+    def _line(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
         import matplotlib.pyplot as plt
 
         if "title" in kwargs:

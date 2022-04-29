@@ -130,6 +130,7 @@ def test_read_column_select_single_time_plot():
     dsp = dfs.read(x=x, y=y)
     sal_prof = dsp.Salinity.isel(time=0)
     sal_prof.plot()
+    sal_prof.plot.line()
 
 
 def test_read_column_interp_time_and_select_time():
