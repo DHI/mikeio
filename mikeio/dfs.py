@@ -482,9 +482,14 @@ class _Dfs123(TimeSeries):
         return self._latitude
 
     @property
+    def origin(self):
+        """Origin (in own CRS)"""
+        return self.geometry.origin
+
+    @property
     def orientation(self):
-        """North to Y orientation"""
-        return self._orientation
+        """Orientation (in own CRS)"""
+        return self.geometry.orientation
 
     @property
     @abstractmethod
