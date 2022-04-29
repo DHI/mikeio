@@ -672,10 +672,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ) and self._is_key_time(key[0]):
             key = pd.DatetimeIndex(key)
         if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
-            time_steps = pd.Series(range(len(self.time)), index=self.time)[key]
-            time_steps = (
-                [time_steps] if np.isscalar(time_steps) else time_steps.to_numpy()
-            )
+            time_steps = self._get_time_idx_list(self.time, key)
+            if len(time_steps) == 0:
+                raise IndexError("No timesteps found!")
             return self.isel(time_steps, axis=0)
         if isinstance(key, slice):
             if self._is_slice_time_slice(key):
