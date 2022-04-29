@@ -703,10 +703,7 @@ def is_header_unchanged_on_read_write(tmpdir, filename):
     dfsB = mikeio.open(filename_out)
     props_B = dfs2_props_to_list(dfsB)
     for pA, pB in zip(props_A, props_B):
-        if isinstance(pA, float):
-            assert pytest.approx(pA == pB, abs=1e-14)
-        else:
-            assert pA == pB
+        assert pytest.approx(pA) == pB
 
 
 def test_read_write_header_unchanged_utm_not_rotated(tmpdir):
