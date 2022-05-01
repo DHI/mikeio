@@ -301,9 +301,9 @@ def _plot_map(
 
         elif plot_type == "contourf" or plot_type == "contour_filled":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-            vbuf = 0.01 * (vmax - vmin) / n_levels
+            # vbuf = 0.01 * (vmax - vmin) / n_levels
             # avoid white outside limits
-            zn = np.clip(zn, vmin + vbuf, vmax - vbuf)
+            # zn = np.clip(zn, vmin + vbuf, vmax - vbuf) # # THIS LINE SEEMS TO CAUSE TROUBLE
             fig_obj = ax.tricontourf(
                 triang,
                 zn,
