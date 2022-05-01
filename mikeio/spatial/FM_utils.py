@@ -134,6 +134,13 @@ def _plot_map(
         if not plot_data:
             print(f"Cannot plot data in {plot_type} plot!")
 
+    if ((vmin is not None) or (vmax is not None)) and (
+        levels is not None and not np.isscalar(levels)
+    ):
+        raise ValueError(
+            "vmin/vmax cannot be provided together with non-integer levels"
+        )
+
     if plot_data and vmin is None:
         vmin = np.nanmin(z)
     if plot_data and vmax is None:
@@ -155,13 +162,12 @@ def _plot_map(
         levels_equidistant = all(np.diff(levels) == np.diff(levels)[0])
         # if not levels_equidistant:  # (isinstance(cmap, mplc.ListedColormap)) or (
         if (not isinstance(cmap, str)) and (not levels_equidistant):
-            # print("ScalarMappable")
             # cmap = mplc.Colormap(cmap)
             cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
             cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
     if ("contour" in plot_type) and (levels is None):
-        levels = 10
         n_levels = 10
+        levels = np.linspace(vmin, vmax, n_levels)
 
     cbar_extend = _cbar_extend(z, vmin, vmax)
 
@@ -311,6 +317,8 @@ def _plot_map(
                 cmap=cmap,
                 norm=cmap_norm,
                 extend=cbar_extend,
+                vmin=vmin,
+                vmax=vmax,
             )
 
             # colorbar
@@ -325,6 +333,7 @@ def _plot_map(
                             label=label,
                             cax=cax,
                             ticks=levels,
+                            extend=cbar_extend,
                         )
                     except:
                         warnings.warn("Cannot add colorbar")
