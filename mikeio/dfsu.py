@@ -373,7 +373,7 @@ class _UnstructuredFile:
     @property
     def codes(self):
         """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
-         warnings.warn(
+        warnings.warn(
             "property codes is deprecated, use .geometry.codes instead",
             FutureWarning,
         )

@@ -319,7 +319,6 @@ class Dfs0(TimeSeries):
         filename,
         data,
         start_time=None,
-        timeseries_unit=TimeStepUnit.SECOND,
         dt=None,
         datetimes=None,
         items=None,
