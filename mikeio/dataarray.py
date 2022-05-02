@@ -1033,7 +1033,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if len(kwargs) > 0:
             idx = self.geometry.find_index(**kwargs)
             if isinstance(idx, tuple):
-                # TODO: support for Dfs3
+                # TODO: support for dfs3
                 assert len(idx) == 2
                 t_ax = 1 if self._has_time_axis else 0
                 ii, jj = idx
