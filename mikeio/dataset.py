@@ -479,6 +479,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def dropna(self) -> "Dataset":
         """Remove time steps where all items are NaN"""
+        if not self[0]._has_time_axis:
+            raise ValueError("Not available if no time axis!")
 
         all_index = []
         for i in range(self.n_items):
