@@ -146,6 +146,10 @@ def _plot_map(
     if plot_data and vmax is None:
         vmax = np.nanmax(z)
 
+    if vmin == vmax:
+        vmin = vmin - 0.1
+        vmax = vmin + 0.2
+
     # set levels
     cmap_norm = None
     cmap_ScMappable = None
@@ -159,12 +163,11 @@ def _plot_map(
             vmax = max(levels)
 
         levels = np.array(levels)
-        levels_equidistant = all(np.diff(levels) == np.diff(levels)[0])
-        # if not levels_equidistant:  # (isinstance(cmap, mplc.ListedColormap)) or (
-        if (not isinstance(cmap, str)) and (not levels_equidistant):
-            # cmap = mplc.Colormap(cmap)
-            cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
-            cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
+
+        if isinstance(cmap, str):
+            cmap = cm.get_cmap(cmap)
+        cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
+        cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
     if ("contour" in plot_type) and (levels is None):
         n_levels = 10
         levels = np.linspace(vmin, vmax, n_levels)
