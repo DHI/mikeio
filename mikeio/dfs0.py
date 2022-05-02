@@ -596,6 +596,10 @@ def dataset_to_dfs0(self, filename):
     filename: str
         full path and file name to the dfs0 file.
     """
+    warnings.warn(
+        "Dataset.to_dfs0() is deprecated, use Dataset.to_dfs()",
+        FutureWarning,
+    )
     self = self.squeeze()
 
     if len(self.data[0].shape) != 1:
