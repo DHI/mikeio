@@ -212,12 +212,6 @@ class Grid2D(_Geometry):
         if (not self._is_spectral) and value:
             self._is_spectral = True
             self._x_logarithmic = self.dx > 1.0
-            # f = (
-            #     self.logarithmic_f(self.nx, self.x0, self.dx)
-            #     if self._x_logarithmic
-            #     else self._x_local
-            # )
-            # self._x_local = f
 
     @property
     def _is_rotated(self):
@@ -319,14 +313,6 @@ class Grid2D(_Geometry):
 
     def __str__(self):
         return f"Grid2D (ny={self.ny}, nx={self.nx})"
-
-    def find_index(self, x: float, y: float, **kwargs) -> Tuple[int, int]:
-
-        dist_x = (self.x - x) ** 2
-        idx_x = np.argmin(dist_x)
-        dist_y = (self.y - y) ** 2
-        idx_y = np.argmin(dist_y)
-        return idx_x, idx_y
 
     @property
     def x0(self) -> float:
@@ -505,13 +491,21 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def find_index(self, xy=None, area=None):
+    # def find_index(self, x: float, y: float) -> Tuple[int, int]:
+
+    #     dist_x = (self.x - x) ** 2
+    #     idx_x = np.argmin(dist_x)
+    #     dist_y = (self.y - y) ** 2
+    #     idx_y = np.argmin(dist_y)
+    #     return idx_x, idx_y
+
+    def find_index(self, x: float = None, y: float = None, coords=None, area=None):
         """Find nearest index (i,j) of point(s)
            -1 is returned if point is outside grid
 
         Parameters
         ----------
-        xy : array(float)
+        coords : array(float)
             xy-coordinate of points given as n-by-2 array
         area : array(float)
             xy-coordinates of bounding box
@@ -521,26 +515,20 @@ class Grid2D(_Geometry):
         array(int), array(int)
             i- and j-index of nearest cell
         """
-        if xy is not None:
-            return self._xy_to_index(xy)
+        if x is not None or y is not None:
+            if coords is not None:
+                raise ValueError("x,y and coords cannot be given at the same time!")
+            if x is None or y is None:
+                raise ValueError("please provide either both x AND y or coords!")
+            coords = np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
+
+        if coords is not None:
+            return self._xy_to_index(coords)
         elif area is not None:
             return self._bbox_to_index(area)
 
-    def _bbox_to_index(self, bbox):
-        assert len(bbox) == 4, "area most be a bounding box of coordinates"
-        x0, y0, x1, y1 = bbox
-        if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
-            warnings.warn("No elements in bbox")
-            return None, None
-
-        mask = (self.x >= x0) & (self.x <= x1)
-        ii = np.where(mask)[0]
-        mask = (self.y >= y0) & (self.y <= y1)
-        jj = np.where(mask)[0]
-
-        return ii, jj
-
     def _xy_to_index(self, xy):
+        """Find specific points in this geometry"""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
         x = xy[:, 0]
@@ -553,6 +541,21 @@ class Grid2D(_Geometry):
             if inside[j]:
                 ii[j] = (np.abs(self.x - xyp[0])).argmin()
                 jj[j] = (np.abs(self.y - xyp[1])).argmin()
+
+        return ii, jj
+
+    def _bbox_to_index(self, bbox):
+        """Find subarea within this geometry"""
+        assert len(bbox) == 4, "area most be a bounding box of coordinates"
+        x0, y0, x1, y1 = bbox
+        if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
+            warnings.warn("No elements in bbox")
+            return None, None
+
+        mask = (self.x >= x0) & (self.x <= x1)
+        ii = np.where(mask)[0]
+        mask = (self.y >= y0) & (self.y <= y1)
+        jj = np.where(mask)[0]
 
         return ii, jj
 
