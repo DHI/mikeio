@@ -51,7 +51,10 @@ def test_plot_dfsu_contour():
 def test_plot_dfsu_contourf_levels():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
     dfs = Dfsu(filename)
-    dfs.plot(plot_type="contourf", levels=[-3, -1])
+    cmap = mpl.colors.ListedColormap(["red", "green", "blue"])
+    bounds = [-3, 1, 2, 100]
+    dfs.plot(levels=bounds, cmap=cmap)
+    dfs.plot(plot_type="contourf", levels=bounds, cmap=cmap)
     assert True
 
 

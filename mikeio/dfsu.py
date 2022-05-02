@@ -14,6 +14,8 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from mikecore.MeshFile import MeshFile
 from mikecore.MeshBuilder import MeshBuilder
 
+from mikeio.spatial.utils import xy_to_bbox
+
 from .base import EquidistantTimeSeries
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset, DataArray
@@ -24,7 +26,6 @@ from .spatial.FM_geometry import (
     GeometryFM3D,
     GeometryFMVerticalProfile,
     GeometryFMPointSpectrum,
-    _GeometryFMLayered,
     GeometryFMPointSpectrum,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
@@ -499,18 +500,21 @@ class _UnstructuredFile:
     def contains(self, points):
         return self.geometry.contains(points)
 
-    def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None):
+    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=None):
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
         ----------
-        dx : float or (float, float), optional
+        dx : float, optional
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
             grid resolution in y-direction
-        shape : (int, int), optional
-            tuple with nx and ny describing number of points in each direction
-            one of them can be None, in which case the value will be inferred
+        nx : int, optional
+            number of points in x-direction,
+            by default None (the value will be inferred)
+        ny : int, optional
+            number of points in y-direction,
+            by default None (the value will be inferred)
         buffer : float, optional
             positive to make the area larger, default=0
             can be set to a small negative value to avoid NaN
@@ -522,12 +526,13 @@ class _UnstructuredFile:
             2d grid
         """
         nc = self._geometry2d.node_coordinates
-        bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
+        bbox = xy_to_bbox(nc, buffer=buffer)
         return Grid2D(
             bbox=bbox,
             dx=dx,
             dy=dy,
-            shape=shape,
+            nx=nx,
+            ny=ny,
             projection=self.geometry.projection_string,
         )
 
@@ -657,7 +662,7 @@ class _UnstructuredFile:
             element_table=geometry.element_table,
             element_coordinates=geometry.element_coordinates,
             boundary_polylines=self.boundary_polylines,
-            is_geo=geometry.is_geo,
+            projection=geometry.projection,
             z=z,
             plot_type=plot_type,
             title=title,
