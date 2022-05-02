@@ -33,7 +33,11 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
     system_start_time = dataset.time[0]
 
     if dataset.is_equidistant:
-        dt = (dataset.time[1] - dataset.time[0]).total_seconds()
+        if len(dataset.time) == 1:
+            dt = 1.0  # TODO
+        else:
+            dt = (dataset.time[1] - dataset.time[0]).total_seconds()
+
         temporal_axis = factory.CreateTemporalEqCalendarAxis(
             TimeStepUnit.SECOND, system_start_time, 0, dt
         )
@@ -71,7 +75,13 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
 
     data = np.array(dataset.to_numpy(), order="F").astype(np.float64).T
     data[np.isnan(data)] = delete_value
-    data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
+
+    if data.ndim == 2:
+        data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
+    else:
+        data_to_write = np.concatenate(
+            [np.atleast_2d(t_seconds), np.atleast_2d(data)], axis=1
+        )
     rc = dfs.WriteDfs0DataDouble(data_to_write)
 
     dfs.Close()

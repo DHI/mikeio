@@ -97,6 +97,19 @@ def da_time_space():
     return da
 
 
+def test_concat_dataarray_by_time():
+    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
+    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
+    da3 = mikeio.DataArray.concat([da1, da2])
+
+    assert da3.start_time == da1.start_time
+    assert da3.start_time < da2.start_time
+    assert da3.end_time == da2.end_time
+    assert da3.end_time > da1.end_time
+    assert da3.n_timesteps == 145
+    assert da3.is_equidistant
+
+
 def test_verify_custom_dims():
     nt = 10
     nx = 7
@@ -1104,3 +1117,7 @@ def test_time_selection():
     das_t = ds.Foo.sel(time="2000-01-05")
 
     assert das_t.shape == (24,)
+
+    with pytest.raises(IndexError):
+        # not in time
+        ds.sel(time="1997-09-15 00:00")

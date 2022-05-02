@@ -288,13 +288,13 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
     def __call__(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
-        return self.lines(ax, **kwargs)
+        return self.line(ax, **kwargs)
 
-    def lines(self, ax=None, figsize=None, extrapolate=True, **kwargs):
+    def line(self, ax=None, figsize=None, extrapolate=True, **kwargs):
         ax = self._get_ax(ax, figsize)
-        return self._lines(ax, extrapolate=extrapolate, **kwargs)
+        return self._line(ax, extrapolate=extrapolate, **kwargs)
 
-    def _lines(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
+    def _line(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
         import matplotlib.pyplot as plt
 
         if "title" in kwargs:
@@ -1252,6 +1252,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
             dai = dai.interp_time(other.time)
 
         return dai
+
+    @staticmethod
+    def concat(dataarrays: Sequence["DataArray"], keep="last") -> "DataArray":
+        from mikeio import Dataset
+
+        datasets = [Dataset([da]) for da in dataarrays]
+
+        ds = Dataset.concat(datasets, keep=keep)
+
+        return ds[0]
 
     # ============= Aggregation methods ===========
 

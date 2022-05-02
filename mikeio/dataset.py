@@ -679,10 +679,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ) and self._is_key_time(key[0]):
             key = pd.DatetimeIndex(key)
         if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
-            time_steps = pd.Series(range(len(self.time)), index=self.time)[key]
-            time_steps = (
-                [time_steps] if np.isscalar(time_steps) else time_steps.to_numpy()
-            )
+            time_steps = self._get_time_idx_list(self.time, key)
+            if len(time_steps) == 0:
+                raise IndexError("No timesteps found!")
             return self.isel(time_steps, axis=0)
         if isinstance(key, slice):
             if self._is_slice_time_slice(key):
@@ -1076,46 +1075,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @classmethod
     def combine(cls, *datasets):
-        """Combine n Datasets either along items or time axis
 
-        Parameters
-        ----------
-            *datasets: datasets to combine
-
-        Returns
-        -------
-        Dataset
-            a combined dataset
-
-        Examples
-        --------
-        >>> import mikeio
-        >>> from mikeio import Dataset
-        >>> ds1 = mikeio.read("HD2D.dfsu", items=0)
-        >>> ds1
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        >>> ds2 = mikeio.read("HD2D.dfsu", items=[2,3])
-        >>> ds2
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  V velocity <v velocity component> (meter per sec)
-        1:  Current speed <Current Speed> (meter per sec)
-        >>> ds3 = Dataset.combine(ds1,ds2)
-        >>> ds3
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  V velocity <v velocity component> (meter per sec)
-        2:  Current speed <Current Speed> (meter per sec)
-        """
+        warnings.warn(
+            "Dataset.combine is been deprecated, use Dataset.concat or Dataset.merge instead",
+            FutureWarning,
+        )
 
         if isinstance(datasets[0], Iterable):
             if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
@@ -1170,20 +1134,20 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return ds
 
-    def concat(self, other) -> "Dataset":
-        """Concatenate this Dataset with data from other Dataset
+    @staticmethod
+    def concat(datasets: Sequence["Dataset"], keep="last") -> "Dataset":
+        """Concatenate Datasets along the time axis
 
         Parameters
         ---------
-        other: Dataset
-            Other dataset to concatenate with
+        datasets: sequence of Datasets
 
         Returns
         -------
         Dataset
             concatenated dataset
-
-
+        keep: str
+            TODO Yet to be implemented, default: last
         Examples
         --------
         >>> import mikeio
@@ -1191,12 +1155,38 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         >>> ds2 = mikeio.read("HD2D.dfsu", time_steps=[2,3])
         >>> ds1.n_timesteps
         2
-        >>> ds3 = ds1.concat(ds2)
+        >>> ds3 = Dataset.concat([ds1,ds2])
         >>> ds3.n_timesteps
         4
         """
 
-        ds = self._concat_time(other, copy=True)
+        if keep != "last":
+            raise NotImplementedError(
+                "Last values is the only available option at the moment."
+            )
+        ds = datasets[0].copy()
+        for dsj in datasets[1:]:
+            ds = ds._concat_time(dsj, copy=False)
+
+        return ds
+
+    @staticmethod
+    def merge(datasets: Sequence["Dataset"]) -> "Dataset":
+        """Merge Datasets along the item dimension
+
+        Parameters
+        ---------
+        datasets: sequence of Datasets
+
+        Returns
+        -------
+        Dataset
+            merged dataset
+
+        """
+        ds = datasets[0].copy()
+        for dsj in datasets[1:]:
+            ds = ds._append_items(dsj, copy=False)
 
         return ds
 
@@ -1525,9 +1515,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             ]
         except:
             raise ValueError("Could not add data in Dataset")
-        time = self.time.copy()
-        items = deepcopy(self.items)
-        return Dataset(data, time, items)
+        newds = self.copy()
+        for j in range(len(self)):
+            newds[j].values = data[j]
+        return newds
 
     def _check_datasets_match(self, other):
         if self.n_items != other.n_items:
@@ -1555,7 +1546,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             raise ValueError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
-        return Dataset(data, time, items)
+        return Dataset(
+            data, time=time, items=items, geometry=self.geometry, zn=self._zn
+        )
 
     def _multiply_value(self, value) -> "Dataset":
         try:
@@ -1564,7 +1557,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             raise ValueError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
-        return Dataset(data, time, items)
+        return Dataset(
+            data, time=time, items=items, geometry=self.geometry, zn=self._zn
+        )
 
     # ===============================================
 
@@ -1613,7 +1608,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         if isinstance(
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
-            if self.ndim == 1 and self.dims[0][0] == "t":
+
+            if self.ndim == 0:  # Not very common, but still...
+                self._validate_extension(filename, ".dfs0")
+                self._to_dfs0(filename, **kwargs)
+            elif self.ndim == 1 and self.dims[0][0] == "t":
                 self._validate_extension(filename, ".dfs0")
                 self._to_dfs0(filename, **kwargs)
             else:

@@ -130,6 +130,7 @@ def test_read_column_select_single_time_plot():
     dsp = dfs.read(x=x, y=y)
     sal_prof = dsp.Salinity.isel(time=0)
     sal_prof.plot()
+    sal_prof.plot.line()
 
 
 def test_read_column_interp_time_and_select_time():
@@ -154,12 +155,12 @@ def test_read_column_interp_time_and_select_time():
     salinity_it = da.isel(time=0)  # single time-step
     assert salinity_it.n_timesteps == 1
 
-    # salinity_st = da.sel(time="1997-09-15 23:00")  # single time-step
-    # assert salinity_st.n_timesteps == 1
+    salinity_st = da.sel(time="1997-09-15 23:00")  # single time-step
+    assert salinity_st.n_timesteps == 1
 
-    # with pytest.raises(IndexError):
-    #    # not in time
-    #    da.sel(time="1997-09-15 00:00")
+    with pytest.raises(IndexError):
+        # not in time
+        da.sel(time="1997-09-15 00:00")
 
 
 def test_number_of_nodes_and_elements_sigma_z():
