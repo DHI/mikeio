@@ -540,16 +540,32 @@ class _UnstructuredFile:
     def get_2d_interpolant(
         self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
     ):
+        warnings.warn(
+            FutureWarning(
+                "get_2d_interpolant have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead"
+            )
+        )
         return self.geometry.get_2d_interpolant(xy, n_nearest, extrapolate, p, radius)
 
     @wraps(GeometryFM.interp2d)
     def interp2d(self, data, elem_ids, weights=None, shape=None):
+
+        warnings.warn(
+            FutureWarning(
+                "interp2d have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead"
+            )
+        )
         return self.geometry.interp2d(data, elem_ids, weights, shape)
 
     @wraps(GeometryFM.find_nearest_elements)
     def find_nearest_elements(
         self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
     ):
+        warnings.warn(
+            FutureWarning(
+                "find_nearest_elements have been deprecated, please use .geometry.find_index() instead"
+            )
+        )
         return self.geometry.find_nearest_elements(
             x, y, z, layer, n_nearest, return_distances
         )
@@ -638,6 +654,11 @@ class _UnstructuredFile:
         1
         >>> dfs.plot(z=ds) # plot surface elevation
         """
+        warnings.warn(
+            FutureWarning(
+                "Dfsu.plot() have been deprecated, please use DataArray.plot() instead"
+            )
+        )
         if elements is None:
             if self.is_2d:
                 geometry = self.geometry
@@ -1344,7 +1365,7 @@ class Dfsu2DH(_Dfsu):
 
         # spatial interpolation
         n_pts = 1 if method == "nearest" else 5
-        elem_ids, weights = self.get_2d_interpolant(
+        elem_ids, weights = self.geometry.get_2d_interpolant(
             coords[i_start : (i_end + 1)], n_nearest=n_pts
         )
 
