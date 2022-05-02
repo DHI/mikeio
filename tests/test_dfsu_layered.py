@@ -51,7 +51,7 @@ def test_read_top_layer():
     dfs = mikeio.open(filename)
 
     ds = dfs.read()  # all data in file
-    dstop1 = ds.sel(layer="top")
+    dstop1 = ds.sel(layers="top")
 
     dstop2 = dfs.read(layers="top")
     assert dstop1.shape == dstop2.shape
@@ -67,7 +67,7 @@ def test_read_bottom_layer():
     dfs = mikeio.open(filename)
 
     ds = dfs.read()  # all data in file
-    dsbot1 = ds.sel(layer="bottom")
+    dsbot1 = ds.sel(layers="bottom")
 
     dsbot2 = dfs.read(layers="bottom")
     assert dsbot1.shape == dsbot2.shape
@@ -83,7 +83,7 @@ def test_read_single_step_bottom_layer():
     dfs = mikeio.open(filename)
 
     ds = dfs.read(time=-1)  # Last timestep
-    dsbot1 = ds.sel(layer="bottom")
+    dsbot1 = ds.sel(layers="bottom")
 
 
 def test_read_multiple_layers():
@@ -91,7 +91,7 @@ def test_read_multiple_layers():
     dfs = mikeio.open(filename)
 
     ds = dfs.read()  # all data in file
-    dstop1 = ds.sel(layer=[-3, -2, -1])
+    dstop1 = ds.sel(layers=[-3, -2, -1])
 
     dstop2 = dfs.read(layers=[-3, -2, -1])
     assert dstop1.shape == dstop2.shape
@@ -460,7 +460,7 @@ def test_modify_values_in_layer(tmpdir):
 
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
     selected_layer = 6  # Zero-based indexing!
-    layer_elem_ids = ds.geometry.get_layer_elements(layer=selected_layer)
+    layer_elem_ids = ds.geometry.get_layer_elements(selected_layer)
 
     ds.Salinity[:, layer_elem_ids] = 35.0  # Set values
 

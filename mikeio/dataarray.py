@@ -1057,16 +1057,23 @@ class DataArray(DataUtilsMixin, TimeSeries):
             da = self
 
         if "layer" in kwargs:
-            layer = kwargs.pop("layer")
+            warnings.warn(
+                "layer is deprecated, use layers instead",
+                FutureWarning,
+            )
+            kwargs["layers"] = kwargs.pop("layer")
+
+        if "layers" in kwargs:
+            layers = kwargs.pop("layers")
             if isinstance(da.geometry, _GeometryFMLayered):
-                idx = da.geometry.get_layer_elements(layer)
+                idx = da.geometry.get_layer_elements(layers)
                 da = da.isel(idx, axis="space")
             elif isinstance(da.geometry, Grid3D):
                 raise NotImplementedError(
-                    f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
+                    f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}'"
                 )
             else:
-                raise ValueError("'layer' can only be selected from layered Dfsu data")
+                raise ValueError("'layers' can only be selected from layered Dfsu data")
 
         if "area" in kwargs:
             area = kwargs.pop("area")
@@ -1085,7 +1092,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         if len(kwargs) > 0:
             args = ",".join(kwargs)
-            raise ValueError(f"Argument(s) '{args}' not recognized (layer, area).")
+            raise ValueError(f"Argument(s) '{args}' not recognized (layers, area).")
 
         # select in time
         if time is not None:
