@@ -371,8 +371,8 @@ The spatial information is available in the <span class="xref myst"><code class=
 <h2>Grid2D<a class="headerlink" href="#grid2d" title="Permalink to this headline">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Grid2D">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Grid2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'LONG/LAT'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D" title="Permalink to this definition">#</a></dt>
-<dd><p>2D horizontal grid
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Grid2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NON-UTM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('x',</span> <span class="pre">'y')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_spectral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D" title="Permalink to this definition">#</a></dt>
+<dd><p>2D grid
 Origin in the center of cell in lower-left corner
 x and y axes are increasing and equidistant</p>
 <dl class="py property">
@@ -407,14 +407,14 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.dx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#mikeio.Grid2D.dx" title="Permalink to this definition">#</a></dt>
-<dd><p>x-spacing</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.dx" title="Permalink to this definition">#</a></dt>
+<dd><p>x grid spacing</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.dy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#mikeio.Grid2D.dy" title="Permalink to this definition">#</a></dt>
-<dd><p>y-spacing</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.dy" title="Permalink to this definition">#</a></dt>
+<dd><p>y grid spacing</p>
 </dd></dl>
 
 <dl class="py method">
@@ -466,22 +466,37 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 <dd><p>Are coordinates relative (NON-UTM)?</p>
 </dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.n">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n</span></span><a class="headerlink" href="#mikeio.Grid2D.n" title="Permalink to this definition">#</a></dt>
-<dd><p>total number of grid points</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Grid2D.logarithmic_f">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logarithmic_f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.055</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D.logarithmic_f" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate logarithmic frequency axis</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – number of frequencies, by default 25</p></li>
+<li><p><strong>f0</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum frequency, by default 0.055</p></li>
+<li><p><strong>freq_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Frequency factor, by default 1.1</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array of logarithmic distributed discrete frequencies</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.nx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><a class="headerlink" href="#mikeio.Grid2D.nx" title="Permalink to this definition">#</a></dt>
-<dd><p>number of points in x-direction</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.Grid2D.nx" title="Permalink to this definition">#</a></dt>
+<dd><p>number of x grid points</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.ny">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><a class="headerlink" href="#mikeio.Grid2D.ny" title="Permalink to this definition">#</a></dt>
-<dd><p>number of cells in y-direction</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.Grid2D.ny" title="Permalink to this definition">#</a></dt>
+<dd><p>number of y grid points</p>
 </dd></dl>
 
 <dl class="py property">
@@ -492,7 +507,7 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.projection_string">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.Grid2D.projection_string" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mikeio.Grid2D.projection_string" title="Permalink to this definition">#</a></dt>
 <dd><p>The projection string</p>
 </dd></dl>
 
@@ -515,25 +530,19 @@ if array: must have length=(nx+1)*(ny+1)</p></li>
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.x">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#mikeio.Grid2D.x" title="Permalink to this definition">#</a></dt>
-<dd><p>array of x-coordinates (single row)</p>
+<dd><p>array of x coordinates (element center)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.x0">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x0</span></span><a class="headerlink" href="#mikeio.Grid2D.x0" title="Permalink to this definition">#</a></dt>
-<dd><p>center of left end-point</p>
+<dd><p>x starting point</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.x1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x1</span></span><a class="headerlink" href="#mikeio.Grid2D.x1" title="Permalink to this definition">#</a></dt>
-<dd><p>center of right end-point</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.xx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xx</span></span><a class="headerlink" href="#mikeio.Grid2D.xx" title="Permalink to this definition">#</a></dt>
-<dd><p>2d array of all x-coordinates</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.x1" title="Permalink to this definition">#</a></dt>
+<dd><p>x end-point</p>
 </dd></dl>
 
 <dl class="py property">
@@ -542,34 +551,22 @@ if array: must have length=(nx+1)*(ny+1)</p></li>
 <dd><p>n-by-2 array of x- and y-coordinates</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.xy_to_bbox">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xy_to_bbox</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D.xy_to_bbox" title="Permalink to this definition">#</a></dt>
-<dd><p>return bounding box for list of coordinates</p>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.y">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#mikeio.Grid2D.y" title="Permalink to this definition">#</a></dt>
-<dd><p>array of y-coordinates (single column)</p>
+<dd><p>array of y coordinates (element center)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.y0">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y0</span></span><a class="headerlink" href="#mikeio.Grid2D.y0" title="Permalink to this definition">#</a></dt>
-<dd><p>center of lower end-point</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y0</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.y0" title="Permalink to this definition">#</a></dt>
+<dd><p>y starting point</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.y1">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y1</span></span><a class="headerlink" href="#mikeio.Grid2D.y1" title="Permalink to this definition">#</a></dt>
-<dd><p>center of upper end-point</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.yy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">yy</span></span><a class="headerlink" href="#mikeio.Grid2D.yy" title="Permalink to this definition">#</a></dt>
-<dd><p>2d array of all y-coordinates</p>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y1</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.y1" title="Permalink to this definition">#</a></dt>
+<dd><p>y end-point</p>
 </dd></dl>
 
 </dd></dl>

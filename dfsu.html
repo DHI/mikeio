@@ -853,15 +853,17 @@ only include elements within radius</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Mesh.get_overset_grid">
-<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_overset_grid" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.get_overset_grid" title="Permalink to this definition">#</a></dt>
 <dd><p>get a 2d grid that covers the domain by specifying spacing or shape</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dx</strong> (<em>float</em><em> or </em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dx</strong> (<em>float</em><em>, </em><em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
 <li><p><strong>dy</strong> (<em>float</em><em>, </em><em>optional</em>) – grid resolution in y-direction</p></li>
-<li><p><strong>shape</strong> (<em>(</em><em>int</em><em>, </em><em>int</em><em>)</em><em>, </em><em>optional</em>) – tuple with nx and ny describing number of points in each direction
-one of them can be None, in which case the value will be inferred</p></li>
+<li><p><strong>nx</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points in x-direction,
+by default None (the value will be inferred)</p></li>
+<li><p><strong>ny</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points in y-direction,
+by default None (the value will be inferred)</p></li>
 <li><p><strong>buffer</strong> (<em>float</em><em>, </em><em>optional</em>) – positive to make the area larger, default=0
 can be set to a small negative value to avoid NaN
 values all around the domain.</p></li>
