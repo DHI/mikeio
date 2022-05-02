@@ -833,6 +833,23 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def to_numpy(self) -> np.ndarray:
         return self._values
 
+    @property
+    def _has_time_axis(self):
+        return self.dims[0][0] == "t"
+
+    def dropna(self) -> "DataArray":
+        """Remove time steps where values are NaN"""
+        if not self._has_time_axis:
+            raise ValueError("Not available if no time axis!")
+
+        x = self.to_numpy()
+
+        # this seems overly complicated...
+        axes = tuple(range(1, x.ndim))
+        idx = np.where(~np.isnan(x).all(axis=axes))
+        idx = list(idx[0])
+        return self.isel(idx, axis=0)
+
     def flipud(self) -> "DataArray":
         """Flip upside down"""
 
