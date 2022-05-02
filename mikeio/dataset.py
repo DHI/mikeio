@@ -1538,7 +1538,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
                 self._to_dfs0(filename, **kwargs)
-            elif self.ndim == 1 and self.dims[0][0] == "t":
+            elif self.ndim == 1 and self[0]._has_time_axis:
                 self._validate_extension(filename, ".dfs0")
                 self._to_dfs0(filename, **kwargs)
             else:
