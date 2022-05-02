@@ -470,7 +470,7 @@ class Grid2D(_Geometry):
         """n-by-2 array of x- and y-coordinates"""
         return self.xy
 
-    def shift_x0y0_to_origin(self):
+    def _shift_x0y0_to_origin(self):
         """Shift spatial axis to start at (0,0) adding the start to origin instead
         Note: this will note change the x or y properties.
         """

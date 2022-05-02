@@ -26,10 +26,15 @@ def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
     builder = DfsBuilder.Create(title, "MIKE IO", 1)
     builder.SetDataType(0)
 
-    geometry: Grid2D = deepcopy(ds.geometry)
+    geometry: Grid2D = ds.geometry
 
-    if not geometry._is_rotated and not geometry.is_spectral:
-        geometry.shift_x0y0_to_origin()
+    if (
+        geometry.origin == (0, 0)
+        and not geometry._is_rotated
+        and not geometry.is_spectral
+    ):
+        geometry = deepcopy(ds.geometry)
+        geometry._shift_x0y0_to_origin()
 
     factory = DfsFactory()
     _write_dfs2_spatial_axis(builder, factory, geometry)
