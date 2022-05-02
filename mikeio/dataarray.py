@@ -1033,71 +1033,15 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if len(kwargs) > 0:
             idx = self.geometry.find_index(**kwargs)
             if isinstance(idx, tuple):
+                # TODO: support for Dfs3
                 assert len(idx) == 2
                 t_ax = 1 if self._has_time_axis else 0
                 ii, jj = idx
                 tmp = da.isel(idx=jj, axis=(0 + t_ax))
                 sp_axis = 0 if len(jj) == 1 else 1
-                da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
-                # for idx_j in reversed(idx):
-                #     sp_axis = 0 if len(idx_j) == 1 else 1
-                #     da = da.isel(idx_j, axis=(sp_axis + t_ax))
+                da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))                
             else:
                 da = da.isel(idx, axis="space")
-
-        # # select in space
-        # if (x is not None) or (y is not None) or (z is not None):
-        #     if isinstance(self.geometry, Grid2D):  # TODO find out better way
-        #         xy = np.column_stack((x, y))
-        #         if len(xy) > 1:
-        #             raise NotImplementedError(
-        #                 "Grid2D does not support multiple point sel()"
-        #             )
-        #         i, j = self.geometry.find_index(xy=xy)
-        #         if i == -1 or j == -1:
-        #             return None
-        #         tmp = self.isel(idx=j[0], axis=(0 + t_ax))
-        #         sp_axis = 0 if len(j) == 1 else 1
-        #         da = tmp.isel(idx=i[0], axis=(sp_axis + t_ax))
-        #     else:
-        #         if isinstance(self.geometry, _GeometryFMLayered):
-        #             idx = self.geometry.find_index(x=x, y=y, z=z)
-        #         else:
-        #             idx = self.geometry.find_index(x=x, y=y)
-        #         da = self.isel(idx, axis="space")
-        # else:
-        #     da = self
-
-        # if "layer" in kwargs:
-        #     layer = kwargs.pop("layer")
-        #     if isinstance(da.geometry, _GeometryFMLayered):
-        #         idx = da.geometry.get_layer_elements(layer)
-        #         da = da.isel(idx, axis="space")
-        #     elif isinstance(da.geometry, Grid3D):
-        #         raise NotImplementedError(
-        #             f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
-        #         )
-        #     else:
-        #         raise ValueError("'layer' can only be selected from layered Dfsu data")
-
-        # if "area" in kwargs:
-        #     area = kwargs.pop("area")
-        #     if isinstance(da.geometry, GeometryFM):
-        #         idx = da.geometry._elements_in_area(area)
-        #         da = da.isel(idx, axis="space")
-        #     elif isinstance(da.geometry, Grid2D):
-        #         ii, jj = self.geometry.find_index(area=area)
-        #         tmp = self.isel(idx=jj, axis=(0 + t_ax))
-        #         sp_axis = 0 if len(jj) == 1 else 1
-        #         da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
-        #     else:
-        #         raise ValueError(
-        #             "'area' can only be selected from Grid2D or flexible mesh data"
-        #         )
-
-        # if len(kwargs) > 0:
-        #     args = ",".join(kwargs)
-        #     raise ValueError(f"Argument(s) '{args}' not recognized (layer, area).")
 
         # select in time
         if time is not None:
