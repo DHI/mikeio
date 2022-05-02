@@ -790,12 +790,12 @@ def test_elements_to_geometry():
     assert geom.n_layers == 5
     assert "nodes" in text
 
-    elements = dfs.get_layer_elements(layer=-1)
+    elements = dfs.get_layer_elements(layers=-1)
     geom = dfs.elements_to_geometry(elements, node_layers="top")
     assert not hasattr(geom, "n_layers")
     assert geom.n_elements == len(elements)
 
-    elements = dfs.get_layer_elements(layer=[-2, -1])
+    elements = dfs.get_layer_elements(layers=[-2, -1])
     with pytest.raises(Exception):
         geom = dfs.elements_to_geometry(elements, node_layers="center")
 

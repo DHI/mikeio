@@ -137,7 +137,7 @@ def test_transect_sel_xyz(vslice_geo):
 
 def test_transect_sel_layers(vslice_geo):
     ds = vslice_geo.read()
-    ds2 = ds.sel(layer=range(-6, -1))
+    ds2 = ds.sel(layers=range(-6, -1))
     assert type(ds2.geometry) == GeometryFMVerticalProfile
 
 

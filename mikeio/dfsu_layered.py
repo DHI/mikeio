@@ -81,10 +81,17 @@ class DfsuLayered(_Dfsu):
         return self.geometry.bottom_elements
 
     @wraps(GeometryFM3D.get_layer_elements)
-    def get_layer_elements(self, layer):
+    def get_layer_elements(self, layers, layer=None):
+        if layer is not None:
+            warnings.warn(
+                "layer argument is deprecated, use layers instead",
+                FutureWarning,
+            )
+            layers = layer
+
         if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
-        return self.geometry.get_layer_elements(layer)
+        return self.geometry.get_layer_elements(layers)
 
     def read(
         self,
@@ -171,7 +178,7 @@ class DfsuLayered(_Dfsu):
             elements, area=area, layers=layers, x=x, y=y, z=z
         )
         if elements is None:
-            elements = self._parse_geometry_sel(area=area, layer=layers, x=x, y=y, z=z)
+            elements = self._parse_geometry_sel(area=area, layers=layers, x=x, y=y, z=z)
 
         if elements is None:
             n_elems = self.n_elements
@@ -261,21 +268,21 @@ class DfsuLayered(_Dfsu):
         else:
             return Dataset(data_list, time, items, geometry=geometry, dims=dims)
 
-    def _parse_geometry_sel(self, area, layer, x, y, z):
+    def _parse_geometry_sel(self, area, layers, x, y, z):
         elements = None
-        if layer is not None:
-            elements = self.geometry.get_layer_elements(layer)
+        if layers is not None:
+            elements = self.geometry.get_layer_elements(layers)
 
         if area is not None:
             elements_a = self.geometry._elements_in_area(area)
             elements = (
-                elements_a if layer is None else np.intersect1d(elements, elements_a)
+                elements_a if layers is None else np.intersect1d(elements, elements_a)
             )
 
         if (x is not None) or (y is not None):
             elements_xy = self.geometry.find_index(x=x, y=y, z=z)
             elements = (
-                elements_xy if layer is None else np.intersect1d(elements, elements_xy)
+                elements_xy if layers is None else np.intersect1d(elements, elements_xy)
             )
 
         return elements

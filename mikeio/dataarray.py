@@ -1129,7 +1129,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
-            xy = [(x, y)]
+            coords = [(x, y)]
 
             if isinstance(self.geometry, Grid2D):  # TODO DIY bilinear interpolation
                 xr_da = self.to_xarray()
@@ -1137,13 +1137,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 geometry = GeometryPoint2D(x=x, y=y)
             elif isinstance(self.geometry, Grid1D):
                 if interpolant is None:
-                    interpolant = self.geometry.get_spatial_interpolant(xy)
+                    interpolant = self.geometry.get_spatial_interpolant(coords)
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM):
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
-                        xy, n_nearest=n_nearest, **kwargs
+                        coords, n_nearest=n_nearest, **kwargs
                     )
                 dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
                 if z is None:

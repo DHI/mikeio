@@ -135,6 +135,13 @@ def _plot_map(
         if not plot_data:
             print(f"Cannot plot data in {plot_type} plot!")
 
+    if ((vmin is not None) or (vmax is not None)) and (
+        levels is not None and not np.isscalar(levels)
+    ):
+        raise ValueError(
+            "vmin/vmax cannot be provided together with non-integer levels"
+        )
+
     if elements is not None:
         if plot_type.startswith("contour"):
             raise ValueError("elements argument not possible with contour plots")
@@ -146,6 +153,10 @@ def _plot_map(
         vmin = np.nanmin(z)
     if plot_data and vmax is None:
         vmax = np.nanmax(z)
+
+    if plot_data and vmin == vmax:
+        vmin = vmin - 0.1
+        vmax = vmin + 0.2
 
     # set levels
     cmap_norm = None
@@ -160,16 +171,14 @@ def _plot_map(
             vmax = max(levels)
 
         levels = np.array(levels)
-        levels_equidistant = all(np.diff(levels) == np.diff(levels)[0])
-        # if not levels_equidistant:  # (isinstance(cmap, mplc.ListedColormap)) or (
-        if (not isinstance(cmap, str)) and (not levels_equidistant):
-            # print("ScalarMappable")
-            # cmap = mplc.Colormap(cmap)
-            cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
-            cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
+
+        if isinstance(cmap, str):
+            cmap = cm.get_cmap(cmap)
+        cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
+        cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
     if ("contour" in plot_type) and (levels is None):
-        levels = 10
         n_levels = 10
+        levels = np.linspace(vmin, vmax, n_levels)
 
     cbar_extend = _cbar_extend(z, vmin, vmax)
 
@@ -312,9 +321,9 @@ def _plot_map(
 
         elif plot_type == "contourf" or plot_type == "contour_filled":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-            vbuf = 0.01 * (vmax - vmin) / n_levels
+            # vbuf = 0.01 * (vmax - vmin) / n_levels
             # avoid white outside limits
-            zn = np.clip(zn, vmin + vbuf, vmax - vbuf)
+            # zn = np.clip(zn, vmin + vbuf, vmax - vbuf) # # THIS LINE SEEMS TO CAUSE TROUBLE
             fig_obj = ax.tricontourf(
                 triang,
                 zn,
@@ -322,6 +331,8 @@ def _plot_map(
                 cmap=cmap,
                 norm=cmap_norm,
                 extend=cbar_extend,
+                vmin=vmin,
+                vmax=vmax,
             )
 
             # colorbar
@@ -336,6 +347,7 @@ def _plot_map(
                             label=label,
                             cax=cax,
                             ticks=levels,
+                            extend=cbar_extend,
                         )
                     except:
                         warnings.warn("Cannot add colorbar")
