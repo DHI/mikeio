@@ -172,8 +172,8 @@ def test_write_projected(tmpdir):
     ds = mikeio.read(filename)
     assert ds.geometry.dx == 100
     assert ds.geometry.dy == 100
-    assert ds.geometry.x0 == x0
-    assert ds.geometry.y0 == y0
+    assert ds.geometry.x0 == pytest.approx(x0)
+    assert ds.geometry.y0 == pytest.approx(y0)
 
 
 def test_read(dfs2_random):
