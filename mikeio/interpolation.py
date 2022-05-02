@@ -60,7 +60,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
     Examples
     --------
-    >>> elem_ids, weights = dfs.get_spatial_interpolant(xy)
+    >>> elem_ids, weights = dfs.get_spatial_interpolant(coords)
     >>> dsi = interp2d(ds, elem_ids, weights)
     """
     from .dataset import Dataset, DataArray

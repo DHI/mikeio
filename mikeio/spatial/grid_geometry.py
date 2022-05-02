@@ -84,9 +84,9 @@ class Grid1D(_Geometry):
         d = (self.x - x) ** 2
         return np.argmin(d)
 
-    def get_spatial_interpolant(self, xy, **kwargs):
+    def get_spatial_interpolant(self, coords, **kwargs):
 
-        x = xy[0][0]  # TODO accept list of points
+        x = coords[0][0]  # TODO accept list of points
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
         weights = 1 - d[ids]
@@ -484,12 +484,12 @@ class Grid2D(_Geometry):
         self._x0, self._y0 = 0.0, 0.0
         self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
-    def contains(self, xy):
+    def contains(self, coords):
         """test if a list of points are inside grid
 
         Parameters
         ----------
-        xy : array(float)
+        coords : array(float)
             xy-coordinate of points given as n-by-2 array
 
         Returns
@@ -497,21 +497,21 @@ class Grid2D(_Geometry):
         bool array
             True for points inside, False otherwise
         """
-        xy = np.atleast_2d(xy)
-        y = xy[:, 1]
-        x = xy[:, 0]
+        coords = np.atleast_2d(coords)
+        y = coords[:, 1]
+        x = coords[:, 0]
 
         xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def find_index(self, xy=None, area=None):
+    def find_index(self, coords=None, area=None):
         """Find nearest index (i,j) of point(s)
            -1 is returned if point is outside grid
 
         Parameters
         ----------
-        xy : array(float)
+        coords : array(float)
             xy-coordinate of points given as n-by-2 array
         area : array(float)
             xy-coordinates of bounding box
@@ -521,8 +521,8 @@ class Grid2D(_Geometry):
         array(int), array(int)
             i- and j-index of nearest cell
         """
-        if xy is not None:
-            return self._xy_to_index(xy)
+        if coords is not None:
+            return self._xy_to_index(coords)
         elif area is not None:
             return self._bbox_to_index(area)
 
