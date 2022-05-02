@@ -172,8 +172,50 @@ def test_write_projected(tmpdir):
     ds = mikeio.read(filename)
     assert ds.geometry.dx == 100
     assert ds.geometry.dy == 100
-    assert ds.geometry.x0 == pytest.approx(x0)
-    assert ds.geometry.y0 == pytest.approx(y0)
+    # shifted x0y0 to origin as not provided in construction of Grid2D
+    assert ds.geometry.x0 == 0.0
+    assert ds.geometry.y0 == 0.0
+    assert ds.geometry.origin[0] == pytest.approx(x0)
+    assert ds.geometry.origin[1] == pytest.approx(y0)
+
+    grid = Grid2D(
+        nx=nx,
+        ny=ny,
+        x0=x0,
+        y0=y0,
+        dx=100,
+        dy=100,
+        projection="UTM-33",
+        origin=(0.0, 0.0),
+    )
+    da = mikeio.DataArray(
+        data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
+    )
+    da.to_dfs(filename)
+
+    ds2 = mikeio.read(filename)
+    assert ds2.geometry.dx == 100
+    assert ds2.geometry.dy == 100
+    # NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
+    assert ds2.geometry.x0 == pytest.approx(x0)
+    assert ds2.geometry.y0 == pytest.approx(y0)
+    assert ds2.geometry.origin[0] == 0.0
+    assert ds2.geometry.origin[1] == 0.0
+
+    grid = Grid2D(nx=nx, ny=ny, origin=(x0, y0), dx=100, dy=100, projection="UTM-33")
+    da = mikeio.DataArray(
+        data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
+    )
+    da.to_dfs(filename)
+
+    ds3 = mikeio.read(filename)
+    assert ds3.geometry.dx == 100
+    assert ds3.geometry.dy == 100
+    # shifted x0y0 to origin as not provided in construction of Grid2D
+    assert ds3.geometry.x0 == 0.0
+    assert ds3.geometry.y0 == 0.0
+    assert ds3.geometry.origin[0] == pytest.approx(x0)
+    assert ds3.geometry.origin[1] == pytest.approx(y0)
 
 
 def test_read(dfs2_random):
