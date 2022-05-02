@@ -277,7 +277,7 @@ def test_select_subset_isel_axis_out_of_range_error(ds2):
     assert len(dss.shape) == 1
 
     with pytest.raises(ValueError):
-        dss.isel(idx=0, axis="spatial")
+        dss.isel(idx=0, axis=1)
 
 
 def test_isel_named_axis(ds2: mikeio.Dataset):

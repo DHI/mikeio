@@ -67,15 +67,23 @@ def test_read_bottom_layer():
     dfs = mikeio.open(filename)
 
     ds = dfs.read()  # all data in file
-    dstop1 = ds.sel(layer="bottom")
+    dsbot1 = ds.sel(layer="bottom")
 
-    dstop2 = dfs.read(layers="bottom")
-    assert dstop1.shape == dstop2.shape
-    assert dstop1.dims == dstop2.dims
-    assert isinstance(dstop1.geometry, GeometryFM)
-    assert dstop1.geometry._type == dstop2.geometry._type
-    assert np.all(dstop1.values == dstop2.values)
-    assert dstop1.geometry.max_nodes_per_element <= 4
+    dsbot2 = dfs.read(layers="bottom")
+    assert dsbot1.shape == dsbot2.shape
+    assert dsbot1.dims == dsbot2.dims
+    assert isinstance(dsbot1.geometry, GeometryFM)
+    assert dsbot1.geometry._type == dsbot2.geometry._type
+    assert np.all(dsbot1.values == dsbot2.values)
+    assert dsbot1.geometry.max_nodes_per_element <= 4
+
+
+def test_read_single_step_bottom_layer():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read(time=-1)  # Last timestep
+    dsbot1 = ds.sel(layer="bottom")
 
 
 def test_read_multiple_layers():
