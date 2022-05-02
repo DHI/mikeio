@@ -97,6 +97,19 @@ def da_time_space():
     return da
 
 
+def test_concat_dataarray_by_time():
+    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
+    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
+    da3 = mikeio.DataArray.concat([da1, da2])
+
+    assert da3.start_time == da1.start_time
+    assert da3.start_time < da2.start_time
+    assert da3.end_time == da2.end_time
+    assert da3.end_time > da1.end_time
+    assert da3.n_timesteps == 145
+    assert da3.is_equidistant
+
+
 def test_verify_custom_dims():
     nt = 10
     nx = 7
@@ -552,6 +565,15 @@ def test_dataarray_grid2d_indexing_error(da_grid2d):
         da_grid2d[14:18]
     with pytest.raises(IndexError):
         da_grid2d[3, :, 100]
+
+
+def test_dropna(da2):
+    da2[8:] = np.nan
+
+    da3 = da2.dropna()
+
+    assert da2.n_timesteps == 10
+    assert da3.n_timesteps == 8
 
 
 def test_da_isel_space(da_grid2d):

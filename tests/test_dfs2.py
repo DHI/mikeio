@@ -606,10 +606,10 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
 def test_read_concat_write_dfs2(tmp_path):
     outfilename = tmp_path / "waves_concat.dfs2"
 
-    ds1 = mikeio.read("tests/testdata/waves.dfs2", time_steps=[0, 1])
-    # ds2 = mikeio.read("tests/testdata/waves.dfs2", time_steps=2) # dont do this, it will not work!
-    ds2 = mikeio.read("tests/testdata/waves.dfs2", time_steps=[2])
-    dsc = ds1.concat(ds2)
+    ds1 = mikeio.read("tests/testdata/waves.dfs2", time=[0, 1])
+    # ds2 = mikeio.read("tests/testdata/waves.dfs2", time=2)  # dont do this, it will not work, since reading a single time step removes the time dimension
+    ds2 = mikeio.read("tests/testdata/waves.dfs2", time=[2])
+    dsc = mikeio.Dataset.concat([ds1, ds2])
     assert dsc.n_timesteps == 3
     assert dsc.end_time == ds2.end_time
     assert isinstance(dsc.geometry, Grid2D)

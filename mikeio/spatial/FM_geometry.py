@@ -1014,7 +1014,7 @@ class GeometryFM(_Geometry):
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
         idx = self._2d_elements_in_area(area)
-        if self.is_layered:
+        if self.is_layered and len(idx) > 0:
             idx = np.hstack(self.e2_e3_table[idx])
         return idx
 
@@ -1115,6 +1115,11 @@ class GeometryFM(_Geometry):
             unique_layer_ids = np.unique(layers_used)
             n_layers = len(unique_layer_ids)
 
+            if n_layers > 1:
+                elem_bot = self.get_layer_elements("bottom")
+                if np.all(np.in1d(elements, elem_bot)):
+                    n_layers = 1
+
             if (
                 self._type == DfsuFileType.Dfsu3DSigma
                 or self._type == DfsuFileType.Dfsu3DSigmaZ
@@ -1125,11 +1130,20 @@ class GeometryFM(_Geometry):
                 node_layers = "bottom"
 
         # extract information for selected elements
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elements, node_layers=node_layers
-        )
-        node_coords = self.node_coordinates[node_ids]
-        codes = self.codes[node_ids]
+        if self.is_layered and n_layers == 1:
+            geom2d = self._geometry2d
+            elem2d = self.elem2d_ids[elements]
+            node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
+            node_coords = geom2d.node_coordinates[node_ids]
+            codes = geom2d.codes[node_ids]
+            elem_ids = self.element_ids[elem2d]
+        else:
+            node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+                elements, node_layers=node_layers
+            )
+            node_coords = self.node_coordinates[node_ids]
+            codes = self.codes[node_ids]
+            elem_ids = self.element_ids[elements]
 
         if self.is_layered and (new_type != DfsuFileType.Dfsu2D):
             if n_layers == len(elem_tbl):
@@ -1145,7 +1159,7 @@ class GeometryFM(_Geometry):
             node_ids=node_ids,
             projection=self.projection_string,
             element_table=elem_tbl,
-            element_ids=self.element_ids[elements],
+            element_ids=elem_ids,
         )
         geom._reindex()
 
