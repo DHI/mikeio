@@ -567,6 +567,15 @@ def test_dataarray_grid2d_indexing_error(da_grid2d):
         da_grid2d[3, :, 100]
 
 
+def test_dropna(da2):
+    da2[8:] = np.nan
+
+    da3 = da2.dropna()
+
+    assert da2.n_timesteps == 10
+    assert da3.n_timesteps == 8
+
+
 def test_da_isel_space(da_grid2d):
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14

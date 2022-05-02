@@ -881,7 +881,7 @@ def test_dropna():
     d1 = np.zeros([nt, 100, 30])
     d2 = np.zeros([nt, 100, 30])
 
-    d1[8:] = np.nan
+    d1[9:] = np.nan
     d2[8:] = np.nan
 
     data = [d1, d2]
