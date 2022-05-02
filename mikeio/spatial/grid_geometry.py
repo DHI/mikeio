@@ -780,8 +780,14 @@ class Grid3D(_Geometry):
         """number of z-axis nodes"""
         return self._nz
 
-    def find_index(self, coords):
-        raise NotImplementedError()
+    def find_index(self, coords=None, layer=None, area=None):
+        if layer is not None:
+            raise NotImplementedError(
+                f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}')"
+            )
+        raise NotImplementedError(
+            "Not yet implemented for Grid3D. Please use mikeio.read('file.dfs3') and its arguments instead."
+        )
 
     def isel(self, idx, axis):
         if not np.isscalar(idx):
