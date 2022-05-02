@@ -1385,7 +1385,7 @@ def test_layer_selection():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    dss_layer = ds.sel(layer=0)
+    dss_layer = ds.sel(layers=0)
     # should not be layered after selection
     assert type(dss_layer.geometry) == mikeio.spatial.FM_geometry.GeometryFM
 

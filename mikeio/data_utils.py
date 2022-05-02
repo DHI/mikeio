@@ -91,10 +91,9 @@ class DataUtilsMixin:
         # axis = 0 if axis == "time" else axis
         if (axis == "spatial") or (axis == "space"):
             if len(data_shape) == 1:
+                if dims[0][0] == "t":
+                    raise ValueError(f"space axis cannot be selected from dims {dims}")
                 return 0
-            #   raise ValueError(
-            #       f"axis '{axis}' not allowed for Dataset with shape {data_shape}"
-            #   )
             if "frequency" in dims or "directions" in dims:
                 space_name = "node" if "node" in dims else "element"
                 return dims.index(space_name)

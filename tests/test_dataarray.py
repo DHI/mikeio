@@ -639,15 +639,15 @@ def test_da_sel_layer():
     assert da.geometry.n_elements == 17118
     assert da.geometry.is_layered
 
-    da1 = da.sel(layer=-1)
+    da1 = da.sel(layers=-1)
     assert da1.geometry.n_elements == 3700
     assert not da1.geometry.is_layered
 
-    da2 = da.sel(layer="top")
+    da2 = da.sel(layers="top")
     assert da2.geometry.n_elements == 3700
     # assert
 
-    da3 = da.sel(layer="bottom")
+    da3 = da.sel(layers="bottom")
     assert da3.geometry.n_elements == 3700
 
 
@@ -1108,7 +1108,7 @@ def test_layer_selection():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    das_layer = ds.Temperature.sel(layer=0)
+    das_layer = ds.Temperature.sel(layers=0)
     # should not be layered after selection
     assert type(das_layer.geometry) == mikeio.spatial.FM_geometry.GeometryFM
 
