@@ -12,11 +12,12 @@ from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
-from .utils import _relative_cumulative_distance
+from .utils import _relative_cumulative_distance, xy_to_bbox
 from .FM_utils import (
     _get_node_centered_data,
     _to_polygons,
     _plot_map,
+    _set_xy_label_by_projection,
     _point_in_polygon,
     _plot_vertical_profile,
 )
@@ -111,7 +112,7 @@ class _GeometryFMPlotter:
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
             boundary_polylines=g.boundary_polylines,
-            is_geo=g.is_geo,
+            projection=g.projection,
             z=None,
             ax=ax,
             **kwargs,
@@ -133,6 +134,7 @@ class _GeometryFMPlotter:
         self.outline(ax=ax)
         ax.set_title(title)
         ax = self._set_plot_limits(ax)
+        _set_xy_label_by_projection(ax, self.g.projection)
         return ax
 
     def outline(self, title="Outline", figsize=None, ax=None):
@@ -186,7 +188,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _set_plot_limits(self, ax):
-        bbox = Grid2D.xy_to_bbox(self.g.node_coordinates)
+        bbox = xy_to_bbox(self.g.node_coordinates)
         xybuf = 6e-3 * (bbox.right - bbox.left)
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
         ax.set_ylim(bbox.bottom - xybuf, bbox.top + xybuf)
@@ -725,7 +727,9 @@ class GeometryFM(_Geometry):
                 return j
         return -1
 
-    def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None) -> Grid2D:
+    def get_overset_grid(
+        self, dx=None, dy=None, nx=None, ny=None, buffer=None
+    ) -> Grid2D:
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
@@ -734,9 +738,12 @@ class GeometryFM(_Geometry):
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
             grid resolution in y-direction
-        shape : (int, int), optional
-            tuple with nx and ny describing number of points in each direction
-            one of them can be None, in which case the value will be inferred
+        nx : int, optional
+            number of points in x-direction, by default None,
+            (the value will be inferred)
+        ny : int, optional
+            number of points in y-direction, by default None,
+            (the value will be inferred)
         buffer : float, optional
             positive to make the area larger, default=0
             can be set to a small negative value to avoid NaN
@@ -748,8 +755,8 @@ class GeometryFM(_Geometry):
             2d grid
         """
         nc = self._geometry2d.node_coordinates
-        bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
-        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape, projection=self.projection)
+        bbox = xy_to_bbox(nc, buffer=buffer)
+        return Grid2D(bbox=bbox, dx=dx, dy=dy, nx=nx, ny=ny, projection=self.projection)
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.
@@ -1007,7 +1014,7 @@ class GeometryFM(_Geometry):
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
         idx = self._2d_elements_in_area(area)
-        if self.is_layered:
+        if self.is_layered and len(idx) > 0:
             idx = np.hstack(self.e2_e3_table[idx])
         return idx
 
@@ -1108,6 +1115,11 @@ class GeometryFM(_Geometry):
             unique_layer_ids = np.unique(layers_used)
             n_layers = len(unique_layer_ids)
 
+            if n_layers > 1:
+                elem_bot = self.get_layer_elements("bottom")
+                if np.all(np.in1d(elements, elem_bot)):
+                    n_layers = 1
+
             if (
                 self._type == DfsuFileType.Dfsu3DSigma
                 or self._type == DfsuFileType.Dfsu3DSigmaZ
@@ -1118,11 +1130,20 @@ class GeometryFM(_Geometry):
                 node_layers = "bottom"
 
         # extract information for selected elements
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elements, node_layers=node_layers
-        )
-        node_coords = self.node_coordinates[node_ids]
-        codes = self.codes[node_ids]
+        if self.is_layered and n_layers == 1:
+            geom2d = self._geometry2d
+            elem2d = self.elem2d_ids[elements]
+            node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
+            node_coords = geom2d.node_coordinates[node_ids]
+            codes = geom2d.codes[node_ids]
+            elem_ids = self.element_ids[elem2d]
+        else:
+            node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+                elements, node_layers=node_layers
+            )
+            node_coords = self.node_coordinates[node_ids]
+            codes = self.codes[node_ids]
+            elem_ids = self.element_ids[elements]
 
         if self.is_layered and (new_type != DfsuFileType.Dfsu2D):
             if n_layers == len(elem_tbl):
@@ -1138,7 +1159,7 @@ class GeometryFM(_Geometry):
             node_ids=node_ids,
             projection=self.projection_string,
             element_table=elem_tbl,
-            element_ids=self.element_ids[elements],
+            element_ids=elem_ids,
         )
         geom._reindex()
 

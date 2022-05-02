@@ -3,7 +3,11 @@ import numpy as np
 import pytest
 import mikeio
 from mikeio import Dfsu, Mesh
-from mikeio.spatial.FM_geometry import GeometryFMVerticalColumn
+from mikeio.spatial.FM_geometry import (
+    GeometryFM,
+    GeometryFM3D,
+    GeometryFMVerticalColumn,
+)
 from mikeio.spatial.geometry import GeometryPoint3D
 
 
@@ -42,7 +46,7 @@ def test_read_returns_correct_items_sigma_z():
     assert ds.items[1].name == "Salinity"
 
 
-def test_read_layers():
+def test_read_top_layer():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -52,8 +56,50 @@ def test_read_layers():
     dstop2 = dfs.read(layers="top")
     assert dstop1.shape == dstop2.shape
     assert dstop1.dims == dstop2.dims
+    assert isinstance(dstop1.geometry, GeometryFM)
     assert dstop1.geometry._type == dstop2.geometry._type
     assert np.all(dstop1.values == dstop2.values)
+    assert dstop1.geometry.max_nodes_per_element <= 4
+
+
+def test_read_bottom_layer():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read()  # all data in file
+    dsbot1 = ds.sel(layer="bottom")
+
+    dsbot2 = dfs.read(layers="bottom")
+    assert dsbot1.shape == dsbot2.shape
+    assert dsbot1.dims == dsbot2.dims
+    assert isinstance(dsbot1.geometry, GeometryFM)
+    assert dsbot1.geometry._type == dsbot2.geometry._type
+    assert np.all(dsbot1.values == dsbot2.values)
+    assert dsbot1.geometry.max_nodes_per_element <= 4
+
+
+def test_read_single_step_bottom_layer():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read(time=-1)  # Last timestep
+    dsbot1 = ds.sel(layer="bottom")
+
+
+def test_read_multiple_layers():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read()  # all data in file
+    dstop1 = ds.sel(layer=[-3, -2, -1])
+
+    dstop2 = dfs.read(layers=[-3, -2, -1])
+    assert dstop1.shape == dstop2.shape
+    assert dstop1.dims == dstop2.dims
+    assert isinstance(dstop1.geometry, GeometryFM3D)
+    assert dstop1.geometry._type == dstop2.geometry._type
+    assert np.all(dstop1.values == dstop2.values)
+    assert dstop1.geometry.max_nodes_per_element >= 6
 
 
 def test_read_dfsu3d_area():
@@ -130,6 +176,7 @@ def test_read_column_select_single_time_plot():
     dsp = dfs.read(x=x, y=y)
     sal_prof = dsp.Salinity.isel(time=0)
     sal_prof.plot()
+    sal_prof.plot.line()
 
 
 def test_read_column_interp_time_and_select_time():

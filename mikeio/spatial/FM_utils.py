@@ -8,8 +8,9 @@ def _plot_map(
     element_table,
     element_coordinates,
     boundary_polylines,
-    is_geo,
+    projection="",
     z=None,
+    elements=None,
     plot_type="patch",
     title=None,
     label=None,
@@ -33,7 +34,7 @@ def _plot_map(
     element_table,
     element_coordinates,
     boundary_polylines,
-    is_geo,
+    projection,
     z: np.array or a Dataset with a single item, optional
         value for each element to plot, default bathymetry
     elements: list(int), optional
@@ -134,12 +135,21 @@ def _plot_map(
         if not plot_data:
             print(f"Cannot plot data in {plot_type} plot!")
 
+
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
     ):
         raise ValueError(
             "vmin/vmax cannot be provided together with non-integer levels"
         )
+
+    if elements is not None:
+        if plot_type.startswith("contour"):
+            raise ValueError("elements argument not possible with contour plots")
+        newz = np.full_like(z, fill_value=np.nan)
+        newz[elements] = z[elements]
+        z = newz
+
 
     if plot_data and vmin is None:
         vmin = np.nanmin(z)
@@ -179,11 +189,14 @@ def _plot_map(
         fig, ax = plt.subplots(figsize=figsize)
 
     # set aspect ratio
+    is_geo = projection == "LONG/LAT"
     if is_geo:
         mean_lat = np.mean(nc[:, 1])
         ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
     else:
         ax.set_aspect("equal")
+
+    _set_xy_label_by_projection(ax, projection)
 
     # set plot limits
     xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
@@ -380,6 +393,18 @@ def _plot_map(
         ax.set_title(title)
 
     return ax
+
+
+def _set_xy_label_by_projection(ax, projection):
+    if (not projection) or projection == "NON-UTM":
+        ax.set_xlabel("x [m]")
+        ax.set_ylabel("y [m]")
+    elif projection == "LONG/LAT":
+        ax.set_xlabel("Longitude [degrees]")
+        ax.set_ylabel("Latitude [degrees]")
+    else:
+        ax.set_xlabel("Easting [m]")
+        ax.set_ylabel("Northing [m]")
 
 
 def _is_tri_only(element_table):

@@ -278,18 +278,18 @@ def test_get_overset_grid():
     assert g.ny == 10
 
     g = dfs.get_overset_grid(dx=0.2)
-    assert g.dx == 0.2
-    assert g.dy == 0.2
+    assert pytest.approx(g.dx) == 0.2
+    assert pytest.approx(g.dy) == 0.2
 
-    g = dfs.get_overset_grid(dx=(0.4, 0.2))
-    assert g.dx == 0.4
-    assert g.dy == 0.2
+    g = dfs.get_overset_grid(dx=0.4, dy=0.2)
+    assert pytest.approx(g.dx) == 0.4
+    assert pytest.approx(g.dy) == 0.2
 
-    g = dfs.get_overset_grid(shape=(5, 4))
+    g = dfs.get_overset_grid(nx=5, ny=4)
     assert g.nx == 5
     assert g.ny == 4
 
-    g = dfs.get_overset_grid(shape=(None, 5))
+    g = dfs.get_overset_grid(ny=5)
     assert g.nx == 11
     assert g.ny == 5
 
@@ -795,6 +795,7 @@ def test_elements_to_geometry():
     assert not hasattr(geom, "n_layers")
     assert geom.n_elements == len(elements)
 
+    elements = dfs.get_layer_elements(layer=[-2, -1])
     with pytest.raises(Exception):
         geom = dfs.elements_to_geometry(elements, node_layers="center")
 
@@ -828,7 +829,7 @@ def test_interp2d():
     ds = dfs.read(items=["Wind speed"])
     nt = ds.n_timesteps
 
-    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
     interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
     dsi = dfs.interp2d(ds, *interpolant)
 
@@ -843,7 +844,7 @@ def test_interp2d_radius():
     ds = dfs.read(items=["Wind speed"])
     nt = ds.n_timesteps
 
-    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
     interpolant = dfs.get_2d_interpolant(
         g.xy, extrapolate=True, n_nearest=1, radius=0.1
     )
@@ -858,7 +859,7 @@ def test_interp2d_reshaped():
     ds = dfs.read(items=["Wind speed"], time=[0, 1])
     nt = ds.n_timesteps
 
-    g = dfs.get_overset_grid(shape=(20, 10), buffer=-1e-2)
+    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
     interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
     dsi = dfs.interp2d(ds, *interpolant, shape=(g.ny, g.nx))
 

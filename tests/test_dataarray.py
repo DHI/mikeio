@@ -42,7 +42,7 @@ def da2():
         data=np.zeros([nt, nx]) + 0.1,
         time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
         item=ItemInfo("Foo"),
-        geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+        geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
     )
 
     return da
@@ -91,10 +91,23 @@ def da_time_space():
         data=np.zeros(shape=(nt, 2), dtype=float),
         time=time,
         item=ItemInfo(name="Foo"),
-        geometry=mikeio.Grid1D(n=2, dx=1.0),
+        geometry=mikeio.Grid1D(nx=2, dx=1.0),
     )
 
     return da
+
+
+def test_concat_dataarray_by_time():
+    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
+    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
+    da3 = mikeio.DataArray.concat([da1, da2])
+
+    assert da3.start_time == da1.start_time
+    assert da3.start_time < da2.start_time
+    assert da3.end_time == da2.end_time
+    assert da3.end_time > da1.end_time
+    assert da3.n_timesteps == 145
+    assert da3.is_equidistant
 
 
 def test_verify_custom_dims():
@@ -107,7 +120,7 @@ def test_verify_custom_dims():
             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
             item=ItemInfo("Foo"),
             dims=("space", "ensemble"),  # no time!
-            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
         )
     assert "time" in str(excinfo.value)
 
@@ -117,7 +130,7 @@ def test_verify_custom_dims():
             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
             item=ItemInfo("Foo"),
             dims=("time", "x", "ensemble"),  # inconsistent with data
-            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
         )
     assert "number" in str(excinfo.value).lower()
 
@@ -296,7 +309,7 @@ def test_dataarray_init_grid1d():
     nx = 5
     time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     data = np.zeros([nt, nx]) + 0.1
-    g = mikeio.Grid1D(n=nx, dx=1.0)
+    g = mikeio.Grid1D(nx=nx, dx=1.0)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
     assert da.ndim == 2
     assert da.dims == ("time", "x")
@@ -552,6 +565,15 @@ def test_dataarray_grid2d_indexing_error(da_grid2d):
         da_grid2d[14:18]
     with pytest.raises(IndexError):
         da_grid2d[3, :, 100]
+
+
+def test_dropna(da2):
+    da2[8:] = np.nan
+
+    da3 = da2.dropna()
+
+    assert da2.n_timesteps == 10
+    assert da3.n_timesteps == 8
 
 
 def test_da_isel_space(da_grid2d):
@@ -999,10 +1021,10 @@ def test_daarray_aggregation_nan_versions():
 
 
 def test_da_quantile_axis0(da2):
-    assert da2.geometry.n == 7
+    assert da2.geometry.nx == 7
     assert len(da2.time) == 10
     daq = da2.quantile(q=0.345, axis="time")
-    assert daq.geometry.n == 7
+    assert daq.geometry.nx == 7
     assert len(da2.time) == 10  # this should not change
     assert len(daq.time) == 1  # aggregated
 

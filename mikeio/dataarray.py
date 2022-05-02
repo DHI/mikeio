@@ -17,7 +17,6 @@ from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .spatial.FM_geometry import (
     _GeometryFMLayered,
     GeometryFM,
-    GeometryFM3D,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
@@ -171,7 +170,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         pos = ax.contour(x, y, values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
-        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
+        self._set_aspect_and_labels(ax, self.da.geometry, y)
         return ax
 
     def contourf(self, ax=None, figsize=None, **kwargs):
@@ -182,7 +181,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
         pos = ax.contourf(x, y, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
-        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, y)
+        self._set_aspect_and_labels(ax, self.da.geometry, y)
         return ax
 
     def pcolormesh(self, ax=None, figsize=None, **kwargs):
@@ -193,26 +192,31 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
         pos = ax.pcolormesh(xn, yn, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
-        self._set_aspect_and_labels(ax, self.da.geometry.is_geo, yn)
+        self._set_aspect_and_labels(ax, self.da.geometry, yn)
         return ax
 
     def _get_x_y(self):
         x = self.da.geometry.x
         y = self.da.geometry.y
-        # x = x + self.da.geometry._origin[0] # TODO WTF?
-        # y = y + self.da.geometry._origin[1] # TODO
         return x, y
 
     def _get_xn_yn(self):
         xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
         yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
-        # xn = xn + self.da.geometry._origin[0] # TODO
-        # yn = yn + self.da.geometry._origin[1] # TODO
         return xn, yn
 
     @staticmethod
-    def _set_aspect_and_labels(ax, is_geo, y):
-        if is_geo:
+    def _set_aspect_and_labels(ax, geometry, y):
+        if geometry.is_spectral:
+            ax.set_xlabel("Frequency [Hz]")
+            ax.set_ylabel("Directions [degree]")
+        elif geometry._is_rotated:
+            ax.set_xlabel("[m]")
+            ax.set_ylabel("[m]")
+        elif geometry.projection == "NON-UTM":
+            ax.set_xlabel("[m]")
+            ax.set_ylabel("[m]")
+        elif geometry.is_geo:
             ax.set_xlabel("Longitude [degrees]")
             ax.set_ylabel("Latitude [degrees]")
             mean_lat = np.mean(y)
@@ -275,7 +279,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
             element_table=geometry.element_table,
             element_coordinates=geometry.element_coordinates,
             boundary_polylines=geometry.boundary_polylines,
-            is_geo=geometry.is_geo,
+            projection=geometry.projection,
             z=values,
             ax=ax,
             **kwargs,
@@ -288,13 +292,13 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
     def __call__(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
-        return self.lines(ax, **kwargs)
+        return self.line(ax, **kwargs)
 
-    def lines(self, ax=None, figsize=None, extrapolate=True, **kwargs):
+    def line(self, ax=None, figsize=None, extrapolate=True, **kwargs):
         ax = self._get_ax(ax, figsize)
-        return self._lines(ax, extrapolate=extrapolate, **kwargs)
+        return self._line(ax, extrapolate=extrapolate, **kwargs)
 
-    def _lines(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
+    def _line(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
         import matplotlib.pyplot as plt
 
         if "title" in kwargs:
@@ -492,7 +496,7 @@ class _DataArraySpectrumToHm0:
             geometry = GeometryPoint2D(x=g.x, y=g.y)
         elif isinstance(g, GeometryFMLineSpectrum):
             geometry = Grid1D(
-                n=g.n_nodes,
+                nx=g.n_nodes,
                 dx=1.0,
                 node_coordinates=g.node_coordinates,
                 axis_name="node",
@@ -666,7 +670,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 ), "data shape does not match number of elements"
         elif isinstance(geometry, Grid1D):
             assert (
-                shape[axis] == geometry.n
+                shape[axis] == geometry.nx
             ), "data shape does not match number of grid points"
         elif isinstance(geometry, Grid2D):
             assert shape[axis] == geometry.ny, "data shape does not match ny"
@@ -832,6 +836,23 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     def to_numpy(self) -> np.ndarray:
         return self._values
+
+    @property
+    def _has_time_axis(self):
+        return self.dims[0][0] == "t"
+
+    def dropna(self) -> "DataArray":
+        """Remove time steps where values are NaN"""
+        if not self._has_time_axis:
+            raise ValueError("Not available if no time axis!")
+
+        x = self.to_numpy()
+
+        # this seems overly complicated...
+        axes = tuple(range(1, x.ndim))
+        idx = np.where(~np.isnan(x).all(axis=axes))
+        idx = list(idx[0])
+        return self.isel(idx, axis=0)
 
     def flipud(self) -> "DataArray":
         """Flip upside down"""
@@ -1041,11 +1062,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 idx = da.geometry.get_layer_elements(layer)
                 da = da.isel(idx, axis="space")
             elif isinstance(da.geometry, Grid3D):
-                layer = kwargs.pop("layer")
                 raise NotImplementedError(
                     f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}'"
                 )
-
             else:
                 raise ValueError("'layer' can only be selected from layered Dfsu data")
 
@@ -1252,6 +1271,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
             dai = dai.interp_time(other.time)
 
         return dai
+
+    @staticmethod
+    def concat(dataarrays: Sequence["DataArray"], keep="last") -> "DataArray":
+        from mikeio import Dataset
+
+        datasets = [Dataset([da]) for da in dataarrays]
+
+        ds = Dataset.concat(datasets, keep=keep)
+
+        return ds[0]
 
     # ============= Aggregation methods ===========
 

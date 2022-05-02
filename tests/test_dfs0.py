@@ -660,3 +660,14 @@ def test_read_write_eum(tmp_path):
     ds2 = mikeio.read(outfilename)
     assert ds2["ST 2: WL (m)"].type == EUMType.Water_Level
     assert ds2["ST 2: WL (m)"].unit == EUMUnit.meter
+
+
+def test_read_write_single_step(tmp_path):
+
+    ds = mikeio.read("tests/testdata/waterlevel_viken.dfs0", time=-1)
+    outfilename = tmp_path / "last_step.dfs0"
+    ds.to_dfs(outfilename)
+
+    dsnew = mikeio.read(outfilename)
+    assert dsnew.n_timesteps == 1
+    assert dsnew[0].to_numpy() == pytest.approx(-0.08139999955892563)

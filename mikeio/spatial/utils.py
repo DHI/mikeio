@@ -1,4 +1,17 @@
 import numpy as np
+from .geometry import BoundingBox
+
+
+def xy_to_bbox(xy, buffer=None):
+    """return bounding box for list of coordinates"""
+    if buffer is None:
+        buffer = 0
+
+    left = xy[:, 0].min() - buffer
+    bottom = xy[:, 1].min() - buffer
+    right = xy[:, 0].max() + buffer
+    top = xy[:, 1].max() + buffer
+    return BoundingBox(left, bottom, right, top)
 
 
 def dist_in_meters(coords, pt, is_geo=False):
