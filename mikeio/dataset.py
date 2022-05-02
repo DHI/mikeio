@@ -1029,11 +1029,18 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return ds
 
     def append(self, other, inplace=False):
-        # TODO: require other da
+        warnings.warn(
+            "Dataframe.append is deprecated, use Dataframe.merge([ds1, ds2]) instead",
+            FutureWarning,
+        )
         return self.append_items(other, inplace)
 
     def append_items(self, other, inplace=False):
         """Append items from other Dataset to this Dataset"""
+        warnings.warn(
+            "Dataframe.append_items is deprecated, use Dataframe.merge([ds1, ds2]) instead",
+            FutureWarning,
+        )
         if inplace:
             self._append_items(other, copy=False)
         else:

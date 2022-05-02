@@ -320,6 +320,11 @@ class Dfs2(_Dfs123):
 
         (int,int): indexes in y, x
         """
+
+        warnings.warn(
+            "find_nearest_elements is deprecated, use .geometry.find_index instead",
+            FutureWarning,
+        )
         projection = self._dfs.FileInfo.Projection
         axis = self._dfs.SpatialAxis
         cart = Cartography(
@@ -532,6 +537,12 @@ class Dfs2(_Dfs123):
         >>> elevation = ds['Elevation']
         >>> dfs.plot(elevation[0], cmap='jet')
         """
+
+        warnings.warn(
+            "Dfs2.plot() is deprecated, use DataArray.plot() instead",
+            FutureWarning,
+        )
+
         import matplotlib.pyplot as plt
         import matplotlib.cm as cm
 
