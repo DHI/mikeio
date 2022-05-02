@@ -213,22 +213,22 @@ def test_find_index():
     g = Grid2D(bbox=bbox, dx=0.2)
     xy1 = [0.52, 1.52]
     xy2 = [1.5, 0.5]
-    i1, j1 = g.find_index(xy1)
+    i1, j1 = g.find_index(coords=xy1)
     assert i1 == 2
     assert j1 == 7
-    i2, j2 = g.find_index(xy2)
+    i2, j2 = g.find_index(coords=xy2)
     assert i2 == -1
     assert j2 == -1
 
     xy = np.vstack([xy1, xy2])
-    ii, jj = g.find_index(xy)
+    ii, jj = g.find_index(coords=xy)
     assert ii[0] == i1
     assert ii[1] == i2
     assert jj[0] == j1
     assert jj[1] == j2
 
     xy = np.vstack([xy1, xy2, xy2])
-    ii, jj = g.find_index(xy)
+    ii, jj = g.find_index(coords=xy)
     assert ii[0] == i1
     assert jj[0] == j1
     assert ii[2] == i2
