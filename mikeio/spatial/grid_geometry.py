@@ -470,6 +470,19 @@ class Grid2D(_Geometry):
         """n-by-2 array of x- and y-coordinates"""
         return self.xy
 
+    def shift_x0y0_to_origin(self):
+        """Shift spatial axis to start at (0,0) adding the start to origin instead
+        Note: this will note change the x or y properties.
+        """
+        if self._is_rotated:
+            raise ValueError("Only possible if orientation = 0")
+        if self.is_spectral:
+            raise ValueError("Not possible for spectral Grid2D")
+        x0, y0 = self.x0, self.y0
+        self._x_local -= x0
+        self._y_local -= y0
+        self._origin = (self._origin[0] + x0, self._origin[1] + y0)
+
     def contains(self, xy):
         """test if a list of points are inside grid
 
