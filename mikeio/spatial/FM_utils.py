@@ -146,7 +146,7 @@ def _plot_map(
     if plot_data and vmax is None:
         vmax = np.nanmax(z)
 
-    if vmin == vmax:
+    if plot_data and vmin == vmax:
         vmin = vmin - 0.1
         vmax = vmin + 0.2
 
