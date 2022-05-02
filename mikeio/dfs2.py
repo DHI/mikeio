@@ -86,10 +86,10 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
         factory.CreateAxisEqD2(
             eumUnit.eumUmeter,
             geometry.nx,
-            geometry._x_local[0],
+            geometry.x0,
             geometry.dx,
             geometry.ny,
-            geometry._y_local[0],
+            geometry.y0,
             geometry.dy,
         )
     )

@@ -19,12 +19,15 @@ def _check_equidistant(x: np.ndarray) -> None:
         raise NotImplementedError("values must be equidistant")
 
 
-def _parse_grid_axis(name, x, x0, dx, nx):
+def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
     if x is not None:
         x = np.asarray(x)
         _check_equidistant(x)
         if len(x) > 1 and x[0] > x[-1]:
             raise ValueError("{name} values must be increasing")
+        x0 = x[0]
+        dx = x[1] - x[0] if len(x) > 1 else 1.0
+        nx = len(x)
     else:
         if nx is None:
             raise ValueError(f"n{name} must be provided")
@@ -32,9 +35,7 @@ def _parse_grid_axis(name, x, x0, dx, nx):
             raise ValueError(f"d{name} must be provided")
         if dx <= 0:
             raise ValueError(f"d{name} must be positive")
-        x1 = x0 + dx * (nx - 1)
-        x = np.linspace(x0, x1, nx)
-    return x
+    return x0, dx, nx
 
 
 class Grid1D(_Geometry):
@@ -59,21 +60,7 @@ class Grid1D(_Geometry):
         self._projstr = projection  # TODO handle other types than string
         self._origin = origin
         self._orientation = orientation
-
-        if x is not None:
-            x = np.asarray(x)
-            _check_equidistant(x)
-            if len(x) > 1 and x[0] > x[-1]:
-                raise ValueError("x values must be increasing")
-
-            self._x = x
-        else:
-            if nx is None:
-                raise ValueError("n must be provided")
-            if dx is None:
-                raise ValueError("dx must be provided")
-            x1 = x0 + dx * (nx - 1)
-            self._x = np.linspace(x0, x1, nx)
+        self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
 
         if node_coordinates is not None and len(node_coordinates) != self.nx:
             raise ValueError("Length of node_coordinates must be n")
@@ -114,17 +101,18 @@ class Grid1D(_Geometry):
     @property
     def dx(self) -> float:
         """grid spacing"""
-        return self.x[1] - self.x[0] if len(self.x) > 1 else 1.0
+        return self._dx
 
     @property
     def x(self):
         """array of node coordinates"""
-        return self._x
+        x1 = self.x0 + self.dx * (self.nx - 1)
+        return np.linspace(self.x0, x1, self.nx)
 
     @property
     def x0(self) -> float:
         """left end-point"""
-        return self.x[0]
+        return self._x0
 
     @property
     def x1(self) -> float:
@@ -134,7 +122,7 @@ class Grid1D(_Geometry):
     @property
     def nx(self) -> int:
         """number of grid points"""
-        return len(self._x)
+        return self._nx
 
     @property
     def origin(self) -> Tuple[float, float]:
@@ -205,9 +193,9 @@ class Grid2D(_Geometry):
                 raise ValueError("x0,y0 cannot be provided together with bbox")
             self._create_in_bbox(bbox, dx=dx, dy=dy, nx=nx, ny=ny)
         else:
-            self._x_local = _parse_grid_axis("x", x, x0, dx, nx)
-            dy = dx if dy is None else dy
-            self._y_local = _parse_grid_axis("y", y, y0, dy, ny)
+            self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
+            dy = self._dx if dy is None else dy
+            self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
 
         self._x_logarithmic = False
         self._is_spectral = is_spectral
@@ -218,19 +206,18 @@ class Grid2D(_Geometry):
 
     @is_spectral.setter
     def is_spectral(self, value):
-        if self._is_spectral and (not value) and self._x_logarithmic:
-            raise ValueError(
-                "is_spectral cannot be unset when frequency axis is logarithmic!"
-            )
+        if self._is_spectral and (not value):
+            self._is_spectral = False
+            self._x_logarithmic = False
         if (not self._is_spectral) and value:
             self._is_spectral = True
             self._x_logarithmic = self.dx > 1.0
-            f = (
-                self.logarithmic_f(self.nx, self.x0, self.dx)
-                if self._x_logarithmic
-                else self._x_local
-            )
-            self._x_local = f
+            # f = (
+            #     self.logarithmic_f(self.nx, self.x0, self.dx)
+            #     if self._x_logarithmic
+            #     else self._x_local
+            # )
+            # self._x_local = f
 
     @property
     def _is_rotated(self):
@@ -277,8 +264,8 @@ class Grid2D(_Geometry):
             dx, dy = dx
         dy = dx if dy is None else dy
 
-        self._x_local = self._create_in_bbox_1d("x", left, right, dx, nx)
-        self._y_local = self._create_in_bbox_1d("y", bottom, top, dy, ny)
+        self._x0, self._dx, self._nx = self._create_in_bbox_1d("x", left, right, dx, nx)
+        self._y0, self._dy, self._ny = self._create_in_bbox_1d("y", bottom, top, dy, ny)
 
     @staticmethod
     def _parse_bbox(bbox):
@@ -317,8 +304,7 @@ class Grid2D(_Geometry):
         else:
             raise ValueError(f"Provide either d{axname} or n{axname}")
         x0 = left + dx / 2
-        x1 = right - dx / 2
-        return np.linspace(x0, x1, nx)
+        return x0, dx, nx
 
     def __repr__(self):
         out = []
@@ -343,22 +329,35 @@ class Grid2D(_Geometry):
         return idx_x, idx_y
 
     @property
+    def x0(self) -> float:
+        return self._x0
+
+    @property
+    def y0(self) -> float:
+        return self._y0
+
+    @property
     def dx(self) -> float:
         """x grid spacing"""
-        return self.x[1] - self.x[0] if self.nx > 1 else 1.0
+        return self._dx
 
     @property
     def dy(self) -> float:
         """y grid spacing"""
-        return self.y[1] - self.y[0] if self.ny > 1 else 1.0
+        return self._dy
 
     @property
     def x(self):
         """array of x coordinates (element center)"""
-        if self._is_rotated or self.is_spectral:
-            return self._x_local
+        if self.is_spectral:
+            return self.logarithmic_f(self.nx, self.x0, self.dx)
+
+        x1 = self.x0 + self.dx * (self.nx - 1)
+        x_local = np.linspace(self.x0, x1, self.nx)
+        if self._is_rotated:
+            return x_local
         else:
-            return self._x_local + self._origin[0]
+            return x_local + self._origin[0]
 
     @staticmethod
     def logarithmic_f(n=25, f0=0.055, freq_factor=1.1):
@@ -386,17 +385,19 @@ class Grid2D(_Geometry):
     @property
     def y(self):
         """array of y coordinates (element center)"""
-        return self._y_local if self._is_rotated else self._y_local + self._origin[1]
+        y1 = self.y0 + self.dy * (self.ny - 1)
+        y_local = np.linspace(self.y0, y1, self.ny)
+        return y_local if self._is_rotated else y_local + self._origin[1]
 
     @property
     def x0(self):
         """x starting point"""
-        return self.x[0]
+        return self._x0
 
     @property
     def y0(self) -> float:
         """y starting point"""
-        return self.y[0]
+        return self._y0
 
     @property
     def x1(self) -> float:
@@ -411,12 +412,12 @@ class Grid2D(_Geometry):
     @property
     def nx(self) -> int:
         """number of x grid points"""
-        return len(self.x)
+        return self._nx
 
     @property
     def ny(self) -> int:
         """number of y grid points"""
-        return len(self.y)
+        return self._ny
 
     @property
     def origin(self) -> Tuple[float, float]:
@@ -480,8 +481,7 @@ class Grid2D(_Geometry):
         if self.is_spectral:
             raise ValueError("Not possible for spectral Grid2D")
         x0, y0 = self.x0, self.y0
-        self._x_local -= x0
-        self._y_local -= y0
+        self._x0, self._y0 = 0.0, 0.0
         self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
     def contains(self, xy):
@@ -709,9 +709,9 @@ class Grid3D(_Geometry):
     ) -> None:
 
         super().__init__()
-        self._x = _parse_grid_axis("x", x, x0, dx, nx)
-        self._y = _parse_grid_axis("y", y, y0, dy, ny)
-        self._z = _parse_grid_axis("z", z, z0, dz, nz)
+        self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
+        self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
+        self._z0, self._dz, self._nz = _parse_grid_axis("z", z, z0, dz, nz)
 
         self._projstr = projection  # TODO handle other types than string
         self._origin = origin
@@ -720,53 +720,65 @@ class Grid3D(_Geometry):
     @property
     def x(self):
         """array of x-axis node coordinates"""
-        return self._x
+        x1 = self.x0 + self.dx * (self.nx - 1)
+        return np.linspace(self.x0, x1, self.nx)
+
+    @property
+    def x0(self) -> float:
+        return self._x0
+
+    @property
+    def y0(self) -> float:
+        return self._y0
+
+    @property
+    def z0(self) -> float:
+        return self._z0
 
     @property
     def dx(self) -> float:
         """x-axis grid spacing"""
-        x = self.x
-        return x[1] - x[0] if len(x) > 1 else 1.0
+        return self._dx
 
     @property
     def nx(self):
         """number of x-axis nodes"""
-        return len(self.x)
+        return self._nx
 
     @property
     def y(self):
         """array of y-axis node coordinates"""
-        return self._y
+        y1 = self.y0 + self.dy * (self.ny - 1)
+        return np.linspace(self.y0, y1, self.ny)
 
     @property
     def dy(self) -> float:
         """y-axis grid spacing"""
-        y = self.y
-        return y[1] - y[0] if len(y) > 1 else 1.0
+        return self._dy
 
     @property
     def ny(self):
         """number of y-axis nodes"""
-        return len(self.y)
+        return self._ny
 
     @property
     def z(self):
         """array of z-axis node coordinates"""
-        return self._z
+        z1 = self.z0 + self.dz * (self.nz - 1)
+        return np.linspace(self.z0, z1, self.nz)
 
     @property
     def dz(self) -> float:
         """z-axis grid spacing"""
-        z = self.z
-        return z[1] - z[0] if len(z) > 1 else 1.0
+        return self._dz
 
     @property
     def nz(self):
         """number of z-axis nodes"""
-        return len(self.z)
+        return self._nz
 
     def find_index(self, coords):
-        pass
+        raise NotImplementedError()
 
     def isel(self, idx, axis):
         if not np.isscalar(idx):
