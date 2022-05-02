@@ -1405,10 +1405,10 @@ class _GeometryFMLayered(GeometryFM):
             self._top_elems = self._findTopLayerElements(self.element_table)
         return self._top_elems
 
-    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layer=None):
+    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
 
-        if layer is not None:
-            idx = self.get_layer_elements(layer)
+        if layers is not None:
+            idx = self.get_layer_elements(layers)
         else:
             idx = self.element_ids
 
@@ -1438,9 +1438,9 @@ class _GeometryFMLayered(GeometryFM):
         elif area is not None:
             idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)
-        elif layer is None:
+        elif layers is None:
             raise ValueError(
-                "At least one selection argument (x,y,z,coords,area,layer) needs to be provided!"
+                "At least one selection argument (x,y,z,coords,area,layers) needs to be provided!"
             )
         return idx
 
@@ -1533,12 +1533,12 @@ class _GeometryFMLayered(GeometryFM):
             self._bot_elems = self.top_elements - self.n_layers_per_column + 1
         return self._bot_elems
 
-    def get_layer_elements(self, layer):
+    def get_layer_elements(self, layers, layer=None):
         """3d element ids for one (or more) specific layer(s)
 
         Parameters
         ----------
-        layer : int or list(int)
+        layers : int or list(int)
             layer between 0 (bottom) and n_layers-1 (top)
             (can also be negative counting from -1 at the top layer)
 
@@ -1547,20 +1547,27 @@ class _GeometryFMLayered(GeometryFM):
         np.array(int)
             element ids
         """
-        if isinstance(layer, str):
-            if layer in ("surface", "top"):
+        if layer is not None:
+            warnings.warn(
+                "layer argument is deprecated, use layers instead",
+                FutureWarning,
+            )
+            layers = layer
+
+        if isinstance(layers, str):
+            if layers in ("surface", "top"):
                 return self.top_elements
-            elif layer in ("bottom"):
+            elif layers in ("bottom"):
                 return self.bottom_elements
             else:
                 raise ValueError(
-                    f"layer '{layer}' not recognized ('top', 'bottom' or integer)"
+                    f"layers '{layers}' not recognized ('top', 'bottom' or integer)"
                 )
 
-        if not np.isscalar(layer):
+        if not np.isscalar(layers):
             elem_ids = []
-            for nn in layer:
-                elem_ids.append(self.get_layer_elements(nn))
+            for layer in layers:
+                elem_ids.append(self.get_layer_elements(layer))
             elem_ids = np.concatenate(elem_ids, axis=0)
             return np.sort(elem_ids)
 
@@ -1568,15 +1575,15 @@ class _GeometryFMLayered(GeometryFM):
         if n_lay is None:
             raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
 
-        if layer < (-n_lay) or layer >= n_lay:
+        if layers < (-n_lay) or layers >= n_lay:
             raise Exception(
-                f"Layer {layer} not allowed; must be between -{n_lay} and {n_lay-1}"
+                f"Layer {layers} not allowed; must be between -{n_lay} and {n_lay-1}"
             )
 
-        if layer < 0:
-            layer = layer + n_lay
+        if layers < 0:
+            layers = layers + n_lay
 
-        return self.element_ids[self.layer_ids == layer]
+        return self.element_ids[self.layer_ids == layers]
 
     @property
     def e2_e3_table(self):
@@ -1669,7 +1676,7 @@ class _GeometryFMLayered(GeometryFM):
                         print(f"Layer {layer} not present for 2d element {elem2d[j]}")
             else:
                 # sigma layer
-                idx = self.get_layer_elements(layer=layer)[elem2d]
+                idx = self.get_layer_elements(layer)[elem2d]
 
         else:
             raise ValueError("layer and z cannot both be supplied!")
@@ -1890,10 +1897,10 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         idx = np.argmin(dd2)
         return self.relative_element_distance[idx]
 
-    def find_index(self, x=None, y=None, z=None, coords=None, layer=None):
+    def find_index(self, x=None, y=None, z=None, coords=None, layers=None):
 
-        if layer is not None:
-            idx = self.get_layer_elements(layer)
+        if layers is not None:
+            idx = self.get_layer_elements(layers)
         else:
             idx = self.element_ids
 

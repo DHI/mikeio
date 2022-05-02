@@ -817,7 +817,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         Examples
         --------
-        ds.sel(layer='bottom')
+        ds.sel(layers='bottom')
         ds.sel(x=1.0, y=55.0)
         ds.sel(area=[1., 12., 2., 15.])
         """
