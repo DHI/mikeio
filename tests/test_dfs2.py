@@ -12,10 +12,7 @@ import mikeio
 from mikeio.dataset import Dataset
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
-from mikeio.custom_exceptions import (
-    DataDimensionMismatch,
-    ItemsError,
-)
+from mikeio.custom_exceptions import ItemsError
 from mikeio.spatial.geometry import GeometryPoint2D
 from mikeio.spatial.grid_geometry import Grid2D
 
@@ -44,10 +41,10 @@ def dfs2_gebco():
     return Dfs2(filepath)
 
 
-@pytest.fixture
-def dfs2_gebco_rotate():
-    filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
-    return Dfs2(filepath)
+# @pytest.fixture
+# def dfs2_gebco_rotate():
+#     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
+#     return Dfs2(filepath)
 
 
 def test_simple_write(tmp_path):
@@ -135,8 +132,8 @@ def test_write_single_item(tmpdir):
 
     newdfs = Dfs2(filename)
     assert newdfs.projection_string == "UTM-33"
-    assert pytest.approx(newdfs.longitude) == 12.0
-    assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.longitude == 12.0
+    assert newdfs.latitude == 55.0
     assert newdfs.dx == 100.0
     assert newdfs.dy == 200.0
 
@@ -175,15 +172,57 @@ def test_write_projected(tmpdir):
     ds = mikeio.read(filename)
     assert ds.geometry.dx == 100
     assert ds.geometry.dy == 100
-    assert ds.geometry.x0 == x0
-    assert ds.geometry.y0 == y0
+    # shifted x0y0 to origin as not provided in construction of Grid2D
+    assert ds.geometry.x0 == 0.0
+    assert ds.geometry.y0 == 0.0
+    assert ds.geometry.origin[0] == pytest.approx(x0)
+    assert ds.geometry.origin[1] == pytest.approx(y0)
+
+    grid = Grid2D(
+        nx=nx,
+        ny=ny,
+        x0=x0,
+        y0=y0,
+        dx=100,
+        dy=100,
+        projection="UTM-33",
+        origin=(0.0, 0.0),
+    )
+    da = mikeio.DataArray(
+        data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
+    )
+    da.to_dfs(filename)
+
+    ds2 = mikeio.read(filename)
+    assert ds2.geometry.dx == 100
+    assert ds2.geometry.dy == 100
+    # NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
+    assert ds2.geometry.x0 == pytest.approx(x0)
+    assert ds2.geometry.y0 == pytest.approx(y0)
+    assert ds2.geometry.origin[0] == 0.0
+    assert ds2.geometry.origin[1] == 0.0
+
+    grid = Grid2D(nx=nx, ny=ny, origin=(x0, y0), dx=100, dy=100, projection="UTM-33")
+    da = mikeio.DataArray(
+        data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
+    )
+    da.to_dfs(filename)
+
+    ds3 = mikeio.read(filename)
+    assert ds3.geometry.dx == 100
+    assert ds3.geometry.dy == 100
+    # shifted x0y0 to origin as not provided in construction of Grid2D
+    assert ds3.geometry.x0 == 0.0
+    assert ds3.geometry.y0 == 0.0
+    assert ds3.geometry.origin[0] == pytest.approx(x0)
+    assert ds3.geometry.origin[1] == pytest.approx(y0)
 
 
 def test_read(dfs2_random):
 
     dfs = dfs2_random
     ds = dfs.read(items=["testing water level"])
-    data = ds.data[0]
+    data = ds[0].to_numpy()
     assert data[0, 88, 0] == 0
     assert np.isnan(data[0, 89, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
@@ -233,7 +272,7 @@ def test_read_numbered_access(dfs2_random_2items):
 
     res = dfs.read(items=[1])
 
-    assert np.isnan(res.data[0][0, 0, 0])
+    assert np.isnan(res[0].to_numpy()[0, 0, 0])
     assert res.time is not None
     assert res.items[0].name == "Untitled"
 
@@ -263,19 +302,21 @@ def test_dir_wave_spectra_relative_time_axis():
     assert da.type == EUMType._3D_Surface_Elevation_Spectrum
 
 
-def test_properties_rotated(dfs2_gebco_rotate):
-    dfs = dfs2_gebco_rotate
-    assert dfs.x0 == 0
-    assert dfs.y0 == 0
-    assert dfs.dx == pytest.approx(0.00416667)
-    assert dfs.dy == pytest.approx(0.00416667)
-    assert dfs.nx == 140
-    assert dfs.ny == 150
-    assert dfs.longitude == pytest.approx(12.2854167)
-    assert dfs.latitude == pytest.approx(55.3270833)
-    assert dfs.orientation == 45
-    assert dfs.n_items == 1
-    assert dfs.n_timesteps == 1
+def test_properties_rotated():
+    filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
+    with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"):
+        Dfs2(filepath)
+    # assert dfs.x0 == 0
+    # assert dfs.y0 == 0
+    # assert dfs.dx == pytest.approx(0.00416667)
+    # assert dfs.dy == pytest.approx(0.00416667)
+    # assert dfs.nx == 140
+    # assert dfs.ny == 150
+    # assert dfs.longitude == pytest.approx(12.2854167)
+    # assert dfs.latitude == pytest.approx(55.3270833)
+    # assert dfs.orientation == 45
+    # assert dfs.n_items == 1
+    # assert dfs.n_timesteps == 1
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
@@ -339,7 +380,7 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmpdir):
 
     ds = dfs.read()
 
-    ds.data[0] = ds.data[0] + 10.0
+    ds[0] = ds[0] + 10.0
 
     dfs.write(outfilename, ds)
 
@@ -353,7 +394,7 @@ def test_read_some_time_step(dfs2_random_2items):
     dfs = dfs2_random_2items
     res = dfs.read(time=[1, 2])
 
-    assert res.data[0].shape[0] == 2
+    assert res[0].to_numpy().shape[0] == 2
     assert len(res.time) == 2
 
 
@@ -526,8 +567,8 @@ def test_write_NonEqCalendarAxis(tmpdir):
 
     newdfs = Dfs2(filename)
     assert newdfs.projection_string == "UTM-33"
-    assert pytest.approx(newdfs.longitude) == 12.0
-    assert pytest.approx(newdfs.latitude) == 55.0
+    assert newdfs.longitude == 12.0
+    assert newdfs.latitude == 55.0
     assert newdfs.dx == 100.0
     assert newdfs.dy == 200.0
     assert newdfs._is_equidistant == False
@@ -661,3 +702,82 @@ def test_read_single_precision():
 
     assert len(ds) == 1
     assert ds[0].dtype == np.float32
+
+
+def dfs2_props_to_list(d):
+
+    lon = d._dfs.FileInfo.Projection.Longitude
+    lat = d._dfs.FileInfo.Projection.Latitude
+    rot = d._dfs.FileInfo.Projection.Orientation
+    res = [
+        d.x0,
+        d.y0,
+        d.dx,
+        d.dy,
+        d.nx,
+        d.ny,
+        d._projstr,
+        lon,
+        lat,
+        rot,
+        d._n_timesteps,
+        d._start_time,
+        d._dfs.FileInfo.TimeAxis.TimeAxisType,
+        d._n_items,
+        # d._deletevalue,
+    ]
+
+    for item in d.items:
+        res.append(item.type)
+        res.append(item.unit)
+        res.append(item.name)
+
+    return res
+
+
+def is_header_unchanged_on_read_write(tmpdir, filename):
+    dfsA = mikeio.open("tests/testdata/" + filename)
+    props_A = dfs2_props_to_list(dfsA)
+
+    ds = dfsA.read()
+    filename_out = os.path.join(tmpdir.dirname, filename)
+    ds.to_dfs(filename_out)
+    dfsB = mikeio.open(filename_out)
+    props_B = dfs2_props_to_list(dfsB)
+    for pA, pB in zip(props_A, props_B):
+        assert pytest.approx(pA) == pB
+
+
+def test_read_write_header_unchanged_utm_not_rotated(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "utm_not_rotated_neurope_temp.dfs2")
+
+
+def test_read_write_header_unchanged_longlat(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "europe_wind_long_lat.dfs2")
+
+
+def test_read_write_header_unchanged_global_longlat(tmpdir):
+    is_header_unchanged_on_read_write(
+        tmpdir, "global_long_lat_pacific_view_temperature_delta.dfs2"
+    )
+
+
+def test_read_write_header_unchanged_local_coordinates(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "M3WFM_sponge_local_coordinates.dfs2")
+
+
+def test_read_write_header_unchanged_utm_rotated(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "BW_Ronne_Layout1998_rotated.dfs2")
+
+
+def test_read_write_header_unchanged_vertical(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "hd_vertical_slice.dfs2")
+
+
+# def test_read_write_header_unchanged_spectral(tmpdir):
+#     # fails: <TimeAxisType.TimeEquidistant: 1> != <TimeAxisType.CalendarEquidistant: 3>
+#     is_header_unchanged_on_read_write(tmpdir, "dir_wave_analysis_spectra.dfs2")
+
+
+def test_read_write_header_unchanged_spectral_2(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "pt_spectra.dfs2")

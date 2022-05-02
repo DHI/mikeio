@@ -12,11 +12,12 @@ from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
 from ..custom_exceptions import InvalidGeometry
-from .utils import _relative_cumulative_distance
+from .utils import _relative_cumulative_distance, xy_to_bbox
 from .FM_utils import (
     _get_node_centered_data,
     _to_polygons,
     _plot_map,
+    _set_xy_label_by_projection,
     _point_in_polygon,
     _plot_vertical_profile,
 )
@@ -111,7 +112,7 @@ class _GeometryFMPlotter:
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
             boundary_polylines=g.boundary_polylines,
-            is_geo=g.is_geo,
+            projection=g.projection,
             z=None,
             ax=ax,
             **kwargs,
@@ -133,6 +134,7 @@ class _GeometryFMPlotter:
         self.outline(ax=ax)
         ax.set_title(title)
         ax = self._set_plot_limits(ax)
+        _set_xy_label_by_projection(ax, self.g.projection)
         return ax
 
     def outline(self, title="Outline", figsize=None, ax=None):
@@ -186,7 +188,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _set_plot_limits(self, ax):
-        bbox = Grid2D.xy_to_bbox(self.g.node_coordinates)
+        bbox = xy_to_bbox(self.g.node_coordinates)
         xybuf = 6e-3 * (bbox.right - bbox.left)
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
         ax.set_ylim(bbox.bottom - xybuf, bbox.top + xybuf)
@@ -725,7 +727,9 @@ class GeometryFM(_Geometry):
                 return j
         return -1
 
-    def get_overset_grid(self, dx=None, dy=None, shape=None, buffer=None) -> Grid2D:
+    def get_overset_grid(
+        self, dx=None, dy=None, nx=None, ny=None, buffer=None
+    ) -> Grid2D:
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
@@ -734,9 +738,12 @@ class GeometryFM(_Geometry):
             grid resolution in x-direction (or in x- and y-direction)
         dy : float, optional
             grid resolution in y-direction
-        shape : (int, int), optional
-            tuple with nx and ny describing number of points in each direction
-            one of them can be None, in which case the value will be inferred
+        nx : int, optional
+            number of points in x-direction, by default None,
+            (the value will be inferred)
+        ny : int, optional
+            number of points in y-direction, by default None,
+            (the value will be inferred)
         buffer : float, optional
             positive to make the area larger, default=0
             can be set to a small negative value to avoid NaN
@@ -748,8 +755,8 @@ class GeometryFM(_Geometry):
             2d grid
         """
         nc = self._geometry2d.node_coordinates
-        bbox = Grid2D.xy_to_bbox(nc, buffer=buffer)
-        return Grid2D(bbox=bbox, dx=dx, dy=dy, shape=shape, projection=self.projection)
+        bbox = xy_to_bbox(nc, buffer=buffer)
+        return Grid2D(bbox=bbox, dx=dx, dy=dy, nx=nx, ny=ny, projection=self.projection)
 
     def get_element_area(self):
         """Calculate the horizontal area of each element.

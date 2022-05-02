@@ -42,7 +42,7 @@ def da2():
         data=np.zeros([nt, nx]) + 0.1,
         time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
         item=ItemInfo("Foo"),
-        geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+        geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
     )
 
     return da
@@ -91,7 +91,7 @@ def da_time_space():
         data=np.zeros(shape=(nt, 2), dtype=float),
         time=time,
         item=ItemInfo(name="Foo"),
-        geometry=mikeio.Grid1D(n=2, dx=1.0),
+        geometry=mikeio.Grid1D(nx=2, dx=1.0),
     )
 
     return da
@@ -120,7 +120,7 @@ def test_verify_custom_dims():
             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
             item=ItemInfo("Foo"),
             dims=("space", "ensemble"),  # no time!
-            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
         )
     assert "time" in str(excinfo.value)
 
@@ -130,7 +130,7 @@ def test_verify_custom_dims():
             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
             item=ItemInfo("Foo"),
             dims=("time", "x", "ensemble"),  # inconsistent with data
-            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, n=nx),
+            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
         )
     assert "number" in str(excinfo.value).lower()
 
@@ -309,7 +309,7 @@ def test_dataarray_init_grid1d():
     nx = 5
     time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     data = np.zeros([nt, nx]) + 0.1
-    g = mikeio.Grid1D(n=nx, dx=1.0)
+    g = mikeio.Grid1D(nx=nx, dx=1.0)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
     assert da.ndim == 2
     assert da.dims == ("time", "x")
@@ -1021,10 +1021,10 @@ def test_daarray_aggregation_nan_versions():
 
 
 def test_da_quantile_axis0(da2):
-    assert da2.geometry.n == 7
+    assert da2.geometry.nx == 7
     assert len(da2.time) == 10
     daq = da2.quantile(q=0.345, axis="time")
-    assert daq.geometry.n == 7
+    assert daq.geometry.nx == 7
     assert len(da2.time) == 10  # this should not change
     assert len(daq.time) == 1  # aggregated
 

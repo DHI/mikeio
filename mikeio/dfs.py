@@ -133,7 +133,8 @@ class _Dfs123(TimeSeries):
             )  # TODO handle other timeunits
             # TODO to get the EndTime
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        self._projstr = dfs.FileInfo.Projection.WKTString
+        projstr = dfs.FileInfo.Projection.WKTString
+        self._projstr = "NON-UTM" if not projstr else projstr
         self._longitude = dfs.FileInfo.Projection.Longitude
         self._latitude = dfs.FileInfo.Projection.Latitude
         self._orientation = dfs.FileInfo.Projection.Orientation
@@ -481,9 +482,14 @@ class _Dfs123(TimeSeries):
         return self._latitude
 
     @property
+    def origin(self):
+        """Origin (in own CRS)"""
+        return self.geometry.origin
+
+    @property
     def orientation(self):
-        """North to Y orientation"""
-        return self._orientation
+        """Orientation (in own CRS)"""
+        return self.geometry.orientation
 
     @property
     @abstractmethod

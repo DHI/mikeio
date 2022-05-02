@@ -587,27 +587,3 @@ def dataframe_to_dfs0(
 pd.DataFrame.to_dfs0 = dataframe_to_dfs0
 
 pd.Series.to_dfs0 = series_to_dfs0
-
-
-def dataset_to_dfs0(self, filename):
-    """Write Dataset to a Dfs0 file
-
-    Parameters
-    ----------
-    filename: str
-        full path and file name to the dfs0 file.
-    """
-    self = self.squeeze()
-
-    if len(self.data[0].shape) != 1:
-        raise ValueError(
-            """Only data with a single dimension can be converted to a dfs0.
-                 Hint: use `isel` to create a subset."""
-        )
-
-    dfs0 = Dfs0()
-
-    dfs0.write(filename, self)
-
-
-Dataset.to_dfs0 = dataset_to_dfs0

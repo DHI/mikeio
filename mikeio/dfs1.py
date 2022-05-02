@@ -22,7 +22,7 @@ class Dfs1(_Dfs123):
 
         if filename:
             self._read_dfs1_header()
-            self.geometry = Grid1D(x0=self._x0, dx=self._dx, n=self._nx)
+            self.geometry = Grid1D(x0=self._x0, dx=self._dx, nx=self._nx)
 
     def __repr__(self):
         out = ["<mikeio.Dfs1>"]
