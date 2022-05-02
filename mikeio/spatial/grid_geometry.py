@@ -604,6 +604,8 @@ class Grid2D(_Geometry):
         """Nodes will be placed mid-way between centers
         If non-equidistant, new centers will hence not equal old centers!
         """
+        if len(x) == 1:
+            return np.array([x[0] - 0.5, x[0] + 0.5])
         xinner = (x[1:] + x[:-1]) / 2
         left = x[0] - (x[1] - x[0]) / 2
         right = x[-1] + (x[-1] - x[-2]) / 2
