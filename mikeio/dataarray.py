@@ -1039,7 +1039,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 ii, jj = idx
                 tmp = da.isel(idx=jj, axis=(0 + t_ax))
                 sp_axis = 0 if len(jj) == 1 else 1
-                da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))                
+                da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
             else:
                 da = da.isel(idx, axis="space")
 
