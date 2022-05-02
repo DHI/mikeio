@@ -29,7 +29,7 @@ def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
     geometry: Grid2D = ds.geometry
 
     if (
-        np.all(geometry.origin == (0, 0))
+        geometry._shift_origin_on_write
         and not geometry._is_rotated
         and not geometry.is_spectral
     ):

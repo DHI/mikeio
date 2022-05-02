@@ -185,14 +185,15 @@ class Grid2D(_Geometry):
         ny=None,
         bbox=None,
         projection="NON-UTM",
-        origin: Tuple[float, float] = (0.0, 0.0),
+        origin: Tuple[float, float] = None,
         orientation=0.0,
         axis_names=("x", "y"),
         is_spectral=False,
     ):
         """Create equidistant 1D spatial geometry"""
         self._projstr = projection  # TODO handle other types than string
-        self._origin = origin
+        self._shift_origin_on_write = origin is None  # user-constructed
+        self._origin = (0.0, 0.0) if origin is None else origin
         self._orientation = orientation
         self.__xx = None
         self.__yy = None
