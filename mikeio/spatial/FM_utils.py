@@ -135,7 +135,6 @@ def _plot_map(
         if not plot_data:
             print(f"Cannot plot data in {plot_type} plot!")
 
-
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
     ):
@@ -149,7 +148,6 @@ def _plot_map(
         newz = np.full_like(z, fill_value=np.nan)
         newz[elements] = z[elements]
         z = newz
-
 
     if plot_data and vmin is None:
         vmin = np.nanmin(z)
