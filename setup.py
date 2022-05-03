@@ -38,7 +38,7 @@ setuptools.setup(
             "netcdf4",
             "rasterio",
             "geopandas",
-            "sklearn",
+            "scikit-learn",
         ],
     },
     author="Henrik Andersson",
