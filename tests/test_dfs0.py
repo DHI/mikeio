@@ -671,3 +671,9 @@ def test_read_write_single_step(tmp_path):
     dsnew = mikeio.read(outfilename)
     assert dsnew.n_timesteps == 1
     assert dsnew[0].to_numpy() == pytest.approx(-0.08139999955892563)
+
+
+def test_read_write_single_step_to_dataframe(tmp_path):
+    ds = mikeio.read("tests/testdata/waterlevel_viken.dfs0", time=-1)
+    df = ds.to_dataframe()
+    assert df.shape[0] == 1
