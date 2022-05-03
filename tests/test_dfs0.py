@@ -674,6 +674,8 @@ def test_read_write_single_step(tmp_path):
 
 
 def test_read_write_single_step_to_dataframe(tmp_path):
-    ds = mikeio.read("tests/testdata/waterlevel_viken.dfs0", time=-1)
+    ds = mikeio.read("tests/testdata/da_diagnostic.dfs0", time=1)
     df = ds.to_dataframe()
     assert df.shape[0] == 1
+    assert df.iloc[0, 0] == pytest.approx(1.81134)
+    assert np.isnan(df.iloc[0, 3])
