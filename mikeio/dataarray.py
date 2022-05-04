@@ -1035,11 +1035,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
                 assert len(idx) == 2
-                t_ax = 1 if self._has_time_axis else 0
+                t_ax_offset = 1 if self._has_time_axis else 0
                 ii, jj = idx
-                tmp = da.isel(idx=jj, axis=(0 + t_ax))
-                sp_axis = 0 if len(jj) == 1 else 1
-                da = tmp.isel(idx=ii, axis=(sp_axis + t_ax))
+                if jj is not None:
+                    da = da.isel(idx=jj, axis=(0 + t_ax_offset))
+                if ii is not None:
+                    sp_axis = 0 if (jj is not None and len(jj) == 1) else 1
+                    da = da.isel(idx=ii, axis=(sp_axis + t_ax_offset))
             else:
                 da = da.isel(idx, axis="space")
 
