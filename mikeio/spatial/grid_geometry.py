@@ -515,12 +515,14 @@ class Grid2D(_Geometry):
         array(int), array(int)
             i- and j-index of nearest cell
         """
-        if x is not None or y is not None:
+        if x is not None and y is not None:
             if coords is not None:
                 raise ValueError("x,y and coords cannot be given at the same time!")
-            if x is None or y is None:
-                raise ValueError("please provide either both x AND y or coords!")
             coords = np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
+        elif x is not None:
+            return np.atleast_1d(np.argmin(np.abs(self.x - x))), None
+        elif y is not None:
+            return None, np.atleast_1d(np.argmin(np.abs(self.y - y)))
 
         if coords is not None:
             return self._xy_to_index(coords)
@@ -577,7 +579,9 @@ class Grid2D(_Geometry):
             return Grid1D(x=self.x, projection=self.projection, node_coordinates=nc)
         else:
             nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])
-            return Grid1D(x=self.y, projection=self.projection, node_coordinates=nc)
+            return Grid1D(
+                x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
+            )
 
     def _index_to_geometry(self, ii, jj):
         di = np.diff(ii)
