@@ -290,3 +290,16 @@ def test_isel():
     g1 = g.isel(0, axis=1)
 
     assert g1.nx == 20
+
+
+def test_grid2d_equality():
+
+    g1 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
+    g2 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
+
+    assert g1 == g2
+
+    g3 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, projection="LONG/LAT")
+    g4 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
+
+    assert g3 != g4

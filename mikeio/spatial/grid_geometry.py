@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Tuple, Union
 import warnings
 import numpy as np
@@ -154,11 +155,22 @@ class Grid1D(_Geometry):
                 return GeometryPoint2D(*coords)
 
 
+@dataclass  # would prefer this to be (frozen=True)
 class Grid2D(_Geometry):
     """2D grid
     Origin in the center of cell in lower-left corner
     x and y axes are increasing and equidistant
     """
+
+    _dx: float
+    _nx: int
+    _x0: float
+    _projstr: str
+    _origin: Tuple[float, float]
+    _shift_origin_on_write: bool
+    _orientation: float
+    _is_spectral: bool
+    _x_logarithmic: bool
 
     def __init__(
         self,
