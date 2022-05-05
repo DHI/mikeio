@@ -611,7 +611,7 @@ class Grid2D(_Geometry):
             warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
             return GeometryUndefined()
         else:
-            return Grid2D(x=self.x[ii], y=self.x[jj], projection=self.projection)
+            return Grid2D(x=self.x[ii], y=self.y[jj], projection=self.projection)
 
     def _to_element_table(self, index_base=0):
 
