@@ -567,7 +567,9 @@ class Grid2D(_Geometry):
 
         return ii, jj
 
-    def _bbox_to_index(self, bbox: Sequence[float]):
+    def _bbox_to_index(
+        self, bbox: Sequence[float]
+    ) -> Union[Tuple[None, None], Tuple[range, range]]:
         """Find subarea within this geometry"""
         if not (len(bbox) == 4):
             raise ValueError(
@@ -583,7 +585,10 @@ class Grid2D(_Geometry):
         mask = (self.y >= y0) & (self.y <= y1)
         jj = np.where(mask)[0]
 
-        return ii, jj
+        i = range(ii[0], ii[-1] + 1)
+        j = range(jj[0], jj[-1] + 1)
+
+        return i, j
 
     def isel(self, idx, axis):
 
