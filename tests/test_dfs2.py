@@ -243,14 +243,26 @@ def test_read_temporal_subset_slice():
     assert len(ds.time) == 13
 
 
+def test_read_area_subset_bad_bbox():
+
+    filename = "tests/testdata/europe_wind_long_lat.dfs2"
+    bbox = (10, 40, 20)
+    with pytest.raises(ValueError):
+        mikeio.read(filename, area=bbox)
+
+
 def test_read_area_subset_geo():
 
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
-    bbox = [10, 40, 20, 50]
+    bbox = (10, 40, 20, 50)
     dsall = mikeio.read(filename)
     dssel = dsall.sel(area=bbox)
     ds = mikeio.read(filename, area=bbox)
     assert ds.geometry == dssel.geometry
+    assert ds.geometry.x[0] == pytest.approx(bbox[0])
+    assert ds.geometry.x[-1] == pytest.approx(bbox[2])
+    assert ds.geometry.y[0] == pytest.approx(bbox[1])
+    assert ds.geometry.y[-1] == pytest.approx(bbox[3])
 
 
 def test_read_area_subset():

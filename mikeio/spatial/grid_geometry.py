@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Tuple, Union
+from typing import Sequence, Tuple, Union
 import warnings
 import numpy as np
 from mikecore.eum import eumQuantity
@@ -567,9 +567,12 @@ class Grid2D(_Geometry):
 
         return ii, jj
 
-    def _bbox_to_index(self, bbox):
+    def _bbox_to_index(self, bbox: Sequence[float]):
         """Find subarea within this geometry"""
-        assert len(bbox) == 4, "area most be a bounding box of coordinates"
+        if not (len(bbox) == 4):
+            raise ValueError(
+                "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
+            )
         x0, y0, x1, y1 = bbox
         if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
             warnings.warn("No elements in bbox")
