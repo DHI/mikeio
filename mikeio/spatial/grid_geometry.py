@@ -39,10 +39,18 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
     return x0, dx, nx
 
 
+@dataclass
 class Grid1D(_Geometry):
     """1D grid (node-based)
     axis is increasing and equidistant
     """
+
+    _dx: float
+    _nx: int
+    _x0: float
+    _orientation: float
+    _origin: Tuple[float, float]
+    _projstr: str
 
     def __init__(
         self,

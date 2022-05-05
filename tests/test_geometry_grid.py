@@ -31,6 +31,18 @@ def test_grid1d_x():
     assert g.x1 == x1
 
 
+def test_grid1d_equality():
+    g1 = Grid1D(dx=0.1, nx=10)
+    g2 = Grid1D(dx=0.1, nx=10)
+
+    assert g1 == g2
+
+    g3 = Grid1D(dx=0.1, nx=12)
+    g4 = Grid1D(dx=0.1, nx=10)
+
+    assert g3 != g4
+
+
 def test_x_y():
     x0 = 2.0
     x1 = 8.0
