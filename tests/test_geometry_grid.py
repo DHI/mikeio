@@ -55,10 +55,6 @@ def test_x_y():
     dy = 1.0
     y = np.linspace(y0, y1, ny)
     g = Grid2D(x=x, y=y)
-    assert g.x0 == x0
-    assert g.x1 == x1
-    assert g.y0 == y0
-    assert g.y1 == y1
     assert np.all(g.x == x)
     assert np.sum(g.y - y) == 0
     assert g.nx == nx
@@ -152,10 +148,10 @@ def test_xx_yy():
 def test_create_in_bbox():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, nx=2, ny=5)
-    assert g.x0 == 0.25
+    assert g.x[0] == 0.25
 
     g = Grid2D(bbox=bbox, nx=2, ny=None)
-    assert g.x0 == 0.25
+    assert g.x[0] == 0.25
 
     g = Grid2D(bbox=bbox)
     assert g.nx == 10

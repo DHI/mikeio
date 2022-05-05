@@ -81,7 +81,7 @@ class Grid1D(_Geometry):
         out = []
         out.append("<mikeio.Grid1D>")
         out.append(
-            f"axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
+            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}"
         )
         return str.join("\n", out)
 
@@ -115,8 +115,8 @@ class Grid1D(_Geometry):
     @property
     def x(self):
         """array of node coordinates"""
-        x1 = self.x0 + self.dx * (self.nx - 1)
-        return np.linspace(self.x0, x1, self.nx)
+        x1 = self._x0 + self.dx * (self.nx - 1)
+        return np.linspace(self._x0, x1, self.nx)
 
     @property
     def x0(self) -> float:
@@ -324,26 +324,16 @@ class Grid2D(_Geometry):
         return x0, dx, nx
 
     def __repr__(self):
-        out = []
-        out.append("<mikeio.Grid2D>")
-        out.append(
-            f"axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
-        )
-        out.append(
-            f"axis: ny={self.ny} points from y0={self.y0:g} to y1={self.y1:g} with dy={self.dy:g}"
-        )
-        return str.join("\n", out)
+        out = [
+            "<mikeio.Grid2D>",
+            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
+            f"axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
+        ]
+
+        return "\n".join(out)
 
     def __str__(self):
         return f"Grid2D (ny={self.ny}, nx={self.nx})"
-
-    @property
-    def x0(self) -> float:
-        return self._x0
-
-    @property
-    def y0(self) -> float:
-        return self._y0
 
     @property
     def dx(self) -> float:
@@ -359,10 +349,10 @@ class Grid2D(_Geometry):
     def x(self):
         """array of x coordinates (element center)"""
         if self.is_spectral:
-            return self.logarithmic_f(self.nx, self.x0, self.dx)
+            return self.logarithmic_f(self.nx, self._x0, self.dx)
 
-        x1 = self.x0 + self.dx * (self.nx - 1)
-        x_local = np.linspace(self.x0, x1, self.nx)
+        x1 = self._x0 + self.dx * (self.nx - 1)
+        x_local = np.linspace(self._x0, x1, self.nx)
         if self._is_rotated:
             return x_local
         else:
@@ -394,29 +384,9 @@ class Grid2D(_Geometry):
     @property
     def y(self):
         """array of y coordinates (element center)"""
-        y1 = self.y0 + self.dy * (self.ny - 1)
-        y_local = np.linspace(self.y0, y1, self.ny)
+        y1 = self._y0 + self.dy * (self.ny - 1)
+        y_local = np.linspace(self._y0, y1, self.ny)
         return y_local if self._is_rotated else y_local + self._origin[1]
-
-    @property
-    def x0(self):
-        """x starting point"""
-        return self._x0
-
-    @property
-    def y0(self) -> float:
-        """y starting point"""
-        return self._y0
-
-    @property
-    def x1(self) -> float:
-        """x end-point"""
-        return self.x[-1]
-
-    @property
-    def y1(self) -> float:
-        """y end-point"""
-        return self.y[-1]
 
     @property
     def nx(self) -> int:
@@ -445,10 +415,10 @@ class Grid2D(_Geometry):
             raise NotImplementedError("Only available if orientation = 0")
         if self.is_spectral:
             raise NotImplementedError("Not available for spectral Grid2D")
-        left = self.x0 - self.dx / 2
-        bottom = self.y0 - self.dy / 2
-        right = self.x1 + self.dx / 2
-        top = self.y1 + self.dy / 2
+        left = self.x[0] - self.dx / 2
+        bottom = self.y[0] - self.dy / 2
+        right = self.x[-1] + self.dx / 2
+        top = self.y[-1] + self.dy / 2
         return BoundingBox(left, bottom, right, top)
 
     @property
@@ -489,7 +459,7 @@ class Grid2D(_Geometry):
             raise ValueError("Only possible if orientation = 0")
         if self.is_spectral:
             raise ValueError("Not possible for spectral Grid2D")
-        x0, y0 = self.x0, self.y0
+        x0, y0 = self._x0, self._y0
         self._x0, self._y0 = 0.0, 0.0
         self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
@@ -576,7 +546,7 @@ class Grid2D(_Geometry):
                 "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
             )
         x0, y0, x1, y1 = bbox
-        if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
+        if x0 > self.x[-1] or y0 > self.y[-1] or x1 < self.x[0] or y1 < self.y[0]:
             warnings.warn("No elements in bbox")
             return None, None
 
@@ -754,20 +724,8 @@ class Grid3D(_Geometry):
     @property
     def x(self):
         """array of x-axis node coordinates"""
-        x1 = self.x0 + self.dx * (self.nx - 1)
-        return np.linspace(self.x0, x1, self.nx)
-
-    @property
-    def x0(self) -> float:
-        return self._x0
-
-    @property
-    def y0(self) -> float:
-        return self._y0
-
-    @property
-    def z0(self) -> float:
-        return self._z0
+        x1 = self._x0 + self.dx * (self.nx - 1)
+        return np.linspace(self._x0, x1, self.nx)
 
     @property
     def dx(self) -> float:
@@ -782,8 +740,8 @@ class Grid3D(_Geometry):
     @property
     def y(self):
         """array of y-axis node coordinates"""
-        y1 = self.y0 + self.dy * (self.ny - 1)
-        return np.linspace(self.y0, y1, self.ny)
+        y1 = self._y0 + self.dy * (self.ny - 1)
+        return np.linspace(self._y0, y1, self.ny)
 
     @property
     def dy(self) -> float:
@@ -798,8 +756,8 @@ class Grid3D(_Geometry):
     @property
     def z(self):
         """array of z-axis node coordinates"""
-        z1 = self.z0 + self.dz * (self.nz - 1)
-        return np.linspace(self.z0, z1, self.nz)
+        z1 = self._z0 + self.dz * (self.nz - 1)
+        return np.linspace(self._z0, z1, self.nz)
 
     @property
     def dz(self) -> float:
