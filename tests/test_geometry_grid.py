@@ -315,3 +315,8 @@ def test_grid2d_equality():
     g4 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
 
     assert g3 != g4
+
+    g5 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, y0=-5)
+    g6 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, y0=5)
+
+    assert g5 != g6

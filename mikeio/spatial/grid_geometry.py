@@ -173,6 +173,9 @@ class Grid2D(_Geometry):
     _dx: float
     _nx: int
     _x0: float
+    _dy: float
+    _ny: int
+    _y0: float
     _projstr: str
     _origin: Tuple[float, float]
     _shift_origin_on_write: bool
