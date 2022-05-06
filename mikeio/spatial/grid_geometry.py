@@ -78,12 +78,11 @@ class Grid1D(_Geometry):
         self._axis_name = axis_name
 
     def __repr__(self):
-        out = []
-        out.append("<mikeio.Grid1D>")
-        out.append(
-            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}"
-        )
-        return str.join("\n", out)
+        out = [
+            "<mikeio.Grid1D>",
+            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
+        ]
+        return "\n".join(out)
 
     def __str__(self):
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
@@ -117,16 +116,6 @@ class Grid1D(_Geometry):
         """array of node coordinates"""
         x1 = self._x0 + self.dx * (self.nx - 1)
         return np.linspace(self._x0, x1, self.nx)
-
-    @property
-    def x0(self) -> float:
-        """left end-point"""
-        return self._x0
-
-    @property
-    def x1(self) -> float:
-        """right end-point"""
-        return self.x[-1]
 
     @property
     def nx(self) -> int:
@@ -178,10 +167,7 @@ class Grid2D(_Geometry):
     _y0: float
     _projstr: str
     _origin: Tuple[float, float]
-    _shift_origin_on_write: bool
     _orientation: float
-    _is_spectral: bool
-    _x_logarithmic: bool
 
     def __init__(
         self,
@@ -686,11 +672,25 @@ class Grid2D(_Geometry):
         newMesh.Write(outfilename)
 
 
+@dataclass
 class Grid3D(_Geometry):
     """3D  grid
     Origin in the center of cell in lower-left corner
     x, y and z axes are increasing and equidistant
     """
+
+    _dx: float
+    _nx: int
+    _x0: float
+    _dy: float
+    _ny: int
+    _y0: float
+    _dz: float
+    _nz: int
+    _z0: float
+    _projstr: str
+    _origin: Tuple[float, float]
+    _orientation: float
 
     def __init__(
         self,
@@ -815,18 +815,14 @@ class Grid3D(_Geometry):
             )
 
     def __repr__(self):
-        out = []
-        out.append("<mikeio.Grid3D>")
-        out.append(
-            f"x-axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}"
-        )
-        out.append(
-            f"y-axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}"
-        )
-        out.append(
-            f"z-axis: nz={self.nz} points from z0={self.z[0]:g} to z1={self.z[-1]:g} with dz={self.dz:g}"
-        )
-        return str.join("\n", out)
+        out = [
+            "<mikeio.Grid3D>"
+            f"x-axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
+            f"y-axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
+            f"z-axis: nz={self.nz} points from z0={self.z[0]:g} to z1={self.z[-1]:g} with dz={self.dz:g}",
+        ]
+
+        return "\n".join(out)
 
     def __str__(self):
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"

@@ -27,8 +27,8 @@ def test_grid1d_x():
     nx = 4
     x = np.linspace(x0, x1, nx)
     g = Grid1D(x=x)
-    assert g.x0 == x0
-    assert g.x1 == x1
+    assert g.x[0] == x0
+    assert g.x[-1] == x1
 
 
 def test_grid1d_equality():

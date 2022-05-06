@@ -1597,7 +1597,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         from .dfs1 import Dfs1
 
         dfs = Dfs1()
-        dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry.x0)
+        dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry._x0)
 
     def _to_dfsu(self, filename):
         from .dfsu import _write_dfsu
