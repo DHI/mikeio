@@ -986,6 +986,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
             data with subset
 
         """
+        if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
+            idx_x = kwargs["x"]
+            idx_y = kwargs["y"]
+            return self.isel(x=idx_x).isel(y=idx_y)
         for dim in kwargs:
             if dim in self.dims:
                 axis = dim
