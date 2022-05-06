@@ -88,6 +88,14 @@ def test_dfs1_interp_x():
 #    assert np.all(ds1[0].values == ds[0].values)
 
 
+# def test_create_dfs2()
+
+#    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
+#    g = ds.geometry.get_overset_grid(dx=5000)
+#    dsi = ds.interp_like(g)
+#    dsi.to_dfs("tests/testdata/consistency/oresundHD.dfs2")
+
+
 def test_read_dfs2():
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs2",
@@ -97,6 +105,26 @@ def test_read_dfs2():
 
     assert ds.n_items == 2
     assert ds.n_timesteps == 4
+
+
+def test_sel_line_dfs2():
+    x = 350000
+    y = 6145000
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+    dsselx = ds.sel(x=x)
+    assert isinstance(dsselx.geometry, mikeio.Grid1D)
+    dssely = ds.sel(y=y)
+    assert isinstance(dssely.geometry, mikeio.Grid1D)
+    assert dsselx.geometry != dssely.geometry
+
+
+def test_sel_mult_line_not_possible():
+    xs = [350000, 360000]
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+    with pytest.raises(
+        Exception, match="scalar"
+    ):  # NotImplemented or ValueError not sure yet
+        ds.sel(x=xs)
 
 
 def test_read_dfs2_single_time():

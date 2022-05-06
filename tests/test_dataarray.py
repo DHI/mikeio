@@ -1056,10 +1056,11 @@ def test_write_dfs2(tmp_path):
 
     nt = 10
     g = mikeio.Grid2D(
-        x=np.linspace(10, 20, 30),
-        y=np.linspace(10, 20, 20),
+        x=np.linspace(10, 20, 11),
+        y=np.linspace(15, 25, 21),
         projection="LONG/LAT",
     )
+    assert g.origin == (0, 0)
     da = mikeio.DataArray(
         np.random.random(size=(nt, g.ny, g.nx)),
         time=pd.date_range(start="2000", freq="H", periods=nt),
@@ -1068,8 +1069,15 @@ def test_write_dfs2(tmp_path):
     )
 
     fn = str(tmp_path / "test.dfs2")
-
     da.to_dfs(fn)
+
+    ds = mikeio.read(fn)
+    g2 = ds.geometry
+    assert g != g2
+    assert np.allclose(g.x, g2.x)
+    assert np.allclose(g.y, g2.y)
+    assert g2.origin == (10.0, 15.0)
+    assert g.projection == g2.projection
 
 
 def test_write_dfs2_single_time_no_time_dim(tmp_path):
