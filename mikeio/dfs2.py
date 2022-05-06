@@ -261,7 +261,7 @@ class Dfs2(_Dfs123):
             take_subset = True
             ii, jj = self.geometry.find_index(area=area)
             shape = (nt, len(jj), len(ii))
-            geometry = self.geometry._index_to_geometry(ii, jj)
+            geometry = self.geometry._index_to_Grid2D(ii, jj)
         else:
             take_subset = False
             shape = (nt, self._ny, self._nx)

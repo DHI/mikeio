@@ -548,9 +548,9 @@ class Grid2D(_Geometry):
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 return GeometryUndefined()
             else:
-                x = self.x if axis == 0 else self.x[idx]
-                y = self.y if axis == 1 else self.y[idx]
-                return Grid2D(x=x, y=y, projection=self.projection)
+                ii = idx if axis == 1 else None
+                jj = idx if axis == 0 else None
+                return self._index_to_Grid2D(ii, jj)
 
         if axis == 0:
             # y is first axis! if we select an element from y-axis (axis 0),
@@ -563,7 +563,10 @@ class Grid2D(_Geometry):
                 x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
             )
 
-    def _index_to_geometry(self, ii, jj):
+    def _index_to_Grid2D(self, ii=None, jj=None):
+        ii = range(self.nx) if ii is None else ii
+        jj = range(self.ny) if jj is None else jj
+        assert len(ii) > 1 and len(jj) > 1, "Index must be at least len 2"
         di = np.diff(ii)
         dj = np.diff(jj)
         if (np.any(di < 1) or not np.allclose(di, di[0])) or (
@@ -572,7 +575,27 @@ class Grid2D(_Geometry):
             warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
             return GeometryUndefined()
         else:
-            return Grid2D(x=self.x[ii], y=self.y[jj], projection=self.projection)
+            dx = self.dx * di[0]
+            dy = self.dy * dj[0]
+            x0 = self.x[ii[0]] - self.x[0]
+            y0 = self.y[jj[0]] - self.y[0]
+            origin = None if self._shift_origin_on_write else self.origin
+            if not self._is_rotated and not self._shift_origin_on_write:
+                origin = (self.origin[0] + x0, self.origin[1] + y0)
+                x0, y0 = (0.0, 0.0)
+
+            return Grid2D(
+                x0=x0,
+                y0=y0,
+                dx=dx,
+                dy=dy,
+                nx=len(ii),
+                ny=len(jj),
+                projection=self.projection,
+                orientation=self._orientation,
+                is_spectral=self.is_spectral,
+                origin=origin,
+            )
 
     def _to_element_table(self, index_base=0):
 
