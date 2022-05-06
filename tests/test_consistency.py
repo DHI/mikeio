@@ -1,4 +1,3 @@
-from statistics import geometric_mean
 import pytest
 
 import numpy as np
