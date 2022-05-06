@@ -1405,7 +1405,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
 
-        data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
+        with warnings.catch_warnings():  # there might be all-Nan slices, it is ok, so we ignore them!
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
         if axis == 0:  # time
             geometry = self.geometry

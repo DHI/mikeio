@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 import numpy as np
 import pandas as pd
+import py
 import pytest
 
 import mikeio
@@ -108,7 +109,8 @@ def test_pop(ds1):
     assert isinstance(da, mikeio.DataArray)
     assert da.name == "Foo"
 
-    ds1["Foo2"] = da  # re-insert
+    with pytest.warns(UserWarning):
+        ds1["Foo2"] = da  # re-insert
     assert len(ds1) == 2
 
     da = ds1.pop(-1)
@@ -165,24 +167,21 @@ def test_index_with_attribute():
 
     # We cannot create a mikeio.Dataset with multiple references to the same DataArray
     da = mikeio.DataArray(data=d, time=time)
-    data_vars = {"Foo": da, "Bar": da}
+    data = [da, da]
     with pytest.raises(ValueError):
-        mikeio.Dataset(data_vars)
+        mikeio.Dataset(data)
 
     # We cannot create a mikeio.Dataset with multiple references to the same data
-    da1 = mikeio.DataArray(data=d, time=time)
-    da2 = mikeio.DataArray(data=d, time=time)
-    data_vars = {"Foo": da1, "Bar": da2}
+    da1 = mikeio.DataArray(item="Foo", data=d, time=time)
+    da2 = mikeio.DataArray(item="Bar", data=d, time=time)
+    data = [da1, da2]
     with pytest.raises(ValueError):
-        mikeio.Dataset(data_vars)
+        mikeio.Dataset(data)
 
-    # Needs to be copy of data...
-    d2 = d.copy()
-    data_vars = {
-        "Foo": mikeio.DataArray(data=d, time=time),
-        "Bar": mikeio.DataArray(data=d2, time=time),
-    }
-    ds = mikeio.Dataset(data_vars)
+    da1 = mikeio.DataArray(item="Foo", data=d, time=time)
+    da2 = mikeio.DataArray(item="Bar", data=d.copy(), time=time)
+    data = [da1, da2]
+    ds = mikeio.Dataset(data)
     assert ds["Foo"].name == "Foo"
     assert ds.Bar.name == "Bar"
 
@@ -1320,17 +1319,18 @@ def test_append_items():
 
     assert ds1.n_items == 1
     assert ds2.n_items == 1
-    ds3 = ds1.append_items(ds2)
+    with pytest.warns(FutureWarning):
+        ds3 = ds1.append_items(ds2)
     assert ds1.n_items == 1
     assert ds2.n_items == 1
     assert ds3.n_items == 2
-
-    ds1.append_items(ds2, inplace=True)
+    with pytest.warns(FutureWarning):
+        ds1.append_items(ds2, inplace=True)
 
     assert ds1.n_items == 2
 
 
-def test_append_items_same_name_error():
+def test_merge_same_name_error():
     filename = "tests/testdata/HD2D.dfsu"
     ds1 = mikeio.read(filename, items=0)
     ds2 = mikeio.read(filename, items=0)
@@ -1338,7 +1338,7 @@ def test_append_items_same_name_error():
     assert ds1.items[0].name == ds2.items[0].name
 
     with pytest.raises(ValueError):
-        ds1.append_items(ds2)
+        mikeio.Dataset.merge([ds1, ds2])
 
 
 def test_incompatible_data_not_allowed():
