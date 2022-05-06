@@ -168,6 +168,7 @@ class Grid2D(_Geometry):
     _projstr: str
     _origin: Tuple[float, float]
     _orientation: float
+    _is_spectral: bool
 
     def __init__(
         self,
@@ -439,7 +440,7 @@ class Grid2D(_Geometry):
 
     def _shift_x0y0_to_origin(self):
         """Shift spatial axis to start at (0,0) adding the start to origin instead
-        Note: this will note change the x or y properties.
+        Note: this will not change the x or y properties.
         """
         if self._is_rotated:
             raise ValueError("Only possible if orientation = 0")
@@ -469,14 +470,6 @@ class Grid2D(_Geometry):
         xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
-
-    # def find_index(self, x: float, y: float) -> Tuple[int, int]:
-
-    #     dist_x = (self.x - x) ** 2
-    #     idx_x = np.argmin(dist_x)
-    #     dist_y = (self.y - y) ** 2
-    #     idx_y = np.argmin(dist_y)
-    #     return idx_x, idx_y
 
     def find_index(self, x: float = None, y: float = None, coords=None, area=None):
         """Find nearest index (i,j) of point(s)
