@@ -1604,13 +1604,15 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def to_xarray(self):
         import xarray as xr
 
-        coords = None
-
-        if isinstance(self.geometry, Grid2D):
-            coords = {}
+        coords = {}
+        if self._has_time_axis:
             coords["time"] = xr.DataArray(self.time, dims="time")
+
+        if isinstance(self.geometry, Grid1D):
             coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
+        elif isinstance(self.geometry, Grid2D):
             coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
+            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
 
         # TODO other geometries
 
