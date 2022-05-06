@@ -143,12 +143,14 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         fig.colorbar(pos, ax=ax, label=self._label_txt())
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot multiple lines as 2d color plot"""
         if not self.da._has_time_axis:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
             )
+        if title is not None:
+            ax.set_title(title)
         fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.pcolormesh(
             self.da.geometry.x,
