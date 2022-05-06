@@ -41,103 +41,6 @@ def dfs2_gebco():
     return Dfs2(filepath)
 
 
-# @pytest.fixture
-# def dfs2_gebco_rotate():
-#     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
-#     return Dfs2(filepath)
-
-
-def test_simple_write(tmp_path):
-
-    filepath = tmp_path / "simple.dfs2"
-
-    data = []
-
-    nt = 100
-    nx = 20
-    ny = 5
-    d = np.random.random([nt, ny, nx])
-
-    data.append(d)
-
-    dfs = Dfs2()
-
-    dfs.write(filepath, data=data)
-
-    newdfs = Dfs2(filepath)
-
-    ds = newdfs.read()
-
-    assert len(ds) == 1
-    assert ds.items[0].type == EUMType.Undefined
-
-
-def test_write_inconsistent_shape(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
-
-    nt = 100
-    nx = 20
-    ny = 5
-    d1 = np.random.random([nt, ny, nx])
-    d2 = np.random.random([nt, ny, nx + 1])
-
-    with pytest.raises(ValueError):
-        Dataset(data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H"))
-
-    # trick Dataset to accept DataArrays of different shapes
-    d2 = np.random.random([nt, ny, nx])
-    ds = Dataset(data=[d1, d2], time=pd.date_range(start="2000", periods=nt, freq="H"))
-    ds[1]._values = np.random.random([nt, ny, nx + 1])
-
-    dfs = Dfs2()
-    with pytest.raises(ValueError):
-        dfs.write(filename=filename, data=ds)
-
-
-def test_write_single_item(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
-
-    data = []
-    d = np.random.random([100, 2, 3])
-    d[10, :, :] = np.nan
-    d[11, :, :] = 0
-    d[12, :, :] = 1e-10
-    d[13, :, :] = 1e10
-
-    data.append(d)
-    # >>> from pyproj import Proj
-    # >>> utm = Proj(32633)
-    # >>> utm(12.0, 55.0)
-    # east = 308124
-    # north = 6098907
-
-    ds = Dataset(
-        data=data,
-        time=pd.date_range("2012-1-1", freq="s", periods=100),
-        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-    )
-
-    dfs = Dfs2()
-
-    dfs.write(
-        filename=filename,
-        data=ds,
-        coordinate=["UTM-33", 12.0, 55.0, 0.0],
-        dx=100,
-        dy=200,
-        title="test dfs2",
-    )
-
-    newdfs = Dfs2(filename)
-    assert newdfs.projection_string == "UTM-33"
-    assert newdfs.longitude == 12.0
-    assert newdfs.latitude == 55.0
-    assert newdfs.dx == 100.0
-    assert newdfs.dy == 200.0
-
-
 def test_write_projected(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "utm.dfs2")
@@ -539,32 +442,23 @@ def test_interp_to_x_y():
 def test_write_accumulated_datatype(tmpdir):
     filename = os.path.join(tmpdir.dirname, "simple.dfs2")
 
-    data = []
     d = np.random.random([100, 2, 3])
-    data.append(d)
 
-    ds = Dataset(
-        data=data,
+    da = mikeio.DataArray(
+        data=d,
         time=pd.date_range("2021-1-1", periods=100, freq="s"),
-        items=[
-            ItemInfo(
-                "testing water level",
-                EUMType.Water_Level,
-                EUMUnit.meter,
-                data_value_type="MeanStepBackward",
-            )
-        ],
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=1, dy=1),
+        item=ItemInfo(
+            "testing water level",
+            EUMType.Water_Level,
+            EUMUnit.meter,
+            data_value_type="MeanStepBackward",
+        ),
     )
 
-    dfs = Dfs2()
+    da.to_dfs(filename)
 
-    dfs.write(
-        filename=filename,
-        data=ds,
-        title="test dfs2",
-    )
-
-    newdfs = Dfs2(filename)
+    newdfs = mikeio.open(filename)
     assert newdfs.items[0].data_value_type == 3
 
 
@@ -577,14 +471,15 @@ def test_write_default_datatype(tmpdir):
 
     dfs = Dfs2()
 
-    dfs.write(
-        filename=filename,
-        data=data,
-        start_time=datetime.datetime(2012, 1, 1),
-        dt=12,
-        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-        title="test dfs2",
-    )
+    with pytest.warns(FutureWarning):
+        dfs.write(
+            filename=filename,
+            data=data,
+            start_time=datetime.datetime(2012, 1, 1),
+            dt=12,
+            items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
+            title="test dfs2",
+        )
 
     newdfs = Dfs2(filename)
     assert newdfs.items[0].data_value_type == 0
@@ -593,45 +488,31 @@ def test_write_default_datatype(tmpdir):
 def test_write_NonEqCalendarAxis(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple.dfs2")
-    data = []
+
     d = np.random.random([6, 5, 10])
     d[1, :, :] = np.nan
     d[2, :, :] = 0
     d[3, 3:, :] = 2
     d[4, :, 4:] = 5
-    data.append(d)
-    # east = 308124 # Not supported, supply lat/lon of origin also for projected coords
-    # north = 6098907
-    orientation = 0
-    dateTime = [
-        datetime.datetime(2012, 1, 1),
-        datetime.datetime(2012, 1, 4),
-        datetime.datetime(2012, 1, 5),
-        datetime.datetime(2012, 1, 10),
-        datetime.datetime(2012, 1, 15),
-        datetime.datetime(2012, 1, 28),
-    ]
-    dfs = Dfs2()
-    dfs.write(
-        filename=filename,
-        data=data,
-        # start_time=datetime.datetime(2012, 1, 1),
-        # dt=12,
-        datetimes=dateTime,
-        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-        coordinate=["UTM-33", 12.0, 55.0, orientation],
-        dx=100,
-        dy=200,
-        title="test dfs2",
+    da = mikeio.DataArray(
+        data=d,
+        geometry=mikeio.Grid2D(nx=10, ny=5, dx=100, dy=200),
+        time=[
+            datetime.datetime(2012, 1, 1),
+            datetime.datetime(2012, 1, 4),
+            datetime.datetime(2012, 1, 5),
+            datetime.datetime(2012, 1, 10),
+            datetime.datetime(2012, 1, 15),
+            datetime.datetime(2012, 1, 28),
+        ],
     )
 
-    newdfs = Dfs2(filename)
-    assert newdfs.projection_string == "UTM-33"
-    assert newdfs.longitude == 12.0
-    assert newdfs.latitude == 55.0
-    assert newdfs.dx == 100.0
-    assert newdfs.dy == 200.0
-    assert newdfs._is_equidistant == False
+    da.to_dfs(filename)
+
+    newds = mikeio.read(filename)
+    assert newds.is_equidistant == False
+    assert newds.start_time.year == 2012
+    assert newds.end_time.day == 28
 
 
 def test_write_non_equidistant_data(tmpdir):

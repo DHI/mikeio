@@ -1,12 +1,10 @@
 import os
-from pathlib import Path
 import numpy as np
 import pandas as pd
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
-from mikeio.eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
-from datetime import timedelta
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 import pytest
 
@@ -31,111 +29,51 @@ def test_repr_equidistant():
     assert "NonEquidistant" not in text
 
 
-def test_simple_write(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfs0")
-
-    data = []
-
-    nt = 100
-    d = np.random.random([nt])
-    data.append(d)
-
-    dfs = Dfs0()
-
-    dfs.write(filename=filename, data=data)
-
-    assert os.path.exists(filename)
-
-    filepath = Path(filename)
-
-    filepath.unlink()  # Remove file
-
-    dfs.write(filepath, data=data)
-
-    assert filepath.exists
-
-
 def test_write_float(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
 
-    data = []
-
     nt = 100
-    d = np.random.random([nt]).astype(np.float32)
-    data.append(d)
 
-    dfs = Dfs0()
+    da = mikeio.DataArray(
+        data=np.random.random([nt]).astype(np.float32),
+        time=pd.date_range("2000", periods=nt, freq="H"),
+    )
 
-    dfs.write(filename=filename, data=data)
+    da.to_dfs(filename)
 
     assert os.path.exists(filename)
 
 
 def test_write_double(tmpdir):
 
-    filename = os.path.join(tmpdir.dirname, "simple_double.dfs0")
-
-    data = []
+    filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
 
     nt = 100
-    d = np.random.random([nt])
-    data.append(d)
 
-    dfs = Dfs0()
+    da = mikeio.DataArray(
+        data=np.random.random([nt]).astype(np.float32),
+        time=pd.date_range("2000", periods=nt, freq="H"),
+    )
 
-    dfs.write(filename=filename, data=data, dtype=np.float64)
+    da.to_dfs(filename, dtype=np.float64)
 
     assert os.path.exists(filename)
 
 
 def test_write_int_not_possible(tmpdir):
 
-    filename = os.path.join(tmpdir.dirname, "simple_double.dfs0")
-
-    data = []
+    filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
 
     nt = 100
-    d = np.random.random([nt])
-    data.append(d)
 
-    dfs = Dfs0()
+    da = mikeio.DataArray(
+        data=np.random.random([nt]).astype(np.float32),
+        time=pd.date_range("2000", periods=nt, freq="H"),
+    )
 
     with pytest.raises(TypeError):
-        dfs.write(filename=filename, data=data, dtype=np.int32)
-
-
-def test_write_2darray(tmpdir):
-    """
-    Data should be ideally be supplied as a list of 1d timeseries.
-    But if I supply a 2d array (nitems, nt), that could work as well
-    """
-
-    filename = os.path.join(tmpdir.dirname, "from2darray.dfs0")
-
-    nt = 100
-    nitems = 2
-    data = np.random.random([nitems, nt])
-
-    dfs = Dfs0()
-
-    dfs.write(filename=filename, data=data)
-
-    assert os.path.exists(filename)
-
-    dfsnew = Dfs0(filename)
-    assert dfsnew.n_items == nitems
-
-    ds = dfsnew.read()
-    assert ds[0].shape == (nt,)
-
-    filepath = Path(filename)
-    dfsnew = Dfs0(filepath)
-    assert dfsnew.n_items == nitems
-
-    ds = dfsnew.read()
-    assert ds[0].shape == (nt,)
+        da.to_dfs(filename, dtype=np.int32)
 
 
 def test_read_units_write_new(tmpdir):
@@ -153,8 +91,7 @@ def test_read_units_write_new(tmpdir):
     newdfs = Dfs0(tmpfile)
     ds2 = newdfs.read()
 
-    assert ds2.items[0].type == ds.items[0].type
-    assert ds2.items[0].unit == ds.items[0].unit
+    assert ds2.items[0] == ds.items[0]
 
 
 def test_read_start_end_time():
@@ -166,27 +103,6 @@ def test_read_start_end_time():
 
     assert dfs.start_time == ds.start_time
     assert dfs.end_time == ds.end_time
-
-
-def test_multiple_write(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "random.dfs0")
-
-    data = []
-
-    nt = 10
-    d1 = np.zeros(nt)
-    data.append(d1)
-    d2 = np.ones(nt)
-    data.append(d2)
-
-    items = [ItemInfo("Zeros"), ItemInfo("Ones")]
-
-    dfs = Dfs0()
-
-    dfs.write(filename=filename, data=data, items=items, title="Zeros and ones")
-
-    assert os.path.exists(filename)
 
 
 def test_write_equidistant_calendar(tmpdir):
@@ -296,20 +212,17 @@ def test_read_dfs0_delete_value_conversion():
 def test_read_dfs0_small_value_not_delete_value(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "small.dfs0")
-
-    data = []
-
     d = np.array([0.0, 0.0000001, -0.0001])
-
     assert np.isclose(d, -1e-35, atol=1e-33).any()
-    data.append(d)
 
-    dfs = Dfs0()
+    da = mikeio.DataArray(
+        data=d,
+        time=pd.date_range("2000", periods=len(d), freq="H"),
+    )
 
-    dfs.write(filename=filename, data=data)
+    da.to_dfs(filename)
 
-    dfs = Dfs0(filename)
-    ds = dfs.read()
+    ds = mikeio.read(filename)
 
     assert not np.isnan(ds[0].to_numpy()).any()
 

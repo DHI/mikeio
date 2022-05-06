@@ -731,17 +731,17 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             return True
         return False
 
-    def _multi_indexing_attempted(self, key):
+    def _multi_indexing_attempted(self, key) -> bool:
         # find out if user is attempting ds[2, :, 1] or similar (not allowed)
         # this is not bullet-proof, but a good estimate
         if not isinstance(key, tuple):
             return False
         for k in key:
             if isinstance(k, slice):
-                warnings.warn(f"Key is a tuple containing a slice")
+                # warnings.warn(f"Key is a tuple containing a slice")
                 return True
             if not isinstance(k, (str, int)):
-                warnings.warn(f"Key is a tuple containing illegal type {type(k)}")
+                # warnings.warn(f"Key is a tuple containing illegal type {type(k)}")
                 return True
         if len(set(key)) != len(key):
             return True

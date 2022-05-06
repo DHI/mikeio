@@ -74,34 +74,10 @@ def test_dfs3_read_multiple_layers():
     assert ds.geometry.nz == 4
     assert isinstance(ds.geometry, Grid3D)
 
-    ds = mikeio.read(fn, layers=[1, 5, -3])
+    with pytest.warns(UserWarning):
+        ds = mikeio.read(fn, layers=[1, 5, -3])
     assert isinstance(ds.geometry, GeometryUndefined)
     assert ds.shape == (2, 3, 17, 21)
-
-
-def test_dfs3_write_single_item(tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "simple.dfs3")
-    start_time = datetime(2012, 1, 1)
-    items = [ItemInfo(EUMType.Relative_moisture_content)]
-    data = []
-    #                     t  , z, y, x
-    d = np.random.random([20, 2, 5, 10])
-    d[:, 0, 0, 0] = 0.0
-    data.append(d)
-    title = "test dfs3"
-    dfs = mikeio.Dfs3()
-    dfs.write(
-        filename=outfilename,
-        data=data,
-        start_time=start_time,
-        dt=3600.0,
-        items=items,
-        coordinate=["UTM-33", 450000, 560000, 0],
-        dx=0.1,
-        dy=0.1,
-        dz=10.0,
-        title=title,
-    )
 
 
 def test_dfs3_read_write(tmpdir):
@@ -111,17 +87,18 @@ def test_dfs3_read_write(tmpdir):
     data = ds.to_numpy()
     title = "test dfs3"
     dfs = mikeio.Dfs3()
-    dfs.write(
-        filename=outfilename,
-        data=data,
-        start_time=ds.time[0],
-        dt=(ds.time[1] - ds.time[0]).total_seconds(),
-        items=items,
-        coordinate=["LONG/LAT", 5, 10, 0],
-        dx=0.1,
-        dy=0.1,
-        title=title,
-    )
+    with pytest.warns(FutureWarning):
+        dfs.write(
+            filename=outfilename,
+            data=data,
+            start_time=ds.time[0],
+            dt=(ds.time[1] - ds.time[0]).total_seconds(),
+            items=items,
+            coordinate=["LONG/LAT", 5, 10, 0],
+            dx=0.1,
+            dy=0.1,
+            title=title,
+        )
 
 
 def test_read_rotated_grid():
