@@ -487,6 +487,12 @@ class Grid2D(_Geometry):
         array(int), array(int)
             i- and j-index of nearest cell
         """
+        if x is None and y is not None and not np.isscalar(y):
+            raise ValueError(f"{y} is not a scalar value")
+
+        if y is None and x is not None and not np.isscalar(x):
+            raise ValueError(f"{x} is not a a scalar value")
+
         if x is not None and y is not None:
             if coords is not None:
                 raise ValueError("x,y and coords cannot be given at the same time!")
