@@ -117,20 +117,34 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         super().__init__(da)
 
     def __call__(self, ax=None, figsize=None, **kwargs):
-        ax = self._get_ax(ax, figsize)
+        _, ax = self._get_fig_ax(ax, figsize)
+        if self.da.n_timesteps == 1:
+            return self.line(ax, **kwargs)
+        else:
+            return self.pcolormesh(ax, **kwargs)
+
+    def line(self, ax=None, figsize=None, **kwargs):
+        _, ax = self._get_fig_ax(ax, figsize)
         return self._lines(ax, **kwargs)
 
     def timeseries(self, ax=None, figsize=None, **kwargs):
+        if self.da.n_timesteps == 1:
+            raise ValueError("Not possible with single timestep DataArray")
         fig, ax = self._get_fig_ax(ax, figsize)
         return super()._timeseries(self.da.values, fig, ax, **kwargs)
 
     def imshow(self, ax=None, figsize=None, **kwargs):
+        if not self.da._has_time_axis:
+            raise ValueError("Not possible without time axis. DataArray only has 1 dimension.")
         fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.imshow(self.da.values, **kwargs)
         fig.colorbar(pos, ax=ax, label=self._label_txt())
         return ax
 
     def pcolormesh(self, ax=None, figsize=None, **kwargs):
+        """Plot multiple lines as 2d plot"""
+        if not self.da._has_time_axis:
+            raise ValueError("Not possible without time axis. DataArray only has 1 dimension.")
         fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.pcolormesh(
             self.da.geometry.x,
@@ -139,15 +153,17 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
             shading="nearest",
             **kwargs,
         )
-        cbar = fig.colorbar(pos, label=self._label_txt())
+        _ = fig.colorbar(pos, label=self._label_txt())
         ax.set_xlabel(self.da.geometry._axis_name)
         ax.set_ylabel("time")
         return ax
 
-    def _lines(self, ax=None, **kwargs):
-        if "title" in kwargs:
-            title = kwargs.pop("title")
+    def _lines(self, ax=None, title=None, **kwargs):
+        """x-lines - one per timestep"""
+        if title is not None:
             ax.set_title(title)
+        elif self.da.n_timesteps == 1:
+            ax.set_title(f"{self.da.time[0]}")
         ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
         ax.set_xlabel(self.da.geometry._axis_name)
         ax.set_ylabel(self._label_txt())
