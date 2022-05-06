@@ -1613,6 +1613,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
         elif isinstance(self.geometry, Grid2D):
             coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
             coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
+        elif isinstance(self.geometry, Grid3D):
+            coords["z"] = xr.DataArray(data=self.geometry.z, dims="z")
+            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
+            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
+        elif isinstance(self.geometry, GeometryFM):
+            coords["element"] = xr.DataArray(
+                data=self.geometry.element_ids, dims="element"
+            )
 
         # TODO other geometries
 
