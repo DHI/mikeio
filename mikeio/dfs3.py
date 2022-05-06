@@ -258,7 +258,7 @@ class Dfs3(_Dfs123):
                 if layers is None:
                     data_list[item][it_number, :, :, :] = d
                 elif len(layers) == 1:
-                    if layers == "bottom":
+                    if layers[0] == "bottom":
                         data_list[item][it_number, :, :] = self._get_bottom_values(d)
                     else:
                         data_list[item][it_number, :, :] = d[layers[0], :, :]
