@@ -135,7 +135,9 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
 
     def imshow(self, ax=None, figsize=None, **kwargs):
         if not self.da._has_time_axis:
-            raise ValueError("Not possible without time axis. DataArray only has 1 dimension.")
+            raise ValueError(
+                "Not possible without time axis. DataArray only has 1 dimension."
+            )
         fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.imshow(self.da.values, **kwargs)
         fig.colorbar(pos, ax=ax, label=self._label_txt())
@@ -144,7 +146,9 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     def pcolormesh(self, ax=None, figsize=None, **kwargs):
         """Plot multiple lines as 2d plot"""
         if not self.da._has_time_axis:
-            raise ValueError("Not possible without time axis. DataArray only has 1 dimension.")
+            raise ValueError(
+                "Not possible without time axis. DataArray only has 1 dimension."
+            )
         fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.pcolormesh(
             self.da.geometry.x,
