@@ -1,13 +1,10 @@
 import os
-from pathlib import Path
-from isort import file
 import numpy as np
 import pandas as pd
 import datetime
 import mikeio
 from mikeio.dfs0 import Dfs0
-from mikeio.eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
-from datetime import timedelta
+from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 import pytest
 
