@@ -1602,6 +1602,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self._to_dataset().to_dfs(filename)
 
     def to_xarray(self):
+        """Export to xarray.DataArray"""
+
         import xarray as xr
 
         coords = {}
@@ -1621,8 +1623,6 @@ class DataArray(DataUtilsMixin, TimeSeries):
             coords["element"] = xr.DataArray(
                 data=self.geometry.element_ids, dims="element"
             )
-
-        # TODO other geometries
 
         xr_da = xr.DataArray(
             data=self.values,
