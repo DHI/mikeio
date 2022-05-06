@@ -714,11 +714,17 @@ def test_spatial_aggregation_dfs2_to_dfs0(tmp_path):
     assert dsnew.n_items == ds.n_items
 
 
-def test_to_xarray():
+def test_da_to_xarray():
     ds = mikeio.read("tests/testdata/waves.dfs2")
     da = ds[0]
     xr_da = da.to_xarray()
     assert isinstance(xr_da, xarray.DataArray)
+
+
+def test_ds_to_xarray():
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    xr_ds = ds.to_xarray()
+    assert isinstance(xr_ds, xarray.Dataset)
 
 
 def test_da_plot():
