@@ -1,4 +1,5 @@
-from typing import Tuple, Union
+from dataclasses import dataclass
+from typing import Sequence, Tuple, Union
 import warnings
 import numpy as np
 from mikecore.eum import eumQuantity
@@ -38,10 +39,18 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
     return x0, dx, nx
 
 
+@dataclass
 class Grid1D(_Geometry):
     """1D grid (node-based)
     axis is increasing and equidistant
     """
+
+    _dx: float
+    _nx: int
+    _x0: float
+    _orientation: float
+    _origin: Tuple[float, float]
+    _projstr: str
 
     def __init__(
         self,
@@ -69,12 +78,11 @@ class Grid1D(_Geometry):
         self._axis_name = axis_name
 
     def __repr__(self):
-        out = []
-        out.append("<mikeio.Grid1D>")
-        out.append(
-            f"axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
-        )
-        return str.join("\n", out)
+        out = [
+            "<mikeio.Grid1D>",
+            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
+        ]
+        return "\n".join(out)
 
     def __str__(self):
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
@@ -106,18 +114,8 @@ class Grid1D(_Geometry):
     @property
     def x(self):
         """array of node coordinates"""
-        x1 = self.x0 + self.dx * (self.nx - 1)
-        return np.linspace(self.x0, x1, self.nx)
-
-    @property
-    def x0(self) -> float:
-        """left end-point"""
-        return self._x0
-
-    @property
-    def x1(self) -> float:
-        """right end-point"""
-        return self.x[-1]
+        x1 = self._x0 + self.dx * (self.nx - 1)
+        return np.linspace(self._x0, x1, self.nx)
 
     @property
     def nx(self) -> int:
@@ -154,11 +152,23 @@ class Grid1D(_Geometry):
                 return GeometryPoint2D(*coords)
 
 
+@dataclass  # would prefer this to be (frozen=True)
 class Grid2D(_Geometry):
     """2D grid
     Origin in the center of cell in lower-left corner
     x and y axes are increasing and equidistant
     """
+
+    _dx: float
+    _nx: int
+    _x0: float
+    _dy: float
+    _ny: int
+    _y0: float
+    _projstr: str
+    _origin: Tuple[float, float]
+    _orientation: float
+    _is_spectral: bool
 
     def __init__(
         self,
@@ -301,26 +311,16 @@ class Grid2D(_Geometry):
         return x0, dx, nx
 
     def __repr__(self):
-        out = []
-        out.append("<mikeio.Grid2D>")
-        out.append(
-            f"axis: nx={self.nx} points from x0={self.x0:g} to x1={self.x1:g} with dx={self.dx:g}"
-        )
-        out.append(
-            f"axis: ny={self.ny} points from y0={self.y0:g} to y1={self.y1:g} with dy={self.dy:g}"
-        )
-        return str.join("\n", out)
+        out = [
+            "<mikeio.Grid2D>",
+            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
+            f"axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
+        ]
+
+        return "\n".join(out)
 
     def __str__(self):
         return f"Grid2D (ny={self.ny}, nx={self.nx})"
-
-    @property
-    def x0(self) -> float:
-        return self._x0
-
-    @property
-    def y0(self) -> float:
-        return self._y0
 
     @property
     def dx(self) -> float:
@@ -336,10 +336,10 @@ class Grid2D(_Geometry):
     def x(self):
         """array of x coordinates (element center)"""
         if self.is_spectral:
-            return self.logarithmic_f(self.nx, self.x0, self.dx)
+            return self.logarithmic_f(self.nx, self._x0, self.dx)
 
-        x1 = self.x0 + self.dx * (self.nx - 1)
-        x_local = np.linspace(self.x0, x1, self.nx)
+        x1 = self._x0 + self.dx * (self.nx - 1)
+        x_local = np.linspace(self._x0, x1, self.nx)
         if self._is_rotated:
             return x_local
         else:
@@ -371,29 +371,9 @@ class Grid2D(_Geometry):
     @property
     def y(self):
         """array of y coordinates (element center)"""
-        y1 = self.y0 + self.dy * (self.ny - 1)
-        y_local = np.linspace(self.y0, y1, self.ny)
+        y1 = self._y0 + self.dy * (self.ny - 1)
+        y_local = np.linspace(self._y0, y1, self.ny)
         return y_local if self._is_rotated else y_local + self._origin[1]
-
-    @property
-    def x0(self):
-        """x starting point"""
-        return self._x0
-
-    @property
-    def y0(self) -> float:
-        """y starting point"""
-        return self._y0
-
-    @property
-    def x1(self) -> float:
-        """x end-point"""
-        return self.x[-1]
-
-    @property
-    def y1(self) -> float:
-        """y end-point"""
-        return self.y[-1]
 
     @property
     def nx(self) -> int:
@@ -422,10 +402,10 @@ class Grid2D(_Geometry):
             raise NotImplementedError("Only available if orientation = 0")
         if self.is_spectral:
             raise NotImplementedError("Not available for spectral Grid2D")
-        left = self.x0 - self.dx / 2
-        bottom = self.y0 - self.dy / 2
-        right = self.x1 + self.dx / 2
-        top = self.y1 + self.dy / 2
+        left = self.x[0] - self.dx / 2
+        bottom = self.y[0] - self.dy / 2
+        right = self.x[-1] + self.dx / 2
+        top = self.y[-1] + self.dy / 2
         return BoundingBox(left, bottom, right, top)
 
     @property
@@ -460,13 +440,13 @@ class Grid2D(_Geometry):
 
     def _shift_x0y0_to_origin(self):
         """Shift spatial axis to start at (0,0) adding the start to origin instead
-        Note: this will note change the x or y properties.
+        Note: this will not change the x or y properties.
         """
         if self._is_rotated:
             raise ValueError("Only possible if orientation = 0")
         if self.is_spectral:
             raise ValueError("Not possible for spectral Grid2D")
-        x0, y0 = self.x0, self.y0
+        x0, y0 = self._x0, self._y0
         self._x0, self._y0 = 0.0, 0.0
         self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
@@ -490,14 +470,6 @@ class Grid2D(_Geometry):
         xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
-
-    # def find_index(self, x: float, y: float) -> Tuple[int, int]:
-
-    #     dist_x = (self.x - x) ** 2
-    #     idx_x = np.argmin(dist_x)
-    #     dist_y = (self.y - y) ** 2
-    #     idx_y = np.argmin(dist_y)
-    #     return idx_x, idx_y
 
     def find_index(self, x: float = None, y: float = None, coords=None, area=None):
         """Find nearest index (i,j) of point(s)
@@ -546,11 +518,16 @@ class Grid2D(_Geometry):
 
         return ii, jj
 
-    def _bbox_to_index(self, bbox):
+    def _bbox_to_index(
+        self, bbox: Sequence[float]
+    ) -> Union[Tuple[None, None], Tuple[range, range]]:
         """Find subarea within this geometry"""
-        assert len(bbox) == 4, "area most be a bounding box of coordinates"
+        if not (len(bbox) == 4):
+            raise ValueError(
+                "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
+            )
         x0, y0, x1, y1 = bbox
-        if x0 > self.x1 or y0 > self.y1 or x1 < self.x0 or y1 < self.y0:
+        if x0 > self.x[-1] or y0 > self.y[-1] or x1 < self.x[0] or y1 < self.y[0]:
             warnings.warn("No elements in bbox")
             return None, None
 
@@ -559,7 +536,10 @@ class Grid2D(_Geometry):
         mask = (self.y >= y0) & (self.y <= y1)
         jj = np.where(mask)[0]
 
-        return ii, jj
+        i = range(ii[0], ii[-1] + 1)
+        j = range(jj[0], jj[-1] + 1)
+
+        return i, j
 
     def isel(self, idx, axis):
 
@@ -592,7 +572,7 @@ class Grid2D(_Geometry):
             warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
             return GeometryUndefined()
         else:
-            return Grid2D(x=self.x[ii], y=self.x[jj], projection=self.projection)
+            return Grid2D(x=self.x[ii], y=self.y[jj], projection=self.projection)
 
     def _to_element_table(self, index_base=0):
 
@@ -689,11 +669,25 @@ class Grid2D(_Geometry):
         newMesh.Write(outfilename)
 
 
+@dataclass
 class Grid3D(_Geometry):
     """3D  grid
     Origin in the center of cell in lower-left corner
     x, y and z axes are increasing and equidistant
     """
+
+    _dx: float
+    _nx: int
+    _x0: float
+    _dy: float
+    _ny: int
+    _y0: float
+    _dz: float
+    _nz: int
+    _z0: float
+    _projstr: str
+    _origin: Tuple[float, float]
+    _orientation: float
 
     def __init__(
         self,
@@ -727,20 +721,8 @@ class Grid3D(_Geometry):
     @property
     def x(self):
         """array of x-axis node coordinates"""
-        x1 = self.x0 + self.dx * (self.nx - 1)
-        return np.linspace(self.x0, x1, self.nx)
-
-    @property
-    def x0(self) -> float:
-        return self._x0
-
-    @property
-    def y0(self) -> float:
-        return self._y0
-
-    @property
-    def z0(self) -> float:
-        return self._z0
+        x1 = self._x0 + self.dx * (self.nx - 1)
+        return np.linspace(self._x0, x1, self.nx)
 
     @property
     def dx(self) -> float:
@@ -755,8 +737,8 @@ class Grid3D(_Geometry):
     @property
     def y(self):
         """array of y-axis node coordinates"""
-        y1 = self.y0 + self.dy * (self.ny - 1)
-        return np.linspace(self.y0, y1, self.ny)
+        y1 = self._y0 + self.dy * (self.ny - 1)
+        return np.linspace(self._y0, y1, self.ny)
 
     @property
     def dy(self) -> float:
@@ -771,8 +753,8 @@ class Grid3D(_Geometry):
     @property
     def z(self):
         """array of z-axis node coordinates"""
-        z1 = self.z0 + self.dz * (self.nz - 1)
-        return np.linspace(self.z0, z1, self.nz)
+        z1 = self._z0 + self.dz * (self.nz - 1)
+        return np.linspace(self._z0, z1, self.nz)
 
     @property
     def dz(self) -> float:
@@ -830,18 +812,14 @@ class Grid3D(_Geometry):
             )
 
     def __repr__(self):
-        out = []
-        out.append("<mikeio.Grid3D>")
-        out.append(
-            f"x-axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}"
-        )
-        out.append(
-            f"y-axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}"
-        )
-        out.append(
-            f"z-axis: nz={self.nz} points from z0={self.z[0]:g} to z1={self.z[-1]:g} with dz={self.dz:g}"
-        )
-        return str.join("\n", out)
+        out = [
+            "<mikeio.Grid3D>"
+            f"x-axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
+            f"y-axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
+            f"z-axis: nz={self.nz} points from z0={self.z[0]:g} to z1={self.z[-1]:g} with dz={self.dz:g}",
+        ]
+
+        return "\n".join(out)
 
     def __str__(self):
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"

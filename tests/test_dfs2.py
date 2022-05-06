@@ -173,8 +173,8 @@ def test_write_projected(tmpdir):
     assert ds.geometry.dx == 100
     assert ds.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
-    assert ds.geometry.x0 == 0.0
-    assert ds.geometry.y0 == 0.0
+    assert ds.geometry._x0 == 0.0
+    assert ds.geometry._y0 == 0.0
     assert ds.geometry.origin[0] == pytest.approx(x0)
     assert ds.geometry.origin[1] == pytest.approx(y0)
 
@@ -197,8 +197,8 @@ def test_write_projected(tmpdir):
     assert ds2.geometry.dx == 100
     assert ds2.geometry.dy == 100
     # NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
-    assert ds2.geometry.x0 == pytest.approx(x0)
-    assert ds2.geometry.y0 == pytest.approx(y0)
+    assert ds2.geometry._x0 == pytest.approx(x0)
+    assert ds2.geometry._y0 == pytest.approx(y0)
     assert ds2.geometry.origin[0] == 0.0
     assert ds2.geometry.origin[1] == 0.0
 
@@ -212,8 +212,8 @@ def test_write_projected(tmpdir):
     assert ds3.geometry.dx == 100
     assert ds3.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
-    assert ds3.geometry.x0 == 0.0
-    assert ds3.geometry.y0 == 0.0
+    assert ds3.geometry._x0 == 0.0
+    assert ds3.geometry._y0 == 0.0
     assert ds3.geometry.origin[0] == pytest.approx(x0)
     assert ds3.geometry.origin[1] == pytest.approx(y0)
 
@@ -243,13 +243,50 @@ def test_read_temporal_subset_slice():
     assert len(ds.time) == 13
 
 
+def test_read_area_subset_bad_bbox():
+
+    filename = "tests/testdata/europe_wind_long_lat.dfs2"
+    bbox = (10, 40, 20)
+    with pytest.raises(ValueError):
+        mikeio.read(filename, area=bbox)
+
+
+def test_read_area_subset_geo():
+
+    filename = "tests/testdata/europe_wind_long_lat.dfs2"
+    bbox = (10, 40, 20, 50)
+    dsall = mikeio.read(filename)
+    dssel = dsall.sel(area=bbox)  # selects all pixels with element center in the bbox
+    ds = mikeio.read(filename, area=bbox)
+    assert ds.geometry == dssel.geometry
+    assert ds.geometry.bbox[0] < bbox[0]  #
+    assert ds.geometry.x[0] == pytest.approx(bbox[0])
+    assert ds.geometry.x[-1] == pytest.approx(bbox[2])
+    assert ds.geometry.y[0] == pytest.approx(bbox[1])
+    assert ds.geometry.y[-1] == pytest.approx(bbox[3])
+
+
+def test_subset_bbox_named_tuple():
+    filename = "tests/testdata/europe_wind_long_lat.dfs2"
+    ds = mikeio.read(filename)
+    dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area
+    # assert (
+    #    ds.geometry == dssel.geometry
+    # )  # TODO This is not true due to two different ways of constructing a geometry, with or without origin
+    ds.geometry.bbox == dssel.geometry.bbox
+
+
 def test_read_area_subset():
 
-    filename = r"tests/testdata/eq.dfs2"
+    filename = "tests/testdata/eq.dfs2"
     bbox = [10, 4, 12, 7]
+
+    dsall = mikeio.read(filename)
+    dssel = dsall.sel(area=bbox)
 
     ds = mikeio.read(filename, area=bbox)
     assert ds.shape == (25, 4, 3)
+    assert ds.geometry == dssel.geometry
 
     g = ds.geometry
     assert g.ny == 4

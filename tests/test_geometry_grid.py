@@ -27,8 +27,20 @@ def test_grid1d_x():
     nx = 4
     x = np.linspace(x0, x1, nx)
     g = Grid1D(x=x)
-    assert g.x0 == x0
-    assert g.x1 == x1
+    assert g.x[0] == x0
+    assert g.x[-1] == x1
+
+
+def test_grid1d_equality():
+    g1 = Grid1D(dx=0.1, nx=10)
+    g2 = Grid1D(dx=0.1, nx=10)
+
+    assert g1 == g2
+
+    g3 = Grid1D(dx=0.1, nx=12)
+    g4 = Grid1D(dx=0.1, nx=10)
+
+    assert g3 != g4
 
 
 def test_x_y():
@@ -43,10 +55,6 @@ def test_x_y():
     dy = 1.0
     y = np.linspace(y0, y1, ny)
     g = Grid2D(x=x, y=y)
-    assert g.x0 == x0
-    assert g.x1 == x1
-    assert g.y0 == y0
-    assert g.y1 == y1
     assert np.all(g.x == x)
     assert np.sum(g.y - y) == 0
     assert g.nx == nx
@@ -140,10 +148,10 @@ def test_xx_yy():
 def test_create_in_bbox():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, nx=2, ny=5)
-    assert g.x0 == 0.25
+    assert g.x[0] == 0.25
 
     g = Grid2D(bbox=bbox, nx=2, ny=None)
-    assert g.x0 == 0.25
+    assert g.x[0] == 0.25
 
     g = Grid2D(bbox=bbox)
     assert g.nx == 10
@@ -290,3 +298,21 @@ def test_isel():
     g1 = g.isel(0, axis=1)
 
     assert g1.nx == 20
+
+
+def test_grid2d_equality():
+
+    g1 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
+    g2 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
+
+    assert g1 == g2
+
+    g3 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, projection="LONG/LAT")
+    g4 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
+
+    assert g3 != g4
+
+    g5 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, y0=-5)
+    g6 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, y0=5)
+
+    assert g5 != g6
