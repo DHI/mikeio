@@ -218,6 +218,29 @@ def test_write_projected(tmpdir):
     assert ds3.geometry.origin[1] == pytest.approx(y0)
 
 
+def test_write_without_time(tmpdir):
+    filename = os.path.join(tmpdir.dirname, "utm.dfs2")
+
+    ny = 2
+    nx = 3
+    grid = Grid2D(nx=nx, ny=ny, dx=100, dy=100, projection="UTM-33")
+
+    d = np.random.random((ny, nx))
+    time = pd.date_range("2012-1-1", freq="s", periods=1)
+    da = mikeio.DataArray(data=d, time=time, geometry=grid)
+    da.to_dfs(filename)
+
+    ds = mikeio.read(filename)
+    assert ds.geometry.ny == ny
+    assert ds.geometry.nx == nx
+    assert ds.shape == (1, ny, nx)
+
+    ds = mikeio.read(filename, time=0)
+    assert ds.geometry.ny == ny
+    assert ds.geometry.nx == nx
+    assert ds.shape == (ny, nx)
+
+
 def test_read(dfs2_random):
 
     dfs = dfs2_random
