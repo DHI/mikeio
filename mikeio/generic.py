@@ -539,23 +539,23 @@ def _parse_start_end(dfs_i, start, end):
         end_sec = (end - file_start_datetime).total_seconds()
 
     if start_step < 0:
-        start_step = 0
-        warnings.warn("start cannot be before start of file")
+        raise ValueError(
+            f"start cannot be before start of file. start={start_step} is invalid"
+        )
 
     if start_sec < file_start_sec:
-        start_sec = file_start_sec
-        warnings.warn("start cannot be before start of file")
+        raise ValueError(
+            f"start cannot be before start of file start={start_step} is invalid"
+        )
 
     if (end_sec < start_sec) or (end_step < start_step):
         raise ValueError("end must be after start")
 
     if end_step > n_time_steps:
-        end_step = n_time_steps
-        warnings.warn("end cannot be after end of file")
+        raise ValueError(f"end cannot be after end of file. end={end_step} is invalid.")
 
     if end_sec > file_end_sec:
-        end_sec = file_end_sec
-        warnings.warn("end cannot be after end of file")
+        raise ValueError(f"end cannot be after end of file. end={end_sec} is invalid.")
 
     file_start_new = None
     if dfs_i.FileInfo.TimeAxis.TimeAxisType == 3:

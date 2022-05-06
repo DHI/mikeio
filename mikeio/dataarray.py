@@ -1620,8 +1620,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename) -> None:
-        self._to_dataset().to_dfs(filename)
+    def to_dfs(self, filename, **kwargs) -> None:
+        self._to_dataset().to_dfs(filename, **kwargs)
 
     def to_xarray(self):
         """Export to xarray.DataArray"""
