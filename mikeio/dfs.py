@@ -163,28 +163,29 @@ class _Dfs123(TimeSeries):
         )
 
         shape = np.shape(data[0])
+        t_offset = 0 if len(shape) == self._ndim else 1
         if self._ndim == 1:
-            self._nx = shape[1]
+            self._nx = shape[t_offset + 0]
         elif self._ndim == 2:
-            self._ny = shape[1]
-            self._nx = shape[2]
+            self._ny = shape[t_offset + 0]
+            self._nx = shape[t_offset + 1]
         elif self._ndim == 3:
-            self._nz = shape[1]
-            self._ny = shape[2]
-            self._nx = shape[3]
+            self._nz = shape[t_offset + 0]
+            self._ny = shape[t_offset + 1]
+            self._nx = shape[t_offset + 2]
 
         self._factory = DfsFactory()
         self._set_spatial_axis()
 
         if self._ndim == 1:
-            if not all(np.shape(d)[1] == self._nx for d in self._data):
+            if not all(np.shape(d)[t_offset + 0] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
 
         if self._ndim == 2:
-            if not all(np.shape(d)[1] == self._ny for d in self._data):
+            if not all(np.shape(d)[t_offset + 0] == self._ny for d in self._data):
                 raise DataDimensionMismatch()
 
-            if not all(np.shape(d)[2] == self._nx for d in self._data):
+            if not all(np.shape(d)[t_offset + 1] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
         if datetimes is not None:
             self._is_equidistant = False
@@ -199,7 +200,7 @@ class _Dfs123(TimeSeries):
         for i in trange(self._n_timesteps, disable=not self.show_progress):
             for item in range(self._n_items):
 
-                d = self._data[item][i]
+                d = self._data[item][i] if t_offset == 1 else self._data[item]
                 d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 
@@ -291,6 +292,7 @@ class _Dfs123(TimeSeries):
         if isinstance(data, Dataset):
             self._items = data.items
             self._start_time = data.time[0]
+            self._n_timesteps = len(data.time)
             if dt is None and len(data.time) > 1:
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
             self._data = data.to_numpy()
