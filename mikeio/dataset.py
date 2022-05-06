@@ -1604,6 +1604,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         _write_dfsu(filename, self)
 
+    def to_xarray(self):
+        """Export to xarray.Dataset"""
+        import xarray
+
+        data = {da.name: da.to_xarray() for da in self}
+        return xarray.Dataset(data)
+
     # ===============================================
 
     def __repr__(self) -> str:

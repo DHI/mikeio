@@ -1624,17 +1624,27 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self._to_dataset().to_dfs(filename)
 
     def to_xarray(self):
+        """Export to xarray.DataArray"""
+
         import xarray as xr
 
-        coords = None
-
-        if isinstance(self.geometry, Grid2D):
-            coords = {}
+        coords = {}
+        if self._has_time_axis:
             coords["time"] = xr.DataArray(self.time, dims="time")
-            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
 
-        # TODO other geometries
+        if isinstance(self.geometry, Grid1D):
+            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
+        elif isinstance(self.geometry, Grid2D):
+            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
+            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
+        elif isinstance(self.geometry, Grid3D):
+            coords["z"] = xr.DataArray(data=self.geometry.z, dims="z")
+            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
+            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
+        elif isinstance(self.geometry, GeometryFM):
+            coords["element"] = xr.DataArray(
+                data=self.geometry.element_ids, dims="element"
+            )
 
         xr_da = xr.DataArray(
             data=self.values,
