@@ -37,49 +37,6 @@ def test_repr_empty():
     assert "Dfs1" in text
 
 
-def test_simple_write(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfs1")
-
-    nt = 100
-    nx = 20
-    d = np.random.random([nt, nx])
-
-    ds = Dataset(
-        data=[d], time=pd.date_range("2000", freq="H", periods=nt), items=["My item"]
-    )
-
-    dfs = Dfs1()
-
-    dfs.write(filename=filename, data=ds)
-
-    assert True
-
-
-def test_write_single_item(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "random.dfs1")
-
-    d = np.random.random([100, 3])
-
-    ds = Dataset(
-        data=[d],
-        time=pd.date_range("2012-1-1", periods=100, freq="12s"),
-        items=[ItemInfo("testing water level", EUMType.Water_Level, EUMUnit.meter)],
-    )
-
-    dfs = Dfs1()
-
-    dfs.write(
-        filename=filename,
-        data=ds,
-        dx=100,
-        title="test dfs1",
-    )
-
-    assert True
-
-
 def test_read():
 
     filename = r"tests/testdata/random.dfs1"
