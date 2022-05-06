@@ -9,7 +9,6 @@ from copy import deepcopy
 import collections.abc
 
 from mikecore.DfsFile import DfsSimpleType
-import xarray
 
 from .eum import EUMType, ItemInfo
 from .data_utils import DataUtilsMixin
@@ -1605,8 +1604,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         _write_dfsu(filename, self)
 
-    def to_xarray(self) -> xarray.Dataset:
+    def to_xarray(self):
         """Export to xarray.Dataset"""
+        import xarray
 
         data = {da.name: da.to_xarray() for da in self}
         return xarray.Dataset(data)
