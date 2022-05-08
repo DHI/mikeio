@@ -39,6 +39,19 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
     return x0, dx, nx
 
 
+def _print_axis_txt(name, x, dx) -> str:
+    n = len(x)
+    txt = f"{name}-axis: [{x[0]:0.4g}"
+    if n > 1:
+        txt = txt + f", {x[1]:0.4g}"
+    if n > 2:
+        txt = txt + f", {x[2]:0.4g}"
+    if n > 3:
+        txt = txt + f", ..., {x[-1]:0.4g}"
+    txt = txt + f"] (n{name}={n}, d{name}={dx:0.4g})"
+    return txt
+
+
 @dataclass
 class Grid1D(_Geometry):
     """1D grid (node-based)
@@ -168,7 +181,7 @@ class Grid2D(_Geometry):
     _projstr: str
     _origin: Tuple[float, float]
     _orientation: float
-    _is_spectral: bool
+    is_spectral: bool
 
     def __init__(
         self,
@@ -207,21 +220,7 @@ class Grid2D(_Geometry):
             dy = self._dx if dy is None else dy
             self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
 
-        self._x_logarithmic = False
-        self._is_spectral = is_spectral
-
-    @property
-    def is_spectral(self):
-        return self._is_spectral
-
-    @is_spectral.setter
-    def is_spectral(self, value):
-        if self._is_spectral and (not value):
-            self._is_spectral = False
-            self._x_logarithmic = False
-        if (not self._is_spectral) and value:
-            self._is_spectral = True
-            self._x_logarithmic = self.dx > 1.0
+        self.is_spectral = is_spectral
 
     @property
     def _is_rotated(self):
@@ -311,11 +310,18 @@ class Grid2D(_Geometry):
         return x0, dx, nx
 
     def __repr__(self):
-        out = [
-            "<mikeio.Grid2D>",
-            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
-            f"axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
-        ]
+        out = (
+            ["<mikeio.Grid2D> (spectral)"] if self.is_spectral else ["<mikeio.Grid2D>"]
+        )
+        out.append(_print_axis_txt("x", self.x, self.dx))
+        out.append(_print_axis_txt("y", self.y, self.dy))
+        if self._is_rotated:
+            ox, oy = self.origin
+            out.append(
+                f"origin: ({ox:.4g}, {oy:.4g}), orientation: {self._orientation:.3f}"
+            )
+        if self.projection_string:
+            out.append(f"projection: {self.projection_string}")
 
         return "\n".join(out)
 
@@ -335,12 +341,12 @@ class Grid2D(_Geometry):
     @property
     def x(self):
         """array of x coordinates (element center)"""
-        if self.is_spectral:
+        if self.is_spectral and self.dx > 1:
             return self.logarithmic_f(self.nx, self._x0, self.dx)
 
         x1 = self._x0 + self.dx * (self.nx - 1)
         x_local = np.linspace(self._x0, x1, self.nx)
-        if self._is_rotated:
+        if self._is_rotated or self.is_spectral:
             return x_local
         else:
             return x_local + self._origin[0]
