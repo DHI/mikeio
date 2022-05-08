@@ -44,7 +44,7 @@ def _print_axis_txt(name, x, dx) -> str:
     txt = f"{name}-axis: [{x[0]:0.4g}"
     if n > 1:
         txt = txt + f", {x[1]:0.4g}"
-    if n > 2:
+    if n == 3:
         txt = txt + f", {x[2]:0.4g}"
     if n > 3:
         txt = txt + f", ..., {x[-1]:0.4g}"
