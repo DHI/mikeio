@@ -91,10 +91,7 @@ class Grid1D(_Geometry):
         self._axis_name = axis_name
 
     def __repr__(self):
-        out = [
-            "<mikeio.Grid1D>",
-            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
-        ]
+        out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
         return "\n".join(out)
 
     def __str__(self):
@@ -882,9 +879,15 @@ class Grid3D(_Geometry):
         g = self
         if len(layers) == 1:
             geometry = Grid2D(
-                x=g.x + g._origin[0],
-                y=g.y + g._origin[1],
-                projection=g.projection,
+                dx=g._dx,
+                dy=g._dy,
+                nx=g._nx,
+                ny=g._ny,
+                x0=g._x0,
+                y0=g._y0,
+                origin=g.origin,
+                projection=g._projstr,
+                orientation=g.orientation,
             )
         else:
             d = np.diff(g.z[layers])
@@ -898,5 +901,6 @@ class Grid3D(_Geometry):
                     z=g.z[layers],
                     origin=g._origin,
                     projection=g.projection,
+                    orientation=g.orientation,
                 )
         return geometry
