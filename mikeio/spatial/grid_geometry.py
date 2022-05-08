@@ -765,7 +765,7 @@ class Grid3D(_Geometry):
         return self._dx
 
     @property
-    def nx(self):
+    def nx(self) -> int:
         """number of x-axis nodes"""
         return self._nx
 
@@ -781,7 +781,7 @@ class Grid3D(_Geometry):
         return self._dy
 
     @property
-    def ny(self):
+    def ny(self) -> int:
         """number of y-axis nodes"""
         return self._ny
 
@@ -797,9 +797,17 @@ class Grid3D(_Geometry):
         return self._dz
 
     @property
-    def nz(self):
+    def nz(self) -> int:
         """number of z-axis nodes"""
         return self._nz
+
+    @property
+    def origin(self) -> Tuple[float, float]:
+        return self._origin
+
+    @property
+    def orientation(self) -> float:
+        return self._orientation
 
     def find_index(self, coords=None, layer=None, area=None):
         if layer is not None:
@@ -825,9 +833,15 @@ class Grid3D(_Geometry):
             # z is the first axis! return x-y Grid2D
             # TODO: origin, how to pass self.z[idx]?
             return Grid2D(
-                x=self.x + self._origin[0],
-                y=self.y + self._origin[1],
+                x0=self._x0,
+                y0=self._y0,
+                nx=self.nx,
+                ny=self.ny,
+                dx=self.dx,
+                dy=self.dy,
                 projection=self.projection,
+                origin=self.origin,
+                orientation=self.orientation,
             )
         elif axis == 1:
             # y is the second axis! return x-z Grid2D
@@ -847,13 +861,15 @@ class Grid3D(_Geometry):
             )
 
     def __repr__(self):
-        out = [
-            "<mikeio.Grid3D>"
-            f"x-axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
-            f"y-axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
-            f"z-axis: nz={self.nz} points from z0={self.z[0]:g} to z1={self.z[-1]:g} with dz={self.dz:g}",
-        ]
-
+        out = ["<mikeio.Grid3D>"]
+        out.append(_print_axis_txt("x", self.x, self.dx))
+        out.append(_print_axis_txt("y", self.y, self.dy))
+        out.append(_print_axis_txt("z", self.z, self.dz))
+        out.append(
+            f"origin: ({self._origin[0]:.4g}, {self._origin[1]:.4g}), orientation: {self._orientation:.3f}"
+        )
+        if self.projection_string:
+            out.append(f"projection: {self.projection_string}")
         return "\n".join(out)
 
     def __str__(self):
