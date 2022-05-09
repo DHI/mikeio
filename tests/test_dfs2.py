@@ -36,6 +36,18 @@ def dfs2_pt_spectrum():
 
 
 @pytest.fixture
+def dfs2_pt_spectrum_linearf():
+    filepath = Path("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    return Dfs2(filepath)
+
+
+@pytest.fixture
+def dfs2_vertical_nonutm():
+    filepath = Path("tests/testdata/hd_vertical_slice.dfs2")
+    return Dfs2(filepath)
+
+
+@pytest.fixture
 def dfs2_gebco():
     filepath = Path("tests/testdata/gebco_sound.dfs2")
     return Dfs2(filepath)
@@ -196,10 +208,7 @@ def test_subset_bbox_named_tuple():
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     ds = mikeio.read(filename)
     dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area
-    # assert (
-    #    ds.geometry == dssel.geometry
-    # )  # TODO This is not true due to two different ways of constructing a geometry, with or without origin
-    ds.geometry.bbox == dssel.geometry.bbox
+    assert ds.geometry == dssel.geometry
 
 
 def test_read_area_subset():
@@ -240,6 +249,40 @@ def test_read_numbered_access(dfs2_random_2items):
     assert res.items[0].name == "Untitled"
 
 
+def test_properties_vertical_nonutm(dfs2_vertical_nonutm):
+    dfs = dfs2_vertical_nonutm
+    assert dfs.x0 == 0
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(0.01930449)
+    assert dfs.dy == 1
+    assert dfs.nx == 41
+    assert dfs.ny == 76
+    assert dfs.longitude == 0
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 4
+    assert dfs.n_timesteps == 13
+
+    g = dfs.geometry
+    assert g.x[0] == dfs.x0
+    assert g.y[0] == dfs.y0
+    assert g.dx == dfs.dx
+    assert g.dy == 1
+    assert g.orientation == 0
+
+
+def test_isel_vertical_nonutm(dfs2_vertical_nonutm):
+    ds = dfs2_vertical_nonutm.read()
+    dssel = ds.isel(y=slice(45, None))
+    g = dssel.geometry
+    assert g._x0 == 0
+    assert g._y0 == 0  # TODO: should this be 45?
+    assert g.x[0] == 0
+    assert g.y[0] == 45
+    assert g.origin[0] == 0
+    assert g.origin[1] == 45  # TODO: should this be 0?
+
+
 def test_properties_pt_spectrum(dfs2_pt_spectrum):
     dfs = dfs2_pt_spectrum
     assert dfs.x0 == pytest.approx(0.055)
@@ -254,6 +297,43 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert dfs.n_items == 1
     assert dfs.n_timesteps == 31
 
+    g = dfs.geometry
+    assert g.x[0] == pytest.approx(0.055)
+    assert g.x[-1] > 25  # if considered linear
+    assert g.y[0] == 0
+    assert g.dx == pytest.approx(1.1)
+    assert g.dy == 22.5
+    assert g.orientation == 0
+
+    g.is_spectral = True
+    assert g.x[-1] < 0.6  # logarithmic
+
+
+def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
+    dfs = dfs2_pt_spectrum_linearf
+    assert dfs.x0 == pytest.approx(0.00390625)
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(0.00390625)
+    assert dfs.dy == 10
+    assert dfs.nx == 128
+    assert dfs.ny == 37
+    assert dfs.longitude == 0
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 1
+    assert dfs.n_timesteps == 1
+
+    g = dfs.geometry
+    assert g.x[0] == pytest.approx(0.00390625)
+    assert g.x[-1] == 0.5  # linear
+    assert g.y[0] == 0
+    assert g.dx == pytest.approx(0.00390625)
+    assert g.dy == 10
+    assert g.orientation == 0
+
+    g.is_spectral = True
+    assert g.x[-1] == 0.5  # still linear
+
 
 def test_dir_wave_spectra_relative_time_axis():
     ds = mikeio.read("tests/testdata/dir_wave_analysis_spectra.dfs2")
@@ -265,21 +345,58 @@ def test_dir_wave_spectra_relative_time_axis():
     assert da.type == EUMType._3D_Surface_Elevation_Spectrum
 
 
-def test_properties_rotated():
+def test_properties_rotated_longlat():
     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
     with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"):
         Dfs2(filepath)
-    # assert dfs.x0 == 0
-    # assert dfs.y0 == 0
-    # assert dfs.dx == pytest.approx(0.00416667)
-    # assert dfs.dy == pytest.approx(0.00416667)
-    # assert dfs.nx == 140
-    # assert dfs.ny == 150
-    # assert dfs.longitude == pytest.approx(12.2854167)
-    # assert dfs.latitude == pytest.approx(55.3270833)
-    # assert dfs.orientation == 45
-    # assert dfs.n_items == 1
-    # assert dfs.n_timesteps == 1
+
+
+def test_properties_rotated_UTM():
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    dfs = Dfs2(filepath)
+    g = dfs.geometry
+    assert dfs.x0 == 0
+    assert dfs.y0 == 0
+    assert dfs.dx == 5
+    assert dfs.dy == 5
+    assert dfs.nx == 263
+    assert dfs.ny == 172
+    assert dfs.longitude == pytest.approx(14.6814730403)
+    assert dfs.latitude == pytest.approx(55.090063)
+    assert dfs.orientation == pytest.approx(-22.2387902)
+    assert g.orientation == dfs.orientation
+    # origin is projected coordinates
+    assert g.origin == pytest.approx((479670, 6104860))
+
+
+def test_select_area_rotated_UTM(tmpdir):
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    ds = mikeio.read(filepath)
+
+    dssel = ds.isel(x=range(10, 20), y=range(15, 45))
+    assert ds.geometry.orientation == dssel.geometry.orientation
+    assert dssel.geometry._x0 == ds.geometry.x[10]
+    assert dssel.geometry._y0 == ds.geometry.y[15]
+
+    tmpfile = os.path.join(tmpdir.dirname, "subset_rotated.dfs2")
+    dssel.to_dfs(tmpfile)
+    dfs = mikeio.open(tmpfile)
+    g = dfs.geometry
+
+    assert dfs.x0 == 50
+    assert dfs.y0 == 75
+    assert dfs.dx == 5
+    assert dfs.dy == 5
+    assert dfs.nx == 10
+    assert dfs.ny == 30
+    assert dfs.longitude == pytest.approx(14.6814730403)
+    assert dfs.latitude == pytest.approx(55.090063)
+    assert dfs.orientation == pytest.approx(-22.2387902)
+    assert g.orientation == dfs.orientation
+    # origin is projected coordinates
+    assert g.origin == pytest.approx((479670, 6104860))
+    assert g.x[0] == dfs.x0
+    assert g.y[0] == dfs.y0
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):

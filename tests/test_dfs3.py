@@ -103,9 +103,9 @@ def test_dfs3_read_write(tmpdir):
 
 def test_read_rotated_grid():
     ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
-    assert (
-        pytest.approx(ds.geometry._orientation) == 18.1246891021729
-    )  # North to Y rotation != Grid rotation
+    assert pytest.approx(ds.geometry.orientation) == 18.1246891
+
+    # North to Y rotation != Grid rotation
 
 
 def test_dfs3_to_dfs(tmpdir):
@@ -117,12 +117,24 @@ def test_dfs3_to_dfs(tmpdir):
     dsnew = mikeio.read(outfilename)
 
     assert ds.n_items == dsnew.n_items
+    assert ds.geometry == dsnew.geometry
 
 
 def test_read_top_layer():
+    dsall = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
     ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3", layers="top")
     assert "z" not in ds.dims
     assert isinstance(ds.geometry, Grid2D)
+
+    # TODO: not yet implemented
+    # dssel = dsall.sel(layer="top")
+    # assert dssel.geometry == ds.geometry
+
+    dssel = dsall.isel(z=-1)
+    assert dssel.geometry == ds.geometry
+    dsdiff = dssel - ds
+    assert dsdiff.nanmax(axis=None).to_numpy()[0] == 0.0
+    assert dsdiff.nanmin(axis=None).to_numpy()[0] == 0.0
 
 
 def test_read_bottom_layer():

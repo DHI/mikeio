@@ -39,6 +39,19 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
     return x0, dx, nx
 
 
+def _print_axis_txt(name, x, dx) -> str:
+    n = len(x)
+    txt = f"{name}: [{x[0]:0.4g}"
+    if n > 1:
+        txt = txt + f", {x[1]:0.4g}"
+    if n == 3:
+        txt = txt + f", {x[2]:0.4g}"
+    if n > 3:
+        txt = txt + f", ..., {x[-1]:0.4g}"
+    txt = txt + f"] (n{name}={n}, d{name}={dx:0.4g})"
+    return txt
+
+
 @dataclass
 class Grid1D(_Geometry):
     """1D grid (node-based)
@@ -78,10 +91,7 @@ class Grid1D(_Geometry):
         self._axis_name = axis_name
 
     def __repr__(self):
-        out = [
-            "<mikeio.Grid1D>",
-            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
-        ]
+        out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
         return "\n".join(out)
 
     def __str__(self):
@@ -168,7 +178,7 @@ class Grid2D(_Geometry):
     _projstr: str
     _origin: Tuple[float, float]
     _orientation: float
-    _is_spectral: bool
+    is_spectral: bool
 
     def __init__(
         self,
@@ -207,21 +217,7 @@ class Grid2D(_Geometry):
             dy = self._dx if dy is None else dy
             self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
 
-        self._x_logarithmic = False
-        self._is_spectral = is_spectral
-
-    @property
-    def is_spectral(self):
-        return self._is_spectral
-
-    @is_spectral.setter
-    def is_spectral(self, value):
-        if self._is_spectral and (not value):
-            self._is_spectral = False
-            self._x_logarithmic = False
-        if (not self._is_spectral) and value:
-            self._is_spectral = True
-            self._x_logarithmic = self.dx > 1.0
+        self.is_spectral = is_spectral
 
     @property
     def _is_rotated(self):
@@ -311,11 +307,18 @@ class Grid2D(_Geometry):
         return x0, dx, nx
 
     def __repr__(self):
-        out = [
-            "<mikeio.Grid2D>",
-            f"axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
-            f"axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
-        ]
+        out = (
+            ["<mikeio.Grid2D> (spectral)"] if self.is_spectral else ["<mikeio.Grid2D>"]
+        )
+        out.append(_print_axis_txt("x", self.x, self.dx))
+        out.append(_print_axis_txt("y", self.y, self.dy))
+        if self._is_rotated:
+            ox, oy = self.origin
+            out.append(
+                f"origin: ({ox:.4g}, {oy:.4g}), orientation: {self._orientation:.3f}"
+            )
+        if self.projection_string:
+            out.append(f"projection: {self.projection_string}")
 
         return "\n".join(out)
 
@@ -335,12 +338,12 @@ class Grid2D(_Geometry):
     @property
     def x(self):
         """array of x coordinates (element center)"""
-        if self.is_spectral:
+        if self.is_spectral and self.dx > 1:
             return self.logarithmic_f(self.nx, self._x0, self.dx)
 
         x1 = self._x0 + self.dx * (self.nx - 1)
         x_local = np.linspace(self._x0, x1, self.nx)
-        if self._is_rotated:
+        if self._is_rotated or self.is_spectral:
             return x_local
         else:
             return x_local + self._origin[0]
@@ -583,8 +586,8 @@ class Grid2D(_Geometry):
         else:
             dx = self.dx * di[0]
             dy = self.dy * dj[0]
-            x0 = self.x[ii[0]] - self.x[0]
-            y0 = self.y[jj[0]] - self.y[0]
+            x0 = self._x0 + (self.x[ii[0]] - self.x[0])
+            y0 = self._y0 + (self.y[jj[0]] - self.y[0])
             origin = None if self._shift_origin_on_write else self.origin
             if not self._is_rotated and not self._shift_origin_on_write:
                 origin = (self.origin[0] + x0, self.origin[1] + y0)
@@ -759,7 +762,7 @@ class Grid3D(_Geometry):
         return self._dx
 
     @property
-    def nx(self):
+    def nx(self) -> int:
         """number of x-axis nodes"""
         return self._nx
 
@@ -775,7 +778,7 @@ class Grid3D(_Geometry):
         return self._dy
 
     @property
-    def ny(self):
+    def ny(self) -> int:
         """number of y-axis nodes"""
         return self._ny
 
@@ -791,9 +794,17 @@ class Grid3D(_Geometry):
         return self._dz
 
     @property
-    def nz(self):
+    def nz(self) -> int:
         """number of z-axis nodes"""
         return self._nz
+
+    @property
+    def origin(self) -> Tuple[float, float]:
+        return self._origin
+
+    @property
+    def orientation(self) -> float:
+        return self._orientation
 
     def find_index(self, coords=None, layer=None, area=None):
         if layer is not None:
@@ -819,9 +830,15 @@ class Grid3D(_Geometry):
             # z is the first axis! return x-y Grid2D
             # TODO: origin, how to pass self.z[idx]?
             return Grid2D(
-                x=self.x + self._origin[0],
-                y=self.y + self._origin[1],
+                x0=self._x0,
+                y0=self._y0,
+                nx=self.nx,
+                ny=self.ny,
+                dx=self.dx,
+                dy=self.dy,
                 projection=self.projection,
+                origin=self.origin,
+                orientation=self.orientation,
             )
         elif axis == 1:
             # y is the second axis! return x-z Grid2D
@@ -841,13 +858,15 @@ class Grid3D(_Geometry):
             )
 
     def __repr__(self):
-        out = [
-            "<mikeio.Grid3D>"
-            f"x-axis: nx={self.nx} points from x0={self.x[0]:g} to x1={self.x[-1]:g} with dx={self.dx:g}",
-            f"y-axis: ny={self.ny} points from y0={self.y[0]:g} to y1={self.y[-1]:g} with dy={self.dy:g}",
-            f"z-axis: nz={self.nz} points from z0={self.z[0]:g} to z1={self.z[-1]:g} with dz={self.dz:g}",
-        ]
-
+        out = ["<mikeio.Grid3D>"]
+        out.append(_print_axis_txt("x", self.x, self.dx))
+        out.append(_print_axis_txt("y", self.y, self.dy))
+        out.append(_print_axis_txt("z", self.z, self.dz))
+        out.append(
+            f"origin: ({self._origin[0]:.4g}, {self._origin[1]:.4g}), orientation: {self._orientation:.3f}"
+        )
+        if self.projection_string:
+            out.append(f"projection: {self.projection_string}")
         return "\n".join(out)
 
     def __str__(self):
@@ -860,9 +879,15 @@ class Grid3D(_Geometry):
         g = self
         if len(layers) == 1:
             geometry = Grid2D(
-                x=g.x + g._origin[0],
-                y=g.y + g._origin[1],
-                projection=g.projection,
+                dx=g._dx,
+                dy=g._dy,
+                nx=g._nx,
+                ny=g._ny,
+                x0=g._x0,
+                y0=g._y0,
+                origin=g.origin,
+                projection=g._projstr,
+                orientation=g.orientation,
             )
         else:
             d = np.diff(g.z[layers])
@@ -876,5 +901,6 @@ class Grid3D(_Geometry):
                     z=g.z[layers],
                     origin=g._origin,
                     projection=g.projection,
+                    orientation=g.orientation,
                 )
         return geometry
