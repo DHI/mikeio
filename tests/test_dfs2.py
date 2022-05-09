@@ -36,6 +36,12 @@ def dfs2_pt_spectrum():
 
 
 @pytest.fixture
+def dfs2_pt_spectrum_linearf():
+    filepath = Path("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    return Dfs2(filepath)
+
+
+@pytest.fixture
 def dfs2_gebco():
     filepath = Path("tests/testdata/gebco_sound.dfs2")
     return Dfs2(filepath)
@@ -264,6 +270,32 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
 
     g.is_spectral = True
     assert g.x[-1] < 0.6  # logarithmic
+
+
+def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
+    dfs = dfs2_pt_spectrum_linearf
+    assert dfs.x0 == pytest.approx(0.00390625)
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(0.00390625)
+    assert dfs.dy == 10
+    assert dfs.nx == 128
+    assert dfs.ny == 37
+    assert dfs.longitude == 0
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 1
+    assert dfs.n_timesteps == 1
+
+    g = dfs.geometry
+    assert g.x[0] == pytest.approx(0.00390625)
+    assert g.x[-1] == 0.5  # linear
+    assert g.y[0] == 0
+    assert g.dx == pytest.approx(0.00390625)
+    assert g.dy == 10
+    assert g.orientation == 0
+
+    g.is_spectral = True
+    assert g.x[-1] == 0.5  # still linear
 
 
 def test_dir_wave_spectra_relative_time_axis():
