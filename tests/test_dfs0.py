@@ -275,6 +275,36 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     assert ds.time[0].year == 1958
 
 
+def test_write_dataframe_different_eum_types_to_dfs0(tmpdir):
+
+    time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
+
+    df = pd.DataFrame(
+        {"flow": np.array([1, np.nan, 2]), "level": np.array([2, 3.0, -1.3])}
+    )
+    df.index = time
+
+    dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
+
+    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+
+    dfr.to_dfs0(
+        filename,
+        items=[
+            mikeio.ItemInfo("Flow", itemtype=mikeio.EUMType.Discharge),
+            mikeio.ItemInfo("Level", itemtype=mikeio.EUMType.Water_Level),
+        ],
+    )
+
+    ds = mikeio.read(filename)
+    assert ds.n_timesteps == 15
+    assert ds[0].type == mikeio.EUMType.Discharge
+    assert ds[1].type == mikeio.EUMType.Water_Level
+    assert len(ds) == 2
+    assert ds.end_time == dfr.index[-1]
+    assert ds.is_equidistant
+
+
 def test_write_from_pandas_series_monkey_patched(tmpdir):
 
     df = pd.read_csv(
