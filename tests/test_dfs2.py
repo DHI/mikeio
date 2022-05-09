@@ -208,10 +208,7 @@ def test_subset_bbox_named_tuple():
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     ds = mikeio.read(filename)
     dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area
-    # assert (
-    #    ds.geometry == dssel.geometry
-    # )  # TODO This is not true due to two different ways of constructing a geometry, with or without origin
-    ds.geometry.bbox == dssel.geometry.bbox
+    assert ds.geometry == dssel.geometry
 
 
 def test_read_area_subset():
