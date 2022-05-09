@@ -41,7 +41,7 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
 
 def _print_axis_txt(name, x, dx) -> str:
     n = len(x)
-    txt = f"{name}-axis: [{x[0]:0.4g}"
+    txt = f"{name}: [{x[0]:0.4g}"
     if n > 1:
         txt = txt + f", {x[1]:0.4g}"
     if n == 3:
