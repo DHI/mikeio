@@ -586,8 +586,8 @@ class Grid2D(_Geometry):
         else:
             dx = self.dx * di[0]
             dy = self.dy * dj[0]
-            x0 = self.x[ii[0]] - self.x[0]
-            y0 = self.y[jj[0]] - self.y[0]
+            x0 = self._x0 + (self.x[ii[0]] - self.x[0])
+            y0 = self._y0 + (self.y[jj[0]] - self.y[0])
             origin = None if self._shift_origin_on_write else self.origin
             if not self._is_rotated and not self._shift_origin_on_write:
                 origin = (self.origin[0] + x0, self.origin[1] + y0)
