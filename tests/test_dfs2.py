@@ -42,6 +42,12 @@ def dfs2_pt_spectrum_linearf():
 
 
 @pytest.fixture
+def dfs2_vertical_nonutm():
+    filepath = Path("tests/testdata/hd_vertical_slice.dfs2")
+    return Dfs2(filepath)
+
+
+@pytest.fixture
 def dfs2_gebco():
     filepath = Path("tests/testdata/gebco_sound.dfs2")
     return Dfs2(filepath)
@@ -244,6 +250,40 @@ def test_read_numbered_access(dfs2_random_2items):
     assert np.isnan(res[0].to_numpy()[0, 0, 0])
     assert res.time is not None
     assert res.items[0].name == "Untitled"
+
+
+def test_properties_vertical_nonutm(dfs2_vertical_nonutm):
+    dfs = dfs2_vertical_nonutm
+    assert dfs.x0 == 0
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(0.01930449)
+    assert dfs.dy == 1
+    assert dfs.nx == 41
+    assert dfs.ny == 76
+    assert dfs.longitude == 0
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 4
+    assert dfs.n_timesteps == 13
+
+    g = dfs.geometry
+    assert g.x[0] == dfs.x0
+    assert g.y[0] == dfs.y0
+    assert g.dx == dfs.dx
+    assert g.dy == 1
+    assert g.orientation == 0
+
+
+def test_isel_vertical_nonutm(dfs2_vertical_nonutm):
+    ds = dfs2_vertical_nonutm.read()
+    dssel = ds.isel(y=slice(45, None))
+    g = dssel.geometry
+    assert g._x0 == 0
+    assert g._y0 == 0  # TODO: should this be 45?
+    assert g.x[0] == 0
+    assert g.y[0] == 45
+    assert g.origin[0] == 0
+    assert g.origin[1] == 45  # TODO: should this be 0?
 
 
 def test_properties_pt_spectrum(dfs2_pt_spectrum):
