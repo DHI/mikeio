@@ -19,7 +19,7 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.0.b2"
+__version__ = "1.0.dev3"
 
 
 if "64" not in architecture()[0]:
