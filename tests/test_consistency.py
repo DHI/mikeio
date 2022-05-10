@@ -229,3 +229,21 @@ def test_read_dfs2_time_selection_str():
     dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time="2018-03")
 
     assert all(dsr.time == dssel.time)
+
+
+def test_read_dfs1_time_selection_str():
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
+    dssel = ds.sel(time="2018-03")
+
+    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfs1", time="2018-03")
+
+    assert all(dsr.time == dssel.time)
+
+
+def test_read_dfs0_time_selection_str():
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs0")
+    dssel = ds.sel(time="2018-03")
+
+    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfs0", time="2018-03")
+
+    assert all(dsr.time == dssel.time)
