@@ -211,3 +211,21 @@ def test_read_dfsu2d_single_time():
 
     assert ds.n_timesteps == 1
     assert "time" in ds.dims
+
+
+def test_read_dfsu2d_time_selection_str():
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
+    dssel = ds.sel(time="2018-03")
+
+    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time="2018-03")
+
+    assert all(dsr.time == dssel.time)
+
+
+def test_read_dfs2_time_selection_str():
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+    dssel = ds.sel(time="2018-03")
+
+    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time="2018-03")
+
+    assert all(dsr.time == dssel.time)
