@@ -32,10 +32,10 @@ Selecting items
 Selecting a specific item "itemA" (at position 0) from a Dataset ds can be 
 done with:
 
-* ds[["itemA"]] - returns a new Dataset with "itemA"
-* ds["itemA"] - returns the data of "itemA"
-* ds[[0]] - returns a new Dataset with "itemA" 
-* ds[0] - returns the data of "itemA"
+* `ds[["itemA"]]` - returns a new Dataset with "itemA"
+* `ds["itemA"]` - returns the data of "itemA"
+* `ds[[0]]` - returns a new Dataset with "itemA" 
+* `ds[0]` - returns the data of "itemA"
 
 ```
 >>> ds.Surface_elevation
@@ -149,8 +149,8 @@ and + and - between two Datasets (if number of items and shapes conform):
 Other methods that also return a Dataset:
 
 * [`interp_time()`](Dataset.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
-* [`dropna()](Dataset.dropna) - Remove time steps where all items are NaN
-* [`squeeze()](Dataset.squeeze) - Remove axes of length 1
+* [`dropna()`](Dataset.dropna) - Remove time steps where all items are NaN
+* [`squeeze()`](Dataset.squeeze) - Remove axes of length 1
 
 *Conversion* methods:
 

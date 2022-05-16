@@ -114,10 +114,10 @@ The <code class="docutils literal notranslate"><span class="pre">mikeio.read()</
 <p>Selecting a specific item “itemA” (at position 0) from a Dataset ds can be
 done with:</p>
 <ul class="simple">
-<li><p>ds[[“itemA”]] - returns a new Dataset with “itemA”</p></li>
-<li><p>ds[“itemA”] - returns the data of “itemA”</p></li>
-<li><p>ds[[0]] - returns a new Dataset with “itemA”</p></li>
-<li><p>ds[0] - returns the data of “itemA”</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ds[[&quot;itemA&quot;]]</span></code> - returns a new Dataset with “itemA”</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ds[&quot;itemA&quot;]</span></code> - returns the data of “itemA”</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ds[[0]]</span></code> - returns a new Dataset with “itemA”</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ds[0]</span></code> - returns the data of “itemA”</p></li>
 </ul>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">Surface_elevation</span>
 <span class="go">&lt;mikeio.DataArray&gt;</span>
@@ -228,8 +228,8 @@ including different ways of <em>selecting</em> data:</p>
 <p>Other methods that also return a Dataset:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#mikeio.Dataset.interp_time" title="mikeio.Dataset.interp_time"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">interp_time()</span></code></span></a> - Temporal interpolation (see <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb">Time interpolation notebook</a>)</p></li>
-<li><p><a class="reference internal" href="#mikeio.Dataset.dropna" title="mikeio.Dataset.dropna"><span class="xref myst py py-meth">`dropna()</span></a> - Remove time steps where all items are NaN</p></li>
-<li><p><a class="reference internal" href="#mikeio.Dataset.squeeze" title="mikeio.Dataset.squeeze"><span class="xref myst py py-meth">`squeeze()</span></a> - Remove axes of length 1</p></li>
+<li><p><a class="reference internal" href="#mikeio.Dataset.dropna" title="mikeio.Dataset.dropna"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">dropna()</span></code></span></a> - Remove time steps where all items are NaN</p></li>
+<li><p><a class="reference internal" href="#mikeio.Dataset.squeeze" title="mikeio.Dataset.squeeze"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">squeeze()</span></code></span></a> - Remove axes of length 1</p></li>
 </ul>
 <p><em>Conversion</em> methods:</p>
 <ul class="simple">
