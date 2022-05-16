@@ -20,7 +20,7 @@ setuptools.setup(
             "pytest",
             "black==22.3.0",
             "sphinx",
-            "sphinx-book-theme",
+            "sphinx-rtd-theme",
             "myst-parser",
             "shapely",
             "pyproj",
