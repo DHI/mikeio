@@ -136,8 +136,8 @@ same base class and have the same core functionality.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Mesh.node_coordinates" title="mikeio.Mesh.node_coordinates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.node_coordinates</span></code></a></p></td>
 <td><p>Coordinates (x,y,z) of all nodes</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Mesh.codes" title="mikeio.Mesh.codes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.codes</span></code></a></p></td>
-<td><p>Node codes of all nodes (0=water, 1=land, 2...=open boundaries)</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.codes</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Mesh.boundary_polylines" title="mikeio.Mesh.boundary_polylines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.boundary_polylines</span></code></a></p></td>
 <td><p>Lists of closed polylines defining domain outline</p></td>
@@ -186,8 +186,8 @@ same base class and have the same core functionality.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Mesh.find_nearest_elements" title="mikeio.Mesh.find_nearest_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.find_nearest_elements</span></code></a></p></td>
 <td><p>Find index of nearest elements (optionally for a list)</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.Mesh.plot" title="mikeio.Mesh.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.plot</span></code></a></p></td>
-<td><p>Plot unstructured data and/or mesh, mesh outline</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.plot</span></code></p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#mikeio.Mesh.to_shapely" title="mikeio.Mesh.to_shapely"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.Mesh.to_shapely</span></code></a></p></td>
 <td><p>Export mesh as shapely MultiPolygon</p></td>
@@ -377,12 +377,6 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 <dd class="field-even"><p>np.array</p>
 </dd>
 </dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Mesh.codes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codes</span></span><a class="headerlink" href="#mikeio.Mesh.codes" title="Permalink to this definition"></a></dt>
-<dd><p>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</p>
 </dd></dl>
 
 <dl class="py method">
@@ -667,50 +661,6 @@ values all around the domain.</p></li>
 <dt class="sig sig-object py" id="mikeio.Mesh.node_coordinates">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_coordinates</span></span><a class="headerlink" href="#mikeio.Mesh.node_coordinates" title="Permalink to this definition"></a></dt>
 <dd><p>Coordinates (x,y,z) of all nodes</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Mesh.plot">
-<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'patch'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_refinements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_mesh</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_outline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Mesh.plot" title="Permalink to this definition"></a></dt>
-<dd><p>Plot unstructured data and/or mesh, mesh outline</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<em>np.array</em><em> or </em><em>a Dataset with a single item</em><em>, </em><em>optional</em>) – value for each element to plot, default bathymetry</p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – list of element ids to be plotted</p></li>
-<li><p><strong>plot_type</strong> (<em>str</em><em>, </em><em>optional</em>) – type of plot: ‘patch’ (default), ‘mesh_only’, ‘shaded’,
-‘contour’, ‘contourf’ or ‘outline_only’</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
-<li><p><strong>label</strong> (<em>str</em><em>, </em><em>optional</em>) – colorbar label (or title if contour plot)</p></li>
-<li><p><strong>cmap</strong> (<em>matplotlib.cm.cmap</em><em>, </em><em>optional</em>) – colormap, default viridis</p></li>
-<li><p><strong>vmin</strong> (<em>real</em><em>, </em><em>optional</em>) – lower bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>vmax</strong> (<em>real</em><em>, </em><em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
-<li><p><strong>levels</strong> (<em>int</em><em>, </em><em>list</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – for contour plots: how many levels, default:10
-or a list of discrete levels e.g. [3.0, 4.5, 6.0]</p></li>
-<li><p><strong>show_mesh</strong> (<em>bool</em><em>, </em><em>optional</em>) – should the mesh be shown on the plot? default=True</p></li>
-<li><p><strong>show_outline</strong> (<em>bool</em><em>, </em><em>optional</em>) – should domain outline be shown on the plot? default=True</p></li>
-<li><p><strong>n_refinements</strong> (<em>int</em><em>, </em><em>optional</em>) – for ‘shaded’ and ‘contour’ plots (and if show_mesh=False)
-do this number of mesh refinements for smoother plotting</p></li>
-<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure</p></li>
-<li><p><strong>ax</strong> (<em>matplotlib.axes</em><em>, </em><em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
-<li><p><strong>add_colorbar</strong> (<em>bool</em>) – Add colorbar to plot, default True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>&lt;matplotlib.axes&gt;</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span> <span class="c1"># bathymetry</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Surface elevation&quot;</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(1, 884)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">n_items</span>
-<span class="go">1</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">z</span><span class="o">=</span><span class="n">ds</span><span class="p">)</span> <span class="c1"># plot surface elevation</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py property">

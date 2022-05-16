@@ -116,26 +116,24 @@ The Dataset/DataArray has several properties:
 
 Methods
 -------
-Dataset has several useful methods for working with data, 
+Dataset and DataArray has several useful methods for working with data, 
 including different ways of *selecting* data:
 
-* `head() <#mikeio.Dataset.head>`_ - Return the first n timesteps
-* `tail() <#mikeio.Dataset.tail>`_ - Return the last n timesteps
-* `thin() <#mikeio.Dataset.thin>`_ - Return every n:th timesteps
-* `isel() <#mikeio.Dataset.isel>`_ - Select subset along an axis
+* [`sel()`](Dataset.sel) - Select subset along an axis
+* [`isel()`](Dataset.isel) - Select subset along an axis with an integer
 
 *Aggregations* along an axis:
 
-* `mean() <#mikeio.Dataset.mean>`_ - Mean value along an axis
-* `nanmean() <#mikeio.Dataset.nanmean>`_ - Mean value along an axis (NaN removed)
-* `max() <#mikeio.Dataset.max>`_ - Max value along an axis
-* `nanmax() <#mikeio.Dataset.nanmax>`_ - Max value along an axis (NaN removed)
-* `min() <#mikeio.Dataset.min>`_ - Min value along an axis
-* `nanmin() <#mikeio.Dataset.nanmin>`_ - Min value along an axis (NaN removed)
-* `average() <#mikeio.Dataset.average>`_ - Compute the weighted average along the specified axis.
-* `aggregate() <#mikeio.Dataset.aggregate>`_ - Aggregate along an axis
-* `quantile() <#mikeio.Dataset.quantile>`_ - Quantiles along an axis
-* `nanquantile() <#mikeio.Dataset.nanquantile>`_ - Quantiles along an axis (NaN ignored)
+* [`mean()`](Dataset.mean) - Mean value along an axis
+* [`nanmean()`](Dataset.nanmean) - Mean value along an axis (NaN removed)
+* [`max()`[Dataset.max) - Max value along an axis
+* [`nanmax()`](Dataset.nanmax) - Max value along an axis (NaN removed)
+* [`min()`](Dataset.min) - Min value along an axis
+* [`nanmin()`](Dataset.nanmin) - Min value along an axis (NaN removed)
+* [`average()`](Dataset.average) - Compute the weighted average along the specified axis.
+* [`aggregate()`](Dataset.aggregate) - Aggregate along an axis
+* [`quantile()`](Dataset.quantile) - Quantiles along an axis
+* [`nanquantile()`](Dataset.nanquantile) - Quantiles along an axis (NaN ignored)
 
 *Mathematical operations* +, - and * with numerical values:
 
@@ -150,15 +148,15 @@ and + and - between two Datasets (if number of items and shapes conform):
 
 Other methods that also return a Dataset:
 
-* `interp_time() <#mikeio.Dataset.interp_time>`_ - Temporal interpolation (see `Time interpolation notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb>`_)
-* `dropna() <#mikeio.Dataset.dropna>`_ - Remove time steps where all items are NaN
-* `squeeze() <#mikeio.Dataset.squeeze>`_ - Remove axes of length 1
+* [`interp_time()`](Dataset.interp_time) - Temporal interpolation (see `Time interpolation notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
+* [`dropna()](Dataset.dropna) - Remove time steps where all items are NaN
+* [`squeeze()](Dataset.squeeze) - Remove axes of length 1
 
 *Conversion* methods:
 
-* `to_dataframe() <#mikeio.Dataset.to_dataframe>`_ - Convert Dataset to a Pandas DataFrame
-* `to_xarray() <#mikeio.Dataset.to_xarray>`_ - Convert Dataset to a xarray dataset (great for Dfs2)
-* `to_dfs() <#mikeio.Dataset.to_dfs>`_ - Write Dataset to a Dfs file
+* [`to_dataframe()`](Dataset.to_dataframe) - Convert Dataset to a Pandas DataFrame
+* [`to_xarray()`](Dataset.to_xarray) - Convert Dataset to a xarray dataset (great for Dfs2)
+* [`to_dfs()`](Dataset.to_dfs) - Write Dataset to a Dfs file
 
 
 
