@@ -312,6 +312,7 @@ An ItemInfo consists of:</p>
 <li><p>type - an <code class="docutils literal notranslate"><span class="pre">EUMType</span></code></p></li>
 <li><p>unit - an <code class="docutils literal notranslate"><span class="pre">EUMUnit</span></code></p></li>
 </ul>
+<p>The ItemInfo class has some sensible defaults, thus you can specify only a name or a type. If you don’t specify a unit, the default unit for that type will be used.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Viken&quot;</span><span class="p">,</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Water_Level</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">item</span>
@@ -320,6 +321,23 @@ An ItemInfo consists of:</p>
 <span class="go">Wind speed &lt;Wind speed&gt; (meter per sec)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Viken&quot;</span><span class="p">,</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Water_Level</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="o">.</span><span class="n">feet</span><span class="p">)</span>
 <span class="go">Viken &lt;Water Level&gt; (feet)</span>
+</pre></div>
+</div>
+<p>Matching units for specific type:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">EUMType</span><span class="o">.</span><span class="n">Wind_speed</span><span class="o">.</span><span class="n">units</span>
+<span class="go">[meter per sec, feet per sec, knot, km per hour, miles per hour]</span>
+</pre></div>
+</div>
+<p>Default unit:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">EUMType</span><span class="o">.</span><span class="n">Precipitation_Rate</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">mm per day</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unit</span> <span class="o">=</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Precipitation_Rate</span><span class="o">.</span><span class="n">units</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">unit</span>
+<span class="go">mm per day</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">type</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+<span class="go">&lt;enum &#39;EUMUnit&#39;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">int</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+<span class="go">2004</span>
 </pre></div>
 </div>
 <p>See the <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Units.ipynb">Units notebook</a> for more examples.</p>

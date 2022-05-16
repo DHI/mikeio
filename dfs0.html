@@ -335,22 +335,22 @@ title="Print to PDF"
                 
   <section id="dfs0">
 <h1>Dfs0<a class="headerlink" href="#dfs0" title="Permalink to this headline">#</a></h1>
-<p>A dfs0 file is also called a time series file. The MIKE IO <code class="docutils literal notranslate"><span class="pre">Dfs0</span> <span class="pre">class</span> <span class="pre">&lt;dfs0.html#mikeio.Dfs0&gt;</span></code>_ provide functionality for working with dfs0 files.</p>
+<p>A dfs0 file is also called a time series file.</p>
 <p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">mikeio.Dataset</span></code> - keeps EUM information (convenient if you save data to new dfs0 file)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code> - utilize all the powerful methods of pandas</p></li>
+<li><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">mikeio.Dataset</span></code></span></a> - keeps EUM information (convenient if you save data to new dfs0 file)</p></li>
+<li><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"><code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> - utilize all the powerful methods of pandas</p></li>
 </ul>
 <section id="read-dfs0-to-dataset">
 <h2>Read Dfs0 to Dataset<a class="headerlink" href="#read-dfs0-to-dataset" title="Permalink to this headline">#</a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;da_diagnostic.dfs0&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
 <span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (time:744)</span>
-<span class="go">Time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 records)</span>
-<span class="go">-- Non-equidistant calendar axis --</span>
-<span class="go">Items:</span>
+<span class="go">dims: (time:744)</span>
+<span class="go">time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)</span>
+<span class="go">items:</span>
 <span class="go">  0:  State 1Sign. Wave Height &lt;Significant wave height&gt; (meter)</span>
 <span class="go">  1:  State 2Sign. Wave Height &lt;Significant wave height&gt; (meter)</span>
 <span class="go">  2:  Mean StateSign. Wave Height &lt;Significant wave height&gt; (meter)</span>

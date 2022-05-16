@@ -304,15 +304,15 @@ title="Print to PDF"
                 
   <section id="generic">
 <h1>Generic<a class="headerlink" href="#generic" title="Permalink to this headline">#</a></h1>
-<p>MIKE IO has generic dfs functionality that works for all dfs files:</p>
+<p>The generic module contains functionality that works for all dfs files:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">concat()</span></code> - Concatenates files along the time axis</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">extract()</span></code> - Extract timesteps and/or items to a new dfs file</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">diff()</span></code>  - Calculate difference between two dfs files</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">sum()</span></code>  - Calculate the sum of two dfs files</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">scale()</span></code>  - Apply scaling to any dfs file</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">avg_time()</span></code>  - Create a temporally averaged dfs file</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">quantile()</span></code> - Create a dfs file with temporal quantiles</p></li>
+<li><p><a class="reference internal" href="#mikeio.generic.concat" title="mikeio.generic.concat"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">concat()</span></code></span></a> - Concatenates files along the time axis</p></li>
+<li><p><a class="reference internal" href="#mikeio.generic.extract" title="mikeio.generic.extract"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">extract()</span></code></span></a> - Extract timesteps and/or items to a new dfs file</p></li>
+<li><p><a class="reference internal" href="#mikeio.generic.diff" title="mikeio.generic.diff"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">diff()</span></code></span></a> - Calculate difference between two dfs files with identical geometry</p></li>
+<li><p><a class="reference internal" href="#mikeio.generic.sum" title="mikeio.generic.sum"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">sum()</span></code></span></a> - Calculate the sum of two dfs files</p></li>
+<li><p><a class="reference internal" href="#mikeio.generic.scale" title="mikeio.generic.scale"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">scale()</span></code></span></a> - Apply scaling to any dfs file</p></li>
+<li><p><a class="reference internal" href="#mikeio.generic.avg_time" title="mikeio.generic.avg_time"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">avg_time()</span></code></span></a> - Create a temporally averaged dfs file</p></li>
+<li><p><a class="reference internal" href="#mikeio.generic.quantile" title="mikeio.generic.quantile"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">quantile()</span></code></span></a> - Create a dfs file with temporal quantiles</p></li>
 </ul>
 <p>All methods in the generic module creates a new dfs file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">generic</span>

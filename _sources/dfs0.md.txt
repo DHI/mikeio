@@ -1,11 +1,11 @@
 # Dfs0
 
-A dfs0 file is also called a time series file. The MIKE IO `Dfs0 class <dfs0.html#mikeio.Dfs0>`_ provide functionality for working with dfs0 files.  
+A dfs0 file is also called a time series file.
 
 Working with data from dfs0 files are conveniently done in one of two ways:
 
-* `mikeio.Dataset` - keeps EUM information (convenient if you save data to new dfs0 file)
-* `pandas.DataFrame` - utilize all the powerful methods of pandas
+* [`mikeio.Dataset`](Dataset) - keeps EUM information (convenient if you save data to new dfs0 file)
+* [`pandas.DataFrame`](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html) - utilize all the powerful methods of pandas
 
 
 Read Dfs0 to Dataset
@@ -15,11 +15,11 @@ Read Dfs0 to Dataset
 >>> import mikeio
 >>> ds = mikeio.read("da_diagnostic.dfs0")
 >>> ds
+>>> ds
 <mikeio.Dataset>
-Dimensions: (time:744)
-Time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 records)
--- Non-equidistant calendar axis --
-Items:
+dims: (time:744)
+time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)
+items:
   0:  State 1Sign. Wave Height <Significant wave height> (meter)
   1:  State 2Sign. Wave Height <Significant wave height> (meter)
   2:  Mean StateSign. Wave Height <Significant wave height> (meter)

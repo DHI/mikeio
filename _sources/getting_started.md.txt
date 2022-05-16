@@ -80,15 +80,15 @@ Read more on the [Dfs123 page](dfs123.rst).
 
 
 ## Generic dfs
-MIKE IO has `generic dfs <generic.html#module-mikeio.generic>`_ functionality that works for all dfs files: 
+MIKE IO has [`generic`](mikeio.generic) functionality that works for all dfs files: 
 
 * [`concat()`](generic.concat) - Concatenates files along the time axis
-* [`extract()](generic.extract) - Extract timesteps and/or items to a new dfs file
-* [`diff()](generic.diff) - Calculate difference between two dfs files with identical geometry
-* [`sum()](generic.sum) - Calculate the sum of two dfs files
-* [`scale()](generic.scale) - Apply scaling to any dfs file
-* [`avg_time()](generic.avg_time) - Create a temporally averaged dfs file
-* [`quantile()](generic.quantile) - Create a dfs file with temporal quantiles
+* [`extract()`](generic.extract) - Extract timesteps and/or items to a new dfs file
+* [`diff()`](generic.diff) - Calculate difference between two dfs files with identical geometry
+* [`sum()`](generic.sum) - Calculate the sum of two dfs files
+* [`scale()`](generic.scale) - Apply scaling to any dfs file
+* [`avg_time()`](generic.avg_time) - Create a temporally averaged dfs file
+* [`quantile()`](generic.quantile) - Create a dfs file with temporal quantiles
 
 All generic methods creates a new dfs file.
 
@@ -97,4 +97,4 @@ from mikeio import generic
 generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
 ```
 
-See [Generic page](generic.rst) and the [Generic notebook](<https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb>) for more examples.
+See [Generic page](mikeio.generic) and the [Generic notebook](<https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb>) for more examples.

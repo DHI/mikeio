@@ -355,12 +355,12 @@ title="Print to PDF"
                 
   <section id="dataset">
 <h1>Dataset<a class="headerlink" href="#dataset" title="Permalink to this headline">#</a></h1>
-<p>The <span class="xref myst">Dataset</span> is the common MIKE IO data structure
+<p>The <a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class">Dataset</span></a> is the common MIKE IO data structure
 for data from dfs files.
 The <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code> methods returns a Dataset as a container of DataArrays (Dfs items)</p>
 <p>Each DataArray have the following properties:</p>
 <ul class="simple">
-<li><p><strong>item</strong> - an  <code class="docutils literal notranslate"><span class="pre">ItemInfo</span> <span class="pre">&lt;#mikeio.eum.ItemInfo&gt;</span></code> with name, type and unit</p></li>
+<li><p><strong>item</strong> - an  <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">ItemInfo</span></code></span></a> with name, type and unit</p></li>
 <li><p><strong>time</strong> - a pandas.DateTimeIndex with the time instances of the data</p></li>
 <li><p><strong>values</strong> - a NumPy array</p></li>
 </ul>
@@ -407,7 +407,7 @@ Several items (“itemA” at 0 and “itemC” at 2) can be selected with the n
 </section>
 <section id="selecting-timesteps-or-elements">
 <h2>Selecting timesteps or elements<a class="headerlink" href="#selecting-timesteps-or-elements" title="Permalink to this headline">#</a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">isel()</span> <span class="pre">&lt;#mikeio.Dataset.isel&gt;</span></code>_ method can be used for selecting specific timesteps or elements across a Dataset.</p>
+<p>The [<code class="docutils literal notranslate"><span class="pre">isel()</span></code>])(Dataset.isel) method can be used for selecting specific timesteps or elements across a Dataset.</p>
 <ul class="simple">
 <li><p>ds.isel([0, 1], axis=0) - selects timestep 0 and 1</p></li>
 <li><p>ds.isel([3,78], axis=1) - selects element 3 and 78</p></li>

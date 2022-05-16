@@ -329,7 +329,7 @@ title="Print to PDF"
 <p>All Dfs classes (and the Dataset) class are representations of timeseries and
 share these properties:</p>
 <ul class="simple">
-<li><p>items - a list of <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="xref myst py py-class">`ItemInfo</span></a> with name, type and unit of each item</p></li>
+<li><p>items - a list of <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">ItemInfo</span></code></span></a> with name, type and unit of each item</p></li>
 <li><p>n_items - Number of items</p></li>
 <li><p>n_timesteps - Number of timesteps</p></li>
 <li><p>start_time - First time instance (as datetime)</p></li>
@@ -339,20 +339,20 @@ share these properties:</p>
 <section id="dfs2">
 <h2>Dfs2<a class="headerlink" href="#dfs2" title="Permalink to this headline">#</a></h2>
 <p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell.
-The spatial information is available in the <span class="xref myst"><code class="docutils literal notranslate"><span class="pre">DataArray.geometry</span></code></span> attribute, which in the case of a Dfs2 file is a <a class="reference internal" href="#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">Grid2D</span></code></span></a> geometry.</p>
+The spatial information is available in the <code class="docutils literal notranslate"><span class="pre">DataArray.geometry</span></code> attribute, which in the case of a Dfs2 file is a <a class="reference internal" href="#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">Grid2D</span></code></span></a> geometry.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;gebco_sound.dfs2&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
 <span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (time:1, y:264, x:216)</span>
-<span class="go">Time: 2020-05-15 11:04:52 (time-invariant)</span>
-<span class="go">Items:</span>
+<span class="go">dims: (time:1, y:264, x:216)</span>
+<span class="go">time: 2020-05-15 11:04:52 (time-invariant)</span>
+<span class="go">geometry: Grid2D (ny=264, nx=216)</span>
+<span class="go">items:</span>
 <span class="go">  0:  Elevation &lt;Total Water Depth&gt; (meter)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">geometry</span>
 <span class="go">&lt;mikeio.Grid2D&gt;</span>
-<span class="go">x-axis: nx=216 points from x0=12.2021 to x1=13.0979 with dx=0.00416667</span>
-<span class="go">y-axis: ny=264 points from y0=55.2021 to y1=56.2979 with dy=0.00416667</span>
-<span class="go">Number of grid points: 57024</span>
+<span class="go">x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)</span>
+<span class="go">y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)</span>
+<span class="go">projection: LONG/LAT</span>
 </pre></div>
 </div>
 </section>
