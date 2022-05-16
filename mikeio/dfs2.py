@@ -305,22 +305,6 @@ class Dfs2(_Dfs123):
         lon,
         lat,
     ):
-        """Find index of closest element
-
-        Parameters
-        ----------
-
-        lon: float
-            longitude
-        lat: float
-            latitude
-
-        Returns
-        -------
-
-        (int,int): indexes in y, x
-        """
-
         warnings.warn(
             "find_nearest_elements is deprecated, use .geometry.find_index instead",
             FutureWarning,
@@ -508,35 +492,6 @@ class Dfs2(_Dfs123):
         figsize=None,
         ax=None,
     ):
-        """
-        Plot dfs2 data
-
-        Parameters
-        ----------
-
-        z: np.array (2d)
-        title: str, optional
-            axes title
-        label: str, optional
-            colorbar label (or title if contour plot)
-        cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis
-        figsize: (float, float), optional
-            specify size of figure
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-
-        Returns
-        -------
-        <matplotlib.axes>
-
-        Examples
-        --------
-        >>> dfs = Dfs2("data/gebco_sound.dfs2")
-        >>> ds = dfs.read()
-        >>> elevation = ds['Elevation']
-        >>> dfs.plot(elevation[0], cmap='jet')
-        """
 
         warnings.warn(
             "Dfs2.plot() is deprecated, use DataArray.plot() instead",

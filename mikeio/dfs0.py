@@ -589,13 +589,6 @@ pd.Series.to_dfs0 = series_to_dfs0
 
 
 def dataset_to_dfs0(self, filename):
-    """Write Dataset to a Dfs0 file
-
-    Parameters
-    ----------
-    filename: str
-        full path and file name to the dfs0 file.
-    """
     warnings.warn(
         "Dataset.to_dfs0() is deprecated, use Dataset.to_dfs()",
         FutureWarning,

@@ -80,80 +80,6 @@ class _DatasetPlotter:
 
 
 class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
-
-    """Dataset
-
-    Attributes
-    ----------
-    data: list[np.array]
-        Data, potentially multivariate and multiple spatial dimensions
-    time: list[datetime]
-        Datetime of each timestep
-    items: list[ItemInfo]
-        Names, type and unit of each item in the data list
-
-    Notes
-    -----
-    Data from a specific item can be accessed using the name of the item
-    similar to a dictionary.
-
-    Attributes data, time, names can also be unpacked like a tuple
-
-    Examples
-    --------
-    >>> ds = mikeio.read("tests/testdata/random.dfs0")
-    >>> ds
-    <mikeio.Dataset>
-    Dimensions: (1000,)
-    Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
-    Items:
-      0:  VarFun01 <Water Level> (meter)
-      1:  NotFun <Water Level> (meter)
-    >>> ds['NotFun'][0:5]
-    array([0.64048636, 0.65325695, nan, 0.21420799, 0.99915695])
-    >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
-    <mikeio.Dataset>
-    Dimensions: (9, 884)
-    Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-    Items:
-      0:  Surface elevation <Surface Elevation> (meter)
-      1:  U velocity <u velocity component> (meter per sec)
-      2:  V velocity <v velocity component> (meter per sec)
-      3:  Current speed <Current Speed> (meter per sec)
-    >>> ds2 = ds[['Surface elevation','Current speed']] # item selection by name
-    >>> ds2
-    <mikeio.Dataset>
-    Dimensions: (9, 884)
-    Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-    Items:
-      0:  Surface elevation <Surface Elevation> (meter)
-      1:  Current speed <Current Speed> (meter per sec)
-    >>> ds3 = ds2.isel([0,1,2], axis=0) # temporal selection
-    >>> ds3
-    <mikeio.Dataset>
-    Dimensions: (3, 884)
-    Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
-    Items:
-      0:  Surface elevation <Surface Elevation> (meter)
-      1:  Current speed <Current Speed> (meter per sec)
-    >>> ds4 = ds3.isel([100,200], axis=1) # element selection
-    >>> ds4
-    <mikeio.Dataset>
-    Dimensions: (3, 2)
-    Time: 1985-08-06 07:00:00 - 1985-08-06 12:00:00
-    Items:
-      0:  Surface elevation <Surface Elevation> (meter)
-      1:  Current speed <Current Speed> (meter per sec)
-    >>>  ds5 = ds[[1,0]] # item selection by position
-    >>>  ds5
-    <mikeio.Dataset>
-    Dimensions: (1000,)
-    Time: 2017-01-01 00:00:00 - 2017-07-28 03:00:00
-    Items:
-      0:  NotFun <Water Level> (meter)
-      1:  VarFun01 <Water Level> (meter)
-    """
-
     def __init__(
         self,
         data: Union[Mapping[str, DataArray], Iterable[DataArray]],
@@ -386,7 +312,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @property
     def data(self) -> Sequence[np.ndarray]:
-        """Data as list of numpy arrays"""
         warnings.warn(
             "property data is deprecated, use to_numpy() instead",
             FutureWarning,
@@ -1036,7 +961,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return self.append_items(other, inplace)
 
     def append_items(self, other, inplace=False):
-        """Append items from other Dataset to this Dataset"""
         warnings.warn(
             "Dataframe.append_items is deprecated, use Dataframe.merge([ds1, ds2]) instead",
             FutureWarning,
@@ -1535,6 +1459,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return df
 
     def to_dfs(self, filename, **kwargs):
+        "Write dataset to a new dfs file"
 
         filename = str(filename)
 

@@ -373,7 +373,6 @@ class _UnstructuredFile:
 
     @property
     def codes(self):
-        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
         warnings.warn(
             "property codes is deprecated, use .geometry.codes instead",
             FutureWarning,
@@ -600,60 +599,7 @@ class _UnstructuredFile:
         ax=None,
         add_colorbar=True,
     ):
-        """
-        Plot unstructured data and/or mesh, mesh outline
 
-        Parameters
-        ----------
-        z: np.array or a Dataset with a single item, optional
-            value for each element to plot, default bathymetry
-        elements: list(int), optional
-            list of element ids to be plotted
-        plot_type: str, optional
-            type of plot: 'patch' (default), 'mesh_only', 'shaded',
-            'contour', 'contourf' or 'outline_only'
-        title: str, optional
-            axes title
-        label: str, optional
-            colorbar label (or title if contour plot)
-        cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis
-        vmin: real, optional
-            lower bound of values to be shown on plot, default:None
-        vmax: real, optional
-            upper bound of values to be shown on plot, default:None
-        levels: int, list(float), optional
-            for contour plots: how many levels, default:10
-            or a list of discrete levels e.g. [3.0, 4.5, 6.0]
-        show_mesh: bool, optional
-            should the mesh be shown on the plot? default=True
-        show_outline: bool, optional
-            should domain outline be shown on the plot? default=True
-        n_refinements: int, optional
-            for 'shaded' and 'contour' plots (and if show_mesh=False)
-            do this number of mesh refinements for smoother plotting
-        figsize: (float, float), optional
-            specify size of figure
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-        add_colorbar: bool
-            Add colorbar to plot, default True
-
-        Returns
-        -------
-        <matplotlib.axes>
-
-        Examples
-        --------
-        >>> dfs = Dfsu("HD2D.dfsu")
-        >>> dfs.plot() # bathymetry
-        >>> ds = dfs.read(items="Surface elevation", time_steps=0)
-        >>> ds.shape
-        (1, 884)
-        >>> ds.n_items
-        1
-        >>> dfs.plot(z=ds) # plot surface elevation
-        """
         warnings.warn(
             FutureWarning(
                 "Dfsu.plot() have been deprecated, please use DataArray.plot() instead"
