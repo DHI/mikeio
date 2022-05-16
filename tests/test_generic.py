@@ -414,7 +414,7 @@ def test_extract_step_equidistant(tmpdir):
     orig = mikeio.read(infile)
     extracted = mikeio.read(outfile)
     assert extracted.n_timesteps == 4
-    assert extracted.timestep = 6*3600
+    assert extracted.timestep == 6*3600
     assert extracted.time[0] == orig.time[0]
     assert extracted.time[-1] == orig.time[-1]
 
