@@ -55,34 +55,52 @@ Several items ("itemA" at 0 and "itemC" at 2) can be selected with the notation:
 Note that this behavior is similar to pandas and xarray.
 
 
-Selecting timesteps or elements
--------------------------------
-The [`isel()`])(Dataset.isel) method can be used for selecting specific timesteps or elements across a Dataset. 
-
-* ds.isel([0, 1], axis=0) - selects timestep 0 and 1
-* ds.isel([3,78], axis=1) - selects element 3 and 78
-
-A date range can also be selected using the slice notation (similar to pandas DataFrame): 
-
-* ds[start_time:end_time] - selects all time steps between start and end (either can be empty)
+## Temporal selection
 
 ```python
+>>> ds.sel(time="1985-08-06 12:00")
+<mikeio.Dataset>
+dims: (element:884)
+time: 1985-08-06 12:00:00 (time-invariant)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation <Surface Elevation> (meter)
+  1:  U velocity <u velocity component> (meter per sec)
+  2:  V velocity <v velocity component> (meter per sec)
+  3:  Current speed <Current Speed> (meter per sec)
+
 >>> ds["1985-8-7":]
 <mikeio.Dataset>
-Geometry: Dfsu2D
-Dimensions: (time:2, element:884)
-Time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
-Items:
+dims: (time:2, element:884)
+time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation <Surface Elevation> (meter)
+  1:  U velocity <u velocity component> (meter per sec)
+  2:  V velocity <v velocity component> (meter per sec)
+  3:  Current speed <Current Speed> (meter per sec)
+
+```
+
+## Spatial selection
+
+The `sel` method finds the nearest element.
+
+```python
+>>> ds.sel(x=607002, y=6906734)
+<mikeio.Dataset>
+dims: (time:9)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
+items:
   0:  Surface elevation <Surface Elevation> (meter)
   1:  U velocity <u velocity component> (meter per sec)
   2:  V velocity <v velocity component> (meter per sec)
   3:  Current speed <Current Speed> (meter per sec)
 ```
 
-Properties
-----------
-The Dataset has several convenience properties 
-(besides the main properties items, time and data):
+## Properties
+The Dataset/DataArray has several properties:
 
 * n_items - Number of items
 * n_timesteps - Number of timesteps
