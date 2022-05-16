@@ -1,11 +1,11 @@
 # Dataset
 
-The [Dataset](#mikeio.Dataset>) is the common MIKE IO data structure 
+The [Dataset](Dataset) is the common MIKE IO data structure 
 for data from dfs files. 
 The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs items)
 
 Each DataArray have the following properties:
-* **item** - an  `ItemInfo <#mikeio.eum.ItemInfo>` with name, type and unit
+* **item** - an  [`ItemInfo`](ItemInfo) with name, type and unit
 * **time** - a pandas.DateTimeIndex with the time instances of the data
 * **values** - a NumPy array
 
@@ -57,7 +57,7 @@ Note that this behavior is similar to pandas and xarray.
 
 Selecting timesteps or elements
 -------------------------------
-The `isel() <#mikeio.Dataset.isel>`_ method can be used for selecting specific timesteps or elements across a Dataset. 
+The [`isel()`])(Dataset.isel) method can be used for selecting specific timesteps or elements across a Dataset. 
 
 * ds.isel([0, 1], axis=0) - selects timestep 0 and 1
 * ds.isel([3,78], axis=1) - selects element 3 and 78
