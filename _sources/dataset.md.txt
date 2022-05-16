@@ -126,7 +126,7 @@ including different ways of *selecting* data:
 
 * [`mean()`](Dataset.mean) - Mean value along an axis
 * [`nanmean()`](Dataset.nanmean) - Mean value along an axis (NaN removed)
-* [`max()`[Dataset.max) - Max value along an axis
+* [`max()`](Dataset.max) - Max value along an axis
 * [`nanmax()`](Dataset.nanmax) - Max value along an axis (NaN removed)
 * [`min()`](Dataset.min) - Min value along an axis
 * [`nanmin()`](Dataset.nanmin) - Min value along an axis (NaN removed)
@@ -148,7 +148,7 @@ and + and - between two Datasets (if number of items and shapes conform):
 
 Other methods that also return a Dataset:
 
-* [`interp_time()`](Dataset.interp_time) - Temporal interpolation (see `Time interpolation notebook <https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
+* [`interp_time()`](Dataset.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
 * [`dropna()](Dataset.dropna) - Remove time steps where all items are NaN
 * [`squeeze()](Dataset.squeeze) - Remove axes of length 1
 
