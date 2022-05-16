@@ -416,7 +416,9 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     dfs_o.Close()
 
 
-def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> None:
+def extract(
+    infilename: str, outfilename: str, start=0, end=-1, step=1, items=None
+) -> None:
     """Extract timesteps and/or items to a new dfs file
 
     Parameters
@@ -431,6 +433,8 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     end : int, float, str or datetime, optional
         end of extraction as either step, relative seconds
         or datetime/str, by default -1 (end of file)
+    step : int, optional
+        jump this many step, by default 1 (every step between start and end)
     items : int, list(int), str, list(str), optional
         items to be extracted to new file
 
@@ -439,6 +443,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     >>> extract('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
     >>> extract('f_in.dfs2', 'f_out.dfs2', end=-3)
     >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)
+    >>> extract('f_hourly.dfsu', 'f_daily.dfsu', step=24)
     >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0])
     >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity")
     >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
@@ -468,7 +473,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
         file_start_shift = (file_start_new - file_start_orig).total_seconds()
 
     timestep_out = -1
-    for timestep in range(start_step, end_step):
+    for timestep in range(start_step, end_step, step):
         for item_out, item in enumerate(item_numbers):
             itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
             time_sec = itemdata.Time
