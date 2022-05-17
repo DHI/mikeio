@@ -1294,7 +1294,7 @@ class Dfsu2DH(_Dfsu):
         n_items = len(item_numbers)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        time_steps = _valid_timesteps(dfs, time_steps=None)
+        _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
         deletevalue = self.deletevalue
 
