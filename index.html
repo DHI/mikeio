@@ -27,7 +27,6 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
             <a href="#" class="icon icon-home"> MIKE IO
-            <img src="_static/MIKE-IO-Logo-Pos-RGB.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -65,7 +64,7 @@
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
       <li>MIKE IO: input/output of MIKE files in Python</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -73,8 +72,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <img alt="https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg" src="https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg" /><section id="mike-io-input-output-of-mike-files-in-python">
+  <section id="mike-io-input-output-of-mike-files-in-python">
 <h1>MIKE IO: input/output of MIKE files in Python<a class="headerlink" href="#mike-io-input-output-of-mike-files-in-python" title="Permalink to this headline"></a></h1>
+<p><img alt="" src="_images/MIKE-IO-Logo-Pos-RGB.svg" /></p>
 <p>Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.</p>
 <p>See our sister library <a class="reference external" href="https://github.com/DHI/mikeio1d">MIKE IO 1D</a> for .res1d and .xns11 files.</p>
 <p><strong>The documentation is currently being updated to reflect the upcoming version of MIKE IO 1.0</strong></p>
@@ -83,38 +83,29 @@
 <ul class="simple">
 <li><p>Windows or Linux operating system</p></li>
 <li><p>Python x64 3.7 - 3.10</p></li>
-<li><p>(Windows) <a class="reference external" href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads">VC++ redistributables</a> (already installed if you have MIKE)</p></li>
+<li><p>(Windows) <a class="reference external" href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads%3E">VC++ redistributables</a> (already installed if you have MIKE)</p></li>
 </ul>
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
-<blockquote>
-<div><p>pip install mikeio</p>
-</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install mikeio
+</pre></div>
+</div>
 </section>
 <section id="getting-started">
 <h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h2>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">import</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">import</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="nn">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Read more in the <a class="reference external" href="getting_started.html">getting started guide</a>.</p>
-</section>
-<section id="notebooks">
-<h2>Notebooks<a class="headerlink" href="#notebooks" title="Permalink to this headline"></a></h2>
-<p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/">List of all notebooks</a></p>
-<ul class="simple">
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb">Dfs0</a></p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb">Dfsu basic</a></p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb">Create Dfs2 from netCDF</a></p></li>
-</ul>
+<p>Read more in the <a class="reference internal" href="getting_started.html"><span class="doc std std-doc">getting started guide</span></a>.</p>
 </section>
 <section id="where-can-i-get-help">
 <h2>Where can I get help?<a class="headerlink" href="#where-can-i-get-help" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p>New ideas and feature requests - <a class="reference external" href="http://github.com/DHI/mikeio/discussions">GitHub Discussions</a></p></li>
-<li><p>Bugs - <a class="reference external" href="http://github.com/DHI/mikeio/issues">GitHub Issues</a></p></li>
+<li><p>New ideas and feature requests - <a class="reference external" href="https://github.com/DHI/mikeio/discussions">GitHub Discussions</a></p></li>
+<li><p>Bugs - <a class="reference external" href="https://github.com/DHI/mikeio/issues">GitHub Issues</a></p></li>
 </ul>
 <div class="toctree-wrapper compound">
 </div>
