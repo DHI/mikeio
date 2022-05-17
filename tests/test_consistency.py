@@ -1,3 +1,4 @@
+from distutils import extension
 import pytest
 
 import numpy as np
@@ -213,37 +214,29 @@ def test_read_dfsu2d_single_time():
     assert "time" in ds.dims
 
 
-def test_read_dfsu2d_time_selection_str():
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
-    dssel = ds.sel(time="2018-03")
+def test_read_dfs_time_selection_str():
 
-    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time="2018-03")
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = "2018-03"
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
 
-    assert all(dsr.time == dssel.time)
+        dsr = mikeio.read(filename=filename, time=time)
 
-
-def test_read_dfs2_time_selection_str():
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
-    dssel = ds.sel(time="2018-03")
-
-    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time="2018-03")
-
-    assert all(dsr.time == dssel.time)
+        assert all(dsr.time == dssel.time)
 
 
-def test_read_dfs1_time_selection_str():
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
-    dssel = ds.sel(time="2018-03")
+def test_read_dfs_time_slice_str():
 
-    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfs1", time="2018-03")
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = slice("2018-03-08", "2018-03-09")
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
 
-    assert all(dsr.time == dssel.time)
+        dsr = mikeio.read(filename=filename, time=time)
 
-
-def test_read_dfs0_time_selection_str():
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs0")
-    dssel = ds.sel(time="2018-03")
-
-    dsr = mikeio.read("tests/testdata/consistency/oresundHD.dfs0", time="2018-03")
-
-    assert all(dsr.time == dssel.time)
+        assert all(dsr.time == dssel.time)
