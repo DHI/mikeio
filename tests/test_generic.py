@@ -414,10 +414,23 @@ def test_extract_step_equidistant(tmpdir):
     extract(infile, outfile, step=12)
     orig = mikeio.read(infile)
     extracted = mikeio.read(outfile)
-    assert extracted.n_timesteps == 4
+    assert extracted.n_timesteps == 9
     assert extracted.timestep == 6 * 3600
     assert extracted.time[0] == orig.time[0]
     assert extracted.time[-1] == orig.time[-1]
+
+
+def test_extract_step_non_equidistant(tmpdir):
+
+    infile = "tests/testdata/da_diagnostic.dfs0"
+    outfile = os.path.join(tmpdir.dirname, "diagnostic_step3.dfs0")
+
+    extract(infile, outfile, step=3)
+    orig = mikeio.read(infile)
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps * 3 == orig.n_timesteps
+    assert extracted.time[0] == orig.time[0]
+    assert extracted.time[-1] == orig.time[-3]
 
 
 def test_extract_items(tmpdir):
