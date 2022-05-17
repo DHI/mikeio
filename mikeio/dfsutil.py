@@ -1,4 +1,4 @@
-from typing import Iterable, List, Union
+from typing import Iterable, List, Tuple, Union
 import numpy as np
 import pandas as pd
 from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
@@ -38,12 +38,16 @@ def _valid_item_numbers(
     return items
 
 
-def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps):
-    # TODO: naming: time_steps or timesteps?
+def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
+
+    single_time_selected = False
+    if isinstance(time_steps, int) and np.isscalar(time_steps):
+        single_time_selected = True
+
     n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
 
     if time_steps is None:
-        return list(range(n_steps_file))
+        return single_time_selected, list(range(n_steps_file))
 
     if isinstance(time_steps, int):
         time_steps = [time_steps]
@@ -93,7 +97,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps):
         if min(time_steps) < 0:
             raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
 
-    return time_steps
+    return single_time_selected, time_steps
 
 
 def _item_numbers_by_name(dfsItemInfo, item_names, ignore_first=False):

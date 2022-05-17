@@ -221,8 +221,8 @@ class Dfs3(_Dfs123):
                 )
             )
             time = time_steps
-        time_steps = _valid_timesteps(dfs.FileInfo, time)
-        nt = len(time_steps)
+        single_time_selected, time_steps = _valid_timesteps(dfs.FileInfo, time)
+        nt = len(time_steps) if not single_time_selected else 1
 
         # Determine the size of the grid
         zNum = self.geometry.nz

@@ -68,13 +68,8 @@ class _Dfs123(TimeSeries):
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        # TODO refactor this to common place
-        time_steps = _valid_timesteps(self._dfs.FileInfo, time)
-        nt = len(time_steps)
-        single_time_selected = False
-        if isinstance(time, int) and np.isscalar(time):
-            single_time_selected = True
-            assert len(time_steps) == 1
+        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
+        nt = len(time_steps) if not single_time_selected else 1
 
         if self._ndim == 1:
             shape = (nt, self._nx)

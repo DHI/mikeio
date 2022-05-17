@@ -171,8 +171,7 @@ class DfsuLayered(_Dfsu):
             )
             time = time_steps
 
-        single_time_selected = np.isscalar(time) if time is not None else False
-        time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         self._validate_elements_and_geometry_sel(
             elements, area=area, layers=layers, x=x, y=y, z=z
@@ -395,7 +394,7 @@ class Dfsu3D(DfsuLayered):
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         )
         assert n_nearest > 0
-        time_steps = _valid_timesteps(self._source, time)
+        _, time_steps = _valid_timesteps(self._source, time)
 
         # make 2d nodes-to-elements interpolator
         top_el = self.top_elements

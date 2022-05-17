@@ -197,7 +197,7 @@ class Dfs0(TimeSeries):
             time_steps = range(self._n_timesteps)
         else:
             sel_time_step_str = None
-            time_steps = _valid_timesteps(dfs.FileInfo, time)
+            _, time_steps = _valid_timesteps(dfs.FileInfo, time)
 
         dfs.Close()
 

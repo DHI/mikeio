@@ -139,8 +139,7 @@ class DfsuSpectral(_Dfsu):
             )
             time = time_steps
 
-        single_time_selected = np.isscalar(time) if time is not None else False
-        time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         if self._type == DfsuFileType.DfsuSpectral2D:
             self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
