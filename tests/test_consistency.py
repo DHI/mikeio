@@ -1,7 +1,5 @@
-from distutils import extension
 import pytest
 
-import numpy as np
 import mikeio
 from mikeio.dataarray import DataArray
 from mikeio.spatial.geometry import GeometryUndefined
