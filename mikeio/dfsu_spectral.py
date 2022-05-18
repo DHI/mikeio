@@ -201,7 +201,9 @@ class DfsuSpectral(_Dfsu):
         dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        return Dataset(data_list, time, items, geometry=geometry, dims=dims, validate=False)
+        return Dataset(
+            data_list, time, items, geometry=geometry, dims=dims, validate=False
+        )
 
     def _parse_elements_nodes(self, elements, nodes):
         if self._type == DfsuFileType.DfsuSpectral0D:

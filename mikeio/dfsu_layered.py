@@ -264,10 +264,12 @@ class DfsuLayered(_Dfsu):
                 geometry=geometry,
                 zn=data_list[0],
                 dims=dims,
-                validate=False
+                validate=False,
             )
         else:
-            return Dataset(data_list, time, items, geometry=geometry, dims=dims, validate=False)
+            return Dataset(
+                data_list, time, items, geometry=geometry, dims=dims, validate=False
+            )
 
     def _parse_geometry_sel(self, area, layers, x, y, z):
         elements = None

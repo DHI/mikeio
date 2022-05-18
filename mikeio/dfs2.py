@@ -298,7 +298,9 @@ class Dfs2(_Dfs123):
         self._dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        return Dataset(data_list, time=time, items=items, geometry=geometry, validate=False)
+        return Dataset(
+            data_list, time=time, items=items, geometry=geometry, validate=False
+        )
 
     def find_nearest_elements(
         self,
