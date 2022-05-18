@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from typing import Iterable, List, Tuple, Union
 import numpy as np
 import pandas as pd
@@ -46,6 +47,12 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
 
     n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
 
+    start_time_file = dfsFileInfo.TimeAxis.StartDateTime
+    time_step_file = dfsFileInfo.TimeAxis.TimeStep
+
+    freq = pd.Timedelta(seconds=time_step_file)
+    time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
+
     if time_steps is None:
         return single_time_selected, list(range(n_steps_file))
 
@@ -70,11 +77,6 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
             raise ValueError(
                 "Only equidistant calendar files are supported for this type of time_step argument"
             )
-        start_time_file = dfsFileInfo.TimeAxis.StartDateTime
-        time_step_file = dfsFileInfo.TimeAxis.TimeStep
-
-        freq = pd.Timedelta(seconds=time_step_file)
-        time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
         if time_steps.start is None:
             time_steps_start = time[0]
         else:
@@ -87,7 +89,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         # s = time.slice_indexer(time_steps_start, time_steps_stop)
         s = time.slice_indexer(time_steps.start, time_steps.stop)
         time_steps = list(range(s.start, s.stop))
-    elif isinstance(time_steps[0], int):
+    elif isinstance(time_steps, Iterable) and isinstance(time_steps[0], int):
         time_steps = np.array(time_steps)
         time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
         time_steps = list(time_steps)
@@ -96,6 +98,14 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
             raise IndexError(f"Timestep cannot be larger than {n_steps_file}")
         if min(time_steps) < 0:
             raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
+    elif isinstance(time_steps, pd.Timestamp):
+        s = time.slice_indexer(time_steps, time_steps)
+        time_steps = list(range(s.start, s.stop))
+    elif isinstance(time_steps, pd.DatetimeIndex):
+        time_steps = list(time.get_indexer(time_steps))
+
+    else:
+        raise TypeError(f"Indexing is not possible with type(time_steps")
     if len(time_steps) == 1:
         single_time_selected = True
     return single_time_selected, time_steps

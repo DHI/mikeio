@@ -24,7 +24,19 @@ class DataUtilsMixin:
     @staticmethod
     def _get_time_idx_list(time: pd.DatetimeIndex, steps):
         """Find list of idx in DatetimeIndex"""
-        # TODO: allow steps to be other DateTimeAxis
+
+        if isinstance(steps, str):
+            parts = steps.split(",")
+            if len(parts) == 1:
+                parts.append(parts[0])  # end=start
+
+            if parts[0] == "":
+                steps = slice(parts[1])  # stop only
+            elif parts[1] == "":
+                steps = slice(parts[0], None)  # start only
+            else:
+                steps = slice(parts[0], parts[1])
+
         if (isinstance(steps, Iterable) and not isinstance(steps, str)) and isinstance(
             steps[0], (str, datetime, np.datetime64, pd.Timestamp)
         ):
