@@ -622,3 +622,10 @@ def test_read_write_single_step_to_dataframe(tmp_path):
     assert df.shape[0] == 1
     assert df.iloc[0, 0] == pytest.approx(1.81134)
     assert np.isnan(df.iloc[0, 3])
+
+
+def test_read_dfs0_with_many_items():
+
+    ds = mikeio.read("tests/testdata/many_items.dfs0")
+
+    assert ds.n_items == 800

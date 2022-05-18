@@ -88,12 +88,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         geometry: _Geometry = None,
         zn=None,
         dims=None,
+        validate=False,
     ):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )
-        return self._init_from_DataArrays(data, validate=True)
+        return self._init_from_DataArrays(data, validate=validate)
 
     @staticmethod
     def _is_DataArrays(data):
