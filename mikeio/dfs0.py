@@ -154,7 +154,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def read(self, items=None, time=None, time_steps=None) -> Dataset:
+    def read(self, items=None, time=None, time_steps=None, keepdims=False) -> Dataset:
         """
         Read data from a dfs0 file.
 

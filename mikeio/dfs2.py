@@ -221,7 +221,9 @@ class Dfs2(_Dfs123):
 
         self._read_header()
 
-    def read(self, *, items=None, time=None, area=None, time_steps=None) -> Dataset:
+    def read(
+        self, *, items=None, time=None, area=None, time_steps=None, keepdims=False
+    ) -> Dataset:
         """
         Read data from a dfs2 file
 
@@ -266,7 +268,7 @@ class Dfs2(_Dfs123):
             shape = (nt, self._ny, self._nx)
             geometry = self.geometry
 
-        if single_time_selected:
+        if single_time_selected and not keepdims:
             shape = shape[1:]
 
         data_list = [
@@ -287,7 +289,7 @@ class Dfs2(_Dfs123):
                 if take_subset:
                     d = np.take(np.take(d, jj, axis=0), ii, axis=-1)
 
-                if single_time_selected:
+                if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
                     data_list[item][i] = d

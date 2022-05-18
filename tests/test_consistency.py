@@ -137,8 +137,7 @@ def test_read_dfs2_single_time():
     assert "time" not in ds.dims
 
     ds = mikeio.read(
-        "tests/testdata/consistency/oresundHD.dfs2",
-        time=[-1],  # time as array, forces time dimension to be kept
+        "tests/testdata/consistency/oresundHD.dfs2", time=[-1], keepdims=True
     )
 
     assert ds.n_timesteps == 1
@@ -207,6 +206,7 @@ def test_read_dfsu2d_single_time():
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfsu",
         time=[-1],
+        keepdims=True,
     )
 
     assert ds.n_timesteps == 1

@@ -203,6 +203,7 @@ class Dfs3(_Dfs123):
         time_steps=None,
         area=None,
         layers=None,
+        keepdims=False,
     ) -> Dataset:
 
         if area is not None:

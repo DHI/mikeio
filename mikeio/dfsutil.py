@@ -96,7 +96,8 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
             raise IndexError(f"Timestep cannot be larger than {n_steps_file}")
         if min(time_steps) < 0:
             raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
-
+    if len(time_steps) == 1:
+        single_time_selected = True
     return single_time_selected, time_steps
 
 

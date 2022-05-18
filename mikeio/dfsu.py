@@ -778,6 +778,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         area=None,
         x=None,
         y=None,
+        keepdims=False,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -867,7 +868,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         data_list = []
 
         n_steps = len(time_steps)
-        shape = (n_elems,) if single_time_selected else (n_steps, n_elems)
+        shape = (
+            (n_elems,)
+            if (single_time_selected and not keepdims)
+            else (n_steps, n_elems)
+        )
         for item in range(n_items):
             # Initialize an empty data block
             data = np.ndarray(shape=shape, dtype=self._dtype)
@@ -886,7 +891,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 if elements is not None:
                     d = d[elements]
 
-                if single_time_selected:
+                if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
                     data_list[item][i] = d
@@ -897,7 +902,10 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         dfs.Close()
 
-        dims = ("time", "element") if not single_time_selected else ("element",)
+        dims = ("time", "element")
+
+        if single_time_selected and not keepdims:
+            dims = ("element",)
 
         if elements is not None and len(elements) == 1:
             # squeeze point data

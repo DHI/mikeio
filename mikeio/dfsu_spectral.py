@@ -80,6 +80,7 @@ class DfsuSpectral(_Dfsu):
         area=None,
         x=None,
         y=None,
+        keepdims=False,
     ) -> Dataset:
         """
         Read data from a spectral dfsu file
@@ -172,7 +173,7 @@ class DfsuSpectral(_Dfsu):
 
         t_seconds = np.zeros(n_steps, dtype=float)
 
-        if single_time_selected:
+        if single_time_selected and not keepdims:
             data = data[0]
 
         for i in trange(n_steps, disable=not self.show_progress):
@@ -190,7 +191,7 @@ class DfsuSpectral(_Dfsu):
                 if pts is not None:
                     d = d[pts, ...]
 
-                if single_time_selected:
+                if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
                     data_list[item][i] = d
