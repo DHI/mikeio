@@ -46,13 +46,6 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         single_time_selected = True
 
     n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
-
-    start_time_file = dfsFileInfo.TimeAxis.StartDateTime
-    time_step_file = dfsFileInfo.TimeAxis.TimeStep
-
-    freq = pd.Timedelta(seconds=time_step_file)
-    time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
-
     if time_steps is None:
         return single_time_selected, list(range(n_steps_file))
 
@@ -71,22 +64,24 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         else:
             time_steps = slice(parts[0], parts[1])
 
-    if isinstance(time_steps, slice):
+    if isinstance(time_steps, (slice, pd.Timestamp, pd.DatetimeIndex)):
         if dfsFileInfo.TimeAxis.TimeAxisType != TimeAxisType.EquidistantCalendar:
             # TODO: handle non-equidistant calendar
             raise ValueError(
                 "Only equidistant calendar files are supported for this type of time_step argument"
             )
+
+        start_time_file = dfsFileInfo.TimeAxis.StartDateTime
+        time_step_file = dfsFileInfo.TimeAxis.TimeStep
+        freq = pd.Timedelta(seconds=time_step_file)
+        time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
+
+    if isinstance(time_steps, slice):
+
         if time_steps.start is None:
             time_steps_start = time[0]
-        else:
-            pass  # time_steps_start = pd.Timestamp(time_steps.start)
         if time_steps.stop is None:
             time_steps_stop = time[-1]
-        else:
-            pass  # time_steps_stop = pd.Timestamp(time_steps.stop)
-
-        # s = time.slice_indexer(time_steps_start, time_steps_stop)
         s = time.slice_indexer(time_steps.start, time_steps.stop)
         time_steps = list(range(s.start, s.stop))
     elif isinstance(time_steps, Iterable) and isinstance(time_steps[0], int):
