@@ -851,7 +851,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d) for d in data_list]
 
-        return Dataset(data_list, time, items, geometry=geometry, dims=dims)
+        return Dataset(data_list, time, items, geometry=geometry, dims=dims, validate=False)
 
     def _validate_elements_and_geometry_sel(self, elements, **kwargs):
         used_kwargs = []

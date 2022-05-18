@@ -1347,7 +1347,7 @@ def test_incompatible_data_not_allowed():
     da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
 
     with pytest.raises(ValueError) as excinfo:
-        mikeio.Dataset([da1, da2], validate=True)
+        mikeio.Dataset([da1, da2])
 
     assert "shape" in str(excinfo.value).lower()
 
@@ -1355,7 +1355,7 @@ def test_incompatible_data_not_allowed():
     da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
 
     with pytest.raises(ValueError) as excinfo:
-        mikeio.Dataset([da1, da2], validate=True)
+        mikeio.Dataset([da1, da2])
 
     assert "name" in str(excinfo.value).lower()
 
@@ -1364,7 +1364,7 @@ def test_incompatible_data_not_allowed():
     da2.name = "Foo"
 
     with pytest.raises(ValueError) as excinfo:
-        mikeio.Dataset([da1, da2], validate=True)
+        mikeio.Dataset([da1, da2])
 
     assert "time" in str(excinfo.value).lower()
 
@@ -1420,7 +1420,7 @@ def test_create_dataset_with_many_items():
         x = np.random.random(nt)
         da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i+1}"))
         das.append(da)
+
     ds = mikeio.Dataset(das)
-    ds.to_dfs("tests/testdata/many_items.dfs0")
 
     assert ds.n_items == n_items

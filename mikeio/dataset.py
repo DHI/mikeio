@@ -88,7 +88,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         geometry: _Geometry = None,
         zn=None,
         dims=None,
-        validate=False,
+        validate=True,
     ):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
@@ -141,7 +141,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         if (len(self) > 1) and validate:
             first = self[0]
-            for da in self[1:]:
+            for i in range(1, len(self)):
+                da = self[i]
                 first._is_compatible(da, raise_error=True)
 
         self._check_all_different_ids(self._data_vars.values())

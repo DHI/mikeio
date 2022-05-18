@@ -113,7 +113,7 @@ class _Dfs123(TimeSeries):
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
-        return Dataset(data_list, time, items, geometry=self.geometry)
+        return Dataset(data_list, time, items, geometry=self.geometry, validate=False)
 
     def _read_header(self):
         dfs = self._dfs
