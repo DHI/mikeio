@@ -228,6 +228,20 @@ def test_read_dfs_time_selection_str():
         assert all(dsr.time == dssel.time)
 
 
+def test_read_dfs_time_selection_str_specific():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = "2018-03-08 00:00:00"
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+
+        dsr = mikeio.read(filename=filename, time=time)
+
+        assert all(dsr.time == dssel.time)
+
+
 def test_read_dfs_time_slice_str():
 
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -236,6 +250,34 @@ def test_read_dfs_time_slice_str():
         time = slice("2018-03-08", "2018-03-09")
         ds = mikeio.read(filename=filename)
         dssel = ds.sel(time=time)
+
+        dsr = mikeio.read(filename=filename, time=time)
+
+        assert all(dsr.time == dssel.time)
+
+
+def test_read_dfs_time_int():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = -1
+        ds = mikeio.read(filename=filename)
+        dssel = ds.isel(time=time)
+
+        dsr = mikeio.read(filename=filename, time=time)
+
+        assert all(dsr.time == dssel.time)
+
+
+def test_read_dfs_time_list_int():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = [0, 1]
+        ds = mikeio.read(filename=filename)
+        dssel = ds.isel(time=time)
 
         dsr = mikeio.read(filename=filename, time=time)
 
