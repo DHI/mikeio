@@ -225,9 +225,11 @@ def test_read_dfs_time_selection_str():
 
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
 
         dsgetitem = ds[time]
         assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
 
 
 def test_read_dfs_time_selection_str_specific():
@@ -241,9 +243,11 @@ def test_read_dfs_time_selection_str_specific():
 
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
 
         dsgetitem = ds[time]
         assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
 
 
 def test_read_dfs_time_slice_str():
@@ -257,9 +261,11 @@ def test_read_dfs_time_slice_str():
 
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
 
         dsgetitem = ds[time]
         assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
 
 
 def test_read_dfs_time_selection_str_comma():
@@ -273,9 +279,11 @@ def test_read_dfs_time_selection_str_comma():
 
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
 
         dsgetitem = ds[time]
         assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
 
 
 def test_read_dfs_time_int():
@@ -289,10 +297,12 @@ def test_read_dfs_time_int():
 
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
 
         # integer time selection for DataArray (not Dataset)
         dsgetitem = ds[0][time]
         assert all(dsr[0].time == dsgetitem.time)
+        assert dsr[0].shape == dsgetitem.shape
 
 
 def test_read_dfs_time_list_int():
@@ -306,7 +316,9 @@ def test_read_dfs_time_list_int():
 
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
 
         # integer time selection for DataArray (not Dataset)
         dsgetitem = ds[0][time]
         assert all(dsr[0].time == dsgetitem.time)
+        assert dsr[0].shape == dsgetitem.shape
