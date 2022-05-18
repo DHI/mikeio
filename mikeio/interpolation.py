@@ -87,7 +87,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
                 idatitem = idatitem.reshape((nt, *shape))
             interp_data_vars[key] = DataArray(data=idatitem, time=da.time, item=da.item)
 
-        new_ds = Dataset(interp_data_vars)
+        new_ds = Dataset(interp_data_vars, validate=False)
         return new_ds
 
     is_single_item = False

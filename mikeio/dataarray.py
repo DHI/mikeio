@@ -1485,7 +1485,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 qd.name = newname
                 res.append(qd)
 
-            return Dataset(res)
+            return Dataset(data=res, validate=False)
 
     # ============= MATH operations ===========
 
