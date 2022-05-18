@@ -660,13 +660,13 @@ def test_incremental_write_from_dfs2(tmpdir):
 
     nt = dfs.n_timesteps
 
-    ds = dfs.read(time=[0],keepdims=True)
+    ds = dfs.read(time=[0], keepdims=True)
 
     dfs_to_write = Dfs2()
     dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True)
 
     for i in range(1, nt):
-        ds = dfs.read(time=[i],keepdims=True)
+        ds = dfs.read(time=[i], keepdims=True)
         dfs_to_write.append(ds)
 
     dfs_to_write.close()
