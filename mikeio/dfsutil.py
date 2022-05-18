@@ -78,10 +78,6 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
 
     if isinstance(time_steps, slice):
 
-        if time_steps.start is None:
-            time_steps_start = time[0]
-        if time_steps.stop is None:
-            time_steps_stop = time[-1]
         s = time.slice_indexer(time_steps.start, time_steps.stop)
         time_steps = list(range(s.start, s.stop))
     elif isinstance(time_steps, Iterable) and isinstance(time_steps[0], int):
