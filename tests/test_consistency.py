@@ -262,6 +262,22 @@ def test_read_dfs_time_slice_str():
         assert all(dsr.time == dsgetitem.time)
 
 
+def test_read_dfs_time_selection_str_comma():
+
+    extensions = ["dfs0", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = "2018-03-08,2018-03-09"
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+
+
 def test_read_dfs_time_int():
 
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
