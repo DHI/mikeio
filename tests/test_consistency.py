@@ -224,8 +224,10 @@ def test_read_dfs_time_selection_str():
         dssel = ds.sel(time=time)
 
         dsr = mikeio.read(filename=filename, time=time)
-
         assert all(dsr.time == dssel.time)
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
 
 
 def test_read_dfs_time_selection_str_specific():
@@ -238,8 +240,10 @@ def test_read_dfs_time_selection_str_specific():
         dssel = ds.sel(time=time)
 
         dsr = mikeio.read(filename=filename, time=time)
-
         assert all(dsr.time == dssel.time)
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
 
 
 def test_read_dfs_time_slice_str():
@@ -252,8 +256,10 @@ def test_read_dfs_time_slice_str():
         dssel = ds.sel(time=time)
 
         dsr = mikeio.read(filename=filename, time=time)
-
         assert all(dsr.time == dssel.time)
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
 
 
 def test_read_dfs_time_int():
@@ -266,8 +272,11 @@ def test_read_dfs_time_int():
         dssel = ds.isel(time=time)
 
         dsr = mikeio.read(filename=filename, time=time)
-
         assert all(dsr.time == dssel.time)
+
+        # integer time selection for DataArray (not Dataset)
+        dsgetitem = ds[0][time]
+        assert all(dsr[0].time == dsgetitem.time)
 
 
 def test_read_dfs_time_list_int():
@@ -280,5 +289,8 @@ def test_read_dfs_time_list_int():
         dssel = ds.isel(time=time)
 
         dsr = mikeio.read(filename=filename, time=time)
-
         assert all(dsr.time == dssel.time)
+
+        # integer time selection for DataArray (not Dataset)
+        dsgetitem = ds[0][time]
+        assert all(dsr[0].time == dsgetitem.time)
