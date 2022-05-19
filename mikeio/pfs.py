@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 import yaml
 import pandas as pd
-import warnings
+
 
 from types import SimpleNamespace
 
@@ -20,9 +20,6 @@ class NestedNamespace(SimpleNamespace):
 class Pfs:
     def __init__(self, filename, encoding="cp1252"):
 
-        warnings.warn(
-            "Support for PFS files in mikeio is experimental. The API is likely to change!"
-        )
         try:
             self._filename = filename
             self._pfs2yaml(encoding=encoding)
