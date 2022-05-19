@@ -16,6 +16,8 @@ from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 
+import mikeio
+
 
 def write_dfs2(filename: str, ds: Dataset, title="") -> None:
     dfs = _write_dfs2_header(filename, ds, title)
@@ -23,7 +25,7 @@ def write_dfs2(filename: str, ds: Dataset, title="") -> None:
 
 
 def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
-    builder = DfsBuilder.Create(title, "MIKE IO", 1)
+    builder = DfsBuilder.Create(title, "mikeio", mikeio.__dfs_version__)
     builder.SetDataType(0)
 
     geometry: Grid2D = ds.geometry
@@ -403,7 +405,7 @@ class Dfs2(_Dfs123):
 
         filename = str(filename)
 
-        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", mikeio.__dfs_version__)
         if not self._dx:
             self._dx = 1
         if dx:

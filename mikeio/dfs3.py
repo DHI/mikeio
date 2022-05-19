@@ -17,6 +17,8 @@ from .dfs import _Dfs123
 from .spatial.grid_geometry import Grid2D, Grid3D
 from .spatial.geometry import GeometryUndefined
 
+import mikeio
+
 
 def write_dfs3(filename: str, ds: Dataset, title="") -> None:
     dfs = _write_dfs3_header(filename, ds, title)
@@ -24,7 +26,7 @@ def write_dfs3(filename: str, ds: Dataset, title="") -> None:
 
 
 def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
-    builder = DfsBuilder.Create(title, "MIKE IO", 1)
+    builder = DfsBuilder.Create(title, "mikeio", mikeio.__dfs_version__)
     builder.SetDataType(0)
 
     geometry: Grid3D = ds.geometry
@@ -347,7 +349,7 @@ class Dfs3(_Dfs123):
 
         filename = str(filename)
 
-        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", mikeio.__dfs_version__)
         if not self._dx:
             self._dx = 1
         if dx:

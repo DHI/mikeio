@@ -9,6 +9,8 @@ from mikecore.DfsBuilder import DfsBuilder
 from .dfs import _Dfs123
 from .spatial.grid_geometry import Grid1D
 
+import mikeio
+
 
 class Dfs1(_Dfs123):
     _ndim = 1
@@ -127,7 +129,7 @@ class Dfs1(_Dfs123):
                 FutureWarning,
             )
 
-        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", mikeio.__dfs_version__)
         self._dx = dx
         self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
 
