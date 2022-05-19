@@ -438,8 +438,9 @@ def test_write(tmpdir):
     dfs = Dfsu(meshfilename)
 
     dfs.write(outfilename, ds)
+    dfs = mikeio.open(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert dfs._source.ApplicationTitle == "mikeio"
 
 
 def test_write_from_dfsu(tmpdir):
@@ -881,7 +882,11 @@ def test_dataset_write_dfsu(tmp_path):
     ds = mikeio.read("tests/testdata/HD2D.dfsu", time=[0, 1])
     ds.to_dfs(outfilename)
 
-    ds2 = mikeio.read(outfilename)
+    dfs = mikeio.open(outfilename)
+
+    assert dfs._source.ApplicationTitle == "mikeio"
+
+    ds2 = dfs.read()
     assert ds2.n_timesteps == 2
 
 

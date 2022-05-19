@@ -16,6 +16,7 @@ from mikecore.MeshBuilder import MeshBuilder
 
 from mikeio.spatial.utils import xy_to_bbox
 
+from . import __dfs_version__
 from .base import EquidistantTimeSeries
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset, DataArray
@@ -75,6 +76,8 @@ def _write_dfsu(filename: str, data: Dataset):
     for item in data.items:
         builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
 
+    builder.ApplicationTitle = "mikeio"
+    builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
 
     for i in range(n_time_steps):
@@ -1124,6 +1127,9 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 builder.AddDynamicItem(
                     item.name, eumQuantity.Create(item.type, item.unit)
                 )
+
+        builder.ApplicationTitle = "mikeio"
+        builder.ApplicationVersion = __dfs_version__
 
         try:
             self._dfs = builder.CreateFile(filename)
