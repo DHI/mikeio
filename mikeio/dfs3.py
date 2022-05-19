@@ -272,7 +272,9 @@ class Dfs3(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
-        return Dataset(data_list, time=time, items=items, geometry=geometry)
+        return Dataset(
+            data_list, time=time, items=items, geometry=geometry, validate=False
+        )
 
     def write(
         self,

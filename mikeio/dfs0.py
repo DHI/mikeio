@@ -253,7 +253,7 @@ class Dfs0(TimeSeries):
             for item in self._dfs.ItemInfo
         ]
 
-        return Dataset(data, time, items)
+        return Dataset(data, time, items, validate=False)
 
     @staticmethod
     def _to_dfs_datatype(dtype):
