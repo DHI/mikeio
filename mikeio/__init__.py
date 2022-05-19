@@ -20,6 +20,7 @@ from platform import architecture
 #
 
 __version__ = "1.0.dev3"
+__dfs_version__: int = 100
 
 
 if "64" not in architecture()[0]:

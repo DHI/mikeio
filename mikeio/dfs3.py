@@ -9,7 +9,7 @@ from mikecore.DfsBuilder import DfsBuilder
 from mikecore.Projections import Cartography
 import pandas as pd
 
-
+from . import __dfs_version__
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
@@ -24,7 +24,7 @@ def write_dfs3(filename: str, ds: Dataset, title="") -> None:
 
 
 def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
-    builder = DfsBuilder.Create(title, "MIKE IO", 1)
+    builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
     geometry: Grid3D = ds.geometry
@@ -347,7 +347,7 @@ class Dfs3(_Dfs123):
 
         filename = str(filename)
 
-        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         if not self._dx:
             self._dx = 1
         if dx:

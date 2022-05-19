@@ -10,6 +10,7 @@ from mikecore.Projections import Cartography
 import pandas as pd
 from tqdm import tqdm
 
+from . import __dfs_version__
 from .dfs import _Dfs123
 from .dataset import Dataset
 from .eum import TimeStepUnit
@@ -23,7 +24,7 @@ def write_dfs2(filename: str, ds: Dataset, title="") -> None:
 
 
 def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
-    builder = DfsBuilder.Create(title, "MIKE IO", 1)
+    builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
     geometry: Grid2D = ds.geometry
@@ -403,7 +404,7 @@ class Dfs2(_Dfs123):
 
         filename = str(filename)
 
-        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         if not self._dx:
             self._dx = 1
         if dx:

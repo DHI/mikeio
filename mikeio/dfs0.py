@@ -16,6 +16,7 @@ from mikecore.DfsFile import (
     TimeAxisType,
 )
 
+from . import __dfs_version__
 from .dfsutil import _valid_item_numbers, _get_item_info, _valid_timesteps
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
@@ -26,7 +27,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
     filename = str(filename)
 
     factory = DfsFactory()
-    builder = DfsBuilder.Create(title, "DFS", 0)
+    builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(1)
     builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
@@ -269,7 +270,7 @@ class Dfs0(TimeSeries):
 
     def _setup_header(self):
         factory = DfsFactory()
-        builder = DfsBuilder.Create(self._title, "DFS", 0)
+        builder = DfsBuilder.Create(self._title, "mikeio", __dfs_version__)
         builder.SetDataType(1)
         builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
