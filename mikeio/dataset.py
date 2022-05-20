@@ -510,9 +510,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             is_replacement = key in self.names
             if key != item_name:
                 # TODO: what would be best in this situation?
-                warnings.warn(
-                    f"key '{key}' and item name '{item_name}' mismatch! item name will be replaced with key!"
-                )
+                # Assignment to a key is enough indication that the user wants to name the item like this
                 value.name = key
             if not is_replacement:
                 self._check_already_present(value)
@@ -957,14 +955,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def append(self, other, inplace=False):
         warnings.warn(
-            "Dataframe.append is deprecated, use Dataframe.merge([ds1, ds2]) instead",
+            "Dataset.append is deprecated, use Dataset.merge([ds1, ds2]) instead",
             FutureWarning,
         )
         return self.append_items(other, inplace)
 
     def append_items(self, other, inplace=False):
         warnings.warn(
-            "Dataframe.append_items is deprecated, use Dataframe.merge([ds1, ds2]) instead",
+            "Dataset.append_items is deprecated, use Dataset.merge([ds1, ds2]) instead",
             FutureWarning,
         )
         if inplace:
