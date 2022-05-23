@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 import pytest
 
 import mikeio
@@ -249,6 +250,25 @@ def test_read_dfs_time_selection_str_specific():
         assert dsr.shape == dsgetitem.shape
 
 
+def test_read_dfs_time_selection_list_str():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = ["2018-03-08 00:00", "2018-03-10 00:00"]
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 2
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
 def test_read_dfs_time_selection_pdTimestamp():
 
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -273,6 +293,66 @@ def test_read_dfs_time_selection_pdDatetimeIndex():
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
         time = pd.date_range("2018-03-08", end="2018-03-10", freq="D")
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_selection_datetime():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = datetime(2018, 3, 8, 0, 0, 0)
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 1
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+        dsr2 = mikeio.read(filename=filename, time=pd.Timestamp(time))
+        assert all(dsr2.time == dsr.time)
+        assert dsr2.shape == dsr.shape
+
+
+def test_read_dfs_time_list_datetime():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = [datetime(2018, 3, 8), datetime(2018, 3, 10)]
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 2
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_slice_datetime():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = slice(datetime(2018, 3, 8), datetime(2018, 3, 9))
         ds = mikeio.read(filename=filename)
         dssel = ds.sel(time=time)
 
