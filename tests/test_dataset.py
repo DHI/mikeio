@@ -109,8 +109,7 @@ def test_pop(ds1):
     assert isinstance(da, mikeio.DataArray)
     assert da.name == "Foo"
 
-    with pytest.warns(UserWarning):
-        ds1["Foo2"] = da  # re-insert
+    ds1["Foo2"] = da  # re-insert
     assert len(ds1) == 2
 
     da = ds1.pop(-1)
