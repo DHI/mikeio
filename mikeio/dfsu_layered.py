@@ -105,6 +105,7 @@ class DfsuLayered(_Dfsu):
         y=None,
         z=None,
         layers=None,
+        keepdims=False,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -171,8 +172,7 @@ class DfsuLayered(_Dfsu):
             )
             time = time_steps
 
-        single_time_selected = np.isscalar(time) if time is not None else False
-        time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         self._validate_elements_and_geometry_sel(
             elements, area=area, layers=layers, x=x, y=y, z=z
@@ -221,7 +221,7 @@ class DfsuLayered(_Dfsu):
 
         t_seconds = np.zeros(n_steps, dtype=float)
 
-        if single_time_selected:
+        if single_time_selected and not keepdims:
             data = data[0]
 
         for i in trange(n_steps, disable=not self.show_progress):
@@ -238,7 +238,7 @@ class DfsuLayered(_Dfsu):
                     else:
                         d = d[elements]
 
-                if single_time_selected:
+                if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
                     data_list[item][i] = d
@@ -264,9 +264,12 @@ class DfsuLayered(_Dfsu):
                 geometry=geometry,
                 zn=data_list[0],
                 dims=dims,
+                validate=False,
             )
         else:
-            return Dataset(data_list, time, items, geometry=geometry, dims=dims)
+            return Dataset(
+                data_list, time, items, geometry=geometry, dims=dims, validate=False
+            )
 
     def _parse_geometry_sel(self, area, layers, x, y, z):
         elements = None
@@ -371,7 +374,7 @@ class Dfsu3D(DfsuLayered):
             elem3d = self.geometry.e2_e3_table[elem2d]
             return elem3d
 
-    def extract_surface_elevation_from_3d(self, filename=None, time=None, n_nearest=4):
+    def extract_surface_elevation_from_3d(self, filename=None, n_nearest=4):
         """
         Extract surface elevation from a 3d dfsu file (based on zn)
         to a new 2d dfsu file with a surface elevation item.
@@ -380,14 +383,12 @@ class Dfsu3D(DfsuLayered):
         ---------
         filename: str
             Output file name
-        time: str, int or list[int], optional
-            Extract only selected time_steps
         n_nearest: int, optional
             number of points for spatial interpolation (inverse_distance), default=4
 
         Examples
         --------
-        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu', time='2018-1-1,2018-2-1')
+        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu')
         """
         # validate input
         assert (
@@ -395,7 +396,6 @@ class Dfsu3D(DfsuLayered):
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         )
         assert n_nearest > 0
-        time_steps = _valid_timesteps(self._source, time)
 
         # make 2d nodes-to-elements interpolator
         top_el = self.top_elements
@@ -410,11 +410,11 @@ class Dfsu3D(DfsuLayered):
             weights = get_idw_interpolant(dist)
 
         # read zn from 3d file and interpolate to element centers
-        ds = self.read(items=0, time_steps=time_steps)  # read only zn
+        ds = self.read(items=0, keepdims=True)  # read only zn
         node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
-        zn_surf = ds[0].values[:, node_ids_surf]  # surface
+        zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
         surf2d = interp2d(zn_surf, node_ids, weights)
 
         # create output

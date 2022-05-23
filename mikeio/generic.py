@@ -14,8 +14,10 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
 from mikecore.eum import eumQuantity
+from . import __dfs_version__
 from .dfsutil import _valid_item_numbers, _get_item_info
 from .eum import EUMType, ItemInfo
+
 
 show_progress = False
 
@@ -81,9 +83,7 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
     source = DfsFileFactory.DfsGenericOpen(infilename)
     fi = source.FileInfo
 
-    builder = DfsBuilder.Create(
-        fi.FileTitle, fi.ApplicationTitle, fi.ApplicationVersion
-    )
+    builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
 
     # Set up the header
     builder.SetDataType(fi.DataType)

@@ -191,7 +191,7 @@ def test_read_single_time_step():
     ds = dfs.read(items=[0, 3], time=1)
     assert "time" not in ds.dims
 
-    ds = dfs.read(items=[0, 3], time=[1])  # this forces time dimension to be kept
+    ds = dfs.read(items=[0, 3], time=[1], keepdims=True)
     assert "time" in ds.dims
 
 
@@ -438,8 +438,9 @@ def test_write(tmpdir):
     dfs = Dfsu(meshfilename)
 
     dfs.write(outfilename, ds)
+    dfs = mikeio.open(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert dfs._source.ApplicationTitle == "mikeio"
 
 
 def test_write_from_dfsu(tmpdir):
@@ -471,12 +472,12 @@ def test_incremental_write_from_dfsu(tmpdir):
 
     nt = dfs.n_timesteps
 
-    ds = dfs.read(time=[0])
+    ds = dfs.read(time=[0], keepdims=True)
 
     dfs.write(outfilename, ds, keep_open=True)
 
     for i in range(1, nt):
-        ds = dfs.read(time=[i])
+        ds = dfs.read(time=[i], keepdims=True)
         dfs.append(ds)
 
     dfs.close()
@@ -495,11 +496,11 @@ def test_incremental_write_from_dfsu_context_manager(tmpdir):
 
     nt = dfs.n_timesteps
 
-    ds = dfs.read(time=[0])
+    ds = dfs.read(time=[0], keepdims=True)
 
     with dfs.write(outfilename, ds, keep_open=True) as f:
         for i in range(1, nt):
-            ds = dfs.read(time=[i])
+            ds = dfs.read(time=[i], keepdims=True)
             f.append(ds)
 
         # dfs.close() # should be called automagically by context manager
@@ -881,7 +882,11 @@ def test_dataset_write_dfsu(tmp_path):
     ds = mikeio.read("tests/testdata/HD2D.dfsu", time=[0, 1])
     ds.to_dfs(outfilename)
 
-    ds2 = mikeio.read(outfilename)
+    dfs = mikeio.open(outfilename)
+
+    assert dfs._source.ApplicationTitle == "mikeio"
+
+    ds2 = dfs.read()
     assert ds2.n_timesteps == 2
 
 

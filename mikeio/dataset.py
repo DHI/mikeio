@@ -88,12 +88,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         geometry: _Geometry = None,
         zn=None,
         dims=None,
+        validate=True,
     ):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )
-        return self._init_from_DataArrays(data, validate=True)
+        return self._init_from_DataArrays(data, validate=validate)
 
     @staticmethod
     def _is_DataArrays(data):
@@ -140,7 +141,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         if (len(self) > 1) and validate:
             first = self[0]
-            for da in self[1:]:
+            for i in range(1, len(self)):
+                da = self[i]
                 first._is_compatible(da, raise_error=True)
 
         self._check_all_different_ids(self._data_vars.values())
@@ -437,7 +439,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        return Dataset(res)
+        return Dataset(data=res, validate=False)
 
     # TODO: delete this?
     @staticmethod
@@ -508,9 +510,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             is_replacement = key in self.names
             if key != item_name:
                 # TODO: what would be best in this situation?
-                warnings.warn(
-                    f"key '{key}' and item name '{item_name}' mismatch! item name will be replaced with key!"
-                )
+                # Assignment to a key is enough indication that the user wants to name the item like this
                 value.name = key
             if not is_replacement:
                 self._check_already_present(value)
@@ -631,7 +631,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             data_vars = {}
             for v in key:
                 data_vars[v] = self._data_vars[v]
-            return Dataset(data_vars)
+            return Dataset(data=data_vars, validate=False)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
@@ -733,7 +733,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         1985-08-06 07:00:00 - 1985-08-06 12:00:00
         """
         res = [da.isel(idx=idx, axis=axis, **kwargs) for da in self]
-        return Dataset(res)
+        return Dataset(data=res, validate=False)
 
     def sel(
         self,
@@ -747,7 +747,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ds.sel(area=[1., 12., 2., 15.])
         """
         res = [da.sel(**kwargs) for da in self]
-        return Dataset(res)
+        return Dataset(data=res, validate=False)
 
     def interp(
         self,
@@ -776,9 +776,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
                 das = [da.interp(x=x, y=y) for da in self]
-            ds = Dataset(das)
+            ds = Dataset(das, validate=False)
         else:
-            ds = Dataset([da for da in self])
+            ds = Dataset([da for da in self], validate=False)
 
         # interp in time
         if time is not None:
@@ -915,7 +915,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
-        ds = Dataset(das)
+        ds = Dataset(das, validate=False)
 
         if hasattr(other, "time"):
             ds = ds.interp_time(other.time)
@@ -955,14 +955,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def append(self, other, inplace=False):
         warnings.warn(
-            "Dataframe.append is deprecated, use Dataframe.merge([ds1, ds2]) instead",
+            "Dataset.append is deprecated, use Dataset.merge([ds1, ds2]) instead",
             FutureWarning,
         )
         return self.append_items(other, inplace)
 
     def append_items(self, other, inplace=False):
         warnings.warn(
-            "Dataframe.append_items is deprecated, use Dataframe.merge([ds1, ds2]) instead",
+            "Dataset.append_items is deprecated, use Dataset.merge([ds1, ds2]) instead",
             FutureWarning,
         )
         if inplace:
@@ -1121,7 +1121,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             for name, da in self._data_vars.items()
         }
 
-        return Dataset(res)
+        return Dataset(data=res, validate=False)
 
     def quantile(self, q, *, axis="time", **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
@@ -1193,7 +1193,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                     qd.name = newname
                     res.append(qd)
 
-        return Dataset(res)
+        return Dataset(data=res, validate=False)
 
     def max(self, axis="time") -> "Dataset":
         """Max value along an axis
@@ -1404,7 +1404,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(
-            data, time=time, items=items, geometry=self.geometry, zn=self._zn
+            data,
+            time=time,
+            items=items,
+            geometry=self.geometry,
+            zn=self._zn,
+            validate=False,
         )
 
     def _multiply_value(self, value) -> "Dataset":
@@ -1415,7 +1420,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(
-            data, time=time, items=items, geometry=self.geometry, zn=self._zn
+            data,
+            time=time,
+            items=items,
+            geometry=self.geometry,
+            zn=self._zn,
+            validate=False,
         )
 
     # ===============================================

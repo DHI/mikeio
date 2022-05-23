@@ -16,6 +16,7 @@ from mikecore.MeshBuilder import MeshBuilder
 
 from mikeio.spatial.utils import xy_to_bbox
 
+from . import __dfs_version__
 from .base import EquidistantTimeSeries
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset, DataArray
@@ -75,6 +76,8 @@ def _write_dfsu(filename: str, data: Dataset):
     for item in data.items:
         builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
 
+    builder.ApplicationTitle = "mikeio"
+    builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
 
     for i in range(n_time_steps):
@@ -724,6 +727,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         area=None,
         x=None,
         y=None,
+        keepdims=False,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -788,8 +792,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             )
             time = time_steps
 
-        single_time_selected = np.isscalar(time) if time is not None else False
-        time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
         if elements is None:
@@ -814,7 +817,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         data_list = []
 
         n_steps = len(time_steps)
-        shape = (n_elems,) if single_time_selected else (n_steps, n_elems)
+        shape = (
+            (n_elems,)
+            if (single_time_selected and not keepdims)
+            else (n_steps, n_elems)
+        )
         for item in range(n_items):
             # Initialize an empty data block
             data = np.ndarray(shape=shape, dtype=self._dtype)
@@ -833,7 +840,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 if elements is not None:
                     d = d[elements]
 
-                if single_time_selected:
+                if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
                     data_list[item][i] = d
@@ -844,14 +851,19 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         dfs.Close()
 
-        dims = ("time", "element") if not single_time_selected else ("element",)
+        dims = ("time", "element")
+
+        if single_time_selected and not keepdims:
+            dims = ("element",)
 
         if elements is not None and len(elements) == 1:
             # squeeze point data
             dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d) for d in data_list]
 
-        return Dataset(data_list, time, items, geometry=geometry, dims=dims)
+        return Dataset(
+            data_list, time, items, geometry=geometry, dims=dims, validate=False
+        )
 
     def _validate_elements_and_geometry_sel(self, elements, **kwargs):
         used_kwargs = []
@@ -1125,6 +1137,9 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     item.name, eumQuantity.Create(item.type, item.unit)
                 )
 
+        builder.ApplicationTitle = "mikeio"
+        builder.ApplicationVersion = __dfs_version__
+
         try:
             self._dfs = builder.CreateFile(filename)
         except IOError:
@@ -1241,7 +1256,7 @@ class Dfsu2DH(_Dfsu):
         n_items = len(item_numbers)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        time_steps = _valid_timesteps(dfs, time_steps=None)
+        _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
         deletevalue = self.deletevalue
 

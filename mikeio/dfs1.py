@@ -6,6 +6,7 @@ from mikecore.eum import eumUnit
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
 
+from . import __dfs_version__
 from .dfs import _Dfs123
 from .spatial.grid_geometry import Grid1D
 
@@ -127,7 +128,7 @@ class Dfs1(_Dfs123):
                 FutureWarning,
             )
 
-        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         self._dx = dx
         self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
 

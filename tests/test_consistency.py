@@ -1,6 +1,7 @@
+import pandas as pd
+from datetime import datetime
 import pytest
 
-import numpy as np
 import mikeio
 from mikeio.dataarray import DataArray
 from mikeio.spatial.geometry import GeometryUndefined
@@ -137,8 +138,7 @@ def test_read_dfs2_single_time():
     assert "time" not in ds.dims
 
     ds = mikeio.read(
-        "tests/testdata/consistency/oresundHD.dfs2",
-        time=[-1],  # time as array, forces time dimension to be kept
+        "tests/testdata/consistency/oresundHD.dfs2", time=[-1], keepdims=True
     )
 
     assert ds.n_timesteps == 1
@@ -207,7 +207,246 @@ def test_read_dfsu2d_single_time():
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfsu",
         time=[-1],
+        keepdims=True,
     )
 
     assert ds.n_timesteps == 1
     assert "time" in ds.dims
+
+
+def test_read_dfs_time_selection_str():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = "2018-03"
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 5
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_selection_str_specific():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = "2018-03-08 00:00:00"
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 1
+        assert "time" not in dssel.dims
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_selection_list_str():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = ["2018-03-08 00:00", "2018-03-10 00:00"]
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 2
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_selection_pdTimestamp():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = pd.Timestamp("2018-03-08 00:00:00")
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 1
+        assert "time" not in dssel.dims
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_selection_pdDatetimeIndex():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = pd.date_range("2018-03-08", end="2018-03-10", freq="D")
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 3
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_selection_datetime():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = datetime(2018, 3, 8, 0, 0, 0)
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 1
+        assert "time" not in dssel.dims
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+        dsr2 = mikeio.read(filename=filename, time=pd.Timestamp(time))
+        assert all(dsr2.time == dsr.time)
+        assert dsr2.shape == dsr.shape
+
+
+def test_read_dfs_time_list_datetime():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = [datetime(2018, 3, 8), datetime(2018, 3, 10)]
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 2
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_slice_datetime():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = slice(datetime(2018, 3, 8), datetime(2018, 3, 10))
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 3
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_slice_str():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = slice("2018-03-08", "2018-03-10")
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 3
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_selection_str_comma():
+
+    extensions = ["dfs0", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = "2018-03-08,2018-03-10"
+        ds = mikeio.read(filename=filename)
+        dssel = ds.sel(time=time)
+        assert dssel.n_timesteps == 3
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        dsgetitem = ds[time]
+        assert all(dsr.time == dsgetitem.time)
+        assert dsr.shape == dsgetitem.shape
+
+
+def test_read_dfs_time_int():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = -1
+        ds = mikeio.read(filename=filename)
+        dssel = ds.isel(time=time)
+        assert dssel.n_timesteps == 1
+        assert "time" not in dssel.dims
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        # integer time selection for DataArray (not Dataset)
+        dsgetitem = ds[0][time]
+        assert all(dsr[0].time == dsgetitem.time)
+        assert dsr[0].shape == dsgetitem.shape
+
+
+def test_read_dfs_time_list_int():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        time = [0, 1]
+        ds = mikeio.read(filename=filename)
+        dssel = ds.isel(time=time)
+        assert dssel.n_timesteps == 2
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
+        # integer time selection for DataArray (not Dataset)
+        dsgetitem = ds[0][time]
+        assert all(dsr[0].time == dsgetitem.time)
+        assert dsr[0].shape == dsgetitem.shape

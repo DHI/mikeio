@@ -10,6 +10,7 @@ from mikecore.Projections import Cartography
 import pandas as pd
 from tqdm import tqdm
 
+from . import __dfs_version__
 from .dfs import _Dfs123
 from .dataset import Dataset
 from .eum import TimeStepUnit
@@ -23,7 +24,7 @@ def write_dfs2(filename: str, ds: Dataset, title="") -> None:
 
 
 def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
-    builder = DfsBuilder.Create(title, "MIKE IO", 1)
+    builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
     geometry: Grid2D = ds.geometry
@@ -221,7 +222,9 @@ class Dfs2(_Dfs123):
 
         self._read_header()
 
-    def read(self, *, items=None, time=None, area=None, time_steps=None) -> Dataset:
+    def read(
+        self, *, items=None, time=None, area=None, time_steps=None, keepdims=False
+    ) -> Dataset:
         """
         Read data from a dfs2 file
 
@@ -253,9 +256,8 @@ class Dfs2(_Dfs123):
         n_items = len(item_numbers)
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
-        time_steps = _valid_timesteps(self._dfs.FileInfo, time)
-        nt = len(time_steps)
-        single_time_selected = np.isscalar(time) if time is not None else False
+        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
+        nt = len(time_steps) if not single_time_selected else 1
 
         if area is not None:
             take_subset = True
@@ -267,7 +269,7 @@ class Dfs2(_Dfs123):
             shape = (nt, self._ny, self._nx)
             geometry = self.geometry
 
-        if single_time_selected:
+        if single_time_selected and not keepdims:
             shape = shape[1:]
 
         data_list = [
@@ -288,7 +290,7 @@ class Dfs2(_Dfs123):
                 if take_subset:
                     d = np.take(np.take(d, jj, axis=0), ii, axis=-1)
 
-                if single_time_selected:
+                if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
                     data_list[item][i] = d
@@ -298,7 +300,9 @@ class Dfs2(_Dfs123):
         self._dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        return Dataset(data_list, time=time, items=items, geometry=geometry)
+        return Dataset(
+            data_list, time=time, items=items, geometry=geometry, validate=False
+        )
 
     def find_nearest_elements(
         self,
@@ -403,7 +407,7 @@ class Dfs2(_Dfs123):
 
         filename = str(filename)
 
-        self._builder = DfsBuilder.Create(title, "mikeio", 0)
+        self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         if not self._dx:
             self._dx = 1
         if dx:

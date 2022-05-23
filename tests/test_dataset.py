@@ -109,8 +109,7 @@ def test_pop(ds1):
     assert isinstance(da, mikeio.DataArray)
     assert da.name == "Foo"
 
-    with pytest.warns(UserWarning):
-        ds1["Foo2"] = da  # re-insert
+    ds1["Foo2"] = da  # re-insert
     assert len(ds1) == 2
 
     da = ds1.pop(-1)
@@ -1407,3 +1406,20 @@ def test_time_selection():
 
     assert dss_t.shape == (24,)
     assert len(dss_tix) == 1
+
+
+def test_create_dataset_with_many_items():
+    n_items = 800
+    nt = 2
+    time = pd.date_range("2000", freq="H", periods=nt)
+
+    das = []
+
+    for i in range(n_items):
+        x = np.random.random(nt)
+        da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i+1}"))
+        das.append(da)
+
+    ds = mikeio.Dataset(das)
+
+    assert ds.n_items == n_items
