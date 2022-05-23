@@ -155,7 +155,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def read(self, items=None, time=None, time_steps=None) -> Dataset:
+    def read(self, items=None, time=None, time_steps=None, keepdims=False) -> Dataset:
         """
         Read data from a dfs0 file.
 
@@ -198,7 +198,7 @@ class Dfs0(TimeSeries):
             time_steps = range(self._n_timesteps)
         else:
             sel_time_step_str = None
-            time_steps = _valid_timesteps(dfs.FileInfo, time)
+            _, time_steps = _valid_timesteps(dfs.FileInfo, time)
 
         dfs.Close()
 

@@ -494,7 +494,7 @@ def test_extract_surface_elevation_from_3d():
     outputfile = "tests/testdata/oresund_surface_elev_extracted.dfsu"
     n_top1 = len(dfs.top_elements)
 
-    dfs.extract_surface_elevation_from_3d(outputfile, time=-1)
+    dfs.extract_surface_elevation_from_3d(outputfile)
 
     dfs2 = Dfsu(outputfile)
     assert dfs2.n_elements == n_top1

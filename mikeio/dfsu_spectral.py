@@ -80,6 +80,7 @@ class DfsuSpectral(_Dfsu):
         area=None,
         x=None,
         y=None,
+        keepdims=False,
     ) -> Dataset:
         """
         Read data from a spectral dfsu file
@@ -139,8 +140,7 @@ class DfsuSpectral(_Dfsu):
             )
             time = time_steps
 
-        single_time_selected = np.isscalar(time) if time is not None else False
-        time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         if self._type == DfsuFileType.DfsuSpectral2D:
             self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
@@ -173,7 +173,7 @@ class DfsuSpectral(_Dfsu):
 
         t_seconds = np.zeros(n_steps, dtype=float)
 
-        if single_time_selected:
+        if single_time_selected and not keepdims:
             data = data[0]
 
         for i in trange(n_steps, disable=not self.show_progress):
@@ -191,7 +191,7 @@ class DfsuSpectral(_Dfsu):
                 if pts is not None:
                     d = d[pts, ...]
 
-                if single_time_selected:
+                if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
                     data_list[item][i] = d

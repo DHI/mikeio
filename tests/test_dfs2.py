@@ -660,13 +660,13 @@ def test_incremental_write_from_dfs2(tmpdir):
 
     nt = dfs.n_timesteps
 
-    ds = dfs.read(time=[0])
+    ds = dfs.read(time=[0], keepdims=True)
 
     dfs_to_write = Dfs2()
     dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True)
 
     for i in range(1, nt):
-        ds = dfs.read(time=[i])
+        ds = dfs.read(time=[i], keepdims=True)
         dfs_to_write.append(ds)
 
     dfs_to_write.close()
@@ -686,13 +686,13 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
 
     nt = dfs.n_timesteps
 
-    ds = dfs.read(time=[0])
+    ds = dfs.read(time=[0], keepdims=True)
 
     dfs_to_write = Dfs2()
     with dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True) as f:
 
         for i in range(1, nt):
-            ds = dfs.read(time=[i])
+            ds = dfs.read(time=[i], keepdims=True)
             f.append(ds)
 
         # dfs_to_write.close() # called automagically by context manager
@@ -708,7 +708,7 @@ def test_read_concat_write_dfs2(tmp_path):
 
     ds1 = mikeio.read("tests/testdata/waves.dfs2", time=[0, 1])
     # ds2 = mikeio.read("tests/testdata/waves.dfs2", time=2)  # dont do this, it will not work, since reading a single time step removes the time dimension
-    ds2 = mikeio.read("tests/testdata/waves.dfs2", time=[2])
+    ds2 = mikeio.read("tests/testdata/waves.dfs2", time=[2], keepdims=True)
     dsc = mikeio.Dataset.concat([ds1, ds2])
     assert dsc.n_timesteps == 3
     assert dsc.end_time == ds2.end_time

@@ -40,7 +40,9 @@ class _Dfs123(TimeSeries):
         self._dfs = None
         self._source = None
 
-    def read(self, *, items=None, time=None, time_steps=None) -> Dataset:
+    def read(
+        self, *, items=None, time=None, time_steps=None, keepdims=False
+    ) -> Dataset:
         """
         Read data from a dfs file
 
@@ -68,9 +70,8 @@ class _Dfs123(TimeSeries):
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        time_steps = _valid_timesteps(self._dfs.FileInfo, time)
-        nt = len(time_steps)
-        single_time_selected = np.isscalar(time) if time is not None else False
+        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
+        nt = len(time_steps) if not single_time_selected else 1
 
         if self._ndim == 1:
             shape = (nt, self._nx)
@@ -79,7 +80,7 @@ class _Dfs123(TimeSeries):
         else:
             shape = (nt, self._nz, self._ny, self._nx)
 
-        if single_time_selected:
+        if single_time_selected and not keepdims:
             shape = shape[1:]
 
         data_list = [

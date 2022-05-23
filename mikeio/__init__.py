@@ -39,7 +39,9 @@ from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .eum import ItemInfo, EUMType, EUMUnit
 
 
-def read(filename, *, items=None, time_steps=None, time=None, **kwargs) -> Dataset:
+def read(
+    filename, *, items=None, time_steps=None, time=None, keepdims=False, **kwargs
+) -> Dataset:
     """Read data from a dfs file
 
     Parameters
@@ -64,7 +66,9 @@ def read(filename, *, items=None, time_steps=None, time=None, **kwargs) -> Datas
 
     dfs = open(filename)
 
-    return dfs.read(items=items, time_steps=time_steps, time=time, **kwargs)
+    return dfs.read(
+        items=items, time_steps=time_steps, time=time, keepdims=keepdims, **kwargs
+    )
 
 
 def open(filename: str, **kwargs):
