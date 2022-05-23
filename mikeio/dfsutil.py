@@ -1,3 +1,4 @@
+from datetime import datetime
 from multiprocessing.sharedctypes import Value
 from typing import Iterable, List, Tuple, Union
 import numpy as np
@@ -64,7 +65,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         else:
             time_steps = slice(parts[0], parts[1])
 
-    if isinstance(time_steps, (slice, pd.Timestamp, pd.DatetimeIndex)):
+    if isinstance(time_steps, (slice, pd.Timestamp, datetime, pd.DatetimeIndex)):
         if dfsFileInfo.TimeAxis.TimeAxisType != TimeAxisType.EquidistantCalendar:
             # TODO: handle non-equidistant calendar
             raise ValueError(
@@ -89,14 +90,22 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
             raise IndexError(f"Timestep cannot be larger than {n_steps_file}")
         if min(time_steps) < 0:
             raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
-    elif isinstance(time_steps, pd.Timestamp):
+    elif isinstance(time_steps, Iterable):
+        steps = []
+        for t in time_steps:
+            _, step = _valid_timesteps(dfsFileInfo, t)
+            steps.append(step[0])
+        single_time_selected = len(steps) == 1
+        time_steps = steps
+
+    elif isinstance(time_steps, (pd.Timestamp, datetime)):
         s = time.slice_indexer(time_steps, time_steps)
         time_steps = list(range(s.start, s.stop))
     elif isinstance(time_steps, pd.DatetimeIndex):
         time_steps = list(time.get_indexer(time_steps))
 
     else:
-        raise TypeError(f"Indexing is not possible with type(time_steps")
+        raise TypeError(f"Indexing is not possible with {type(time_steps)}")
     if len(time_steps) == 1:
         single_time_selected = True
     return single_time_selected, time_steps
