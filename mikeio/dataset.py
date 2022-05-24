@@ -1065,8 +1065,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
             # if there is an overlap "other" data will be used!
-            newdata[j][idx1, :] = ds[j].to_numpy()
-            newdata[j][idx2, :] = other[j].to_numpy()
+            newdata[j][idx1] = ds[j].to_numpy()
+            newdata[j][idx2] = other[j].to_numpy()
 
         zn = None
         if self._zn is not None:
