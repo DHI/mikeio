@@ -1230,8 +1230,8 @@ def test_concat_by_time_ndim1():
 
 
 def test_concat_by_time_inconsistent_shape_not_possible():
-    ds1 = mikeio.read("tests/testdata/tide1.dfs1").isel(x=[0,1])
-    ds2 = mikeio.read("tests/testdata/tide2.dfs1").isel(x=[0,1,2])
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1").isel(x=[0, 1])
+    ds2 = mikeio.read("tests/testdata/tide2.dfs1").isel(x=[0, 1, 2])
     with pytest.raises(ValueError, match="Shape"):
         mikeio.Dataset.concat([ds1, ds2])
 
