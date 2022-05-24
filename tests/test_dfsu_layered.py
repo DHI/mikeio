@@ -58,7 +58,7 @@ def test_read_top_layer():
     assert dstop1.dims == dstop2.dims
     assert isinstance(dstop1.geometry, GeometryFM)
     assert dstop1.geometry._type == dstop2.geometry._type
-    assert np.all(dstop1.values == dstop2.values)
+    assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
     assert dstop1.geometry.max_nodes_per_element <= 4
 
 
@@ -74,7 +74,7 @@ def test_read_bottom_layer():
     assert dsbot1.dims == dsbot2.dims
     assert isinstance(dsbot1.geometry, GeometryFM)
     assert dsbot1.geometry._type == dsbot2.geometry._type
-    assert np.all(dsbot1.values == dsbot2.values)
+    assert np.all(dsbot1.to_numpy() == dsbot2.to_numpy())
     assert dsbot1.geometry.max_nodes_per_element <= 4
 
 
@@ -98,7 +98,7 @@ def test_read_multiple_layers():
     assert dstop1.dims == dstop2.dims
     assert isinstance(dstop1.geometry, GeometryFM3D)
     assert dstop1.geometry._type == dstop2.geometry._type
-    assert np.all(dstop1.values == dstop2.values)
+    assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
     assert dstop1.geometry.max_nodes_per_element >= 6
 
 
@@ -119,7 +119,7 @@ def test_read_dfsu3d_area():
     assert dsa1.shape == dsa2.shape
     assert dsa1.dims == dsa2.dims
     assert dsa1.geometry._type == dsa2.geometry._type
-    assert np.all(dsa1.values == dsa2.values)
+    assert np.all(dsa1.to_numpy() == dsa2.to_numpy())
 
 
 def test_read_dfsu3d_column():
@@ -141,7 +141,7 @@ def test_read_dfsu3d_column():
     assert dscol1.shape == dscol2.shape
     assert dscol1.dims == dscol2.dims
     assert dscol1.geometry._type == dscol2.geometry._type
-    assert np.all(dscol1.values == dscol2.values)
+    assert np.all(dscol1.to_numpy() == dscol2.to_numpy())
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
 
 
@@ -159,7 +159,7 @@ def test_read_dfsu3d_xyz():
     assert isinstance(dspt2.geometry, GeometryPoint3D)
     assert dspt1.shape == dspt2.shape
     assert dspt1.dims == dspt2.dims
-    assert np.all(dspt1.values == dspt2.values)
+    assert np.all(dspt1.to_numpy() == dspt2.to_numpy())
 
     dspt3 = dfs.read(time=-1, x=x, y=y, z=z)
     assert dspt3.dims == ()
