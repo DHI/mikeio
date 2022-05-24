@@ -1052,7 +1052,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         See Also
         --------
-        dims : Get axis names 
+        dims : Get axis names
         sel : Select data using labels
 
         Examples
