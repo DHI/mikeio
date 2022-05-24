@@ -339,7 +339,7 @@ class Grid2D(_Geometry):
     def x(self):
         """array of x coordinates (element center)"""
         if self.is_spectral and self.dx > 1:
-            return self.logarithmic_f(self.nx, self._x0, self.dx)
+            return self._logarithmic_f(self.nx, self._x0, self.dx)
 
         x1 = self._x0 + self.dx * (self.nx - 1)
         x_local = np.linspace(self._x0, x1, self.nx)
@@ -349,7 +349,7 @@ class Grid2D(_Geometry):
             return x_local + self._origin[0]
 
     @staticmethod
-    def logarithmic_f(n=25, f0=0.055, freq_factor=1.1):
+    def _logarithmic_f(n=25, f0=0.055, freq_factor=1.1):
         """Generate logarithmic frequency axis
 
         Parameters
@@ -390,10 +390,12 @@ class Grid2D(_Geometry):
 
     @property
     def origin(self) -> Tuple[float, float]:
+        """Coordinates of grid origo (in projection)"""
         return self._origin
 
     @property
     def orientation(self) -> float:
+        """Grid orientation"""
         return self._orientation
 
     @property
@@ -800,10 +802,12 @@ class Grid3D(_Geometry):
 
     @property
     def origin(self) -> Tuple[float, float]:
+        """Coordinates of grid origo (in projection)"""
         return self._origin
 
     @property
     def orientation(self) -> float:
+        """Grid orientation"""
         return self._orientation
 
     def find_index(self, coords=None, layers=None, area=None):
