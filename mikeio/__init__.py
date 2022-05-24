@@ -42,21 +42,50 @@ from .eum import ItemInfo, EUMType, EUMUnit
 def read(
     filename, *, items=None, time_steps=None, time=None, keepdims=False, **kwargs
 ) -> Dataset:
-    """Read data from a dfs file
+    """Read all or a subset of the data from a dfs file
+
+    All dfs files can be subsetted with the *items* and *time* arguments. But
+    the following file types also have the shown additional arguments:
+
+    * Dfs2: area
+    * Dfs3: layers
+    * Dfsu-2d: (x,y), elements, area
+    * Dfsu-layered: (xy,z), elements, area, layers
 
     Parameters
     ----------
     filename
         full path and file name to the dfs file.
-    items: list[int] or list[str], optional
-        Read only selected items, by number (0-based), or by name
-    time: int or list[int], optional
-        Read only selected time_steps
+    items: int, str, list[int] or list[str], optional
+        Read only selected items, by number (0-based), or by name,
+        by default None (=all)
+    time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+        Read only selected time steps, by default None (=all)
+    keepdims: bool, optional
+        When reading a single time step only, should the time-dimension be kept
+        in the returned Dataset? by default: False
+    x, y, z: float, optional
+        Dfsu: Read only data for elements containing the (x,y)
+        or (x,y,z) points(s), by default None
+    area: (float, float, float, float), optional
+        Dfs2/Dfsu: read only data within an area given by a bounding
+        box of coordinates (left, lower, right, upper), by default None (=all)
+    layers: int, str or sequence, optional
+        Dfs3/Dfsu-layered: read only data from specific layers,
+        by default None (=all layers)
 
     Returns
     -------
     Dataset
-        A Dataset with data dimensions according to the file type
+        A Dataset with specification according to the file type
+
+    See also
+    --------
+    mikeio.open - open a Dfs file and only read the header
+
+    Examples
+    --------
+    >>> ds = mikeio.read("")
     """
 
     _, ext = os.path.splitext(filename)
