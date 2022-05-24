@@ -1126,6 +1126,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self._check_all_items_match(other)
         if not np.all(self.shape[1:] == other.shape[1:]):
             raise ValueError("Shape of the datasets must match (except time dimension)")
+        if "time" not in self.dims:
+            raise ValueError(
+                "Datasets cannot be concatenated as they have no time axis!"
+            )
         ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
@@ -1140,8 +1144,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
             # if there is an overlap "other" data will be used!
-            newdata[j][idx1, :] = ds[j].to_numpy()
-            newdata[j][idx2, :] = other[j].to_numpy()
+            newdata[j][idx1] = ds[j].to_numpy()
+            newdata[j][idx2] = other[j].to_numpy()
 
         zn = None
         if self._zn is not None:
