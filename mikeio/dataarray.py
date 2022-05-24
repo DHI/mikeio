@@ -38,7 +38,7 @@ class _DataArrayPlotter:
         self.da = da
 
     def __call__(self, ax=None, figsize=None, **kwargs):
-        """Plot DataArray
+        """Plot DataArray according to geometry
 
         Parameters
         ----------

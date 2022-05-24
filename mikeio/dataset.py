@@ -1072,13 +1072,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ---------
         datasets: sequence of Datasets
+        keep: str, optional
+            TODO Yet to be implemented, default: last
 
         Returns
         -------
         Dataset
             concatenated dataset
-        keep: str
-            TODO Yet to be implemented, default: last
+
         Examples
         --------
         >>> import mikeio
