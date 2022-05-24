@@ -1030,7 +1030,6 @@ class DataArray(DataUtilsMixin, TimeSeries):
         -------
         DataArray
             data with subset
-
         """
         if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
             idx_x = kwargs["x"]
@@ -1098,7 +1097,93 @@ class DataArray(DataUtilsMixin, TimeSeries):
         time: Union[str, pd.DatetimeIndex, "DataArray"] = None,
         **kwargs,
     ) -> "DataArray":
+        """Return a new DataArray whose data is given by
+        selecting index labels along the specified dimension(s).
 
+        In contrast to DataArray.isel, indexers for this method
+        should use labels instead of integers.
+
+        Under the hood, this method is powered by using
+        pandas’s powerful Index objects. This makes label based
+        indexing essentially just as fast as using integer indexing.
+
+        The spatial parameters available depend on the geometry of the DataArray:
+
+        * Grid1D: x
+        * Grid2D: x, y, area
+        * Grid3D: x, y, z, area, layer
+        * GeometryFM: (x,y), coords, area
+        * GeometryFMLayered: (x,y,z), coords, area, layers
+
+        Parameters
+        ----------
+        time : Union[str, pd.DatetimeIndex, DataArray], optional
+            time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
+            by default None
+        x : float, optional
+            x-coordinate of point
+
+        Returns
+        -------
+        DataArray
+            new DataArray with selected data
+
+        Examples
+        --------
+        >>> da = mikeio.read("random.dfs1")[0]
+        >>> da
+        <mikeio.DataArray>
+        name: testing water level
+        dims: (time:100, x:3)
+        time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
+        geometry: Grid1D (n=3, dx=100)
+        >>> da.sel(time=slice(None, "2012-1-1 00:02"))
+        <mikeio.DataArray>
+        name: testing water level
+        dims: (time:15, x:3)
+        time: 2012-01-01 00:00:00 - 2012-01-01 00:02:48 (15 records)
+        geometry: Grid1D (n=3, dx=100)
+        >>> da.sel(x=100)
+        <mikeio.DataArray>
+        name: testing water level
+        dims: (time:100)
+        time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
+        values: [0.3231, 0.6315, ..., 0.7506]
+
+        >>> da = mikeio.read("oresund_sigma_z.dfsu").Temperature
+        >>> da
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:17118)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
+        >>> da.sel(time="1997-09-15")
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (element:17118)
+        time: 1997-09-15 21:00:00 (time-invariant)
+        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
+        values: [16.31, 16.43, ..., 16.69]
+        >>> da.sel(x=340000, y=6160000, z=-3)
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: GeometryPoint3D(x=340028.1116933554, y=6159980.070243686, z=-3.0)
+        values: [17.54, 17.31, 17.08]
+        >>> da.sel(area=(340000, 6160000, 350000, 6170000))
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:224)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (224 elements, 3 sigma-layers, 1 z-layers)
+        >>> da.sel(layers="bottom")
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:3700)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu2D (3700 elements, 2090 nodes)
+        """
         da = self
 
         # select in space
