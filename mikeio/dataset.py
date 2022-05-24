@@ -1051,6 +1051,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self._check_all_items_match(other)
         if not np.all(self.shape[1:] == other.shape[1:]):
             raise ValueError("Shape of the datasets must match (except time dimension)")
+        if "time" not in self.dims:
+            raise ValueError(
+                "Datasets cannot be concatenated as they have no time axis!"
+            )
         ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")

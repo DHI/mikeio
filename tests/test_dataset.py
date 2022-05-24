@@ -1229,6 +1229,14 @@ def test_concat_by_time_ndim1():
     assert ds3.is_equidistant
 
 
+# TODO: implement this
+def test_concat_by_time_no_time():
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=0)
+    ds2 = mikeio.read("tests/testdata/tide2.dfs1", time=1)
+    with pytest.raises(ValueError, match="has no time axis"):
+        mikeio.Dataset.concat([ds1, ds2])
+
+
 def test_concat_by_time_2():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=range(0, 12))
     ds2 = mikeio.read("tests/testdata/tide2.dfs1")
