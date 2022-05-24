@@ -1110,8 +1110,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
         The spatial parameters available depend on the geometry of the DataArray:
 
         * Grid1D: x
-        * Grid2D: x, y, area
-        * Grid3D: x, y, z, area, layer
+        * Grid2D: x, y, coords, area
+        * Grid3D: [not yet implemented! use isel instead]
         * GeometryFM: (x,y), coords, area
         * GeometryFMLayered: (x,y,z), coords, area, layers
 
@@ -1121,7 +1121,23 @@ class DataArray(DataUtilsMixin, TimeSeries):
             time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
             by default None
         x : float, optional
-            x-coordinate of point
+            x-coordinate of point to be selected, by default None
+        y : float, optional
+            y-coordinate of point to be selected, by default None
+        z : float, optional
+            z-coordinate of point to be selected, by default None
+        coords : np.array(float,float), optional
+            As an alternative to specifying x, y and z individually,
+            the argument coords can be used instead.
+            (x,y)- or (x,y,z)-coordinates of point to be selected,
+            by default None
+        area : (float, float, float, float), optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
+        layers : int or str or list, optional
+            layer(s) to be selected: "top", "bottom" or layer number
+            from bottom 0,1,2,... or from the top -1,-2,... or as
+            list of these; only for layered dfsu, by default None
 
         Returns
         -------
