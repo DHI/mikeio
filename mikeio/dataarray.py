@@ -1017,19 +1017,92 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self._values[key] = value
 
     def isel(self, idx=None, axis=0, **kwargs) -> "DataArray":
-        """
-        Select subset along an axis.
+        """Return a new DataArray whose data is given by
+        integer indexing along the specified dimension(s).
+
+        The spatial parameters available depend on the dims
+        (i.e. geometry) of the DataArray:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: x, y, z
+        * GeometryFM: element
 
         Parameters
         ----------
         idx: int, scalar or array_like
         axis: (int, str, None), optional
             axis number or "time", by default 0
+        time : int, optional
+            time index,by default None
+        x : int, optional
+            x index, by default None
+        y : int, optional
+            y index, by default None
+        z : int, optional
+            z index, by default None
+        element : int, optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
 
         Returns
         -------
         DataArray
-            data with subset
+            new DataArray with selected data
+
+        See Also
+        --------
+        dims : Get axis names 
+        sel : Select data using labels
+
+        Examples
+        --------
+        >>> da = mikeio.read("europe_wind_long_lat.dfs2")[0]
+        >>> da
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (time:1, y:101, x:221)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid2D (ny=101, nx=221)
+        >>> da.isel(time=-1)
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (y:101, x:221)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid2D (ny=101, nx=221)
+        >>> da.isel(x=slice(10,20), y=slice(40,60))
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (time:1, y:20, x:10)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid2D (ny=20, nx=10)
+        >>> da.isel(y=34)
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (time:1, x:221)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid1D (n=221, dx=0.25)
+
+        >>> da = mikeio.read("oresund_sigma_z.dfsu").Temperature
+        >>> da
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:17118)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
+        >>> da.isel(element=45)
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: GeometryPoint3D(x=328717.05429134873, y=6143529.158495431, z=-4.0990404685338335)
+        values: [17.29, 17.25, 17.19]
+        >>> da.isel(element=range(200))
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:200)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (200 elements, 3 sigma-layers, 3 z-layers)
         """
         if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
             idx_x = kwargs["x"]
@@ -1143,6 +1216,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
         -------
         DataArray
             new DataArray with selected data
+
+        See Also
+        --------
+        isel : Select data using integer indexing
 
         Examples
         --------
