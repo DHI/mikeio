@@ -80,6 +80,46 @@ class _DatasetPlotter:
 
 
 class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
+    """Dataset containing one or more DataArrays with common geometry and time
+
+    Most often obtained by reading a dfs file. But can also be
+    created a sequence or dictonary of DataArrays. The mikeio.Dataset
+    is inspired by and similar to the xarray.Dataset.
+
+    The Dataset is primarily a container for one or more DataArrays
+    all having the same time and geometry (and shape, dims, etc).
+    For convenience, the Dataset provides access to these common properties:
+
+    * time - a pandas.DatetimeIndex with the time instances of the data
+    * geometry - a geometry object e.g. Grid2D or GeometryFM
+    * shape - a tuple of array dimensions (for each DataArray)
+    * dims - a tuple of dimension labels
+
+    Selecting items
+    ---------------
+    Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done with:
+
+    * ds[["itemA"]] - returns a new Dataset with "itemA"
+    * ds["itemA"] - returns the "itemA" DataArray
+    * ds[[0]] - returns a new Dataset with "itemA"
+    * ds[0] - returns the "itemA" DataArray
+    * ds.itemA - returns the "itemA" DataArray
+
+    Examples
+    --------
+    >>> mikeio.read("europe_wind_long_lat.dfs2")
+    <mikeio.Dataset>
+    dims: (time:1, y:101, x:221)
+    time: 2012-01-01 00:00:00 (time-invariant)
+    geometry: Grid2D (ny=101, nx=221)
+    items:
+    0:  Mean Sea Level Pressure <Air Pressure> (hectopascal)
+    1:  Wind x-comp (10m) <Wind Velocity> (meter per sec)
+    2:  Wind y-comp (10m) <Wind Velocity> (meter per sec)
+
+    >>> mikeio.Dataset([da1, da2])
+    """
+
     def __init__(
         self,
         data: Union[Mapping[str, DataArray], Iterable[DataArray]],
@@ -360,12 +400,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @property
     def ndim(self) -> int:
-        """Number of data dimensions of each DataArray"""
+        """Number of array dimensions of each DataArray"""
         return self[0].ndim
 
     @property
     def dims(self):
-        """Named data dimensions of each DataArray"""
+        """Named array dimensions of each DataArray"""
         return self[0].dims
 
     @property
