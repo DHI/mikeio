@@ -32,10 +32,27 @@ from .data_utils import DataUtilsMixin
 
 
 class _DataArrayPlotter:
+    """Context aware plotter"""
+
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
     def __call__(self, ax=None, figsize=None, **kwargs):
+        """Plot DataArray
+
+        Parameters
+        ----------
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+        figsize: (float, float), optional
+            specify size of figure
+        title: str, optional
+            axes title
+
+        Returns
+        -------
+        <matplotlib.axes>
+        """
         fig, ax = self._get_fig_ax(ax, figsize)
 
         if self.da.ndim == 1:
@@ -69,6 +86,32 @@ class _DataArrayPlotter:
         return fig, ax
 
     def hist(self, ax=None, figsize=None, **kwargs):
+        """Plot DataArray as histogram (using ax.hist)
+
+        Parameters
+        ----------
+        bins : int or sequence or str,
+            If bins is an integer, it defines the number
+            of equal-width bins in the range.
+            If bins is a sequence, it defines the bin edges,
+            including the left edge of the first bin and the
+            right edge of the last bin.
+            by default: rcParams["hist.bins"] (default: 10)
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+        figsize: (float, float), optional
+            specify size of figure
+        title: str, optional
+            axes title
+
+        See Also
+        --------
+        matplotlib.pyplot.hist
+
+        Returns
+        -------
+        <matplotlib.axes>
+        """
         ax = self._get_ax(ax, figsize)
         return self._hist(ax, **kwargs)
 
@@ -184,7 +227,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         return self.pcolormesh(ax, figsize, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
-        fig, ax = self._get_fig_ax(ax, figsize)
+        _, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
         values = self._get_first_step_values()
@@ -793,10 +836,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def type(self) -> EUMType:
+        """EUMType"""
         return self.item.type
 
     @property
     def unit(self) -> EUMUnit:
+        """EUMUnit"""
         return self.item.unit
 
     @property
@@ -877,7 +922,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return self.isel(idx, axis=0)
 
     def flipud(self) -> "DataArray":
-        """Flip upside down"""
+        """Flip upside down (on first non-time axis)"""
 
         first_non_t_axis = 1 if self._has_time_axis else 0
         self.values = np.flip(self.values, axis=first_non_t_axis)
@@ -892,6 +937,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return df
 
     def copy(self) -> "DataArray":
+        """Make copy of DataArray"""
         return deepcopy(self)
 
     def squeeze(self) -> "DataArray":
