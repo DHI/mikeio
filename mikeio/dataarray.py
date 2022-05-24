@@ -1191,10 +1191,6 @@ class DataArray(DataUtilsMixin, TimeSeries):
         In contrast to DataArray.isel, indexers for this method
         should use labels instead of integers.
 
-        Under the hood, this method is powered by using
-        pandas’s powerful Index objects. This makes label based
-        indexing essentially just as fast as using integer indexing.
-
         The spatial parameters available depend on the geometry of the DataArray:
 
         * Grid1D: x
