@@ -159,8 +159,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         # since Dataset is MutableMapping it has values and keys by default
         # but we delete those to avoid confusion
-        self.values = None
+        # self.values = None
         self.keys = None
+
+    @property
+    def values(self):
+        raise AttributeError(
+            "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
+        )
 
     # remove values and keys from dir to avoid confusion
     def __dir__(self):
