@@ -806,10 +806,10 @@ class Grid3D(_Geometry):
     def orientation(self) -> float:
         return self._orientation
 
-    def find_index(self, coords=None, layer=None, area=None):
-        if layer is not None:
+    def find_index(self, coords=None, layers=None, area=None):
+        if layers is not None:
             raise NotImplementedError(
-                f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layer}')"
+                f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"
             )
         raise NotImplementedError(
             "Not yet implemented for Grid3D. Please use mikeio.read('file.dfs3') and its arguments instead."
