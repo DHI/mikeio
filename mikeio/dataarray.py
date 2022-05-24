@@ -584,6 +584,15 @@ class _DataArraySpectrumToHm0:
 
 
 class DataArray(DataUtilsMixin, TimeSeries):
+    """DataArray with data and metadata for a single item in a dfs file
+
+    The DataArray has these main properties:
+
+    * time - a pandas.DatetimeIndex with the time instances of the data
+    * geometry - a geometry object e.g. Grid2D or GeometryFM
+    * values - a numpy array containing the data
+    * item - an ItemInfo with name, type and unit
+    """
 
     deletevalue = 1.0e-35
 
@@ -828,6 +837,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def name(self) -> Optional[str]:
+        """Name of this DataArray (=da.item.name)"""
         return self.item.name
 
     @name.setter
@@ -880,18 +890,22 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def shape(self):
+        """Tuple of array dimensions"""
         return self.values.shape
 
     @property
     def ndim(self) -> int:
+        """Number of array dimensions"""
         return self.values.ndim
 
     @property
     def dtype(self):
+        """Data-type of the array elements"""
         return self.values.dtype
 
     @property
     def values(self) -> np.ndarray:
+        """Values as a np.ndarray (equivalent to to_numpy())"""
         return self._values
 
     @values.setter
@@ -902,6 +916,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self._values = value
 
     def to_numpy(self) -> np.ndarray:
+        """Values as a np.ndarray (equivalent to values)"""
         return self._values
 
     @property
