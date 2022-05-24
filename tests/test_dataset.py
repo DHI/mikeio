@@ -1233,7 +1233,7 @@ def test_concat_by_time_ndim1():
 def test_concat_by_time_no_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=0)
     ds2 = mikeio.read("tests/testdata/tide2.dfs1", time=1)
-    with pytest.raises(ValueError, match="has no time axis"):
+    with pytest.raises(ValueError, match="no time axis"):
         mikeio.Dataset.concat([ds1, ds2])
 
 
