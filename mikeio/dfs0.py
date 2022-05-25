@@ -109,7 +109,6 @@ class Dfs0(TimeSeries):
         self._items = None
         self._n_timesteps = None
 
-
         self._filename = str(filename)
 
         if filename:
