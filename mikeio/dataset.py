@@ -43,7 +43,7 @@ class _DatasetPlotter:
         self.ds = ds
 
     def __call__(self, ax=None, figsize=None, **kwargs):
-
+        """Plot multiple DataArrays as time series (only possible dfs0-type data)"""
         if self.ds.dims == ("time",):
             df = self.ds.to_dataframe()
             df.plot(figsize=figsize, **kwargs)  # TODO ax
@@ -64,6 +64,32 @@ class _DatasetPlotter:
         return fig, ax
 
     def scatter(self, x, y, ax=None, figsize=None, **kwargs):
+        """Plot data from two DataArrays against each other in a scatter plot
+
+        Parameters
+        ----------
+        x : str or int
+            Identifier for first DataArray
+        y : str or int
+            Identifier for second DataArray
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+        figsize: (float, float), optional
+            specify size of figure
+        title: str, optional
+            axes title
+        **kwargs: additional kwargs will be passed to ax.scatter()
+
+        Returns
+        -------
+        <matplotlib.axes>
+
+        Examples
+        --------
+        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
+        >>> ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
+        >>> ds.plot.scatter(x=0, y=1, figsize=(9,9), marker='*')
+        """
         _, ax = self._get_fig_ax(ax, figsize)
         if "title" in kwargs:
             title = kwargs.pop("title")
@@ -72,14 +98,56 @@ class _DatasetPlotter:
         yval = self.ds[y].values.ravel()
         ax.scatter(xval, yval, **kwargs)
 
-        x = self.ds.items[x].name if isinstance(x, int) else x
-        y = self.ds.items[y].name if isinstance(y, int) else y
-        ax.set_xlabel(x)
-        ax.set_ylabel(y)
+        ax.set_xlabel(self._label_txt(self.ds[x]))
+        ax.set_ylabel(self._label_txt(self.ds[y]))
         return ax
+
+    @staticmethod
+    def _label_txt(da):
+        return f"{da.name} [{da.unit.name}]"
 
 
 class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
+    """Dataset containing one or more DataArrays with common geometry and time
+
+    Most often obtained by reading a dfs file. But can also be
+    created a sequence or dictonary of DataArrays. The mikeio.Dataset
+    is inspired by and similar to the xarray.Dataset.
+
+    The Dataset is primarily a container for one or more DataArrays
+    all having the same time and geometry (and shape, dims, etc).
+    For convenience, the Dataset provides access to these common properties:
+
+    * time - a pandas.DatetimeIndex with the time instances of the data
+    * geometry - a geometry object e.g. Grid2D or GeometryFM
+    * shape - a tuple of array dimensions (for each DataArray)
+    * dims - a tuple of dimension labels
+
+    Selecting items
+    ---------------
+    Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done with:
+
+    * ds[["itemA"]] - returns a new Dataset with "itemA"
+    * ds["itemA"] - returns the "itemA" DataArray
+    * ds[[0]] - returns a new Dataset with "itemA"
+    * ds[0] - returns the "itemA" DataArray
+    * ds.itemA - returns the "itemA" DataArray
+
+    Examples
+    --------
+    >>> mikeio.read("europe_wind_long_lat.dfs2")
+    <mikeio.Dataset>
+    dims: (time:1, y:101, x:221)
+    time: 2012-01-01 00:00:00 (time-invariant)
+    geometry: Grid2D (ny=101, nx=221)
+    items:
+    0:  Mean Sea Level Pressure <Air Pressure> (hectopascal)
+    1:  Wind x-comp (10m) <Wind Velocity> (meter per sec)
+    2:  Wind y-comp (10m) <Wind Velocity> (meter per sec)
+
+    >>> mikeio.Dataset([da1, da2])
+    """
+
     def __init__(
         self,
         data: Union[Mapping[str, DataArray], Iterable[DataArray]],
@@ -159,8 +227,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         # since Dataset is MutableMapping it has values and keys by default
         # but we delete those to avoid confusion
-        self.values = None
+        # self.values = None
         self.keys = None
+
+    @property
+    def values(self):
+        raise AttributeError(
+            "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
+        )
 
     # remove values and keys from dir to avoid confusion
     def __dir__(self):
@@ -273,6 +347,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """Time axis"""
         return list(self)[0].time
 
     @time.setter
@@ -354,12 +429,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @property
     def ndim(self) -> int:
-        """Number of data dimensions of each DataArray"""
+        """Number of array dimensions of each DataArray"""
         return self[0].ndim
 
     @property
     def dims(self):
-        """Named data dimensions of each DataArray"""
+        """Named array dimensions of each DataArray"""
         return self[0].dims
 
     @property
@@ -423,15 +498,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return self.isel(all_index, axis=0)
 
     def flipud(self) -> "Dataset":
-        """Flip dataset upside down"""
+        """Flip data upside down (on first non-time axis)"""
         self._data_vars = {
             key: value.flipud() for (key, value) in self._data_vars.items()
         }
         return self
 
     def squeeze(self) -> "Dataset":
-        """
-        Remove axes of length 1
+        """Remove axes of length 1
 
         Returns
         -------
@@ -524,7 +598,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     def insert(self, key: int, value: DataArray):
         """Insert DataArray in a specific position
 
-
         Parameters
         ----------
         key : int
@@ -564,7 +637,26 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return self.pop(0)
 
     def rename(self, mapper: Mapping[str, str], inplace=False):
-        # TODO: docstring
+        """Rename items (DataArrays) in Dataset
+
+        Parameters
+        ----------
+        mapper : Mapping[str, str]
+            dictionary (or similar) mapping from old to new names
+        inplace : bool, optional
+            Should the renaming be done in the original dataset(=True)
+            or return a new(=False)?, by default False
+
+        Returns
+        -------
+        Dataset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tide1.dfs1")
+        >>> newds = ds.rename({"Level":"Surface Elevation"})
+        >>> ds.rename({"Level":"Surface Elevation"}, inplace=True)
+        """
         if inplace:
             ds = self
         else:
@@ -702,14 +794,33 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     # ============ select/interp =============
 
     def isel(self, idx=None, axis=0, **kwargs):
-        """
-        Select subset along an axis.
+        """Return a new Dataset whose data is given by
+        integer indexing along the specified dimension(s).
+
+        The spatial parameters available depend on the dims
+        (i.e. geometry) of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: x, y, z
+        * GeometryFM: element
 
         Parameters
         ----------
         idx: int, scalar or array_like
         axis: (int, str, None), optional
-            axis number or "time", by default 1
+            axis number or "time", by default 0
+        time : int, optional
+            time index,by default None
+        x : int, optional
+            x index, by default None
+        y : int, optional
+            y index, by default None
+        z : int, optional
+            z index, by default None
+        element : int, optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
 
         Returns
         -------
@@ -718,19 +829,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         Examples
         --------
+        >>> ds = mikeio.read("europe_wind_long_lat.dfs2")
+        >>> ds.isel(time=-1)
+        >>> ds.isel(x=slice(10,20), y=slice(40,60))
+        >>> ds.isel(y=34)
+
         >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
-        >>> ds2 = ds.isel([0,1,2], axis=0) # temporal selection
-        >>> ds2
-        DataSet(data, time, items)
-        Number of items: 2
-        Shape: (3, 884)
-        1985-08-06 07:00:00 - 1985-08-06 12:00:00
-        >>> ds3 = ds2.isel([100,200], axis=1) # element selection
-        >>> ds3
-        DataSet(data, time, items)
-        Number of items: 2
-        Shape: (3, 2)
-        1985-08-06 07:00:00 - 1985-08-06 12:00:00
+        >>> ds2 = ds.isel(time=[0,1,2])
+        >>> ds3 = ds2.isel(elements=[100,200])
         """
         res = [da.isel(idx=idx, axis=axis, **kwargs) for da in self]
         return Dataset(data=res, validate=False)
@@ -739,12 +845,64 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self,
         **kwargs,
     ) -> "Dataset":
-        """
+        """Return a new Dataset whose data is given by
+        selecting index labels along the specified dimension(s).
+
+        In contrast to Dataset.isel, indexers for this method
+        should use labels instead of integers.
+
+        The spatial parameters available depend on the geometry of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y, coords, area
+        * Grid3D: [not yet implemented! use isel instead]
+        * GeometryFM: (x,y), coords, area
+        * GeometryFMLayered: (x,y,z), coords, area, layers
+
+        Parameters
+        ----------
+        time : Union[str, pd.DatetimeIndex, Dataset], optional
+            time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
+            by default None
+        x : float, optional
+            x-coordinate of point to be selected, by default None
+        y : float, optional
+            y-coordinate of point to be selected, by default None
+        z : float, optional
+            z-coordinate of point to be selected, by default None
+        coords : np.array(float,float), optional
+            As an alternative to specifying x, y and z individually,
+            the argument coords can be used instead.
+            (x,y)- or (x,y,z)-coordinates of point to be selected,
+            by default None
+        area : (float, float, float, float), optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
+        layers : int or str or list, optional
+            layer(s) to be selected: "top", "bottom" or layer number
+            from bottom 0,1,2,... or from the top -1,-2,... or as
+            list of these; only for layered dfsu, by default None
+
+        Returns
+        -------
+        Dataset
+            new Dataset with selected data
+
+        See Also
+        --------
+        isel : Select data using integer indexing
+
         Examples
         --------
-        ds.sel(layers='bottom')
-        ds.sel(x=1.0, y=55.0)
-        ds.sel(area=[1., 12., 2., 15.])
+        >>> ds = mikeio.read("random.dfs1")
+        >>> ds.sel(time=slice(None, "2012-1-1 00:02"))
+        >>> ds.sel(x=100)
+
+        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
+        >>> ds.sel(time="1997-09-15")
+        >>> ds.sel(x=340000, y=6160000, z=-3)
+        >>> ds.sel(area=(340000, 6160000, 350000, 6170000))
+        >>> ds.sel(layers="bottom")
         """
         res = [da.sel(**kwargs) for da in self]
         return Dataset(data=res, validate=False)
@@ -759,7 +917,53 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         n_nearest=3,
         **kwargs,
     ) -> "Dataset":
+        """Interpolate data in time and space
 
+        This method currently has limited functionality for
+        spatial interpolation. It will be extended in the future.
+
+        The spatial parameters available depend on the geometry of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: [not yet implemented!]
+        * GeometryFM: (x,y)
+        * GeometryFMLayered: (x,y) [surface point will be returned!]
+
+        Parameters
+        ----------
+        time : Union[float, pd.DatetimeIndex, Dataset], optional
+            timestep in seconds or discrete time instances given by
+            pd.DatetimeIndex (typically from another Dataset
+            da2.time), by default None (=don't interp in time)
+        x : float, optional
+            x-coordinate of point to be interpolated to, by default None
+        y : float, optional
+            y-coordinate of point to be interpolated to, by default None
+        n_nearest : int, optional
+            When using IDW interpolation, how many nearest points should
+            be used, by default: 3
+
+        Returns
+        -------
+        Dataset
+            new Dataset with interped data
+
+        See Also
+        --------
+        sel : Select data using label indexing
+        interp_like : Interp to another time/space of another DataSet
+        interp_time : Interp in the time direction only
+
+        Examples
+        --------
+        >>> ds = mikeio.read("random.dfs1")
+        >>> ds.interp(time=3600)
+        >>> ds.interp(x=110)
+
+        >>> ds = mikeio.read("HD2D.dfsu")
+        >>> ds.interp(x=340000, y=6160000)
+        """
         if z is not None:
             raise NotImplementedError()
 
@@ -801,7 +1005,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         dt: float or pd.DatetimeIndex or Dataset
-            output timestep in seconds
+            output timestep in seconds or discrete time instances given
+            as a pd.DatetimeIndex (typically from another Dataset
+            ds2.time)
         method: str or int, optional
             Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
         extrapolate: bool, optional
@@ -998,18 +1204,19 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ---------
         datasets: sequence of Datasets
+        keep: str, optional
+            TODO Yet to be implemented, default: last
 
         Returns
         -------
         Dataset
             concatenated dataset
-        keep: str
-            TODO Yet to be implemented, default: last
+
         Examples
         --------
         >>> import mikeio
-        >>> ds1 = mikeio.read("HD2D.dfsu", time_steps=[0,1])
-        >>> ds2 = mikeio.read("HD2D.dfsu", time_steps=[2,3])
+        >>> ds1 = mikeio.read("HD2D.dfsu", time=[0,1])
+        >>> ds2 = mikeio.read("HD2D.dfsu", time=[2,3])
         >>> ds1.n_timesteps
         2
         >>> ds3 = Dataset.concat([ds1,ds2])
@@ -1039,7 +1246,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         -------
         Dataset
             merged dataset
-
         """
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
@@ -1210,7 +1416,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with max values
 
         See Also
         --------
@@ -1229,7 +1435,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with min values
 
         See Also
         --------
@@ -1248,18 +1454,17 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with mean value
+            dataset with mean values
 
         See Also
         --------
             nanmean : Mean values with NaN values removed
-            average: Weighted average
+            average : Weighted average
         """
         return self.aggregate(axis=axis, func=np.mean)
 
     def average(self, weights, axis="time") -> "Dataset":
-        """
-        Compute the weighted average along the specified axis.
+        """Compute the weighted average along the specified axis.
 
         Parameters
         ----------
@@ -1269,12 +1474,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with weighted average value
+            dataset with weighted average values
 
         See Also
         --------
             nanmean : Mean values with NaN values removed
-            aggregate: Weighted average
+            aggregate : Weighted average
 
         Examples
         --------
@@ -1300,10 +1505,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         axis: (int, str, None), optional
             axis number or "time" or "space", by default "time"=0
 
+        See Also
+        --------
+            max : Mean values
+
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with max values
         """
         return self.aggregate(axis=axis, func=np.nanmax)
 
@@ -1318,7 +1527,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with min values
         """
         return self.aggregate(axis=axis, func=np.nanmin)
 
@@ -1333,7 +1542,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with mean value
+            dataset with mean values
         """
         return self.aggregate(axis=axis, func=np.nanmean)
 
@@ -1443,8 +1652,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ----------
         unit_in_name: bool, optional
             include unit in column name, default False,
-        round_time: str, bool
-            round time to, default ms, use False to avoid rounding
+        round_time: str, bool, optional
+            round time to, by default "ms", use False to avoid rounding
 
         Returns
         -------
@@ -1473,7 +1682,16 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return df
 
     def to_dfs(self, filename, **kwargs):
-        "Write dataset to a new dfs file"
+        """Write dataset to a new dfs file
+
+        Parameters
+        ----------
+        filename: str
+            full path to the new dfs file
+        dtype: str, np.dtype, DfsSimpleType, optional
+            Dfs0 only: set the dfs data type of the written data
+            to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
+        """
 
         filename = str(filename)
 
