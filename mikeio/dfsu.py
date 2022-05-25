@@ -736,8 +736,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time: str, int or list[int], optional
-            Read only selected time_steps
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
         area: list[float], optional
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
@@ -764,7 +767,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         1:  U velocity <u velocity component> (meter per sec)
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
-        >>> dfsu.read(time_steps="1985-08-06 12:00,1985-08-07 00:00")
+        >>> dfsu.read(time="1985-08-06 12:00,1985-08-07 00:00")
         <mikeio.Dataset>
         Dimensions: (5, 884)
         Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00

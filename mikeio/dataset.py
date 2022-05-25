@@ -1083,8 +1083,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Examples
         --------
         >>> import mikeio
-        >>> ds1 = mikeio.read("HD2D.dfsu", time_steps=[0,1])
-        >>> ds2 = mikeio.read("HD2D.dfsu", time_steps=[2,3])
+        >>> ds1 = mikeio.read("HD2D.dfsu", time=[0,1])
+        >>> ds2 = mikeio.read("HD2D.dfsu", time=[2,3])
         >>> ds1.n_timesteps
         2
         >>> ds3 = Dataset.concat([ds1,ds2])
