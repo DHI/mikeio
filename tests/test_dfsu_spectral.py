@@ -1,7 +1,8 @@
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
-from mikeio import Dfsu, eum
+import mikeio
+from mikeio import eum
 from mikecore.DfsuFile import DfsuFileType
 
 from mikeio.dfsu_spectral import DfsuSpectral
@@ -12,43 +13,43 @@ import mikeio.spectral_utils as spectral_utils
 @pytest.fixture
 def dfsu_pt():
     filename = "tests/testdata/pt_spectra.dfsu"
-    return Dfsu(filename)
+    return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line():
     filename = "tests/testdata/line_spectra.dfsu"
-    return Dfsu(filename)
+    return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area():
     filename = "tests/testdata/area_spectra.dfsu"
-    return Dfsu(filename)
+    return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_sector():
     filename = "tests/testdata/MIKE21SW_dir_sector_area_spectra.dfsu"
-    return Dfsu(filename)
+    return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_pt_freq():
     filename = "tests/testdata/pt_freq_spectra.dfsu"
-    return Dfsu(filename)
+    return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line_dir():
     filename = "tests/testdata/line_dir_spectra.dfsu"
-    return Dfsu(filename)
+    return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_freq():
     filename = "tests/testdata/area_freq_spectra.dfsu"
-    return Dfsu(filename)
+    return mikeio.open(filename)
 
 
 def test_properties_pt_spectrum(dfsu_pt):
