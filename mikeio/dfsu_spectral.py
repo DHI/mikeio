@@ -81,6 +81,7 @@ class DfsuSpectral(_Dfsu):
         x=None,
         y=None,
         keepdims=False,
+        dtype=np.float32,
     ) -> Dataset:
         """
         Read data from a spectral dfsu file
@@ -126,6 +127,8 @@ class DfsuSpectral(_Dfsu):
         Items:
         0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
         """
+        if dtype not in [np.float32, np.float64]:
+            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
         # Open the dfs file for reading
         # self._read_dfsu_header(self._filename)
@@ -168,7 +171,7 @@ class DfsuSpectral(_Dfsu):
         read_shape, shape, dims = self._get_spectral_data_shape(n_steps, pts)
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=read_shape, dtype=self._dtype)
+            data = np.ndarray(shape=read_shape, dtype=dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(n_steps, dtype=float)

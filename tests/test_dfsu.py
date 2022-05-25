@@ -62,24 +62,20 @@ def test_read_item_0():
 
 def test_read_single_precision():
     filename = "tests/testdata/HD2D.dfsu"
-    dfs = Dfsu(filename, dtype=np.float32)
-
-    ds = dfs.read(items=1)
+    ds = mikeio.read(filename, items=1, dtype=np.float32)
 
     assert len(ds) == 1
     assert ds[0].dtype == np.float32
 
 
-def test_read_precision_open():
+def test_read_precision_single_and_double():
     filename = "tests/testdata/HD2D.dfsu"
 
-    dfs = mikeio.open(filename)
-    ds = dfs.read(items=1)
+    ds = mikeio.read(filename, items=1)
     assert ds[0].dtype == np.float32
 
     # Double precision
-    dfs = mikeio.open(filename, dtype=np.float64)
-    ds = dfs.read(items=1)
+    ds = mikeio.read(filename, items=1, dtype=np.float64)
     assert ds[0].dtype == np.float64
 
 

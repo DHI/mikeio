@@ -78,7 +78,6 @@ def open(filename: str, **kwargs):
     --------
     >>> dfs = mikeio.open("wl.dfs1")
     >>> dfs = mikeio.open("HD2D.dfsu")
-    >>> dfs = mikeio.open("HD2D.dfsu", dtype=np.float64)
     """
     _, ext = os.path.splitext(filename)
 
