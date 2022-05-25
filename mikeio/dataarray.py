@@ -956,8 +956,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return deepcopy(self)
 
     def squeeze(self) -> "DataArray":
-        """
-        Remove axes of length 1
+        """Remove axes of length 1
 
         Returns
         -------
@@ -1493,6 +1492,30 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @staticmethod
     def concat(dataarrays: Sequence["DataArray"], keep="last") -> "DataArray":
+        """Concatenate DataArrays along the time axis
+
+        Parameters
+        ---------
+        dataarrays: sequence of DataArrays
+        keep: str, optional
+            TODO Yet to be implemented, default: last
+
+        Returns
+        -------
+        DataArray
+            The concatenated DataArray
+
+        Examples
+        --------
+        >>> import mikeio
+        >>> da1 = mikeio.read("HD2D.dfsu", time=[0,1])[0]
+        >>> da2 = mikeio.read("HD2D.dfsu", time=[2,3])[0]
+        >>> da1.n_timesteps
+        2
+        >>> da3 = Dataset.concat([da1,da2])
+        >>> da3.n_timesteps
+        4
+        """
         from mikeio import Dataset
 
         datasets = [Dataset([da]) for da in dataarrays]
@@ -1864,6 +1887,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
     def to_dfs(self, filename, **kwargs) -> None:
+        """Write data to a new dfs file
+
+        Parameters
+        ----------
+        filename: str
+            full path to the new dfs file
+        dtype: str, np.dtype, DfsSimpleType, optional
+            Dfs0 only: set the dfs data type of the written data
+            to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
+        """
         self._to_dataset().to_dfs(filename, **kwargs)
 
     def to_xarray(self):
