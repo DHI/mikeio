@@ -32,6 +32,16 @@ def test_dfs3_geometry():
     assert dfs.geometry.nz == 34
 
 
+def test_dfs_to_xarray():
+    ds = mikeio.read("tests/testdata/test_dfs3.dfs3")
+    xr_ds = ds.to_xarray()
+    assert xr_ds.dims["time"] == 2
+
+    ds_1d = ds.isel(z=0).isel(y=0)
+    xr_ds_1d = ds_1d.to_xarray()
+    assert xr_ds_1d.dims["time"] == 2
+
+
 def test_dfs3_read():
     ds = mikeio.read("tests/testdata/Grid1.dfs3")
     assert ds.n_items == 2
