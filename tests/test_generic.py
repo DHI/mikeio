@@ -465,8 +465,8 @@ def test_time_average_dfsu_3d(tmpdir):
     outfilename = os.path.join(tmpdir, "oresund_sigma_z_avg.dfsu")
     avg_time(infilename, outfilename)
 
-    org = Dfsu(infilename)
-    averaged = Dfsu(outfilename)
+    org = mikeio.open(infilename)
+    averaged = mikeio.open(outfilename)
 
     assert averaged.n_timesteps == 1
     assert org.start_time == averaged.start_time
@@ -545,5 +545,5 @@ def test_quantile_dfsu_3d(tmpdir):
     outfilename = os.path.join(tmpdir, "oresund_sigma_z_avg.dfsu")
     generic.quantile(infilename, outfilename, q=[0.1, 0.9])
 
-    qd = Dfsu(outfilename)
+    qd = mikeio.open(outfilename)
     assert qd.n_timesteps == 1

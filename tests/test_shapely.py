@@ -1,6 +1,6 @@
 import os
 import pytest
-from mikeio import Dfsu
+import mikeio
 
 
 ##################################################
@@ -11,6 +11,6 @@ pytest.importorskip("shapely")
 
 def test_to_shapely():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     shp = dfs.to_shapely()
     assert True

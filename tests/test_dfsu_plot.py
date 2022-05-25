@@ -15,42 +15,42 @@ pytest.importorskip("matplotlib")
 
 def test_plot_bathymetry():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     dfs.plot()
     assert True
 
 
 def test_plot_bathymetry_no_colorbar():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     dfs.plot(add_colorbar=False)
     assert True
 
 
 def test_plot_2d():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     dfs.plot(cmap="plasma")
     assert True
 
 
 def test_plot_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     dfs.plot()
     assert True
 
 
 def test_plot_dfsu_contour():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     dfs.plot(plot_type="contour", levels=5)
     assert True
 
 
 def test_plot_dfsu_contourf_levels():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     cmap = mpl.colors.ListedColormap(["red", "green", "blue"])
     bounds = [-3, 1, 2, 100]
     dfs.plot(levels=bounds, cmap=cmap)
@@ -80,7 +80,7 @@ def test_plot_dfsu_n_refinements():
 
 def test_plot_dfsu_shaded():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     da = dfs.read(items="Surface elevation", time=0)[0]
     elem40 = np.arange(40)
     wl_40 = da.values[elem40]
@@ -90,7 +90,7 @@ def test_plot_dfsu_shaded():
 
 def test_plot_dfsu():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     data = dfs.read()
     dfs.plot(z=data[1][0, :], figsize=(3, 3), plot_type="mesh_only")
     assert True
@@ -98,7 +98,7 @@ def test_plot_dfsu():
 
 def test_plot_dfsu_squeeze():
     filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     data = dfs.read(items=0, time=0)
     dfs.plot(z=data)  # 1 item-dataset
     assert True
@@ -106,7 +106,7 @@ def test_plot_dfsu_squeeze():
 
 def test_plot_dfsu_arguments():
     filename = os.path.join("tests", "testdata", "NorthSea_HD_and_windspeed.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     data = dfs.read()
     dfs.plot(title="test", label="test", vmin=-23, vmax=23)
     assert True
@@ -167,7 +167,7 @@ def test_plot_dfsu_vertical_profile():
     import matplotlib.pyplot as plt
 
     filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
-    dfs = Dfsu(filename)
+    dfs = mikeio.open(filename)
     time_step = 1
     item_number = 1
     data = dfs.read()[item_number].to_numpy()[time_step, :]
