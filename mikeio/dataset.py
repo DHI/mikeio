@@ -637,7 +637,26 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return self.pop(0)
 
     def rename(self, mapper: Mapping[str, str], inplace=False):
-        # TODO: docstring
+        """Rename items (DataArrays) in Dataset
+
+        Parameters
+        ----------
+        mapper : Mapping[str, str]
+            dictionary (or similar) mapping from old to new names
+        inplace : bool, optional
+            Should the renaming be done in the original dataset(=True)
+            or return a new(=False)?, by default False
+
+        Returns
+        -------
+        Dataset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tide1.dfs1")
+        >>> newds = ds.rename({"Level":"Surface Elevation"})
+        >>> ds.rename({"Level":"Surface Elevation"}, inplace=True)
+        """
         if inplace:
             ds = self
         else:
@@ -922,7 +941,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         y : float, optional
             y-coordinate of point to be interpolated to, by default None
         n_nearest : int, optional
-            When using IWD interpolation, how many nearest points should
+            When using IDW interpolation, how many nearest points should
             be used, by default: 3
 
         Returns
