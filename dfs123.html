@@ -221,27 +221,6 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 <dd><p>Are coordinates relative (NON-UTM)?</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.logarithmic_f">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">logarithmic_f</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.055</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freq_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D.logarithmic_f" title="Permalink to this definition"></a></dt>
-<dd><p>Generate logarithmic frequency axis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – number of frequencies, by default 25</p></li>
-<li><p><strong>f0</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum frequency, by default 0.055</p></li>
-<li><p><strong>freq_factor</strong> (<em>float</em><em>, </em><em>optional</em>) – Frequency factor, by default 1.1</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>array of logarithmic distributed discrete frequencies</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid2D.nx">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.Grid2D.nx" title="Permalink to this definition"></a></dt>
@@ -252,6 +231,18 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 <dt class="sig sig-object py" id="mikeio.Grid2D.ny">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.Grid2D.ny" title="Permalink to this definition"></a></dt>
 <dd><p>number of y grid points</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.orientation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.orientation" title="Permalink to this definition"></a></dt>
+<dd><p>Grid orientation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.origin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mikeio.Grid2D.origin" title="Permalink to this definition"></a></dt>
+<dd><p>Coordinates of grid origo (in projection)</p>
 </dd></dl>
 
 <dl class="py property">
