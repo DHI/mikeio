@@ -85,7 +85,25 @@ def read(
 
     Examples
     --------
-    >>> ds = mikeio.read("")
+    >>> ds = mikeio.read("ts.dfs0")
+    >>> ds = mikeio.read("ts.dfs0", items=0)
+    >>> ds = mikeio.read("ts.dfs0", items="Temperature")
+    >>> ds = mikeio.read("ts.dfs0", items=["u","v"], time="2016")
+    >>> ds = mikeio.read("tide.dfs1", time="2018-5")
+    >>> ds = mikeio.read("tide.dfs1", time=slice("2018-5-1","2018-6-1"))
+    >>> ds = mikeio.read("tide.dfs1", items=[0,3,6], time=-1)
+    >>> ds = mikeio.read("tide.dfs1", time=-1, keepdims=True)
+    >>> ds = mikeio.read("era5.dfs2", area=(10,50,16,58))
+    >>> ds = mikeio.read("HD2D.dfsu")
+    >>> ds = mikeio.read("HD2D.dfsu", x=2.2, y=54.2)
+    >>> ds = mikeio.read("HD2D.dfsu", elements=183)
+    >>> ds = mikeio.read("HD2D.dfsu", elements=range(0,2000))
+    >>> ds = mikeio.read("HD2D.dfsu", area=(10,50,16,58))
+    >>> ds = mikeio.read("MT3D_sigma_z.dfsu", x=11.4, y=56.2)
+    >>> ds = mikeio.read("MT3D_sigma_z.dfsu", x=11.4, y=56.2, z=-1.1)
+    >>> ds = mikeio.read("MT3D_sigma_z.dfsu", elements=lst_of_elems)
+    >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers="bottom")
+    >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers=[-2,-1])
     """
 
     _, ext = os.path.splitext(filename)
@@ -101,13 +119,36 @@ def read(
 
 
 def open(filename: str, **kwargs):
-    """Open a dfs/mesh file
+    """Open a dfs/mesh file (and read the header)
+
+    The typical workflow for small dfs files is to read all data
+    with *mikeio.read* instead of using this function. For big files, however,
+    it can be convenient to open the file first with *dfs=mikeio.open(...)* to
+    inspect it's content (items, time and shape) and then decide what to
+    read using dfs.read(...)
+
+    Parameters
+    ----------
+    filename
+        full path and file name to the dfs file.
+    dtype : str, np.dtype, optional
+        Numpy dtype of returned Dataset upon reading;
+        not available for Dfs0 or Mesh. By default: np.float32
+    type : str, optional
+        Dfs2 only. Additional information about the file, e.g.
+        "spectral" for spectral dfs2 files. By default: None.
+
+    See also
+    --------
+    mikeio.read - read data from a dfs file
 
     Examples
     --------
     >>> dfs = mikeio.open("wl.dfs1")
     >>> dfs = mikeio.open("HD2D.dfsu")
     >>> dfs = mikeio.open("HD2D.dfsu", dtype=np.float64)
+    >>> ds = dfs.read(items="Salinity", time="2016-01")
+    >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
     """
     _, ext = os.path.splitext(filename)
 
