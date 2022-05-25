@@ -146,8 +146,10 @@ def open(filename: str, **kwargs):
     --------
     >>> dfs = mikeio.open("wl.dfs1")
     >>> dfs = mikeio.open("HD2D.dfsu")
+
     >>> dfs = mikeio.open("HD2D.dfsu", dtype=np.float64)
     >>> ds = dfs.read(items="Salinity", time="2016-01")
+
     >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
     """
     _, ext = os.path.splitext(filename)
