@@ -108,7 +108,6 @@ class Dfs0(TimeSeries):
         self._title = None
         self._items = None
         self._n_timesteps = None
-        self._dtype = None
 
         self._filename = str(filename)
 

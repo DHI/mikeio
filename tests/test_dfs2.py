@@ -761,8 +761,7 @@ def test_da_plot():
 
 def test_read_single_precision():
 
-    dfs = Dfs2("tests/testdata/random.dfs2", dtype=np.float32)
-    ds = dfs.read(items=0)
+    ds = mikeio.read("tests/testdata/random.dfs2", items=0, dtype=np.float32)
 
     assert len(ds) == 1
     assert ds[0].dtype == np.float32

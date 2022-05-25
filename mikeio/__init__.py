@@ -131,9 +131,6 @@ def open(filename: str, **kwargs):
     ----------
     filename
         full path and file name to the dfs file.
-    dtype : str, np.dtype, optional
-        Numpy dtype of returned Dataset upon reading;
-        not available for Dfs0 or Mesh. By default: np.float32
     type : str, optional
         Dfs2 only. Additional information about the file, e.g.
         "spectral" for spectral dfs2 files. By default: None.
@@ -146,8 +143,6 @@ def open(filename: str, **kwargs):
     --------
     >>> dfs = mikeio.open("wl.dfs1")
     >>> dfs = mikeio.open("HD2D.dfsu")
-
-    >>> dfs = mikeio.open("HD2D.dfsu", dtype=np.float64)
     >>> ds = dfs.read(items="Salinity", time="2016-01")
 
     >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
