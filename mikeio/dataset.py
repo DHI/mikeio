@@ -347,6 +347,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """Time axis"""
         return list(self)[0].time
 
     @time.setter
@@ -497,15 +498,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return self.isel(all_index, axis=0)
 
     def flipud(self) -> "Dataset":
-        """Flip dataset upside down"""
+        """Flip data upside down (on first non-time axis)"""
         self._data_vars = {
             key: value.flipud() for (key, value) in self._data_vars.items()
         }
         return self
 
     def squeeze(self) -> "Dataset":
-        """
-        Remove axes of length 1
+        """Remove axes of length 1
 
         Returns
         -------
@@ -597,7 +597,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def insert(self, key: int, value: DataArray):
         """Insert DataArray in a specific position
-
 
         Parameters
         ----------
@@ -776,14 +775,33 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     # ============ select/interp =============
 
     def isel(self, idx=None, axis=0, **kwargs):
-        """
-        Select subset along an axis.
+        """Return a new Dataset whose data is given by
+        integer indexing along the specified dimension(s).
+
+        The spatial parameters available depend on the dims
+        (i.e. geometry) of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: x, y, z
+        * GeometryFM: element
 
         Parameters
         ----------
         idx: int, scalar or array_like
         axis: (int, str, None), optional
-            axis number or "time", by default 1
+            axis number or "time", by default 0
+        time : int, optional
+            time index,by default None
+        x : int, optional
+            x index, by default None
+        y : int, optional
+            y index, by default None
+        z : int, optional
+            z index, by default None
+        element : int, optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
 
         Returns
         -------
@@ -792,19 +810,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         Examples
         --------
+        >>> ds = mikeio.read("europe_wind_long_lat.dfs2")
+        >>> ds.isel(time=-1)
+        >>> ds.isel(x=slice(10,20), y=slice(40,60))
+        >>> ds.isel(y=34)
+
         >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
-        >>> ds2 = ds.isel([0,1,2], axis=0) # temporal selection
-        >>> ds2
-        DataSet(data, time, items)
-        Number of items: 2
-        Shape: (3, 884)
-        1985-08-06 07:00:00 - 1985-08-06 12:00:00
-        >>> ds3 = ds2.isel([100,200], axis=1) # element selection
-        >>> ds3
-        DataSet(data, time, items)
-        Number of items: 2
-        Shape: (3, 2)
-        1985-08-06 07:00:00 - 1985-08-06 12:00:00
+        >>> ds2 = ds.isel(time=[0,1,2])
+        >>> ds3 = ds2.isel(elements=[100,200])
         """
         res = [da.isel(idx=idx, axis=axis, **kwargs) for da in self]
         return Dataset(data=res, validate=False)
@@ -813,12 +826,64 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self,
         **kwargs,
     ) -> "Dataset":
-        """
+        """Return a new Dataset whose data is given by
+        selecting index labels along the specified dimension(s).
+
+        In contrast to Dataset.isel, indexers for this method
+        should use labels instead of integers.
+
+        The spatial parameters available depend on the geometry of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y, coords, area
+        * Grid3D: [not yet implemented! use isel instead]
+        * GeometryFM: (x,y), coords, area
+        * GeometryFMLayered: (x,y,z), coords, area, layers
+
+        Parameters
+        ----------
+        time : Union[str, pd.DatetimeIndex, Dataset], optional
+            time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
+            by default None
+        x : float, optional
+            x-coordinate of point to be selected, by default None
+        y : float, optional
+            y-coordinate of point to be selected, by default None
+        z : float, optional
+            z-coordinate of point to be selected, by default None
+        coords : np.array(float,float), optional
+            As an alternative to specifying x, y and z individually,
+            the argument coords can be used instead.
+            (x,y)- or (x,y,z)-coordinates of point to be selected,
+            by default None
+        area : (float, float, float, float), optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
+        layers : int or str or list, optional
+            layer(s) to be selected: "top", "bottom" or layer number
+            from bottom 0,1,2,... or from the top -1,-2,... or as
+            list of these; only for layered dfsu, by default None
+
+        Returns
+        -------
+        Dataset
+            new Dataset with selected data
+
+        See Also
+        --------
+        isel : Select data using integer indexing
+
         Examples
         --------
-        ds.sel(layers='bottom')
-        ds.sel(x=1.0, y=55.0)
-        ds.sel(area=[1., 12., 2., 15.])
+        >>> ds = mikeio.read("random.dfs1")
+        >>> ds.sel(time=slice(None, "2012-1-1 00:02"))
+        >>> ds.sel(x=100)
+
+        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
+        >>> ds.sel(time="1997-09-15")
+        >>> ds.sel(x=340000, y=6160000, z=-3)
+        >>> ds.sel(area=(340000, 6160000, 350000, 6170000))
+        >>> ds.sel(layers="bottom")
         """
         res = [da.sel(**kwargs) for da in self]
         return Dataset(data=res, validate=False)
@@ -1114,7 +1179,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         -------
         Dataset
             merged dataset
-
         """
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
@@ -1285,7 +1349,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with max values
 
         See Also
         --------
@@ -1304,7 +1368,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with min values
 
         See Also
         --------
@@ -1323,18 +1387,17 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with mean value
+            dataset with mean values
 
         See Also
         --------
             nanmean : Mean values with NaN values removed
-            average: Weighted average
+            average : Weighted average
         """
         return self.aggregate(axis=axis, func=np.mean)
 
     def average(self, weights, axis="time") -> "Dataset":
-        """
-        Compute the weighted average along the specified axis.
+        """Compute the weighted average along the specified axis.
 
         Parameters
         ----------
@@ -1344,12 +1407,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with weighted average value
+            dataset with weighted average values
 
         See Also
         --------
             nanmean : Mean values with NaN values removed
-            aggregate: Weighted average
+            aggregate : Weighted average
 
         Examples
         --------
@@ -1375,10 +1438,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         axis: (int, str, None), optional
             axis number or "time" or "space", by default "time"=0
 
+        See Also
+        --------
+            max : Mean values
+
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with max values
         """
         return self.aggregate(axis=axis, func=np.nanmax)
 
@@ -1393,7 +1460,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with max value
+            dataset with min values
         """
         return self.aggregate(axis=axis, func=np.nanmin)
 
@@ -1408,7 +1475,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Returns
         -------
         Dataset
-            dataset with mean value
+            dataset with mean values
         """
         return self.aggregate(axis=axis, func=np.nanmean)
 
@@ -1518,8 +1585,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ----------
         unit_in_name: bool, optional
             include unit in column name, default False,
-        round_time: str, bool
-            round time to, default ms, use False to avoid rounding
+        round_time: str, bool, optional
+            round time to, by default "ms", use False to avoid rounding
 
         Returns
         -------
@@ -1548,7 +1615,16 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return df
 
     def to_dfs(self, filename, **kwargs):
-        "Write dataset to a new dfs file"
+        """Write dataset to a new dfs file
+
+        Parameters
+        ----------
+        filename: str
+            full path to the new dfs file
+        dtype: str, np.dtype, DfsSimpleType, optional
+            Dfs0 only: set the dfs data type of the written data
+            to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
+        """
 
         filename = str(filename)
 
