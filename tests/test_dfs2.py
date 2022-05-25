@@ -20,37 +20,37 @@ from mikeio.spatial.grid_geometry import Grid2D
 @pytest.fixture
 def dfs2_random():
     filepath = Path("tests/testdata/random.dfs2")
-    return Dfs2(filepath)
+    return mikeio.open(filepath)
 
 
 @pytest.fixture
 def dfs2_random_2items():
     filepath = Path("tests/testdata/random_two_item.dfs2")
-    return Dfs2(filepath)
+    return mikeio.open(filepath)
 
 
 @pytest.fixture
 def dfs2_pt_spectrum():
     filepath = Path("tests/testdata/pt_spectra.dfs2")
-    return Dfs2(filepath)
+    return mikeio.open(filepath)
 
 
 @pytest.fixture
 def dfs2_pt_spectrum_linearf():
     filepath = Path("tests/testdata/dir_wave_analysis_spectra.dfs2")
-    return Dfs2(filepath)
+    return mikeio.open(filepath)
 
 
 @pytest.fixture
 def dfs2_vertical_nonutm():
     filepath = Path("tests/testdata/hd_vertical_slice.dfs2")
-    return Dfs2(filepath)
+    return mikeio.open(filepath)
 
 
 @pytest.fixture
 def dfs2_gebco():
     filepath = Path("tests/testdata/gebco_sound.dfs2")
-    return Dfs2(filepath)
+    return mikeio.open(filepath)
 
 
 def test_write_projected(tmpdir):
@@ -175,7 +175,7 @@ def test_read_bad_item(dfs2_random):
 def test_read_temporal_subset_slice():
 
     filename = r"tests/testdata/eq.dfs2"
-    dfs = Dfs2(filename)
+    dfs = mikeio.open(filename)
     ds = dfs.read(time=slice("2000-01-01 00:00", "2000-01-01 12:00"))
 
     assert len(ds.time) == 13
@@ -348,12 +348,12 @@ def test_dir_wave_spectra_relative_time_axis():
 def test_properties_rotated_longlat():
     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
     with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"):
-        Dfs2(filepath)
+        mikeio.open(filepath)
 
 
 def test_properties_rotated_UTM():
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
-    dfs = Dfs2(filepath)
+    dfs = mikeio.open(filepath)
     g = dfs.geometry
     assert dfs.x0 == 0
     assert dfs.y0 == 0
@@ -409,7 +409,7 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
 
     dfs.write(outfilename, ds)
 
-    dfs2 = Dfs2(outfilename)
+    dfs2 = mikeio.open(outfilename)
 
     ds2 = dfs2.read()
 
@@ -464,7 +464,7 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmpdir):
 
     dfs.write(outfilename, ds)
 
-    dfsmod = Dfs2(outfilename)
+    dfsmod = mikeio.open(outfilename)
 
     assert dfs._longitude == dfsmod._longitude
 
@@ -481,7 +481,7 @@ def test_read_some_time_step(dfs2_random_2items):
 def test_interpolate_non_equidistant_data(tmpdir):
 
     filename = r"tests/testdata/eq.dfs2"
-    dfs = Dfs2(filename)
+    dfs = mikeio.open(filename)
 
     ds = dfs.read(time=[0, 2, 3, 6])  # non-equidistant dataset
 
@@ -495,7 +495,7 @@ def test_interpolate_non_equidistant_data(tmpdir):
 
     dfs.write(outfilename, ds2)
 
-    dfs2 = Dfs2(outfilename)
+    dfs2 = mikeio.open(outfilename)
     assert dfs2.timestep == 3600.0
 
     ds3 = dfs2.read()
@@ -506,7 +506,7 @@ def test_interpolate_non_equidistant_data(tmpdir):
 def test_write_some_time_step(tmpdir):
 
     filename = r"tests/testdata/waves.dfs2"
-    dfs = Dfs2(filename)
+    dfs = mikeio.open(filename)
 
     ds = dfs.read(time=[1, 2])
 
@@ -520,7 +520,7 @@ def test_write_some_time_step(tmpdir):
 
     dfs.write(outfilename, ds)
 
-    dfs2 = Dfs2(outfilename)
+    dfs2 = mikeio.open(outfilename)
     assert dfs2.timestep == 86400.0
     assert dfs2.start_time.day == 2
 
@@ -598,7 +598,7 @@ def test_write_default_datatype(tmpdir):
             title="test dfs2",
         )
 
-    newdfs = Dfs2(filename)
+    newdfs = mikeio.open(filename)
     assert newdfs.items[0].data_value_type == 0
 
 
@@ -635,7 +635,7 @@ def test_write_NonEqCalendarAxis(tmpdir):
 def test_write_non_equidistant_data(tmpdir):
 
     filename = r"tests/testdata/eq.dfs2"
-    dfs = Dfs2(filename)
+    dfs = mikeio.open(filename)
 
     ds = dfs.read(time=[0, 2, 3, 6])  # non-equidistant dataset
 
@@ -645,7 +645,7 @@ def test_write_non_equidistant_data(tmpdir):
 
     dfs.write(outfilename, ds)
 
-    dfs2 = Dfs2(outfilename)
+    dfs2 = mikeio.open(outfilename)
     ds3 = dfs2.read()
 
     assert not ds3.is_equidistant
@@ -656,7 +656,7 @@ def test_incremental_write_from_dfs2(tmpdir):
 
     sourcefilename = "tests/testdata/eq.dfs2"
     outfilename = os.path.join(tmpdir.dirname, "appended.dfs2")
-    dfs = Dfs2(sourcefilename)
+    dfs = mikeio.open(sourcefilename)
 
     nt = dfs.n_timesteps
 
@@ -671,7 +671,7 @@ def test_incremental_write_from_dfs2(tmpdir):
 
     dfs_to_write.close()
 
-    newdfs = Dfs2(outfilename)
+    newdfs = mikeio.open(outfilename)
     assert dfs.start_time == newdfs.start_time
     assert dfs.timestep == newdfs.timestep
     assert dfs.end_time == newdfs.end_time
@@ -682,7 +682,7 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
 
     sourcefilename = "tests/testdata/eq.dfs2"
     outfilename = os.path.join(tmpdir.dirname, "appended.dfs2")
-    dfs = Dfs2(sourcefilename)
+    dfs = mikeio.open(sourcefilename)
 
     nt = dfs.n_timesteps
 
@@ -697,7 +697,7 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
 
         # dfs_to_write.close() # called automagically by context manager
 
-    newdfs = Dfs2(outfilename)
+    newdfs = mikeio.open(outfilename)
     assert dfs.start_time == newdfs.start_time
     assert dfs.timestep == newdfs.timestep
     assert dfs.end_time == newdfs.end_time
@@ -761,7 +761,7 @@ def test_da_plot():
 
 def test_read_single_precision():
 
-    dfs = Dfs2("tests/testdata/random.dfs2", dtype=np.float32)
+    dfs = mikeio.open("tests/testdata/random.dfs2", dtype=np.float32)
     ds = dfs.read(items=0)
 
     assert len(ds) == 1

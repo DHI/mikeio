@@ -13,13 +13,13 @@ from mikeio.eum import EUMType, EUMUnit, ItemInfo
 
 def test_filenotexist():
     with pytest.raises(FileNotFoundError):
-        Dfs1("file_that_does_not_exist.dfs1")
+        mikeio.open("file_that_does_not_exist.dfs1")
 
 
 def test_repr():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = Dfs1(filename)
+    dfs = mikeio.open(filename)
 
     text = repr(dfs)
 
@@ -40,7 +40,7 @@ def test_repr_empty():
 def test_read():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = Dfs1(filename)
+    dfs = mikeio.open(filename)
 
     ds = dfs.read(items=[0])
     data = ds[0].to_numpy()
@@ -50,7 +50,7 @@ def test_read():
 def test_read_item_names():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = Dfs1(filename)
+    dfs = mikeio.open(filename)
 
     ds = dfs.read(items=["testing water level"])
     data = ds[0].to_numpy()
@@ -60,7 +60,7 @@ def test_read_item_names():
 def test_read_time_steps():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = Dfs1(filename)
+    dfs = mikeio.open(filename)
 
     ds = dfs.read(time=[3, 5])
     data = ds[0].to_numpy()
@@ -71,7 +71,7 @@ def test_write_some_time_steps_new_file(tmpdir):
 
     outfilename = os.path.join(tmpdir.dirname, "subset.dfs1")
     filename = r"tests/testdata/random.dfs1"
-    dfs = Dfs1(filename)
+    dfs = mikeio.open(filename)
 
     ds = dfs.read(time=[0, 1, 2, 3, 4, 5])
     data = ds[0].to_numpy()
@@ -79,7 +79,7 @@ def test_write_some_time_steps_new_file(tmpdir):
 
     dfs.write(outfilename, ds)
 
-    dfsnew = Dfs1(outfilename)
+    dfsnew = mikeio.open(outfilename)
 
     dsnew = dfsnew.read()
 
@@ -89,7 +89,7 @@ def test_write_some_time_steps_new_file(tmpdir):
 def test_read_item_names_not_in_dataset_fails():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = Dfs1(filename)
+    dfs = mikeio.open(filename)
 
     with pytest.raises(Exception):
         dfs.read(["NOTAREALVARIABLE"])
@@ -98,7 +98,7 @@ def test_read_item_names_not_in_dataset_fails():
 def test_read_names_access():
 
     filename = r"tests/testdata/random.dfs1"
-    dfs = Dfs1(filename)
+    dfs = mikeio.open(filename)
 
     res = dfs.read(items=[0])
     item_data = res[0].to_numpy()
@@ -112,7 +112,7 @@ def test_read_names_access():
 
 def test_read_start_end_time():
 
-    dfs = Dfs1("tests/testdata/random.dfs1")
+    dfs = mikeio.open("tests/testdata/random.dfs1")
     ds = dfs.read()
 
     assert dfs.start_time == ds.start_time
@@ -121,7 +121,7 @@ def test_read_start_end_time():
 
 def test_read_start_end_time_relative_time():
 
-    dfs = Dfs1("tests/testdata/physical_basin_wave_maker_signal.dfs1")
+    dfs = mikeio.open("tests/testdata/physical_basin_wave_maker_signal.dfs1")
     ds = dfs.read()
 
     assert dfs.start_time == ds.start_time
