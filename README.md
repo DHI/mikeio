@@ -12,8 +12,8 @@ Facilitates common data processing workflows for MIKE files.
 
 *For res1d and xns11 files use the related package [MIKE IO 1D](https://github.com/DHI/mikeio1d)*
 
-## Upcoming release: MIKE IO 1.0
-MIKE IO 1.0 is planned to be released in May 2022 and it will have a lot of benefits to make working with dfs files easier, but it also requires some changes to your existing code. More details in the [discussion page](https://github.com/DHI/mikeio/discussions/279).
+## MIKE IO 1.0
+MIKE IO 1.0 is now available and it has a lot of benefits to working with dfs files even easier than before, but it also requires some changes to your existing code. More details in the [discussion page](https://github.com/DHI/mikeio/discussions/279).
 
 ![code example](https://raw.githubusercontent.com/DHI/mikeio/main/images/code.png)
 
@@ -55,48 +55,49 @@ MIKE IO is tested extensively. **95%** total test coverage.
 
 See detailed test coverage report below:
 ```
----------- coverage: platform linux, python 3.10.2-final-0 -----------
+---------- coverage: platform linux, python 3.10.4-final-0 -----------
 Name                              Stmts   Miss  Cover
 -----------------------------------------------------
-mikeio/__init__.py                   38      3    92%
-mikeio/aggregator.py                 98      9    91%
+mikeio/__init__.py                   39      2    95%
 mikeio/base.py                       26      5    81%
-mikeio/custom_exceptions.py          25      6    76%
-mikeio/data_utils.py                111     24    78%
-mikeio/dataarray.py                 686    101    85%
-mikeio/dataset.py                   695     87    87%
-mikeio/dfs0.py                      278     26    91%
-mikeio/dfs1.py                       61      6    90%
-mikeio/dfs2.py                      186     37    80%
-mikeio/dfs3.py                      202     77    62%
-mikeio/dfs.py                       269     21    92%
-mikeio/dfsu.py                      735     56    92%
+mikeio/custom_exceptions.py          25      8    68%
+mikeio/data_utils.py                127     22    83%
+mikeio/dataarray.py                 927    145    84%
+mikeio/dataset.py                   722     92    87%
+mikeio/dfs0.py                      284     33    88%
+mikeio/dfs1.py                       62      6    90%
+mikeio/dfs2.py                      244     42    83%
+mikeio/dfs3.py                      201     15    93%
+mikeio/dfs.py                       275     30    89%
+mikeio/dfsu.py                      699     63    91%
 mikeio/dfsu_factory.py               41      2    95%
-mikeio/dfsu_layered.py              142     19    87%
-mikeio/dfsu_spectral.py              97      8    92%
-mikeio/dfsutil.py                    89      5    94%
-mikeio/eum.py                      1297      4    99%
-mikeio/generic.py                   399      8    98%
+mikeio/dfsu_layered.py              186     23    88%
+mikeio/dfsu_spectral.py             128      7    95%
+mikeio/dfsutil.py                   104      8    92%
+mikeio/eum.py                      1297      3    99%
+mikeio/generic.py                   396      9    98%
 mikeio/helpers.py                    16      5    69%
-mikeio/interpolation.py              63      2    97%
-mikeio/pfs.py                        95      0   100%
-mikeio/spatial/FM_geometry.py       867     80    91%
-mikeio/spatial/FM_utils.py          231     19    92%
-mikeio/spatial/__init__.py            4      0   100%
+mikeio/interpolation.py              63      1    98%
+mikeio/pfs.py                        93      0   100%
+mikeio/spatial/FM_geometry.py      1123    116    90%
+mikeio/spatial/FM_utils.py          293     30    90%
+mikeio/spatial/__init__.py            0      0   100%
 mikeio/spatial/crs.py                50     25    50%
-mikeio/spatial/geometry.py           88     34    61%
-mikeio/spatial/grid_geometry.py     334     16    95%
-mikeio/spatial/spatial.py           278    181    35%
+mikeio/spatial/geometry.py           88     33    62%
+mikeio/spatial/grid_geometry.py     497     33    93%
+mikeio/spatial/utils.py              38      0   100%
+mikeio/spectral_utils.py             89      5    94%
 mikeio/xyz.py                        12      0   100%
 -----------------------------------------------------
-TOTAL                              7513    866    88%
+TOTAL                              8145    763    91%
 
-================ 454 passed in 41.76s =================
+
+============ 561 passed in 74.58s (0:01:14) ============
 ```
 
 ## Cloud enabled
 
-From MIKE IO v.0.7 it is possible to run MIKE IO in your favorite cloud notebook environment e.g. [Deepnote](https://deepnote.com/), [Google Colab](https://colab.research.google.com/), etc...
+It is possible to run MIKE IO in your favorite cloud notebook environment e.g. [Deepnote](https://deepnote.com/), [Google Colab](https://colab.research.google.com/), etc...
 
 ![DeepNote](images/deepnote.png)
 
