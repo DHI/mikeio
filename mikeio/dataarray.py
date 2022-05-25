@@ -868,7 +868,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def is_equidistant(self) -> bool:
-        """Is Dataset equidistant in time?"""
+        """Is DataArray equidistant in time?"""
         if len(self.time) < 3:
             return True
         return len(self.time.to_series().diff().dropna().unique()) == 1
@@ -1230,6 +1230,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         See Also
         --------
         isel : Select data using integer indexing
+        interp : Interp data in time and space
 
         Examples
         --------
@@ -1329,7 +1330,53 @@ class DataArray(DataUtilsMixin, TimeSeries):
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
+        """Interpolate data in time and space
 
+        This method currently has limited functionality for
+        spatial interpolation. It will be extended in the future.
+
+        The spatial parameters available depend on the geometry of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: [not yet implemented!]
+        * GeometryFM: (x,y)
+        * GeometryFMLayered: (x,y) [surface point will be returned!]
+
+        Parameters
+        ----------
+        time : Union[float, pd.DatetimeIndex, DataArray], optional
+            timestep in seconds or discrete time instances given by
+            pd.DatetimeIndex (typically from another DataArray
+            da2.time), by default None (=don't interp in time)
+        x : float, optional
+            x-coordinate of point to be interpolated to, by default None
+        y : float, optional
+            y-coordinate of point to be interpolated to, by default None
+        n_nearest : int, optional
+            When using IDW interpolation, how many nearest points should
+            be used, by default: 3
+
+        Returns
+        -------
+        DataArray
+            new DataArray with interped data
+
+        See Also
+        --------
+        sel : Select data using label indexing
+        interp_like : Interp to another time/space of another DataArray
+        interp_time : Interp in the time direction only
+
+        Examples
+        --------
+        >>> da = mikeio.read("random.dfs1")[0]
+        >>> da.interp(time=3600)
+        >>> da.interp(x=110)
+
+        >>> da = mikeio.read("HD2D.dfsu").Salinity
+        >>> da.interp(x=340000, y=6160000)
+        """
         if z is not None:
             raise NotImplementedError()
 
@@ -1512,7 +1559,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         >>> da2 = mikeio.read("HD2D.dfsu", time=[2,3])[0]
         >>> da1.n_timesteps
         2
-        >>> da3 = Dataset.concat([da1,da2])
+        >>> da3 = DataArray.concat([da1,da2])
         >>> da3.n_timesteps
         4
         """

@@ -898,7 +898,53 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         n_nearest=3,
         **kwargs,
     ) -> "Dataset":
+        """Interpolate data in time and space
 
+        This method currently has limited functionality for
+        spatial interpolation. It will be extended in the future.
+
+        The spatial parameters available depend on the geometry of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: [not yet implemented!]
+        * GeometryFM: (x,y)
+        * GeometryFMLayered: (x,y) [surface point will be returned!]
+
+        Parameters
+        ----------
+        time : Union[float, pd.DatetimeIndex, Dataset], optional
+            timestep in seconds or discrete time instances given by
+            pd.DatetimeIndex (typically from another Dataset
+            da2.time), by default None (=don't interp in time)
+        x : float, optional
+            x-coordinate of point to be interpolated to, by default None
+        y : float, optional
+            y-coordinate of point to be interpolated to, by default None
+        n_nearest : int, optional
+            When using IWD interpolation, how many nearest points should
+            be used, by default: 3
+
+        Returns
+        -------
+        Dataset
+            new Dataset with interped data
+
+        See Also
+        --------
+        sel : Select data using label indexing
+        interp_like : Interp to another time/space of another DataSet
+        interp_time : Interp in the time direction only
+
+        Examples
+        --------
+        >>> ds = mikeio.read("random.dfs1")
+        >>> ds.interp(time=3600)
+        >>> ds.interp(x=110)
+
+        >>> ds = mikeio.read("HD2D.dfsu")
+        >>> ds.interp(x=340000, y=6160000)
+        """
         if z is not None:
             raise NotImplementedError()
 
@@ -940,7 +986,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         dt: float or pd.DatetimeIndex or Dataset
-            output timestep in seconds
+            output timestep in seconds or discrete time instances given
+            as a pd.DatetimeIndex (typically from another Dataset
+            ds2.time)
         method: str or int, optional
             Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
         extrapolate: bool, optional
