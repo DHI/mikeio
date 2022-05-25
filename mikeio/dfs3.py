@@ -229,8 +229,9 @@ class Dfs3(_Dfs123):
             return NotImplementedError(
                 "area subsetting is not yet implemented for Dfs3"
             )
-        if keepdims is not None:
-            return NotImplementedError("keepdims is not yet implemented for Dfs3")
+        # NOTE:
+        # if keepdims is not False:
+        #    return NotImplementedError("keepdims is not yet implemented for Dfs3")
 
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
