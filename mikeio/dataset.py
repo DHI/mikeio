@@ -219,8 +219,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         for key, value in self._data_vars.items():
             self._set_name_attr(key, value)
 
-        if len(self) > 1:
-            self.plot = _DatasetPlotter(self)
+        self.plot = _DatasetPlotter(self)
 
         if len(self) > 0:
             self._set_spectral_attributes(self.geometry)
@@ -590,10 +589,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 self._check_already_present(value)
             self._data_vars[key] = value
             self._set_name_attr(key, value)
-
-        if len(self) == 2 and not is_replacement:
-            # now big enough for a plotter
-            self.plot = _DatasetPlotter(self)
 
     def insert(self, key: int, value: DataArray):
         """Insert DataArray in a specific position
