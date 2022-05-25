@@ -108,8 +108,6 @@ read using dfs.read(…)</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – full path and file name to the dfs file.</p></li>
-<li><p><strong>dtype</strong> (<em>str</em><em>, </em><em>np.dtype</em><em>, </em><em>optional</em>) – Numpy dtype of returned Dataset upon reading;
-not available for Dfs0 or Mesh. By default: np.float32</p></li>
 <li><p><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – Dfs2 only. Additional information about the file, e.g.
 “spectral” for spectral dfs2 files. By default: None.</p></li>
 </ul>
@@ -122,9 +120,6 @@ not available for Dfs0 or Mesh. By default: np.float32</p></li>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;wl.dfs1&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Salinity&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;2016-01&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
