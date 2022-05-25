@@ -74,13 +74,14 @@ class DfsuSpectral(_Dfsu):
         *,
         items=None,
         time=None,
-        time_steps=None,
         elements=None,
         nodes=None,
         area=None,
         x=None,
         y=None,
         keepdims=False,
+        time_steps=None,
+        dtype=np.float32,
     ) -> Dataset:
         """
         Read data from a spectral dfsu file
@@ -89,8 +90,11 @@ class DfsuSpectral(_Dfsu):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time: str, int or list[int], optional
-            Read only selected time_steps
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
         area: list[float], optional
             Read only data inside (horizontal) area (spectral area files
             only) given as a bounding box (tuple with left, lower, right, upper)
@@ -126,6 +130,8 @@ class DfsuSpectral(_Dfsu):
         Items:
         0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
         """
+        if dtype not in [np.float32, np.float64]:
+            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
         # Open the dfs file for reading
         # self._read_dfsu_header(self._filename)
@@ -168,7 +174,7 @@ class DfsuSpectral(_Dfsu):
         read_shape, shape, dims = self._get_spectral_data_shape(n_steps, pts)
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=read_shape, dtype=self._dtype)
+            data = np.ndarray(shape=read_shape, dtype=dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(n_steps, dtype=float)

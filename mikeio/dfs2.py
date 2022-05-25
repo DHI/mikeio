@@ -125,8 +125,8 @@ class Dfs2(_Dfs123):
 
     _ndim = 2
 
-    def __init__(self, filename=None, dtype=np.float32, type="horizontal"):
-        super(Dfs2, self).__init__(filename, dtype)
+    def __init__(self, filename=None, type="horizontal"):
+        super(Dfs2, self).__init__(filename)
 
         self._dx = None
         self._dy = None
@@ -223,7 +223,14 @@ class Dfs2(_Dfs123):
         self._read_header()
 
     def read(
-        self, *, items=None, time=None, area=None, time_steps=None, keepdims=False
+        self,
+        *,
+        items=None,
+        time=None,
+        area=None,
+        keepdims=False,
+        time_steps=None,
+        dtype=np.float32,
     ) -> Dataset:
         """
         Read data from a dfs2 file
@@ -232,8 +239,11 @@ class Dfs2(_Dfs123):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time: str, int or list[int], optional
-            Read only selected times
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
         area: array[float], optional
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper) coordinates
@@ -272,9 +282,7 @@ class Dfs2(_Dfs123):
         if single_time_selected and not keepdims:
             shape = shape[1:]
 
-        data_list = [
-            np.ndarray(shape=shape, dtype=self._dtype) for item in range(n_items)
-        ]
+        data_list = [np.ndarray(shape=shape, dtype=dtype) for item in range(n_items)]
 
         t_seconds = np.zeros(len(time_steps))
 

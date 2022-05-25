@@ -120,7 +120,6 @@ class _UnstructuredFile:
         self._timestep_in_seconds = None
 
         self._items = None
-        self._dtype = np.float64
 
     def __repr__(self):
         out = []
@@ -651,7 +650,7 @@ class _UnstructuredFile:
 
 
 class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
-    def __init__(self, filename, dfs=None, dtype=np.float32):
+    def __init__(self, filename, dfs=None):
         """
         Create a Dfsu object
 
@@ -660,17 +659,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         filename: str
             dfsu or mesh filename
         dfs :
-        dtype: np.dtype, optional
-            default np.float32, valid options are np.float32, np.float64
         """
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
-
         super().__init__()
         self._filename = str(filename)
         input = self._filename if dfs is None else dfs
         self._read_header(input)
-        self._dtype = dtype
 
         # show progress bar for large files
         # if self._type == UnstructuredType.Mesh:
@@ -728,6 +721,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         x=None,
         y=None,
         keepdims=False,
+        dtype=np.float32,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -736,8 +730,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time: str, int or list[int], optional
-            Read only selected time_steps
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
         area: list[float], optional
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
@@ -764,7 +761,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         1:  U velocity <u velocity component> (meter per sec)
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
-        >>> dfsu.read(time_steps="1985-08-06 12:00,1985-08-07 00:00")
+        >>> dfsu.read(time="1985-08-06 12:00,1985-08-07 00:00")
         <mikeio.Dataset>
         Dimensions: (5, 884)
         Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
@@ -774,6 +771,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
+        if dtype not in [np.float32, np.float64]:
+            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
         # Open the dfs file for reading
         # self._read_dfsu_header(self._filename)
@@ -824,7 +823,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         )
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=shape, dtype=self._dtype)
+            data = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(n_steps, dtype=float)
@@ -1215,7 +1214,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
 
 class Dfsu2DH(_Dfsu):
-    def extract_track(self, track, items=None, method="nearest"):
+    def extract_track(self, track, items=None, method="nearest", dtype=np.float32):
         """
         Extract track data from a dfsu file
 
@@ -1297,7 +1296,7 @@ class Dfsu2DH(_Dfsu):
         data_list.append(coords[:, 1])  # latitude
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.empty(shape=(len(times)), dtype=self._dtype)
+            data = np.empty(shape=(len(times)), dtype=dtype)
             data[:] = np.nan
             data_list.append(data)
 
@@ -1331,8 +1330,8 @@ class Dfsu2DH(_Dfsu):
         )
 
         # initialize dfsu data arrays
-        d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
-        d2 = np.ndarray(shape=(n_items, self.n_elements), dtype=self._dtype)
+        d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=dtype)
+        d2 = np.ndarray(shape=(n_items, self.n_elements), dtype=dtype)
         t1 = 0.0
         t2 = 0.0
 
@@ -1385,7 +1384,7 @@ class Dfsu2DH(_Dfsu):
                 dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
                 dati = dati + w * np.dot(d2[:, eid], weights[i_interp])
             else:
-                dati = np.empty(shape=n_items, dtype=self._dtype)
+                dati = np.empty(shape=n_items, dtype=dtype)
                 dati[:] = np.nan
 
             for item in range(n_items):
