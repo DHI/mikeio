@@ -226,7 +226,9 @@ class Dfs3(_Dfs123):
         """
 
         if area is not None:
-            return NotImplementedError("area subsetting is not yet implemented for Dfs3")
+            return NotImplementedError(
+                "area subsetting is not yet implemented for Dfs3"
+            )
         if keepdims is not None:
             return NotImplementedError("keepdims is not yet implemented for Dfs3")
 
