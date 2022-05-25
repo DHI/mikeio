@@ -137,7 +137,7 @@ def test_read_top_layer():
     assert isinstance(ds.geometry, Grid2D)
 
     # TODO: not yet implemented
-    # dssel = dsall.sel(layer="top")
+    # dssel = dsall.sel(layers="top")
     # assert dssel.geometry == ds.geometry
 
     dssel = dsall.isel(z=-1)
@@ -157,7 +157,7 @@ def test_read_bottom_layer():
 def test_sel_bottom_layer():
     dsall = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
     with pytest.raises(NotImplementedError) as excinfo:
-        dsall.sel(layer="bottom")  # TODO layers vs layer
+        dsall.sel(layers="bottom")  # TODO layers vs layer
     assert "mikeio.read" in str(excinfo.value)
     # assert "z" not in ds.dims
     # assert isinstance(ds.geometry, Grid2D)

@@ -32,10 +32,27 @@ from .data_utils import DataUtilsMixin
 
 
 class _DataArrayPlotter:
+    """Context aware plotter"""
+
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
     def __call__(self, ax=None, figsize=None, **kwargs):
+        """Plot DataArray according to geometry
+
+        Parameters
+        ----------
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+        figsize: (float, float), optional
+            specify size of figure
+        title: str, optional
+            axes title
+
+        Returns
+        -------
+        <matplotlib.axes>
+        """
         fig, ax = self._get_fig_ax(ax, figsize)
 
         if self.da.ndim == 1:
@@ -69,6 +86,32 @@ class _DataArrayPlotter:
         return fig, ax
 
     def hist(self, ax=None, figsize=None, **kwargs):
+        """Plot DataArray as histogram (using ax.hist)
+
+        Parameters
+        ----------
+        bins : int or sequence or str,
+            If bins is an integer, it defines the number
+            of equal-width bins in the range.
+            If bins is a sequence, it defines the bin edges,
+            including the left edge of the first bin and the
+            right edge of the last bin.
+            by default: rcParams["hist.bins"] (default: 10)
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+        figsize: (float, float), optional
+            specify size of figure
+        title: str, optional
+            axes title
+
+        See Also
+        --------
+        matplotlib.pyplot.hist
+
+        Returns
+        -------
+        <matplotlib.axes>
+        """
         ax = self._get_ax(ax, figsize)
         return self._hist(ax, **kwargs)
 
@@ -184,7 +227,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         return self.pcolormesh(ax, figsize, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
-        fig, ax = self._get_fig_ax(ax, figsize)
+        _, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
         values = self._get_first_step_values()
@@ -541,6 +584,15 @@ class _DataArraySpectrumToHm0:
 
 
 class DataArray(DataUtilsMixin, TimeSeries):
+    """DataArray with data and metadata for a single item in a dfs file
+
+    The DataArray has these main properties:
+
+    * time - a pandas.DatetimeIndex with the time instances of the data
+    * geometry - a geometry object e.g. Grid2D or GeometryFM
+    * values - a numpy array containing the data
+    * item - an ItemInfo with name, type and unit
+    """
 
     deletevalue = 1.0e-35
 
@@ -785,6 +837,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def name(self) -> Optional[str]:
+        """Name of this DataArray (=da.item.name)"""
         return self.item.name
 
     @name.setter
@@ -793,10 +846,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def type(self) -> EUMType:
+        """EUMType"""
         return self.item.type
 
     @property
     def unit(self) -> EUMUnit:
+        """EUMUnit"""
         return self.item.unit
 
     @property
@@ -813,7 +868,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def is_equidistant(self) -> bool:
-        """Is Dataset equidistant in time?"""
+        """Is DataArray equidistant in time?"""
         if len(self.time) < 3:
             return True
         return len(self.time.to_series().diff().dropna().unique()) == 1
@@ -835,18 +890,22 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @property
     def shape(self):
+        """Tuple of array dimensions"""
         return self.values.shape
 
     @property
     def ndim(self) -> int:
+        """Number of array dimensions"""
         return self.values.ndim
 
     @property
     def dtype(self):
+        """Data-type of the array elements"""
         return self.values.dtype
 
     @property
     def values(self) -> np.ndarray:
+        """Values as a np.ndarray (equivalent to to_numpy())"""
         return self._values
 
     @values.setter
@@ -857,6 +916,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self._values = value
 
     def to_numpy(self) -> np.ndarray:
+        """Values as a np.ndarray (equivalent to values)"""
         return self._values
 
     @property
@@ -877,7 +937,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return self.isel(idx, axis=0)
 
     def flipud(self) -> "DataArray":
-        """Flip upside down"""
+        """Flip upside down (on first non-time axis)"""
 
         first_non_t_axis = 1 if self._has_time_axis else 0
         self.values = np.flip(self.values, axis=first_non_t_axis)
@@ -892,11 +952,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return df
 
     def copy(self) -> "DataArray":
+        """Make copy of DataArray"""
         return deepcopy(self)
 
     def squeeze(self) -> "DataArray":
-        """
-        Remove axes of length 1
+        """Remove axes of length 1
 
         Returns
         -------
@@ -971,20 +1031,92 @@ class DataArray(DataUtilsMixin, TimeSeries):
         self._values[key] = value
 
     def isel(self, idx=None, axis=0, **kwargs) -> "DataArray":
-        """
-        Select subset along an axis.
+        """Return a new DataArray whose data is given by
+        integer indexing along the specified dimension(s).
+
+        The spatial parameters available depend on the dims
+        (i.e. geometry) of the DataArray:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: x, y, z
+        * GeometryFM: element
 
         Parameters
         ----------
         idx: int, scalar or array_like
         axis: (int, str, None), optional
             axis number or "time", by default 0
+        time : int, optional
+            time index,by default None
+        x : int, optional
+            x index, by default None
+        y : int, optional
+            y index, by default None
+        z : int, optional
+            z index, by default None
+        element : int, optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
 
         Returns
         -------
         DataArray
-            data with subset
+            new DataArray with selected data
 
+        See Also
+        --------
+        dims : Get axis names
+        sel : Select data using labels
+
+        Examples
+        --------
+        >>> da = mikeio.read("europe_wind_long_lat.dfs2")[0]
+        >>> da
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (time:1, y:101, x:221)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid2D (ny=101, nx=221)
+        >>> da.isel(time=-1)
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (y:101, x:221)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid2D (ny=101, nx=221)
+        >>> da.isel(x=slice(10,20), y=slice(40,60))
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (time:1, y:20, x:10)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid2D (ny=20, nx=10)
+        >>> da.isel(y=34)
+        <mikeio.DataArray>
+        name: Mean Sea Level Pressure
+        dims: (time:1, x:221)
+        time: 2012-01-01 00:00:00 (time-invariant)
+        geometry: Grid1D (n=221, dx=0.25)
+
+        >>> da = mikeio.read("oresund_sigma_z.dfsu").Temperature
+        >>> da
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:17118)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
+        >>> da.isel(element=45)
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: GeometryPoint3D(x=328717.05429134873, y=6143529.158495431, z=-4.0990404685338335)
+        values: [17.29, 17.25, 17.19]
+        >>> da.isel(element=range(200))
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:200)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (200 elements, 3 sigma-layers, 3 z-layers)
         """
         if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
             idx_x = kwargs["x"]
@@ -1052,7 +1184,110 @@ class DataArray(DataUtilsMixin, TimeSeries):
         time: Union[str, pd.DatetimeIndex, "DataArray"] = None,
         **kwargs,
     ) -> "DataArray":
+        """Return a new DataArray whose data is given by
+        selecting index labels along the specified dimension(s).
 
+        In contrast to DataArray.isel, indexers for this method
+        should use labels instead of integers.
+
+        The spatial parameters available depend on the geometry of the DataArray:
+
+        * Grid1D: x
+        * Grid2D: x, y, coords, area
+        * Grid3D: [not yet implemented! use isel instead]
+        * GeometryFM: (x,y), coords, area
+        * GeometryFMLayered: (x,y,z), coords, area, layers
+
+        Parameters
+        ----------
+        time : Union[str, pd.DatetimeIndex, DataArray], optional
+            time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
+            by default None
+        x : float, optional
+            x-coordinate of point to be selected, by default None
+        y : float, optional
+            y-coordinate of point to be selected, by default None
+        z : float, optional
+            z-coordinate of point to be selected, by default None
+        coords : np.array(float,float), optional
+            As an alternative to specifying x, y and z individually,
+            the argument coords can be used instead.
+            (x,y)- or (x,y,z)-coordinates of point to be selected,
+            by default None
+        area : (float, float, float, float), optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
+        layers : int or str or list, optional
+            layer(s) to be selected: "top", "bottom" or layer number
+            from bottom 0,1,2,... or from the top -1,-2,... or as
+            list of these; only for layered dfsu, by default None
+
+        Returns
+        -------
+        DataArray
+            new DataArray with selected data
+
+        See Also
+        --------
+        isel : Select data using integer indexing
+        interp : Interp data in time and space
+
+        Examples
+        --------
+        >>> da = mikeio.read("random.dfs1")[0]
+        >>> da
+        <mikeio.DataArray>
+        name: testing water level
+        dims: (time:100, x:3)
+        time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
+        geometry: Grid1D (n=3, dx=100)
+        >>> da.sel(time=slice(None, "2012-1-1 00:02"))
+        <mikeio.DataArray>
+        name: testing water level
+        dims: (time:15, x:3)
+        time: 2012-01-01 00:00:00 - 2012-01-01 00:02:48 (15 records)
+        geometry: Grid1D (n=3, dx=100)
+        >>> da.sel(x=100)
+        <mikeio.DataArray>
+        name: testing water level
+        dims: (time:100)
+        time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
+        values: [0.3231, 0.6315, ..., 0.7506]
+
+        >>> da = mikeio.read("oresund_sigma_z.dfsu").Temperature
+        >>> da
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:17118)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
+        >>> da.sel(time="1997-09-15")
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (element:17118)
+        time: 1997-09-15 21:00:00 (time-invariant)
+        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
+        values: [16.31, 16.43, ..., 16.69]
+        >>> da.sel(x=340000, y=6160000, z=-3)
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: GeometryPoint3D(x=340028.1116933554, y=6159980.070243686, z=-3.0)
+        values: [17.54, 17.31, 17.08]
+        >>> da.sel(area=(340000, 6160000, 350000, 6170000))
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:224)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu3DSigmaZ (224 elements, 3 sigma-layers, 1 z-layers)
+        >>> da.sel(layers="bottom")
+        <mikeio.DataArray>
+        name: Temperature
+        dims: (time:3, element:3700)
+        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+        geometry: Dfsu2D (3700 elements, 2090 nodes)
+        """
         da = self
 
         # select in space
@@ -1095,7 +1330,53 @@ class DataArray(DataUtilsMixin, TimeSeries):
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
+        """Interpolate data in time and space
 
+        This method currently has limited functionality for
+        spatial interpolation. It will be extended in the future.
+
+        The spatial parameters available depend on the geometry of the Dataset:
+
+        * Grid1D: x
+        * Grid2D: x, y
+        * Grid3D: [not yet implemented!]
+        * GeometryFM: (x,y)
+        * GeometryFMLayered: (x,y) [surface point will be returned!]
+
+        Parameters
+        ----------
+        time : Union[float, pd.DatetimeIndex, DataArray], optional
+            timestep in seconds or discrete time instances given by
+            pd.DatetimeIndex (typically from another DataArray
+            da2.time), by default None (=don't interp in time)
+        x : float, optional
+            x-coordinate of point to be interpolated to, by default None
+        y : float, optional
+            y-coordinate of point to be interpolated to, by default None
+        n_nearest : int, optional
+            When using IDW interpolation, how many nearest points should
+            be used, by default: 3
+
+        Returns
+        -------
+        DataArray
+            new DataArray with interped data
+
+        See Also
+        --------
+        sel : Select data using label indexing
+        interp_like : Interp to another time/space of another DataArray
+        interp_time : Interp in the time direction only
+
+        Examples
+        --------
+        >>> da = mikeio.read("random.dfs1")[0]
+        >>> da.interp(time=3600)
+        >>> da.interp(x=110)
+
+        >>> da = mikeio.read("HD2D.dfsu").Salinity
+        >>> da.interp(x=340000, y=6160000)
+        """
         if z is not None:
             raise NotImplementedError()
 
@@ -1258,6 +1539,30 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @staticmethod
     def concat(dataarrays: Sequence["DataArray"], keep="last") -> "DataArray":
+        """Concatenate DataArrays along the time axis
+
+        Parameters
+        ---------
+        dataarrays: sequence of DataArrays
+        keep: str, optional
+            TODO Yet to be implemented, default: last
+
+        Returns
+        -------
+        DataArray
+            The concatenated DataArray
+
+        Examples
+        --------
+        >>> import mikeio
+        >>> da1 = mikeio.read("HD2D.dfsu", time=[0,1])[0]
+        >>> da2 = mikeio.read("HD2D.dfsu", time=[2,3])[0]
+        >>> da1.n_timesteps
+        2
+        >>> da3 = DataArray.concat([da1,da2])
+        >>> da3.n_timesteps
+        4
+        """
         from mikeio import Dataset
 
         datasets = [Dataset([da]) for da in dataarrays]
@@ -1629,6 +1934,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
     def to_dfs(self, filename, **kwargs) -> None:
+        """Write data to a new dfs file
+
+        Parameters
+        ----------
+        filename: str
+            full path to the new dfs file
+        dtype: str, np.dtype, DfsSimpleType, optional
+            Dfs0 only: set the dfs data type of the written data
+            to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
+        """
         self._to_dataset().to_dfs(filename, **kwargs)
 
     def to_xarray(self):

@@ -50,8 +50,11 @@ class _Dfs123(TimeSeries):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time: str, int or list[int], optional
-            Read only selected times
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
 
         Returns
         -------
