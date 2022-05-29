@@ -123,8 +123,8 @@ class Dfs3(_Dfs123):
 
     _ndim = 3
 
-    def __init__(self, filename=None, dtype=np.float32):
-        super(Dfs3, self).__init__(filename, dtype)
+    def __init__(self, filename=None):
+        super(Dfs3, self).__init__(filename)
 
         self._dx = None
         self._dy = None
@@ -200,14 +200,38 @@ class Dfs3(_Dfs123):
         *,
         items=None,
         time=None,
-        time_steps=None,
         area=None,
         layers=None,
         keepdims=False,
+        time_steps=None,
     ) -> Dataset:
+        """
+        Read data from a dfs3 file
+
+        Parameters
+        ---------
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        area: array[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper) coordinates
+        layers: int, str, list[int], optional
+            Read only data for specific layers, by default None
+
+        Returns
+        -------
+        Dataset
+        """
 
         if area is not None:
-            return NotImplementedError("area subsetting is not yet implemented")
+            return NotImplementedError(
+                "area subsetting is not yet implemented for Dfs3"
+            )
+        # NOTE:
+        # if keepdims is not False:
+        #    return NotImplementedError("keepdims is not yet implemented for Dfs3")
 
         # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)

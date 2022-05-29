@@ -774,6 +774,12 @@ def test_interp_time(da1):
     assert dai.timestep == 1800
 
 
+def test_interp_like_index(da1):
+    da = mikeio.read("tests/testdata/HD2D.dfsu")[0]
+    dai = da.interp_like(da.time)
+    assert any(dai.time == da.time)
+
+
 def test_dims_time(da1):
 
     assert da1.dims[0][0] == "t"

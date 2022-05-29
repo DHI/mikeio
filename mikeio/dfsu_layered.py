@@ -98,7 +98,6 @@ class DfsuLayered(_Dfsu):
         *,
         items=None,
         time=None,
-        time_steps=None,
         elements=None,
         area=None,
         x=None,
@@ -106,6 +105,8 @@ class DfsuLayered(_Dfsu):
         z=None,
         layers=None,
         keepdims=False,
+        time_steps=None,
+        dtype=np.float32
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -114,8 +115,11 @@ class DfsuLayered(_Dfsu):
         ---------
         items: list[int] or list[str], optional
             Read only selected items, by number (0-based), or by name
-        time: str, int or list[int], optional
-            Read only selected time_steps
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
         area: list[float], optional
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
@@ -154,6 +158,8 @@ class DfsuLayered(_Dfsu):
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
         """
+        if dtype not in [np.float32, np.float64]:
+            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
         # Open the dfs file for reading
         # self._read_dfsu_header(self._filename)
@@ -214,9 +220,9 @@ class DfsuLayered(_Dfsu):
             if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
                 # and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(n_steps, n_nodes), dtype=self._dtype)
+                data = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
             else:
-                data = np.ndarray(shape=(n_steps, n_elems), dtype=self._dtype)
+                data = np.ndarray(shape=(n_steps, n_elems), dtype=dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(n_steps, dtype=float)

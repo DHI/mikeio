@@ -77,7 +77,7 @@ def _plot_map(
     --------
     >>> dfs = Dfsu("HD2D.dfsu")
     >>> dfs.plot() # bathymetry
-    >>> ds = dfs.read(items="Surface elevation", time_steps=0)
+    >>> ds = dfs.read(items="Surface elevation", time=0)
     >>> ds.shape
     (1, 884)
     >>> ds.n_items

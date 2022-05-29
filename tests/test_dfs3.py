@@ -32,6 +32,16 @@ def test_dfs3_geometry():
     assert dfs.geometry.nz == 34
 
 
+def test_dfs_to_xarray():
+    ds = mikeio.read("tests/testdata/test_dfs3.dfs3")
+    xr_ds = ds.to_xarray()
+    assert xr_ds.dims["time"] == 2
+
+    ds_1d = ds.isel(z=0).isel(y=0)
+    xr_ds_1d = ds_1d.to_xarray()
+    assert xr_ds_1d.dims["time"] == 2
+
+
 def test_dfs3_read():
     ds = mikeio.read("tests/testdata/Grid1.dfs3")
     assert ds.n_items == 2
@@ -127,7 +137,7 @@ def test_read_top_layer():
     assert isinstance(ds.geometry, Grid2D)
 
     # TODO: not yet implemented
-    # dssel = dsall.sel(layer="top")
+    # dssel = dsall.sel(layers="top")
     # assert dssel.geometry == ds.geometry
 
     dssel = dsall.isel(z=-1)
@@ -147,7 +157,7 @@ def test_read_bottom_layer():
 def test_sel_bottom_layer():
     dsall = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
     with pytest.raises(NotImplementedError) as excinfo:
-        dsall.sel(layer="bottom")  # TODO layers vs layer
+        dsall.sel(layers="bottom")  # TODO layers vs layer
     assert "mikeio.read" in str(excinfo.value)
     # assert "z" not in ds.dims
     # assert isinstance(ds.geometry, Grid2D)
