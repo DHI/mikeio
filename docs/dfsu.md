@@ -1,7 +1,8 @@
 # Dfsu and Mesh
 
-| :exclamation: Not fully updated to MIKE IO 1.0   |
-|-----------------------------------------|
+```{warning} 
+Not fully updated to MIKE IO 1.0
+```
 
 Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. 
 The .mesh file is an ASCII format for storing the flexible mesh geometry. 
@@ -27,9 +28,10 @@ Each element has:
 * Element type; triangular, quadrilateral, prism etc.
 * Element table; specifies for each element the nodes that defines the element. 
 
-| :warning:  In MIKE Zero, node ids, element ids and layer ids are 1-based. <br /> In MIKE IO, all ids are **0-based** following standard Python indexing. <br />That means, as an example, that when finding the element closest to a <br />point its id will be 1 lower in MIKE IO compared to examining the file in <br />MIKE Zero. |
-|-----------------------------------------|
 
+```{warning} 
+In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all ids are **0-based** following standard Python indexing. That means, as an example, that when finding the element closest to a point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.
+```
 
 
 ## Common Dfsu and Mesh properties
@@ -197,20 +199,39 @@ Apart from the basic dfsu functionality, layered dfsu have the below additional 
     mikeio.dfsu_layered.DfsuLayered.plot_vertical_profile
 ```
 
-
-| :warning:  In MIKE Zero, layer ids are 1-based. In MIKE IO, all ids are **0-based**<br />following standard Python indexing. The bottom layer is 0. In early versions<br />of MIKE IO, layer ids was 1-based! From release 0.10 all ids are 0-based.  |
-|-----------------------------------------|
-
+```{warning}
+In MIKE Zero, layer ids are 1-based. In MIKE IO, all ids are **0-based**following standard Python indexing. The bottom layer is 0. In early versionsof MIKE IO, layer ids was 1-based! From release 0.10 all ids are 0-based.
+```
 
 
 Dfsu API
 --------
 
 ```{eval-rst}
-.. autoclass:: mikeio.Dfsu
+.. autoclass:: mikeio.Dfsu2DH
 	:members:
 	:inherited-members:
 ```
+
+```{eval-rst}
+.. autoclass:: mikeio.Dfsu3D
+	:members:
+	:inherited-members:
+```
+
+```{eval-rst}
+.. autoclass:: mikeio.Dfsu2DV
+	:members:
+	:inherited-members:
+```
+
+
+```{eval-rst}
+.. autoclass:: mikeio.DfsuSpectral
+	:members:
+	:inherited-members:
+```
+
 
 Mesh API
 --------
