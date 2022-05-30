@@ -46,7 +46,9 @@ Where can I get help?
 
    getting_started
    design
+   data_structures
    dataset
+   dataarray   
    dfs0
    dfs123
    dfsu   
