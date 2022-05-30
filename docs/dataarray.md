@@ -1,0 +1,126 @@
+# DataArray
+
+The [DataArray](DataArray) is the common MIKE IO data structure 
+for *item* data from dfs files. 
+The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs items)
+
+Each DataArray have the following properties:
+* **item** - an  [`ItemInfo`](ItemInfo) with name, type and unit
+* **time** - a pandas.DateTimeIndex with the time instances of the data
+* **geometry** - a Geometry object with the spatial description of the data
+* **values** - a NumPy array
+
+Use DataArray's string representation to get an overview of the DataArray
+
+
+```python
+>>> import mikeio
+>>> ds = mikeio.read("testdata/HD2D.dfsu")
+>>> da = ds["Surface Elevation"]
+>>> da
+<mikeio.DataArray>
+name: Surface elevation
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+```
+
+
+## Temporal selection
+
+```python
+>>> da.sel(time="1985-08-06 12:00")
+<mikeio.DataArray>
+name: Surface elevation
+dims: (element:884)
+time: 1985-08-06 12:00:00 (time-invariant)
+geometry: Dfsu2D (884 elements, 529 nodes)
+values: [0.1012, 0.1012, ..., 0.105]
+
+>>> da["1985-8-7":]
+<mikeio.DataArray>
+name: Surface elevation
+dims: (time:2, element:884)
+time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+
+```
+
+## Spatial selection
+
+The `sel` method finds the nearest element.
+
+```python
+>>> da.sel(x=607002, y=6906734)
+<mikeio.DataArray>
+name: Surface elevation
+dims: (time:9)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
+values: [0.4591, 0.8078, ..., -0.6311]
+```
+
+## Properties
+
+The DataArray has several properties:
+
+* n_items - Number of items
+* n_timesteps - Number of timesteps
+* n_elements - Number of elements
+* start_time - First time instance (as datetime)
+* end_time - Last time instance (as datetime)
+* is_equidistant - Is the time series equidistant in time
+* timestep - Time step in seconds (if is_equidistant)
+* shape - Shape of each item
+* deletevalue - File delete value (NaN value)
+
+
+
+## Methods
+
+DataArray has several useful methods for working with data, 
+including different ways of *selecting* data:
+
+* [`sel()`](DataArray.sel) - Select subset along an axis
+* [`isel()`](DataArray.isel) - Select subset along an axis with an integer
+
+*Aggregations* along an axis:
+
+* [`mean()`](DataArray.mean) - Mean value along an axis
+* [`nanmean()`](DataArray.nanmean) - Mean value along an axis (NaN removed)
+* [`max()`](DataArray.max) - Max value along an axis
+* [`nanmax()`](DataArray.nanmax) - Max value along an axis (NaN removed)
+* [`min()`](DataArray.min) - Min value along an axis
+* [`nanmin()`](DataArray.nanmin) - Min value along an axis (NaN removed)
+* [`aggregate()`](DataArray.aggregate) - Aggregate along an axis
+* [`quantile()`](DataArray.quantile) - Quantiles along an axis
+
+*Mathematical operations* +, - and * with numerical values:
+
+* ds + value
+* ds - value
+* ds * value
+
+and + and - between two DataArrays (if number of items and shapes conform):
+
+* ds1 + ds2
+* ds1 - ds2
+
+Other methods that also return a DataArray:
+
+* [`interp_time()`](DataArray.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
+* [`dropna()`](DataArray.dropna) - Remove time steps where all items are NaN
+* [`squeeze()`](DataArray.squeeze) - Remove axes of length 1
+
+*Conversion* methods:
+
+* [`to_xarray()`](DataArray.to_xarray) - Convert DataArray to a xarray DataArray (great for Dfs2)
+* [`to_dfs()`](DataArray.to_dfs) - Write DataArray to a Dfs file
+
+
+## DataArray API
+
+```{eval-rst}
+.. autoclass:: mikeio.DataArray
+	:members:
+```
