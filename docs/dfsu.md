@@ -19,8 +19,8 @@ The mesh geometry in a .mesh or a .dfsu file consists of a number of nodes and a
 Each node has:
 
 * Node id
-* X,Y,Z coordinate
-* Code for the boundary
+* x,y,z coordinates
+* Code (0 for internal water points, 1 for land, >1 for open boundary)
 
 Each element has:
 
@@ -33,12 +33,58 @@ Each element has:
 In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all ids are **0-based** following standard Python indexing. That means, as an example, that when finding the element closest to a point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.
 ```
 
+## MIKE IO Flexible Mesh Geometry 
+
+MIKE IO has a Flexible Mesh Geometry class containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
+
+```{eval-rst}
+.. autosummary::
+    :nosignatures:
+
+    mikeio.spatial.FM_geometry.GeometryFM.n_nodes
+    mikeio.spatial.FM_geometry.GeometryFM.node_coordinates
+    mikeio.spatial.FM_geometry.GeometryFM.codes
+    mikeio.spatial.FM_geometry.GeometryFM.boundary_polylines
+    mikeio.spatial.FM_geometry.GeometryFM.n_elements
+    mikeio.spatial.FM_geometry.GeometryFM.element_coordinates
+    mikeio.spatial.FM_geometry.GeometryFM.element_table
+    mikeio.spatial.FM_geometry.GeometryFM.max_nodes_per_element
+    mikeio.spatial.FM_geometry.GeometryFM.is_tri_only
+    mikeio.spatial.FM_geometry.GeometryFM.projection_string
+    mikeio.spatial.FM_geometry.GeometryFM.is_geo
+    mikeio.spatial.FM_geometry.GeometryFM.is_local_coordinates
+    mikeio.spatial.FM_geometry.GeometryFM.type_name    
+```
+
+If a .dfsu file is *read* with mikeio.read, the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with mikeio.open, the returned object will also contain a Flexible Mesh Geometry `geometry`. 
+
+```python
+>>> import mikeio
+>>> ds = mikeio.read("oresundHD_run1.dfsu")
+>>> ds.geometry
+Flexible Mesh Geometry: Dfsu2D
+number of nodes: 2046
+number of elements: 3612
+projection: UTM-33
+
+>>> dfs = mikeio.open("oresundHD_run1.dfsu")
+>>> dfs.geometry
+Flexible Mesh Geometry: Dfsu2D
+number of nodes: 2046
+number of elements: 3612
+projection: UTM-33
+```
+
+
+
 
 ## Common Dfsu and Mesh properties
 
-MIKE IO has a [Dfsu class](mikeio.Dfsu for handling .dfsu files 
-and a [Mesh class](mikeio.Mesh) for handling .mesh files both they inherit from the 
-same base class and have the same core functionality. 
+MIKE IO has a Dfsu class for .dfsu files 
+and a [Mesh class](mikeio.Mesh) for .mesh files which both 
+have a [Flexible Mesh Geometry](mikeio.spatial.FM_geometry.GeometryFM) accessible through the ´geometry´ accessor. 
+
+Some of the most common geometry properties can be directly accessed from the Mesh/Dfsu.  
 
 ```{eval-rst}
 .. autosummary::
@@ -139,7 +185,7 @@ Apart from the common flexible file functionality, the Dfsu has the following *m
     mikeio.dfsu._Dfsu.extract_track
 ```
 
-See the [Dfsu API specification](mikeio.Dfsu) below for a detailed description. 
+See the [Dfsu API specification](#dfsu-api) below for a detailed description. 
 See the [Dfsu Read Example notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb) for basic dfsu functionality.
 
 
@@ -208,26 +254,26 @@ Dfsu API
 --------
 
 ```{eval-rst}
-.. autoclass:: mikeio.Dfsu2DH
+.. autoclass:: mikeio.dfsu.Dfsu2DH
 	:members:
 	:inherited-members:
 ```
 
 ```{eval-rst}
-.. autoclass:: mikeio.Dfsu3D
+.. autoclass:: mikeio.dfsu_layered.Dfsu3D
 	:members:
 	:inherited-members:
 ```
 
 ```{eval-rst}
-.. autoclass:: mikeio.Dfsu2DV
+.. autoclass:: mikeio.dfsu_layered.Dfsu2DV
 	:members:
 	:inherited-members:
 ```
 
 
 ```{eval-rst}
-.. autoclass:: mikeio.DfsuSpectral
+.. autoclass:: mikeio.dfsu_spectral.DfsuSpectral
 	:members:
 	:inherited-members:
 ```
@@ -241,3 +287,56 @@ Mesh API
 	:members:
 	:inherited-members:
 ```
+
+Flexible Mesh Geometry API
+--------------------------
+
+```{eval-rst}
+.. autoclass:: mikeio.spatial.FM_geometry.GeometryFM
+	:members:
+	:inherited-members:
+```
+
+```{eval-rst}
+.. autoclass:: mikeio.spatial.FM_geometry.GeometryFM3D
+	:members:
+	:inherited-members:
+```
+
+```{eval-rst}
+.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMVerticalProfile
+	:members:
+	:inherited-members:
+```
+
+
+```{eval-rst}
+.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMVerticalColumn
+	:members:
+	:inherited-members:
+```
+
+
+
+
+```{eval-rst}
+.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMPointSpectrum
+	:members:
+	:inherited-members:
+```
+
+
+
+```{eval-rst}
+.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMLineSpectrum
+	:members:
+	:inherited-members:
+```
+
+
+```{eval-rst}
+.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum
+	:members:
+	:inherited-members:
+```
+
