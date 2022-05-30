@@ -1,13 +1,25 @@
 # Dataset
 
-The [Dataset](Dataset) is the common MIKE IO data structure 
+The [Dataset](Dataset) is the MIKE IO data structure 
 for data from dfs files. 
 The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs items)
 
-Each DataArray have the following properties:
+Each [DataArray](dataarray) have the following properties:
+
 * **item** - an  [`ItemInfo`](ItemInfo) with name, type and unit
 * **time** - a pandas.DateTimeIndex with the time instances of the data
-* **values** - a NumPy array
+* **geometry** - a Geometry object with the spatial description of the data
+* **values** - a NumPy array of the data
+
+The time and geometry are common to all DataArrays in the Dataset. 
+
+
+The Dataset has the following primary properties: 
+
+* **items** - a list of the DataArray items
+* **time** - a pandas.DateTimeIndex with the time instances of the data
+* **geometry** - a Geometry object with the spatial description of the data
+
 
 Use Dataset's string representation to get an overview of the Dataset
 
@@ -17,14 +29,14 @@ Use Dataset's string representation to get an overview of the Dataset
 >>> ds = mikeio.read("testdata/HD2D.dfsu")
 >>> ds
 <mikeio.Dataset>
-Geometry: Dfsu2D
-Dimensions: (time:9, element:884)
-Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-Items:
-  0:  Surface elevation <Surface Elevation> (meter)        
-  1:  U velocity <u velocity component> (meter per sec)    
-  2:  V velocity <v velocity component> (meter per sec)    
-  3:  Current speed <Current Speed> (meter per sec)   
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation <Surface Elevation> (meter)
+  1:  U velocity <u velocity component> (meter per sec)
+  2:  V velocity <v velocity component> (meter per sec)
+  3:  Current speed <Current Speed> (meter per sec)
 ```
 
 Selecting items
@@ -40,10 +52,10 @@ done with:
 ```
 >>> ds.Surface_elevation
 <mikeio.DataArray>
-Name: Surface elevation
-Geometry: Dfsu2D
-Dimensions: (time:9, element:884)
-Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+name: Surface elevation
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
 ```
 
 Negative index e.g. ds[-1] can also be used to select from the end. 
@@ -100,7 +112,7 @@ items:
 ```
 
 ## Properties
-The Dataset/DataArray has several properties:
+The Dataset (and DataArray) has several properties:
 
 * n_items - Number of items
 * n_timesteps - Number of timesteps
@@ -114,9 +126,9 @@ The Dataset/DataArray has several properties:
 
 
 
-Methods
--------
-Dataset and DataArray has several useful methods for working with data, 
+## Methods
+
+Dataset (and DataArray) has several useful methods for working with data, 
 including different ways of *selecting* data:
 
 * [`sel()`](Dataset.sel) - Select subset along an axis
@@ -164,12 +176,5 @@ Dataset API
 -----------
 ```{eval-rst}
 .. autoclass:: mikeio.Dataset
-	:members:
-```
-
-DataArray API
------------
-```{eval-rst}
-.. autoclass:: mikeio.DataArray
 	:members:
 ```
