@@ -11,13 +11,13 @@ Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 Facilitates common data processing workflows for MIKE files.
 
 *For res1d and xns11 files use the related package [MIKE IO 1D](https://github.com/DHI/mikeio1d)*
-
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Jm0iAeK8QW0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![YouTube](images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
 
 ## MIKE IO 1.0
-MIKE IO 1.0 is now available and it has a lot of benefits to working with dfs files even easier than before, but it also requires some changes to your existing code. More details in the [discussion page](https://github.com/DHI/mikeio/discussions/279).
+MIKE IO 1.0 is now available and it has a lot of benefits to working with dfs files even easier than before.
 
-![code example](https://raw.githubusercontent.com/DHI/mikeio/main/images/code.png)
+[![YouTube](images/youtube2.png)](http://www.youtube.com/watch?v=0oVedpx9zAQ)
+
 
 ### Important changes
 * New class `mikeio.DataArray` which will be the main class to interact with, having these properties and methods
