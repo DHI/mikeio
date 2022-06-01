@@ -12,6 +12,8 @@ Facilitates common data processing workflows for MIKE files.
 
 *For res1d and xns11 files use the related package [MIKE IO 1D](https://github.com/DHI/mikeio1d)*
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Jm0iAeK8QW0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## MIKE IO 1.0
 MIKE IO 1.0 is now available and it has a lot of benefits to working with dfs files even easier than before, but it also requires some changes to your existing code. More details in the [discussion page](https://github.com/DHI/mikeio/discussions/279).
 
