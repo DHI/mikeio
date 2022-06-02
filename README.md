@@ -10,7 +10,9 @@ Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
 MIKE IO facilitates common data processing workflows for [MIKE files in Python](https://www.mikepoweredbydhi.com/products/mike-for-developers#io).
 
-[:loudspeaker: **Sign up for the MIKE IO webinar (2022-06-16)**](https://www.theacademybydhi.com/course-sessions/mike-io---an-introduction-to-manipulating-mike-modelling-data-files-with-python-11600057-289)
+:loudspeaker: **Sign up for the MIKE IO webinar** [(2022-06-16 07:00 UTC)](https://www.theacademybydhi.com/course-sessions/mike-io---an-introduction-to-manipulating-mike-modelling-data-files-with-python-11600057-289) [(2022-06-16 15:00 UTC)](https://www.theacademybydhi.com/course-sessions/mike-io---an-introduction-to-manipulating-mike-modelling-data-files-with-python-11600057-288)
+
+
 
 [![YouTube](images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
 
