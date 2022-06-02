@@ -1,4 +1,4 @@
-# Dfsu and Mesh
+# Dfsu and Mesh Overview
 
 Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. 
 The .mesh file is an ASCII file for storing the flexible mesh geometry. 
@@ -37,7 +37,7 @@ MIKE IO has a Flexible Mesh Geometry class, `GeometryFM`, containing the list of
 .. autosummary::
     :nosignatures:
 
-    mikeio.spatial.FM_geometry.GeometryFM.n_nodes
+    GeometryFM.n_nodes
     mikeio.spatial.FM_geometry.GeometryFM.node_coordinates
     mikeio.spatial.FM_geometry.GeometryFM.codes
     mikeio.spatial.FM_geometry.GeometryFM.boundary_polylines
@@ -120,34 +120,6 @@ Some of the most common geometry properties can be directly accessed from the Me
     mikeio.Mesh.elements_to_geometry
 ```
 
-## Mesh functionality
-
-The Mesh class is returned by `mikeio.open("my.mesh")` if the argument is a mesh file (or using `mikeio.Mesh()` given a mesh or a dfsu file). 
-
-
-
-```python
->>> msh = mikeio.open("../tests/testdata/odense_rough.mesh")
->>> msh
-Number of elements: 654
-Number of nodes: 399
-Projection: UTM-33
-```
-
-Apart from the common flexible file functionality, 
-the Mesh object has the following methods and properties:
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.Mesh.write
-    mikeio.Mesh.plot_boundary_nodes
-    mikeio.Mesh.zn
-```
-
-See the [Mesh API specification](mikeio.Mesh) below for a detailed description. 
-See the [Mesh Example notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Mesh.ipynb) for more Mesh operations (including shapely examples).
 
 
 ## Dfsu functionality
@@ -182,7 +154,8 @@ Apart from the common flexible file functionality, the Dfsu has the following *m
     mikeio.dfsu._Dfsu.close
 ```
 
-See the [Dfsu API specification](#dfsu-api) below for a detailed description. 
+See the Dfsu API specification on the following pages for a detailed description. 
+
 See the [Dfsu Read Example notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb) for basic dfsu functionality.
 
 
@@ -214,148 +187,3 @@ but the following values types exists:
 ## Layered dfsu files
 
 There are three type of layered dfsu files: 3D dfsu, 2d vertical slices and 1d vertical profiles.
-
-Apart from the basic dfsu functionality, layered dfsu have the below additional *properties* (from the geometry): 
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.dfsu_layered.DfsuLayered.n_layers
-    mikeio.dfsu_layered.DfsuLayered.n_sigma_layers
-    mikeio.dfsu_layered.DfsuLayered.n_z_layers
-    mikeio.dfsu_layered.DfsuLayered.layer_ids
-    mikeio.dfsu_layered.DfsuLayered.top_elements
-    mikeio.dfsu_layered.DfsuLayered.bottom_elements
-    mikeio.dfsu_layered.DfsuLayered.n_layers_per_column
-    mikeio.dfsu_layered.Dfsu3D.geometry2d
-    mikeio.dfsu_layered.DfsuLayered.e2_e3_table
-    mikeio.dfsu_layered.DfsuLayered.elem2d_ids
-```
-
-Dfsu3D addtionally, has:
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.dfsu_layered.Dfsu3D.geometry2d
-```
-
-
-
-Apart from the basic dfsu functionality, Dfsu3D has the below additional *methods*: 
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.dfsu_layered.DfsuLayered.get_layer_elements
-    mikeio.dfsu_layered.Dfsu3D.find_nearest_profile_elements
-```
-
-
-
-```{warning}
-In MIKE Zero, layer ids are 1-based. In MIKE IO, all ids are **0-based**following standard Python indexing. The bottom layer is 0. In early versionsof MIKE IO, layer ids was 1-based! From release 0.10 all ids are 0-based.
-```
-
-
-## Spectral Dfsu files
-
-
-### Spectral Dfsu Example notebooks
-
-* [Dfsu - Spectral data other formats.ipynb](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Spectral%20data%20other%20formats.ipynb) 
-
-
-
-
-## Dfsu API
-
-```{eval-rst}
-.. autoclass:: mikeio.dfsu.Dfsu2DH
-	:members:
-	:inherited-members:
-```
-
-```{eval-rst}
-.. autoclass:: mikeio.dfsu_layered.Dfsu3D
-	:members:
-	:inherited-members:
-```
-
-```{eval-rst}
-.. autoclass:: mikeio.dfsu_layered.Dfsu2DV
-	:members:
-	:inherited-members:
-```
-
-
-```{eval-rst}
-.. autoclass:: mikeio.dfsu_spectral.DfsuSpectral
-	:members:
-	:inherited-members:
-```
-
-
-## Mesh API
-
-```{eval-rst}
-.. autoclass:: mikeio.Mesh
-	:members:
-	:inherited-members:
-```
-
-## Flexible Mesh Geometry API
-
-```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFM
-	:members:
-	:inherited-members:
-```
-
-```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFM3D
-	:members:
-	:inherited-members:
-```
-
-```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMVerticalProfile
-	:members:
-	:inherited-members:
-```
-
-
-```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMVerticalColumn
-	:members:
-	:inherited-members:
-```
-
-
-## Flexible Mesh Geometry Spectral API
-
-
-```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMPointSpectrum
-	:members:
-	:inherited-members:
-```
-
-
-
-```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMLineSpectrum
-	:members:
-	:inherited-members:
-```
-
-
-```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum
-	:members:
-	:inherited-members:
-```
-
