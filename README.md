@@ -53,7 +53,7 @@ Or development version:
 
 ## Tested
 
-MIKE IO is tested extensively. **95%** total test coverage.
+MIKE IO is tested extensively.
 
 See detailed test coverage report below:
 ```
