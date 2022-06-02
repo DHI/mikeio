@@ -11,7 +11,7 @@
 
 ## Dataset
 The [Dataset](Dataset) is the common MIKE IO data structure for data read from dfs files. 
-The  `mikeio.read()` method returns a Dataset with a [DataArray](DataArray) for each item.
+The  `mikeio.read()` method returns a Dataset with a [DataArray](dataarray) for each item.
 
 The DataArray have all the relevant information, e.g:
 
@@ -76,11 +76,11 @@ Items:
   0:  Elevation <Total Water Depth> (meter)
 ```
 
-Read more on the [Dfs123 page](dfs123.rst).
+Read more on the [Dfs2 page](dfs2).
 
 
 ## Generic dfs
-MIKE IO has [`generic`](mikeio.generic) functionality that works for all dfs files: 
+MIKE IO has [`generic`](generic.md) functionality that works for all dfs files: 
 
 * [`concat()`](generic.concat) - Concatenates files along the time axis
 * [`extract()`](generic.extract) - Extract timesteps and/or items to a new dfs file
@@ -97,4 +97,4 @@ from mikeio import generic
 generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
 ```
 
-See [Generic page](mikeio.generic) and the [Generic notebook](<https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb>) for more examples.
+See [Generic page](generic.md) and the [Generic notebook](<https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb>) for more examples.
