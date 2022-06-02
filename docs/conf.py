@@ -56,3 +56,5 @@ html_theme = "sphinx_rtd_theme"
 # html_static_path = ["_static"]
 
 # html_logo = "../images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg"
+
+myst_heading_anchors = 3
