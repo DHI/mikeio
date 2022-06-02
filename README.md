@@ -1,6 +1,6 @@
 
 ![logo](https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
-# MIKE IO: input/output of MIKE files in python
+# MIKE IO: input/output of MIKE files in Python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
  [![Full test](https://github.com/DHI/mikeio/actions/workflows/full_test.yml/badge.svg)](https://github.com/DHI/mikeio/actions/workflows/full_test.yml)
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
@@ -8,9 +8,10 @@
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
-Facilitates common data processing workflows for MIKE files.
+MIKE IO facilitates common data processing workflows for [MIKE files in Python](https://www.mikepoweredbydhi.com/products/mike-for-developers#io).
 
-*For res1d and xns11 files use the related package [MIKE IO 1D](https://github.com/DHI/mikeio1d)*
+[:loudspeaker: **Sign up for the MIKE IO webinar (2022-06-16)**](https://www.theacademybydhi.com/course-sessions/mike-io---an-introduction-to-manipulating-mike-modelling-data-files-with-python-11600057-289)
+
 [![YouTube](images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
 
 ## MIKE IO 1.0
@@ -36,9 +37,8 @@ MIKE IO 1.0 is now available and it has a lot of benefits to working with dfs fi
 
 ## Where can I get help?
 * Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
-* New ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
+* General help, new ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
 * Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
-* General help, FAQ - [Stackoverflow with the tag `mikeio`](https://stackoverflow.com/questions/tagged/mikeio)
 
 ## Installation
 
