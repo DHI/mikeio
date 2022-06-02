@@ -18,6 +18,7 @@ All methods in the generic module creates a new dfs file.
 >>> from mikeio import generic
 >>> generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
 ```
+## Generic example notebooks
 
 See the [Generic notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb) for more examples.
 
