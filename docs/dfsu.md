@@ -1,11 +1,7 @@
 # Dfsu and Mesh
 
-```{warning} 
-Not fully updated to MIKE IO 1.0
-```
-
 Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. 
-The .mesh file is an ASCII format for storing the flexible mesh geometry. 
+The .mesh file is an ASCII file for storing the flexible mesh geometry. 
 The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is 
 available in a .dfsu file as static items.  
 
@@ -14,7 +10,7 @@ For a detailed description of the .mesh and .dfsu file specification see the [fl
 
 ## The flexible mesh
 
-The mesh geometry in a .mesh or a .dfsu file consists of a number of nodes and a number of elements.
+The mesh geometry in a .mesh or a .dfsu file consists of a list of nodes and a list of elements.
 
 Each node has:
 
@@ -25,8 +21,8 @@ Each node has:
 Each element has:
 
 * Element id
-* Element type; triangular, quadrilateral, prism etc.
 * Element table; specifies for each element the nodes that defines the element. 
+(the number of nodes defines the type: triangular, quadrilateral, prism etc.)
 
 
 ```{warning} 
@@ -35,7 +31,7 @@ In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all 
 
 ## MIKE IO Flexible Mesh Geometry 
 
-MIKE IO has a Flexible Mesh Geometry class containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
+MIKE IO has a Flexible Mesh Geometry class, `GeometryFM`, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
 
 ```{eval-rst}
 .. autosummary::
@@ -56,7 +52,9 @@ MIKE IO has a Flexible Mesh Geometry class containing the list of node coordinat
     mikeio.spatial.FM_geometry.GeometryFM.type_name    
 ```
 
-If a .dfsu file is *read* with mikeio.read, the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with mikeio.open, the returned object will also contain a Flexible Mesh Geometry `geometry`. 
+`GeometryFM` has a number of child classes: [GeometryFM3D](GeometryFM3D), [GeometryFMVerticalProfile](GeometryFMVerticalProfile), [GeometryFMVerticalColumn](GeometryFMVerticalColumn), [GeometryFMPointSpectrum](GeometryFMPointSpectrum), [GeometryFMLineSpectrum](GeometryFMLineSpectrum), and [GeometryFMAreaSpectrum](GeometryFMAreaSpectrum) with specialized functionality according to the type of dfsu file. 
+
+If a .dfsu file is *read* with `mikeio.read()`, the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with mikeio.open, the returned object will also contain a Flexible Mesh Geometry `geometry`. 
 
 ```python
 >>> import mikeio
@@ -80,9 +78,9 @@ projection: UTM-33
 
 ## Common Dfsu and Mesh properties
 
-MIKE IO has a Dfsu class for .dfsu files 
+MIKE IO has Dfsu classes for .dfsu files 
 and a [Mesh class](mikeio.Mesh) for .mesh files which both 
-have a [Flexible Mesh Geometry](mikeio.spatial.FM_geometry.GeometryFM) accessible through the ´geometry´ accessor. 
+have a [Flexible Mesh Geometry](GeometryFM) accessible through the ´geometry´ accessor. 
 
 Some of the most common geometry properties can be directly accessed from the Mesh/Dfsu.  
 
@@ -124,12 +122,12 @@ Some of the most common geometry properties can be directly accessed from the Me
 
 ## Mesh functionality
 
-The Mesh class is initialized with a mesh or a dfsu file. 
+The Mesh class is returned by `mikeio.open("my.mesh")` if the argument is a mesh file (or using `mikeio.Mesh()` given a mesh or a dfsu file). 
 
 
 
 ```python
->>> msh = Mesh("../tests/testdata/odense_rough.mesh")
+>>> msh = mikeio.open("../tests/testdata/odense_rough.mesh")
 >>> msh
 Number of elements: 654
 Number of nodes: 399
@@ -154,7 +152,7 @@ See the [Mesh Example notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/b
 
 ## Dfsu functionality
 
-The Dfsu class is initialized with a mesh or a dfsu file. 
+A Dfsu class (e.g. Dfsu2DH) is returned by `mikeio.open()` if the argument is a dfsu file. 
 
 Apart from the common flexible file functionality, the Dfsu has the following *properties*:
 
@@ -182,7 +180,6 @@ Apart from the common flexible file functionality, the Dfsu has the following *m
     mikeio.dfsu._Dfsu.write
     mikeio.dfsu._Dfsu.write_header
     mikeio.dfsu._Dfsu.close
-    mikeio.dfsu._Dfsu.extract_track
 ```
 
 See the [Dfsu API specification](#dfsu-api) below for a detailed description. 
@@ -200,6 +197,8 @@ The following dfsu file types are supported by MIKE IO.
 * 1D vertical column - a vertical dfs1 file and is produced by taking out one column of a 3D layered file.
 * 3D/4D SW, two horizontal dimensions and 1-2 spectral dimensions. Output from MIKE 21 SW.
 
+When a dfsu file is opened with mikeio.open() the returned dfs object will be a specialized class [Dfsu2DH](Dfsu2DH), [Dfsu3D](Dfsu3D), [Dfsu2DV](Dfsu2DV), or [DfsuSpectral](DfsuSpectral) according to the type of dfsu file. 
+
 The layered files (3d, 2d/1d vertical) can have both sigma- and z-layers or only sigma-layers. 
 
 In most cases values are stored in cell centers and vertical (z) information in nodes, 
@@ -216,7 +215,7 @@ but the following values types exists:
 
 There are three type of layered dfsu files: 3D dfsu, 2d vertical slices and 1d vertical profiles.
 
-Apart from the basic dfsu functionality, layered dfsu have the below additional *properties*: 
+Apart from the basic dfsu functionality, layered dfsu have the below additional *properties* (from the geometry): 
 
 ```{eval-rst}
 .. autosummary::
@@ -229,29 +228,50 @@ Apart from the basic dfsu functionality, layered dfsu have the below additional 
     mikeio.dfsu_layered.DfsuLayered.top_elements
     mikeio.dfsu_layered.DfsuLayered.bottom_elements
     mikeio.dfsu_layered.DfsuLayered.n_layers_per_column
-    mikeio.dfsu_layered.DfsuLayered.geometry2d
+    mikeio.dfsu_layered.Dfsu3D.geometry2d
     mikeio.dfsu_layered.DfsuLayered.e2_e3_table
     mikeio.dfsu_layered.DfsuLayered.elem2d_ids
 ```
 
-Apart from the basic dfsu functionality, layered dfsu have the below additional *methods*: 
+Dfsu3D addtionally, has:
+
+```{eval-rst}
+.. autosummary::
+    :nosignatures:
+
+    mikeio.dfsu_layered.Dfsu3D.geometry2d
+```
+
+
+
+Apart from the basic dfsu functionality, Dfsu3D has the below additional *methods*: 
 
 ```{eval-rst}
 .. autosummary::
     :nosignatures:
 
     mikeio.dfsu_layered.DfsuLayered.get_layer_elements
-    mikeio.dfsu_layered.DfsuLayered.find_nearest_profile_elements
-    mikeio.dfsu_layered.DfsuLayered.plot_vertical_profile
+    mikeio.dfsu_layered.Dfsu3D.find_nearest_profile_elements
 ```
+
+
 
 ```{warning}
 In MIKE Zero, layer ids are 1-based. In MIKE IO, all ids are **0-based**following standard Python indexing. The bottom layer is 0. In early versionsof MIKE IO, layer ids was 1-based! From release 0.10 all ids are 0-based.
 ```
 
 
-Dfsu API
---------
+## Spectral Dfsu files
+
+
+### Spectral Dfsu Example notebooks
+
+* [Dfsu - Spectral data other formats.ipynb](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Spectral%20data%20other%20formats.ipynb) 
+
+
+
+
+## Dfsu API
 
 ```{eval-rst}
 .. autoclass:: mikeio.dfsu.Dfsu2DH
@@ -279,8 +299,7 @@ Dfsu API
 ```
 
 
-Mesh API
---------
+## Mesh API
 
 ```{eval-rst}
 .. autoclass:: mikeio.Mesh
@@ -288,8 +307,7 @@ Mesh API
 	:inherited-members:
 ```
 
-Flexible Mesh Geometry API
---------------------------
+## Flexible Mesh Geometry API
 
 ```{eval-rst}
 .. autoclass:: mikeio.spatial.FM_geometry.GeometryFM
@@ -317,6 +335,7 @@ Flexible Mesh Geometry API
 ```
 
 
+## Flexible Mesh Geometry Spectral API
 
 
 ```{eval-rst}
