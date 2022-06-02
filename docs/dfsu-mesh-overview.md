@@ -37,7 +37,7 @@ MIKE IO has a Flexible Mesh Geometry class, `GeometryFM`, containing the list of
 .. autosummary::
     :nosignatures:
 
-    GeometryFM.n_nodes
+    mikeio.spatial.FM_geometry.GeometryFM.n_nodes
     mikeio.spatial.FM_geometry.GeometryFM.node_coordinates
     mikeio.spatial.FM_geometry.GeometryFM.codes
     mikeio.spatial.FM_geometry.GeometryFM.boundary_polylines
