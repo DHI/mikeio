@@ -1,6 +1,9 @@
 # Dfs Overview
 
-MIKE IO has a similar API for the three gridded dfs file types: [Dfs1](Dfs1), [Dfs2](Dfs2) and [Dfs3](Dfs3). 
+[DFS file system specification](https://docs.mikepoweredbydhi.com/core_libraries/dfs/dfs-file-system)
+
+
+## MIKE IO Dfs classes
 
 All Dfs classes (and the Dataset) class are representations of timeseries and 
 share these properties: 
@@ -10,7 +13,7 @@ share these properties:
 * n_timesteps - Number of timesteps
 * start_time - First time instance (as datetime)
 * end_time - Last time instance (as datetime)
-* geometry - spatial description of the data in the file ([Grid1D](Grid1D), [Grid2D](Grid2D), or [Grid3D](Grid3D))
+* geometry - spatial description of the data in the file ([Grid1D](Grid1D), [Grid2D](Grid2D), etc ... )
 * deletevalue - File delete value (NaN value)
 
 
