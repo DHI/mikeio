@@ -98,6 +98,7 @@ class Grid1D(_Geometry):
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
 
     def find_index(self, x: float, **kwargs) -> int:
+        """Find nearest point"""
 
         d = (self.x - x) ** 2
         return np.argmin(d)
@@ -141,6 +142,7 @@ class Grid1D(_Geometry):
         return self._orientation
 
     def isel(self, idx, axis=0):
+        """Get a subset geometry from this geometry"""
 
         if not np.isscalar(idx):
             nc = None if self._nc is None else self._nc[idx, :]
@@ -478,7 +480,8 @@ class Grid2D(_Geometry):
 
     def find_index(self, x: float = None, y: float = None, coords=None, area=None):
         """Find nearest index (i,j) of point(s)
-           -1 is returned if point is outside grid
+
+        -1 is returned if point is outside grid
 
         Parameters
         ----------
@@ -820,6 +823,7 @@ class Grid3D(_Geometry):
         )
 
     def isel(self, idx, axis):
+        """Get a subset geometry from this geometry"""
         if not np.isscalar(idx):
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
