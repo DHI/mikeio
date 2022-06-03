@@ -3,7 +3,7 @@
 # Dfs3
 
 A dfs3 file contains 3D gridded data.  
-The spatial information is available in the `geometry` attribute, which in the case of a dfs3 file is a [`Grid3D`](Grid3D) geometry. 
+
 
 ```python
 >>> import mikeio
@@ -15,14 +15,6 @@ time: 2001-12-28 00:00:00 (time-invariant)
 geometry: Grid3D(nz=17, ny=112, nx=91)
 items:
   0:  Diss. oxygen (mg/l) <Concentration 3> (mg per liter)
-
->>> ds.geometry
-<mikeio.Grid3D>
-x: [0, 150, ..., 1.35e+04] (nx=91, dx=150)
-y: [0, 150, ..., 1.665e+04] (ny=112, dy=150)
-z: [0, 1, ..., 16] (nz=17, dz=1)
-origin: (10.37, 55.42), orientation: 18.125
-projection: PROJCS["UTM-32",GEOGCS["Unused",DATUM["UTM...
 ```
 
 A specific layer can be read with the `layers` argument, in which case a 2D Dataset will be returned: 
@@ -38,6 +30,38 @@ items:
   0:  Diss. oxygen (mg/l) <Concentration 3> (mg per liter)
 ```
 
+## Grid3D
+
+The spatial information is available in the `geometry` attribute (accessible from Dfs3, Dataset, and DataArray), which in the case of a dfs3 file is a [`Grid3D`](Grid3D) geometry. 
+
+```python
+>>> dfs = mikeio.open("dissolved_oxygen.dfs3")
+>>> dfs.geometry
+<mikeio.Grid3D>
+x: [0, 150, ..., 1.35e+04] (nx=91, dx=150)
+y: [0, 150, ..., 1.665e+04] (ny=112, dy=150)
+z: [0, 1, ..., 16] (nz=17, dz=1)
+origin: (10.37, 55.42), orientation: 18.125
+projection: PROJCS["UTM-32",GEOGCS["Unused",DATUM["UTM...
+```
+
+Grid3D's primary properties and methods are: 
+
+* `x` 
+* `nx`
+* `dx`
+* `y`
+* `ny`
+* `dy`
+* `z`
+* `nz`
+* `dz`
+* `origin`
+* `projection`
+* `contains()`
+* `isel()`
+
+See [API specification](Grid3D) below for details.
 
 ## Dfs3 Example notebooks
 
