@@ -60,6 +60,21 @@ geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
 values: [0.4591, 0.8078, ..., -0.6311]
 ```
 
+## Plotting
+
+The plotting of a DataArray is context-aware meaning that plotting behaviour depends on the geometry of the DataArray being plotted. 
+
+```python
+>>> da = mikeio.read("testdata/HD2D.dfsu")["Surface Elevation"]
+>>> da.plot()
+>>> da.plot.contourf()
+>>> da.plot.mesh()
+```
+
+See details in the [API specification](_DatasetPlotter) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](_DataArrayPlotterGrid2D) on the dfs2 page.
+
+
+
 ## Properties
 
 The DataArray has several properties:
@@ -124,3 +139,16 @@ Other methods that also return a DataArray:
 .. autoclass:: mikeio.DataArray
 	:members:
 ```
+
+
+
+## DataArray Plotter API
+
+A DataArray `da` can be plotted using `da.plot`. 
+
+```{eval-rst}
+.. autoclass:: mikeio.dataarray._DataArrayPlotter
+	:members:
+```
+
+
