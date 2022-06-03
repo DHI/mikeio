@@ -25,3 +25,10 @@ Dfs files contain data and meta data.
 If the file is small (e.g. <100 MB), you probably just want to get all the data at once with `mikeio.read(...)` which will return a `Dataset` for further processing.   
 
 If the file is big, you will typically get the file *header* with `dfs = mikeio.open(...)` which will return a MIKE IO Dfs class, before reading any data. When you have decided what to read (e.g. specific time steps, an sub area or selected elements), you can the get the Dataset `ds` you need with `ds = dfs.read(...)`.
+
+## Open and read API
+
+```{eval-rst}
+.. automodule:: mikeio
+	:members:
+```
