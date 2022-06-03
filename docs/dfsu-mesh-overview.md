@@ -33,26 +33,36 @@ In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all 
 
 MIKE IO has a Flexible Mesh Geometry class, `GeometryFM`, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
 
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
+| Property  |      Description     |
+|----------|--------------|
+| `n_nodes` | Number of nodes | 
+| `node_coordinates` | Coordinates (x,y,z) of all nodes | 
+| `codes` | Codes of all nodes (0:water, 1:land, >=2:open boundary) | 
+| `boundary_polylines` | Lists of closed polylines defining domain outline | 
+| `n_elements` | Number of elements | 
+| `element_coordinates` | Center coordinates of each element | 
+| `element_table` | Element to node connectivity | 
+| `max_nodes_per_element` | The maximum number of nodes for an element | 
+| `is_tri_only` | Does the mesh consist of triangles only? | 
+| `projection_string` | The projection string | 
+| `is_geo` | Are coordinates geographical (LONG/LAT)? | 
+| `is_local_coordinates` | Are coordinates relative (NON-UTM)? | 
+| `type_name` | Type name, e.g. Dfsu2D| 
 
-    mikeio.spatial.FM_geometry.GeometryFM.n_nodes
-    mikeio.spatial.FM_geometry.GeometryFM.node_coordinates
-    mikeio.spatial.FM_geometry.GeometryFM.codes
-    mikeio.spatial.FM_geometry.GeometryFM.boundary_polylines
-    mikeio.spatial.FM_geometry.GeometryFM.n_elements
-    mikeio.spatial.FM_geometry.GeometryFM.element_coordinates
-    mikeio.spatial.FM_geometry.GeometryFM.element_table
-    mikeio.spatial.FM_geometry.GeometryFM.max_nodes_per_element
-    mikeio.spatial.FM_geometry.GeometryFM.is_tri_only
-    mikeio.spatial.FM_geometry.GeometryFM.projection_string
-    mikeio.spatial.FM_geometry.GeometryFM.is_geo
-    mikeio.spatial.FM_geometry.GeometryFM.is_local_coordinates
-    mikeio.spatial.FM_geometry.GeometryFM.type_name    
-```
 
-`GeometryFM` has a number of child classes: [GeometryFM3D](GeometryFM3D), [GeometryFMVerticalProfile](GeometryFMVerticalProfile), [GeometryFMVerticalColumn](GeometryFMVerticalColumn), [GeometryFMPointSpectrum](GeometryFMPointSpectrum), [GeometryFMLineSpectrum](GeometryFMLineSpectrum), and [GeometryFMAreaSpectrum](GeometryFMAreaSpectrum) with specialized functionality according to the type of dfsu file. 
+| Method  |      Description     |
+|----------|--------------|
+| `contains()` | test if a list of points are contained by mesh | 
+| `find_index()` | Find index of elements containing points/area|
+| `isel()` | Get subset geometry for list of indicies |
+| `find_nearest_points()` | Find index of nearest elements (optionally for a list) |
+| `plot` | Plot the geometry |
+| `get_overset_grid()` | Get a Grid2D covering the domain |
+| `to_shapely()` | Export mesh as shapely MultiPolygon | 
+| `get_element_area()` | Calculate the horizontal area of each element | 
+
+
+These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object. 
 
 If a .dfsu file is *read* with `mikeio.read()`, the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with mikeio.open, the returned object will also contain a Flexible Mesh Geometry `geometry`. 
 
@@ -82,81 +92,6 @@ MIKE IO has Dfsu classes for .dfsu files
 and a [Mesh class](mikeio.Mesh) for .mesh files which both 
 have a [Flexible Mesh Geometry](GeometryFM) accessible through the ´geometry´ accessor. 
 
-Some of the most common geometry properties can be directly accessed from the Mesh/Dfsu.  
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.Mesh.n_nodes
-    mikeio.Mesh.node_coordinates
-    mikeio.Mesh.codes
-    mikeio.Mesh.boundary_polylines
-    mikeio.Mesh.n_elements
-    mikeio.Mesh.element_coordinates
-    mikeio.Mesh.element_table
-    mikeio.Mesh.max_nodes_per_element
-    mikeio.Mesh.is_tri_only
-    mikeio.Mesh.projection_string
-    mikeio.Mesh.is_geo
-    mikeio.Mesh.is_local_coordinates
-    mikeio.Mesh.type_name    
-```
-
-## Common Dfsu and Mesh methods
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.Mesh.contains
-    mikeio.Mesh.find_nearest_elements
-    mikeio.Mesh.plot
-    mikeio.Mesh.to_shapely
-    mikeio.Mesh.get_overset_grid
-    mikeio.Mesh.get_2d_interpolant
-    mikeio.Mesh.interp2d
-    mikeio.Mesh.get_element_area
-    mikeio.Mesh.elements_to_geometry
-```
-
-
-
-## Dfsu functionality
-
-A Dfsu class (e.g. Dfsu2DH) is returned by `mikeio.open()` if the argument is a dfsu file. 
-
-Apart from the common flexible file functionality, the Dfsu has the following *properties*:
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.dfsu._Dfsu.deletevalue
-    mikeio.dfsu._Dfsu.n_items
-    mikeio.dfsu._Dfsu.items
-    mikeio.dfsu._Dfsu.n_timesteps
-    mikeio.dfsu._Dfsu.start_time
-    mikeio.dfsu._Dfsu.end_time
-    mikeio.dfsu._Dfsu.timestep
-    mikeio.dfsu._Dfsu.is_2d
-```
-
-Apart from the common flexible file functionality, the Dfsu has the following *methods*:
-
-```{eval-rst}
-.. autosummary::
-    :nosignatures:
-
-    mikeio.dfsu._Dfsu.read
-    mikeio.dfsu._Dfsu.write
-    mikeio.dfsu._Dfsu.write_header
-    mikeio.dfsu._Dfsu.close
-```
-
-See the Dfsu API specification on the following pages for a detailed description. 
-
-See the [Dfsu Read Example notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb) for basic dfsu functionality.
 
 
 
@@ -182,8 +117,3 @@ but the following values types exists:
 * Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW. 
 
 
-
-
-## Layered dfsu files
-
-There are three type of layered dfsu files: 3D dfsu, 2d vertical slices and 1d vertical profiles.
