@@ -15,7 +15,6 @@ Working with data from dfs0 files are conveniently done in one of two ways:
 >>> import mikeio
 >>> ds = mikeio.read("da_diagnostic.dfs0")
 >>> ds
->>> ds
 <mikeio.Dataset>
 dims: (time:744)
 time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)
