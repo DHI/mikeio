@@ -59,7 +59,6 @@ Where can I get help?
    dfsu-2d
    dfsu-3d
    dfsu-2dv-vertical-profile
-   dfsu-1dv-vertical-column
    dfsu-spectral
    eum
    generic
