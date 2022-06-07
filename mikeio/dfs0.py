@@ -201,7 +201,9 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-        ds = self.__read(self._filename)
+        fdata, ftime, fitems = self.__read(self._filename)
+        ds = Dataset(fdata, ftime, fitems, validate=False)
+
         ds = ds[item_numbers]
         if time_steps:
             ds = ds.isel(time_steps, axis=0)
@@ -252,7 +254,7 @@ class Dfs0(TimeSeries):
             for item in self._dfs.ItemInfo
         ]
 
-        return Dataset(data, time, items, validate=False)
+        return data, time, items
 
     @staticmethod
     def _to_dfs_datatype(dtype):
@@ -430,8 +432,18 @@ class Dfs0(TimeSeries):
         -------
         pd.DataFrame
         """
-        ds = self.read()
-        df = ds.to_dataframe(unit_in_name=unit_in_name, round_time=round_time)
+        data, time, items = self.__read(self._filename)
+        if unit_in_name:
+            cols = [f"{item.name} ({item.unit.name})" for item in items]
+        else:
+            cols = [f"{item.name}" for item in items]
+        df = pd.DataFrame(np.atleast_2d(data).T, index=time, columns=cols)
+
+        if round_time:
+            rounded_idx = pd.DatetimeIndex(time).round(round_time)
+            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
+        else:
+            df.index = pd.DatetimeIndex(time, freq="infer")
 
         return df
 
