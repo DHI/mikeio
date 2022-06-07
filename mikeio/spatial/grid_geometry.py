@@ -25,7 +25,7 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
         x = np.asarray(x)
         _check_equidistant(x)
         if len(x) > 1 and x[0] > x[-1]:
-            raise ValueError("{name} values must be increasing")
+            raise ValueError(f"{name} values must be increasing")
         x0 = x[0]
         dx = x[1] - x[0] if len(x) > 1 else 1.0
         nx = len(x)
