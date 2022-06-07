@@ -181,30 +181,32 @@ class Dfs0(TimeSeries):
         if not os.path.exists(self._filename):
             raise FileNotFoundError(f"File {self._filename} not found.")
 
-        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
-        self._source = dfs
-        self._dfs = dfs
+        # read data from file
+        fdata, ftime, fitems = self.__read(self._filename)
+        self._source = self._dfs
+        dfs = self._dfs
 
+        # select items
         self._n_items = len(dfs.ItemInfo)
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        if items is not None:
+            fdata = [fdata[it] for it in item_numbers]
+            fitems = [fitems[it] for it in item_numbers]
+        ds = Dataset(fdata, ftime, fitems, validate=False)
 
+        # select time steps
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
         if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
             time, str
         ):
             sel_time_step_str = time
-            time_steps = range(self._n_timesteps)
+            time_steps = None
         else:
             sel_time_step_str = None
-            _, time_steps = _valid_timesteps(dfs.FileInfo, time)
+            time_steps = None
+            if time is not None:
+                _, time_steps = _valid_timesteps(dfs.FileInfo, time)
 
-        dfs.Close()
-
-        fdata, ftime, fitems = self.__read(self._filename)
-        ds = Dataset(fdata, ftime, fitems, validate=False)
-
-        ds = ds[item_numbers]
         if time_steps:
             ds = ds.isel(time_steps, axis=0)
 
