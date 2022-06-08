@@ -13,7 +13,7 @@ Number of nodes: 399
 Projection: UTM-33
 ```
 
-Apart from the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), `Mesh` has the following properties and methods:
+In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), `Mesh` has the following properties and methods:
 
 
 ```{eval-rst}
