@@ -75,19 +75,36 @@ class GeometryFMPointSpectrum(_Geometry):
 
 
 class _GeometryFMPlotter:
+    """Plot GeometryFM
+
+    Examples
+    --------
+    >>> ds = mikeio.read("HD2D.dfsu")
+    >>> g = ds.geometry
+    >>> g.plot()          # bathymetry (as patches)
+    >>> g.plot.contour()  # bathymetry contours
+    >>> g.plot.contourf() # filled bathymetry contours
+    >>> g.plot.mesh()     # mesh only
+    >>> g.plot.outline()  # domain outline only
+    >>> g.plot.boundary_nodes()
+    """
+
     def __init__(self, geometry: "GeometryFM") -> None:
         self.g = geometry
 
     def __call__(self, ax=None, figsize=None, **kwargs):
+        """Plot bathymetry as coloured patches"""
         ax = self._get_ax(ax, figsize)
         return self._plot_FM_map(ax, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
+        """Plot bathymetry as contour lines"""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
         return self._plot_FM_map(ax, **kwargs)
 
     def contourf(self, ax=None, figsize=None, **kwargs):
+        """Plot bathymetry as filled contours"""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contourf"
         return self._plot_FM_map(ax, **kwargs)
@@ -119,6 +136,7 @@ class _GeometryFMPlotter:
         )
 
     def mesh(self, title="Mesh", figsize=None, ax=None):
+        """Plot mesh only"""
         from matplotlib.collections import PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
@@ -138,6 +156,7 @@ class _GeometryFMPlotter:
         return ax
 
     def outline(self, title="Outline", figsize=None, ax=None):
+        """Plot domain outline (using the boundary_polylines property)"""
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
@@ -153,9 +172,7 @@ class _GeometryFMPlotter:
         return ax
 
     def boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
-        """
-        Plot mesh boundary nodes and their codes
-        """
+        """Plot mesh boundary nodes and their code values"""
         import matplotlib.pyplot as plt
 
         ax = self._get_ax(ax=ax, figsize=figsize)
@@ -510,7 +527,6 @@ class GeometryFM(_Geometry):
 
         Parameters
         ----------
-
         x: float or array(float)
             X coordinate(s) (easting or longitude)
         y: float or array(float)
@@ -537,16 +553,21 @@ class GeometryFM(_Geometry):
 
         Examples
         --------
-        >>> id = dfs.find_nearest_elements(3, 4)
-        >>> ids = dfs.find_nearest_elements([3, 8], [4, 6])
-        >>> ids = dfs.find_nearest_elements(xy)
-        >>> ids = dfs.find_nearest_elements(3, 4, n_nearest=4)
-        >>> ids, d = dfs.find_nearest_elements(xy, return_distances=True)
+        >>> g = dfs.geometry
+        >>> id = g.find_nearest_elements(3, 4)
+        >>> ids = g.find_nearest_elements([3, 8], [4, 6])
+        >>> ids = g.find_nearest_elements(xy)
+        >>> ids = g.find_nearest_elements(3, 4, n_nearest=4)
+        >>> ids, d = g.find_nearest_elements(xy, return_distances=True)
 
-        >>> ids = dfs.find_nearest_elements(3, 4, z=-3)
-        >>> ids = dfs.find_nearest_elements(3, 4, layer=4)
-        >>> ids = dfs.find_nearest_elements(xyz)
-        >>> ids = dfs.find_nearest_elements(xyz, n_nearest=3)
+        >>> ids = g.find_nearest_elements(3, 4, z=-3)
+        >>> ids = g.find_nearest_elements(3, 4, layer=4)
+        >>> ids = g.find_nearest_elements(xyz)
+        >>> ids = g.find_nearest_elements(xyz, n_nearest=3)
+
+        See Also
+        --------
+        find_index : find element indicies for points or an area
         """
         idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
 
@@ -949,9 +970,31 @@ class GeometryFM(_Geometry):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
-    def isel(self, idx=None, axis="elements", simplify=True):
+    def isel(self, idx=None, axis="elements", keepdims=False):
+        """export a selection of elements to a new geometry
 
-        if (np.isscalar(idx) or len(idx)) == 1 and simplify:
+        Typically not called directly, but by Dataset/DataArray's
+        isel() or sel() methods.
+
+        Parameters
+        ----------
+        idx : list(int)
+            list of element indicies
+        keepdims : bool, optional
+            Should the original Geometry type be kept (keepdims=True)
+            or should it be reduced e.g. to a GeometryPoint2D if possible
+            (keepdims=False), by default False
+
+        Returns
+        -------
+        Geometry
+            geometry subset
+
+        See Also
+        --------
+        find_index : find element indicies for points or an area
+        """
+        if (np.isscalar(idx) or len(idx)) == 1 and (not keepdims):
             coords = self.element_coordinates[idx].flatten()
 
             if self.is_layered:
@@ -965,7 +1008,44 @@ class GeometryFM(_Geometry):
                 return self.elements_to_geometry(elements=idx, node_layers=None)
 
     def find_index(self, x=None, y=None, coords=None, area=None):
+        """Find element indicies for a number of points or within an area
 
+        This method will return elements *containing* the argument
+        points/area, which is not necessarily the same as the nearest.
+
+        Typically not called directly, but by Dataset/DataArray's
+        sel() method.
+
+        Parameters
+        ----------
+        x: float or array(float)
+            X coordinate(s) (easting or longitude)
+        y: float or array(float)
+            Y coordinate(s) (northing or latitude)
+        coords : np.array(float,float), optional
+            As an alternative to specifying x, and y individually,
+            the argument coords can be used instead.
+            (x,y)-coordinates of points to be found,
+            by default None
+        area : (float, float, float, float), optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
+
+        Returns
+        -------
+        np.array
+            indicies of containing elements
+
+        Examples
+        --------
+        >>> g = dfs.geometry
+        >>> id = dfs.find_index(x=3.1, y=4.3)
+
+        See Also
+        --------
+        isel : get subset geometry for specific indicies
+        find_nearest_elements : find nearest instead of containing elements
+        """
         if (coords is not None) or (x is not None) or (y is not None):
             if area is not None:
                 raise ValueError(

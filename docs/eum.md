@@ -39,11 +39,15 @@ mm per day
 2004
 ```
 
+
+
+## EUM example notebooks
+
 See the [Units notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Units.ipynb) for more examples.
 
 
-EUM API
--------
+## EUM API
+
 ```{eval-rst}
 .. automodule:: mikeio.eum
 	:members:

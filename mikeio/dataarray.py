@@ -32,7 +32,7 @@ from .data_utils import DataUtilsMixin
 
 
 class _DataArrayPlotter:
-    """Context aware plotter"""
+    """Context aware plotter (sensible plotting according to geometry)"""
 
     def __init__(self, da: "DataArray") -> None:
         self.da = da
@@ -121,6 +121,7 @@ class _DataArrayPlotter:
         return result
 
     def line(self, ax=None, figsize=None, **kwargs):
+        """Plot data as lines (timeseries if time is present)"""
         fig, ax = self._get_fig_ax(ax, figsize)
         if self.da._has_time_axis:
             return self._timeseries(self.da.values, fig, ax, **kwargs)
@@ -156,6 +157,19 @@ class _DataArrayPlotter:
 
 
 class _DataArrayPlotterGrid1D(_DataArrayPlotter):
+    """Plot a DataArray with a Grid1D geometry
+
+    Examples
+    --------
+    >>> da = mikeio.read("tide1.dfs1")["Level"]
+    >>> da.plot()
+    >>> da.plot.line()
+    >>> da.plot.timeseries()
+    >>> da.plot.imshow()
+    >>> da.plot.pcolormesh()
+    >>> da.plot.hist()
+    """
+
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
 
@@ -167,16 +181,19 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
             return self.pcolormesh(ax, **kwargs)
 
     def line(self, ax=None, figsize=None, **kwargs):
+        """Plot as spatial lines"""
         _, ax = self._get_fig_ax(ax, figsize)
         return self._lines(ax, **kwargs)
 
     def timeseries(self, ax=None, figsize=None, **kwargs):
+        """Plot as timeseries"""
         if self.da.n_timesteps == 1:
             raise ValueError("Not possible with single timestep DataArray")
         fig, ax = self._get_fig_ax(ax, figsize)
         return super()._timeseries(self.da.values, fig, ax, **kwargs)
 
     def imshow(self, ax=None, figsize=None, **kwargs):
+        """Plot as 2d"""
         if not self.da._has_time_axis:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
@@ -220,6 +237,20 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
 
 
 class _DataArrayPlotterGrid2D(_DataArrayPlotter):
+    """Plot a DataArray with a Grid2D geometry
+
+    If DataArray has multiple time steps, the first step will be plotted.
+
+    Examples
+    --------
+    >>> da = mikeio.read("gebco_sound.dfs2")["Elevation"]
+    >>> da.plot()
+    >>> da.plot.contour()
+    >>> da.plot.contourf()
+    >>> da.plot.pcolormesh()
+    >>> da.plot.hist()
+    """
+
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
 
@@ -227,6 +258,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         return self.pcolormesh(ax, figsize, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
+        """Plot data as contour lines"""
         _, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
@@ -239,6 +271,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         return ax
 
     def contourf(self, ax=None, figsize=None, **kwargs):
+        """Plot data as filled contours"""
         fig, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
@@ -250,6 +283,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         return ax
 
     def pcolormesh(self, ax=None, figsize=None, **kwargs):
+        """Plot data as coloured patches"""
         fig, ax = self._get_fig_ax(ax, figsize)
 
         xn, yn = self._get_xn_yn()
@@ -294,32 +328,56 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
 
 class _DataArrayPlotterFM(_DataArrayPlotter):
+    """Plot a DataArray with a GeometryFM geometry
+
+    If DataArray has multiple time steps, the first step will be plotted.
+
+    If DataArray is 3D the surface layer will be plotted.
+
+    Examples
+    --------
+    >>> da = mikeio.read("HD2D.dfsu")["Surface elevation"]
+    >>> da.plot()
+    >>> da.plot.contour()
+    >>> da.plot.contourf()
+
+    >>> da.plot.mesh()
+    >>> da.plot.outline()
+    >>> da.plot.hist()
+    """
+
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
 
     def __call__(self, ax=None, figsize=None, **kwargs):
+        """Plot data as coloured patches"""
         ax = self._get_ax(ax, figsize)
         return self._plot_FM_map(ax, **kwargs)
 
     def patch(self, ax=None, figsize=None, **kwargs):
+        """Plot data as coloured patches"""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "patch"
         return self._plot_FM_map(ax, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
+        """Plot data as contour lines"""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
         return self._plot_FM_map(ax, **kwargs)
 
     def contourf(self, ax=None, figsize=None, **kwargs):
+        """Plot data as filled contours"""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contourf"
         return self._plot_FM_map(ax, **kwargs)
 
     def mesh(self, ax=None, figsize=None, **kwargs):
+        """Plot mesh only"""
         return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
 
     def outline(self, ax=None, figsize=None, **kwargs):
+        """Plot domain outline (using the boundary_polylines property)"""
         return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax, **kwargs):
@@ -352,6 +410,21 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
 
 class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
+    """Plot a DataArray with a GeometryFMVerticalColumn geometry
+
+    If DataArray has multiple time steps, the first step will be plotted.
+
+    Examples
+    --------
+    >>> ds = mikeio.read("oresund_sigma_z.dfsu")
+    >>> dsp = ds.sel(x=333934.1, y=6158101.5)
+    >>> da = dsp["Temperature"]
+    >>> dsp.plot()
+    >>> dsp.plot(extrapolate=False, marker='o')
+    >>> dsp.plot.pcolormesh()
+    >>> dsp.plot.hist()
+    """
+
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
 
@@ -360,6 +433,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         return self.line(ax, **kwargs)
 
     def line(self, ax=None, figsize=None, extrapolate=True, **kwargs):
+        """Plot data as vertical lines"""
         ax = self._get_ax(ax, figsize)
         return self._line(ax, extrapolate=extrapolate, **kwargs)
 
@@ -392,6 +466,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         return ax
 
     def pcolormesh(self, ax=None, figsize=None, **kwargs):
+        """Plot data as coloured patches"""
         fig, ax = self._get_fig_ax(ax, figsize)
         ze = self.da.geometry.calc_ze()
         pos = ax.pcolormesh(
@@ -409,6 +484,18 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
 
 class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
+    """Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry
+
+    If DataArray has multiple time steps, the first step will be plotted.
+
+    Examples
+    --------
+    >>> da = mikeio.read("oresund_vertical_slice.dfsu")["Temperature"]
+    >>> da.plot()
+    >>> da.plot.mesh()
+    >>> da.plot.hist()
+    """
+
     def __init__(self, da: "DataArray") -> None:
         super().__init__(da)
 

@@ -1,13 +1,14 @@
 # Dataset
 
-The [Dataset](Dataset) is the common MIKE IO data structure 
+The [Dataset](Dataset) is the MIKE IO data structure 
 for data from dfs files. 
-The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs items)
+The `mikeio.read()` methods returns a Dataset as a container of [DataArrays](dataarray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
 
-Each DataArray have the following properties:
-* **item** - an  [`ItemInfo`](ItemInfo) with name, type and unit
+The Dataset has the following primary properties: 
+
+* **items** - a list of the DataArray items
 * **time** - a pandas.DateTimeIndex with the time instances of the data
-* **values** - a NumPy array
+* **geometry** - a Geometry object with the spatial description of the data
 
 Use Dataset's string representation to get an overview of the Dataset
 
@@ -17,33 +18,35 @@ Use Dataset's string representation to get an overview of the Dataset
 >>> ds = mikeio.read("testdata/HD2D.dfsu")
 >>> ds
 <mikeio.Dataset>
-Geometry: Dfsu2D
-Dimensions: (time:9, element:884)
-Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-Items:
-  0:  Surface elevation <Surface Elevation> (meter)        
-  1:  U velocity <u velocity component> (meter per sec)    
-  2:  V velocity <v velocity component> (meter per sec)    
-  3:  Current speed <Current Speed> (meter per sec)   
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation <Surface Elevation> (meter)
+  1:  U velocity <u velocity component> (meter per sec)
+  2:  V velocity <v velocity component> (meter per sec)
+  3:  Current speed <Current Speed> (meter per sec)
 ```
 
-Selecting items
----------------
-Selecting a specific item "itemA" (at position 0) from a Dataset ds can be 
-done with:
+## Selecting items
+
+Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done with:
 
 * `ds[["itemA"]]` - returns a new Dataset with "itemA"
-* `ds["itemA"]` - returns the data of "itemA"
+* `ds["itemA"]` - returns "itemA" DataArray
 * `ds[[0]]` - returns a new Dataset with "itemA" 
-* `ds[0]` - returns the data of "itemA"
+* `ds[0]` - returns "itemA" DataArray
+* `ds.itemA` - returns "itemA" DataArray
+
+We recommend the use *named* items for readability. 
 
 ```
 >>> ds.Surface_elevation
 <mikeio.DataArray>
-Name: Surface elevation
-Geometry: Dfsu2D
-Dimensions: (time:9, element:884)
-Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+name: Surface elevation
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
 ```
 
 Negative index e.g. ds[-1] can also be used to select from the end. 
@@ -56,6 +59,8 @@ Note that this behavior is similar to pandas and xarray.
 
 
 ## Temporal selection
+
+A time slice of a Dataset can be selected in several different ways. 
 
 ```python
 >>> ds.sel(time="1985-08-06 12:00")
@@ -99,8 +104,19 @@ items:
   3:  Current speed <Current Speed> (meter per sec)
 ```
 
+
+## Plotting
+
+In most cases, you will *not* plot the Dataset, but rather it's DataArrays. But there are two exceptions: 
+
+* dfs0-Dataset : plot all items as timeseries with ds.plot()
+* scatter : compare two items using ds.plot.scatter(x="itemA", y="itemB")
+
+See details in the [API specification](_DatasetPlotter) below.
+
+
 ## Properties
-The Dataset/DataArray has several properties:
+The Dataset (and DataArray) has several properties:
 
 * n_items - Number of items
 * n_timesteps - Number of timesteps
@@ -114,9 +130,9 @@ The Dataset/DataArray has several properties:
 
 
 
-Methods
--------
-Dataset and DataArray has several useful methods for working with data, 
+## Methods
+
+Dataset (and DataArray) has several useful methods for working with data, 
 including different ways of *selecting* data:
 
 * [`sel()`](Dataset.sel) - Select subset along an axis
@@ -160,16 +176,19 @@ Other methods that also return a Dataset:
 
 
 
-Dataset API
------------
+## Dataset API
+
 ```{eval-rst}
 .. autoclass:: mikeio.Dataset
 	:members:
 ```
 
-DataArray API
------------
+
+## Dataset Plotter API
+
 ```{eval-rst}
-.. autoclass:: mikeio.DataArray
+.. autoclass:: mikeio.dataset._DatasetPlotter
 	:members:
 ```
+
+

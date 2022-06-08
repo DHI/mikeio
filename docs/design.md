@@ -36,10 +36,10 @@ Examples are available in two forms:
 * [Jupyter notebooks](https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/)
 
 ## Open Source​
-MIKE IO is an open source project licensed under the `BSD-3 license <https://github.com/DHI/mikeio/blob/main/License.txt>`_.
+MIKE IO is an open source project licensed under the [BSD-3 license] (https://github.com/DHI/mikeio/blob/main/License.txt).
 The software is provided free of charge with the source code available for inspection and modification.
 
-Contributions are welcome, more details can be found in our `contribution guidelines <https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md>`_.
+Contributions are welcome, more details can be found in our [contribution guidelines](https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md).
 
 ## Easy to collaborate
 By developing MIKE IO on GitHub along with a completely open discussion, we believe that the collaboration between developers and end-users results in a useful library.
@@ -50,7 +50,7 @@ By providing the historical versions of MIKE IO on PyPI it is possible to reprod
 Install specific version::
 
 ```
-pip install mikeio==0.4.3
+pip install mikeio==0.12.2
 ```
 
 ## Easy access to new features
