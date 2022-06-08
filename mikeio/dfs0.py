@@ -181,28 +181,32 @@ class Dfs0(TimeSeries):
         if not os.path.exists(self._filename):
             raise FileNotFoundError(f"File {self._filename} not found.")
 
-        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
-        self._source = dfs
-        self._dfs = dfs
+        # read data from file
+        fdata, ftime, fitems = self.__read(self._filename)
+        self._source = self._dfs
+        dfs = self._dfs
 
+        # select items
         self._n_items = len(dfs.ItemInfo)
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        if items is not None:
+            fdata = [fdata[it] for it in item_numbers]
+            fitems = [fitems[it] for it in item_numbers]
+        ds = Dataset(fdata, ftime, fitems, validate=False)
 
+        # select time steps
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
         if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
             time, str
         ):
             sel_time_step_str = time
-            time_steps = range(self._n_timesteps)
+            time_steps = None
         else:
             sel_time_step_str = None
-            _, time_steps = _valid_timesteps(dfs.FileInfo, time)
+            time_steps = None
+            if time is not None:
+                _, time_steps = _valid_timesteps(dfs.FileInfo, time)
 
-        dfs.Close()
-
-        ds = self.__read(self._filename)
-        ds = ds[item_numbers]
         if time_steps:
             ds = ds.isel(time_steps, axis=0)
 
@@ -252,7 +256,7 @@ class Dfs0(TimeSeries):
             for item in self._dfs.ItemInfo
         ]
 
-        return Dataset(data, time, items, validate=False)
+        return data, time, items
 
     @staticmethod
     def _to_dfs_datatype(dtype):
@@ -430,8 +434,18 @@ class Dfs0(TimeSeries):
         -------
         pd.DataFrame
         """
-        ds = self.read()
-        df = ds.to_dataframe(unit_in_name=unit_in_name, round_time=round_time)
+        data, time, items = self.__read(self._filename)
+        if unit_in_name:
+            cols = [f"{item.name} ({item.unit.name})" for item in items]
+        else:
+            cols = [f"{item.name}" for item in items]
+        df = pd.DataFrame(np.atleast_2d(data).T, index=time, columns=cols)
+
+        if round_time:
+            rounded_idx = pd.DatetimeIndex(time).round(round_time)
+            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
+        else:
+            df.index = pd.DatetimeIndex(time, freq="infer")
 
         return df
 
