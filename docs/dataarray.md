@@ -6,7 +6,7 @@ The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs 
 
 Each DataArray have the following properties:
 * **item** - an  [`ItemInfo`](ItemInfo) with name, type and unit
-* **time** - a pandas.DateTimeIndex with the time instances of the data
+* **time** - a [pandas.DateimeIndex](https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html) with the time instances of the data
 * **geometry** - a Geometry object with the spatial description of the data
 * **values** - a NumPy array
 
