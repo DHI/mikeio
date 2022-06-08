@@ -311,10 +311,28 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     @staticmethod
     def _check_all_different_ids(das):
         """Are all the DataArrays different objects or are some referring to the same"""
-        for j, da1 in enumerate(das):
-            for k, da2 in enumerate(das):
-                if j != k:
-                    Dataset._id_of_DataArrays_equal(da1, da2)
+        ids = np.zeros(len(das), dtype=np.int64)
+        ids_val = np.zeros(len(das), dtype=np.int64)
+        for j, da in enumerate(das):
+            ids[j] = id(da)
+            ids_val[j] = id(da.values)
+
+        if len(ids) != len(np.unique(ids)):
+            # DataArrays not unique! - find first duplicate and report error
+            das = list(das)
+            u, c = np.unique(ids, return_counts=True)
+            dups = u[c > 1]
+            for dup in dups:
+                jj = np.where(ids == dup)[0]
+                Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
+        if len(ids_val) != len(np.unique(ids_val)):
+            # DataArray *values* not unique! - find first duplicate and report error
+            das = list(das)
+            u, c = np.unique(ids_val, return_counts=True)
+            dups = u[c > 1]
+            for dup in dups:
+                jj = np.where(ids_val == dup)[0]
+                Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
 
     @staticmethod
     def _id_of_DataArrays_equal(da1, da2):
@@ -668,14 +686,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def _set_name_attr(self, name: str, value: DataArray):
         name = self._to_safe_name(name)
-        item_names = [self._to_safe_name(n) for n in self.names]
-        if (name not in item_names) and hasattr(self, name):
-            # oh-no the item_name matches the name of another attr
-            pass
-        else:
-            if name not in self.__itemattr:
-                self.__itemattr.append(name)  # keep track of what we insert
-            setattr(self, name, value)
+        if name not in self.__itemattr:
+            self.__itemattr.append(name)  # keep track of what we insert
+        setattr(self, name, value)
 
     def _del_name_attr(self, name: str):
         name = self._to_safe_name(name)
