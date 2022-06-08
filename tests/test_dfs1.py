@@ -1,14 +1,12 @@
-import datetime
 import os
 
 import numpy as np
-import pandas as pd
 import pytest
 
 import mikeio
 
-from mikeio import Dfs1, Dataset
-from mikeio.eum import EUMType, EUMUnit, ItemInfo
+from mikeio import Dfs1
+from mikeio.eum import EUMType, EUMUnit
 
 
 def test_filenotexist():
@@ -35,6 +33,40 @@ def test_repr_empty():
     text = repr(dfs)
 
     assert "Dfs1" in text
+
+
+def test_properties():
+    filename = r"tests/testdata/tide1.dfs1"
+    dfs = mikeio.open(filename)
+
+    assert dfs.dx == 0.06666692346334457
+    assert dfs.x0 == 0.0
+    assert dfs.nx == 10
+    assert dfs.projection_string == "LONG/LAT"
+    assert dfs.longitude == -5.0
+    assert dfs.latitude == 51.20000076293945
+    assert dfs.orientation == 180
+
+    g = dfs.geometry
+    assert isinstance(g, mikeio.Grid1D)
+    assert g.dx == 0.06666692346334457
+    assert g._x0 == 0.0
+    assert g.nx == 10
+    assert g.projection == "LONG/LAT"
+    assert g.origin == (-5.0, 51.20000076293945)
+    assert g.orientation == 180
+
+
+def test_read_write_properties(tmpdir):
+    # test that properties are the same after read-write
+    filename = r"tests/testdata/tide1.dfs1"
+    ds1 = mikeio.read(filename)
+
+    outfilename = os.path.join(tmpdir.dirname, "tide1.dfs1")
+    ds1.to_dfs(outfilename)
+    ds2 = mikeio.read(outfilename)
+
+    assert ds1.geometry == ds2.geometry
 
 
 def test_read():

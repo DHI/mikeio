@@ -23,7 +23,15 @@ class Dfs1(_Dfs123):
 
         if filename:
             self._read_dfs1_header()
-            self.geometry = Grid1D(x0=self._x0, dx=self._dx, nx=self._nx)
+            origin = self._longitude, self._latitude
+            self.geometry = Grid1D(
+                x0=self._x0,
+                dx=self._dx,
+                nx=self._nx,
+                projection=self._projstr,
+                origin=origin,
+                orientation=self._orientation,
+            )
 
     def __repr__(self):
         out = ["<mikeio.Dfs1>"]
@@ -52,6 +60,7 @@ class Dfs1(_Dfs123):
             raise FileNotFoundError(self._filename)
 
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
+        self._x0 = self._dfs.SpatialAxis.X0
         self._dx = self._dfs.SpatialAxis.Dx
         self._nx = self._dfs.SpatialAxis.XCount
 
@@ -140,6 +149,16 @@ class Dfs1(_Dfs123):
         )
 
     @property
+    def x0(self):
+        """Start point of x values (often 0)"""
+        return self._x0
+
+    @property
     def dx(self):
         """Step size in x direction"""
         return self._dx
+
+    @property
+    def nx(self):
+        """Number of node values"""
+        return self._nx
