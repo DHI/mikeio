@@ -21,7 +21,7 @@ In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-over
 ```
 
 
-And apart from the basic dfsu functionality, Dfsu2DV has the below additional *methods*: 
+And in addition to the basic dfsu functionality, Dfsu2DV has the below additional *methods*: 
 
 ```{eval-rst}
 .. autosummary::
