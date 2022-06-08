@@ -20,7 +20,7 @@ share these properties:
 
 ## Open or read? 
 
-Dfs files contain data and meta data. 
+Dfs files contain data and metadata. 
 
 If the file is small (e.g. <100 MB), you probably just want to get all the data at once with `mikeio.read(...)` which will return a `Dataset` for further processing.   
 
