@@ -1,7 +1,7 @@
 # Dfsu 3D
 
 
-Apart from the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu3D has the below additional *properties* (from it's geometry [GeometryFM3D](GeometryFM3D)): 
+In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu3D has the below additional *properties* (from it's geometry [GeometryFM3D](GeometryFM3D)): 
 
 ```{eval-rst}
 .. autosummary::
