@@ -7,7 +7,7 @@ setuptools.setup(
     name="mikeio",
     version="1.1.dev0",
     install_requires=[
-        "mikecore>=0.2.0",
+        "mikecore>=0.2.1",
         "numpy>=1.15.0",  # first version with numpy.quantile
         "pandas>1.0",
         "scipy>1.0",
