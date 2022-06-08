@@ -1,75 +1,53 @@
 import os
 import numpy as np
-from datetime import datetime
+import pandas as pd
+import mikeio
 
-from mikeio import Dfs0
 
-
-def test_write_long_dfs0(tmpdir):
+def test_write_read_long_dfs0(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "big.dfs0")
 
     nt = 10_000_000
-    data = [np.random.random([nt])]
-    start_time = datetime(2001, 1, 1)
-    Dfs0().write(filename=filename, data=data, start_time=start_time)
+    data = np.random.random([nt])
+    da = mikeio.DataArray(
+        data=data, time=pd.date_range(start="2001-01-01", freq="s", periods=nt)
+    )
+    da.to_dfs(filename)
 
     assert os.path.exists(filename)
 
-
-def test_read_long_dfs0(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "big.dfs0")
-    nt = 10_000_000
-    assert os.path.exists(filename)
-
-    dfs = Dfs0(filename=filename)
-    ds = dfs.read()
+    ds = mikeio.read(filename)
 
     assert len(ds.time) == nt
 
 
-def test_write_many_items_dfs0(tmpdir):
+def test_write_read_many_items_dataset_pandas(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "many_items.dfs0")
 
     n_items = 10_000
     nt = 200
-    data = [np.random.random([nt]) for _ in range(n_items)]
-    start_time = datetime(2001, 1, 1)
-    Dfs0().write(filename=filename, data=data, start_time=start_time)
+    time = pd.date_range("2000", freq="s", periods=nt)
+    das = [
+        mikeio.DataArray(
+            data=np.random.random([nt]), time=time, item=mikeio.ItemInfo(f"Item {i+1}")
+        )
+        for i in range(n_items)
+    ]
+    ds = mikeio.Dataset(das)
+    ds.to_dfs(filename)
 
     assert os.path.exists(filename)
 
-
-def test_read_many_items_dfs0(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "many_items.dfs0")
-
-    n_items = 10_000
-    nt = 200
-    assert os.path.exists(filename)
-
-    dfs = Dfs0(filename=filename)
-    ds = dfs.read()
+    # read to dataset
+    ds = mikeio.read(filename)
 
     assert len(ds.time) == nt
     assert ds.n_items == n_items
 
-
-def test_write_read_many_items_dfs0_pandas(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "even_more_items.dfs0")
-
-    n_items = 100_000  # pandas can read more then Dataset...
-    nt = 20
-    data = [np.random.random([nt]) for _ in range(n_items)]
-    start_time = datetime(2001, 1, 1)
-    Dfs0().write(filename=filename, data=data, start_time=start_time)
-
-    assert os.path.exists(filename)
-
-    dfs = Dfs0(filename=filename)
+    # skip dataset, read directly to dataframe
+    dfs = mikeio.open(filename=filename)
     df = dfs.to_dataframe()
 
     assert len(df) == nt
