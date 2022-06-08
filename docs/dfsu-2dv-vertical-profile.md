@@ -1,7 +1,7 @@
 # Dfsu 2DV Vertical Profile
 
 
-Apart from the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu2DV has the below additional *properties* (from it's geometry [GeometryFMVerticalProfile](GeometryFMVerticalProfile)): 
+In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu2DV has the below additional *properties* (from it's geometry [GeometryFMVerticalProfile](GeometryFMVerticalProfile)): 
 
 
 
