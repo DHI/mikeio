@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dfs2 &mdash; MIKE IO  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Dfs3" href="dfs3.html" />
+    <link rel="prev" title="Dfs1" href="dfs1.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> MIKE IO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dfs2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#grid2d">Grid2D</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfs2-example-notebooks">Dfs2 Example notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfs2-api">Dfs2 API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#grid2d-api">Grid2D API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-grid2d-api">DataArray Plotter Grid2D API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dfs3.html">Dfs3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eum.html">EUM and items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">Generic</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MIKE IO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Dfs2</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/dfs2.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dfs2">
+<h1>Dfs2<a class="headerlink" href="#dfs2" title="Permalink to this heading"></a></h1>
+<p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;gebco_sound.dfs2&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">dims: (time:1, y:264, x:216)</span>
+<span class="go">time: 2020-05-15 11:04:52 (time-invariant)</span>
+<span class="go">geometry: Grid2D (ny=264, nx=216)</span>
+<span class="go">items:</span>
+<span class="go">  0:  Elevation &lt;Total Water Depth&gt; (meter)</span>
+</pre></div>
+</div>
+<section id="grid2d">
+<h2>Grid2D<a class="headerlink" href="#grid2d" title="Permalink to this heading"></a></h2>
+<p>The spatial information is available in the <code class="docutils literal notranslate"><span class="pre">geometry</span></code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a class="reference internal" href="#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">Grid2D</span></code></span></a> geometry.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">geometry</span>
+<span class="go">&lt;mikeio.Grid2D&gt;</span>
+<span class="go">x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)</span>
+<span class="go">y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)</span>
+<span class="go">projection: LONG/LAT</span>
+</pre></div>
+</div>
+<p>Grid2D’s primary properties and methods are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nx</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dx</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ny</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dy</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">origin</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">projection</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xy</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bbox</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">contains()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">find_index()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">isel()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">to_mesh()</span></code></p></li>
+</ul>
+<p>See <a class="reference internal" href="#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class">API specification</span></a> below for details.</p>
+</section>
+<section id="dfs2-example-notebooks">
+<h2>Dfs2 Example notebooks<a class="headerlink" href="#dfs2-example-notebooks" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://dhi.github.io/getting-started-with-mikeio/dfs2.html">Dfs2 | getting-started-with-mikeio</a></p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb">Dfs2-Bathymetry</a> - GEBCO NetCDF/xarray to dfs2</p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb">Dfs2-Boundary</a> - Vertical transect dfs2, interpolation in time</p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb">Dfs2-Export-to-netCDF</a> Export dfs2 to NetCDF</p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb">Dfs2-GFS</a> - GFS NetCDF/xarray to dfs2</p></li>
+<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb">Dfs2-SST</a> - DMI NetCDF/xarray to dfs2</p></li>
+</ul>
+</section>
+<section id="dfs2-api">
+<h2>Dfs2 API<a class="headerlink" href="#dfs2-api" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.Dfs2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horizontal'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs2.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">Dataset</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.Dfs2.append" title="Permalink to this definition"></a></dt>
+<dd><p>Append to a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs2.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.close" title="Permalink to this definition"></a></dt>
+<dd><p>Finalize write for a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.deletevalue">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs2.deletevalue" title="Permalink to this definition"></a></dt>
+<dd><p>File delete value</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.dx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#mikeio.Dfs2.dx" title="Permalink to this definition"></a></dt>
+<dd><p>Step size in x direction</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.dy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#mikeio.Dfs2.dy" title="Permalink to this definition"></a></dt>
+<dd><p>Step size in y direction</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.end_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.Dfs2.end_time" title="Permalink to this definition"></a></dt>
+<dd><p>File end time</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Dfs2.is_geo" title="Permalink to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs2.items" title="Permalink to this definition"></a></dt>
+<dd><p>List of items</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.latitude">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">latitude</span></span><a class="headerlink" href="#mikeio.Dfs2.latitude" title="Permalink to this definition"></a></dt>
+<dd><p>Origin latitude</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.longitude">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">longitude</span></span><a class="headerlink" href="#mikeio.Dfs2.longitude" title="Permalink to this definition"></a></dt>
+<dd><p>Origin longitude</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.n_items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfs2.n_items" title="Permalink to this definition"></a></dt>
+<dd><p>Number of items</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.n_timesteps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfs2.n_timesteps" title="Permalink to this definition"></a></dt>
+<dd><p>Number of time steps</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.nx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><a class="headerlink" href="#mikeio.Dfs2.nx" title="Permalink to this definition"></a></dt>
+<dd><p>Number of values in the x-direction</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.ny">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><a class="headerlink" href="#mikeio.Dfs2.ny" title="Permalink to this definition"></a></dt>
+<dd><p>Number of values in the y-direction</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.orientation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><a class="headerlink" href="#mikeio.Dfs2.orientation" title="Permalink to this definition"></a></dt>
+<dd><p>Orientation (in own CRS)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.origin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin</span></span><a class="headerlink" href="#mikeio.Dfs2.origin" title="Permalink to this definition"></a></dt>
+<dd><p>Origin (in own CRS)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs2.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="headerlink" href="#mikeio.Dfs2.read" title="Permalink to this definition"></a></dt>
+<dd><p>Read data from a dfs2 file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<em>list</em><em>[</em><em>int</em><em>] or </em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
+<li><p><strong>time</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>datetime</em><em>, </em><em>pd.TimeStamp</em><em>, </em><em>sequence</em><em>, </em><em>slice</em><em> or </em><em>pd.DatetimeIndex</em><em>, </em><em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
+<li><p><strong>keepdims</strong> (<em>bool</em><em>, </em><em>optional</em>) – When reading a single time step only, should the time-dimension be kept
+in the returned Dataset? by default: False</p></li>
+<li><p><strong>area</strong> (<em>array</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Read only data inside (horizontal) area given as a
+bounding box (tuple with left, lower, right, upper) coordinates</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.shape">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#mikeio.Dfs2.shape" title="Permalink to this definition"></a></dt>
+<dd><p>Tuple with number of values in the t-, y-, x-direction</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.start_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfs2.start_time" title="Permalink to this definition"></a></dt>
+<dd><p>File start time</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.timestep">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfs2.timestep" title="Permalink to this definition"></a></dt>
+<dd><p>Time step size in seconds</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dfs2.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.write" title="Permalink to this definition"></a></dt>
+<dd><p>Create a dfs2 file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<em>str</em>) – Location to write the dfs2 file</p></li>
+<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>] or </em><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
+<li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – start date of type datetime.</p></li>
+<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The time step in seconds.</p></li>
+<li><p><strong>datetimes</strong> (<em>datetime</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – The list of datetimes for the case of non-equisstant Timeaxis.</p></li>
+<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
+<li><p><strong>dx</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the x direction (projection units)</p></li>
+<li><p><strong>dy</strong> (<em>float</em><em>, </em><em>optional</em>) – length of each grid in the y direction (projection units)</p></li>
+<li><p><strong>coordinate</strong> – list of [projection, origin_x, origin_y, orientation]
+e.g. [‘LONG/LAT’, 12.4387, 55.2257, 327]</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – title of the dfs2 file. Default is blank.</p></li>
+<li><p><strong>keep_open</strong> (<em>bool</em><em>, </em><em>optional</em>) – Keep file open for appending</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.x0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x0</span></span><a class="headerlink" href="#mikeio.Dfs2.x0" title="Permalink to this definition"></a></dt>
+<dd><p>Start point of x values (often 0)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs2.y0">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y0</span></span><a class="headerlink" href="#mikeio.Dfs2.y0" title="Permalink to this definition"></a></dt>
+<dd><p>Start point of y values (often 0)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="grid2d-api">
+<h2>Grid2D API<a class="headerlink" href="#grid2d-api" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.Grid2D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Grid2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NON-UTM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('x',</span> <span class="pre">'y')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_spectral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D" title="Permalink to this definition"></a></dt>
+<dd><p>2D grid
+Origin in the center of cell in lower-left corner
+x and y axes are increasing and equidistant</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.bbox">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bbox</span></span><a class="headerlink" href="#mikeio.Grid2D.bbox" title="Permalink to this definition"></a></dt>
+<dd><p>bounding box (left, bottom, right, top)
+Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Grid2D.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D.contains" title="Permalink to this definition"></a></dt>
+<dd><p>test if a list of points are inside grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>coords</strong> (<em>array</em><em>(</em><em>float</em><em>)</em>) – xy-coordinate of points given as n-by-2 array</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True for points inside, False otherwise</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates</span></span><a class="headerlink" href="#mikeio.Grid2D.coordinates" title="Permalink to this definition"></a></dt>
+<dd><p>n-by-2 array of x- and y-coordinates</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.dx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.dx" title="Permalink to this definition"></a></dt>
+<dd><p>x grid spacing</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.dy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.dy" title="Permalink to this definition"></a></dt>
+<dd><p>y grid spacing</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Grid2D.find_index">
+<span class="sig-name descname"><span class="pre">find_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D.find_index" title="Permalink to this definition"></a></dt>
+<dd><p>Find nearest index (i,j) of point(s)</p>
+<p>-1 is returned if point is outside grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>coords</strong> (<em>array</em><em>(</em><em>float</em><em>)</em>) – xy-coordinate of points given as n-by-2 array</p></li>
+<li><p><strong>area</strong> (<em>array</em><em>(</em><em>float</em><em>)</em>) – xy-coordinates of bounding box</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>i- and j-index of nearest cell</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array(int), array(int)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Grid2D.get_node_coordinates">
+<span class="sig-name descname"><span class="pre">get_node_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D.get_node_coordinates" title="Permalink to this definition"></a></dt>
+<dd><p>node coordinates for this grid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>2d array with x,y-coordinates, length=(nx+1)*(ny+1)</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>array(float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.Grid2D.is_geo" title="Permalink to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.is_local_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.Grid2D.is_local_coordinates" title="Permalink to this definition"></a></dt>
+<dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.nx">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.Grid2D.nx" title="Permalink to this definition"></a></dt>
+<dd><p>number of x grid points</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.ny">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.Grid2D.ny" title="Permalink to this definition"></a></dt>
+<dd><p>number of y grid points</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.orientation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#mikeio.Grid2D.orientation" title="Permalink to this definition"></a></dt>
+<dd><p>Grid orientation</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.origin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mikeio.Grid2D.origin" title="Permalink to this definition"></a></dt>
+<dd><p>Coordinates of grid origo (in projection)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.projection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#mikeio.Grid2D.projection" title="Permalink to this definition"></a></dt>
+<dd><p>The projection</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.projection_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mikeio.Grid2D.projection_string" title="Permalink to this definition"></a></dt>
+<dd><p>The projection string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Grid2D.to_mesh">
+<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Grid2D.to_mesh" title="Permalink to this definition"></a></dt>
+<dd><p>export grid to mesh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outfilename</strong> (<em>str</em>) – path of new mesh file</p></li>
+<li><p><strong>projection</strong> (<em>str</em><em>, </em><em>optional</em>) – WKT projection string, by default ‘LONG/LAT’</p></li>
+<li><p><strong>z</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – bathymetry values for each node, by default 0
+if array: must have length=(nx+1)*(ny+1)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.x">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#mikeio.Grid2D.x" title="Permalink to this definition"></a></dt>
+<dd><p>array of x coordinates (element center)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.xy">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xy</span></span><a class="headerlink" href="#mikeio.Grid2D.xy" title="Permalink to this definition"></a></dt>
+<dd><p>n-by-2 array of x- and y-coordinates</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Grid2D.y">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#mikeio.Grid2D.y" title="Permalink to this definition"></a></dt>
+<dd><p>array of y coordinates (element center)</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="dataarray-plotter-grid2d-api">
+<h2>DataArray Plotter Grid2D API<a class="headerlink" href="#dataarray-plotter-grid2d-api" title="Permalink to this heading"></a></h2>
+<p>A DataArray <code class="docutils literal notranslate"><span class="pre">da</span></code> with a Grid2D geometry can be plotted using <code class="docutils literal notranslate"><span class="pre">da.plot</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterGrid2D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dataarray.</span></span><span class="sig-name descname"><span class="pre">_DataArrayPlotterGrid2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dataarray.html#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">DataArray</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterGrid2D" title="Permalink to this definition"></a></dt>
+<dd><p>Plot a DataArray with a Grid2D geometry</p>
+<p>If DataArray has multiple time steps, the first step will be plotted.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;gebco_sound.dfs2&quot;</span><span class="p">)[</span><span class="s2">&quot;Elevation&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">contour</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">contourf</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterGrid2D.contour">
+<span class="sig-name descname"><span class="pre">contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterGrid2D.contour" title="Permalink to this definition"></a></dt>
+<dd><p>Plot data as contour lines</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterGrid2D.contourf">
+<span class="sig-name descname"><span class="pre">contourf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterGrid2D.contourf" title="Permalink to this definition"></a></dt>
+<dd><p>Plot data as filled contours</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterGrid2D.hist">
+<span class="sig-name descname"><span class="pre">hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterGrid2D.hist" title="Permalink to this definition"></a></dt>
+<dd><p>Plot DataArray as histogram (using ax.hist)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bins</strong> (<em>int</em><em> or </em><em>sequence</em><em> or </em><em>str</em><em>,</em>) – If bins is an integer, it defines the number
+of equal-width bins in the range.
+If bins is a sequence, it defines the bin edges,
+including the left edge of the first bin and the
+right edge of the last bin.
+by default: rcParams[“hist.bins”] (default: 10)</p></li>
+<li><p><strong>ax</strong> (<em>matplotlib.axes</em><em>, </em><em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
+<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure</p></li>
+<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>&lt;matplotlib.axes&gt;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterGrid2D.line">
+<span class="sig-name descname"><span class="pre">line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterGrid2D.line" title="Permalink to this definition"></a></dt>
+<dd><p>Plot data as lines (timeseries if time is present)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterGrid2D.pcolormesh">
+<span class="sig-name descname"><span class="pre">pcolormesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterGrid2D.pcolormesh" title="Permalink to this definition"></a></dt>
+<dd><p>Plot data as coloured patches</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="dfs1.html" class="btn btn-neutral float-left" title="Dfs1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dfs3.html" class="btn btn-neutral float-right" title="Dfs3" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

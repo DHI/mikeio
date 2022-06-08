@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MIKE IO: input/output of MIKE files in Python &mdash; MIKE IO  documentation</title>
+  <title>Data Structures &mdash; MIKE IO  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,7 +19,8 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Getting started" href="getting-started.html" /> 
+    <link rel="next" title="Dataset" href="dataset.html" />
+    <link rel="prev" title="Design philosophy" href="design.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -27,7 +28,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> MIKE IO
+            <a href="index.html" class="icon icon-home"> MIKE IO
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -38,10 +39,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
@@ -65,17 +66,17 @@
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">MIKE IO</a>
+          <a href="index.html">MIKE IO</a>
       </nav>
 
       <div class="wy-nav-content">
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>MIKE IO: input/output of MIKE files in Python</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Data Structures</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/data-structures.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -83,51 +84,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="mike-io-input-output-of-mike-files-in-python">
-<h1>MIKE IO: input/output of MIKE files in Python<a class="headerlink" href="#mike-io-input-output-of-mike-files-in-python" title="Permalink to this heading"></a></h1>
-<p><img alt="" src="_images/MIKE-IO-Logo-Pos-RGB.svg" /></p>
-<p>Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.</p>
-<p>See our sister library <a class="reference external" href="https://github.com/DHI/mikeio1d">MIKE IO 1D</a> for .res1d and .xns11 files.</p>
-<p><strong>The documentation is currently being updated to reflect the upcoming version of MIKE IO 1.0</strong></p>
-<section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading"></a></h2>
+  <section id="data-structures">
+<h1>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h1>
+<p>MIKE IO has these primary data structures:</p>
 <ul class="simple">
-<li><p>Windows or Linux operating system</p></li>
-<li><p>Python x64 3.7 - 3.10</p></li>
-<li><p>(Windows) <a class="reference external" href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads%3E">VC++ redistributables</a> (already installed if you have MIKE)</p></li>
+<li><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class">Dataset</span></a> - a collection of DataArrays corresponding to the contents of a dfs file; typically obtained from <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code></p></li>
+<li><p><a class="reference internal" href="dataarray.html#mikeio.DataArray" title="mikeio.DataArray"><span class="xref myst py py-class">DataArray</span></a> - data and metadata corresponding to one “item” in a dfs file.</p></li>
+<li><p><strong>Geometry</strong> - spatial description of the data in a dfs file; comes in different flavours: <a class="reference internal" href="dfs1.html#mikeio.Grid1D" title="mikeio.Grid1D"><span class="xref myst py py-class">Grid1D</span></a>, <a class="reference internal" href="dfs2.html#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class">Grid2D</span></a>, <a class="reference internal" href="dfs3.html#mikeio.Grid3D" title="mikeio.Grid3D"><span class="xref myst py py-class">Grid3D</span></a>, <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="xref myst py py-class">GeometryFM</span></a>, <a class="reference internal" href="dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D" title="mikeio.spatial.FM_geometry.GeometryFM3D"><span class="xref myst py py-class">GeometryFM3D</span></a>, etc. corresponding to different types of dfs files.</p></li>
+<li><p><strong>Dfs</strong> - an object returned by <code class="docutils literal notranslate"><span class="pre">dfs</span> <span class="pre">=</span> <span class="pre">mikeio.open()</span></code> containing the metadata (=header) of a dfs file ready for reading the data (which can be done with <code class="docutils literal notranslate"><span class="pre">dfs.read()</span></code>); exists in different specialized versions: <a class="reference internal" href="dfs0.html#mikeio.Dfs0" title="mikeio.Dfs0"><span class="xref myst py py-class">Dfs0</span></a>, <a class="reference internal" href="dfs1.html#mikeio.Dfs1" title="mikeio.Dfs1"><span class="xref myst py py-class">Dfs1</span></a>, <a class="reference internal" href="dfs2.html#mikeio.Dfs2" title="mikeio.Dfs2"><span class="xref myst py py-class">Dfs2</span></a>, <a class="reference internal" href="dfs3.html#mikeio.Dfs3" title="mikeio.Dfs3"><span class="xref myst py py-class">Dfs3</span></a>, <a class="reference internal" href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH" title="mikeio.dfsu.Dfsu2DH"><span class="xref myst py py-class">Dfsu2DH</span></a>, <a class="reference internal" href="dfsu-3d.html#mikeio.dfsu_layered.Dfsu3D" title="mikeio.dfsu_layered.Dfsu3D"><span class="xref myst py py-class">Dfsu3D</span></a>, <a class="reference internal" href="dfsu-2dv-vertical-profile.html#mikeio.dfsu_layered.Dfsu2DV" title="mikeio.dfsu_layered.Dfsu2DV"><span class="xref myst py py-class">Dfsu2DV</span></a>, <a class="reference internal" href="dfsu-spectral.html#mikeio.dfsu_spectral.DfsuSpectral" title="mikeio.dfsu_spectral.DfsuSpectral"><span class="xref myst py py-class">DfsuSpectral</span></a>,</p></li>
 </ul>
-</section>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install mikeio
-</pre></div>
-</div>
-</section>
-<section id="getting-started">
-<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h2>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span> <span class="kn">import</span>
-<span class="gp">&gt;&gt;&gt; </span> <span class="nn">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;simple.dfs0&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span> <span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>Read more in the <a class="reference internal" href="getting-started.html"><span class="doc std std-doc">getting started guide</span></a>.</p>
-</section>
-<section id="where-can-i-get-help">
-<h2>Where can I get help?<a class="headerlink" href="#where-can-i-get-help" title="Permalink to this heading"></a></h2>
-<ul class="simple">
-<li><p>New ideas and feature requests - <a class="reference external" href="https://github.com/DHI/mikeio/discussions">GitHub Discussions</a></p></li>
-<li><p>Bugs - <a class="reference external" href="https://github.com/DHI/mikeio/issues">GitHub Issues</a></p></li>
-</ul>
-<div class="toctree-wrapper compound">
-</div>
-</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="getting-started.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="design.html" class="btn btn-neutral float-left" title="Design philosophy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dataset.html" class="btn btn-neutral float-right" title="Dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

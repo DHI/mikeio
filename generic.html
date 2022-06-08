@@ -14,6 +14,7 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -38,15 +39,26 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfs123.html">Dfs1, Dfs2 and Dfs3</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu.html">Dfsu and Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs2.html">Dfs2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs3.html">Dfs3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eum.html">EUM and items</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Generic</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-mikeio">Generic API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generic-example-notebooks">Generic example notebooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mikeio.generic">Generic API</a></li>
 </ul>
 </li>
 </ul>
@@ -76,7 +88,7 @@
            <div itemprop="articleBody">
              
   <section id="generic">
-<h1>Generic<a class="headerlink" href="#generic" title="Permalink to this headline"></a></h1>
+<h1>Generic<a class="headerlink" href="#generic" title="Permalink to this heading"></a></h1>
 <p>The generic module contains functionality that works for all dfs files:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#mikeio.generic.concat" title="mikeio.generic.concat"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">concat()</span></code></span></a> - Concatenates files along the time axis</p></li>
@@ -92,111 +104,13 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">generic</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="s2">&quot;fileA.dfs2&quot;</span><span class="p">,</span> <span class="s2">&quot;fileB.dfs2&quot;</span><span class="p">],</span> <span class="s2">&quot;new_file.dfs2&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
+<section id="generic-example-notebooks">
+<h2>Generic example notebooks<a class="headerlink" href="#generic-example-notebooks" title="Permalink to this heading"></a></h2>
 <p>See the <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb">Generic notebook</a> for more examples.</p>
-<section id="module-mikeio">
-<span id="generic-api"></span><h2>Generic API<a class="headerlink" href="#module-mikeio" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-mikeio.generic">
+<span id="generic-api"></span><h2>Generic API<a class="headerlink" href="#module-mikeio.generic" title="Permalink to this heading"></a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="mikeio.open">
-<span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">open</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.open" title="Permalink to this definition"></a></dt>
-<dd><p>Open a dfs/mesh file (and read the header)</p>
-<p>The typical workflow for small dfs files is to read all data
-with <em>mikeio.read</em> instead of using this function. For big files, however,
-it can be convenient to open the file first with <em>dfs=mikeio.open(…)</em> to
-inspect it’s content (items, time and shape) and then decide what to
-read using dfs.read(…)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> – full path and file name to the dfs file.</p></li>
-<li><p><strong>type</strong> (<em>str</em><em>, </em><em>optional</em>) – Dfs2 only. Additional information about the file, e.g.
-“spectral” for spectral dfs2 files. By default: None.</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#mikeio.read" title="mikeio.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.read</span></code></a></p>
-</div>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;wl.dfs1&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Salinity&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;2016-01&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;pt_spectra.dfs2&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;spectral&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="mikeio.read">
-<span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">mikeio.dataset.Dataset</span></a></span></span><a class="headerlink" href="#mikeio.read" title="Permalink to this definition"></a></dt>
-<dd><p>Read all or a subset of the data from a dfs file</p>
-<p>All dfs files can be subsetted with the <em>items</em> and <em>time</em> arguments. But
-the following file types also have the shown additional arguments:</p>
-<ul class="simple">
-<li><p>Dfs2: area</p></li>
-<li><p>Dfs3: layers</p></li>
-<li><p>Dfsu-2d: (x,y), elements, area</p></li>
-<li><p>Dfsu-layered: (xy,z), elements, area, layers</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> – full path and file name to the dfs file.</p></li>
-<li><p><strong>items</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>list</em><em>[</em><em>int</em><em>] or </em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based), or by name,
-by default None (=all)</p></li>
-<li><p><strong>time</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>datetime</em><em>, </em><em>pd.TimeStamp</em><em>, </em><em>sequence</em><em>, </em><em>slice</em><em> or </em><em>pd.DatetimeIndex</em><em>, </em><em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
-<li><p><strong>keepdims</strong> (<em>bool</em><em>, </em><em>optional</em>) – When reading a single time step only, should the time-dimension be kept
-in the returned Dataset? by default: False</p></li>
-<li><p><strong>x</strong> (<em>float</em><em>, </em><em>optional</em>) – Dfsu: Read only data for elements containing the (x,y)
-or (x,y,z) points(s), by default None</p></li>
-<li><p><strong>y</strong> (<em>float</em><em>, </em><em>optional</em>) – Dfsu: Read only data for elements containing the (x,y)
-or (x,y,z) points(s), by default None</p></li>
-<li><p><strong>z</strong> (<em>float</em><em>, </em><em>optional</em>) – Dfsu: Read only data for elements containing the (x,y)
-or (x,y,z) points(s), by default None</p></li>
-<li><p><strong>area</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Dfs2/Dfsu: read only data within an area given by a bounding
-box of coordinates (left, lower, right, upper), by default None (=all)</p></li>
-<li><p><strong>layers</strong> (<em>int</em><em>, </em><em>str</em><em> or </em><em>sequence</em><em>, </em><em>optional</em>) – Dfs3/Dfsu-layered: read only data from specific layers,
-by default None (=all layers)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A Dataset with specification according to the file type</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference internal" href="#mikeio.open" title="mikeio.open"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.open</span></code></a></p>
-</div>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;ts.dfs0&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;ts.dfs0&quot;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;ts.dfs0&quot;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="s2">&quot;Temperature&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;ts.dfs0&quot;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;u&quot;</span><span class="p">,</span><span class="s2">&quot;v&quot;</span><span class="p">],</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;2016&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tide.dfs1&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="s2">&quot;2018-5&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tide.dfs1&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="s2">&quot;2018-5-1&quot;</span><span class="p">,</span><span class="s2">&quot;2018-6-1&quot;</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tide.dfs1&quot;</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">6</span><span class="p">],</span> <span class="n">time</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tide.dfs1&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;era5.dfs2&quot;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">58</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">2.2</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">54.2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="mi">183</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2000</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">58</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">11.4</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">56.2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="mf">11.4</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">56.2</span><span class="p">,</span> <span class="n">z</span><span class="o">=-</span><span class="mf">1.1</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">lst_of_elems</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<span class="target" id="module-mikeio.generic"></span><dl class="py function">
 <dt class="sig sig-object py" id="mikeio.generic.avg_time">
 <span class="sig-prename descclassname"><span class="pre">mikeio.generic.</span></span><span class="sig-name descname"><span class="pre">avg_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">infilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outfilename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skipna</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.generic.avg_time" title="Permalink to this definition"></a></dt>
 <dd><p>Create a temporally averaged dfs file</p>

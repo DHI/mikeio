@@ -29,7 +29,7 @@ $ pip install mikeio
 >>>  df = ds.to_dataframe()
 ```
 
-Read more in the [getting started guide](getting_started).
+Read more in the [getting started guide](getting-started).
 
 
 Where can I get help?
@@ -44,12 +44,22 @@ Where can I get help?
    :caption: Contents:
    :hidden:
 
-   getting_started
+   getting-started
    design
+   data-structures
    dataset
+   dataarray
+   dfs-overview
    dfs0
-   dfs123
-   dfsu   
+   dfs1
+   dfs2
+   dfs3
+   dfsu-mesh-overview
+   mesh
+   dfsu-2d
+   dfsu-3d
+   dfsu-2dv-vertical-profile
+   dfsu-spectral
    eum
    generic
 ```

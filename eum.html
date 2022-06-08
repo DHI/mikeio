@@ -14,12 +14,13 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Generic" href="generic.html" />
-    <link rel="prev" title="Dfsu and Mesh" href="dfsu.html" /> 
+    <link rel="prev" title="Dfsu Spectral" href="dfsu-spectral.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,13 +40,24 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfs123.html">Dfs1, Dfs2 and Dfs3</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu.html">Dfsu and Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs2.html">Dfs2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs3.html">Dfs3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">EUM and items</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#eum-example-notebooks">EUM example notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-mikeio.eum">EUM API</a></li>
 </ul>
 </li>
@@ -77,7 +89,7 @@
            <div itemprop="articleBody">
              
   <section id="eum-and-items">
-<h1>EUM and items<a class="headerlink" href="#eum-and-items" title="Permalink to this headline"></a></h1>
+<h1>EUM and items<a class="headerlink" href="#eum-and-items" title="Permalink to this heading"></a></h1>
 <p>The dfs items in MIKE IO are represented by the <code class="docutils literal notranslate"><span class="pre">ItemInfo</span></code> class.
 An ItemInfo consists of:</p>
 <ul class="simple">
@@ -113,9 +125,12 @@ An ItemInfo consists of:</p>
 <span class="go">2004</span>
 </pre></div>
 </div>
+<section id="eum-example-notebooks">
+<h2>EUM example notebooks<a class="headerlink" href="#eum-example-notebooks" title="Permalink to this heading"></a></h2>
 <p>See the <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Units.ipynb">Units notebook</a> for more examples.</p>
+</section>
 <section id="module-mikeio.eum">
-<span id="eum-api"></span><h2>EUM API<a class="headerlink" href="#module-mikeio.eum" title="Permalink to this headline"></a></h2>
+<span id="eum-api"></span><h2>EUM API<a class="headerlink" href="#module-mikeio.eum" title="Permalink to this heading"></a></h2>
 <p>Functionality related to the DHI EUM scientific type system.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio.eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
@@ -250,7 +265,7 @@ An ItemInfo consists of:</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="dfsu.html" class="btn btn-neutral float-left" title="Dfsu and Mesh" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dfsu-spectral.html" class="btn btn-neutral float-left" title="Dfsu Spectral" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="generic.html" class="btn btn-neutral float-right" title="Generic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

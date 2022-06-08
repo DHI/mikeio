@@ -14,12 +14,13 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Dataset" href="dataset.html" />
-    <link rel="prev" title="Getting started" href="getting_started.html" /> 
+    <link rel="next" title="Data Structures" href="data-structures.html" />
+    <link rel="prev" title="Getting started" href="getting-started.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,7 +40,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Design philosophy</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#easy-to-use">Easy to use</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#familiar">Familiar</a></li>
@@ -51,10 +52,20 @@
 <li class="toctree-l2"><a class="reference internal" href="#easy-access-to-new-features">Easy access to new features</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfs123.html">Dfs1, Dfs2 and Dfs3</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu.html">Dfsu and Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs2.html">Dfs2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs3.html">Dfs3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eum.html">EUM and items</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generic.html">Generic</a></li>
 </ul>
@@ -84,7 +95,7 @@
            <div itemprop="articleBody">
              
   <section id="design-philosophy">
-<h1>Design philosophy<a class="headerlink" href="#design-philosophy" title="Permalink to this headline"></a></h1>
+<h1>Design philosophy<a class="headerlink" href="#design-philosophy" title="Permalink to this heading"></a></h1>
 <ul class="simple">
 <li><p>Easy to use</p></li>
 <li><p>Familiar</p></li>
@@ -96,23 +107,23 @@
 <li><p>Easy access to new features</p></li>
 </ul>
 <section id="easy-to-use">
-<h2>Easy to use<a class="headerlink" href="#easy-to-use" title="Permalink to this headline"></a></h2>
+<h2>Easy to use<a class="headerlink" href="#easy-to-use" title="Permalink to this heading"></a></h2>
 <p>Common operations such as reading a file should only need a few lines of code.</p>
 <p>Make extensive use of existing standard libraries for scientific computing such as numpy, matplotlib and pandas.</p>
 </section>
 <section id="familiar">
-<h2>Familiar<a class="headerlink" href="#familiar" title="Permalink to this headline"></a></h2>
+<h2>Familiar<a class="headerlink" href="#familiar" title="Permalink to this heading"></a></h2>
 <p>MIKE IO aims to use a syntax familiar to users of scientific computing libraries such as NumPy, Pandas and xarray.</p>
 </section>
 <section id="easy-to-install">
-<h2>Easy to install<a class="headerlink" href="#easy-to-install" title="Permalink to this headline"></a></h2>
+<h2>Easy to install<a class="headerlink" href="#easy-to-install" title="Permalink to this heading"></a></h2>
 <p>From PyPI::</p>
 <div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install mikeio
 </pre></div>
 </div>
 </section>
 <section id="easy-to-get-started">
-<h2>Easy to get started<a class="headerlink" href="#easy-to-get-started" title="Permalink to this headline"></a></h2>
+<h2>Easy to get started<a class="headerlink" href="#easy-to-get-started" title="Permalink to this heading"></a></h2>
 <p>By providing many examples to cut/paste from.</p>
 <p>Examples are available in two forms:</p>
 <ul class="simple">
@@ -121,25 +132,25 @@
 </ul>
 </section>
 <section id="open-source">
-<h2>Open Source​<a class="headerlink" href="#open-source" title="Permalink to this headline"></a></h2>
-<p>MIKE IO is an open source project licensed under the <code class="docutils literal notranslate"><span class="pre">BSD-3</span> <span class="pre">license</span> <span class="pre">&lt;https://github.com/DHI/mikeio/blob/main/License.txt&gt;</span></code>_.
+<h2>Open Source​<a class="headerlink" href="#open-source" title="Permalink to this heading"></a></h2>
+<p>MIKE IO is an open source project licensed under the [BSD-3 license] (https://github.com/DHI/mikeio/blob/main/License.txt).
 The software is provided free of charge with the source code available for inspection and modification.</p>
-<p>Contributions are welcome, more details can be found in our <code class="docutils literal notranslate"><span class="pre">contribution</span> <span class="pre">guidelines</span> <span class="pre">&lt;https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md&gt;</span></code>_.</p>
+<p>Contributions are welcome, more details can be found in our <a class="reference external" href="https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md">contribution guidelines</a>.</p>
 </section>
 <section id="easy-to-collaborate">
-<h2>Easy to collaborate<a class="headerlink" href="#easy-to-collaborate" title="Permalink to this headline"></a></h2>
+<h2>Easy to collaborate<a class="headerlink" href="#easy-to-collaborate" title="Permalink to this heading"></a></h2>
 <p>By developing MIKE IO on GitHub along with a completely open discussion, we believe that the collaboration between developers and end-users results in a useful library.</p>
 </section>
 <section id="reproducible">
-<h2>Reproducible<a class="headerlink" href="#reproducible" title="Permalink to this headline"></a></h2>
+<h2>Reproducible<a class="headerlink" href="#reproducible" title="Permalink to this heading"></a></h2>
 <p>By providing the historical versions of MIKE IO on PyPI it is possible to reproduce the behaviour of an older existing system, based on an older version.</p>
 <p>Install specific version::</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mikeio</span><span class="o">==</span><span class="mf">0.4.3</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mikeio</span><span class="o">==</span><span class="mf">0.12.2</span>
 </pre></div>
 </div>
 </section>
 <section id="easy-access-to-new-features">
-<h2>Easy access to new features<a class="headerlink" href="#easy-access-to-new-features" title="Permalink to this headline"></a></h2>
+<h2>Easy access to new features<a class="headerlink" href="#easy-access-to-new-features" title="Permalink to this heading"></a></h2>
 <p>Features are being added all the time, by developers at DHI in offices all around the globe as well as external contributors using MIKE IO in their work.
 These new features are always available from the main branch on GitHub and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.</p>
 <p>Install development version::</p>
@@ -153,8 +164,8 @@ These new features are always available from the main branch on GitHub and thank
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dataset.html" class="btn btn-neutral float-right" title="Dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="getting-started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data-structures.html" class="btn btn-neutral float-right" title="Data Structures" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
