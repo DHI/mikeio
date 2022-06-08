@@ -149,6 +149,16 @@ class Dfs1(_Dfs123):
         )
 
     @property
+    def x0(self):
+        """Start point of x values (often 0)"""
+        return self._x0
+
+    @property
     def dx(self):
         """Step size in x direction"""
         return self._dx
+
+    @property
+    def nx(self):
+        """Number of node values"""
+        return self._nx
