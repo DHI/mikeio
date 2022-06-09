@@ -2,7 +2,7 @@
 
 The [Dataset](Dataset) is the MIKE IO data structure 
 for data from dfs files. 
-The `mikeio.read()` methods returns a Dataset as a container of [DataArrays](dataarray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
+The {py:meth}`mikeio.read` methods returns a Dataset as a container of [DataArrays](dataarray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
 
 The Dataset has the following primary properties: 
 

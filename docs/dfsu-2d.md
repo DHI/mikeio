@@ -3,7 +3,7 @@
 
 ## Dfsu functionality
 
-A Dfsu class (e.g. Dfsu2DH) is returned by `mikeio.open()` if the argument is a dfsu file. 
+A Dfsu class (e.g. Dfsu2DH) is returned by {py:meth}`mikeio.open` if the argument is a dfsu file. 
 
 Apart from the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu2DH has the following *properties*:
 
