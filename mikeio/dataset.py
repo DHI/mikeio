@@ -483,7 +483,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return n_elem
 
     def describe(self, **kwargs) -> pd.DataFrame:
-        """Generate descriptive statistics by wrapping pandas describe()"""
+        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`"""
         data = {x.name: x.to_numpy().ravel() for x in self}
         df = pd.DataFrame(data).describe(**kwargs)
 
@@ -1008,7 +1008,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     ) -> "Dataset":
         """Temporal interpolation
 
-        Wrapper of `scipy.interpolate.interp`
+        Wrapper of :py:class:`scipy.interpolate.interp1d`
 
         Parameters
         ----------

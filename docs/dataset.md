@@ -171,7 +171,7 @@ Other methods that also return a Dataset:
 
 *Conversion* methods:
 
-* [`to_dataframe()`](Dataset.to_dataframe) - Convert Dataset to a {py:class}`pandas.core.frame.DataFrame`
+* [`to_dataframe()`](Dataset.to_dataframe) - Convert Dataset to a {py:class}`pandas.DataFrame`
 * [`to_xarray()`](Dataset.to_xarray) - Convert Dataset to a {py:class}`xarray.Dataset` (great for Dfs2)
 * [`to_dfs()`](Dataset.to_dfs) - Write Dataset to a Dfs file
 

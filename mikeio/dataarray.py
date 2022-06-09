@@ -1031,7 +1031,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return self
 
     def describe(self, **kwargs) -> pd.DataFrame:
-        """Generate descriptive statistics by wrapping pandas describe()"""
+        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`"""
         data = {}
         data[self.name] = self.to_numpy().ravel()
         df = pd.DataFrame(data).describe(**kwargs)
@@ -1513,7 +1513,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     ) -> "DataArray":
         """Temporal interpolation
 
-        Wrapper of `scipy.interpolate.interp`
+        Wrapper of :py:class:`scipy.interpolate.interp1d`
 
         Parameters
         ----------
