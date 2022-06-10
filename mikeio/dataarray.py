@@ -1583,6 +1583,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         DataArray
             Interpolated DataArray
         """
+        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+            raise NotImplementedError(
+                "Currently only supports interpolating from 2d flexible mesh data!"
+            )
+
         if isinstance(other, pd.DatetimeIndex):
             return self.interp_time(other, **kwargs)
 
