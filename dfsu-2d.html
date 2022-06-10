@@ -95,7 +95,7 @@
 <h1>Dfsu 2D<a class="headerlink" href="#dfsu-2d" title="Permalink to this heading"></a></h1>
 <section id="dfsu-functionality">
 <h2>Dfsu functionality<a class="headerlink" href="#dfsu-functionality" title="Permalink to this heading"></a></h2>
-<p>A Dfsu class (e.g. Dfsu2DH) is returned by <code class="docutils literal notranslate"><span class="pre">mikeio.open()</span></code> if the argument is a dfsu file.</p>
+<p>A Dfsu class (e.g. Dfsu2DH) is returned by <a class="reference internal" href="dfs-overview.html#mikeio.open" title="mikeio.open"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mikeio.open()</span></code></a> if the argument is a dfsu file.</p>
 <p>Apart from the common <span class="xref myst">dfsu-geometry properties and methods</span>, Dfsu2DH has the following <em>properties</em>:</p>
 <table class="autosummary longtable docutils align-default">
 <colgroup>
@@ -157,10 +157,10 @@
 <h2>Dfsu 2DH API<a class="headerlink" href="#dfsu-2dh-api" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dfsu.</span></span><span class="sig-name descname"><span class="pre">Dfsu2DH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dfsu.</span></span><span class="sig-name descname"><span class="pre">Dfsu2DH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu.html#Dfsu2DH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH" title="Permalink to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">Dataset</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.append" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">Dataset</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.append" title="Permalink to this definition"></a></dt>
 <dd><p>Append to a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -190,8 +190,8 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>np.array</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – element ids of selected elements</p></li>
-<li><p><strong>zn</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – only the z-coodinates of the nodes</p></li>
+<li><p><strong>elements</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em><em>, </em><em>optional</em>) – element ids of selected elements</p></li>
+<li><p><strong>zn</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – only the z-coodinates of the nodes</p></li>
 </ul>
 </dd>
 </dl>
@@ -214,7 +214,7 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.contains" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.10)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.contains" title="Permalink to this definition"></a></dt>
 <dd><p>test if a list of points are contained by mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -249,13 +249,13 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.elements_to_geometry">
-<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="pre">GeometryFM</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D" title="mikeio.spatial.FM_geometry.GeometryFM3D"><span class="pre">GeometryFM3D</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.elements_to_geometry" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="pre">GeometryFM</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D" title="mikeio.spatial.FM_geometry.GeometryFM3D"><span class="pre">GeometryFM3D</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.elements_to_geometry" title="Permalink to this definition"></a></dt>
 <dd><p>export a selection of elements to new flexible file geometry</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – list of element ids</p></li>
-<li><p><strong>node_layers</strong> (<em>str</em><em>, </em><em>optional</em>) – for 3d files either ‘top’, ‘bottom’ layer nodes
+<li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em>) – list of element ids</p></li>
+<li><p><strong>node_layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – for 3d files either ‘top’, ‘bottom’ layer nodes
 or ‘all’ can be selected, by default ‘all’</p></li>
 </ul>
 </dd>
@@ -276,16 +276,16 @@ or ‘all’ can be selected, by default ‘all’</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.extract_track">
-<span class="sig-name descname"><span class="pre">extract_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method='nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.extract_track" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">extract_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method='nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu.html#Dfsu2DH.extract_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.extract_track" title="Permalink to this definition"></a></dt>
 <dd><p>Extract track data from a dfsu file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>track</strong> (<em>str</em>) – with DatetimeIndex and (x, y) of track points as first two columns
+<li><p><strong>track</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – with DatetimeIndex and (x, y) of track points as first two columns
 x,y coordinates must be in same coordinate system as dfsu</p></li>
 <li><p><strong>track</strong> – filename of csv or dfs0 file containing t,x,y</p></li>
-<li><p><strong>items</strong> (<em>list</em><em>[</em><em>int</em><em>] or </em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Extract only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Spatial interpolation method (‘nearest’ or ‘inverse_distance’)
+<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – Extract only selected items, by number (0-based), or by name</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Spatial interpolation method (‘nearest’ or ‘inverse_distance’)
 default=’nearest’</p></li>
 </ul>
 </dd>
@@ -316,15 +316,15 @@ The first two items will be x- and y- coordinates of track</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – X coordinate(s) (easting or longitude)</p></li>
-<li><p><strong>y</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – Y coordinate(s) (northing or latitude)</p></li>
-<li><p><strong>z</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Z coordinate(s)  (vertical coordinate, positive upwards)
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – X coordinate(s) (easting or longitude)</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – Y coordinate(s) (northing or latitude)</p></li>
+<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – Z coordinate(s)  (vertical coordinate, positive upwards)
 If not provided for a 3d file, the surface element is returned</p></li>
-<li><p><strong>layer</strong> (<em>int</em><em>, </em><em>optional</em>) – Search in a specific layer only (3D files only)
+<li><p><strong>layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Search in a specific layer only (3D files only)
 Either z or layer (0-based) can be provided for a 3D file</p></li>
-<li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – return this many (horizontally) nearest points for
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – return this many (horizontally) nearest points for
 each coordinate set, default=1</p></li>
-<li><p><strong>return_distances</strong> (<em>bool</em><em>, </em><em>optional</em>) – should the horizontal distances to each point be returned?
+<li><p><strong>return_distances</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – should the horizontal distances to each point be returned?
 default=False</p></li>
 </ul>
 </dd>
@@ -362,16 +362,16 @@ default=False</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.get_2d_interpolant">
-<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.get_2d_interpolant" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.get_2d_interpolant" title="Permalink to this definition"></a></dt>
 <dd><p>IDW interpolant for list of coordinates</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>xy</strong> (<em>array-like</em>) – x,y coordinates of new points</p></li>
-<li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – number of nearest elements used for IDW, by default 5</p></li>
-<li><p><strong>extrapolate</strong> (<em>bool</em><em>, </em><em>optional</em>) – allow extrapolation, by default False</p></li>
-<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – power of inverse distance weighting, default=2</p></li>
-<li><p><strong>radius</strong> (<em>float</em><em>, </em><em>optional</em>) – an alternative to extrapolate=False,
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of nearest elements used for IDW, by default 5</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – allow extrapolation, by default False</p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – power of inverse distance weighting, default=2</p></li>
+<li><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – an alternative to extrapolate=False,
 only include elements within radius</p></li>
 </ul>
 </dd>
@@ -393,7 +393,7 @@ only include elements within radius</p></li>
 <dd class="field-odd"><p>areas in m2</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array(float)</p>
+<dd class="field-even"><p>np.array(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -405,15 +405,15 @@ only include elements within radius</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – cell-centered data</p></li>
-<li><p><strong>extrapolate</strong> (<em>bool</em><em>, </em><em>optional</em>) – allow the method to extrapolate, default:True</p></li>
+<li><p><strong>data</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – cell-centered data</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – allow the method to extrapolate, default:True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>node-centered data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(float)</p>
+<dd class="field-odd"><p>np.array(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -424,7 +424,7 @@ only include elements within radius</p></li>
 <dd><p>Get the coordinates of each node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<em>int</em>) – Get only nodes with specific code, e.g. land == 1</p>
+<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Get only nodes with specific code, e.g. land == 1</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>x,y,z of each node</p>
@@ -442,13 +442,13 @@ only include elements within radius</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dx</strong> (<em>float</em><em>, </em><em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
-<li><p><strong>dy</strong> (<em>float</em><em>, </em><em>optional</em>) – grid resolution in y-direction</p></li>
-<li><p><strong>nx</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points in x-direction,
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – grid resolution in y-direction</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of points in x-direction,
 by default None (the value will be inferred)</p></li>
-<li><p><strong>ny</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points in y-direction,
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of points in y-direction,
 by default None (the value will be inferred)</p></li>
-<li><p><strong>buffer</strong> (<em>float</em><em>, </em><em>optional</em>) – positive to make the area larger, default=0
+<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – positive to make the area larger, default=0
 can be set to a small negative value to avoid NaN
 values all around the domain.</p></li>
 </ul>
@@ -469,17 +469,17 @@ values all around the domain.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>ndarray</em><em> or </em><em>list</em><em>(</em><em>ndarray</em><em>)</em>) – dfsu data</p></li>
-<li><p><strong>elem_ids</strong> (<em>ndarray</em><em>(</em><em>int</em><em>)</em>) – n sized array of 1 or more element ids used for interpolation</p></li>
-<li><p><strong>weights</strong> (<em>ndarray</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – weights with same size as elem_ids used for interpolation</p></li>
-<li><p><strong>shape</strong> (<em>tuple</em><em>, </em><em>optional</em>) – reshape output</p></li>
+<li><p><strong>data</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>(</em><em>ndarray</em><em>)</em>) – dfsu data</p></li>
+<li><p><strong>elem_ids</strong> (<em>ndarray</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em>) – n sized array of 1 or more element ids used for interpolation</p></li>
+<li><p><strong>weights</strong> (<em>ndarray</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – weights with same size as elem_ids used for interpolation</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>, </em><em>optional</em>) – reshape output</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>spatially interped data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray or list(ndarray)</p>
+<dd class="field-odd"><p>ndarray or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>(ndarray)</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -582,18 +582,18 @@ values all around the domain.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<em>list</em><em>[</em><em>int</em><em>] or </em><em>list</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>time</strong> (<em>int</em><em>, </em><em>str</em><em>, </em><em>datetime</em><em>, </em><em>pd.TimeStamp</em><em>, </em><em>sequence</em><em>, </em><em>slice</em><em> or </em><em>pd.DatetimeIndex</em><em>, </em><em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
-<li><p><strong>keepdims</strong> (<em>bool</em><em>, </em><em>optional</em>) – When reading a single time step only, should the time-dimension be kept
+<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>datetime</em><em>, </em><em>pd.TimeStamp</em><em>, </em><em>sequence</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.10)"><em>slice</em></a><em> or </em><em>pd.DatetimeIndex</em><em>, </em><em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – When reading a single time step only, should the time-dimension be kept
 in the returned Dataset? by default: False</p></li>
-<li><p><strong>area</strong> (<em>list</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Read only data inside (horizontal) area given as a
+<li><p><strong>area</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>]</em><em>, </em><em>optional</em>) – Read only data inside (horizontal) area given as a
 bounding box (tuple with left, lower, right, upper)
 or as list of coordinates for a polygon, by default None</p></li>
-<li><p><strong>x</strong> (<em>float</em><em>, </em><em>optional</em>) – Read only data for elements containing the (x,y) points(s),
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Read only data for elements containing the (x,y) points(s),
 by default None</p></li>
-<li><p><strong>y</strong> (<em>float</em><em>, </em><em>optional</em>) – Read only data for elements containing the (x,y) points(s),
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – Read only data for elements containing the (x,y) points(s),
 by default None</p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – Read only selected element ids, by default None</p></li>
+<li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – Read only selected element ids, by default None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -644,7 +644,7 @@ by default None</p></li>
 <dd><p>write object to mesh file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>outfilename</strong> (<em>str</em>) – path to file to be written</p>
+<dd class="field-odd"><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – path to file to be written</p>
 </dd>
 </dl>
 </dd></dl>
@@ -682,14 +682,14 @@ by default None</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
-<li><p><strong>data</strong> (<em>list</em><em>[</em><em>np.array</em><em>] or </em><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – full path to the new dfsu file</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><em>np.array</em><em>] or </em><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><em>Dataset</em></a>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
 <li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – start datetime, default is datetime.now()</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – The time step (in seconds)</p></li>
-<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – </p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
-<li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
-<li><p><strong>keep_open</strong> (<em>bool</em><em>, </em><em>optional</em>) – Keep file open for appending</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – The time step (in seconds)</p></li>
+<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em><em>, </em><em>deprecated</em>) – </p></li>
+<li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – title of the dfsu file. Default is blank.</p></li>
+<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Keep file open for appending</p></li>
 </ul>
 </dd>
 </dl>
@@ -702,12 +702,12 @@ by default None</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>str</em>) – full path to the new dfsu file</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – full path to the new dfsu file</p></li>
 <li><p><strong>start_time</strong> (<em>datetime</em><em>, </em><em>optional</em>) – start datetime, default is datetime.now()</p></li>
-<li><p><strong>dt</strong> (<em>float</em><em>, </em><em>optional</em>) – The time step (in seconds)</p></li>
-<li><p><strong>items</strong> (<em>list</em><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – </p></li>
-<li><p><strong>elements</strong> (<em>list</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
-<li><p><strong>title</strong> (<em>str</em>) – title of the dfsu file. Default is blank.</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – write only these element ids to file</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – title of the dfsu file. Default is blank.</p></li>
 </ul>
 </dd>
 </dl>
@@ -745,7 +745,7 @@ by default None</p></li>
 <p>A DataArray <code class="docutils literal notranslate"><span class="pre">da</span></code> with a GeometryFM geometry can be plotted using <code class="docutils literal notranslate"><span class="pre">da.plot</span></code>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterFM">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dataarray.</span></span><span class="sig-name descname"><span class="pre">_DataArrayPlotterFM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dataarray.html#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">DataArray</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dataarray.</span></span><span class="sig-name descname"><span class="pre">_DataArrayPlotterFM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="dataarray.html#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">DataArray</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataarray.html#_DataArrayPlotterFM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM" title="Permalink to this definition"></a></dt>
 <dd><p>Plot a DataArray with a GeometryFM geometry</p>
 <p>If DataArray has multiple time steps, the first step will be plotted.</p>
 <p>If DataArray is 3D the surface layer will be plotted.</p>
@@ -763,13 +763,13 @@ by default None</p></li>
 </div>
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterFM.contour">
-<span class="sig-name descname"><span class="pre">contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.contour" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataarray.html#_DataArrayPlotterFM.contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.contour" title="Permalink to this definition"></a></dt>
 <dd><p>Plot data as contour lines</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterFM.contourf">
-<span class="sig-name descname"><span class="pre">contourf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.contourf" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">contourf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataarray.html#_DataArrayPlotterFM.contourf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.contourf" title="Permalink to this definition"></a></dt>
 <dd><p>Plot data as filled contours</p>
 </dd></dl>
 
@@ -780,21 +780,21 @@ by default None</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bins</strong> (<em>int</em><em> or </em><em>sequence</em><em> or </em><em>str</em><em>,</em>) – If bins is an integer, it defines the number
+<li><p><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><em>sequence</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>,</em>) – If bins is an integer, it defines the number
 of equal-width bins in the range.
 If bins is a sequence, it defines the bin edges,
 including the left edge of the first bin and the
 right edge of the last bin.
 by default: rcParams[“hist.bins”] (default: 10)</p></li>
 <li><p><strong>ax</strong> (<em>matplotlib.axes</em><em>, </em><em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
-<li><p><strong>figsize</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – specify size of figure</p></li>
-<li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – axes title</p></li>
+<li><p><strong>figsize</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – specify size of figure</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – axes title</p></li>
 </ul>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></p>
+<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.5.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -811,19 +811,19 @@ by default: rcParams[“hist.bins”] (default: 10)</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterFM.mesh">
-<span class="sig-name descname"><span class="pre">mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.mesh" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataarray.html#_DataArrayPlotterFM.mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.mesh" title="Permalink to this definition"></a></dt>
 <dd><p>Plot mesh only</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterFM.outline">
-<span class="sig-name descname"><span class="pre">outline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.outline" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">outline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataarray.html#_DataArrayPlotterFM.outline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.outline" title="Permalink to this definition"></a></dt>
 <dd><p>Plot domain outline (using the boundary_polylines property)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dataarray._DataArrayPlotterFM.patch">
-<span class="sig-name descname"><span class="pre">patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.patch" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">patch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataarray.html#_DataArrayPlotterFM.patch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataarray._DataArrayPlotterFM.patch" title="Permalink to this definition"></a></dt>
 <dd><p>Plot data as coloured patches</p>
 </dd></dl>
 

@@ -88,7 +88,7 @@
 <h2>FM Geometry Vertical Column API<a class="headerlink" href="#fm-geometry-vertical-column-api" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.spatial.FM_geometry.</span></span><span class="sig-name descname"><span class="pre">GeometryFMVerticalColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfsu_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.spatial.FM_geometry.</span></span><span class="sig-name descname"><span class="pre">GeometryFMVerticalColumn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_coordinates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_table</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfsu_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/FM_geometry.html#GeometryFMVerticalColumn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn" title="Permalink to this definition"></a></dt>
 <dd><dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.bottom_elements">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bottom_elements</span></span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.bottom_elements" title="Permalink to this definition"></a></dt>
@@ -110,8 +110,8 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>np.array</em><em>(</em><em>int</em><em>)</em><em>, </em><em>optional</em>) – element ids of selected elements</p></li>
-<li><p><strong>zn</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – only the z-coodinates of the nodes</p></li>
+<li><p><strong>elements</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em><em>, </em><em>optional</em>) – element ids of selected elements</p></li>
+<li><p><strong>zn</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – only the z-coodinates of the nodes</p></li>
 </ul>
 </dd>
 </dl>
@@ -134,7 +134,7 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.contains" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.10)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.contains" title="Permalink to this definition"></a></dt>
 <dd><p>test if a list of points are contained by mesh</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -175,13 +175,13 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.elements_to_geometry">
-<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="pre">GeometryFM</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D" title="mikeio.spatial.FM_geometry.GeometryFM3D"><span class="pre">GeometryFM3D</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.elements_to_geometry" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="pre">GeometryFM</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D" title="mikeio.spatial.FM_geometry.GeometryFM3D"><span class="pre">GeometryFM3D</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.elements_to_geometry" title="Permalink to this definition"></a></dt>
 <dd><p>export a selection of elements to new flexible file geometry</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – list of element ids</p></li>
-<li><p><strong>node_layers</strong> (<em>str</em><em>, </em><em>optional</em>) – for 3d files either ‘top’, ‘bottom’ layer nodes
+<li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em>) – list of element ids</p></li>
+<li><p><strong>node_layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – for 3d files either ‘top’, ‘bottom’ layer nodes
 or ‘all’ can be selected, by default ‘all’</p></li>
 </ul>
 </dd>
@@ -205,13 +205,13 @@ sel() method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – X coordinate(s) (easting or longitude)</p></li>
-<li><p><strong>y</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – Y coordinate(s) (northing or latitude)</p></li>
-<li><p><strong>coords</strong> (<em>np.array</em><em>(</em><em>float</em><em>,</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – As an alternative to specifying x, and y individually,
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – X coordinate(s) (easting or longitude)</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – Y coordinate(s) (northing or latitude)</p></li>
+<li><p><strong>coords</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>,</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – As an alternative to specifying x, and y individually,
 the argument coords can be used instead.
 (x,y)-coordinates of points to be found,
 by default None</p></li>
-<li><p><strong>area</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Bounding box of coordinates (left lower and right upper)
+<li><p><strong>area</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – Bounding box of coordinates (left lower and right upper)
 to be selected, by default None</p></li>
 </ul>
 </dd>
@@ -245,15 +245,15 @@ to be selected, by default None</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – X coordinate(s) (easting or longitude)</p></li>
-<li><p><strong>y</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em>) – Y coordinate(s) (northing or latitude)</p></li>
-<li><p><strong>z</strong> (<em>float</em><em> or </em><em>array</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Z coordinate(s)  (vertical coordinate, positive upwards)
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – X coordinate(s) (easting or longitude)</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – Y coordinate(s) (northing or latitude)</p></li>
+<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – Z coordinate(s)  (vertical coordinate, positive upwards)
 If not provided for a 3d file, the surface element is returned</p></li>
-<li><p><strong>layer</strong> (<em>int</em><em>, </em><em>optional</em>) – Search in a specific layer only (3D files only)
+<li><p><strong>layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Search in a specific layer only (3D files only)
 Either z or layer (0-based) can be provided for a 3D file</p></li>
-<li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – return this many (horizontally) nearest points for
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – return this many (horizontally) nearest points for
 each coordinate set, default=1</p></li>
-<li><p><strong>return_distances</strong> (<em>bool</em><em>, </em><em>optional</em>) – should the horizontal distances to each point be returned?
+<li><p><strong>return_distances</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – should the horizontal distances to each point be returned?
 default=False</p></li>
 </ul>
 </dd>
@@ -297,16 +297,16 @@ default=False</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.get_2d_interpolant">
-<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.get_2d_interpolant" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.get_2d_interpolant" title="Permalink to this definition"></a></dt>
 <dd><p>IDW interpolant for list of coordinates</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>xy</strong> (<em>array-like</em>) – x,y coordinates of new points</p></li>
-<li><p><strong>n_nearest</strong> (<em>int</em><em>, </em><em>optional</em>) – number of nearest elements used for IDW, by default 5</p></li>
-<li><p><strong>extrapolate</strong> (<em>bool</em><em>, </em><em>optional</em>) – allow extrapolation, by default False</p></li>
-<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – power of inverse distance weighting, default=2</p></li>
-<li><p><strong>radius</strong> (<em>float</em><em>, </em><em>optional</em>) – an alternative to extrapolate=False,
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of nearest elements used for IDW, by default 5</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – allow extrapolation, by default False</p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – power of inverse distance weighting, default=2</p></li>
+<li><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – an alternative to extrapolate=False,
 only include elements within radius</p></li>
 </ul>
 </dd>
@@ -328,7 +328,7 @@ only include elements within radius</p></li>
 <dd class="field-odd"><p>areas in m2</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.array(float)</p>
+<dd class="field-even"><p>np.array(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -339,14 +339,14 @@ only include elements within radius</p></li>
 <dd><p>3d element ids for one (or more) specific layer(s)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>layers</strong> (<em>int</em><em> or </em><em>list</em><em>(</em><em>int</em><em>)</em>) – layer between 0 (bottom) and n_layers-1 (top)
+<dd class="field-odd"><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em>) – layer between 0 (bottom) and n_layers-1 (top)
 (can also be negative counting from -1 at the top layer)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>element ids</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(int)</p>
+<dd class="field-odd"><p>np.array(<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -358,15 +358,15 @@ only include elements within radius</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>np.array</em><em>(</em><em>float</em><em>)</em>) – cell-centered data</p></li>
-<li><p><strong>extrapolate</strong> (<em>bool</em><em>, </em><em>optional</em>) – allow the method to extrapolate, default:True</p></li>
+<li><p><strong>data</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em>) – cell-centered data</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – allow the method to extrapolate, default:True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>node-centered data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>np.array(float)</p>
+<dd class="field-odd"><p>np.array(<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)">float</a>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -378,13 +378,13 @@ only include elements within radius</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dx</strong> (<em>float</em><em> or </em><em>(</em><em>float</em><em>, </em><em>float</em><em>)</em><em>, </em><em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
-<li><p><strong>dy</strong> (<em>float</em><em>, </em><em>optional</em>) – grid resolution in y-direction</p></li>
-<li><p><strong>nx</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points in x-direction, by default None,
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em> or </em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – grid resolution in y-direction</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of points in x-direction, by default None,
 (the value will be inferred)</p></li>
-<li><p><strong>ny</strong> (<em>int</em><em>, </em><em>optional</em>) – number of points in y-direction, by default None,
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – number of points in y-direction, by default None,
 (the value will be inferred)</p></li>
-<li><p><strong>buffer</strong> (<em>float</em><em>, </em><em>optional</em>) – positive to make the area larger, default=0
+<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>, </em><em>optional</em>) – positive to make the area larger, default=0
 can be set to a small negative value to avoid NaN
 values all around the domain.</p></li>
 </ul>
@@ -405,17 +405,17 @@ values all around the domain.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> (<em>ndarray</em><em> or </em><em>list</em><em>(</em><em>ndarray</em><em>)</em>) – dfsu data</p></li>
-<li><p><strong>elem_ids</strong> (<em>ndarray</em><em>(</em><em>int</em><em>)</em>) – n sized array of 1 or more element ids used for interpolation</p></li>
-<li><p><strong>weights</strong> (<em>ndarray</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – weights with same size as elem_ids used for interpolation</p></li>
-<li><p><strong>shape</strong> (<em>tuple</em><em>, </em><em>optional</em>) – reshape output</p></li>
+<li><p><strong>data</strong> (<em>ndarray</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>(</em><em>ndarray</em><em>)</em>) – dfsu data</p></li>
+<li><p><strong>elem_ids</strong> (<em>ndarray</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em>) – n sized array of 1 or more element ids used for interpolation</p></li>
+<li><p><strong>weights</strong> (<em>ndarray</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – weights with same size as elem_ids used for interpolation</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>, </em><em>optional</em>) – reshape output</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>spatially interped data</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ndarray or list(ndarray)</p>
+<dd class="field-odd"><p>ndarray or <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>(ndarray)</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -429,37 +429,37 @@ values all around the domain.</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_2d">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_2d" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_2d" title="Permalink to this definition"></a></dt>
 <dd><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_geo">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_geo" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_geo" title="Permalink to this definition"></a></dt>
 <dd><p>Are coordinates geographical (LONG/LAT)?</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_layered">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_layered" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_layered" title="Permalink to this definition"></a></dt>
 <dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_local_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_local_coordinates" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_local_coordinates" title="Permalink to this definition"></a></dt>
 <dd><p>Are coordinates relative (NON-UTM)?</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_spectral">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_spectral" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_spectral" title="Permalink to this definition"></a></dt>
 <dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_tri_only">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_tri_only" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.is_tri_only" title="Permalink to this definition"></a></dt>
 <dd><p>Does the mesh consist of triangles only?</p>
 </dd></dl>
 
@@ -472,8 +472,8 @@ isel() or sel() methods.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>idx</strong> (<em>list</em><em>(</em><em>int</em><em>)</em>) – list of element indicies</p></li>
-<li><p><strong>keepdims</strong> (<em>bool</em><em>, </em><em>optional</em>) – Should the original Geometry type be kept (keepdims=True)
+<li><p><strong>idx</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>)</em>) – list of element indicies</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Should the original Geometry type be kept (keepdims=True)
 or should it be reduced e.g. to a GeometryPoint2D if possible
 (keepdims=False), by default False</p></li>
 </ul>
@@ -508,7 +508,7 @@ or should it be reduced e.g. to a GeometryPoint2D if possible
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.n_elements">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.n_elements" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.n_elements" title="Permalink to this definition"></a></dt>
 <dd><p>Number of elements</p>
 </dd></dl>
 
@@ -526,7 +526,7 @@ or should it be reduced e.g. to a GeometryPoint2D if possible
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.n_nodes">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.n_nodes" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.n_nodes" title="Permalink to this definition"></a></dt>
 <dd><p>Number of nodes</p>
 </dd></dl>
 
@@ -556,7 +556,7 @@ or should it be reduced e.g. to a GeometryPoint2D if possible
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.projection_string">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.projection_string" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#mikeio.spatial.FM_geometry.GeometryFMVerticalColumn.projection_string" title="Permalink to this definition"></a></dt>
 <dd><p>The projection string</p>
 </dd></dl>
 

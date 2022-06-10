@@ -31,7 +31,7 @@ In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all 
 
 ## MIKE IO Flexible Mesh Geometry 
 
-MIKE IO has a Flexible Mesh Geometry class, `GeometryFM`, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
+MIKE IO has a Flexible Mesh Geometry class, [`GeometryFM`](GeometryFM), containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
 
 | Property  |      Description     |
 |----------|--------------|
@@ -64,7 +64,7 @@ MIKE IO has a Flexible Mesh Geometry class, `GeometryFM`, containing the list of
 
 These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object. 
 
-If a .dfsu file is *read* with `mikeio.read()`, the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with mikeio.open, the returned object will also contain a Flexible Mesh Geometry `geometry`. 
+If a .dfsu file is *read* with {py:meth}`mikeio.read`, the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with {py:meth}`mikeio.open`, the returned object will also contain a Flexible Mesh Geometry `geometry`. 
 
 ```python
 >>> import mikeio

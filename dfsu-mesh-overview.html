@@ -119,7 +119,7 @@ available in a .dfsu file as static items.</p>
 </section>
 <section id="mike-io-flexible-mesh-geometry">
 <h2>MIKE IO Flexible Mesh Geometry<a class="headerlink" href="#mike-io-flexible-mesh-geometry" title="Permalink to this heading"></a></h2>
-<p>MIKE IO has a Flexible Mesh Geometry class, <code class="docutils literal notranslate"><span class="pre">GeometryFM</span></code>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh.</p>
+<p>MIKE IO has a Flexible Mesh Geometry class, <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">GeometryFM</span></code></span></a>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh.</p>
 <table class="colwidths-auto docutils align-default">
 <thead>
 <tr class="row-odd"><th class="head"><p>Property</p></th>
@@ -202,7 +202,7 @@ available in a .dfsu file as static items.</p>
 </tbody>
 </table>
 <p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
-<p>If a .dfsu file is <em>read</em> with <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code>, the returned Dataset ds will contain a Flexible Mesh Geometry <code class="docutils literal notranslate"><span class="pre">geometry</span></code>. If a .dfsu or a .mesh file is <em>opened</em> with mikeio.open, the returned object will also contain a Flexible Mesh Geometry <code class="docutils literal notranslate"><span class="pre">geometry</span></code>.</p>
+<p>If a .dfsu file is <em>read</em> with <a class="reference internal" href="dfs-overview.html#mikeio.read" title="mikeio.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mikeio.read()</span></code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code class="docutils literal notranslate"><span class="pre">geometry</span></code>. If a .dfsu or a .mesh file is <em>opened</em> with <a class="reference internal" href="dfs-overview.html#mikeio.open" title="mikeio.open"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mikeio.open()</span></code></a>, the returned object will also contain a Flexible Mesh Geometry <code class="docutils literal notranslate"><span class="pre">geometry</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;oresundHD_run1.dfsu&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">geometry</span>

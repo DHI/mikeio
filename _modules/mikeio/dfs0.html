@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mikeio.dfs0 &mdash; MIKE IO  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> MIKE IO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../design.html">Design philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data-structures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dataarray.html">DataArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfs-overview.html">Dfs Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfs0.html">Dfs0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfs1.html">Dfs1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfs2.html">Dfs2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfs3.html">Dfs3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfsu-2d.html">Dfsu 2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../dfsu-spectral.html">Dfsu Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../eum.html">EUM and items</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../generic.html">Generic</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">MIKE IO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+          <li><a href="../mikeio.html">mikeio</a> &raquo;</li>
+      <li>mikeio.dfs0</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mikeio.dfs0</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span><span class="p">,</span> <span class="n">DfsBuilder</span>
+
+<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DfsSimpleType</span><span class="p">,</span>
+    <span class="n">DataValueType</span><span class="p">,</span>
+    <span class="n">StatType</span><span class="p">,</span>
+    <span class="n">TimeAxisType</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
+<span class="kn">from</span> <span class="nn">.dfsutil</span> <span class="kn">import</span> <span class="n">_valid_item_numbers</span><span class="p">,</span> <span class="n">_get_item_info</span><span class="p">,</span> <span class="n">_valid_timesteps</span>
+<span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">TimeStepUnit</span><span class="p">,</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">,</span> <span class="n">ItemInfo</span>
+<span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
+
+
+<span class="k">def</span> <span class="nf">_write_dfs0</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">dataset</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">DfsSimpleType</span><span class="o">.</span><span class="n">Float</span><span class="p">):</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">factory</span> <span class="o">=</span> <span class="n">DfsFactory</span><span class="p">()</span>
+    <span class="n">builder</span> <span class="o">=</span> <span class="n">DfsBuilder</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="s2">&quot;mikeio&quot;</span><span class="p">,</span> <span class="n">__dfs_version__</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">SetDataType</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">SetGeographicalProjection</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionUndefined</span><span class="p">())</span>
+
+    <span class="n">system_start_time</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">dataset</span><span class="o">.</span><span class="n">is_equidistant</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># TODO</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dataset</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+        <span class="n">temporal_axis</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateTemporalEqCalendarAxis</span><span class="p">(</span>
+            <span class="n">TimeStepUnit</span><span class="o">.</span><span class="n">SECOND</span><span class="p">,</span> <span class="n">system_start_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dt</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">temporal_axis</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateTemporalNonEqCalendarAxis</span><span class="p">(</span>
+            <span class="n">TimeStepUnit</span><span class="o">.</span><span class="n">SECOND</span><span class="p">,</span> <span class="n">system_start_time</span>
+        <span class="p">)</span>
+
+    <span class="n">builder</span><span class="o">.</span><span class="n">SetTemporalAxis</span><span class="p">(</span><span class="n">temporal_axis</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">SetItemStatisticsType</span><span class="p">(</span><span class="n">StatType</span><span class="o">.</span><span class="n">RegularStat</span><span class="p">)</span>
+
+    <span class="n">dfs_dtype</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="o">.</span><span class="n">_to_dfs_datatype</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="n">dataset</span><span class="p">:</span>
+        <span class="n">newitem</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">CreateDynamicItemBuilder</span><span class="p">()</span>
+        <span class="n">quantity</span> <span class="o">=</span> <span class="n">eumQuantity</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">newitem</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">quantity</span><span class="p">,</span> <span class="n">dfs_dtype</span><span class="p">)</span>
+
+        <span class="c1"># TODO set default on DataArray</span>
+        <span class="k">if</span> <span class="n">da</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">data_value_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">newitem</span><span class="o">.</span><span class="n">SetValueType</span><span class="p">(</span><span class="n">da</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">data_value_type</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newitem</span><span class="o">.</span><span class="n">SetValueType</span><span class="p">(</span><span class="n">DataValueType</span><span class="o">.</span><span class="n">Instantaneous</span><span class="p">)</span>
+
+        <span class="n">newitem</span><span class="o">.</span><span class="n">SetAxis</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">CreateAxisEqD0</span><span class="p">())</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">AddDynamicItem</span><span class="p">(</span><span class="n">newitem</span><span class="o">.</span><span class="n">GetDynamicItemInfo</span><span class="p">())</span>
+
+    <span class="n">builder</span><span class="o">.</span><span class="n">CreateFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+    <span class="n">dfs</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">GetFile</span><span class="p">()</span>
+
+    <span class="n">delete_value</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueFloat</span>
+
+    <span class="n">t_seconds</span> <span class="o">=</span> <span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">time</span> <span class="o">-</span> <span class="n">dataset</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span> <span class="o">=</span> <span class="n">delete_value</span>
+
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">data_to_write</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">t_seconds</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">data</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">data_to_write</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">t_seconds</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">data</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+    <span class="n">rc</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">WriteDfs0DataDouble</span><span class="p">(</span><span class="n">data_to_write</span><span class="p">)</span>
+
+    <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Dfs0"><a class="viewcode-back" href="../../dfs0.html#mikeio.Dfs0">[docs]</a><span class="k">class</span> <span class="nc">Dfs0</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a Dfs0 object for reading, writing</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename: str or Path, optional</span>
+<span class="sd">            File name including full path to the dfs0 file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_equidistant</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_title</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_header</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;mikeio.Dfs0&gt;&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">):</span>
+            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;timeaxis: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_timeaxistype</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;items:&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">):</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:  </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;number of items: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_read_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+
+        <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="n">dfs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_deletevalue</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueDouble</span>  <span class="c1"># NOTE: changed in cutil</span>
+
+        <span class="c1"># Read items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="n">_get_item_info</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span><span class="p">)))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timeaxistype</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeaxistype</span> <span class="ow">in</span> <span class="p">{</span>
+            <span class="n">TimeAxisType</span><span class="o">.</span><span class="n">CalendarEquidistant</span><span class="p">,</span>
+            <span class="n">TimeAxisType</span><span class="o">.</span><span class="n">CalendarNonEquidistant</span><span class="p">,</span>
+        <span class="p">}:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">StartDateTime</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># relative time axis</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">1970</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Dfs0.read"><a class="viewcode-back" href="../../dfs0.html#mikeio.Dfs0.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read data from a dfs0 file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        items: list[int] or list[str], optional</span>
+<span class="sd">            Read only selected items, by number (0-based), or by name</span>
+<span class="sd">        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional</span>
+<span class="sd">            Read only selected time steps, by default None (=all)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dataset</span>
+<span class="sd">            A Dataset with data dimensions [t]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">time_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="ne">FutureWarning</span><span class="p">(</span>
+                    <span class="s2">&quot;time_steps have been renamed to time, and will be removed in a future release&quot;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">time_steps</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="si">}</span><span class="s2"> not found.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># read data from file</span>
+        <span class="n">fdata</span><span class="p">,</span> <span class="n">ftime</span><span class="p">,</span> <span class="n">fitems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span>
+        <span class="n">dfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span>
+
+        <span class="c1"># select items</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">)</span>
+        <span class="n">item_numbers</span> <span class="o">=</span> <span class="n">_valid_item_numbers</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fdata</span> <span class="o">=</span> <span class="p">[</span><span class="n">fdata</span><span class="p">[</span><span class="n">it</span><span class="p">]</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">item_numbers</span><span class="p">]</span>
+            <span class="n">fitems</span> <span class="o">=</span> <span class="p">[</span><span class="n">fitems</span><span class="p">[</span><span class="n">it</span><span class="p">]</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">item_numbers</span><span class="p">]</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">fdata</span><span class="p">,</span> <span class="n">ftime</span><span class="p">,</span> <span class="n">fitems</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="c1"># select time steps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeaxistype</span> <span class="o">==</span> <span class="n">TimeAxisType</span><span class="o">.</span><span class="n">CalendarNonEquidistant</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="n">time</span><span class="p">,</span> <span class="nb">str</span>
+        <span class="p">):</span>
+            <span class="n">sel_time_step_str</span> <span class="o">=</span> <span class="n">time</span>
+            <span class="n">time_steps</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel_time_step_str</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">time_steps</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">time_steps</span> <span class="o">=</span> <span class="n">_valid_timesteps</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">time_steps</span><span class="p">:</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time_steps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sel_time_step_str</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">sel_time_step_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># end=start</span>
+
+            <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">sel</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># stop only</span>
+            <span class="k">elif</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">sel</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># start only</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sel</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">ds</span></div>
+
+    <span class="k">def</span> <span class="nf">__read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read all data from a dfs0 file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">raw_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">ReadDfs0DataDouble</span><span class="p">()</span>  <span class="c1"># Bulk read the data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+        <span class="c1"># matrix[matrix == self._deletevalue] = np.nan</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="n">matrix</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueDouble</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># cutil</span>
+        <span class="n">matrix</span><span class="p">[</span><span class="n">matrix</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueFloat</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>  <span class="c1"># linux</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">matrix</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+        <span class="n">t_seconds</span> <span class="o">=</span> <span class="n">raw_data</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">t_seconds</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">freq</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span><span class="p">)</span>  <span class="c1"># accept nothing finer than milliseconds</span>
+
+        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">ItemInfo</span><span class="p">(</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span>
+                <span class="n">EUMType</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">Quantity</span><span class="o">.</span><span class="n">Item</span><span class="p">),</span>
+                <span class="n">EUMUnit</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">Quantity</span><span class="o">.</span><span class="n">Unit</span><span class="p">),</span>
+                <span class="n">data_value_type</span><span class="o">=</span><span class="n">item</span><span class="o">.</span><span class="n">ValueType</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">ItemInfo</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">items</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_to_dfs_datatype</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DfsSimpleType</span><span class="o">.</span><span class="n">Float</span>
+
+        <span class="k">if</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="p">{</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">DfsSimpleType</span><span class="o">.</span><span class="n">Double</span><span class="p">,</span> <span class="s2">&quot;double&quot;</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="n">DfsSimpleType</span><span class="o">.</span><span class="n">Double</span>
+
+        <span class="k">if</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="p">{</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">DfsSimpleType</span><span class="o">.</span><span class="n">Float</span><span class="p">,</span> <span class="s2">&quot;float&quot;</span><span class="p">,</span> <span class="s2">&quot;single&quot;</span><span class="p">}:</span>
+            <span class="k">return</span> <span class="n">DfsSimpleType</span><span class="o">.</span><span class="n">Float</span>
+
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Dfs files only support float or double&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_setup_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">factory</span> <span class="o">=</span> <span class="n">DfsFactory</span><span class="p">()</span>
+        <span class="n">builder</span> <span class="o">=</span> <span class="n">DfsBuilder</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_title</span><span class="p">,</span> <span class="s2">&quot;mikeio&quot;</span><span class="p">,</span> <span class="n">__dfs_version__</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">SetDataType</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">SetGeographicalProjection</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionUndefined</span><span class="p">())</span>
+
+        <span class="n">system_start_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_equidistant</span><span class="p">:</span>
+            <span class="n">temporal_axis</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateTemporalEqCalendarAxis</span><span class="p">(</span>
+                <span class="n">TimeStepUnit</span><span class="o">.</span><span class="n">SECOND</span><span class="p">,</span> <span class="n">system_start_time</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temporal_axis</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateTemporalNonEqCalendarAxis</span><span class="p">(</span>
+                <span class="n">TimeStepUnit</span><span class="o">.</span><span class="n">SECOND</span><span class="p">,</span> <span class="n">system_start_time</span>
+            <span class="p">)</span>
+
+        <span class="n">builder</span><span class="o">.</span><span class="n">SetTemporalAxis</span><span class="p">(</span><span class="n">temporal_axis</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">SetItemStatisticsType</span><span class="p">(</span><span class="n">StatType</span><span class="o">.</span><span class="n">RegularStat</span><span class="p">)</span>
+
+        <span class="n">dtype_dfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_dfs_datatype</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span><span class="p">):</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">newitem</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">CreateDynamicItemBuilder</span><span class="p">()</span>
+            <span class="n">quantity</span> <span class="o">=</span> <span class="n">eumQuantity</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">item</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+            <span class="n">newitem</span><span class="o">.</span><span class="n">Set</span><span class="p">(</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">quantity</span><span class="p">,</span>
+                <span class="n">dtype_dfs</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">data_value_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">newitem</span><span class="o">.</span><span class="n">SetValueType</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data_value_type</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newitem</span><span class="o">.</span><span class="n">SetValueType</span><span class="p">(</span><span class="n">DataValueType</span><span class="o">.</span><span class="n">Instantaneous</span><span class="p">)</span>
+
+            <span class="n">newitem</span><span class="o">.</span><span class="n">SetAxis</span><span class="p">(</span><span class="n">factory</span><span class="o">.</span><span class="n">CreateAxisEqD0</span><span class="p">())</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">AddDynamicItem</span><span class="p">(</span><span class="n">newitem</span><span class="o">.</span><span class="n">GetDynamicItemInfo</span><span class="p">())</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">builder</span><span class="o">.</span><span class="n">CreateFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot create dfs0 file: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">builder</span><span class="o">.</span><span class="n">GetFile</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Dfs0.write"><a class="viewcode-back" href="../../dfs0.html#mikeio.Dfs0.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">datetimes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a dfs0 file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            Full path and filename to dfs0 to be created.</span>
+<span class="sd">        data: list[np.array]</span>
+<span class="sd">            values</span>
+<span class="sd">        start_time: datetime.datetime, , optional</span>
+<span class="sd">            start date of type datetime.</span>
+<span class="sd">        dt: float, optional</span>
+<span class="sd">            the time step. Therefore dt of 5.5 with timeseries_unit of minutes</span>
+<span class="sd">            means 5 mins and 30 seconds. default to 1.0</span>
+<span class="sd">        datetimes: list[datetime]</span>
+<span class="sd">        items: list[ItemInfo], optional</span>
+<span class="sd">            List of ItemInfo corresponding to a variable types (ie. Water Level).</span>
+<span class="sd">        title: str, optional</span>
+<span class="sd">            title, default blank</span>
+<span class="sd">        dtype : np.dtype, optional</span>
+<span class="sd">            default np.float32</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_title</span> <span class="o">=</span> <span class="n">title</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span> <span class="o">=</span> <span class="n">dtype</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span>
+
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">is_equidistant</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">datetimes</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">datetimes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">datetimes</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">datetimes</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;infer&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dt</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="n">dt</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+        <span class="k">if</span> <span class="n">start_time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">start_time</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">items</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="n">items</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No items info supplied. Using Item 1, 2, 3,...&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">ItemInfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_items</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of items must match the number of data columns.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">datetimes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">datetimes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_equidistant</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">t_seconds</span> <span class="o">=</span> <span class="p">(</span><span class="n">datetimes</span> <span class="o">-</span> <span class="n">datetimes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_equidistant</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;No start time supplied. Using current time: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span><span class="si">}</span><span class="s2"> as start time.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dt</span><span class="p">)</span>
+            <span class="n">t_seconds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span><span class="p">))</span>
+
+        <span class="n">dfs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setup_header</span><span class="p">()</span>
+
+        <span class="n">delete_value</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueFloat</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s2">&quot;F&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span> <span class="o">=</span> <span class="n">delete_value</span>
+        <span class="n">data_to_write</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">t_seconds</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">data</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rc</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">WriteDfs0DataDouble</span><span class="p">(</span><span class="n">data_to_write</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rc</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;mikecore WriteDfs0DataDouble returned </span><span class="si">{</span><span class="n">rc</span><span class="si">}</span><span class="s2">! Writing file probably failed.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Dfs0.to_dataframe"><a class="viewcode-back" href="../../dfs0.html#mikeio.Dfs0.to_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit_in_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">round_time</span><span class="o">=</span><span class="s2">&quot;ms&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read data from the dfs0 file and return a Pandas DataFrame.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        unit_in_name: bool, optional</span>
+<span class="sd">            include unit in column name, default False</span>
+<span class="sd">        round_time: string, bool, optional</span>
+<span class="sd">            round time to avoid problem with floating point inaccurcy, set to False to avoid rounding</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">items</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unit_in_name</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">round_time</span><span class="p">:</span>
+            <span class="n">rounded_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">round_time</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">rounded_idx</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;infer&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;infer&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="Dfs0.from_dataframe"><a class="viewcode-back" href="../../dfs0.html#mikeio.Dfs0.from_dataframe">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">itemtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a dfs0 from a pandas Dataframe</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        df: pd.DataFrame</span>
+<span class="sd">            Dataframe with data</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            filename to write output</span>
+<span class="sd">        itemtype: EUMType, optional</span>
+<span class="sd">            Same type for all items</span>
+<span class="sd">        unit: EUMUnit, optional</span>
+<span class="sd">            Same unit for all items</span>
+<span class="sd">        items: list[ItemInfo]</span>
+<span class="sd">            Different types, units for each items, similar to `create`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">dataframe_to_dfs0</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">deletevalue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;File delete value&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deletevalue</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of items&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_items</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;List of items&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_items</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;File start time&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">IsEquidistant</span><span class="p">():</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeStep</span>
+                <span class="n">n_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
+                <span class="n">timespan</span> <span class="o">=</span> <span class="n">dt</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">timespan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeSpan</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">timespan</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_end_time</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_timesteps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Number of time steps&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span></div>
+
+
+<span class="k">def</span> <span class="nf">series_to_dfs0</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">,</span>
+    <span class="n">itemtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_dfs0</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">dataframe_to_dfs0</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">filename</span><span class="p">,</span>
+    <span class="n">itemtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a dfs0</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename: str</span>
+<span class="sd">        filename to write output</span>
+<span class="sd">    itemtype: EUMType, optional</span>
+<span class="sd">        Same type for all items</span>
+<span class="sd">    unit: EUMUnit, optional</span>
+<span class="sd">        Same unit for all items</span>
+<span class="sd">    items: list[ItemInfo]</span>
+<span class="sd">        Different types, units for each items, similar to `create`</span>
+<span class="sd">    title: str, optional</span>
+<span class="sd">        Title of dfs0 file</span>
+<span class="sd">    dtype : np.dtype, optional</span>
+<span class="sd">            default np.float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">()</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">itemtype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">ItemInfo</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">ItemInfo</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">ItemInfo</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># non-equidistant</span>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">datetimes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># equidistant</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">delta</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+<span class="c1"># Monkey patching onto Pandas classes</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">to_dfs0</span> <span class="o">=</span> <span class="n">dataframe_to_dfs0</span>
+
+<span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="o">.</span><span class="n">to_dfs0</span> <span class="o">=</span> <span class="n">series_to_dfs0</span>
+
+
+<span class="k">def</span> <span class="nf">dataset_to_dfs0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">&quot;Dataset.to_dfs0() is deprecated, use Dataset.to_dfs()&quot;</span><span class="p">,</span>
+        <span class="ne">FutureWarning</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;Only data with a single dimension can be converted to a dfs0.</span>
+<span class="sd">                 Hint: use `isel` to create a subset.&quot;&quot;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">dfs0</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">()</span>
+
+    <span class="n">dfs0</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+
+<span class="n">Dataset</span><span class="o">.</span><span class="n">to_dfs0</span> <span class="o">=</span> <span class="n">dataset_to_dfs0</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

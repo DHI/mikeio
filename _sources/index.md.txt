@@ -1,13 +1,13 @@
 
-# MIKE IO: input/output of MIKE files in Python
-
 ![](../images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg)
+
+# MIKE IO: input/output of MIKE files in Python
+ ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
+[![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. 
 
 See our sister library [MIKE IO 1D](https://github.com/DHI/mikeio1d) for .res1d and .xns11 files.
-
-**The documentation is currently being updated to reflect the upcoming version of MIKE IO 1.0**
 
 ## Requirements
 
