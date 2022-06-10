@@ -76,15 +76,21 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
         for da in ds:
             key = da.name
-            nt, ne = da.shape
-            idatitem = np.empty(shape=(nt, ni))
-            for step in range(nt):
-                idatitem[step, :] = _interp_itemstep(
-                    da[step].to_numpy(), elem_ids, weights
-                )
+            if "time" not in da.dims:
+                idatitem = np.empty(shape=ni)
+                idatitem[:] = _interp_itemstep(da[step].to_numpy(), elem_ids, weights)
+                if shape:
+                    idatitem = idatitem.reshape(*shape)
 
-            if shape:
-                idatitem = idatitem.reshape((nt, *shape))
+            else:
+                nt, _ = da.shape
+                idatitem = np.empty(shape=(nt, ni))
+                for step in range(nt):
+                    idatitem[step, :] = _interp_itemstep(
+                        da[step].to_numpy(), elem_ids, weights
+                    )
+                if shape:
+                    idatitem = idatitem.reshape((nt, *shape))
             interp_data_vars[key] = DataArray(data=idatitem, time=da.time, item=da.item)
 
         new_ds = Dataset(interp_data_vars, validate=False)
@@ -94,7 +100,11 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     if isinstance(data, np.ndarray):
         if data.ndim == 1:
             # data is single item and single time step
-            return _interp_itemstep(data, elem_ids, weights)
+            idatitem = _interp_itemstep(data, elem_ids, weights)
+            if shape:
+                idatitem = idatitem.reshape(*shape)
+            return idatitem
+
         elif data.ndim == 2:
             is_single_item = True
             data = [data]

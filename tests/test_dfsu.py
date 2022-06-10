@@ -913,6 +913,15 @@ def test_interp_like_grid():
 
 
 def test_interp_like_grid_time_invariant():
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
+    assert "time" not in ds.dims
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+    ds_grid = ds.interp_like(grid)
+    assert ds_grid.n_timesteps == ds.n_timesteps
+    assert isinstance(ds_grid, Dataset)
+    assert isinstance(ds_grid.geometry, Grid2D)
+
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
     assert "time" not in ds.dims
     ws = ds[0]
