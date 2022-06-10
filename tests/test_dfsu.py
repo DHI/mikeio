@@ -912,6 +912,17 @@ def test_interp_like_grid():
     assert isinstance(ws_grid.geometry, Grid2D)
 
 
+def test_interp_like_grid_time_invariant():
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
+    assert "time" not in ds.dims
+    ws = ds[0]
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+    ws_grid = ws.interp_like(grid)
+    assert ws_grid.n_timesteps == ds.n_timesteps
+    assert isinstance(ws_grid, DataArray)
+    assert isinstance(ws_grid.geometry, Grid2D)
+
+
 def test_interp_like_dataarray(tmpdir):
 
     outfilename = os.path.join(tmpdir, "interp.dfs2")
