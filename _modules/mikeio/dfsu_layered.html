@@ -507,15 +507,22 @@
         <span class="p">)</span>
         <span class="n">zn_surf</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_zn</span><span class="p">[:,</span> <span class="n">node_ids_surf</span><span class="p">]</span>  <span class="c1"># surface</span>
         <span class="n">surf2d</span> <span class="o">=</span> <span class="n">interp2d</span><span class="p">(</span><span class="n">zn_surf</span><span class="p">,</span> <span class="n">node_ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+        <span class="n">surf_da</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">surf2d</span><span class="p">,</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">,</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="n">geom</span><span class="p">,</span>
+            <span class="n">item</span><span class="o">=</span><span class="n">ItemInfo</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Surface_Elevation</span><span class="p">),</span>
+        <span class="p">)</span>
 
         <span class="c1"># create output</span>
-        <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">ItemInfo</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Surface_Elevation</span><span class="p">)]</span>
-        <span class="n">ds2</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">([</span><span class="n">surf2d</span><span class="p">],</span> <span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geom</span><span class="p">)</span>
+        <span class="c1"># items = [ItemInfo(EUMType.Surface_Elevation)]</span>
+        <span class="c1"># ds2 = Dataset([surf2d], ds.time, items, geometry=geom)</span>
         <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ds2</span>
+            <span class="k">return</span> <span class="n">surf_da</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;Surface extracted from 3D file&quot;</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">ds2</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">top_el</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span></div></div>
+            <span class="c1"># title = &quot;Surface extracted from 3D file&quot;</span>
+            <span class="n">surf_da</span><span class="o">.</span><span class="n">to_dfs</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div></div>
+            <span class="c1"># self.write(filename, ds2, elements=top_el, title=title)</span>
 </pre></div>
 
            </div>

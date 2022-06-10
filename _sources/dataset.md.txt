@@ -165,6 +165,7 @@ and + and - between two Datasets (if number of items and shapes conform):
 
 Other methods that also return a Dataset:
 
+* [`interp_like`](Dataset.interp_like) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%202D%20interpolation.ipynb))
 * [`interp_time()`](Dataset.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
 * [`dropna()`](Dataset.dropna) - Remove time steps where all items are NaN
 * [`squeeze()`](Dataset.squeeze) - Remove axes of length 1
