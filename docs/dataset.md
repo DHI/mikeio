@@ -2,13 +2,14 @@
 
 The [Dataset](Dataset) is the MIKE IO data structure 
 for data from dfs files. 
-The `mikeio.read()` methods returns a Dataset as a container of [DataArrays](dataarray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
+The {py:meth}`mikeio.read` methods returns a Dataset as a container of [DataArrays](dataarray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
 
 The Dataset has the following primary properties: 
 
-* **items** - a list of the DataArray items
-* **time** - a pandas.DateTimeIndex with the time instances of the data
+* **items** - a list of {py:class}`mikeio.eum.ItemInfo` items for each dataarray
+* **time** - a {py:class}`pandas.DatetimeIndex` with the time instances of the data
 * **geometry** - a Geometry object with the spatial description of the data
+
 
 Use Dataset's string representation to get an overview of the Dataset
 
@@ -170,8 +171,8 @@ Other methods that also return a Dataset:
 
 *Conversion* methods:
 
-* [`to_dataframe()`](Dataset.to_dataframe) - Convert Dataset to a Pandas DataFrame
-* [`to_xarray()`](Dataset.to_xarray) - Convert Dataset to a xarray dataset (great for Dfs2)
+* [`to_dataframe()`](Dataset.to_dataframe) - Convert Dataset to a {py:class}`pandas.DataFrame`
+* [`to_xarray()`](Dataset.to_xarray) - Convert Dataset to a {py:class}`xarray.Dataset` (great for Dfs2)
 * [`to_dfs()`](Dataset.to_dfs) - Write Dataset to a Dfs file
 
 

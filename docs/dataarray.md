@@ -2,13 +2,13 @@
 
 The [DataArray](DataArray) is the common MIKE IO data structure 
 for *item* data from dfs files. 
-The `mikeio.read()` methods returns a Dataset as a container of DataArrays (Dfs items)
+The {py:meth}`mikeio.read` methods returns a Dataset as a container of DataArrays (Dfs items)
 
 Each DataArray have the following properties:
-* **item** - an  [`ItemInfo`](ItemInfo) with name, type and unit
-* **time** - a [pandas.DateimeIndex](https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html) with the time instances of the data
+* **item** - an  {py:class}`mikeio.eum.ItemInfo` with name, type and unit
+* **time** - a {py:class}`pandas.DatetimeIndex` with the time instances of the data
 * **geometry** - a Geometry object with the spatial description of the data
-* **values** - a NumPy array
+* **values** - a {py:class}`numpy.ndarray`
 
 Use DataArray's string representation to get an overview of the DataArray
 

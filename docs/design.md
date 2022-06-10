@@ -36,7 +36,7 @@ Examples are available in two forms:
 * [Jupyter notebooks](https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/)
 
 ## Open Source​
-MIKE IO is an open source project licensed under the [BSD-3 license] (https://github.com/DHI/mikeio/blob/main/License.txt).
+MIKE IO is an open source project licensed under the [BSD-3 license](https://github.com/DHI/mikeio/blob/main/License.txt).
 The software is provided free of charge with the source code available for inspection and modification.
 
 Contributions are welcome, more details can be found in our [contribution guidelines](https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md).

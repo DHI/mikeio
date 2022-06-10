@@ -31,8 +31,22 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",
     "sphinx.ext.autosummary",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.extlinks",
+    "sphinx.ext.intersphinx",
     "myst_parser",
 ]
+
+# Configuration to include links to other project docs when referencing
+# functions/classes
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    "numpy": ("https://docs.scipy.org/doc/numpy/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "xarray": ("https://xarray.pydata.org/en/stable/", None),
+    "matplotlib": ("https://matplotlib.org/", None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
