@@ -422,12 +422,19 @@ class Dfsu3D(DfsuLayered):
         )
         zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
         surf2d = interp2d(zn_surf, node_ids, weights)
+        surf_da = DataArray(
+            data=surf2d,
+            time=ds.time,
+            geometry=geom,
+            item=ItemInfo(EUMType.Surface_Elevation),
+        )
 
         # create output
-        items = [ItemInfo(EUMType.Surface_Elevation)]
-        ds2 = Dataset([surf2d], ds.time, items, geometry=geom)
+        # items = [ItemInfo(EUMType.Surface_Elevation)]
+        # ds2 = Dataset([surf2d], ds.time, items, geometry=geom)
         if filename is None:
-            return ds2
+            return surf_da
         else:
-            title = "Surface extracted from 3D file"
-            self.write(filename, ds2, elements=top_el, title=title)
+            # title = "Surface extracted from 3D file"
+            surf_da.to_dfs(filename)
+            # self.write(filename, ds2, elements=top_el, title=title)

@@ -489,16 +489,18 @@ def test_to_mesh_3d(tmpdir):
     assert True
 
 
-def test_extract_surface_elevation_from_3d():
+def test_extract_surface_elevation_from_3d(tmpdir):
+
     dfs = mikeio.open("tests/testdata/oresund_sigma_z.dfsu")
-    outputfile = "tests/testdata/oresund_surface_elev_extracted.dfsu"
+    outputfile = os.path.join(
+        tmpdir, "tests/testdata/oresund_surface_elev_extracted.dfsu"
+    )
     n_top1 = len(dfs.top_elements)
 
     dfs.extract_surface_elevation_from_3d(outputfile)
 
     dfs2 = mikeio.open(outputfile)
     assert dfs2.n_elements == n_top1
-    os.remove(outputfile)  # clean up
 
 
 def test_find_nearest_element_in_Zlayer():

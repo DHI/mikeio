@@ -123,6 +123,7 @@ and + and - between two DataArrays (if number of items and shapes conform):
 
 Other methods that also return a DataArray:
 
+* [`interp_like`](DataArray.interp_like) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%202D%20interpolation.ipynb))
 * [`interp_time()`](DataArray.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
 * [`dropna()`](DataArray.dropna) - Remove time steps where all items are NaN
 * [`squeeze()`](DataArray.squeeze) - Remove axes of length 1

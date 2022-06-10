@@ -44,7 +44,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
     Parameters
     ----------
-    data : mikeio.Dataset, list(ndarray), or ndarray
+    data : mikeio.Dataset, DataArray, or ndarray
         dfsu data
     elem_ids : ndarray(int)
         n sized array of 1 or more element ids used for interpolation
@@ -55,7 +55,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
     Returns
     -------
-    ndarray or list(ndarray)
+    ndarray, Dataset, or DataArray
         spatially interped data with same type and shape as input
 
     Examples
@@ -65,9 +65,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     """
     from .dataset import Dataset, DataArray
 
-    is_dataset = False
     if isinstance(data, Dataset):
-        is_dataset = True
         ds = data.copy()
 
         ni = len(elem_ids)
@@ -76,46 +74,45 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
         for da in ds:
             key = da.name
-            nt, ne = da.shape
-            idatitem = np.empty(shape=(nt, ni))
-            for step in range(nt):
-                idatitem[step, :] = _interp_itemstep(
-                    da[step].to_numpy(), elem_ids, weights
-                )
+            if "time" not in da.dims:
+                idatitem = _interp_itemstep(da.to_numpy(), elem_ids, weights)
+                if shape:
+                    idatitem = idatitem.reshape(*shape)
 
-            if shape:
-                idatitem = idatitem.reshape((nt, *shape))
+            else:
+                nt, _ = da.shape
+                idatitem = np.empty(shape=(nt, ni))
+                for step in range(nt):
+                    idatitem[step, :] = _interp_itemstep(
+                        da[step].to_numpy(), elem_ids, weights
+                    )
+                if shape:
+                    idatitem = idatitem.reshape((nt, *shape))
             interp_data_vars[key] = DataArray(data=idatitem, time=da.time, item=da.item)
 
         new_ds = Dataset(interp_data_vars, validate=False)
         return new_ds
 
-    is_single_item = False
+    if isinstance(data, DataArray):
+        data = data.to_numpy()
+
     if isinstance(data, np.ndarray):
         if data.ndim == 1:
             # data is single item and single time step
-            return _interp_itemstep(data, elem_ids, weights)
-        elif data.ndim == 2:
-            is_single_item = True
-            data = [data]
+            idatitem = _interp_itemstep(data, elem_ids, weights)
+            if shape:
+                idatitem = idatitem.reshape(*shape)
+            return idatitem
 
-    idat = []
     ni = len(elem_ids)
-    for datitem in data:
-        nt, _ = datitem.shape
-        idatitem = np.empty(shape=(nt, ni))
-        for step in range(nt):
-            idatitem[step, :] = _interp_itemstep(datitem[step], elem_ids, weights)
-
-        if shape:
-            idatitem = idatitem.reshape((nt, *shape))
-
-        idat.append(idatitem)
-
-    if is_single_item:
-        idat = idat[0]
-
-    return idat
+    datitem = data
+    nt, _ = datitem.shape
+    idatitem = np.empty(shape=(nt, ni))
+    for step in range(nt):
+        idatitem[step, :] = _interp_itemstep(datitem[step], elem_ids, weights)
+    if shape:
+        idatitem = idatitem.reshape((nt, *shape))
+    return idatitem
 
 
 def _interp_itemstep(data, elem_ids, weights=None):

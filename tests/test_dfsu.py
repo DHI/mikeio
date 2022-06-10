@@ -786,6 +786,18 @@ def test_get_node_centered_data():
     assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
 
 
+def test_interp2d_time_invariant():
+    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"], time=-1)
+
+    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
+    with pytest.warns(FutureWarning):
+        interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+        dsi = dfs.interp2d(ds, *interpolant)
+
+    assert dsi.shape == (20 * 10,)
+
+
 def test_interp2d():
     dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"])
@@ -904,6 +916,26 @@ def test_dataset_interp():
 
 def test_interp_like_grid():
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    ws = ds[0]
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+    ws_grid = ws.interp_like(grid)
+    assert ws_grid.n_timesteps == ds.n_timesteps
+    assert isinstance(ws_grid, DataArray)
+    assert isinstance(ws_grid.geometry, Grid2D)
+
+
+def test_interp_like_grid_time_invariant():
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
+    assert "time" not in ds.dims
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+    ds_grid = ds.interp_like(grid)
+    assert ds_grid.n_timesteps == ds.n_timesteps
+    assert isinstance(ds_grid, Dataset)
+    assert isinstance(ds_grid.geometry, Grid2D)
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
+    assert "time" not in ds.dims
     ws = ds[0]
     grid = ds.geometry.get_overset_grid(dx=0.1)
     ws_grid = ws.interp_like(grid)

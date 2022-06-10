@@ -1485,7 +1485,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                     interpolant = self.geometry.get_2d_interpolant(
                         coords, n_nearest=n_nearest, **kwargs
                     )
-                dai = self.geometry.interp2d(self.to_numpy(), *interpolant).flatten()
+                dai = self.geometry.interp2d(self, *interpolant).flatten()
                 if z is None:
                     geometry = GeometryPoint2D(x=x, y=y)
                 else:
@@ -1583,6 +1583,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         DataArray
             Interpolated DataArray
         """
+        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+            raise NotImplementedError(
+                "Currently only supports interpolating from 2d flexible mesh data!"
+            )
+
         if isinstance(other, pd.DatetimeIndex):
             return self.interp_time(other, **kwargs)
 
