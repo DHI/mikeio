@@ -786,6 +786,18 @@ def test_get_node_centered_data():
     assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
 
 
+def test_interp2d_time_invariant():
+    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"], time=-1)
+
+    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
+    with pytest.warns(FutureWarning):
+        interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
+        dsi = dfs.interp2d(ds, *interpolant)
+
+    assert dsi.shape == (20 * 10,)
+
+
 def test_interp2d():
     dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"])

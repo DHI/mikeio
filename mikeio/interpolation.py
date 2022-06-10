@@ -75,8 +75,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
         for da in ds:
             key = da.name
             if "time" not in da.dims:
-                idatitem = np.empty(shape=ni)
-                idatitem[:] = _interp_itemstep(da[step].to_numpy(), elem_ids, weights)
+                idatitem = _interp_itemstep(da.to_numpy(), elem_ids, weights)
                 if shape:
                     idatitem = idatitem.reshape(*shape)
 
