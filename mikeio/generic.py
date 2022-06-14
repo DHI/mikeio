@@ -289,9 +289,10 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
 
             outdata = d_a - d_b
 
-            darray = outdata.astype(np.float32)
+            d = outdata.astype(np.float32)
+            d[np.isnan(d)] = deletevalue
 
-            dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
+            dfs_o.WriteItemTimeStep(item + 1, timestep, time, d)
 
     dfs_i_a.Close()
     dfs_i_b.Close()
