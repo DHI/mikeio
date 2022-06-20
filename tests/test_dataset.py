@@ -1503,8 +1503,7 @@ def test_from_xarray_ensemble_subset():
 
     xds_all = xarray.open_dataset("tests/testdata/gefs.nc")
 
-
     for i in range(2):
         xds = xds_all.isel(ens=i)
         ds = mikeio.Dataset.from_xarray(xds, xvar="lon", yvar="lat", tvar="time")
-        assert ds.n_items ==3
+        assert ds.n_items == 3
