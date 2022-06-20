@@ -1791,7 +1791,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         projection="LONG/LAT",
         iteminfo: Mapping[str, ItemInfo] = None,
     ) -> "Dataset":
-    """Convert 2d gridded data from xarray"""
+        """Convert 2d gridded data from xarray"""
 
         if tvar is None:
             time = None
@@ -1815,7 +1815,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 expected_dims = 3
 
             if dataset[name].ndim != expected_dims:
-                raise NotImplementedError("Only 2d spatial data supported so far. Try subsetting the xarray dataset to include only 2d variables.")
+                raise NotImplementedError(
+                    "Only 2d spatial data supported so far. Try subsetting the xarray dataset to include only 2d variables."
+                )
 
             das[name] = DataArray(
                 data=dataset[name].to_numpy(),
