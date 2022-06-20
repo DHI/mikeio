@@ -9,6 +9,7 @@ from copy import deepcopy
 import collections.abc
 
 from mikecore.DfsFile import DfsSimpleType
+import xarray
 
 from .eum import EUMType, ItemInfo
 from .data_utils import DataUtilsMixin
@@ -1780,6 +1781,52 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         data = {da.name: da.to_xarray() for da in self}
         return xarray.Dataset(data)
+
+    @staticmethod
+    def from_xarray(
+        dataset: xarray.Dataset,
+        xvar="lon",
+        yvar="lat",
+        tvar="time",
+        projection="LONG/LAT",
+        iteminfo: Mapping[str, ItemInfo] = None,
+    ) -> "Dataset":
+    """Convert 2d gridded data from xarray"""
+
+        if tvar is None:
+            time = None
+        else:
+            time = pd.DatetimeIndex(dataset[tvar])
+
+        geometry = Grid2D(
+            x=dataset[xvar].values, y=dataset[yvar].values, projection=projection
+        )
+
+        das = {}
+
+        if iteminfo is None:
+            iteminfo = {}
+
+        for name in dataset.data_vars:
+
+            if time is None:
+                expected_dims = 2
+            else:
+                expected_dims = 3
+
+            if dataset[name].ndim != expected_dims:
+                raise NotImplementedError("Only 2d spatial data supported so far. Try subsetting the xarray dataset to include only 2d variables.")
+
+            das[name] = DataArray(
+                data=dataset[name].to_numpy(),
+                time=time,
+                geometry=geometry,
+                item=iteminfo.get(name, ItemInfo(name)),
+            )
+
+        ds = Dataset(das)
+
+        return ds
 
     # ===============================================
 

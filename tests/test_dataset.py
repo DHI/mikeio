@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import py
+import xarray
 import pytest
 
 import mikeio
@@ -1446,3 +1446,65 @@ def test_create_dataset_with_many_items():
     ds = mikeio.Dataset(das)
 
     assert ds.n_items == n_items
+
+
+def test_from_xarray_time_dependent_eum_undefined():
+
+    xds = xarray.open_dataset("tests/testdata/gfs_wind.nc")
+
+    ds = mikeio.Dataset.from_xarray(xds, xvar="lon", yvar="lat", tvar="time")
+
+    assert isinstance(ds.geometry, mikeio.Grid2D)
+    assert ds.n_items == 3
+
+
+def test_from_xarray_time_invariant_eum_undefined():
+
+    xds = xarray.open_dataset("tests/testdata/gebco_2020_n56.3_s55.2_w12.2_e13.1.nc")
+
+    ds = mikeio.Dataset.from_xarray(xds, xvar="lon", yvar="lat", tvar=None)
+
+    assert isinstance(ds.geometry, mikeio.Grid2D)
+    assert ds.n_items == 1
+
+
+def test_from_xarray_time_dependent_proper_eum():
+
+    xds = xarray.open_dataset("tests/testdata/gfs_wind.nc")
+
+    from mikeio import ItemInfo, EUMType, EUMUnit
+
+    iteminfo = dict(
+        msletmsl=ItemInfo(
+            "Mean Sea Level Pressure", EUMType.Air_Pressure, EUMUnit.hectopascal
+        ),
+        ugrd10m=ItemInfo("Wind U", EUMType.Wind_Velocity, EUMUnit.meter_per_sec),
+        vgrd10m=ItemInfo("Wind V", EUMType.Wind_Velocity, EUMUnit.meter_per_sec),
+    )
+
+    ds = mikeio.Dataset.from_xarray(
+        xds, xvar="lon", yvar="lat", tvar="time", iteminfo=iteminfo
+    )
+
+    assert isinstance(ds.geometry, mikeio.Grid2D)
+    assert ds.n_items == 3
+    assert ds[-1].type == EUMType.Wind_Velocity
+
+
+def test_from_xarray_ensemble_wrong_dim():
+
+    xds = xarray.open_dataset("tests/testdata/gefs.nc")
+
+    with pytest.raises(Exception):
+        mikeio.Dataset.from_xarray(xds, xvar="lon", yvar="lat", tvar="time")
+
+
+def test_from_xarray_ensemble_subset():
+
+    xds_all = xarray.open_dataset("tests/testdata/gefs.nc")
+
+
+    for i in range(2):
+        xds = xds_all.isel(ens=i)
+        ds = mikeio.Dataset.from_xarray(xds, xvar="lon", yvar="lat", tvar="time")
+        assert ds.n_items ==3
