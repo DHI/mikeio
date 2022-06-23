@@ -145,6 +145,17 @@ def test_read_dfsu3d_column():
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
 
 
+def test_read_dfsu3d_column_save(tmpdir):
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = os.path.join(tmpdir, "new_column.dfsu")
+    dfs = mikeio.open(filename)
+
+    (x, y) = (333934.1, 6158101.5)
+
+    ds = dfs.read(x=x, y=y)  # all data in file
+    ds.to_dfs(outfilename)
+
+
 def test_read_dfsu3d_columns_sigma_only():
     dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
     dscol = dfs.read(x=500, y=50)
@@ -155,6 +166,13 @@ def test_read_dfsu3d_columns_sigma_only():
 
     dscol2 = dfs.read().sel(x=500, y=50)
     assert dscol.shape == dscol2.shape
+
+
+def test_read_dfsu3d_columns_sigma_only_save(tmpdir):
+    dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
+    outfilename = os.path.join(tmpdir, "new_column.dfsu")
+    dscol = dfs.read(x=500, y=50)
+    dscol.to_dfs(outfilename)
 
 
 def test_read_dfsu3d_xyz():
