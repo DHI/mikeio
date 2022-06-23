@@ -192,6 +192,7 @@ class DfsuLayered(_Dfsu):
             geometry = self.geometry
         else:
             elements = [elements] if np.isscalar(elements) else elements
+            elements = elements.astype(int)
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
             if self.is_layered:  # and items[0].name == "Z coordinate":
