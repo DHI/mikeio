@@ -1258,11 +1258,8 @@ class GeometryFM(_Geometry):
             else:
                 geom._type = self._type
                 geom._n_layers = n_layers
-                if self._type == DfsuFileType.Dfsu3DSigma:
-                    geom._n_sigma = n_layers
-                else:
-                    lowest_sigma = self.n_layers - self.n_sigma_layers + 1
-                    geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
+                lowest_sigma = self.n_layers - self.n_sigma_layers
+                geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
 
                 # If source is sigma-z but output only has sigma layers
                 # then change type accordingly
