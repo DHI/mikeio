@@ -1276,6 +1276,7 @@
         <span class="c1"># create new geometry</span>
         <span class="n">new_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_layered</span><span class="p">:</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
             <span class="n">layers_used</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_ids</span><span class="p">[</span><span class="n">elements</span><span class="p">]</span>
             <span class="n">unique_layer_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">layers_used</span><span class="p">)</span>
             <span class="n">n_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_layer_ids</span><span class="p">)</span>
@@ -1599,7 +1600,7 @@
                 <span class="n">idx_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">idx_2d</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">idx_3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_elem3d_from_elem2d</span><span class="p">(</span><span class="n">idx_2d</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
-            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx_3d</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx_3d</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">idx_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements_in_area</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx_area</span><span class="p">)</span>
