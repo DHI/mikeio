@@ -144,7 +144,9 @@
         <span class="k">return</span> <span class="n">_ChunkInfo</span><span class="p">(</span><span class="n">n_data</span><span class="p">,</span> <span class="n">n_chunks</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_clone</span><span class="p">(</span><span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DfsFile</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_clone</span><span class="p">(</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DfsFile</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Clone a dfs file</span>
 
 <span class="sd">    Parameters</span>
@@ -154,7 +156,9 @@
 <span class="sd">    outfilename : str</span>
 <span class="sd">        output filename</span>
 <span class="sd">    start_time : datetime, optional</span>
-<span class="sd">        new start time for the new file, default</span>
+<span class="sd">        new start time for the new file, by default None</span>
+<span class="sd">    timestep : float, optional</span>
+<span class="sd">        new timestep (in seconds) for the new file, by default None</span>
 <span class="sd">    items : list(int,str,eum.ItemInfo), optional</span>
 <span class="sd">        list of items for new file, either as a list of</span>
 <span class="sd">        ItemInfo or a list of str/int referring to original file,</span>
@@ -178,6 +182,8 @@
     <span class="n">time_axis</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">TimeAxis</span>
     <span class="k">if</span> <span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">time_axis</span><span class="o">.</span><span class="n">StartDateTime</span> <span class="o">=</span> <span class="n">start_time</span>
+    <span class="k">if</span> <span class="n">timestep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeStep</span> <span class="o">=</span> <span class="n">timestep</span>
     <span class="n">builder</span><span class="o">.</span><span class="n">SetTemporalAxis</span><span class="p">(</span><span class="n">time_axis</span><span class="p">)</span>
 
     <span class="n">builder</span><span class="o">.</span><span class="n">SetItemStatisticsType</span><span class="p">(</span><span class="n">fi</span><span class="o">.</span><span class="n">StatsType</span><span class="p">)</span>
@@ -502,7 +508,9 @@
     <span class="n">dfs_o</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="extract"><a class="viewcode-back" href="../../generic.html#mikeio.generic.extract">[docs]</a><span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="extract"><a class="viewcode-back" href="../../generic.html#mikeio.generic.extract">[docs]</a><span class="k">def</span> <span class="nf">extract</span><span class="p">(</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Extract timesteps and/or items to a new dfs file</span>
 
 <span class="sd">    Parameters</span>
@@ -517,6 +525,8 @@
 <span class="sd">    end : int, float, str or datetime, optional</span>
 <span class="sd">        end of extraction as either step, relative seconds</span>
 <span class="sd">        or datetime/str, by default -1 (end of file)</span>
+<span class="sd">    step : int, optional</span>
+<span class="sd">        jump this many step, by default 1 (every step between start and end)</span>
 <span class="sd">    items : int, list(int), str, list(str), optional</span>
 <span class="sd">        items to be extracted to new file</span>
 
@@ -525,6 +535,7 @@
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfs0&#39;, &#39;f_out.dfs0&#39;, start=&#39;2018-1-1&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfs2&#39;, &#39;f_out.dfs2&#39;, end=-3)</span>
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfsu&#39;, &#39;f_out.dfsu&#39;, start=1800.0, end=3600.0)</span>
+<span class="sd">    &gt;&gt;&gt; extract(&#39;f_hourly.dfsu&#39;, &#39;f_daily.dfsu&#39;, step=24)</span>
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfsu&#39;, &#39;f_out.dfsu&#39;, items=[2, 0])</span>
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfsu&#39;, &#39;f_out.dfsu&#39;, items=&quot;Salinity&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfsu&#39;, &#39;f_out.dfsu&#39;, end=&#39;2018-2-1 00:00&#39;, items=&quot;Salinity&quot;)</span>
@@ -536,6 +547,7 @@
     <span class="n">file_start_new</span><span class="p">,</span> <span class="n">start_step</span><span class="p">,</span> <span class="n">start_sec</span><span class="p">,</span> <span class="n">end_step</span><span class="p">,</span> <span class="n">end_sec</span> <span class="o">=</span> <span class="n">_parse_start_end</span><span class="p">(</span>
         <span class="n">dfs_i</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span>
     <span class="p">)</span>
+    <span class="n">timestep</span> <span class="o">=</span> <span class="n">_parse_step</span><span class="p">(</span><span class="n">dfs_i</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
     <span class="n">item_numbers</span> <span class="o">=</span> <span class="n">_valid_item_numbers</span><span class="p">(</span>
         <span class="n">dfs_i</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">ignore_first</span><span class="o">=</span><span class="n">is_layered_dfsu</span>
     <span class="p">)</span>
@@ -545,7 +557,11 @@
         <span class="n">item_numbers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">dfs_o</span> <span class="o">=</span> <span class="n">_clone</span><span class="p">(</span>
-        <span class="n">infilename</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">file_start_new</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">item_numbers</span>
+        <span class="n">infilename</span><span class="p">,</span>
+        <span class="n">outfilename</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="n">file_start_new</span><span class="p">,</span>
+        <span class="n">timestep</span><span class="o">=</span><span class="n">timestep</span><span class="p">,</span>
+        <span class="n">items</span><span class="o">=</span><span class="n">item_numbers</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">file_start_shift</span> <span class="o">=</span> <span class="mi">0</span>
@@ -554,7 +570,7 @@
         <span class="n">file_start_shift</span> <span class="o">=</span> <span class="p">(</span><span class="n">file_start_new</span> <span class="o">-</span> <span class="n">file_start_orig</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
 
     <span class="n">timestep_out</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_step</span><span class="p">,</span> <span class="n">end_step</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_step</span><span class="p">,</span> <span class="n">end_step</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item_out</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">):</span>
             <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">((</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="n">timestep</span><span class="p">)</span>
             <span class="n">time_sec</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
@@ -655,6 +671,19 @@
             <span class="n">file_start_new</span> <span class="o">=</span> <span class="n">file_start_datetime</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">start_sec</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">file_start_new</span><span class="p">,</span> <span class="n">start_step</span><span class="p">,</span> <span class="n">start_sec</span><span class="p">,</span> <span class="n">end_step</span><span class="p">,</span> <span class="n">end_sec</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_step</span><span class="p">(</span><span class="n">dfs_i</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function for parsing step argument&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">timestep</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">timestep</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeStep</span> <span class="o">*</span> <span class="n">step</span>
+    <span class="k">elif</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">timestep</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;TimeAxisType not supported&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">timestep</span>
 
 
 <div class="viewcode-block" id="avg_time"><a class="viewcode-back" href="../../generic.html#mikeio.generic.avg_time">[docs]</a><span class="k">def</span> <span class="nf">avg_time</span><span class="p">(</span><span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
