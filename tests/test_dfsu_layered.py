@@ -149,6 +149,10 @@ def test_read_dfsu3d_columns_sigma_only():
     dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
     dscol = dfs.read(x=500, y=50)
     assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
+    assert dscol.n_elements == 10
+    assert dscol.n_items == dfs.n_items
+
+    assert dscol["U velocity"].isel(time=-1)[-1].values == pytest.approx(0.363413)
 
 
 def test_read_dfsu3d_xyz():
