@@ -145,6 +145,12 @@ def test_read_dfsu3d_column():
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
 
 
+def test_read_dfsu3d_columns_sigma_only():
+    dfs = mikeio.open("../tests/testdata/basin_3d.dfsu")
+    dscol = dfs.read(x=500, y=50)
+    assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
+
+
 def test_read_dfsu3d_xyz():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
