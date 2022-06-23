@@ -1191,6 +1191,7 @@ class GeometryFM(_Geometry):
         # create new geometry
         new_type = self._type
         if self.is_layered:
+            elements = list(elements)
             layers_used = self.layer_ids[elements]
             unique_layer_ids = np.unique(layers_used)
             n_layers = len(unique_layer_ids)
@@ -1514,7 +1515,7 @@ class _GeometryFMLayered(GeometryFM):
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
             else:
                 idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
-            idx = np.intersect1d(idx, idx_3d)
+            idx = np.intersect1d(idx, idx_3d).astype(int)
         elif area is not None:
             idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)

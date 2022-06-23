@@ -151,8 +151,10 @@ def test_read_dfsu3d_columns_sigma_only():
     assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
     assert dscol.n_elements == 10
     assert dscol.n_items == dfs.n_items
-
     assert dscol["U velocity"].isel(time=-1)[-1].values == pytest.approx(0.363413)
+
+    dscol2 = dfs.read().sel(x=500, y=50)
+    assert dscol.shape == dscol2.shape
 
 
 def test_read_dfsu3d_xyz():
