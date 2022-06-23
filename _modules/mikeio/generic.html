@@ -374,9 +374,10 @@
 
             <span class="n">outdata</span> <span class="o">=</span> <span class="n">d_a</span> <span class="o">-</span> <span class="n">d_b</span>
 
-            <span class="n">darray</span> <span class="o">=</span> <span class="n">outdata</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">outdata</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">d</span><span class="p">)]</span> <span class="o">=</span> <span class="n">deletevalue</span>
 
-            <span class="n">dfs_o</span><span class="o">.</span><span class="n">WriteItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">darray</span><span class="p">)</span>
+            <span class="n">dfs_o</span><span class="o">.</span><span class="n">WriteItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
 
     <span class="n">dfs_i_a</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
     <span class="n">dfs_i_b</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
