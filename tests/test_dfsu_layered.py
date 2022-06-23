@@ -146,7 +146,7 @@ def test_read_dfsu3d_column():
 
 
 def test_read_dfsu3d_columns_sigma_only():
-    dfs = mikeio.open("../tests/testdata/basin_3d.dfsu")
+    dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
     dscol = dfs.read(x=500, y=50)
     assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
 
