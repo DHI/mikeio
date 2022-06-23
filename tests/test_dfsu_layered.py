@@ -170,8 +170,12 @@ def test_read_dfsu3d_columns_sigma_only():
 
 def test_read_dfsu3d_columns_sigma_only_save(tmpdir):
     dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
-    outfilename = os.path.join(tmpdir, "new_column.dfsu")
+    assert dfs.geometry.n_sigma_layers == 10
+    assert dfs.geometry.n_z_layers == 0
     dscol = dfs.read(x=500, y=50)
+    assert dscol.geometry.n_sigma_layers == 10
+    assert dscol.geometry.n_z_layers == 0
+    outfilename = os.path.join(tmpdir, "new_column.dfsu")
     dscol.to_dfs(outfilename)
 
 
