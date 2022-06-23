@@ -147,12 +147,22 @@ def test_read_dfsu3d_column():
 
 def test_read_dfsu3d_column_save(tmpdir):
     filename = "tests/testdata/oresund_sigma_z.dfsu"
-    outfilename = os.path.join(tmpdir, "new_column.dfsu")
     dfs = mikeio.open(filename)
 
     (x, y) = (333934.1, 6158101.5)
 
     ds = dfs.read(x=x, y=y)  # all data in file
+    assert ds.geometry.n_sigma_layers == 4
+    assert ds.geometry.n_z_layers == 0
+    outfilename = os.path.join(tmpdir, "new_column.dfsu")
+    ds.to_dfs(outfilename)
+
+    (x, y) = (347698.5188405, 6221233.34815)
+
+    ds = dfs.read(x=x, y=y)  # all data in file
+    assert ds.geometry.n_sigma_layers == 4
+    assert ds.geometry.n_z_layers == 4
+    outfilename = os.path.join(tmpdir, "new_column_2.dfsu")
     ds.to_dfs(outfilename)
 
 
