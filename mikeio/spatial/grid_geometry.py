@@ -4,6 +4,7 @@ import warnings
 import numpy as np
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
+
 from .geometry import (
     _Geometry,
     GeometryPoint2D,
@@ -666,7 +667,7 @@ class Grid2D(_Geometry):
             if array: must have length=(nx+1)*(ny+1)
         """
         if projection is None:
-            projection = "LONG/LAT"
+            projection = self.projection
 
         # get node based grid
         xn = self._centers_to_nodes(self.x)
@@ -687,14 +688,14 @@ class Grid2D(_Geometry):
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
                     )
         codes = np.zeros(n, dtype=int)
-        codes[y == gn.bbox.top] = 5  # north
-        codes[x == gn.bbox.right] = 4  # east
-        codes[y == gn.bbox.bottom] = 3  # south
-        codes[x == gn.bbox.left] = 2  # west
-        codes[(y == gn.bbox.top) & (x == gn.bbox.left)] = 5  # corner->north
+        codes[y == y[-1]] = 5  # north
+        codes[x == x[-1]] = 4  # east
+        codes[y == y[0]] = 3  # south
+        codes[x == x[0]] = 2  # west
+        codes[(y == y[-1]) & (x == x[0])] = 5  # corner->north
 
         builder = MeshBuilder()
-        builder.SetNodes(x, y, z, codes)
+        builder.SetNodes(np.round(x, 8), np.round(y, 8), z, codes)
 
         elem_table = gn._to_element_table(index_base=1)
         builder.SetElements(elem_table)
