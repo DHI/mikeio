@@ -653,6 +653,36 @@ class Grid2D(_Geometry):
         gn = Grid2D(x=xn, y=yn)
         return gn.xy
 
+    def to_geometryFM(self):
+        """convert Grid2D to GeometryFM"""
+        from mikeio.spatial.FM_geometry import GeometryFM
+
+        # get node based grid
+        xn = self._centers_to_nodes(self.x)
+        yn = self._centers_to_nodes(self.y)
+        gn = Grid2D(x=xn, y=yn)
+
+        x = gn.xy[:, 0]
+        y = gn.xy[:, 1]
+        n = gn.nx * gn.ny
+        z = np.zeros_like(x)
+
+        codes = np.zeros(n, dtype=int)
+        codes[y == y[-1]] = 5  # north
+        codes[x == x[-1]] = 4  # east
+        codes[y == y[0]] = 3  # south
+        codes[x == x[0]] = 2  # west
+        codes[(y == y[-1]) & (x == x[0])] = 5  # corner->north
+
+        nc = np.column_stack([x, y, z])
+        elem_table = gn._to_element_table(index_base=0)
+        return GeometryFM(
+            node_coordinates=nc,
+            element_table=elem_table,
+            codes=codes,
+            projection=self.projection,
+        )
+
     def to_mesh(self, outfilename, projection=None, z=None):
         """export grid to mesh file
 
