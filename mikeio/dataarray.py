@@ -26,7 +26,6 @@ from .spatial.FM_geometry import (
 from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map, _plot_vertical_profile
 from mikecore.DfsuFile import DfsuFileType
-from .spatial.FM_utils import _plot_map
 from .spectral_utils import plot_2dspectrum, calc_m0_from_spectrum
 from .data_utils import DataUtilsMixin
 
