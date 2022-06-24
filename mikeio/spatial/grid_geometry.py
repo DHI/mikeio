@@ -164,6 +164,101 @@ class Grid1D(_Geometry):
                 return GeometryPoint2D(*coords)
 
 
+class _Grid2DPlotter:
+    """Plot GeometryFM
+
+    Examples
+    --------
+    >>> ds = mikeio.read("data.dfs2")
+    >>> g = ds.geometry
+    >>> g.plot()
+    >>> g.plot.outline()
+    """
+
+    def __init__(self, geometry: "Grid2D") -> None:
+        self.g = geometry
+
+    def __call__(self, ax=None, figsize=None, **kwargs):
+        """Plot bathymetry as coloured patches"""
+        ax = self._get_ax(ax, figsize)
+        return self._plot_grid(ax, **kwargs)
+
+    @staticmethod
+    def _get_ax(ax=None, figsize=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            _, ax = plt.subplots(figsize=figsize)
+        return ax
+
+    def _plot_grid(self, ax, title=None, color="0.5", linewidth=0.6, **kwargs):
+        g = self.g
+        xn = g._centers_to_nodes(g.x)
+        yn = g._centers_to_nodes(g.y)
+        for yj in yn:
+            ax.plot(
+                xn, yj * np.ones_like(xn), color=color, linewidth=linewidth, **kwargs
+            )
+        for xj in xn:
+            ax.plot(
+                xj * np.ones_like(yn), yn, color=color, linewidth=linewidth, **kwargs
+            )
+        if title is not None:
+            ax.set_title(title)
+        self._set_aspect_and_labels(ax)
+        return ax
+
+    def outline(
+        self,
+        title="Outline",
+        ax=None,
+        figsize=None,
+        color="0.4",
+        linewidth=1.2,
+        **kwargs,
+    ):
+        """Plot Grid2D outline"""
+        ax = self._get_ax(ax, figsize)
+        g = self.g
+        xn = g._centers_to_nodes(g.x)
+        yn = g._centers_to_nodes(g.y)
+        for yj in [yn[0], yn[-1]]:
+            ax.plot(
+                xn, yj * np.ones_like(xn), color=color, linewidth=linewidth, **kwargs
+            )
+        for xj in [xn[0], xn[-1]]:
+            ax.plot(
+                xj * np.ones_like(yn), yn, color=color, linewidth=linewidth, **kwargs
+            )
+        if title is not None:
+            ax.set_title(title)
+        self._set_aspect_and_labels(ax)
+
+        return ax
+
+    def _set_aspect_and_labels(self, ax):
+        g = self.g
+        if g.is_spectral:
+            ax.set_xlabel("Frequency [Hz]")
+            ax.set_ylabel("Directions [degree]")
+        elif g._is_rotated:
+            ax.set_xlabel("[m]")
+            ax.set_ylabel("[m]")
+        elif g.projection == "NON-UTM":
+            ax.set_xlabel("[m]")
+            ax.set_ylabel("[m]")
+        elif g.is_geo:
+            ax.set_xlabel("Longitude [degrees]")
+            ax.set_ylabel("Latitude [degrees]")
+            mean_lat = np.mean(g.y)
+            aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
+            ax.set_aspect(aspect_ratio)
+        else:
+            ax.set_xlabel("Easting [m]")
+            ax.set_ylabel("Northing [m]")
+            ax.set_aspect("equal")
+
+
 @dataclass  # would prefer this to be (frozen=True)
 class Grid2D(_Geometry):
     """2D grid
@@ -220,6 +315,8 @@ class Grid2D(_Geometry):
             self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
 
         self.is_spectral = is_spectral
+
+        self.plot = _Grid2DPlotter(self)
 
     @property
     def _is_rotated(self):
