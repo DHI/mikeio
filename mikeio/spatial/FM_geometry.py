@@ -1258,7 +1258,7 @@ class GeometryFM(_Geometry):
             else:
                 geom._type = self._type
                 geom._n_layers = n_layers
-                lowest_sigma = self.n_layers - self.n_sigma_layers + 1
+                lowest_sigma = self.n_layers - self.n_sigma_layers
                 geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
 
                 # If source is sigma-z but output only has sigma layers
