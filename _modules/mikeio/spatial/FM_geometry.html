@@ -1343,7 +1343,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">geom</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
                 <span class="n">geom</span><span class="o">.</span><span class="n">_n_layers</span> <span class="o">=</span> <span class="n">n_layers</span>
-                <span class="n">lowest_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">lowest_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span>
                 <span class="n">geom</span><span class="o">.</span><span class="n">_n_sigma</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">unique_layer_ids</span> <span class="o">&gt;=</span> <span class="n">lowest_sigma</span><span class="p">)</span>
 
                 <span class="c1"># If source is sigma-z but output only has sigma layers</span>
