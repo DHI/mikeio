@@ -154,9 +154,14 @@ def test_read_dfs2_single_time():
 
 
 def test_read_single_row_dfs2_single_time_step():
-    ds = mikeio.read("tests/testdata", time="2000-01-01")
+    ds = mikeio.read("tests/testdata/single_row.dfs2", time="2000-01-01")
     assert ds.n_timesteps == 1
-    assert "time" in ds.dims
+    assert "time" not in ds.dims
+
+    ds2 = mikeio.read("tests/testdata/single_row.dfs2").sel(time="2000-01-01")
+
+    assert ds.dims == ds2.dims
+    assert all(ds.time == ds2.time)
 
 
 def test_interp_x_y_dfs2():
