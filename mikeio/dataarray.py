@@ -1741,6 +1741,39 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.std)
 
+    def average(self, weights, axis="time", **kwargs) -> "DataArray":
+        """Compute the weighted average along the specified axis.
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            DataArray with weighted average values
+
+        See Also
+        --------
+            aggregate : Weighted average
+
+        Examples
+        --------
+        >>> dfs = Dfsu("HD2D.dfsu")
+        >>> da = dfs.read(["Current speed"])[0]
+        >>> area = dfs.get_element_area()
+        >>> da2 = da.average(axis="space", weights=area)
+        """
+
+        def func(x, axis, keepdims):
+            if keepdims:
+                raise NotImplementedError()
+
+            return np.average(x, weights=weights, axis=axis)
+
+        return self.aggregate(axis=axis, func=func, **kwargs)
+
     def nanmax(self, axis="time") -> "DataArray":
         """Max value along an axis (NaN removed)
 
@@ -1896,6 +1929,36 @@ class DataArray(DataUtilsMixin, TimeSeries):
         nanquantile : quantile with NaN values ignored
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+
+    def nanquantile(self, q, *, axis="time", **kwargs):
+        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
+
+        Wrapping np.nanquantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            data with quantile values
+
+        Examples
+        --------
+        >>> da.nanquantile(q=[0.25,0.75])
+        >>> da.nanquantile(q=0.5)
+        >>> da.nanquantile(q=[0.01,0.5,0.99], axis="space")
+
+        See Also
+        --------
+        quantile : Quantile with NaN values
+        """
+        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
