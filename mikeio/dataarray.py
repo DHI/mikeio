@@ -85,7 +85,7 @@ class _DataArrayPlotter:
             fig = plt.gcf()
         return fig, ax
 
-    def hist(self, ax=None, figsize=None, **kwargs):
+    def hist(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot DataArray as histogram (using ax.hist)
 
         Parameters
@@ -113,6 +113,8 @@ class _DataArrayPlotter:
         <matplotlib.axes>
         """
         ax = self._get_ax(ax, figsize)
+        if title is not None:
+            ax.set_title(title)
         return self._hist(ax, **kwargs)
 
     def _hist(self, ax, **kwargs):
@@ -471,7 +473,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot data as coloured patches"""
         fig, ax = self._get_fig_ax(ax, figsize)
         ze = self.da.geometry.calc_ze()
@@ -486,6 +488,8 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         ax.set_xlabel("time")
         fig.autofmt_xdate()
         ax.set_ylabel("z (static)")
+        if title is not None:
+            ax.set_title(title)
         return ax
 
 
