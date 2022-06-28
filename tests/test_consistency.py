@@ -138,9 +138,23 @@ def test_read_dfs2_single_time():
     assert "time" not in ds.dims
 
     ds = mikeio.read(
+        "tests/testdata/consistency/oresundHD.dfs2",
+        time="2018-03-10",
+    )
+
+    assert ds.n_timesteps == 1
+    assert "time" not in ds.dims
+
+    ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs2", time=[-1], keepdims=True
     )
 
+    assert ds.n_timesteps == 1
+    assert "time" in ds.dims
+
+
+def test_read_single_row_dfs2_single_time_step():
+    ds = mikeio.read("tests/testdata", time="2000-01-01")
     assert ds.n_timesteps == 1
     assert "time" in ds.dims
 
