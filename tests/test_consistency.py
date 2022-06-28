@@ -1,7 +1,6 @@
 import pandas as pd
 from datetime import datetime
 import pytest
-from tomlkit import item
 
 import mikeio
 from mikeio.dataarray import DataArray
