@@ -1529,6 +1529,25 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
+    def std(self, axis="time", **kwargs) -> "Dataset":
+        """Standard deviation along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with standard deviation values
+
+        See Also
+        --------
+            nanstd : Standard deviation with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.std, **kwargs)
+
     def average(self, weights, axis="time", **kwargs) -> "Dataset":
         """Compute the weighted average along the specified axis.
 
@@ -1611,6 +1630,25 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             dataset with mean values
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
+
+    def nanstd(self, axis="time", **kwargs) -> "Dataset":
+        """Standard deviation along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        Dataset
+            dataset with standard deviation values
+
+        See Also
+        --------
+            std : Standard deviation
+        """
+        return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
     # ============ arithmetic/Math =============
 

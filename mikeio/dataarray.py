@@ -1722,6 +1722,25 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.mean)
 
+    def std(self, axis="time") -> "DataArray":
+        """Standard deviation values along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with standard deviation values
+
+        See Also
+        --------
+            nanstd : Standard deviation values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.std)
+
     def nanmax(self, axis="time") -> "DataArray":
         """Max value along an axis (NaN removed)
 
@@ -1778,6 +1797,25 @@ class DataArray(DataUtilsMixin, TimeSeries):
             mean : Mean values
         """
         return self.aggregate(axis=axis, func=np.nanmean)
+
+    def nanstd(self, axis="time") -> "DataArray":
+        """Standard deviation value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with standard deviation values
+
+        See Also
+        --------
+            std : Standard deviation
+        """
+        return self.aggregate(axis=axis, func=np.nanstd)
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "DataArray":
         """Aggregate along an axis
