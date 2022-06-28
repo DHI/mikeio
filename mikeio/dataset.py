@@ -10,7 +10,7 @@ import collections.abc
 
 from mikecore.DfsFile import DfsSimpleType
 
-from .eum import EUMType, ItemInfo
+from .eum import EUMType, EUMUnit, ItemInfo
 from .data_utils import DataUtilsMixin
 from .spatial.FM_geometry import GeometryFM
 from .base import TimeSeries
@@ -1338,13 +1338,41 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Dataset
             dataset with aggregated values
         """
+        if axis == "items":
+            if self.n_items <= 1:
+                return self
+            keepdims = kwargs.pop("keepdims", False)
+            data = func(self.to_numpy(), axis=0, keepdims=False, **kwargs)
+            item = self._agg_item_from_items(self.items, func.__name__)
+            da = DataArray(
+                data=data,
+                time=self.time,
+                item=item,
+                geometry=self.geometry,
+                dims=self.dims,
+                zn=self._zn,
+            )
+            return Dataset([da], validate=False) if keepdims else da
+        else:
+            res = {
+                name: da.aggregate(axis=axis, func=func, **kwargs)
+                for name, da in self._data_vars.items()
+            }
+            return Dataset(data=res, validate=False)
 
-        res = {
-            name: da.aggregate(axis=axis, func=func, **kwargs)
-            for name, da in self._data_vars.items()
-        }
-
-        return Dataset(data=res, validate=False)
+    @staticmethod
+    def _agg_item_from_items(items, name):
+        it_type = (
+            items[0].type
+            if all([it.type == items[0].type for it in items])
+            else EUMType.Undefined
+        )
+        it_unit = (
+            items[0].unit
+            if all([it.unit == items[0].unit for it in items])
+            else EUMUnit.Undefined
+        )
+        return ItemInfo(name, it_type, it_unit)
 
     def quantile(self, q, *, axis="time", **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
@@ -1404,21 +1432,46 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> "Dataset":
 
-        if np.isscalar(q):
-            res = [da._quantile(q=q, axis=axis, func=func) for da in self]
-        else:
-            res = []
-
-            for name, da in self._data_vars.items():
+        if axis == "items":
+            keepdims = kwargs.pop("keepdims", False)
+            if self.n_items <= 1:
+                return self  # or raise ValueError?
+            if np.isscalar(q):
+                data = func(self.to_numpy(), q=q, axis=0, keepdims=False, **kwargs)
+                item = self._agg_item_from_items(self.items, f"Quantile {q}")
+                da = DataArray(
+                    data=data,
+                    time=self.time,
+                    item=item,
+                    geometry=self.geometry,
+                    dims=self.dims,
+                    zn=self._zn,
+                )
+                return Dataset([da], validate=False) if keepdims else da
+            else:
+                if keepdims:
+                    raise ValueError("Cannot keepdims for multiple quantiles")
+                res = []
                 for quantile in q:
-                    qd = da._quantile(q=quantile, axis=axis, func=func)
-                    newname = f"Quantile {quantile}, {name}"
-                    qd.name = newname
+                    qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)
                     res.append(qd)
+                return Dataset(data=res, validate=False)
+        else:
+            if np.isscalar(q):
+                res = [da._quantile(q=q, axis=axis, func=func) for da in self]
+            else:
+                res = []
 
-        return Dataset(data=res, validate=False)
+                for name, da in self._data_vars.items():
+                    for quantile in q:
+                        qd = da._quantile(q=quantile, axis=axis, func=func)
+                        newname = f"Quantile {quantile}, {name}"
+                        qd.name = newname
+                        res.append(qd)
 
-    def max(self, axis="time") -> "Dataset":
+            return Dataset(data=res, validate=False)
+
+    def max(self, axis="time", **kwargs) -> "Dataset":
         """Max value along an axis
 
         Parameters
@@ -1435,9 +1488,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         --------
             nanmax : Max values with NaN values removed
         """
-        return self.aggregate(axis=axis, func=np.max)
+        return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis="time") -> "Dataset":
+    def min(self, axis="time", **kwargs) -> "Dataset":
         """Min value along an axis
 
         Parameters
@@ -1454,9 +1507,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         --------
             nanmin : Min values with NaN values removed
         """
-        return self.aggregate(axis=axis, func=np.min)
+        return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis="time") -> "Dataset":
+    def mean(self, axis="time", **kwargs) -> "Dataset":
         """Mean value along an axis
 
         Parameters
@@ -1474,9 +1527,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             nanmean : Mean values with NaN values removed
             average : Weighted average
         """
-        return self.aggregate(axis=axis, func=np.mean)
+        return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def average(self, weights, axis="time") -> "Dataset":
+    def average(self, weights, axis="time", **kwargs) -> "Dataset":
         """Compute the weighted average along the specified axis.
 
         Parameters
@@ -1508,9 +1561,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
             return np.average(x, weights=weights, axis=axis)
 
-        return self.aggregate(axis=axis, func=func)
+        return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis="time") -> "Dataset":
+    def nanmax(self, axis="time", **kwargs) -> "Dataset":
         """Max value along an axis (NaN removed)
 
         Parameters
@@ -1527,9 +1580,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Dataset
             dataset with max values
         """
-        return self.aggregate(axis=axis, func=np.nanmax)
+        return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis="time") -> "Dataset":
+    def nanmin(self, axis="time", **kwargs) -> "Dataset":
         """Min value along an axis (NaN removed)
 
         Parameters
@@ -1542,9 +1595,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Dataset
             dataset with min values
         """
-        return self.aggregate(axis=axis, func=np.nanmin)
+        return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis="time") -> "Dataset":
+    def nanmean(self, axis="time", **kwargs) -> "Dataset":
         """Mean value along an axis (NaN removed)
 
         Parameters
@@ -1557,7 +1610,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Dataset
             dataset with mean values
         """
-        return self.aggregate(axis=axis, func=np.nanmean)
+        return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
     # ============ arithmetic/Math =============
 
