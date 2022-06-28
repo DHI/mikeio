@@ -88,6 +88,7 @@ def read(
     >>> ds = mikeio.read("ts.dfs0")
     >>> ds = mikeio.read("ts.dfs0", items=0)
     >>> ds = mikeio.read("ts.dfs0", items="Temperature")
+    >>> ds = mikeio.read("sw_points.dfs0, items="*Buoy 4*")
     >>> ds = mikeio.read("ts.dfs0", items=["u","v"], time="2016")
     >>> ds = mikeio.read("tide.dfs1", time="2018-5")
     >>> ds = mikeio.read("tide.dfs1", time=slice("2018-5-1","2018-6-1"))

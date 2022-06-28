@@ -1,5 +1,4 @@
 from datetime import datetime
-from multiprocessing.sharedctypes import Value
 from typing import Iterable, List, Tuple, Union
 import numpy as np
 import pandas as pd
@@ -9,9 +8,19 @@ from .custom_exceptions import ItemsError
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFileInfo
 
 
+def _fuzzy_item_search(dfsItemInfo: List[DfsDynamicItemInfo], search: str):
+    import fnmatch
+
+    names = [info.Name for info in dfsItemInfo]
+    item_numbers = [i for i, name in enumerate(names) if fnmatch.fnmatch(name, search)]
+    if len(item_numbers) == 0:
+        raise KeyError(f"No items like: {search} found. Valid names are {names}")
+    return item_numbers
+
+
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    items: Union[int, List[int], List[str]] = None,
+    items: Union[str, int, List[int], List[str]] = None,
     ignore_first: bool = False,
 ) -> Iterable[int]:
     start_idx = 1 if ignore_first else 0
@@ -20,7 +29,10 @@ def _valid_item_numbers(
         return list(range(n_items_file))
 
     if np.isscalar(items):
-        items = [items]
+        if isinstance(items, str) and "*" in items:
+            return _fuzzy_item_search(dfsItemInfo=dfsItemInfo, search=items)
+        else:
+            items = [items]
 
     for idx, item in enumerate(items):
         if isinstance(item, str):
