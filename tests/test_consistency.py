@@ -491,7 +491,22 @@ def test_filter_items_dfs0():
         )  # Note missing wildcard in beginning
 
 
+def test_filter_items_wildcard_getitem():
+    dsall = mikeio.read("tests/testdata/sw_points.dfs0")
+
+    ds = dsall["*Height*"]
+    assert ds.n_items == 12
+
+
 def test_filter_items_dfsu():
 
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", items="*direction*")
     assert ds.n_items == 1
+
+
+def test_filter_items_dfsu_getitem():
+
+    dsall = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    ds = dsall["*direction*"]
+    assert ds.n_items == 1
+    assert "direction" in ds[0].name
