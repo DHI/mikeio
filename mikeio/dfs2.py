@@ -308,8 +308,19 @@ class Dfs2(_Dfs123):
         self._dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+
+        if single_time_selected and not keepdims:
+            dims = ("y", "x")
+        else:
+            dims = ("time", "y", "x")
+
         return Dataset(
-            data_list, time=time, items=items, geometry=geometry, validate=False
+            data_list,
+            time=time,
+            items=items,
+            geometry=geometry,
+            dims=dims,
+            validate=False,
         )
 
     def find_nearest_elements(
