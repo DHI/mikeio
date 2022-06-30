@@ -1352,8 +1352,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             if self.n_items <= 1:
                 return self
             keepdims = kwargs.pop("keepdims", False)
+            name = kwargs.pop("name", func.__name__)
             data = func(self.to_numpy(), axis=0, keepdims=False, **kwargs)
-            item = self._agg_item_from_items(self.items, func.__name__)
+            item = self._agg_item_from_items(self.items, name)
             da = DataArray(
                 data=data,
                 time=self.time,
