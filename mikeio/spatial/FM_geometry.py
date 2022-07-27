@@ -1388,16 +1388,24 @@ class GeometryFM(_Geometry):
         return mp
 
     def to_mesh(self, outfilename):
-
+        """Export geometry to new mesh file
+        
+        Parameters
+        ----------
+        outfilename : str
+            path to file to be written
+        """
         builder = MeshBuilder()
 
-        nc = self.node_coordinates
-        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
-        # builder.SetNodeIds(self.node_ids+1)
-        # builder.SetElementIds(self.elements+1)
-        element_table_MZ = [np.asarray(row) + 1 for row in self.element_table]
+        geom2d = self._geometry2d
+
+        nc = geom2d.node_coordinates
+        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geom2d.codes)
+        # builder.SetNodeIds(geom2d.node_ids+1)
+        # builder.SetElementIds(geom2d.elements+1)
+        element_table_MZ = [np.asarray(row) + 1 for row in geom2d.element_table]
         builder.SetElements(element_table_MZ)
-        builder.SetProjection(self.projection_string)
+        builder.SetProjection(geom2d.projection_string)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
