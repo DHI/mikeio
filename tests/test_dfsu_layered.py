@@ -522,15 +522,15 @@ def test_to_mesh_3d(tmpdir):
 
     dfs = mikeio.open(filename)
 
-    outfilename = os.path.join(tmpdir, "oresund.mesh")
-
+    outfilename = os.path.join(tmpdir, "oresund_from_dfs.mesh")
     dfs.to_mesh(outfilename)
-
     assert os.path.exists(outfilename)
-
     mesh = Mesh(outfilename)
 
-    assert True
+    outfilename = os.path.join(tmpdir, "oresund_from_geometry.mesh")
+    dfs.geometry.to_mesh(outfilename)
+    assert os.path.exists(outfilename)
+    mesh = Mesh(outfilename)
 
 
 def test_extract_surface_elevation_from_3d(tmpdir):
