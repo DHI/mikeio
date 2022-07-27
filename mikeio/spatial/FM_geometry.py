@@ -1389,7 +1389,7 @@ class GeometryFM(_Geometry):
 
     def to_mesh(self, outfilename):
         """Export geometry to new mesh file
-        
+
         Parameters
         ----------
         outfilename : str
