@@ -1292,6 +1292,7 @@ class GeometryFM(_Geometry):
                 top_elems.append(j - 1)
             x_old = ec[j, 0]
             y_old = ec[j, 1]
+        top_elems.append(len(ec) - 1)
         return np.array(top_elems)
 
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
