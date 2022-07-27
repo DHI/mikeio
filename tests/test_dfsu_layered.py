@@ -403,9 +403,8 @@ def test_top_elements_subset():
 
     idx3d = g3d.find_index(area=area)
     subg = g3d.isel(idx3d)
-    
-    assert len(subg.top_elements) == 6
 
+    assert len(subg.top_elements) == 6
 
 
 def test_bottom_elements():
