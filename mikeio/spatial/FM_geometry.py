@@ -1278,7 +1278,7 @@ class GeometryFM(_Geometry):
         """Get list of top element ids based on element coordinates"""
         if ec is None:
             ec = self.element_coordinates
-        
+
         d_eps = 1e-4
         top_elems = []
         x_old = ec[0, 0]
@@ -1292,7 +1292,7 @@ class GeometryFM(_Geometry):
                 top_elems.append(j - 1)
             x_old = ec[j, 0]
             y_old = ec[j, 1]
-        top_elems.append(len(ec) - 1)  #last element will always be top element
+        top_elems.append(len(ec) - 1)  # last element will always be top element
         return np.array(top_elems)
 
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
