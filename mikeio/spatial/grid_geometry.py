@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Sequence, Tuple, Union
 import warnings
 import numpy as np
-from mikecore.eum import eumQuantity
-from mikecore.MeshBuilder import MeshBuilder
 
 from .geometry import (
     _Geometry,
@@ -12,7 +10,6 @@ from .geometry import (
     GeometryUndefined,
     BoundingBox,
 )
-from ..eum import EUMType, EUMUnit
 
 
 def _check_equidistant(x: np.ndarray) -> None:
@@ -662,6 +659,7 @@ class Grid2D(_Geometry):
         yn = self._centers_to_nodes(self.y)
         gn = Grid2D(x=xn, y=yn)
 
+        # node coordinates
         x = gn.xy[:, 0]
         y = gn.xy[:, 1]
         n = gn.nx * gn.ny
@@ -694,42 +692,16 @@ class Grid2D(_Geometry):
             bathymetry values for each node, by default 0
             if array: must have length=(nx+1)*(ny+1)
         """
-        # get node based grid
-        xn = self._centers_to_nodes(self.x)
-        yn = self._centers_to_nodes(self.y)
-        gn = Grid2D(x=xn, y=yn)
+        g = self.to_geometryFM()
 
-        x = gn.xy[:, 0]
-        y = gn.xy[:, 1]
-        n = gn.nx * gn.ny
-        if z is None:
-            z = np.zeros(n)
-        else:
-            if np.isscalar(z):
-                z = z * np.ones(n)
-            else:
-                if len(z) != n:
+        if z is not None:
+            if not np.isscalar(z):
+                if len(z) != g.n_nodes:
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
                     )
-        codes = np.zeros(n, dtype=int)
-        codes[y == y[-1]] = 5  # north
-        codes[x == x[-1]] = 4  # east
-        codes[y == y[0]] = 3  # south
-        codes[x == x[0]] = 2  # west
-        codes[(y == y[-1]) & (x == x[0])] = 5  # corner->north
-
-        builder = MeshBuilder()
-        builder.SetNodes(np.round(x, 8), np.round(y, 8), z, codes)
-
-        elem_table = gn._to_element_table(index_base=1)
-        builder.SetElements(elem_table)
-
-        builder.SetProjection(self.projection)
-        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-        builder.SetEumQuantity(quantity)
-        newMesh = builder.CreateMesh()
-        newMesh.Write(outfilename)
+            g.node_coordinates[:, 2] = z
+        g.to_mesh(outfilename=outfilename)
 
 
 @dataclass
