@@ -263,6 +263,11 @@ def test_to_geometryFM():
     assert ye[ny - 1] == grd.y[-1]
     assert ye[-1] == grd.y[-1]
 
+    assert g.codes[0] == 2  # west (lower left corner)
+    assert g.codes[1] == 3  # south
+    assert g.codes[-2] == 5  # north
+    assert g.codes[-1] == 4  # east (upper right corner)
+
 
 def test_to_mesh(tmp_path: Path):
     outfilename = tmp_path / "temp.mesh"
