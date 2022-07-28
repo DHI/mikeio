@@ -1472,21 +1472,29 @@
 
         <span class="k">return</span> <span class="n">mp</span></div>
 
-    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryFM.to_mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.to_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Export geometry to new mesh file</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        outfilename : str</span>
+<span class="sd">            path to file to be written</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">builder</span> <span class="o">=</span> <span class="n">MeshBuilder</span><span class="p">()</span>
 
-        <span class="n">nc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">SetNodes</span><span class="p">(</span><span class="n">nc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">nc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">nc</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">codes</span><span class="p">)</span>
-        <span class="c1"># builder.SetNodeIds(self.node_ids+1)</span>
-        <span class="c1"># builder.SetElementIds(self.elements+1)</span>
-        <span class="n">element_table_MZ</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">]</span>
+        <span class="n">geom2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span>
+
+        <span class="n">nc</span> <span class="o">=</span> <span class="n">geom2d</span><span class="o">.</span><span class="n">node_coordinates</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">SetNodes</span><span class="p">(</span><span class="n">nc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">nc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">nc</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">geom2d</span><span class="o">.</span><span class="n">codes</span><span class="p">)</span>
+        <span class="c1"># builder.SetNodeIds(geom2d.node_ids+1)</span>
+        <span class="c1"># builder.SetElementIds(geom2d.elements+1)</span>
+        <span class="n">element_table_MZ</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">geom2d</span><span class="o">.</span><span class="n">element_table</span><span class="p">]</span>
         <span class="n">builder</span><span class="o">.</span><span class="n">SetElements</span><span class="p">(</span><span class="n">element_table_MZ</span><span class="p">)</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">SetProjection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_string</span><span class="p">)</span>
+        <span class="n">builder</span><span class="o">.</span><span class="n">SetProjection</span><span class="p">(</span><span class="n">geom2d</span><span class="o">.</span><span class="n">projection_string</span><span class="p">)</span>
         <span class="n">quantity</span> <span class="o">=</span> <span class="n">eumQuantity</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Bathymetry</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="o">.</span><span class="n">meter</span><span class="p">)</span>
         <span class="n">builder</span><span class="o">.</span><span class="n">SetEumQuantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span>
         <span class="n">newMesh</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">CreateMesh</span><span class="p">()</span>
-        <span class="n">newMesh</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span></div>
+        <span class="n">newMesh</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span></div></div>
 
 
 <span class="c1"># class GeometryFMHorizontal(GeometryFM):</span>
