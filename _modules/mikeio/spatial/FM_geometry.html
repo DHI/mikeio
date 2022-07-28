@@ -1355,29 +1355,9 @@
                     <span class="c1"># TODO fix this</span>
                     <span class="n">geom</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu3DSigma</span>
 
-                <span class="n">geom</span><span class="o">.</span><span class="n">_top_elems</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">_get_top_elements_from_coordinates</span><span class="p">()</span>
+                <span class="n">geom</span><span class="o">.</span><span class="n">_top_elems</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">_findTopLayerElements</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">element_table</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">geom</span></div>
-
-    <span class="k">def</span> <span class="nf">_get_top_elements_from_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get list of top element ids based on element coordinates&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">ec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span>
-
-        <span class="n">d_eps</span> <span class="o">=</span> <span class="mf">1e-4</span>
-        <span class="n">top_elems</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">x_old</span> <span class="o">=</span> <span class="n">ec</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">y_old</span> <span class="o">=</span> <span class="n">ec</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ec</span><span class="p">)):</span>
-            <span class="n">d2</span> <span class="o">=</span> <span class="p">(</span><span class="n">ec</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">x_old</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ec</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_old</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="c1"># print(d2)</span>
-            <span class="k">if</span> <span class="n">d2</span> <span class="o">&gt;</span> <span class="n">d_eps</span><span class="p">:</span>
-                <span class="c1"># this is a new x,y point</span>
-                <span class="c1"># then the previous element must be a top element</span>
-                <span class="n">top_elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="n">x_old</span> <span class="o">=</span> <span class="n">ec</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-            <span class="n">y_old</span> <span class="o">=</span> <span class="n">ec</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">top_elems</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_nodes_and_table_for_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;list of nodes and element table for a list of elements</span>
