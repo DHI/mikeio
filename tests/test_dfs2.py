@@ -752,9 +752,18 @@ def test_da_plot():
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
     da = ds[0]
     da.plot()
-    da.plot.contour()
+    da.plot.contour(title="contour plot")
     da.plot.contourf()
-    da.plot.hist()
+    da.plot.hist(title="histogram plot", alpha=0.2)
+
+    plt.close("all")
+
+
+def test_grid2d_plot():
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+    g = ds[0].geometry
+    g.plot(color="0.2", linewidth=2, title="grid plot")
+    g.plot.outline(title="outline plot")
 
     plt.close("all")
 
