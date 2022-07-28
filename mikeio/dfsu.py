@@ -858,7 +858,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if elements is not None and len(elements) == 1:
             # squeeze point data
             dims = tuple([d for d in dims if d != "element"])
-            data_list = [np.squeeze(d) for d in data_list]
+            data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         return Dataset(
             data_list, time, items, geometry=geometry, dims=dims, validate=False
@@ -885,6 +885,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         if (x is not None) or (y is not None):
             elements = self.geometry.find_index(x=x, y=y)
+
+        if (x is not None) or (y is not None) or (area is not None):
+            # selection was attempted
+            if (elements is None) or len(elements) == 0:
+                raise ValueError("No elements in selection!")
 
         return elements
 

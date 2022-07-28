@@ -11,6 +11,7 @@ from mikeio.eum import ItemInfo
 from pytest import approx
 
 from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.spatial.geometry import GeometryPoint2D
 from mikeio.spatial.grid_geometry import Grid2D
 
 
@@ -210,6 +211,39 @@ def test_read_single_time_step_outside_bounds_fails():
     with pytest.raises(Exception):
 
         dfs.read(items=[0, 3], time=[100])
+
+
+def test_read_area():
+
+    filename = "tests/testdata/FakeLake.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read(area=[0, 0, 0.1, 0.1])
+    assert isinstance(ds.geometry, GeometryFM)
+    assert ds.geometry.n_elements == 18
+
+
+def test_read_area_single_element():
+
+    filename = "tests/testdata/FakeLake.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read(area=[0, 0, 0.02, 0.02])
+    assert isinstance(ds.geometry, GeometryPoint2D)
+    assert ds.dims == ("time",)
+
+    ds = dfs.read(area=[0, 0, 0.02, 0.02], time=0)
+    assert isinstance(ds.geometry, GeometryPoint2D)
+    assert len(ds.dims) == 0
+
+
+def test_read_empty_area_fails():
+
+    filename = "tests/testdata/FakeLake.dfsu"
+    dfs = mikeio.open(filename)
+
+    with pytest.raises(ValueError, match="No elements in selection"):
+        dfs.read(area=[0, 0, 0.001, 0.001])
 
 
 def test_number_of_time_steps():

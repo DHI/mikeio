@@ -122,6 +122,33 @@ def test_read_dfsu3d_area():
     assert np.all(dsa1.to_numpy() == dsa2.to_numpy())
 
 
+def test_read_dfsu3d_area_single_element():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    bbox = [356000, 6144000, 357000, 6144500]
+    ds = dfs.read(area=bbox)
+    assert ds.geometry.geometry2d.n_elements == 1
+    assert ds.geometry.n_elements == 4
+
+    ds = dfs.read(area=bbox, layers="top")
+    assert isinstance(ds.geometry, GeometryPoint3D)
+    assert ds.dims == ("time",)
+
+    ds = dfs.read(area=bbox, layers="top", time=0)
+    assert isinstance(ds.geometry, GeometryPoint3D)
+    assert len(ds.dims) == 0
+
+
+def test_read_dfsu3d_area_empty_fails():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    bbox = [350000, 6192000, 350001, 6192001]
+    with pytest.raises(ValueError, match="No elements in selection"):
+        dfs.read(area=bbox)
+
+
 def test_read_dfsu3d_column():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
