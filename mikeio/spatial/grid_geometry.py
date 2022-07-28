@@ -683,22 +683,17 @@ class Grid2D(_Geometry):
             projection=self.projection,
         )
 
-    def to_mesh(self, outfilename, projection=None, z=None):
+    def to_mesh(self, outfilename, z=None):
         """export grid to mesh file
 
         Parameters
         ----------
         outfilename : str
             path of new mesh file
-        projection : str, optional
-            WKT projection string, by default 'LONG/LAT'
         z : float or array(float), optional
             bathymetry values for each node, by default 0
             if array: must have length=(nx+1)*(ny+1)
         """
-        if projection is None:
-            projection = self.projection
-
         # get node based grid
         xn = self._centers_to_nodes(self.x)
         yn = self._centers_to_nodes(self.y)
@@ -730,7 +725,7 @@ class Grid2D(_Geometry):
         elem_table = gn._to_element_table(index_base=1)
         builder.SetElements(elem_table)
 
-        builder.SetProjection(projection)
+        builder.SetProjection(self.projection)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
