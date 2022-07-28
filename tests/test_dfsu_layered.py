@@ -391,6 +391,22 @@ def test_top_elements():
     assert not hasattr(dfs, "top_elements")
 
 
+def test_top_elements_subset():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    g3d = mikeio.open(filename).geometry
+    g2d = g3d.geometry2d
+
+    area = [356000, 6144000, 359000, 6146000]
+    idx2d = g2d.find_index(area=area)
+    assert len(idx2d) == 6
+    assert idx2d[-1] == 3408
+
+    idx3d = g3d.find_index(area=area)
+    subg = g3d.isel(idx3d)
+
+    assert len(subg.top_elements) == 6
+
+
 def test_bottom_elements():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = mikeio.open(filename)
