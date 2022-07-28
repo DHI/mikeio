@@ -1274,27 +1274,6 @@ class GeometryFM(_Geometry):
 
         return geom
 
-    # def _get_top_elements_from_coordinates(self, ec=None):
-    #     """Get list of top element ids based on element coordinates"""
-    #     if ec is None:
-    #         ec = self.element_coordinates
-
-    #     d_eps = 1e-4
-    #     top_elems = []
-    #     x_old = ec[0, 0]
-    #     y_old = ec[0, 1]
-    #     for j in range(1, len(ec)):
-    #         d2 = (ec[j, 0] - x_old) ** 2 + (ec[j, 1] - y_old) ** 2
-    #         # print(d2)
-    #         if d2 > d_eps:
-    #             # this is a new x,y point
-    #             # then the previous element must be a top element
-    #             top_elems.append(j - 1)
-    #         x_old = ec[j, 0]
-    #         y_old = ec[j, 1]
-    #     top_elems.append(len(ec) - 1)  # last element will always be top element
-    #     return np.array(top_elems)
-
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
         """list of nodes and element table for a list of elements
 
