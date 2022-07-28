@@ -1002,8 +1002,9 @@ def test_daarray_aggregation():
     assert pytest.approx(da_mean.values[0]) == 0.04334851
     assert pytest.approx(da_mean.values[778]) == 0.452692
 
-    da_std = da.std()
+    da_std = da.std(name="standard deviation")
     assert isinstance(da_std, mikeio.DataArray)
+    assert da_std.name == "standard deviation"
     assert da_std.geometry == da.geometry
     assert da_std.start_time == da.start_time
     assert len(da_std.time) == 1
