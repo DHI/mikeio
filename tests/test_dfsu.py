@@ -220,7 +220,7 @@ def test_read_area():
 
     ds = dfs.read(area=[0, 0, 0.1, 0.1])
     assert isinstance(ds.geometry, GeometryFM)
-    assert ds.geometry.n_elements == 19
+    assert ds.geometry.n_elements == 18
 
 
 def test_read_area_single_element():
