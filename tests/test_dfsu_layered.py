@@ -128,7 +128,7 @@ def test_read_dfsu3d_area_single_element():
 
     bbox = [356000, 6144000, 357000, 6144500]
     ds = dfs.read(area=bbox)
-    # assert ds.geometry.geometry2d.n_elements == 1  # requires #393
+    assert ds.geometry.geometry2d.n_elements == 1
     assert ds.geometry.n_elements == 4
 
     ds = dfs.read(area=bbox, layers="top")
