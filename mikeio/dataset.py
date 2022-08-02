@@ -24,7 +24,6 @@ from .spatial.geometry import (
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
 
-
 class _DatasetPlotter:
     def __init__(self, ds: "Dataset") -> None:
         self.ds = ds
