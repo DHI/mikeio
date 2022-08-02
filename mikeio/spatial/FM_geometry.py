@@ -1270,29 +1270,9 @@ class GeometryFM(_Geometry):
                     # TODO fix this
                     geom._type = DfsuFileType.Dfsu3DSigma
 
-                geom._top_elems = geom._get_top_elements_from_coordinates()
+                geom._top_elems = geom._findTopLayerElements(geom.element_table)
 
         return geom
-
-    def _get_top_elements_from_coordinates(self, ec=None):
-        """Get list of top element ids based on element coordinates"""
-        if ec is None:
-            ec = self.element_coordinates
-
-        d_eps = 1e-4
-        top_elems = []
-        x_old = ec[0, 0]
-        y_old = ec[0, 1]
-        for j in range(1, len(ec)):
-            d2 = (ec[j, 0] - x_old) ** 2 + (ec[j, 1] - y_old) ** 2
-            # print(d2)
-            if d2 > d_eps:
-                # this is a new x,y point
-                # then the previous element must be a top element
-                top_elems.append(j - 1)
-            x_old = ec[j, 0]
-            y_old = ec[j, 1]
-        return np.array(top_elems)
 
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
         """list of nodes and element table for a list of elements
@@ -1388,16 +1368,24 @@ class GeometryFM(_Geometry):
         return mp
 
     def to_mesh(self, outfilename):
+        """Export geometry to new mesh file
 
+        Parameters
+        ----------
+        outfilename : str
+            path to file to be written
+        """
         builder = MeshBuilder()
 
-        nc = self.node_coordinates
-        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
-        # builder.SetNodeIds(self.node_ids+1)
-        # builder.SetElementIds(self.elements+1)
-        element_table_MZ = [np.asarray(row) + 1 for row in self.element_table]
+        geom2d = self._geometry2d
+
+        nc = geom2d.node_coordinates
+        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geom2d.codes)
+        # builder.SetNodeIds(geom2d.node_ids+1)
+        # builder.SetElementIds(geom2d.elements+1)
+        element_table_MZ = [np.asarray(row) + 1 for row in geom2d.element_table]
         builder.SetElements(element_table_MZ)
-        builder.SetProjection(self.projection_string)
+        builder.SetProjection(geom2d.projection_string)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
