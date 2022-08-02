@@ -25,7 +25,7 @@ $ pip install mikeio
 
 ```python
 >>>  import
->>>  ds = mikeio.read('simple.dfs0')
+>>>  ds = mikeio.read("simple.dfs0")
 >>>  df = ds.to_dataframe()
 ```
 
