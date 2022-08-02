@@ -24,19 +24,6 @@ from .spatial.geometry import (
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
 
-# def _repeat_items(
-#     items_in: Sequence[ItemInfo], prefixes: Sequence[str]
-# ) -> Sequence[ItemInfo]:
-#     """Rereat a list of items n times with different prefixes"""
-#     new_items = []
-#     for item_in in items_in:
-#         for prefix in prefixes:
-#             item = deepcopy(item_in)
-#             item.name = f"{prefix}, {item.name}"
-#             new_items.append(item)
-
-#     return new_items
-
 
 class _DatasetPlotter:
     def __init__(self, ds: "Dataset") -> None:
