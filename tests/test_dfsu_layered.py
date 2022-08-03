@@ -122,6 +122,33 @@ def test_read_dfsu3d_area():
     assert np.all(dsa1.to_numpy() == dsa2.to_numpy())
 
 
+def test_read_dfsu3d_area_single_element():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    bbox = [356000, 6144000, 357000, 6144500]
+    ds = dfs.read(area=bbox)
+    assert ds.geometry.geometry2d.n_elements == 1
+    assert ds.geometry.n_elements == 4
+
+    ds = dfs.read(area=bbox, layers="top")
+    assert isinstance(ds.geometry, GeometryPoint3D)
+    assert ds.dims == ("time",)
+
+    ds = dfs.read(area=bbox, layers="top", time=0)
+    assert isinstance(ds.geometry, GeometryPoint3D)
+    assert len(ds.dims) == 0
+
+
+def test_read_dfsu3d_area_empty_fails():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    bbox = [350000, 6192000, 350001, 6192001]
+    with pytest.raises(ValueError, match="No elements in selection"):
+        dfs.read(area=bbox)
+
+
 def test_read_dfsu3d_column():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
@@ -143,6 +170,50 @@ def test_read_dfsu3d_column():
     assert dscol1.geometry._type == dscol2.geometry._type
     assert np.all(dscol1.to_numpy() == dscol2.to_numpy())
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
+
+
+def test_read_dfsu3d_column_save(tmpdir):
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    (x, y) = (333934.1, 6158101.5)
+
+    ds = dfs.read(x=x, y=y)  # all data in file
+    assert ds.geometry.n_sigma_layers == 4
+    assert ds.geometry.n_z_layers == 0
+    outfilename = os.path.join(tmpdir, "new_column.dfsu")
+    ds.to_dfs(outfilename)
+
+    (x, y) = (347698.5188405, 6221233.34815)
+
+    ds = dfs.read(x=x, y=y)  # all data in file
+    assert ds.geometry.n_sigma_layers == 4
+    assert ds.geometry.n_z_layers == 4
+    outfilename = os.path.join(tmpdir, "new_column_2.dfsu")
+    ds.to_dfs(outfilename)
+
+
+def test_read_dfsu3d_columns_sigma_only():
+    dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
+    dscol = dfs.read(x=500, y=50)
+    assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
+    assert dscol.n_elements == 10
+    assert dscol.n_items == dfs.n_items
+    assert dscol["U velocity"].isel(time=-1)[-1].values == pytest.approx(0.363413)
+
+    dscol2 = dfs.read().sel(x=500, y=50)
+    assert dscol.shape == dscol2.shape
+
+
+def test_read_dfsu3d_columns_sigma_only_save(tmpdir):
+    dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
+    assert dfs.geometry.n_sigma_layers == 10
+    assert dfs.geometry.n_z_layers == 0
+    dscol = dfs.read(x=500, y=50)
+    assert dscol.geometry.n_sigma_layers == 10
+    assert dscol.geometry.n_z_layers == 0
+    outfilename = os.path.join(tmpdir, "new_column.dfsu")
+    dscol.to_dfs(outfilename)
 
 
 def test_read_dfsu3d_xyz():
@@ -347,6 +418,22 @@ def test_top_elements():
     assert not hasattr(dfs, "top_elements")
 
 
+def test_top_elements_subset():
+    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    g3d = mikeio.open(filename).geometry
+    g2d = g3d.geometry2d
+
+    area = [356000, 6144000, 359000, 6146000]
+    idx2d = g2d.find_index(area=area)
+    assert len(idx2d) == 6
+    assert idx2d[-1] == 3408
+
+    idx3d = g3d.find_index(area=area)
+    subg = g3d.isel(idx3d)
+
+    assert len(subg.top_elements) == 6
+
+
 def test_bottom_elements():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = mikeio.open(filename)
@@ -478,15 +565,15 @@ def test_to_mesh_3d(tmpdir):
 
     dfs = mikeio.open(filename)
 
-    outfilename = os.path.join(tmpdir, "oresund.mesh")
-
+    outfilename = os.path.join(tmpdir, "oresund_from_dfs.mesh")
     dfs.to_mesh(outfilename)
-
     assert os.path.exists(outfilename)
-
     mesh = Mesh(outfilename)
 
-    assert True
+    outfilename = os.path.join(tmpdir, "oresund_from_geometry.mesh")
+    dfs.geometry.to_mesh(outfilename)
+    assert os.path.exists(outfilename)
+    mesh = Mesh(outfilename)
 
 
 def test_extract_surface_elevation_from_3d(tmpdir):

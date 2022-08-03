@@ -191,7 +191,7 @@ class DfsuLayered(_Dfsu):
             n_nodes = self.n_nodes
             geometry = self.geometry
         else:
-            elements = [elements] if np.isscalar(elements) else elements
+            elements = list(elements)
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
             if self.is_layered:  # and items[0].name == "Z coordinate":
@@ -260,7 +260,7 @@ class DfsuLayered(_Dfsu):
         if elements is not None and len(elements) == 1:
             # squeeze point data
             dims = tuple([d for d in dims if d != "element"])
-            data_list = [np.squeeze(d) for d in data_list]
+            data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         if hasattr(geometry, "is_layered") and geometry.is_layered:
             return Dataset(
@@ -293,6 +293,16 @@ class DfsuLayered(_Dfsu):
             elements = (
                 elements_xy if layers is None else np.intersect1d(elements, elements_xy)
             )
+
+        if (
+            (x is not None)
+            or (y is not None)
+            or (layers is not None)
+            or (area is not None)
+        ):
+            # selection was attempted
+            if (elements is None) or len(elements) == 0:
+                raise ValueError("No elements in selection!")
 
         return elements
 

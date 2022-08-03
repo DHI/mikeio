@@ -59,7 +59,9 @@ class _ChunkInfo:
         return _ChunkInfo(n_data, n_chunks)
 
 
-def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> DfsFile:
+def _clone(
+    infilename: str, outfilename: str, start_time=None, timestep=None, items=None
+) -> DfsFile:
     """Clone a dfs file
 
     Parameters
@@ -69,7 +71,9 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
     outfilename : str
         output filename
     start_time : datetime, optional
-        new start time for the new file, default
+        new start time for the new file, by default None
+    timestep : float, optional
+        new timestep (in seconds) for the new file, by default None
     items : list(int,str,eum.ItemInfo), optional
         list of items for new file, either as a list of
         ItemInfo or a list of str/int referring to original file,
@@ -93,6 +97,8 @@ def _clone(infilename: str, outfilename: str, start_time=None, items=None) -> Df
     time_axis = fi.TimeAxis
     if start_time is not None:
         time_axis.StartDateTime = start_time
+    if timestep is not None:
+        time_axis.TimeStep = timestep
     builder.SetTemporalAxis(time_axis)
 
     builder.SetItemStatisticsType(fi.StatsType)
@@ -289,9 +295,10 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
 
             outdata = d_a - d_b
 
-            darray = outdata.astype(np.float32)
+            d = outdata.astype(np.float32)
+            d[np.isnan(d)] = deletevalue
 
-            dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
+            dfs_o.WriteItemTimeStep(item + 1, timestep, time, d)
 
     dfs_i_a.Close()
     dfs_i_b.Close()
@@ -416,7 +423,9 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     dfs_o.Close()
 
 
-def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> None:
+def extract(
+    infilename: str, outfilename: str, start=0, end=-1, step=1, items=None
+) -> None:
     """Extract timesteps and/or items to a new dfs file
 
     Parameters
@@ -431,6 +440,8 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     end : int, float, str or datetime, optional
         end of extraction as either step, relative seconds
         or datetime/str, by default -1 (end of file)
+    step : int, optional
+        jump this many step, by default 1 (every step between start and end)
     items : int, list(int), str, list(str), optional
         items to be extracted to new file
 
@@ -439,6 +450,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     >>> extract('f_in.dfs0', 'f_out.dfs0', start='2018-1-1')
     >>> extract('f_in.dfs2', 'f_out.dfs2', end=-3)
     >>> extract('f_in.dfsu', 'f_out.dfsu', start=1800.0, end=3600.0)
+    >>> extract('f_hourly.dfsu', 'f_daily.dfsu', step=24)
     >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0])
     >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity")
     >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
@@ -450,6 +462,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
     )
+    timestep = _parse_step(dfs_i, step)
     item_numbers = _valid_item_numbers(
         dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
     )
@@ -459,7 +472,11 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
         item_numbers.insert(0, 0)
 
     dfs_o = _clone(
-        infilename, outfilename, start_time=file_start_new, items=item_numbers
+        infilename,
+        outfilename,
+        start_time=file_start_new,
+        timestep=timestep,
+        items=item_numbers,
     )
 
     file_start_shift = 0
@@ -468,7 +485,7 @@ def extract(infilename: str, outfilename: str, start=0, end=-1, items=None) -> N
         file_start_shift = (file_start_new - file_start_orig).total_seconds()
 
     timestep_out = -1
-    for timestep in range(start_step, end_step):
+    for timestep in range(start_step, end_step, step):
         for item_out, item in enumerate(item_numbers):
             itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
             time_sec = itemdata.Time
@@ -569,6 +586,19 @@ def _parse_start_end(dfs_i, start, end):
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
     return file_start_new, start_step, start_sec, end_step, end_sec
+
+
+def _parse_step(dfs_i, step):
+    """Helper function for parsing step argument"""
+    if step == 1:
+        timestep = None
+    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 3:
+        timestep = dfs_i.FileInfo.TimeAxis.TimeStep * step
+    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 4:
+        timestep = None
+    else:
+        raise ValueError("TimeAxisType not supported")
+    return timestep
 
 
 def avg_time(infilename: str, outfilename: str, skipna=True):

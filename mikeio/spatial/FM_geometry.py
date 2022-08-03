@@ -1191,6 +1191,7 @@ class GeometryFM(_Geometry):
         # create new geometry
         new_type = self._type
         if self.is_layered:
+            elements = list(elements)
             layers_used = self.layer_ids[elements]
             unique_layer_ids = np.unique(layers_used)
             n_layers = len(unique_layer_ids)
@@ -1257,7 +1258,7 @@ class GeometryFM(_Geometry):
             else:
                 geom._type = self._type
                 geom._n_layers = n_layers
-                lowest_sigma = self.n_layers - self.n_sigma_layers + 1
+                lowest_sigma = self.n_layers - self.n_sigma_layers
                 geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
 
                 # If source is sigma-z but output only has sigma layers
@@ -1269,29 +1270,9 @@ class GeometryFM(_Geometry):
                     # TODO fix this
                     geom._type = DfsuFileType.Dfsu3DSigma
 
-                geom._top_elems = geom._get_top_elements_from_coordinates()
+                geom._top_elems = geom._findTopLayerElements(geom.element_table)
 
         return geom
-
-    def _get_top_elements_from_coordinates(self, ec=None):
-        """Get list of top element ids based on element coordinates"""
-        if ec is None:
-            ec = self.element_coordinates
-
-        d_eps = 1e-4
-        top_elems = []
-        x_old = ec[0, 0]
-        y_old = ec[0, 1]
-        for j in range(1, len(ec)):
-            d2 = (ec[j, 0] - x_old) ** 2 + (ec[j, 1] - y_old) ** 2
-            # print(d2)
-            if d2 > d_eps:
-                # this is a new x,y point
-                # then the previous element must be a top element
-                top_elems.append(j - 1)
-            x_old = ec[j, 0]
-            y_old = ec[j, 1]
-        return np.array(top_elems)
 
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
         """list of nodes and element table for a list of elements
@@ -1387,16 +1368,24 @@ class GeometryFM(_Geometry):
         return mp
 
     def to_mesh(self, outfilename):
+        """Export geometry to new mesh file
 
+        Parameters
+        ----------
+        outfilename : str
+            path to file to be written
+        """
         builder = MeshBuilder()
 
-        nc = self.node_coordinates
-        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
-        # builder.SetNodeIds(self.node_ids+1)
-        # builder.SetElementIds(self.elements+1)
-        element_table_MZ = [np.asarray(row) + 1 for row in self.element_table]
+        geom2d = self._geometry2d
+
+        nc = geom2d.node_coordinates
+        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geom2d.codes)
+        # builder.SetNodeIds(geom2d.node_ids+1)
+        # builder.SetElementIds(geom2d.elements+1)
+        element_table_MZ = [np.asarray(row) + 1 for row in geom2d.element_table]
         builder.SetElements(element_table_MZ)
-        builder.SetProjection(self.projection_string)
+        builder.SetProjection(geom2d.projection_string)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
@@ -1514,7 +1503,7 @@ class _GeometryFMLayered(GeometryFM):
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
             else:
                 idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
-            idx = np.intersect1d(idx, idx_3d)
+            idx = np.intersect1d(idx, idx_3d).astype(int)
         elif area is not None:
             idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)

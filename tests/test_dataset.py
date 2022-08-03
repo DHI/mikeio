@@ -851,6 +851,41 @@ def test_nanquantile():
     assert dsq2[0].to_numpy() == nqnt
 
 
+def test_aggregate_across_items():
+
+    ds = mikeio.read("tests/testdata/State_wlbc_north_err.dfs1")
+
+    dam = ds.max(axis="items")
+
+    assert isinstance(dam, mikeio.DataArray)
+    assert dam.geometry == ds.geometry
+    assert dam.dims == ds.dims
+    assert dam.type == ds[-1].type
+
+    dsm = ds.mean(axis="items", keepdims=True)
+
+    assert isinstance(dsm, mikeio.Dataset)
+    assert dsm.geometry == ds.geometry
+    assert dsm.dims == ds.dims
+
+
+def test_aggregate_selected_items_dfsu_save_to_new_file(tmpdir):
+
+    ds = mikeio.read("tests/testdata/State_Area.dfsu", items="*Level*")
+
+    assert ds.n_items == 5
+
+    dam = ds.max(axis="items", name="Max Water Level")  # add a nice name
+    assert dam.name == "Max Water Level"
+    assert isinstance(dam, mikeio.DataArray)
+    assert dam.geometry == ds.geometry
+    assert dam.dims == ds.dims
+    assert dam.type == ds[-1].type
+
+    outfilename = os.path.join(tmpdir, "maxwl.dfsu")
+    dam.to_dfs(outfilename)
+
+
 def test_copy():
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5

@@ -138,11 +138,30 @@ def test_read_dfs2_single_time():
     assert "time" not in ds.dims
 
     ds = mikeio.read(
+        "tests/testdata/consistency/oresundHD.dfs2",
+        time="2018-03-10",
+    )
+
+    assert ds.n_timesteps == 1
+    assert "time" not in ds.dims
+
+    ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs2", time=[-1], keepdims=True
     )
 
     assert ds.n_timesteps == 1
     assert "time" in ds.dims
+
+
+def test_read_single_row_dfs2_single_time_step():
+    ds = mikeio.read("tests/testdata/single_row.dfs2", time="2000-01-01")
+    assert ds.n_timesteps == 1
+    assert "time" not in ds.dims
+
+    ds2 = mikeio.read("tests/testdata/single_row.dfs2").sel(time="2000-01-01")
+
+    assert ds.dims == ds2.dims
+    assert all(ds.time == ds2.time)
 
 
 def test_interp_x_y_dfs2():
@@ -450,3 +469,44 @@ def test_read_dfs_time_list_int():
         dsgetitem = ds[0][time]
         assert all(dsr[0].time == dsgetitem.time)
         assert dsr[0].shape == dsgetitem.shape
+
+
+def test_filter_items_dfs0():
+
+    ds = mikeio.read("tests/testdata/sw_points.dfs0", items="*Point 42*")
+    assert ds.n_items == 15
+
+    for da in ds:
+        assert "Point 42" in da.name
+
+    ds = mikeio.read("tests/testdata/sw_points.dfs0", items="*Height*")
+    assert ds.n_items == 12
+
+    for da in ds:
+        assert "Height" in da.name
+
+    with pytest.raises(KeyError):
+        mikeio.read(
+            "tests/testdata/sw_points.dfs0", items="height*"
+        )  # Note missing wildcard in beginning
+
+
+def test_filter_items_wildcard_getitem():
+    dsall = mikeio.read("tests/testdata/sw_points.dfs0")
+
+    ds = dsall["*Height*"]
+    assert ds.n_items == 12
+
+
+def test_filter_items_dfsu():
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", items="*direction*")
+    assert ds.n_items == 1
+
+
+def test_filter_items_dfsu_getitem():
+
+    dsall = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    ds = dsall["*direction*"]
+    assert ds.n_items == 1
+    assert "direction" in ds[0].name
