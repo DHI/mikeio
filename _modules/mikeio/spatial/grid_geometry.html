@@ -87,8 +87,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span>
-<span class="kn">from</span> <span class="nn">mikecore.MeshBuilder</span> <span class="kn">import</span> <span class="n">MeshBuilder</span>
+
 <span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_Geometry</span><span class="p">,</span>
     <span class="n">GeometryPoint2D</span><span class="p">,</span>
@@ -96,7 +95,6 @@
     <span class="n">GeometryUndefined</span><span class="p">,</span>
     <span class="n">BoundingBox</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
 
 
 <span class="k">def</span> <span class="nf">_check_equidistant</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -834,58 +832,75 @@
         <span class="n">gn</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xn</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">gn</span><span class="o">.</span><span class="n">xy</span></div>
 
-<div class="viewcode-block" id="Grid2D.to_mesh"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.to_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;export grid to mesh file</span>
+<div class="viewcode-block" id="Grid2D.to_geometryFM"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.to_geometryFM">[docs]</a>    <span class="k">def</span> <span class="nf">to_geometryFM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">west</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">east</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">north</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">south</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;convert Grid2D to GeometryFM</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        outfilename : str</span>
-<span class="sd">            path of new mesh file</span>
-<span class="sd">        projection : str, optional</span>
-<span class="sd">            WKT projection string, by default &#39;LONG/LAT&#39;</span>
-<span class="sd">        z : float or array(float), optional</span>
+<span class="sd">        z : float, optional</span>
 <span class="sd">            bathymetry values for each node, by default 0</span>
-<span class="sd">            if array: must have length=(nx+1)*(ny+1)</span>
+<span class="sd">        west: int, optional</span>
+<span class="sd">            code value for west boundary</span>
+<span class="sd">        east: int, optional</span>
+<span class="sd">            code value for east boundary</span>
+<span class="sd">        north: int, optional</span>
+<span class="sd">            code value for north boundary</span>
+<span class="sd">        south: int, optional</span>
+<span class="sd">            code value for south boundary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">projection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">projection</span> <span class="o">=</span> <span class="s2">&quot;LONG/LAT&quot;</span>
+        <span class="kn">from</span> <span class="nn">mikeio.spatial.FM_geometry</span> <span class="kn">import</span> <span class="n">GeometryFM</span>
 
         <span class="c1"># get node based grid</span>
         <span class="n">xn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centers_to_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
         <span class="n">yn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centers_to_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
         <span class="n">gn</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xn</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yn</span><span class="p">)</span>
 
+        <span class="c1"># node coordinates</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">gn</span><span class="o">.</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">gn</span><span class="o">.</span><span class="n">xy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">gn</span><span class="o">.</span><span class="n">nx</span> <span class="o">*</span> <span class="n">gn</span><span class="o">.</span><span class="n">ny</span>
-        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
-                <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
+
+        <span class="n">zn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zn</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">z</span>
+
+        <span class="n">codes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">codes</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">north</span>
+        <span class="n">codes</span><span class="p">[</span><span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">east</span>
+        <span class="n">codes</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">south</span>
+        <span class="n">codes</span><span class="p">[</span><span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">west</span>
+        <span class="n">codes</span><span class="p">[(</span><span class="n">y</span> <span class="o">==</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># corner-&gt;north</span>
+
+        <span class="n">nc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">zn</span><span class="p">])</span>
+        <span class="n">elem_table</span> <span class="o">=</span> <span class="n">gn</span><span class="o">.</span><span class="n">_to_element_table</span><span class="p">(</span><span class="n">index_base</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">GeometryFM</span><span class="p">(</span>
+            <span class="n">node_coordinates</span><span class="o">=</span><span class="n">nc</span><span class="p">,</span>
+            <span class="n">element_table</span><span class="o">=</span><span class="n">elem_table</span><span class="p">,</span>
+            <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+            <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Grid2D.to_mesh"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.to_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;export grid to mesh file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        outfilename : str</span>
+<span class="sd">            path of new mesh file</span>
+<span class="sd">        z : float or array(float), optional</span>
+<span class="sd">            bathymetry values for each node, by default 0</span>
+<span class="sd">            if array: must have length=(nx+1)*(ny+1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_geometryFM</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">!=</span> <span class="n">g</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;z must either be scalar or have length of nodes ((nx+1)*(ny+1))&quot;</span>
                     <span class="p">)</span>
-        <span class="n">codes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-        <span class="n">codes</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">gn</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">top</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># north</span>
-        <span class="n">codes</span><span class="p">[</span><span class="n">x</span> <span class="o">==</span> <span class="n">gn</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">right</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># east</span>
-        <span class="n">codes</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">gn</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">bottom</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># south</span>
-        <span class="n">codes</span><span class="p">[</span><span class="n">x</span> <span class="o">==</span> <span class="n">gn</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">left</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># west</span>
-        <span class="n">codes</span><span class="p">[(</span><span class="n">y</span> <span class="o">==</span> <span class="n">gn</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">top</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">gn</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">left</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># corner-&gt;north</span>
-
-        <span class="n">builder</span> <span class="o">=</span> <span class="n">MeshBuilder</span><span class="p">()</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">SetNodes</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">codes</span><span class="p">)</span>
-
-        <span class="n">elem_table</span> <span class="o">=</span> <span class="n">gn</span><span class="o">.</span><span class="n">_to_element_table</span><span class="p">(</span><span class="n">index_base</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">SetElements</span><span class="p">(</span><span class="n">elem_table</span><span class="p">)</span>
-
-        <span class="n">builder</span><span class="o">.</span><span class="n">SetProjection</span><span class="p">(</span><span class="n">projection</span><span class="p">)</span>
-        <span class="n">quantity</span> <span class="o">=</span> <span class="n">eumQuantity</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Bathymetry</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="o">.</span><span class="n">meter</span><span class="p">)</span>
-        <span class="n">builder</span><span class="o">.</span><span class="n">SetEumQuantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span>
-        <span class="n">newMesh</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">CreateMesh</span><span class="p">()</span>
-        <span class="n">newMesh</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span></div></div>
+            <span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">to_mesh</span><span class="p">(</span><span class="n">outfilename</span><span class="o">=</span><span class="n">outfilename</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Grid3D"><a class="viewcode-back" href="../../../dfs3.html#mikeio.Grid3D">[docs]</a><span class="nd">@dataclass</span>
