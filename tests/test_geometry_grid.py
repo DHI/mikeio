@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D
+from mikeio.spatial.FM_geometry import GeometryFM
 
 
 def test_create_nx_ny():
@@ -241,6 +242,42 @@ def test_find_index():
     assert jj[0] == j1
     assert ii[2] == i2
     assert jj[2] == j2
+
+
+def test_to_geometryFM():
+    nx = 5
+    ny = 3
+    grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
+    g = grd.to_geometryFM()
+    assert isinstance(g, GeometryFM)
+    assert g.n_elements == nx * ny
+    assert g.n_nodes == (nx + 1) * (ny + 1)
+    assert g.projection_string == "NON-UTM"
+
+    xe = g.element_coordinates[:, 0]
+    ye = g.element_coordinates[:, 1]
+    assert xe[0] == grd.x[0]
+    assert xe[ny - 1] == grd.x[0]
+    assert ye[0] == grd.y[0]
+    assert xe[-1] == grd.x[-1]
+    assert ye[ny - 1] == grd.y[-1]
+    assert ye[-1] == grd.y[-1]
+
+    assert g.codes[0] == 2  # west (lower left corner)
+    assert g.codes[1] == 3  # south
+    assert g.codes[-2] == 5  # north
+    assert g.codes[-1] == 4  # east (upper right corner)
+
+
+def test_to_geometryFM_custom_z_custom_code():
+    nx = 5
+    ny = 3
+    grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
+    g = grd.to_geometryFM(z=-12.0, west=30)
+    assert isinstance(g, GeometryFM)
+    assert all(g.node_coordinates[:, 2] == -12.0)
+
+    assert g.codes[0] == 30
 
 
 def test_to_mesh(tmp_path: Path):

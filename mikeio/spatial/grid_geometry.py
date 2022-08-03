@@ -2,8 +2,7 @@ from dataclasses import dataclass
 from typing import Sequence, Tuple, Union
 import warnings
 import numpy as np
-from mikecore.eum import eumQuantity
-from mikecore.MeshBuilder import MeshBuilder
+
 from .geometry import (
     _Geometry,
     GeometryPoint2D,
@@ -11,7 +10,6 @@ from .geometry import (
     GeometryUndefined,
     BoundingBox,
 )
-from ..eum import EUMType, EUMUnit
 
 
 def _check_equidistant(x: np.ndarray) -> None:
@@ -749,58 +747,75 @@ class Grid2D(_Geometry):
         gn = Grid2D(x=xn, y=yn)
         return gn.xy
 
-    def to_mesh(self, outfilename, projection=None, z=None):
-        """export grid to mesh file
+    def to_geometryFM(self, *, z=None, west=2, east=4, north=5, south=3):
+        """convert Grid2D to GeometryFM
 
         Parameters
         ----------
-        outfilename : str
-            path of new mesh file
-        projection : str, optional
-            WKT projection string, by default 'LONG/LAT'
-        z : float or array(float), optional
+        z : float, optional
             bathymetry values for each node, by default 0
-            if array: must have length=(nx+1)*(ny+1)
+        west: int, optional
+            code value for west boundary
+        east: int, optional
+            code value for east boundary
+        north: int, optional
+            code value for north boundary
+        south: int, optional
+            code value for south boundary
         """
-        if projection is None:
-            projection = "LONG/LAT"
+        from mikeio.spatial.FM_geometry import GeometryFM
 
         # get node based grid
         xn = self._centers_to_nodes(self.x)
         yn = self._centers_to_nodes(self.y)
         gn = Grid2D(x=xn, y=yn)
 
+        # node coordinates
         x = gn.xy[:, 0]
         y = gn.xy[:, 1]
         n = gn.nx * gn.ny
-        if z is None:
-            z = np.zeros(n)
-        else:
-            if np.isscalar(z):
-                z = z * np.ones(n)
-            else:
-                if len(z) != n:
+
+        zn = np.zeros_like(x)
+        if z is not None:
+            zn[:] = z
+
+        codes = np.zeros(n, dtype=int)
+        codes[y == y[-1]] = north
+        codes[x == x[-1]] = east
+        codes[y == y[0]] = south
+        codes[x == x[0]] = west
+        codes[(y == y[-1]) & (x == x[0])] = 5  # corner->north
+
+        nc = np.column_stack([x, y, zn])
+        elem_table = gn._to_element_table(index_base=0)
+        return GeometryFM(
+            node_coordinates=nc,
+            element_table=elem_table,
+            codes=codes,
+            projection=self.projection,
+        )
+
+    def to_mesh(self, outfilename, z=None):
+        """export grid to mesh file
+
+        Parameters
+        ----------
+        outfilename : str
+            path of new mesh file
+        z : float or array(float), optional
+            bathymetry values for each node, by default 0
+            if array: must have length=(nx+1)*(ny+1)
+        """
+        g = self.to_geometryFM()
+
+        if z is not None:
+            if not np.isscalar(z):
+                if len(z) != g.n_nodes:
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
                     )
-        codes = np.zeros(n, dtype=int)
-        codes[y == gn.bbox.top] = 5  # north
-        codes[x == gn.bbox.right] = 4  # east
-        codes[y == gn.bbox.bottom] = 3  # south
-        codes[x == gn.bbox.left] = 2  # west
-        codes[(y == gn.bbox.top) & (x == gn.bbox.left)] = 5  # corner->north
-
-        builder = MeshBuilder()
-        builder.SetNodes(x, y, z, codes)
-
-        elem_table = gn._to_element_table(index_base=1)
-        builder.SetElements(elem_table)
-
-        builder.SetProjection(projection)
-        quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-        builder.SetEumQuantity(quantity)
-        newMesh = builder.CreateMesh()
-        newMesh.Write(outfilename)
+            g.node_coordinates[:, 2] = z
+        g.to_mesh(outfilename=outfilename)
 
 
 @dataclass
