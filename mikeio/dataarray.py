@@ -85,7 +85,7 @@ class _DataArrayPlotter:
             fig = plt.gcf()
         return fig, ax
 
-    def hist(self, ax=None, figsize=None, **kwargs):
+    def hist(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot DataArray as histogram (using ax.hist)
 
         Parameters
@@ -113,6 +113,8 @@ class _DataArrayPlotter:
         <matplotlib.axes>
         """
         ax = self._get_ax(ax, figsize)
+        if title is not None:
+            ax.set_title(title)
         return self._hist(ax, **kwargs)
 
     def _hist(self, ax, **kwargs):
@@ -257,7 +259,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     def __call__(self, ax=None, figsize=None, **kwargs):
         return self.pcolormesh(ax, figsize, **kwargs)
 
-    def contour(self, ax=None, figsize=None, **kwargs):
+    def contour(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot data as contour lines"""
         _, ax = self._get_fig_ax(ax, figsize)
 
@@ -268,9 +270,11 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
         self._set_aspect_and_labels(ax, self.da.geometry, y)
+        if title is not None:
+            ax.set_title(title)
         return ax
 
-    def contourf(self, ax=None, figsize=None, **kwargs):
+    def contourf(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot data as filled contours"""
         fig, ax = self._get_fig_ax(ax, figsize)
 
@@ -280,9 +284,11 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         pos = ax.contourf(x, y, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
         self._set_aspect_and_labels(ax, self.da.geometry, y)
+        if title is not None:
+            ax.set_title(title)
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot data as coloured patches"""
         fig, ax = self._get_fig_ax(ax, figsize)
 
@@ -292,6 +298,8 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         pos = ax.pcolormesh(xn, yn, values, **kwargs)
         fig.colorbar(pos, label=self._label_txt())
         self._set_aspect_and_labels(ax, self.da.geometry, yn)
+        if title is not None:
+            ax.set_title(title)
         return ax
 
     def _get_x_y(self):
@@ -465,7 +473,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, **kwargs):
+    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
         """Plot data as coloured patches"""
         fig, ax = self._get_fig_ax(ax, figsize)
         ze = self.da.geometry.calc_ze()
@@ -480,6 +488,8 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         ax.set_xlabel("time")
         fig.autofmt_xdate()
         ax.set_ylabel("z (static)")
+        if title is not None:
+            ax.set_title(title)
         return ax
 
 
