@@ -268,6 +268,16 @@ def test_to_geometryFM():
     assert g.codes[-2] == 5  # north
     assert g.codes[-1] == 4  # east (upper right corner)
 
+def test_to_geometryFM_custom_z_custom_code():
+    nx = 5
+    ny = 3
+    grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
+    g = grd.to_geometryFM(z=-12.0, west=30)
+    assert isinstance(g, GeometryFM)
+    assert all(g.node_coordinates[:,2] == -12.0)
+
+    assert g.codes[0] == 30
+
 
 def test_to_mesh(tmp_path: Path):
     outfilename = tmp_path / "temp.mesh"

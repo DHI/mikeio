@@ -650,8 +650,22 @@ class Grid2D(_Geometry):
         gn = Grid2D(x=xn, y=yn)
         return gn.xy
 
-    def to_geometryFM(self):
-        """convert Grid2D to GeometryFM"""
+    def to_geometryFM(self,*,z=None, west=2, east=4, north=5,south=3):
+        """convert Grid2D to GeometryFM
+
+        Parameters
+        ----------
+        z : float, optional
+            bathymetry values for each node, by default 0
+        west: int, optional
+            code value for west boundary
+        east: int, optional
+            code value for east boundary
+        north: int, optional
+            code value for north boundary
+        south: int, optional
+            code value for south boundary
+        """
         from mikeio.spatial.FM_geometry import GeometryFM
 
         # get node based grid
@@ -663,16 +677,19 @@ class Grid2D(_Geometry):
         x = gn.xy[:, 0]
         y = gn.xy[:, 1]
         n = gn.nx * gn.ny
-        z = np.zeros_like(x)
 
+        zn = np.zeros_like(x)
+        if z is not None:
+            zn[:] = z
+        
         codes = np.zeros(n, dtype=int)
-        codes[y == y[-1]] = 5  # north
-        codes[x == x[-1]] = 4  # east
-        codes[y == y[0]] = 3  # south
-        codes[x == x[0]] = 2  # west
+        codes[y == y[-1]] = north
+        codes[x == x[-1]] = east
+        codes[y == y[0]] = south
+        codes[x == x[0]] = west
         codes[(y == y[-1]) & (x == x[0])] = 5  # corner->north
 
-        nc = np.column_stack([x, y, z])
+        nc = np.column_stack([x, y, zn])
         elem_table = gn._to_element_table(index_base=0)
         return GeometryFM(
             node_coordinates=nc,
