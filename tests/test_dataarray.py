@@ -981,23 +981,34 @@ def test_daarray_aggregation():
     assert da_max.dims[0][0] == "e"  # element
     assert isinstance(da_max, mikeio.DataArray)
     assert da_max.geometry == da.geometry
-    assert da_max.start_time == da.start_time  # TODO is this consistent
+    assert da_max.start_time == da.start_time
     assert len(da_max.time) == 1
-    # TODO verify values
+    assert pytest.approx(da_max.values[0]) == 0.06279723
+    assert pytest.approx(da_max.values[778]) == 0.4833801
 
     da_min = da.min()
     assert isinstance(da_max, mikeio.DataArray)
     assert da_min.geometry == da.geometry
-    assert da_min.start_time == da.start_time  # TODO is this consistent
+    assert da_min.start_time == da.start_time
     assert len(da_min.time) == 1
-    # TODO verify values
+    assert pytest.approx(da_min.values[0]) == 0.009865114
+    assert pytest.approx(da_min.values[778]) == 0.4032839
 
     da_mean = da.mean()
     assert isinstance(da_mean, mikeio.DataArray)
     assert da_mean.geometry == da.geometry
-    assert da_mean.start_time == da.start_time  # TODO is this consistent
+    assert da_mean.start_time == da.start_time
     assert len(da_mean.time) == 1
-    # TODO verify values
+    assert pytest.approx(da_mean.values[0]) == 0.04334851
+    assert pytest.approx(da_mean.values[778]) == 0.452692
+
+    da_std = da.std(name="standard deviation")
+    assert isinstance(da_std, mikeio.DataArray)
+    assert da_std.name == "standard deviation"
+    assert da_std.geometry == da.geometry
+    assert da_std.start_time == da.start_time
+    assert len(da_std.time) == 1
+    assert pytest.approx(da_std.values[0]) == 0.015291579
 
 
 def test_daarray_aggregation_nan_versions():
@@ -1010,20 +1021,33 @@ def test_daarray_aggregation_nan_versions():
     da_max = da.nanmax()
     assert isinstance(da_max, mikeio.DataArray)
     assert da_max.geometry == da.geometry
-    assert da_max.start_time == da.start_time  # TODO is this consistent
+    assert da_max.start_time == da.start_time
     assert len(da_max.time) == 1
+    assert pytest.approx(da_max.values[0]) == 0.06279723
+    assert pytest.approx(da_max.values[778]) == 0.4833801
 
     da_min = da.nanmin()
     assert isinstance(da_max, mikeio.DataArray)
     assert da_min.geometry == da.geometry
-    assert da_min.start_time == da.start_time  # TODO is this consistent
+    assert da_min.start_time == da.start_time
     assert len(da_min.time) == 1
+    assert pytest.approx(da_min.values[0]) == 0.009865114
+    assert pytest.approx(da_min.values[778]) == 0.4032839
 
     da_mean = da.nanmean()
     assert isinstance(da_mean, mikeio.DataArray)
     assert da_mean.geometry == da.geometry
-    assert da_mean.start_time == da.start_time  # TODO is this consistent
+    assert da_mean.start_time == da.start_time
     assert len(da_mean.time) == 1
+    assert pytest.approx(da_mean.values[0]) == 0.04334851
+    assert pytest.approx(da_mean.values[778]) == 0.452692
+
+    da_std = da.nanstd()
+    assert isinstance(da_std, mikeio.DataArray)
+    assert da_std.geometry == da.geometry
+    assert da_std.start_time == da.start_time
+    assert len(da_std.time) == 1
+    assert pytest.approx(da_std.values[0]) == 0.015291579
 
 
 def test_da_quantile_axis0(da2):

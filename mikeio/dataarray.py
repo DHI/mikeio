@@ -1665,7 +1665,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     # ============= Aggregation methods ===========
 
-    def max(self, axis="time") -> "DataArray":
+    def max(self, axis="time", **kwargs) -> "DataArray":
         """Max value along an axis
 
         Parameters
@@ -1682,9 +1682,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         --------
             nanmax : Max values with NaN values removed
         """
-        return self.aggregate(axis=axis, func=np.max)
+        return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis="time") -> "DataArray":
+    def min(self, axis="time", **kwargs) -> "DataArray":
         """Min value along an axis
 
         Parameters
@@ -1701,9 +1701,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         --------
             nanmin : Min values with NaN values removed
         """
-        return self.aggregate(axis=axis, func=np.min)
+        return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis="time") -> "DataArray":
+    def mean(self, axis="time", **kwargs) -> "DataArray":
         """Mean value along an axis
 
         Parameters
@@ -1720,9 +1720,61 @@ class DataArray(DataUtilsMixin, TimeSeries):
         --------
             nanmean : Mean values with NaN values removed
         """
-        return self.aggregate(axis=axis, func=np.mean)
+        return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def nanmax(self, axis="time") -> "DataArray":
+    def std(self, axis="time", **kwargs) -> "DataArray":
+        """Standard deviation values along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with standard deviation values
+
+        See Also
+        --------
+            nanstd : Standard deviation values with NaN values removed
+        """
+        return self.aggregate(axis=axis, func=np.std, **kwargs)
+
+    def average(self, weights, axis="time", **kwargs) -> "DataArray":
+        """Compute the weighted average along the specified axis.
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            DataArray with weighted average values
+
+        See Also
+        --------
+            aggregate : Weighted average
+
+        Examples
+        --------
+        >>> dfs = Dfsu("HD2D.dfsu")
+        >>> da = dfs.read(["Current speed"])[0]
+        >>> area = dfs.get_element_area()
+        >>> da2 = da.average(axis="space", weights=area)
+        """
+
+        def func(x, axis, keepdims):
+            if keepdims:
+                raise NotImplementedError()
+
+            return np.average(x, weights=weights, axis=axis)
+
+        return self.aggregate(axis=axis, func=func, **kwargs)
+
+    def nanmax(self, axis="time", **kwargs) -> "DataArray":
         """Max value along an axis (NaN removed)
 
         Parameters
@@ -1739,9 +1791,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         --------
             nanmax : Max values with NaN values removed
         """
-        return self.aggregate(axis=axis, func=np.nanmax)
+        return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis="time") -> "DataArray":
+    def nanmin(self, axis="time", **kwargs) -> "DataArray":
         """Min value along an axis (NaN removed)
 
         Parameters
@@ -1758,9 +1810,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         --------
             nanmin : Min values with NaN values removed
         """
-        return self.aggregate(axis=axis, func=np.nanmin)
+        return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis="time") -> "DataArray":
+    def nanmean(self, axis="time", **kwargs) -> "DataArray":
         """Mean value along an axis (NaN removed)
 
         Parameters
@@ -1777,7 +1829,26 @@ class DataArray(DataUtilsMixin, TimeSeries):
         --------
             mean : Mean values
         """
-        return self.aggregate(axis=axis, func=np.nanmean)
+        return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
+
+    def nanstd(self, axis="time", **kwargs) -> "DataArray":
+        """Standard deviation value along an axis (NaN removed)
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with standard deviation values
+
+        See Also
+        --------
+            std : Standard deviation
+        """
+        return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "DataArray":
         """Aggregate along an axis
@@ -1808,6 +1879,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
 
+        item = deepcopy(self.item)
+        if "name" in kwargs:
+            item.name = kwargs.pop("name")
+
         with warnings.catch_warnings():  # there might be all-Nan slices, it is ok, so we ignore them!
             warnings.simplefilter("ignore", category=RuntimeWarning)
             data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
@@ -1823,7 +1898,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return DataArray(
             data=data,
             time=time,
-            item=deepcopy(self.item),
+            item=item,
             geometry=geometry,
             dims=dims,
             zn=zn,
@@ -1858,6 +1933,36 @@ class DataArray(DataUtilsMixin, TimeSeries):
         nanquantile : quantile with NaN values ignored
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+
+    def nanquantile(self, q, *, axis="time", **kwargs):
+        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
+
+        Wrapping np.nanquantile
+
+        Parameters
+        ----------
+        q: array_like of float
+            Quantile or sequence of quantiles to compute,
+            which must be between 0 and 1 inclusive.
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            data with quantile values
+
+        Examples
+        --------
+        >>> da.nanquantile(q=[0.25,0.75])
+        >>> da.nanquantile(q=0.5)
+        >>> da.nanquantile(q=[0.01,0.5,0.99], axis="space")
+
+        See Also
+        --------
+        quantile : Quantile with NaN values
+        """
+        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
 
