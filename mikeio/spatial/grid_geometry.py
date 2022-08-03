@@ -650,7 +650,7 @@ class Grid2D(_Geometry):
         gn = Grid2D(x=xn, y=yn)
         return gn.xy
 
-    def to_geometryFM(self,*,z=None, west=2, east=4, north=5,south=3):
+    def to_geometryFM(self, *, z=None, west=2, east=4, north=5, south=3):
         """convert Grid2D to GeometryFM
 
         Parameters
@@ -681,7 +681,7 @@ class Grid2D(_Geometry):
         zn = np.zeros_like(x)
         if z is not None:
             zn[:] = z
-        
+
         codes = np.zeros(n, dtype=int)
         codes[y == y[-1]] = north
         codes[x == x[-1]] = east
