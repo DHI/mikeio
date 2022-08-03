@@ -249,6 +249,101 @@
                 <span class="k">return</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">)</span></div></div>
 
 
+<span class="k">class</span> <span class="nc">_Grid2DPlotter</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Plot GeometryFM</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; ds = mikeio.read(&quot;data.dfs2&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; g = ds.geometry</span>
+<span class="sd">    &gt;&gt;&gt; g.plot()</span>
+<span class="sd">    &gt;&gt;&gt; g.plot.outline()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="s2">&quot;Grid2D&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">geometry</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot bathymetry as coloured patches&quot;&quot;&quot;</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_grid</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="k">def</span> <span class="nf">_plot_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;0.5&quot;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span>
+        <span class="n">xn</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">_centers_to_nodes</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">yn</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">_centers_to_nodes</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">yj</span> <span class="ow">in</span> <span class="n">yn</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">xn</span><span class="p">,</span> <span class="n">yj</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">xn</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">xj</span> <span class="ow">in</span> <span class="n">xn</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">xj</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">yn</span><span class="p">),</span> <span class="n">yn</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_aspect_and_labels</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="k">def</span> <span class="nf">outline</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Outline&quot;</span><span class="p">,</span>
+        <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;0.4&quot;</span><span class="p">,</span>
+        <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot Grid2D outline&quot;&quot;&quot;</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span>
+        <span class="n">xn</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">_centers_to_nodes</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">yn</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">_centers_to_nodes</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">yj</span> <span class="ow">in</span> <span class="p">[</span><span class="n">yn</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">yn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">xn</span><span class="p">,</span> <span class="n">yj</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">xn</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="k">for</span> <span class="n">xj</span> <span class="ow">in</span> <span class="p">[</span><span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
+                <span class="n">xj</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">yn</span><span class="p">),</span> <span class="n">yn</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="n">linewidth</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_aspect_and_labels</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="k">def</span> <span class="nf">_set_aspect_and_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span>
+        <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">is_spectral</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Frequency [Hz]&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Directions [degree]&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">g</span><span class="o">.</span><span class="n">_is_rotated</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">g</span><span class="o">.</span><span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;NON-UTM&quot;</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;[m]&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">g</span><span class="o">.</span><span class="n">is_geo</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Longitude [degrees]&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Latitude [degrees]&quot;</span><span class="p">)</span>
+            <span class="n">mean_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">mean_lat</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="n">aspect_ratio</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Easting [m]&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Northing [m]&quot;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="Grid2D"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D">[docs]</a><span class="nd">@dataclass</span>  <span class="c1"># would prefer this to be (frozen=True)</span>
 <span class="k">class</span> <span class="nc">Grid2D</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;2D grid</span>
@@ -305,6 +400,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span> <span class="o">=</span> <span class="n">_parse_grid_axis</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">ny</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">is_spectral</span> <span class="o">=</span> <span class="n">is_spectral</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">_Grid2DPlotter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_is_rotated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
