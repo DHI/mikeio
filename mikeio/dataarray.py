@@ -1763,7 +1763,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         DataArray
             array with peak to peak values
         """
-        return self.aggregate(axis=axis, func=np.ptp, **kwargs)        
+        return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
     def average(self, weights, axis="time", **kwargs) -> "DataArray":
         """Compute the weighted average along the specified axis.

@@ -1557,7 +1557,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         DataArray
             array with peak to peak values
         """
-        return self.aggregate(axis=axis, func=np.ptp, **kwargs) 
+        return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
     def average(self, weights, axis="time", **kwargs) -> "Dataset":
         """Compute the weighted average along the specified axis.
