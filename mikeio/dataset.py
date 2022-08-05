@@ -1554,8 +1554,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         Returns
         -------
-        DataArray
-            array with peak to peak values
+        Dataset
+            dataset with peak to peak values
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs) 
 
