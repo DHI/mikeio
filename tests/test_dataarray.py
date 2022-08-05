@@ -1010,6 +1010,13 @@ def test_daarray_aggregation():
     assert len(da_std.time) == 1
     assert pytest.approx(da_std.values[0]) == 0.015291579
 
+    da_ptp = da.ptp(name="peak to peak (max - min)")
+    assert isinstance(da_std, mikeio.DataArray)
+    assert da_ptp.geometry == da.geometry
+    assert da_ptp.start_time == da.start_time
+    assert len(da_ptp.time) == 1
+    assert pytest.approx(da_ptp.values[0]) == 0.0529321208596229
+
 
 def test_daarray_aggregation_nan_versions():
 
