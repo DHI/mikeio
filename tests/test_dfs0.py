@@ -105,6 +105,21 @@ def test_read_start_end_time():
     assert dfs.end_time == ds.end_time
 
 
+def test_read_all_time_steps_without_reading_items():
+
+    dfs0file = r"tests/testdata/random.dfs0"
+    dfs = mikeio.open(dfs0file)
+    assert isinstance(dfs.time, pd.DatetimeIndex)
+    assert len(dfs.time) == 1000
+
+
+def test_read_all_time_steps_without_reading_items_neq():
+    dfs0file = r"tests/testdata/da_diagnostic.dfs0"
+    dfs = mikeio.open(dfs0file)
+    assert isinstance(dfs.time, pd.DatetimeIndex)
+    assert len(dfs.time) == 744
+
+
 def test_write_equidistant_calendar(tmpdir):
 
     dfs0file = os.path.join(tmpdir.dirname, "random.dfs0")

@@ -158,7 +158,7 @@ def test_read_all_time_steps_without_reading_items():
 
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
-
+    assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 9
 
 
