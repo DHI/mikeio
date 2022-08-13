@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pytest
+import pandas as pd
 
 import mikeio
 
@@ -158,6 +159,21 @@ def test_read_start_end_time_relative_time():
 
     assert dfs.start_time == ds.start_time
     assert dfs.end_time == ds.end_time
+
+
+def test_read_all_time_steps_without_reading_items():
+
+    dfs0file = r"tests/testdata/random.dfs1"
+    dfs = mikeio.open(dfs0file)
+    assert isinstance(dfs.time, pd.DatetimeIndex)
+    assert len(dfs.time) == 100
+
+
+def test_read_all_time_steps_without_reading_items_relative():
+    dfs0file = r"tests/testdata/physical_basin_wave_maker_signal.dfs1"
+    dfs = mikeio.open(dfs0file)
+    assert isinstance(dfs.time, pd.DatetimeIndex)  # start time is not correct !
+    assert len(dfs.time) == 200
 
 
 def test_select_point_dfs1_to_dfs0(tmp_path):
