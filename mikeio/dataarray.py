@@ -1750,6 +1750,21 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
+    def ptp(self, axis="time", **kwargs) -> "DataArray":
+        """Range (max - min) a.k.a Peak to Peak along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+
+        Returns
+        -------
+        DataArray
+            array with peak to peak values
+        """
+        return self.aggregate(axis=axis, func=np.ptp, **kwargs)
+
     def average(self, weights, axis="time", **kwargs) -> "DataArray":
         """Compute the weighted average along the specified axis.
 
