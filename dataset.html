@@ -257,7 +257,7 @@ including different ways of <em>selecting</em> data:</p>
 <p><em>Conversion</em> methods:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#mikeio.Dataset.to_dataframe" title="mikeio.Dataset.to_dataframe"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_dataframe()</span></code></span></a> - Convert Dataset to a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.4.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></p></li>
-<li><p><a class="reference internal" href="#mikeio.Dataset.to_xarray" title="mikeio.Dataset.to_xarray"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_xarray()</span></code></span></a> - Convert Dataset to a <a class="reference external" href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2022.6.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> (great for Dfs2)</p></li>
+<li><p><a class="reference internal" href="#mikeio.Dataset.to_xarray" title="mikeio.Dataset.to_xarray"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_xarray()</span></code></span></a> - Convert Dataset to a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2022.6.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> (great for Dfs2)</p></li>
 <li><p><a class="reference internal" href="#mikeio.Dataset.to_dfs" title="mikeio.Dataset.to_dfs"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_dfs()</span></code></span></a> - Write Dataset to a Dfs file</p></li>
 </ul>
 </section>
@@ -887,6 +887,22 @@ which must be between 0 and 1 inclusive.</p></li>
 <p class="admonition-title">See also</p>
 <p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></p>
 </div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.ptp">
+<span class="sig-name descname"><span class="pre">ptp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataset.html#Dataset.ptp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dataset.ptp" title="Permalink to this definition"></a></dt>
+<dd><p>Range (max - min) a.k.a Peak to Peak along an axis
+:param axis: axis number or “time” or “space”, by default “time”=0
+:type axis: (int, str, None), optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>dataset with peak to peak values</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
