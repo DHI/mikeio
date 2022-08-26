@@ -518,6 +518,22 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return Dataset(data=res, validate=False)
 
+    def create_data_array(self, data, item=None) -> DataArray:
+        """Create a new  DataArray with the same time and geometry as the dataset
+
+        Examples
+        --------
+
+        >>> ds = mikeio.read("file.dfsu")
+        >>> values = np.zeros(ds.Temperature.shape)
+        >>> da = ds.create_data_array(values)
+        >>> da_name = ds.create_data_array(values,"Foo")
+        >>> da_eum = ds.create_data_array(values, item=mikeio.ItemInfo("TS", mikeio.EUMType.Temperature))
+        """
+        return DataArray(
+            data=data, time=self.time, geometry=self.geometry, zn=self._zn, item=item
+        )
+
     # TODO: delete this?
     @staticmethod
     def create_empty_data(n_items=1, n_timesteps=1, n_elements=None, shape=None):

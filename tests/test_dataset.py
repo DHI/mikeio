@@ -1481,3 +1481,33 @@ def test_create_dataset_with_many_items():
     ds = mikeio.Dataset(das)
 
     assert ds.n_items == n_items
+
+
+def test_create_array_with_defaults_from_dataset():
+
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds: mikeio.Dataset = mikeio.read(filename)
+
+    values = np.zeros(ds.Temperature.shape)
+
+    da = ds.create_data_array(values)
+
+    assert isinstance(da, mikeio.DataArray)
+    assert da.geometry == ds.geometry
+    assert all(da.time == ds.time)
+    assert da.item.type == mikeio.EUMType.Undefined
+
+    da_name = ds.create_data_array(values, "Foo")
+
+    assert isinstance(da, mikeio.DataArray)
+    assert da_name.geometry == ds.geometry
+    assert da_name.item.type == mikeio.EUMType.Undefined
+    assert da_name.name == "Foo"
+
+    da_eum = ds.create_data_array(
+        values, item=mikeio.ItemInfo("TS", mikeio.EUMType.Temperature)
+    )
+
+    assert isinstance(da_eum, mikeio.DataArray)
+    assert da_eum.geometry == ds.geometry
+    assert da_eum.item.type == mikeio.EUMType.Temperature
