@@ -1661,6 +1661,50 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
+    def argmax(self, axis="time", skipna=True, **kwargs) -> "Dataset":
+        """Index position of the largest value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+        skipna: bool, optional
+            Exclude NA/null values when showing the result, by default True
+
+        Returns
+        -------
+        Dataset
+            index position of the largest value
+
+        See Also
+        --------
+            max : Max values with NaN values removed
+        """
+        func = np.nanargmax if skipna else np.argmax
+        return self.aggregate(axis=axis, func=func, **kwargs)
+
+    def argmin(self, axis="time", skipna=True, **kwargs) -> "Dataset":
+        """Index position of the smallest value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+        skipna: bool, optional
+            Exclude NA/null values when showing the result, by default True
+
+        Returns
+        -------
+        Dataset
+            index position of the smallest value
+
+        See Also
+        --------
+            min : Min values with NaN values removed
+        """
+        func = np.nanargmin if skipna else np.argmin
+        return self.aggregate(axis=axis, func=func, **kwargs)
+
     # ============ arithmetic/Math =============
 
     def __radd__(self, other) -> "Dataset":
