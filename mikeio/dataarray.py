@@ -2054,9 +2054,37 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def __abs__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.abs)
 
-    def _apply_unary_math_operation(self, func) -> "DataArray":
+    def apply(self, func, *args, **kwargs) -> "DataArray":
+        """Invoke function on values of DataArray.
+
+        Can be ufunc (a NumPy function that applies to all data)
+        or a Python function that only works on single values.
+
+        Parameters
+        ----------
+        func : function
+            Python function or NumPy ufunc to apply.
+
+        Returns
+        -------
+        DataArray
+            A copy of the DataArray with the function applied to the values
+
+        Examples
+        --------
+        >>> da.apply(np.sin)
+        >>> da.apply(np.clip, 0.0, 1.0)
+        >>> da.apply(lambda x: x**2 if x > 0 else 0)
+        """
+        funcname = f"{func.__name__} of" if hasattr(func, "__name__") else "Transformed"
+        func = func if isinstance(func, np.ufunc) else np.vectorize(func)
+        new_da = self._apply_unary_math_operation(func, *args, **kwargs)
+        new_da.item = ItemInfo(f"{funcname} {self.name}", itemtype=EUMType.Undefined)
+        return new_da
+
+    def _apply_unary_math_operation(self, func, *args, **kwargs) -> "DataArray":
         try:
-            data = func(self.values)
+            data = func(self.values, *args, **kwargs)
         except:
             # TODO: better except... TypeError etc
             raise ValueError(f"Math operation could not be applied to DataArray")
