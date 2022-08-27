@@ -1894,7 +1894,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
             max : Max values with NaN values removed
         """
         func = np.nanargmax if skipna else np.argmax
-        return self.aggregate(axis=axis, func=func, **kwargs)
+        da = self.aggregate(axis=axis, func=func, **kwargs)
+        da.item = ItemInfo(f"argmax of {da.name}", EUMType.Undefined, EUMUnit.Integer)
+        return da
 
     def argmin(self, axis="time", skipna=True, **kwargs) -> "DataArray":
         """Index position of the smallest value along an axis
@@ -1916,7 +1918,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
             min : Min values with NaN values removed
         """
         func = np.nanargmin if skipna else np.argmin
-        return self.aggregate(axis=axis, func=func, **kwargs)
+        da = self.aggregate(axis=axis, func=func, **kwargs)
+        da.item = ItemInfo(f"argmin of {da.name}", EUMType.Undefined, EUMUnit.Integer)
+        return da
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "DataArray":
         """Aggregate along an axis
