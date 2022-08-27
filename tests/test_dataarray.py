@@ -909,6 +909,30 @@ def test_unary_math_operations(da2):
     assert isinstance(da5, mikeio.DataArray)
 
 
+def test_apply_ufunc(da2):
+    da3 = da2.apply(np.sqrt)
+    assert np.all(da3.values == np.sqrt(da2.values))
+    assert isinstance(da3, mikeio.DataArray)
+    assert "sqrt" in da3.name
+
+
+def test_apply_ufunc_with_args(da2):
+    da3 = da2.apply(np.clip, 1.0, 2.0)
+    assert np.all(da3.values >= 1.0)
+    assert np.all(da3.values <= 2.0)
+    assert isinstance(da3, mikeio.DataArray)
+    assert "clip" in da3.name
+
+
+def test_apply_lambda(da2):
+    fun = lambda x: x**2 if x > 0 else 0
+    da3 = da2.apply(fun)
+    vals = np.vectorize(fun)(da2.values)
+    assert np.all(da3.values == vals)
+    assert isinstance(da3, mikeio.DataArray)
+    assert "lambda" in da3.name
+
+
 def test_binary_math_operations(da1):
     da2 = da1**2
     assert np.all(da2.values == da1.values**2)
