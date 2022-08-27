@@ -110,16 +110,27 @@ including different ways of *selecting* data:
 * [`aggregate()`](DataArray.aggregate) - Aggregate along an axis
 * [`quantile()`](DataArray.quantile) - Quantiles along an axis
 
-*Mathematical operations* +, - and * with numerical values:
+*Mathematical operations* +, -, *, **, / with numerical values:
 
 * ds + value
 * ds - value
 * ds * value
+* ds ** value
+* ds / value
+* abs(ds)
+* -ds
 
-and + and - between two DataArrays (if number of items and shapes conform):
+And apply with a function to all values:
+
+* [`apply()`](DataArray.apply) - Apply a function to all values
+
+and +, -, * and / between two DataArrays (if number of items and shapes conform):
 
 * ds1 + ds2
 * ds1 - ds2
+* ds1 * ds2
+* ds1 / ds2
+
 
 Other methods that also return a DataArray:
 
