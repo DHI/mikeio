@@ -1813,7 +1813,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         See Also
         --------
-            nanmax : Max values with NaN values removed
+            max : Max values with NaN values
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
@@ -1832,7 +1832,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         See Also
         --------
-            nanmin : Min values with NaN values removed
+            min : Min values with NaN values
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
@@ -1873,6 +1873,50 @@ class DataArray(DataUtilsMixin, TimeSeries):
             std : Standard deviation
         """
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
+
+    def argmax(self, axis="time", skipna=True, **kwargs) -> "DataArray":
+        """Index position of the largest value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+        skipna: bool, optional
+            Exclude NA/null values when showing the result, by default True
+
+        Returns
+        -------
+        DataArray
+            index position of the largest value
+
+        See Also
+        --------
+            max : Max values with NaN values removed
+        """
+        func = np.nanargmax if skipna else np.argmax
+        return self.aggregate(axis=axis, func=func, **kwargs)
+
+    def argmin(self, axis="time", skipna=True, **kwargs) -> "DataArray":
+        """Index position of the smallest value along an axis
+
+        Parameters
+        ----------
+        axis: (int, str, None), optional
+            axis number or "time" or "space", by default "time"=0
+        skipna: bool, optional
+            Exclude NA/null values when showing the result, by default True
+
+        Returns
+        -------
+        DataArray
+            index position of the smallest value
+
+        See Also
+        --------
+            min : Min values with NaN values removed
+        """
+        func = np.nanargmin if skipna else np.argmin
+        return self.aggregate(axis=axis, func=func, **kwargs)
 
     def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "DataArray":
         """Aggregate along an axis
