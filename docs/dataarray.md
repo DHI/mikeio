@@ -105,8 +105,10 @@ including different ways of *selecting* data:
 * [`nanmean()`](DataArray.nanmean) - Mean value along an axis (NaN removed)
 * [`max()`](DataArray.max) - Max value along an axis
 * [`nanmax()`](DataArray.nanmax) - Max value along an axis (NaN removed)
+* [`argmax()`](DataArray.argmax) - Index of max value along an axis
 * [`min()`](DataArray.min) - Min value along an axis
 * [`nanmin()`](DataArray.nanmin) - Min value along an axis (NaN removed)
+* [`argmin()`](DataArray.argmin) - Index of min value along an axis
 * [`aggregate()`](DataArray.aggregate) - Aggregate along an axis
 * [`quantile()`](DataArray.quantile) - Quantiles along an axis
 
