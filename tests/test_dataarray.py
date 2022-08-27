@@ -1057,6 +1057,14 @@ def test_daarray_aggregation_nan_versions():
     assert pytest.approx(da_std.values[0]) == 0.015291579
 
 
+def test_daarray_argmin():
+    filename = "tests/testdata/HD2D.dfsu"
+    da = mikeio.read(filename, items=[3])[0]
+    argmin0 = da.argmin(axis=0)
+
+    argmin1 = da.argmin(axis=1)
+
+
 def test_da_quantile_axis0(da2):
     assert da2.geometry.nx == 7
     assert len(da2.time) == 10
