@@ -2054,6 +2054,29 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def __abs__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.abs)
 
+    def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
+        out = kwargs.pop("out", ())
+        #print(ufunc)
+
+        if ufunc.signature is not None:
+            raise NotImplementedError(
+                f"{ufunc} not supported: mikeio objects do not directly implement "
+                "generalized ufuncs. Instead, "
+                "explicitly convert to mikeio objects to NumPy arrays "
+                "(e.g., with `.values`)."
+            )
+
+        if method != "__call__":
+            raise NotImplementedError(
+                f"{method} method for ufunc {ufunc} is not implemented on mikeio objects, "
+                "which currently only support the __call__ method. As an "
+                "alternative, consider explicitly converting mikeio objects "
+                "to NumPy arrays (e.g., with `.values`)."
+            )
+
+        da = self.apply(ufunc, *inputs, **kwargs)
+        return da if isinstance(da.values, np.ndarray) else da.values
+
     def apply(self, func, *args, **kwargs) -> "DataArray":
         """Invoke function on values of DataArray.
 
