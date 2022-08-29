@@ -1060,9 +1060,20 @@ def test_daarray_aggregation_nan_versions():
 def test_daarray_argmin():
     filename = "tests/testdata/HD2D.dfsu"
     da = mikeio.read(filename, items=[3])[0]
-    argmin0 = da.argmin(axis=0)
+    da0 = da.argmin(axis=0)
+    assert isinstance(da0.values[0], np.int64)
 
-    argmin1 = da.argmin(axis=1)
+    da1 = da.argmin(axis=1)
+    assert isinstance(da1.values[0], np.int64)
+    assert da1.dims == ("time",)
+
+
+def test_daarray_argmax():
+    filename = "tests/testdata/HD2D.dfsu"
+    da = mikeio.read(filename, items=[3])[0]
+    da0 = da.argmax(axis=0)
+
+    da1 = da.argmax(axis=1)
 
 
 def test_da_quantile_axis0(da2):
