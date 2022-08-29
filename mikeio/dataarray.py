@@ -2056,7 +2056,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     def __array_ufunc__(self, ufunc, method, *inputs, **kwargs):
         out = kwargs.pop("out", ())
-        #print(ufunc)
+        # print(ufunc)
 
         if ufunc.signature is not None:
             raise NotImplementedError(
