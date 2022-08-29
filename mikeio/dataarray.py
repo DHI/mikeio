@@ -1957,6 +1957,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         with warnings.catch_warnings():  # there might be all-Nan slices, it is ok, so we ignore them!
             warnings.simplefilter("ignore", category=RuntimeWarning)
+            axis = None if len(np.atleast_1d(axis)) == len(self.dims) else axis
             data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
         if axis == 0:  # time
