@@ -20,7 +20,7 @@ See our sister library [MIKE IO 1D](https://github.com/DHI/mikeio1d) for .res1d 
 ```
 $ pip install mikeio
 ```
-:warning: **Don't use conda to install MIKE IO!**, the version on conda is outdated.
+**Don't use conda to install MIKE IO!**, the version on conda is outdated.
 
 ## Getting started
 
