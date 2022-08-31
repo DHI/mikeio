@@ -51,6 +51,7 @@ Or development version:
 
 `pip install https://github.com/DHI/mikeio/archive/main.zip`
 
+:warning: **Don't use conda to install MIKE IO!**, the version on conda is outdated.
 
 ## Tested
 
