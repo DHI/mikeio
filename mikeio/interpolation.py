@@ -140,6 +140,7 @@ def _interp_itemstep(
     # for j in range(ni):
     #    idat[j] = np.dot(data[elem_ids[j]], weights[j])
 
+    # TODO if len(elem_ids) > too_many use sparse matrix
     W = np.zeros(shape=(len(elem_ids), len(data)), dtype="float")
 
     # TODO Numpy magic indexing to avoid loop
