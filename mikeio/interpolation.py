@@ -1,6 +1,7 @@
 from typing import Optional
 import numpy as np
 from mikeio.eum import ItemInfo
+from scipy.sparse import csr_matrix
 
 
 # class Interpolation2D:
@@ -140,10 +141,13 @@ def _interp_itemstep(
     # for j in range(ni):
     #    idat[j] = np.dot(data[elem_ids[j]], weights[j])
 
-    # TODO if len(elem_ids) > too_many use sparse matrix
-    W = np.zeros(shape=(len(elem_ids), len(data)), dtype="float")
+    threshold = 1000 # TODO calculate threshold
+    if len(elem_ids) > threshold: 
+        W = csr_matrix((len(elem_ids), len(data)), dtype=np.float64)
+    else:
+        W = np.zeros(shape=(len(elem_ids), len(data)), dtype="float")
 
-    # TODO Numpy magic indexing to avoid loop
+    # TODO Numpy magic indexing to avoid loop or create csr from 1d arrays, of row, col, data
     for i in range(ni):
         el = elem_ids[i]
         W[i, el] = weights[i]
