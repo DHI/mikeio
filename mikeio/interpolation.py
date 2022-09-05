@@ -141,8 +141,8 @@ def _interp_itemstep(
     # for j in range(ni):
     #    idat[j] = np.dot(data[elem_ids[j]], weights[j])
 
-    threshold = 1000 # TODO calculate threshold
-    if len(elem_ids) > threshold: 
+    threshold = 1000  # TODO calculate threshold
+    if len(elem_ids) > threshold:
         W = csr_matrix((len(elem_ids), len(data)), dtype=np.float64)
     else:
         W = np.zeros(shape=(len(elem_ids), len(data)), dtype="float")
