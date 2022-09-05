@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 from mikeio.eum import ItemInfo
 
@@ -115,7 +116,22 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     return idatitem
 
 
-def _interp_itemstep(data, elem_ids, weights=None):
+def _interp_itemstep(
+    data: np.ndarray, elem_ids: np.ndarray, weights: Optional[np.ndarray] = None
+) -> np.ndarray:
+    """
+    Parameters
+    ----------
+    data: np.ndarray (nin,)
+
+    elem_ids: np.ndarray (nout, n_weights)
+    weights, optional: np.ndarray (nout, n_weights)
+
+    Returns
+    -------
+    np.ndarray (nout,)
+
+    """
     if weights is None:
         # nearest neighbor
         return data[elem_ids]
