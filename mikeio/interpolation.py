@@ -120,16 +120,16 @@ def _interp_itemstep(data, elem_ids, weights=None):
         # nearest neighbor
         return data[elem_ids]
     ni = len(elem_ids)
-    #idat = np.empty(ni)
-    #for j in range(ni):
+    # idat = np.empty(ni)
+    # for j in range(ni):
     #    idat[j] = np.dot(data[elem_ids[j]], weights[j])
 
-    W = np.zeros(shape=(len(elem_ids), len(data)),dtype='float')
-    
+    W = np.zeros(shape=(len(elem_ids), len(data)), dtype="float")
+
     # TODO Numpy magic indexing to avoid loop
     for i in range(ni):
         el = elem_ids[i]
-        W[i,el] = weights[i]
+        W[i, el] = weights[i]
 
     idat = W @ data
     return idat
