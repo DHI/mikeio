@@ -494,7 +494,9 @@ def test_filter_items_dfs0():
 def test_filter_items_wildcard_getitem():
     dsall = mikeio.read("tests/testdata/sw_points.dfs0")
 
-    ds = dsall["*Height*"]
+    # ds = dsall["*Height*"]
+    cols = [da.name for da in dsall if "Height" in da.name]
+    ds = dsall[cols]
     assert ds.n_items == 12
 
 
@@ -507,6 +509,8 @@ def test_filter_items_dfsu():
 def test_filter_items_dfsu_getitem():
 
     dsall = mikeio.read("tests/testdata/wind_north_sea.dfsu")
-    ds = dsall["*direction*"]
+    cols = [da.name for da in dsall if "direction" in da.name]
+    # ds = dsall["*direction*"]
+    ds = dsall[cols]
     assert ds.n_items == 1
     assert "direction" in ds[0].name
