@@ -117,10 +117,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
 
 def _interp_itemstep(data, elem_ids, weights=None):
     if weights is None:
-        # nearest neighbor
         return data[elem_ids]
-    ni = len(elem_ids)
-    idat = np.empty(ni)
-    for j in range(ni):
-        idat[j] = np.dot(data[elem_ids[j]], weights[j])
-    return idat
+    else:
+        idat = data[elem_ids] * weights
+        return np.sum(idat, axis=1) if weights.ndim == 2 else idat
