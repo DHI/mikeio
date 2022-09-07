@@ -165,34 +165,3 @@ class Dfs1(_Dfs123):
     def nx(self):
         """Number of node values"""
         return self._nx
-
-    @property
-    def n_timesteps(self):
-        """Number of time steps"""
-        return self._n_timesteps
-
-    @property
-    def timestep(self):
-        """Time step size in seconds"""
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.TimeEquidistant,
-        }:
-            return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
-
-    @property
-    def time(self):
-        """File all datetimes"""
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.TimeEquidistant,
-        }:
-            return pd.to_datetime(
-                [
-                    self.start_time + timedelta(seconds=i * self.timestep)
-                    for i in range(self.n_timesteps)
-                ]
-            )
-
-        else:
-            return None

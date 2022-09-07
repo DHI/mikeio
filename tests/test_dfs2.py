@@ -53,6 +53,14 @@ def dfs2_gebco():
     return mikeio.open(filepath)
 
 
+def test_get_time_without_reading_data():
+    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2")
+
+    assert isinstance(dfs.time, pd.DatetimeIndex)
+    assert len(dfs.time) == 13
+    assert dfs.time[-1].hour == 12
+
+
 def test_write_projected(tmpdir):
 
     filename = os.path.join(tmpdir.dirname, "utm.dfs2")
