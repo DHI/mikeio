@@ -2031,7 +2031,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return self.__mul__(other)
 
     def __mul__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.multiply, "*")
+        return self._apply_math_operation(other, np.multiply, "x")  # x in place of *
 
     def __pow__(self, other) -> "DataArray":
         return self._apply_math_operation(other, np.power, "**")
