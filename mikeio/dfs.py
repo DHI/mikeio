@@ -1,5 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from abc import abstractmethod
+from typing import Optional
 
 import warnings
 import numpy as np
@@ -467,14 +468,35 @@ class _Dfs123(TimeSeries):
         return self._end_time
 
     @property
-    def n_timesteps(self):
+    def n_timesteps(self) -> int:
         """Number of time steps"""
         return self._n_timesteps
 
     @property
-    def timestep(self):
+    def timestep(self) -> Optional[float]:
         """Time step size in seconds"""
-        return self._timestep_in_seconds
+        if self._timeaxistype in {
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.TimeEquidistant,
+        }:
+            return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
+
+    @property
+    def time(self) -> Optional[pd.DatetimeIndex]:
+        """File all datetimes"""
+        if self._timeaxistype in {
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.TimeEquidistant,
+        }:
+            return pd.to_datetime(
+                [
+                    self.start_time + timedelta(seconds=i * self.timestep)
+                    for i in range(self.n_timesteps)
+                ]
+            )
+
+        else:
+            return None
 
     @property
     def projection_string(self):

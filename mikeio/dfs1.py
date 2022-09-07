@@ -1,6 +1,8 @@
 import os
 import warnings
 import numpy as np
+import pandas as pd
+from datetime import timedelta
 
 from mikecore.eum import eumUnit
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -9,6 +11,7 @@ from mikecore.DfsBuilder import DfsBuilder
 from . import __dfs_version__
 from .dfs import _Dfs123
 from .spatial.grid_geometry import Grid1D
+from mikecore.DfsFile import TimeAxisType
 
 
 class Dfs1(_Dfs123):

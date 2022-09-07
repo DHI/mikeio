@@ -710,6 +710,16 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             seconds=((self.n_timesteps - 1) * self.timestep)
         )
 
+    @property
+    def time(self):
+        """File all datetimes"""
+        return pd.to_datetime(
+            [
+                self.start_time + timedelta(seconds=i * self.timestep)
+                for i in range(self.n_timesteps)
+            ]
+        )
+
     def read(
         self,
         *,

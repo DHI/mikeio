@@ -152,6 +152,9 @@ class Dfs0(TimeSeries):
         else:  # relative time axis
             self._start_time = datetime(1970, 1, 1)
 
+        # time
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
         dfs.Close()
 
     def read(self, items=None, time=None, keepdims=False, time_steps=None) -> Dataset:
@@ -508,6 +511,35 @@ class Dfs0(TimeSeries):
     def n_timesteps(self):
         """Number of time steps"""
         return self._n_timesteps
+
+    @property
+    def timestep(self):
+        """Time step size in seconds"""
+        if self._timeaxistype == TimeAxisType.CalendarEquidistant:
+            return self._source.FileInfo.TimeAxis.TimeStep
+
+    @property
+    def time(self):
+        """File all datetimes"""
+        if self._timeaxistype == TimeAxisType.CalendarEquidistant:
+            return pd.to_datetime(
+                [
+                    self.start_time + timedelta(seconds=i * self.timestep)
+                    for i in range(self.n_timesteps)
+                ]
+            )
+
+        elif self._timeaxistype == TimeAxisType.CalendarNonEquidistant:
+            dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+            t_seconds = np.zeros(self.n_timesteps)
+            for it in range(self.n_timesteps):
+                itemdata = dfs.ReadItemTimeStep(1, int(it))
+                t_seconds[it] = itemdata.Time
+
+            return pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+
+        else:
+            return None
 
 
 def series_to_dfs0(
