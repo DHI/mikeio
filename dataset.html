@@ -392,6 +392,20 @@ For convenience, the Dataset provides access to these common properties:</p>
 <dd><p>Returns a copy of this dataset.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.create_data_array">
+<span class="sig-name descname"><span class="pre">create_data_array</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">item</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="dataarray.html#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">DataArray</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataset.html#Dataset.create_data_array"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dataset.create_data_array" title="Permalink to this definition"></a></dt>
+<dd><p>Create a new  DataArray with the same time and geometry as the dataset</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;file.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">Temperature</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da_name</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="n">values</span><span class="p">,</span><span class="s2">&quot;Foo&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da_eum</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="n">mikeio</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;TS&quot;</span><span class="p">,</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Temperature</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dataset.deletevalue">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dataset.deletevalue" title="Permalink to this definition"></a></dt>

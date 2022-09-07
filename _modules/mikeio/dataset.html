@@ -603,6 +603,22 @@
 
         <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">res</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
+<div class="viewcode-block" id="Dataset.create_data_array"><a class="viewcode-back" href="../../dataset.html#mikeio.Dataset.create_data_array">[docs]</a>    <span class="k">def</span> <span class="nf">create_data_array</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a new  DataArray with the same time and geometry as the dataset</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        &gt;&gt;&gt; ds = mikeio.read(&quot;file.dfsu&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; values = np.zeros(ds.Temperature.shape)</span>
+<span class="sd">        &gt;&gt;&gt; da = ds.create_data_array(values)</span>
+<span class="sd">        &gt;&gt;&gt; da_name = ds.create_data_array(values,&quot;Foo&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; da_eum = ds.create_data_array(values, item=mikeio.ItemInfo(&quot;TS&quot;, mikeio.EUMType.Temperature))</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DataArray</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="n">item</span>
+        <span class="p">)</span></div>
+
     <span class="c1"># TODO: delete this?</span>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">create_empty_data</span><span class="p">(</span><span class="n">n_items</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
