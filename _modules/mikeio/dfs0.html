@@ -237,6 +237,9 @@
         <span class="k">else</span><span class="p">:</span>  <span class="c1"># relative time axis</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">1970</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
+        <span class="c1"># time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
+
         <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Dfs0.read"><a class="viewcode-back" href="../../dfs0.html#mikeio.Dfs0.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
@@ -592,7 +595,36 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_timesteps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Number of time steps&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Time step size in seconds&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeaxistype</span> <span class="o">==</span> <span class="n">TimeAxisType</span><span class="o">.</span><span class="n">CalendarEquidistant</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_source</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeStep</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;File all datetimes&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeaxistype</span> <span class="o">==</span> <span class="n">TimeAxisType</span><span class="o">.</span><span class="n">CalendarEquidistant</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">i</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timeaxistype</span> <span class="o">==</span> <span class="n">TimeAxisType</span><span class="o">.</span><span class="n">CalendarNonEquidistant</span><span class="p">:</span>
+            <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+            <span class="n">t_seconds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">):</span>
+                <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>
+                <span class="n">t_seconds</span><span class="p">[</span><span class="n">it</span><span class="p">]</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
+
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">t_seconds</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
 
 
 <span class="k">def</span> <span class="nf">series_to_dfs0</span><span class="p">(</span>
