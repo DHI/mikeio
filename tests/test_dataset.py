@@ -373,11 +373,15 @@ def test_missing_item_error():
     nt = 100
 
     da1 = mikeio.DataArray(
-        data=np.zeros(nt), time=pd.date_range("2000-1-2", freq="H", periods=nt), item="Foo"
+        data=np.zeros(nt),
+        time=pd.date_range("2000-1-2", freq="H", periods=nt),
+        item="Foo",
     )
 
     da2 = mikeio.DataArray(
-        data=np.ones(nt), time=pd.date_range("2000-1-2", freq="H", periods=nt), item="Bar"
+        data=np.ones(nt),
+        time=pd.date_range("2000-1-2", freq="H", periods=nt),
+        item="Bar",
     )
 
     ds = mikeio.Dataset([da1, da2])
