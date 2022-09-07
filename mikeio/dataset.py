@@ -725,7 +725,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 }
                 return Dataset(data=data_vars, validate=False)
             else:
-                return self._data_vars[key]
+                item_names = ",".join(self._data_vars.keys())
+                raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
             data_vars = {}
