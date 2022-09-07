@@ -710,7 +710,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         # select items
         key = self._key_to_str(key)
+
         if isinstance(key, str):
+            if key in self._data_vars.keys():
+                return self._data_vars[key]
+
             if "*" in key:
                 import fnmatch
 
@@ -721,7 +725,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 }
                 return Dataset(data=data_vars, validate=False)
             else:
-                return self._data_vars[key]
+                item_names = ",".join(self._data_vars.keys())
+                raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
             data_vars = {}
@@ -771,7 +776,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         )
         return False
 
-    def _key_to_str(self, key):
+    def _key_to_str(
+        self, key: Union[str, int, slice, Iterable[str], Iterable[int]]
+    ) -> Union[str, Iterable[str]]:
         """Translate item selection key to str (or List[str])"""
         if isinstance(key, str):
             return key

@@ -369,6 +369,27 @@ def test_select_item_by_name():
     assert foo_data.to_numpy()[0, 10, 0] == 2.0
 
 
+def test_missing_item_error():
+    nt = 100
+
+    da1 = mikeio.DataArray(
+        data=np.zeros(nt),
+        time=pd.date_range("2000-1-2", freq="H", periods=nt),
+        item="Foo",
+    )
+
+    da2 = mikeio.DataArray(
+        data=np.ones(nt),
+        time=pd.date_range("2000-1-2", freq="H", periods=nt),
+        item="Bar",
+    )
+
+    ds = mikeio.Dataset([da1, da2])
+
+    with pytest.raises(KeyError, match="Baz"):
+        ds["Baz"]  # there is no Bar item
+
+
 def test_select_multiple_items_by_name():
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5

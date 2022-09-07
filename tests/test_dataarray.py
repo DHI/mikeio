@@ -146,6 +146,19 @@ def test_write_1d(da2, tmp_path):
     assert isinstance(ds.geometry, mikeio.Grid1D)
 
 
+def test_dataset_with_asterisk(da2):
+
+    da2.name = "Foo * Bar"
+
+    ds1 = mikeio.Dataset([da2], validate=False)
+
+    assert ds1[0].name == "Foo * Bar"
+
+    ds2 = mikeio.Dataset({"Foo * Bar": da2})
+
+    assert ds2[0].name == "Foo * Bar"
+
+
 def test_data_0d(da0):
     assert da0.ndim == 1
     assert da0.dims == ("time",)
