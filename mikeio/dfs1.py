@@ -142,7 +142,9 @@ class Dfs1(_Dfs123):
 
         self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         self._dx = dx
-        self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
+        self._write(
+            filename=filename, data=data, dt=dt, coordinate=coordinate, title=title
+        )
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(

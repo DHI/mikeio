@@ -438,15 +438,12 @@ class Dfs2(_Dfs123):
             self._dy = dy
 
         self._write(
-            filename,
-            data,
-            start_time,
-            dt,
-            datetimes,
-            items,
-            coordinate,
-            title,
-            keep_open,
+            filename=filename,
+            data=data,
+            dt=dt,
+            coordinate=coordinate,
+            title=title,
+            keep_open=keep_open,
         )
 
         if keep_open:

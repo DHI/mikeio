@@ -391,14 +391,11 @@ class Dfs3(_Dfs123):
             self._dz = dz
 
         self._write(
-            filename,
-            data,
-            start_time,
-            dt,
-            datetimes,
-            items,
-            coordinate,
-            title,
+            filename=filename,
+            data=data,
+            dt=dt,
+            coordinate=coordinate,
+            title=title,
         )
 
     def _set_spatial_axis(self):
