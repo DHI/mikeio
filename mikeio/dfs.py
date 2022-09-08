@@ -156,13 +156,14 @@ class _Dfs123(TimeSeries):
         filename,
         data,
         dt,
-        coordinate,
+        coordinate=None,
         title,
         keep_open=False,
     ):
 
+        neq_datetimes = None
         if isinstance(data, Dataset) and not data.is_equidistant:
-            datetimes = data.time
+            neq_datetimes = data.time
 
         self._write_handle_common_arguments(
             title=title, data=data, coordinate=coordinate, dt=dt
@@ -194,9 +195,9 @@ class _Dfs123(TimeSeries):
             if not all(np.shape(d)[t_offset + 1] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
 
-        if datetimes is not None:
+        if neq_datetimes is not None:
             self._is_equidistant = False
-            start_time = datetimes[0]
+            start_time = neq_datetimes[0]
             self._start_time = start_time
 
         dfs = self._setup_header(filename)
@@ -214,7 +215,7 @@ class _Dfs123(TimeSeries):
                 if self._is_equidistant:
                     dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
                 else:
-                    t = datetimes[i]
+                    t = neq_datetimes[i]
                     relt = (t - self._start_time).total_seconds()
                     dfs.WriteItemTimeStepNext(relt, d.astype(np.float32))
 

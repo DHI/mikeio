@@ -359,13 +359,9 @@ class Dfs2(_Dfs123):
         self,
         filename,
         data,
-        start_time=None,
         dt=None,
-        datetimes=None,
-        items=None,
         dx=None,
         dy=None,
-        coordinate=None,
         title=None,
         keep_open=False,
     ):
@@ -377,51 +373,22 @@ class Dfs2(_Dfs123):
 
         filename: str
             Location to write the dfs2 file
-        data: list[np.array] or Dataset
+        data: Dataset
             list of matrices, one for each item. Matrix dimension: time, y, x
-        start_time: datetime, optional, deprecated
-            start date of type datetime.
         dt: float, optional
             The time step in seconds.
-        datetimes: datetime, optional, deprecated
-            The list of datetimes for the case of non-equisstant Timeaxis.
-        items: list[ItemInfo], optional
-            List of ItemInfo corresponding to a variable types (ie. Water Level).
         dx: float, optional
             length of each grid in the x direction (projection units)
         dy: float, optional
             length of each grid in the y direction (projection units)
-        coordinate:
-            list of [projection, origin_x, origin_y, orientation]
-            e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         title: str, optional
             title of the dfs2 file. Default is blank.
         keep_open: bool, optional
             Keep file open for appending
         """
-
-        if start_time:
-            warnings.warn(
-                "setting start_time is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if datetimes:
-            warnings.warn(
-                "setting datetimes is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if items:
-            warnings.warn(
-                "setting items is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if isinstance(data, list):
-            warnings.warn(
+            raise TypeError(
                 "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
             )
 
         filename = str(filename)
@@ -441,7 +408,6 @@ class Dfs2(_Dfs123):
             filename=filename,
             data=data,
             dt=dt,
-            coordinate=coordinate,
             title=title,
             keep_open=keep_open,
         )
