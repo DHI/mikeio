@@ -193,7 +193,12 @@ class _Dfs123(TimeSeries):
 
             if not all(np.shape(d)[t_offset + 1] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
-        
+
+        if datetimes is not None:
+            self._is_equidistant = False
+            start_time = datetimes[0]
+            self._start_time = start_time
+
         dfs = self._setup_header(filename)
         self._dfs = dfs
 
