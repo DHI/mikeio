@@ -23,7 +23,7 @@ def test_interp2d():
     xy[3, :] = [0, 55]
     xy[4, :] = [5, 54]
 
-    elem_ids, weights = dfs.get_2d_interpolant(xy, n_nearest=1)
+    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     dati = interp2d(ds, elem_ids, weights)
     assert isinstance(dati, Dataset)
@@ -36,7 +36,7 @@ def test_interp2d():
     assert dati.size == ds.n_timesteps * npts
     assert dati[0, 0] == 8.262675285339355
 
-    elem_ids, weights = dfs.get_2d_interpolant(xy, n_nearest=3)
+    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=3)
 
     dat = ds[0].values[0, :]  # a single time step
     dati = interp2d(dat, elem_ids, weights)
@@ -50,7 +50,7 @@ def test_interp2d_same_points():
     npts = 3
     # same points as data (could cause IDW to diverge)
     xy = dfs.element_coordinates[:npts, 0:2]
-    elem_ids, weights = dfs.get_2d_interpolant(xy, n_nearest=4)
+    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
     assert np.max(weights) <= 1.0
     dat = ds[0].values[0, :]
     dati = interp2d(dat, elem_ids, weights)
@@ -65,10 +65,10 @@ def test_interp2d_outside():
     xy = np.zeros((npts, 2))
     xy[0, :] = [2, 50]
     xy[1, :] = [3, 51]
-    elem_ids, weights = dfs.get_2d_interpolant(xy, n_nearest=4)
+    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
     dati = interp2d(ds[0].values[0, :], elem_ids, weights)
     assert np.all(np.isnan(dati))
-    elem_ids, weights = dfs.get_2d_interpolant(xy, n_nearest=4, extrapolate=True)
+    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4, extrapolate=True)
     dati = interp2d(ds[0].values[0, :], elem_ids, weights)
     assert np.all(~np.isnan(dati))
 
@@ -84,7 +84,7 @@ def test_interp_itemstep():
     xy[2, :] = [7, 54]
     xy[3, :] = [0, 55]
     xy[4, :] = [5, 54]
-    elem_ids, weights = dfs.get_2d_interpolant(xy, n_nearest=1)
+    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     dat = ds[0].values[0, :]
     dati = _interp_itemstep(dat, elem_ids, weights)
