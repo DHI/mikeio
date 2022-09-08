@@ -1390,24 +1390,6 @@ def test_concat_dfsu3d():
     assert np.all(ds3._zn == ds._zn)
 
 
-def test_append_items():
-    filename = "tests/testdata/HD2D.dfsu"
-    ds1 = mikeio.read(filename, items=0)
-    ds2 = mikeio.read(filename, items=1)
-
-    assert ds1.n_items == 1
-    assert ds2.n_items == 1
-    with pytest.warns(FutureWarning):
-        ds3 = ds1.append_items(ds2)
-    assert ds1.n_items == 1
-    assert ds2.n_items == 1
-    assert ds3.n_items == 2
-    with pytest.warns(FutureWarning):
-        ds1.append_items(ds2, inplace=True)
-
-    assert ds1.n_items == 2
-
-
 def test_merge_same_name_error():
     filename = "tests/testdata/HD2D.dfsu"
     ds1 = mikeio.read(filename, items=0)
