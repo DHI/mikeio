@@ -537,27 +537,6 @@ class _UnstructuredFile:
             projection=self.geometry.projection_string,
         )
 
-    @wraps(GeometryFM.get_2d_interpolant)
-    def get_2d_interpolant(
-        self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
-    ):
-        warnings.warn(
-            FutureWarning(
-                "get_2d_interpolant have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead"
-            )
-        )
-        return self.geometry.get_2d_interpolant(xy, n_nearest, extrapolate, p, radius)
-
-    @wraps(GeometryFM.interp2d)
-    def interp2d(self, data, elem_ids, weights=None, shape=None):
-
-        warnings.warn(
-            FutureWarning(
-                "interp2d have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead"
-            )
-        )
-        return self.geometry.interp2d(data, elem_ids, weights, shape)
-
     @wraps(GeometryFM.find_nearest_elements)
     def find_nearest_elements(
         self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
@@ -725,7 +704,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         *,
         items=None,
         time=None,
-        time_steps=None,
         elements=None,
         area=None,
         x=None,
@@ -793,13 +771,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         # (could have been replaced in the meantime)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 

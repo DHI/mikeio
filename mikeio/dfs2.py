@@ -229,7 +229,6 @@ class Dfs2(_Dfs123):
         time=None,
         area=None,
         keepdims=False,
-        time_steps=None,
         dtype=np.float32,
     ) -> Dataset:
         """
@@ -252,13 +251,6 @@ class Dfs2(_Dfs123):
         -------
         Dataset
         """
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         self._open()
 

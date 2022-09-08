@@ -45,7 +45,6 @@ class _Dfs123(TimeSeries):
         *,
         items=None,
         time=None,
-        time_steps=None,
         keepdims=False,
         dtype=np.float32,
     ) -> Dataset:
@@ -66,13 +65,6 @@ class _Dfs123(TimeSeries):
         -------
         Dataset
         """
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         self._open()
 

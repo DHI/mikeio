@@ -203,7 +203,6 @@ class Dfs3(_Dfs123):
         area=None,
         layers=None,
         keepdims=False,
-        time_steps=None,
     ) -> Dataset:
         """
         Read data from a dfs3 file
@@ -239,13 +238,6 @@ class Dfs3(_Dfs123):
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
         single_time_selected, time_steps = _valid_timesteps(dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
 
