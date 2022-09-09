@@ -560,24 +560,29 @@ def test_write_big_file(tmpdir):
 
     dfs = Dfsu(meshfilename)
 
-    nt = 1000
+    nt = 5  # or some big number 50000
 
     n_items = 10
 
-    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+    das = [
+        DataArray(
+            data=np.random.random((1, n_elements)),
+            geometry=msh.geometry,
+            time="2000-1-1",
+            item=f"Item {i+1}",
+        )
+        for i in range(n_items)
+    ]
 
-    # with dfs.write(outfilename, [], items=items, keep_open=True) as f:
-    # TODO rewrite to use DataArray
-    with pytest.warns(FutureWarning):
-        with dfs.write_header(
-            outfilename, start_time=datetime(2000, 1, 1), dt=3600, items=items
-        ) as f:
-            for i in range(nt):
-                data = []
-                for i in range(n_items):
-                    d = np.random.random((1, n_elements))
-                    data.append(d)
-                f.append(data)
+    ds = Dataset(das)
+
+    with dfs.write(outfilename, data=ds, dt=3600, keep_open=True) as f:
+        for _ in range(1, nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((1, n_elements))
+                data.append(d)
+            f.append(data)
 
     dfsu = mikeio.open(outfilename)
 
@@ -606,31 +611,6 @@ def test_write_from_dfsu_2_time_steps(tmpdir):
     assert dfs.end_time != newdfs.end_time
 
 
-def test_write_invalid_data_closes_and_deletes_file(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfsu")
-    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
-
-    msh = Mesh(meshfilename)
-
-    n_elements = msh.n_elements
-    d = np.zeros((1, n_elements - 1))
-
-    assert d.shape[1] != n_elements
-    data = []
-    data.append(d)
-
-    items = [ItemInfo("Bad data")]
-
-    dfs = Dfsu(meshfilename)
-
-    # TODO rewrite to use DataArray
-    with pytest.warns(FutureWarning):
-        dfs.write(filename, data, items=items)
-
-    assert not os.path.exists(filename)
-
-
 def test_write_non_equidistant_is_not_possible(tmpdir):
 
     sourcefilename = "tests/testdata/HD2D.dfsu"
@@ -639,7 +619,7 @@ def test_write_non_equidistant_is_not_possible(tmpdir):
 
     ds = dfs.read(time=[0, 1, 3])
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         dfs.write(outfilename, ds)
 
     assert not os.path.exists(outfilename)

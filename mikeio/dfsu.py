@@ -931,9 +931,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         self,
         filename,
         data,
-        start_time=None,
         dt=None,
-        items=None,
         elements=None,
         title=None,
         keep_open=False,
@@ -944,13 +942,10 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         -----------
         filename: str
             full path to the new dfsu file
-        data: list[np.array] or Dataset
+        data: Dataset
             list of matrices, one for each item. Matrix dimension: time, x
-        start_time: datetime, optional, deprecated
-            start datetime, default is datetime.now()
         dt: float, optional, deprecated
             The time step (in seconds)
-        items: list[ItemInfo], optional, deprecated
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -961,33 +956,16 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if self.is_spectral:
             raise ValueError("write() is not supported for spectral dfsu!")
 
-        if start_time:
-            warnings.warn(
-                "setting start_time is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if dt:
             warnings.warn(
                 "setting dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
             )
 
-        if items:
-            warnings.warn(
-                "setting items is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if isinstance(data, list):
-            warnings.warn(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
+            raise TypeError(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
-            if self.is_layered:
-                raise ValueError(
-                    "Layered dfsu files can only be written by providing a Dataset"
-                )
 
         filename = str(filename)
 
@@ -996,7 +974,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 if not data.is_equidistant:
-                    raise Exception(
+                    raise ValueError(
                         "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
                     )
                 dt = (data.time[1] - data.time[0]).total_seconds()
