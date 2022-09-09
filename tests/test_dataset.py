@@ -595,6 +595,9 @@ def test_interp_time():
     assert ds.time[0] == dsi.time[0]
     assert dsi[0].shape == (73, 10, 3)
 
+    dsi2 = ds.interp_time(freq="2H")
+    assert dsi2.timestep == 2*3600
+
 
 def test_interp_time_to_other_dataset():
 
