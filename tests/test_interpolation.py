@@ -68,7 +68,9 @@ def test_interp2d_outside():
     elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
     dati = interp2d(ds[0].values[0, :], elem_ids, weights)
     assert np.all(np.isnan(dati))
-    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4, extrapolate=True)
+    elem_ids, weights = dfs.geometry.get_2d_interpolant(
+        xy, n_nearest=4, extrapolate=True
+    )
     dati = interp2d(ds[0].values[0, :], elem_ids, weights)
     assert np.all(~np.isnan(dati))
 
