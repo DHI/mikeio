@@ -91,17 +91,16 @@ def test_set_z(tri_mesh):
 
 
 def test_set_codes(tri_mesh):
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = tri_mesh
-    codes = msh.codes
-    assert msh.codes[2] == 2
+    codes = msh.geometry.codes
+    assert msh.geometry.codes[2] == 2
     codes[codes == 2] = 7  # work directly on reference
 
-    assert msh.codes[2] == 7
+    assert msh.geometry.codes[2] == 7
 
     new_codes = msh.codes.copy()
     new_codes[new_codes == 7] = 9
-    msh.codes = new_codes  # assign from copy
+    msh.geometry.codes = new_codes  # assign from copy
 
     assert msh.codes[2] == 9
 

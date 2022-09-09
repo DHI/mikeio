@@ -390,14 +390,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             return True
         return len(self.time.to_series().diff().dropna().unique()) == 1
 
-    @property
-    def data(self) -> Sequence[np.ndarray]:
-        warnings.warn(
-            "property data is deprecated, use to_numpy() instead",
-            FutureWarning,
-        )
-        return [x.to_numpy() for x in self]
-
     def to_numpy(self) -> np.ndarray:
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
 
@@ -1161,52 +1153,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return ds
 
     # ============= Combine/concat ===========
-
-    @classmethod
-    def combine(cls, *datasets):
-
-        warnings.warn(
-            "Dataset.combine is been deprecated, use Dataset.concat or Dataset.merge instead",
-            FutureWarning,
-        )
-
-        if isinstance(datasets[0], Iterable):
-            if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
-                datasets = datasets[0]
-
-        # if isinstance(datasets[0], DataArray):
-        #     ds = datasets[0]._to_dataset()
-        #     print("to dataset")
-        # else:
-        ds = datasets[0].copy()
-
-        for dsj in datasets[1:]:
-            ds = ds._combine(dsj, copy=False)
-        return ds
-
-    def _combine(self, other, copy=True):
-        try:
-            ds = self._concat_time(other, copy=copy)
-        except ValueError:
-            ds = self._append_items(other, copy=copy)
-        return ds
-
-    def append(self, other, inplace=False):
-        warnings.warn(
-            "Dataset.append is deprecated, use Dataset.merge([ds1, ds2]) instead",
-            FutureWarning,
-        )
-        return self.append_items(other, inplace)
-
-    def append_items(self, other, inplace=False):
-        warnings.warn(
-            "Dataset.append_items is deprecated, use Dataset.merge([ds1, ds2]) instead",
-            FutureWarning,
-        )
-        if inplace:
-            self._append_items(other, copy=False)
-        else:
-            return self._append_items(other, copy=True)
 
     def _append_items(self, other, copy=True):
         if isinstance(other, DataArray):

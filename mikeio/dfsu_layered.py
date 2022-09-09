@@ -81,14 +81,7 @@ class DfsuLayered(_Dfsu):
         return self.geometry.bottom_elements
 
     @wraps(GeometryFM3D.get_layer_elements)
-    def get_layer_elements(self, layers, layer=None):
-        if layer is not None:
-            warnings.warn(
-                "layer argument is deprecated, use layers instead",
-                FutureWarning,
-            )
-            layers = layer
-
+    def get_layer_elements(self, layers):
         if self.n_layers is None:
             raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
         return self.geometry.get_layer_elements(layers)
@@ -105,7 +98,6 @@ class DfsuLayered(_Dfsu):
         z=None,
         layers=None,
         keepdims=False,
-        time_steps=None,
         dtype=np.float32
     ) -> Dataset:
         """
@@ -170,13 +162,6 @@ class DfsuLayered(_Dfsu):
         # (could have been replaced in the meantime)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 

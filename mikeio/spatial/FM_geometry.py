@@ -851,6 +851,12 @@ class GeometryFM(_Geometry):
         """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
         return self._codes
 
+    @codes.setter
+    def codes(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
+        self._codes = np.array(v, dtype=np.int32)
+
     @property
     def boundary_polylines(self):
         """Lists of closed polylines defining domain outline"""

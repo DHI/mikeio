@@ -229,7 +229,6 @@ class Dfs2(_Dfs123):
         time=None,
         area=None,
         keepdims=False,
-        time_steps=None,
         dtype=np.float32,
     ) -> Dataset:
         """
@@ -252,13 +251,6 @@ class Dfs2(_Dfs123):
         -------
         Dataset
         """
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         self._open()
 
@@ -323,34 +315,6 @@ class Dfs2(_Dfs123):
             validate=False,
         )
 
-    def find_nearest_elements(
-        self,
-        lon,
-        lat,
-    ):
-        warnings.warn(
-            "find_nearest_elements is deprecated, use .geometry.find_index instead",
-            FutureWarning,
-        )
-        projection = self._dfs.FileInfo.Projection
-        axis = self._dfs.SpatialAxis
-        cart = Cartography(
-            projection.WKTString,
-            projection.Longitude,
-            projection.Latitude,
-            projection.Orientation,
-        )
-
-        xx, yy = cart.Geo2Xy(lon, lat)
-
-        j = int(xx / axis.Dx + 0.5)
-        k = axis.YCount - int(yy / axis.Dy + 0.5) - 1
-
-        j = min(max(0, j), axis.XCount - 1)
-        k = min(max(0, k), axis.YCount - 1)
-
-        return k, j
-
     def _open(self):
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
@@ -359,13 +323,9 @@ class Dfs2(_Dfs123):
         self,
         filename,
         data,
-        start_time=None,
         dt=None,
-        datetimes=None,
-        items=None,
         dx=None,
         dy=None,
-        coordinate=None,
         title=None,
         keep_open=False,
     ):
@@ -377,51 +337,22 @@ class Dfs2(_Dfs123):
 
         filename: str
             Location to write the dfs2 file
-        data: list[np.array] or Dataset
+        data: Dataset
             list of matrices, one for each item. Matrix dimension: time, y, x
-        start_time: datetime, optional, deprecated
-            start date of type datetime.
         dt: float, optional
             The time step in seconds.
-        datetimes: datetime, optional, deprecated
-            The list of datetimes for the case of non-equisstant Timeaxis.
-        items: list[ItemInfo], optional
-            List of ItemInfo corresponding to a variable types (ie. Water Level).
         dx: float, optional
             length of each grid in the x direction (projection units)
         dy: float, optional
             length of each grid in the y direction (projection units)
-        coordinate:
-            list of [projection, origin_x, origin_y, orientation]
-            e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         title: str, optional
             title of the dfs2 file. Default is blank.
         keep_open: bool, optional
             Keep file open for appending
         """
-
-        if start_time:
-            warnings.warn(
-                "setting start_time is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if datetimes:
-            warnings.warn(
-                "setting datetimes is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if items:
-            warnings.warn(
-                "setting items is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if isinstance(data, list):
-            warnings.warn(
+            raise TypeError(
                 "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
             )
 
         filename = str(filename)
@@ -438,15 +369,11 @@ class Dfs2(_Dfs123):
             self._dy = dy
 
         self._write(
-            filename,
-            data,
-            start_time,
-            dt,
-            datetimes,
-            items,
-            coordinate,
-            title,
-            keep_open,
+            filename=filename,
+            data=data,
+            dt=dt,
+            title=title,
+            keep_open=keep_open,
         )
 
         if keep_open:
@@ -504,56 +431,3 @@ class Dfs2(_Dfs123):
     def is_geo(self):
         """Are coordinates geographical (LONG/LAT)?"""
         return self._projstr == "LONG/LAT"
-
-    def plot(
-        self,
-        z,
-        *,
-        title=None,
-        label=None,
-        cmap=None,
-        figsize=None,
-        ax=None,
-    ):
-
-        warnings.warn(
-            "Dfs2.plot() is deprecated, use DataArray.plot() instead",
-            FutureWarning,
-        )
-
-        import matplotlib.pyplot as plt
-        import matplotlib.cm as cm
-
-        if len(z) == 1:  # if single-item Dataset
-            z = z[0].to_numpy().copy()
-
-            if z.shape[0] == 1:
-                z = np.squeeze(z).copy()  # handles single time step
-
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-
-        if z.ndim != 2:
-            raise ValueError(
-                "Only 2d data is supported. Hint select a specific timestep: e.g. z[0]"
-            )
-
-        if cmap is None:
-            cmap = cm.viridis
-
-        if self.is_geo and self.orientation == 0.0:
-            lats = [self.latitude + self.dy * i for i in range(self.ny)]
-            lons = [self.longitude + self.dx * i for i in range(self.nx)]
-
-            cf = ax.imshow(z, extent=(lons[0], lons[-1], lats[0], lats[-1]), cmap=cmap)
-
-        else:
-            # TODO get spatial axes in this case as well
-            cf = ax.imshow(z)
-
-        fig.colorbar(cf, ax=ax, label=label)
-
-        if title:
-            ax.set_title(title)
-
-        return ax

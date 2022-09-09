@@ -203,7 +203,6 @@ class Dfs3(_Dfs123):
         area=None,
         layers=None,
         keepdims=False,
-        time_steps=None,
     ) -> Dataset:
         """
         Read data from a dfs3 file
@@ -239,13 +238,6 @@ class Dfs3(_Dfs123):
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
         single_time_selected, time_steps = _valid_timesteps(dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
 
@@ -305,10 +297,7 @@ class Dfs3(_Dfs123):
         self,
         filename,
         data,
-        start_time=None,
         dt=None,
-        datetimes=None,
-        items=None,
         dx=None,
         dy=None,
         dz=None,
@@ -323,16 +312,10 @@ class Dfs3(_Dfs123):
 
         filename: str
             Location to write the dfs3 file
-        data: list[np.array] or Dataset
+        data: Dataset
             list of matrices, one for each item. Matrix dimension: time, y, x
-        start_time: datetime, optional, deprecated
-            start date of type datetime.
         dt: float, optional
             The time step in seconds.
-        datetimes: datetime, optional, deprecated
-            The list of datetimes for the case of non-equisstant Timeaxis.
-        items: list[ItemInfo], optional
-            List of ItemInfo corresponding to a variable types (ie. Water Level).
         dx: float, optional
             length of each grid in the x direction (projection units)
         dy: float, optional
@@ -348,28 +331,9 @@ class Dfs3(_Dfs123):
             Keep file open for appending
         """
 
-        if start_time:
-            warnings.warn(
-                "setting start_time is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if datetimes:
-            warnings.warn(
-                "setting datetimes is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if items:
-            warnings.warn(
-                "setting items is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if isinstance(data, list):
-            warnings.warn(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
+            raise TypeError(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
 
         filename = str(filename)
@@ -391,14 +355,11 @@ class Dfs3(_Dfs123):
             self._dz = dz
 
         self._write(
-            filename,
-            data,
-            start_time,
-            dt,
-            datetimes,
-            items,
-            coordinate,
-            title,
+            filename=filename,
+            data=data,
+            dt=dt,
+            coordinate=coordinate,
+            title=title,
         )
 
     def _set_spatial_axis(self):

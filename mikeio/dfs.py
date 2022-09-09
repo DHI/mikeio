@@ -45,7 +45,6 @@ class _Dfs123(TimeSeries):
         *,
         items=None,
         time=None,
-        time_steps=None,
         keepdims=False,
         dtype=np.float32,
     ) -> Dataset:
@@ -66,13 +65,6 @@ class _Dfs123(TimeSeries):
         -------
         Dataset
         """
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         self._open()
 
@@ -152,22 +144,21 @@ class _Dfs123(TimeSeries):
 
     def _write(
         self,
+        *,
         filename,
         data,
-        start_time,
         dt,
-        datetimes,
-        items,
-        coordinate,
+        coordinate=None,
         title,
         keep_open=False,
     ):
 
+        neq_datetimes = None
         if isinstance(data, Dataset) and not data.is_equidistant:
-            datetimes = data.time
+            neq_datetimes = data.time
 
         self._write_handle_common_arguments(
-            title, data, items, coordinate, start_time, dt
+            title=title, data=data, coordinate=coordinate, dt=dt
         )
 
         shape = np.shape(data[0])
@@ -195,9 +186,10 @@ class _Dfs123(TimeSeries):
 
             if not all(np.shape(d)[t_offset + 1] == self._nx for d in self._data):
                 raise DataDimensionMismatch()
-        if datetimes is not None:
+
+        if neq_datetimes is not None:
             self._is_equidistant = False
-            start_time = datetimes[0]
+            start_time = neq_datetimes[0]
             self._start_time = start_time
 
         dfs = self._setup_header(filename)
@@ -215,7 +207,7 @@ class _Dfs123(TimeSeries):
                 if self._is_equidistant:
                     dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
                 else:
-                    t = datetimes[i]
+                    t = neq_datetimes[i]
                     relt = (t - self._start_time).total_seconds()
                     dfs.WriteItemTimeStepNext(relt, d.astype(np.float32))
 
@@ -265,9 +257,7 @@ class _Dfs123(TimeSeries):
         "Finalize write for a dfs file opened with `write(...,keep_open=True)`"
         self._dfs.Close()
 
-    def _write_handle_common_arguments(
-        self, title, data, items, coordinate, start_time, dt
-    ):
+    def _write_handle_common_arguments(self, *, title, data, coordinate, dt):
 
         if title is None:
             self._title = ""
@@ -305,18 +295,7 @@ class _Dfs123(TimeSeries):
                 self._dt = (data.time[1] - data.time[0]).total_seconds()
             self._data = data.to_numpy()
         else:
-            self._data = data
-
-        if start_time is None:
-            if self._start_time is None:
-                self._start_time = datetime.now()
-                warnings.warn(
-                    f"No start time supplied. Using current time: {self._start_time} as start time."
-                )
-            else:
-                self._start_time = self._start_time
-        else:
-            self._start_time = start_time
+            raise TypeError("data must be supplied in the form of a mikeio.Dataset")
 
         if dt:
             self._dt = dt
@@ -325,9 +304,6 @@ class _Dfs123(TimeSeries):
             self._dt = 1
             if self._n_timesteps > 1:
                 warnings.warn("No timestep supplied. Using 1s.")
-
-        if items:
-            self._items = items
 
         if self._items is None:
             self._items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]

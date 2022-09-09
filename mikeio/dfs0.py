@@ -157,7 +157,7 @@ class Dfs0(TimeSeries):
 
         dfs.Close()
 
-    def read(self, items=None, time=None, keepdims=False, time_steps=None) -> Dataset:
+    def read(self, items=None, time=None, keepdims=False) -> Dataset:
         """
         Read data from a dfs0 file.
 
@@ -173,13 +173,6 @@ class Dfs0(TimeSeries):
         Dataset
             A Dataset with data dimensions [t]
         """
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         if not os.path.exists(self._filename):
             raise FileNotFoundError(f"File {self._filename} not found.")
@@ -632,24 +625,3 @@ def dataframe_to_dfs0(
 pd.DataFrame.to_dfs0 = dataframe_to_dfs0
 
 pd.Series.to_dfs0 = series_to_dfs0
-
-
-def dataset_to_dfs0(self, filename):
-    warnings.warn(
-        "Dataset.to_dfs0() is deprecated, use Dataset.to_dfs()",
-        FutureWarning,
-    )
-    self = self.squeeze()
-
-    if len(self.data[0].shape) != 1:
-        raise ValueError(
-            """Only data with a single dimension can be converted to a dfs0.
-                 Hint: use `isel` to create a subset."""
-        )
-
-    dfs0 = Dfs0()
-
-    dfs0.write(filename, self)
-
-
-Dataset.to_dfs0 = dataset_to_dfs0

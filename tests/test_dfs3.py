@@ -93,22 +93,8 @@ def test_dfs3_read_multiple_layers():
 def test_dfs3_read_write(tmpdir):
     ds = mikeio.read("tests/testdata/Grid1.dfs3")
     outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
-    items = ds.items
-    data = ds.to_numpy()
-    title = "test dfs3"
-    dfs = mikeio.Dfs3()
-    with pytest.warns(FutureWarning):
-        dfs.write(
-            filename=outfilename,
-            data=data,
-            start_time=ds.time[0],
-            dt=(ds.time[1] - ds.time[0]).total_seconds(),
-            items=items,
-            coordinate=["LONG/LAT", 5, 10, 0],
-            dx=0.1,
-            dy=0.1,
-            title=title,
-        )
+
+    ds.to_dfs(outfilename)
 
 
 def test_read_rotated_grid():
