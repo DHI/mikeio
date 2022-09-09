@@ -1096,8 +1096,9 @@
 
 <div class="viewcode-block" id="Dataset.interp_time"><a class="viewcode-back" href="../../dataset.html#mikeio.Dataset.interp_time">[docs]</a>    <span class="k">def</span> <span class="nf">interp_time</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">],</span>
+        <span class="n">dt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
+        <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
         <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
@@ -1112,6 +1113,8 @@
 <span class="sd">            output timestep in seconds or discrete time instances given</span>
 <span class="sd">            as a pd.DatetimeIndex (typically from another Dataset</span>
 <span class="sd">            ds2.time)</span>
+<span class="sd">        freq: str</span>
+<span class="sd">            pandas frequency</span>
 <span class="sd">        method: str or int, optional</span>
 <span class="sd">            Specifies the kind of interpolation as a string (&#39;linear&#39;, &#39;nearest&#39;, &#39;zero&#39;, &#39;slinear&#39;, &#39;quadratic&#39;, &#39;cubic&#39;, &#39;previous&#39;, &#39;next&#39;, where &#39;zero&#39;, &#39;slinear&#39;, &#39;quadratic&#39; and &#39;cubic&#39; refer to a spline interpolation of zeroth, first, second or third order; &#39;previous&#39; and &#39;next&#39; simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is &#39;linear&#39;.</span>
 <span class="sd">        extrapolate: bool, optional</span>
@@ -1145,7 +1148,14 @@
 <span class="sd">        1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
 <span class="sd">        2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
 <span class="sd">        3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
+<span class="sd">        &gt;&gt;&gt; dsi = ds.interp_time(freq=&#39;2H&#39;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">freq</span><span class="p">:</span>
+            <span class="n">dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_timedelta</span><span class="p">(</span><span class="n">freq</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">dt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must specify either dt or freq&quot;</span><span class="p">)</span>
+
         <span class="n">t_out_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_interp_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
         <span class="n">t_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
         <span class="n">t_out</span> <span class="o">=</span> <span class="n">t_out_index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
