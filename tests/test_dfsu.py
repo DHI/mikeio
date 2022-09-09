@@ -622,8 +622,6 @@ def test_write_non_equidistant_is_not_possible(tmpdir):
     with pytest.raises(ValueError):
         dfs.write(outfilename, ds)
 
-    assert not os.path.exists(outfilename)
-
 
 def test_temporal_resample_by_reading_selected_timesteps(tmpdir):
 
