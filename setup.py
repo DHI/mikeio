@@ -1,11 +1,11 @@
 import setuptools
 
-with open("README.md", "r", encoding="utf-8") as fh:
+with open("mikeio/README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="mikeio",
-    version="1.1.0",
+    version="1.1.dev1",
     install_requires=[
         "mikecore>=0.2.1",
         "numpy>=1.15.0",  # first version with numpy.quantile
