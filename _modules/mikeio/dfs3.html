@@ -288,7 +288,6 @@
         <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read data from a dfs3 file</span>
@@ -324,13 +323,6 @@
         <span class="n">item_numbers</span> <span class="o">=</span> <span class="n">_valid_item_numbers</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
         <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">time_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="ne">FutureWarning</span><span class="p">(</span>
-                    <span class="s2">&quot;time_steps have been renamed to time, and will be removed in a future release&quot;</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="n">time_steps</span>
         <span class="n">single_time_selected</span><span class="p">,</span> <span class="n">time_steps</span> <span class="o">=</span> <span class="n">_valid_timesteps</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
         <span class="n">nt</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">time_steps</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">single_time_selected</span> <span class="k">else</span> <span class="mi">1</span>
 
@@ -390,10 +382,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
-        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">datetimes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dz</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -408,16 +397,10 @@
 
 <span class="sd">        filename: str</span>
 <span class="sd">            Location to write the dfs3 file</span>
-<span class="sd">        data: list[np.array] or Dataset</span>
+<span class="sd">        data: Dataset</span>
 <span class="sd">            list of matrices, one for each item. Matrix dimension: time, y, x</span>
-<span class="sd">        start_time: datetime, optional, deprecated</span>
-<span class="sd">            start date of type datetime.</span>
 <span class="sd">        dt: float, optional</span>
 <span class="sd">            The time step in seconds.</span>
-<span class="sd">        datetimes: datetime, optional, deprecated</span>
-<span class="sd">            The list of datetimes for the case of non-equisstant Timeaxis.</span>
-<span class="sd">        items: list[ItemInfo], optional</span>
-<span class="sd">            List of ItemInfo corresponding to a variable types (ie. Water Level).</span>
 <span class="sd">        dx: float, optional</span>
 <span class="sd">            length of each grid in the x direction (projection units)</span>
 <span class="sd">        dy: float, optional</span>
@@ -433,28 +416,9 @@
 <span class="sd">            Keep file open for appending</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">if</span> <span class="n">start_time</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;setting start_time is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">datetimes</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;setting datetimes is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">items</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;setting items is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span>
             <span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -476,14 +440,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_dz</span> <span class="o">=</span> <span class="n">dz</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span>
-            <span class="n">filename</span><span class="p">,</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">start_time</span><span class="p">,</span>
-            <span class="n">dt</span><span class="p">,</span>
-            <span class="n">datetimes</span><span class="p">,</span>
-            <span class="n">items</span><span class="p">,</span>
-            <span class="n">coordinate</span><span class="p">,</span>
-            <span class="n">title</span><span class="p">,</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
+            <span class="n">coordinate</span><span class="o">=</span><span class="n">coordinate</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
         <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_set_spatial_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

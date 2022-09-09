@@ -165,7 +165,6 @@
         <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -223,13 +222,6 @@
         <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsuFile</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
-        <span class="k">if</span> <span class="n">time_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="ne">FutureWarning</span><span class="p">(</span>
-                    <span class="s2">&quot;time_steps have been renamed to time, and will be removed in a future release&quot;</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="n">time_steps</span>
 
         <span class="n">single_time_selected</span><span class="p">,</span> <span class="n">time_steps</span> <span class="o">=</span> <span class="n">_valid_timesteps</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
 

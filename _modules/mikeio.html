@@ -123,9 +123,7 @@
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
 
 
-<div class="viewcode-block" id="read"><a class="viewcode-back" href="../dfs-overview.html#mikeio.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
-    <span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<div class="viewcode-block" id="read"><a class="viewcode-back" href="../dfs-overview.html#mikeio.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read all or a subset of the data from a dfs file</span>
 
 <span class="sd">    All dfs files can be subsetted with the *items* and *time* arguments. But</span>
@@ -194,13 +192,11 @@
     <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s2">&quot;dfs&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ext</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mikeio.read is only supported for Dfs files&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mikeio.read() is only supported for Dfs files&quot;</span><span class="p">)</span>
 
     <span class="n">dfs</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-        <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="n">time_steps</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="open"><a class="viewcode-back" href="../dfs-overview.html#mikeio.open">[docs]</a><span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

@@ -166,14 +166,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">bottom_elements</span>
 
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">GeometryFM3D</span><span class="o">.</span><span class="n">get_layer_elements</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">get_layer_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">layer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;layer argument is deprecated, use layers instead&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">layers</span> <span class="o">=</span> <span class="n">layer</span>
-
+    <span class="k">def</span> <span class="nf">get_layer_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InvalidGeometry</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot get_layer_elements&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_layer_elements</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
@@ -190,7 +183,6 @@
         <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -255,13 +247,6 @@
         <span class="c1"># (could have been replaced in the meantime)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
-        <span class="k">if</span> <span class="n">time_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="ne">FutureWarning</span><span class="p">(</span>
-                    <span class="s2">&quot;time_steps have been renamed to time, and will be removed in a future release&quot;</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="n">time_steps</span>
 
         <span class="n">single_time_selected</span><span class="p">,</span> <span class="n">time_steps</span> <span class="o">=</span> <span class="n">_valid_timesteps</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
 

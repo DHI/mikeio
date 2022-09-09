@@ -622,40 +622,6 @@
             <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="nd">@wraps</span><span class="p">(</span><span class="n">GeometryFM</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">get_2d_interpolant</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">n_nearest</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="ne">FutureWarning</span><span class="p">(</span>
-                <span class="s2">&quot;get_2d_interpolant have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">n_nearest</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
-
-    <span class="nd">@wraps</span><span class="p">(</span><span class="n">GeometryFM</span><span class="o">.</span><span class="n">interp2d</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">interp2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="ne">FutureWarning</span><span class="p">(</span>
-                <span class="s2">&quot;interp2d have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">interp2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
-
-    <span class="nd">@wraps</span><span class="p">(</span><span class="n">GeometryFM</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">find_nearest_elements</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_distances</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">):</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="ne">FutureWarning</span><span class="p">(</span>
-                <span class="s2">&quot;find_nearest_elements have been deprecated, please use .geometry.find_index() instead&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">layer</span><span class="p">,</span> <span class="n">n_nearest</span><span class="p">,</span> <span class="n">return_distances</span>
-        <span class="p">)</span>
-
     <span class="nd">@wraps</span><span class="p">(</span><span class="n">GeometryFM</span><span class="o">.</span><span class="n">get_element_area</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">get_element_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_element_area</span><span class="p">()</span>
@@ -810,7 +776,6 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -878,13 +843,6 @@
         <span class="c1"># (could have been replaced in the meantime)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
-        <span class="k">if</span> <span class="n">time_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="ne">FutureWarning</span><span class="p">(</span>
-                    <span class="s2">&quot;time_steps have been renamed to time, and will be removed in a future release&quot;</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-            <span class="n">time</span> <span class="o">=</span> <span class="n">time_steps</span>
 
         <span class="n">single_time_selected</span><span class="p">,</span> <span class="n">time_steps</span> <span class="o">=</span> <span class="n">_valid_timesteps</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
 
@@ -1045,9 +1003,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
-        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">keep_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -1058,13 +1014,10 @@
 <span class="sd">        -----------</span>
 <span class="sd">        filename: str</span>
 <span class="sd">            full path to the new dfsu file</span>
-<span class="sd">        data: list[np.array] or Dataset</span>
+<span class="sd">        data: Dataset</span>
 <span class="sd">            list of matrices, one for each item. Matrix dimension: time, x</span>
-<span class="sd">        start_time: datetime, optional, deprecated</span>
-<span class="sd">            start datetime, default is datetime.now()</span>
 <span class="sd">        dt: float, optional, deprecated</span>
 <span class="sd">            The time step (in seconds)</span>
-<span class="sd">        items: list[ItemInfo], optional, deprecated</span>
 <span class="sd">        elements: list[int], optional</span>
 <span class="sd">            write only these element ids to file</span>
 <span class="sd">        title: str</span>
@@ -1075,33 +1028,16 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_spectral</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;write() is not supported for spectral dfsu!&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">start_time</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;setting start_time is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-
         <span class="k">if</span> <span class="n">dt</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="s2">&quot;setting dt is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
                 <span class="ne">FutureWarning</span><span class="p">,</span>
             <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">items</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;setting items is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
-            <span class="p">)</span>
-
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-                <span class="ne">FutureWarning</span><span class="p">,</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_layered</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;Layered dfsu files can only be written by providing a Dataset&quot;</span>
-                <span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
@@ -1110,7 +1046,7 @@
             <span class="n">start_time</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">dt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">is_equidistant</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                         <span class="s2">&quot;Data is not equidistant in time. Dfsu requires equidistant temporal axis!&quot;</span>
                     <span class="p">)</span>
                 <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
