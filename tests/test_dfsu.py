@@ -337,8 +337,7 @@ def test_find_nearest_element_2d():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    with pytest.warns(FutureWarning):
-        elem_id = dfs.find_nearest_elements(606200, 6905480)
+    elem_id = dfs.geometry.find_nearest_elements(606200, 6905480)
     assert elem_id == 317
 
 
@@ -346,10 +345,9 @@ def test_find_nearest_element_2d_and_distance():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    with pytest.warns(FutureWarning):
-        (elem_id, dist) = dfs.find_nearest_elements(
-            606200, 6905480, return_distances=True
-        )
+    (elem_id, dist) = dfs.geometry.find_nearest_elements(
+        606200, 6905480, return_distances=True
+    )
     assert elem_id == 317
 
     assert dist > 0.0
@@ -373,8 +371,7 @@ def test_find_nearest_elements_2d_array():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    with pytest.warns(FutureWarning):
-        elem_ids = dfs.find_nearest_elements(x=[606200, 606200], y=[6905480, 6905480])
+    elem_ids = dfs.geometry.find_nearest_elements(x=[606200, 606200], y=[6905480, 6905480])
     assert len(elem_ids) == 2
     assert elem_ids[0] == 317
     assert elem_ids[1] == 317

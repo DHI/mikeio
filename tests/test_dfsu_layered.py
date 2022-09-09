@@ -305,14 +305,14 @@ def test_find_nearest_elements_3d():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = mikeio.open(filename)
 
-    elem_id = dfs.find_nearest_elements(333934, 6158101)
+    elem_id = dfs.geometry.find_nearest_elements(333934, 6158101)
     assert elem_id == 5323
     assert elem_id in dfs.top_elements
 
-    elem_id = dfs.find_nearest_elements(333934, 6158101, layer=7)
+    elem_id = dfs.geometry.find_nearest_elements(333934, 6158101, layer=7)
     assert elem_id == 5322
 
-    elem_id = dfs.find_nearest_elements(333934, 6158101, -7)
+    elem_id = dfs.geometry.find_nearest_elements(333934, 6158101, -7)
     assert elem_id == 5320
 
 
@@ -595,13 +595,13 @@ def test_find_nearest_element_in_Zlayer():
     dfs = mikeio.open(filename)
     el2dindx = dfs.elem2d_ids[12]
     assert el2dindx == 2
-    ids = dfs.find_nearest_elements(357000, 6200000, layer=0)
+    ids = dfs.geometry.find_nearest_elements(357000, 6200000, layer=0)
     el2dindx = dfs.elem2d_ids[ids]
     table = dfs.e2_e3_table[el2dindx]
     assert ids == 3216
     assert el2dindx == 745
     assert len(table) == 9
-    ids = dfs.find_nearest_elements(357000, 6200000, layer=8)
+    ids = dfs.geometry.find_nearest_elements(357000, 6200000, layer=8)
     el2dindx = dfs.elem2d_ids[ids]
     table = dfs.e2_e3_table[el2dindx]
     assert ids == 3224
@@ -610,7 +610,7 @@ def test_find_nearest_element_in_Zlayer():
 
     with pytest.raises(Exception):
         # z and layer cannot both be given
-        dfs.find_nearest_elements(357000, 6200000, z=-3, layer=8)
+        dfs.geometry.find_nearest_elements(357000, 6200000, z=-3, layer=8)
 
 
 def test_dataset_write_dfsu3d(tmp_path):

@@ -537,19 +537,6 @@ class _UnstructuredFile:
             projection=self.geometry.projection_string,
         )
 
-    @wraps(GeometryFM.find_nearest_elements)
-    def find_nearest_elements(
-        self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
-    ):
-        warnings.warn(
-            FutureWarning(
-                "find_nearest_elements have been deprecated, please use .geometry.find_index() instead"
-            )
-        )
-        return self.geometry.find_nearest_elements(
-            x, y, z, layer, n_nearest, return_distances
-        )
-
     @wraps(GeometryFM.get_element_area)
     def get_element_area(self):
         return self.geometry.get_element_area()
