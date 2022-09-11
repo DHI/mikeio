@@ -93,7 +93,7 @@ class _DatasetPlotter:
         return f"{da.name} [{da.unit.name}]"
 
 
-class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
+class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableSequence):
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
@@ -191,7 +191,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def _init_from_DataArrays(self, data, validate=True):
         """Initialize Dataset object with Iterable of DataArrays"""
-        self._data_vars = self._DataArrays_as_mapping(data)
+        dataarray_map = self._DataArrays_as_mapping(data)
+        self._dataarray_list = list(dataarray_map.values())
 
         if (len(self) > 1) and validate:
             first = self[0]
@@ -199,10 +200,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 da = self[i]
                 first._is_compatible(da, raise_error=True)
 
-        self._check_all_different_ids(self._data_vars.values())
+        self._check_all_different_ids(self._dataarray_list)
 
         self.__itemattr = []
-        for key, value in self._data_vars.items():
+        for key, value in zip(self.names, self._dataarray_list):
             self._set_name_attr(key, value)
 
         self.plot = _DatasetPlotter(self)
@@ -412,12 +413,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     @property
     def n_items(self) -> int:
         """Number of items/DataArrays, equivalent to len()"""
-        return len(self._data_vars)
+        return len(self._dataarray_list)
 
     @property
     def names(self):
         """Name of each of the DataArrays as a list"""
-        return [da.name for da in self]
+        return [da.name for da in self._dataarray_list]
 
     def _ipython_key_completions_(self):
         return [x.name for x in self.items]
@@ -494,9 +495,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def flipud(self) -> "Dataset":
         """Flip data upside down (on first non-time axis)"""
-        self._data_vars = {
-            key: value.flipud() for (key, value) in self._data_vars.items()
-        }
+        self._dataarray_list = [da.flipud() for da in self._dataarray_list]
         return self
 
     def squeeze(self) -> "Dataset":
@@ -506,7 +505,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         -------
         Dataset
         """
-        res = {name: da.squeeze() for name, da in self._data_vars.items()}
+        res = [da.squeeze() for da in self._dataarray_list]
 
         return Dataset(data=res, validate=False)
 
@@ -546,10 +545,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     # ============= Dataset is (almost) a MutableMapping ===========
 
     def __len__(self):
-        return len(self._data_vars)
+        return len(self._dataarray_list)
 
     def __iter__(self):
-        yield from self._data_vars.values()
+        yield from self._dataarray_list
 
     def __setitem__(self, key, value):
         self.__set_or_insert_item(key, value, insert=False)
@@ -567,11 +566,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         item_name = value.name
 
+        key = self._key_to_idx(key)
+
         if isinstance(key, int):
             is_replacement = not insert
             if is_replacement:
-                key_str = self.names[key]
-                self._data_vars[key_str] = value
+                # key_str = self.names[key]
+                self._dataarray_list[key] = value  # TODO
             else:
                 self._check_already_present(value)
 
@@ -579,28 +580,36 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                     raise ValueError(
                         f"Item name {item_name} already in Dataset ({self.names})"
                     )
-                all_keys = list(self._data_vars.keys())
+                all_keys = self.names
                 all_keys.insert(key, item_name)
 
-                data_vars = {}
+                data_vars = []
                 for k in all_keys:
-                    if k in self._data_vars.keys():
-                        data_vars[k] = self._data_vars[k]
+                    if k in self.names:
+                        # idx = self.index(key)
+                        data_vars.append(self._dataarray_list[key])
                     else:
-                        data_vars[k] = value
-                self._data_vars = data_vars
+                        data_vars.append(value)
+                self._dataarray_list = data_vars
 
             self._set_name_attr(item_name, value)
         else:
-            is_replacement = key in self.names
-            if key != item_name:
-                # TODO: what would be best in this situation?
-                # Assignment to a key is enough indication that the user wants to name the item like this
-                value.name = key
-            if not is_replacement:
-                self._check_already_present(value)
-            self._data_vars[key] = value
-            self._set_name_attr(key, value)
+            raise ValueError("key not recognized")
+            # is_replacement = key in self.names
+            # if key != item_name:
+            #     # TODO: what would be best in this situation?
+            #     # Assignment to a key is enough indication that the user wants to name the item like this
+            #     value.name = key
+            # if not is_replacement:
+            #     self._check_already_present(value)
+            # self._dataarray_list[key] = value  # TODO
+            # self._set_name_attr(key, value)
+
+    def index(self, x) -> int:
+        return self.names.index(x)
+
+    def count(self, x) -> int:
+        return self.names.count(x)
 
     def insert(self, key: int, value: DataArray):
         """Insert DataArray in a specific position
@@ -670,11 +679,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             ds = self.copy()
 
         for old_name, new_name in mapper.items():
-            da = ds._data_vars.pop(old_name)
-            da.name = new_name
-            ds._data_vars[new_name] = da
+            # TODO
+            idx = self.index(old_name)
+            ds._dataarray_list[idx].name = new_name
+            # da.name = new_name
+            # #ds._dataarray_list[new_name] = da  # TODO
+            # ds._dataarray_list.insert
             self._del_name_attr(old_name)
-            self._set_name_attr(new_name, da)
+            self._set_name_attr(new_name, ds._dataarray_list[idx])
 
         return ds
 
@@ -720,26 +732,26 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         key = self._key_to_str(key)
 
         if isinstance(key, str):
-            if key in self._data_vars.keys():
-                return self._data_vars[key]
+            if key in self.names:
+                return self._dataarray_list[self.index(key)]
 
             if "*" in key:
                 import fnmatch
 
                 data_vars = {
                     k: da
-                    for k, da in self._data_vars.items()
+                    for k, da in zip(self.names, self._dataarray_list)
                     if fnmatch.fnmatch(k, key)
                 }
-                return Dataset(data=data_vars, validate=False)
+                return Dataset(data=data_vars.values(), validate=False)
             else:
-                item_names = ",".join(self._data_vars.keys())
+                item_names = ",".join(self.names)
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
-            data_vars = {}
+            data_vars = []
             for v in key:
-                data_vars[v] = self._data_vars[v]
+                data_vars.append(self._dataarray_list[self.index(v)])
             return Dataset(data=data_vars, validate=False)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
@@ -791,7 +803,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         if isinstance(key, str):
             return key
         if isinstance(key, int):
-            return list(self._data_vars.keys())[key]
+            return self.names[key]
         if isinstance(key, slice):
             s = key.indices(len(self))
             return self._key_to_str(list(range(*s)))
@@ -804,10 +816,30 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             return key.name
         raise TypeError(f"indexing with type {type(key)} is not supported")
 
+    def _key_to_idx(
+        self, key: Union[str, int, slice, Iterable[str], Iterable[int]]
+    ) -> Union[str, Iterable[str]]:
+        """Translate item selection key to int (or List[int])"""
+        if isinstance(key, str):
+            return self.index(key)
+        if isinstance(key, int):
+            return key
+        if isinstance(key, slice):
+            s = key.indices(len(self))
+            return self._key_to_idx(list(range(*s)))
+        if isinstance(key, Iterable):
+            keys = []
+            for k in key:
+                keys.append(self._key_to_idx(k))
+            return keys
+        if hasattr(key, "name"):
+            return self._key_to_idx(key.name)
+        raise TypeError(f"indexing with type {type(key)} is not supported")
+
     def __delitem__(self, key):
 
-        key = self._key_to_str(key)
-        self._data_vars.__delitem__(key)
+        idx = self._key_to_idx(key)
+        self._dataarray_list.__delitem__(idx)
         self._del_name_attr(key)
 
     # ============ select/interp =============
@@ -1179,7 +1211,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             raise ValueError("All timesteps must match")
         ds = self.copy() if copy else self
 
-        for key, value in other._data_vars.items():
+        for key, value in zip(other.names, other._dataarray_list):
             if key != "Z coordinate":
                 ds[key] = value
 
@@ -1332,7 +1364,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
-                for name, da in self._data_vars.items()
+                for name, da in zip(self.names, self._dataarray_list)
             }
             return Dataset(data=res, validate=False)
 
@@ -1438,7 +1470,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             else:
                 res = []
 
-                for name, da in self._data_vars.items():
+                for name, da in zip(self.names, self._dataarray_list):
                     for quantile in q:
                         qd = da._quantile(q=quantile, axis=axis, func=func)
                         newname = f"Quantile {quantile}, {name}"
