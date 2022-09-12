@@ -1,4 +1,5 @@
 import sys
+import os
 import pytest
 
 from mikeio import Pfs
@@ -20,6 +21,14 @@ def test_mztoolbox():
     pfs = Pfs("tests/testdata/concat.mzt")
     assert "tide1.dfs" in pfs.data.Setup.File_1.InputFile
     assert "|" in pfs.data.Setup.File_1.InputFile
+
+
+def test_read_write(tmpdir):
+    pfs1 = Pfs("tests/testdata/concat.mzt")
+    outfilename = os.path.join(tmpdir.dirname, "concat_out.mzt")
+    pfs1.write(outfilename)
+    pfs2 = Pfs(outfilename)
+    # TODO
 
 
 def test_sw():
