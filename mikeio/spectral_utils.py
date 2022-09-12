@@ -17,6 +17,7 @@ def plot_2dspectrum(
     levels=None,
     figsize=(7, 7),
     add_colorbar=True,
+    ax=None,
 ):
     """
     Plot spectrum in polar coordinates
@@ -52,6 +53,8 @@ def plot_2dspectrum(
         specify size of figure, default (7, 7)
     add_colorbar: bool, optional
         Add colorbar to plot, default True
+    ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
 
     Returns
     -------
@@ -82,8 +85,11 @@ def plot_2dspectrum(
         freq = 1.0 / np.flip(freq)
         spectrum = np.fliplr(spectrum)
 
-    fig = plt.figure(figsize=figsize)
-    ax = plt.subplot(111, polar=True)
+    if ax is None:
+        fig = plt.figure(figsize=figsize)
+        ax = plt.subplot(111, polar=True)
+    else:
+        fig = plt.gcf()
     ax.set_theta_direction(-1)
     ax.set_theta_zero_location("N")
 

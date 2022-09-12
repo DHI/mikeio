@@ -543,7 +543,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def __call__(self, ax=None, figsize=None, **kwargs):
         # ax = self._get_ax(ax, figsize)
         if self.da.n_frequencies > 0 and self.da.n_directions > 0:
-            return self._plot_2dspectrum(figsize=figsize, **kwargs)
+            return self._plot_2dspectrum(ax=ax, figsize=figsize, **kwargs)
         elif self.da.n_frequencies == 0:
             return self._plot_dirspectrum(ax=ax, figsize=figsize, **kwargs)
         elif self.da.n_directions == 0:
@@ -591,7 +591,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         ax.plot(x_values, y_values, **kwargs)
         return ax
 
-    def _plot_2dspectrum(self, **kwargs):
+    def _plot_2dspectrum(self,ax=None, **kwargs):
         values = self._get_first_step_values()
 
         if "figsize" not in kwargs or kwargs["figsize"] is None:
@@ -605,6 +605,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
             values,
             frequencies=self.da.geometry.frequencies,
             directions=self.da.geometry.directions,
+            ax=ax,
             **kwargs,
         )
 
