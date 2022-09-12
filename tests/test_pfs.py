@@ -16,6 +16,12 @@ def test_basic():
     assert data.POINT_1.y == 50
 
 
+def test_mztoolbox():
+    pfs = Pfs("tests/testdata/concat.mzt")
+    assert "tide1.dfs" in pfs.data.Setup.File_1.InputFile
+    assert "|" in pfs.data.Setup.File_1.InputFile
+
+
 def test_sw():
 
     pfs = Pfs("tests/testdata/lake.sw")
