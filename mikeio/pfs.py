@@ -114,7 +114,9 @@ class Pfs:
 
         # check for pipes in filenames
         if s.count("|") == 2:
-            s = s[0:-1].replace("|", "'|") + "|'"
+            # s = s[0:-1].replace("|", "'|") + "|'"
+            parts = s.split("|")
+            s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
 
         if len(s) > 0 and s[0] != "!":
             if "=" in s:
