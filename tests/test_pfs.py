@@ -45,7 +45,7 @@ def test_read_write(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "concat_out.mzt")
     pfs1.write(outfilename)
     check_txt_files_match(infilename, outfilename)
-    _ = Pfs(outfilename) # try to parse it also
+    _ = Pfs(outfilename)  # try to parse it also
 
 
 def test_sw():
