@@ -172,10 +172,12 @@ class Pfs:
                 # add either '' or || as pre- and suffix to strings depending on path definition
                 if v == "":
                     v = "''"
-                elif (
-                    v[0:2] == ".."
-                ):  # if it begins with . (hinting at relative path, use ||)
-                    v = f"|{v}|"
+                elif v.count("|") == 2:
+                    v = f"{v}"
+                # elif (
+                #     v[0:2] == ".."
+                # ):  # if it begins with . (hinting at relative path, use ||)
+                #     v = f"|{v}|"
                 else:
                     v = f"'{v}'"
 
