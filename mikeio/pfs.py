@@ -109,13 +109,12 @@ class Pfs:
 
             if s[-1] == "]":
                 s = s.replace("]", ":")
-            # check for pipes in filenames
-            if s.count("|") == 2:
-                piped_arg = True
-            else:
-                piped_arg = False
 
-        s = s.replace("//", "").replace("|", "")
+        s = s.replace("//", "")
+
+        # check for pipes in filenames
+        if s.count("|") == 2:
+            s = s[0:-1].replace("|", "'|") + "|'"
 
         if len(s) > 0 and s[0] != "!":
             if "=" in s:
@@ -124,7 +123,7 @@ class Pfs:
                 key = s[0:idx]
                 key = key.strip()
                 value = s[(idx + 1) :]
-                key = key.lower()
+                # key = key.lower()
 
                 if s.count("'") == 2:  # This is a quoted string and not a list
                     s = s
