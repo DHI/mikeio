@@ -1,0 +1,313 @@
+// Created     : 2012-05-9 9:32:26
+// DLL id      : C:\Program Files (x86)\DHI\2012\bin\pfs2004.dll
+// PFS version : May  2 2012 21:00:13
+
+[MZ_WAVE_SPECTRA_CONVERTER]
+   CLSID = '{24C75E1A-0F7C-4F93-B7FF-9679F988C79C}'
+   TypeName = 'MZ_WAVE_SPECTRA_CONVERTER'
+   CREATEDTIME = '2012-05-09T08:54:54'
+   MODIFIEDTIME = '2012-05-09T09:31:30'
+   NOTES = ''
+   [Setup]
+      Name = 'Setup A'
+      [DATA]
+         data_format = 1
+         number_of_inputs = 1
+         [INPUT_1]
+            file_name = |.\2D_Wave_spectrum_A.txt|
+            item = 1
+         EndSect  // INPUT_1
+
+      EndSect  // DATA
+
+      [OUTPUTS]
+         write_check_data_files = 0
+         number_of_outputs = 9
+         [OUTPUT_1]
+            include = 1
+            file_name = |.\out A - Wave parameters.dfs0|
+            title = 'out A - Wave parameters'
+            type = 1
+            format = 0
+            [INTEGRAL_WAVE_PARAMETERS]
+               Significant_wave_height = 1
+               Peak_wave_period = 1
+               Wave_period_t01 = 0
+               Wave_period_t02 = 0
+               Mean_wave_direction = 1
+               Directional_standard_deviation = 1
+            EndSect  // INTEGRAL_WAVE_PARAMETERS
+
+         EndSect  // OUTPUT_1
+
+         [OUTPUT_2]
+            include = 0
+            file_name = ||
+            title = 'out A - Wave parameters - Line'
+            type = 1
+            format = 1
+            [INTEGRAL_WAVE_PARAMETERS]
+               Significant_wave_height = 1
+               Peak_wave_period = 1
+               Wave_period_t01 = 0
+               Wave_period_t02 = 0
+               Mean_wave_direction = 1
+               Directional_standard_deviation = 1
+            EndSect  // INTEGRAL_WAVE_PARAMETERS
+
+         EndSect  // OUTPUT_2
+
+         [OUTPUT_3]
+            include = 1
+            file_name = |.\out A - Direction spectrum.dfs1|
+            title = 'out A - Direction spectrum'
+            type = 2
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_3
+
+         [OUTPUT_4]
+            include = 0
+            file_name = ||
+            title = 'out A - Direction spectrum - Line'
+            type = 2
+            format = 1
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_4
+
+         [OUTPUT_5]
+            include = 1
+            file_name = |.\out A - Frequency spectrum.dfs1|
+            title = 'out A - Frequency spectrum'
+            type = 3
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_5
+
+         [OUTPUT_6]
+            include = 0
+            file_name = ||
+            title = 'out A - Frequency spectrum - Line'
+            type = 3
+            format = 1
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_6
+
+         [OUTPUT_7]
+            include = 1
+            file_name = |.\out A - 2D Wave spectrum.dfsu|
+            title = 'out A - 2D Wave spectrum'
+            type = 4
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_7
+
+         [OUTPUT_8]
+            include = 1
+            file_name = |.\out A - 2D Wave spectrum.dfs2|
+            title = 'out A - 2D Wave spectrum'
+            type = 4
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_8
+
+         [OUTPUT_9]
+            include = 0
+            file_name = ||
+            title = 'out A - 2D Wave spectrum - Line'
+            type = 4
+            format = 1
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_9
+
+      EndSect  // OUTPUTS
+
+   EndSect  // Setup
+
+EndSect  // MZ_WAVE_SPECTRA_CONVERTER
+
+[MZ_WAVE_SPECTRA_CONVERTER]
+   CLSID = '{24C75E1A-0F7C-4F93-B7FF-9679F988C79C}'
+   TypeName = 'MZ_WAVE_SPECTRA_CONVERTER'
+   CREATEDTIME = '2012-05-09T09:18:17'
+   MODIFIEDTIME = '2012-05-09T09:31:48'
+   NOTES = ''
+   [Setup]
+      Name = 'Setup AB'
+      [DATA]
+         data_format = 1
+         number_of_inputs = 2
+         [INPUT_1]
+            file_name = |.\2D_Wave_spectrum_A.txt|
+            item = 1
+         EndSect  // INPUT_1
+
+         [INPUT_2]
+            file_name = |.\2D_Wave_spectrum_B.txt|
+            item = 1
+         EndSect  // INPUT_2
+
+      EndSect  // DATA
+
+      [OUTPUTS]
+         write_check_data_files = 0
+         number_of_outputs = 9
+         [OUTPUT_1]
+            include = 1
+            file_name = |.\out AB - Wave parameters.dfs0|
+            title = 'out AB - Wave parameters'
+            type = 1
+            format = 0
+            [INTEGRAL_WAVE_PARAMETERS]
+               Significant_wave_height = 1
+               Peak_wave_period = 1
+               Wave_period_t01 = 0
+               Wave_period_t02 = 0
+               Mean_wave_direction = 1
+               Directional_standard_deviation = 1
+            EndSect  // INTEGRAL_WAVE_PARAMETERS
+
+         EndSect  // OUTPUT_1
+
+         [OUTPUT_2]
+            include = 1
+            file_name = |.\out AB - Wave parameters - Line.dfs1|
+            title = 'out AB - Wave parameters - Line'
+            type = 1
+            format = 1
+            [INTEGRAL_WAVE_PARAMETERS]
+               Significant_wave_height = 1
+               Peak_wave_period = 1
+               Wave_period_t01 = 0
+               Wave_period_t02 = 0
+               Mean_wave_direction = 1
+               Directional_standard_deviation = 1
+            EndSect  // INTEGRAL_WAVE_PARAMETERS
+
+         EndSect  // OUTPUT_2
+
+         [OUTPUT_3]
+            include = 1
+            file_name = |.\out AB - Direction spectrum.dfs1|
+            title = 'out AB - Direction spectrum'
+            type = 2
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_3
+
+         [OUTPUT_4]
+            include = 0
+            file_name = ||
+            title = 'out WSC - Direction spectrum - Line'
+            type = 2
+            format = 1
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_4
+
+         [OUTPUT_5]
+            include = 1
+            file_name = |.\out AB - Frequency spectrum.dfs1|
+            title = 'out AB - Frequency spectrum'
+            type = 3
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_5
+
+         [OUTPUT_6]
+            include = 0
+            file_name = ||
+            title = 'out WSC - Frequency spectrum - Line'
+            type = 3
+            format = 1
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_6
+
+         [OUTPUT_7]
+            include = 1
+            file_name = |.\out AB - 2D Wave spectrum.dfsu|
+            title = 'out AB - 2D Wave spectrum'
+            type = 4
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_7
+
+         [OUTPUT_8]
+            include = 1
+            file_name = |.\out AB - 2D Wave spectrum.dfs2|
+            title = 'out AB - 2D Wave spectrum'
+            type = 4
+            format = 0
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_8
+
+         [OUTPUT_9]
+            include = 1
+            file_name = |.\out AB - 2D Wave spectrum - Line.dfsu|
+            title = 'out AB - 2D Wave spectrum - Line'
+            type = 4
+            format = 1
+            [SPECTRAL_PARAMETERS]
+               wave_energy = 1
+               wave_action = 0
+            EndSect  // SPECTRAL_PARAMETERS
+
+         EndSect  // OUTPUT_9
+
+      EndSect  // OUTPUTS
+
+   EndSect  // Setup
+
+EndSect  // MZ_WAVE_SPECTRA_CONVERTER
+
