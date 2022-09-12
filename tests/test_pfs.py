@@ -23,12 +23,29 @@ def test_mztoolbox():
     assert "|" in pfs.data.Setup.File_1.InputFile
 
 
+def check_txt_files_match(f1, f2, comment="//"):
+    with open(f1) as file:
+        file1lines = file.read().split("\n")
+
+    with open(f2) as file:
+        file2lines = file.read().split("\n")
+
+    for j in range(len(file1lines)):
+        s1 = file1lines[j].strip()
+        if s1 == "" or s1.startswith(comment):
+            continue
+
+        s2 = file2lines[j].strip()
+        assert s1 == s2
+
+
 def test_read_write(tmpdir):
-    pfs1 = Pfs("tests/testdata/concat.mzt")
+    infilename = "tests/testdata/concat.mzt"
+    pfs1 = Pfs(infilename)
     outfilename = os.path.join(tmpdir.dirname, "concat_out.mzt")
     pfs1.write(outfilename)
-    pfs2 = Pfs(outfilename)
-    # TODO
+    check_txt_files_match(infilename, outfilename)
+    _ = Pfs(outfilename) # try to parse it also
 
 
 def test_sw():
