@@ -28,7 +28,12 @@ class Pfs:
             self._data = yaml.load(self._yaml, Loader=yaml.CLoader)
             targets = list(self._data.keys())
             if len(targets) == 1:
+                self._rootname = targets[0]
                 self._data = self._data[targets[0]]
+            else:
+                raise ValueError(
+                    "Only pfs files with a single root element are supported"
+                )
 
             self.data = NestedNamespace(self._data)
 
@@ -198,7 +203,7 @@ class Pfs:
         """
         from types import SimpleNamespace
 
-        lvl_prefix = "\t"
+        lvl_prefix = "   "
         for k, v in vars(nested_data).items():
             # check if values are again a namespace instance / new level
             if isinstance(v, SimpleNamespace):
@@ -233,8 +238,8 @@ class Pfs:
             f.write("\n")
             f.write(r"// Version     : 19.0.0.14309")
             f.write("\n\n")
-            f.write("[FemEngineSW]\n")
+            f.write(f"[{self._rootname}]\n")
 
             self.write_nested_output(f, self.data, 1)
 
-            f.write("EndSect")
+            f.write(f"EndSect  // {self._rootname}")
