@@ -33,11 +33,11 @@ class Pfs:
             self.data = NestedNamespace(self._data)
 
             # create aliases
-            #if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
+            # if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
             #    self.data.SW = self.data.SPECTRAL_WAVE_MODULE
             #    self.data.SW.get_outputs = self._get_sw_outputs
 
-            #if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
+            # if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
             #    self.data.HD = self.data.HYDRODYNAMIC_MODULE
             #    self.data.HD.get_outputs = self._get_hd_outputs
 
@@ -115,14 +115,13 @@ class Pfs:
             else:
                 piped_arg = False
 
-            
         s = s.replace("//", "").replace("|", "")
 
         if len(s) > 0 and s[0] != "!":
             if "=" in s:
                 idx = s.index("=")
 
-                key = s[0:idx]               
+                key = s[0:idx]
                 key = key.strip()
                 value = s[(idx + 1) :]
                 key = key.lower()
@@ -168,22 +167,23 @@ class Pfs:
             # catch scientific notation
             try:
                 v = float(v)
-            except ValueError:                
+            except ValueError:
                 # add either '' or || as pre- and suffix to strings depending on path definition
-                if v == '':
-                    v = '\'\''
-                elif v[0:2] == '..': # if it begins with . (hinting at relative path, use ||)
-                    v = f'|{v}|'
+                if v == "":
+                    v = "''"
+                elif (
+                    v[0:2] == ".."
+                ):  # if it begins with . (hinting at relative path, use ||)
+                    v = f"|{v}|"
                 else:
-                    v = f'\'{v}\''
-                    
-        if isinstance(v, datetime):
-            v = v.strftime('%Y, %#m, %#d, %#H, 0, 0') # pfs-datetime output  
-             
-        if isinstance(v, list):
-            v = str(v)[1:-1] # strip [] from lists
-        return v
+                    v = f"'{v}'"
 
+        if isinstance(v, datetime):
+            v = v.strftime("%Y, %#m, %#d, %#H, 0, 0")  # pfs-datetime output
+
+        if isinstance(v, list):
+            v = str(v)[1:-1]  # strip [] from lists
+        return v
 
     def write_nested_output(self, f, nested_data, lvl):
         """
@@ -194,23 +194,22 @@ class Pfs:
             lvl (int): level of indentation, add a tab \t for each
         """
         from types import SimpleNamespace
-        
-        lvl_prefix = '\t' 
+
+        lvl_prefix = "\t"
         for k, v in vars(nested_data).items():
             # check if values are again a namespace instance / new level
             if isinstance(v, SimpleNamespace):
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                self.write_nested_output(f, v, lvl+1) 
+                self.write_nested_output(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
 
             else:
-                #print(f"{lvl_prefix * lvl}{k} = {v}\n") # JUST FOR TESTING, TO BE REMOVED
+                # print(f"{lvl_prefix * lvl}{k} = {v}\n") # JUST FOR TESTING, TO BE REMOVED
 
                 v = self.catch_str_exceptions(v)
-                    
-                # write output                
-                f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
+                # write output
+                f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
     def write(self, fname_out):
         """
@@ -220,17 +219,19 @@ class Pfs:
             lvl (int): level of indentation, add a tab \t for each
         """
 
-        with open(fname_out, 'w') as f:
+        with open(fname_out, "w") as f:
             # HEADER (TO BE MODIFIED LATER)
-            f.write(f"// Created     : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-            f.write(r"// DLL         : C:\Program Files (x86)\DHI\MIKE Zero\2021\bin\x64\pfs2004.dll")
+            f.write(
+                f"// Created     : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+            )
+            f.write(
+                r"// DLL         : C:\Program Files (x86)\DHI\MIKE Zero\2021\bin\x64\pfs2004.dll"
+            )
             f.write("\n")
             f.write(r"// Version     : 19.0.0.14309")
             f.write("\n\n")
-            f.write('[FemEngineSW]\n') 
+            f.write("[FemEngineSW]\n")
 
-            
             self.write_nested_output(f, self.data, 1)
-            
-            f.write('EndSect')
-    
+
+            f.write("EndSect")
