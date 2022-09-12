@@ -18,24 +18,29 @@ class NestedNamespace(SimpleNamespace):
             else:
                 self.__setattr__(key, value)
 
+    def __getitem__(self, key):
+        return getattr(self, key)
+
 
 class Pfs:
     def __init__(self, filename, encoding="cp1252"):
 
         try:
             self._filename = filename
-            self._pfs2yaml(encoding=encoding)
-            self._data = yaml.load(self._yaml, Loader=yaml.CLoader)
-            targets = list(self._data.keys())
+
+            _yaml = self._pfs2yaml(encoding=encoding)
+            _data = yaml.load(_yaml, Loader=yaml.CLoader)
+            targets = list(_data.keys())
             if len(targets) == 1:
                 self._rootname = targets[0]
-                self._data = self._data[targets[0]]
+                _data = _data[targets[0]]
             else:
                 raise ValueError(
                     "Only pfs files with a single root element are supported"
                 )
 
-            self.data = NestedNamespace(self._data)
+            self.data = NestedNamespace(_data)
+            setattr(self, self._rootname, self.data)
 
             # create aliases
             # if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
@@ -60,7 +65,7 @@ class Pfs:
 
     def get_outputs(self, section, included_only=False):
 
-        sub = self._data[section]["OUTPUTS"]
+        sub = self.data[section]["OUTPUTS"]
         n = sub["number_of_outputs"]
 
         sel_keys = [
@@ -102,11 +107,11 @@ class Pfs:
             adj_line = self._parse_line(line)
             output.append(adj_line)
 
-        self._yaml = "\n".join(output)
+        return "\n".join(output)
 
     def _parse_line(self, line):
         s = line.strip()
-        s = re.sub(r"\s*//.*", "", s)
+        s = re.sub(r"\s*//.*", "", s)  # remove comments
 
         if len(s) > 0:
             if s[0] == "[":
@@ -119,7 +124,6 @@ class Pfs:
 
         # check for pipes in filenames
         if s.count("|") == 2:
-            # s = s[0:-1].replace("|", "'|") + "|'"
             parts = s.split("|")
             s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
 
@@ -226,20 +230,19 @@ class Pfs:
             fname_out (path): path and filename to write output to
             lvl (int): level of indentation, add a tab \t for each
         """
+        from mikeio import __version__ as mikeio_version
 
         with open(fname_out, "w") as f:
             # HEADER (TO BE MODIFIED LATER)
             f.write(
                 f"// Created     : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
             )
-            f.write(
-                r"// DLL         : C:\Program Files (x86)\DHI\MIKE Zero\2021\bin\x64\pfs2004.dll"
-            )
+            f.write(r"// By          : MIKE IO")
             f.write("\n")
-            f.write(r"// Version     : 19.0.0.14309")
+            f.write(rf"// Version     : {mikeio_version}")
             f.write("\n\n")
             f.write(f"[{self._rootname}]\n")
 
             self.write_nested_output(f, self.data, 1)
 
-            f.write(f"EndSect  // {self._rootname}")
+            f.write(f"EndSect  // {self._rootname}\n")
