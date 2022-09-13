@@ -1,13 +1,31 @@
 import sys
 import os
 import pytest
+import mikeio
 
-from mikeio import Pfs
+
+@pytest.fixture
+def d1():
+    return dict(key1=1, lst=[0.3, 0.7], SMILE=r"|file\path.dfs|")
+
+
+def test_pfssection_from_dict(d1):
+    sct = mikeio.PfsSection(d1)
+    assert sct.key1 == 1
+    assert list(sct.keys()) == ["key1", "lst", "SMILE"]
+    assert sct["SMILE"] == r"|file\path.dfs|"
+    assert len(sct.lst) == 2
+
+
+def test_pfssection_to_dict(d1):
+    sct = mikeio.PfsSection(d1)
+    d2 = sct.to_dict()
+    assert d1 == d2
 
 
 def test_basic():
 
-    pfs = Pfs("tests/testdata/simple.pfs")
+    pfs = mikeio.Pfs("tests/testdata/simple.pfs")
 
     data = pfs.data
     # On a pfs file with a single target, the target is implicit,
@@ -18,7 +36,7 @@ def test_basic():
 
 
 def test_mztoolbox():
-    pfs = Pfs("tests/testdata/concat.mzt")
+    pfs = mikeio.Pfs("tests/testdata/concat.mzt")
     assert "tide1.dfs" in pfs.data.Setup.File_1.InputFile
     assert "|" in pfs.data.Setup.File_1.InputFile
 
@@ -54,16 +72,16 @@ def assert_txt_files_match(f1, f2, comment="//") -> None:
 
 def test_read_write(tmpdir):
     infilename = "tests/testdata/concat.mzt"
-    pfs1 = Pfs(infilename)
+    pfs1 = mikeio.Pfs(infilename)
     outfilename = os.path.join(tmpdir.dirname, "concat_out.mzt")
     pfs1.write(outfilename)
     assert_txt_files_match(infilename, outfilename)
-    _ = Pfs(outfilename)  # try to parse it also
+    _ = mikeio.Pfs(outfilename)  # try to parse it also
 
 
 def test_sw():
 
-    pfs = Pfs("tests/testdata/lake.sw")
+    pfs = mikeio.Pfs("tests/testdata/lake.sw")
     data = pfs.data
 
     # On a pfs file with a single target, the target is implicit,
@@ -84,7 +102,7 @@ def test_sw():
 
 def test_outputs():
 
-    pfs = Pfs("tests/testdata/lake.sw")
+    pfs = mikeio.Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE")
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
@@ -92,7 +110,7 @@ def test_outputs():
 
 # def test_sw_outputs():
 
-#     pfs = Pfs("tests/testdata/lake.sw")
+#     pfs = mikeio.Pfs("tests/testdata/lake.sw")
 #     df = pfs.data.SW.get_outputs()
 
 #     assert df["file_name"][1] == "Wave_parameters.dfsu"
@@ -106,7 +124,7 @@ def test_outputs():
 
 # def test_hd_outputs():
 
-#     pfs = Pfs("tests/testdata/lake.m21fm")
+#     pfs = mikeio.Pfs("tests/testdata/lake.m21fm")
 #     df = pfs.data.HD.get_outputs()
 
 #     assert df["file_name"][2] == "ts.dfs0"
@@ -119,7 +137,7 @@ def test_outputs():
 
 def test_included_outputs():
 
-    pfs = Pfs("tests/testdata/lake.sw")
+    pfs = mikeio.Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
@@ -130,7 +148,7 @@ def test_included_outputs():
 
 def test_output_by_id():
 
-    pfs = Pfs("tests/testdata/lake.sw")
+    pfs = mikeio.Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=False)
     # .loc refers to output_id irrespective of included or not
     assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
@@ -141,10 +159,10 @@ def test_output_by_id():
 
 
 def test_encoding():
-    Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm")
+    mikeio.Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm")
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_encoding_linux():
     with pytest.raises(ValueError):
-        Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm", encoding=None)
+        mikeio.Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm", encoding=None)
