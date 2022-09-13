@@ -3,11 +3,17 @@ import os
 import pytest
 import mikeio
 import pandas as pd
+from datetime import datetime
 
 
 @pytest.fixture
 def d1():
-    return dict(key1=1, lst=[0.3, 0.7], SMILE=r"|file\path.dfs|")
+    return dict(
+        key1=1,
+        lst=[0.3, 0.7],
+        SMILE=r"|file\path.dfs|",
+        dt=datetime(1979, 2, 3, 3, 5, 0),
+    )
 
 
 @pytest.fixture
@@ -21,9 +27,10 @@ def df1():
 def test_pfssection(d1):
     sct = mikeio.PfsSection(d1)
     assert sct.key1 == 1
-    assert list(sct.keys()) == ["key1", "lst", "SMILE"]
+    assert list(sct.keys()) == ["key1", "lst", "SMILE", "dt"]
     assert sct["SMILE"] == r"|file\path.dfs|"
     assert len(sct.lst) == 2
+    assert sct.dt == datetime(1979, 2, 3, 3, 5, 0)
 
 
 def test_pfssection_keys_values_items(d1):
