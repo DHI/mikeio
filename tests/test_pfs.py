@@ -75,7 +75,61 @@ def test_pfssection_pop(d1):
     assert v99 is None
 
 
-def test_pfssection_insert(d1):
+def test_pfssection_del(d1):
+    sct = mikeio.PfsSection(d1)
+
+    assert hasattr(sct, "key1")
+    del sct["key1"]
+    assert not hasattr(sct, "key1")
+
+
+def test_pfssection_clear(d1):
+    sct = mikeio.PfsSection(d1)
+
+    assert hasattr(sct, "key1")
+    sct.clear()
+    assert not hasattr(sct, "key1")
+    assert sct.__dict__ == dict()
+
+
+def test_pfssection_copy(d1):
+    sct1 = mikeio.PfsSection(d1)
+    sct2 = sct1  # not copy, only reference
+
+    sct2.key1 = 2
+    assert sct1.key1 == 2
+    assert sct2.key1 == 2
+
+    sct3 = sct1.copy()
+    sct3.key1 = 3
+    assert sct3.key1 == 3
+    assert sct1.key1 == 2
+
+
+def test_pfssection_copy_nested(d1):
+    sct1 = mikeio.PfsSection(d1)
+    sct1["nest"] = mikeio.PfsSection(d1)
+
+    sct3 = sct1.copy()
+    sct3.nest.key1 = 2
+    assert sct3.nest.key1 == 2
+    assert sct1.nest.key1 == 1
+
+
+def test_pfssection_setitem_update(d1):
+    sct = mikeio.PfsSection(d1)
+    assert sct.key1 == 1
+
+    sct["key1"] = 2
+    assert sct.key1 == 2
+    assert sct["key1"] == 2
+
+    sct.key1 = 3
+    assert sct.key1 == 3
+    assert sct["key1"] == 3
+
+
+def test_pfssection_setitem_insert(d1):
     sct = mikeio.PfsSection(d1)
 
     assert not hasattr(sct, "key99")
@@ -83,6 +137,17 @@ def test_pfssection_insert(d1):
     assert sct["key99"] == 99
     assert sct.key99 == 99
     assert hasattr(sct, "key99")
+
+
+def test_pfssection_insert_pfssection(d1):
+    sct = mikeio.PfsSection(d1)
+
+    for j in range(10):
+        dj = dict(val=j, lst=[0.3, 0.7])
+        key = f"FILE_{j+1}"
+        sct[key] = mikeio.PfsSection(dj)
+
+    assert sct.FILE_6.val == 5
 
 
 def test_basic():
