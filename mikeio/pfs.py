@@ -80,6 +80,12 @@ class PfsSection(SimpleNamespace):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
+    def to_Pfs(self, rootname: str = None):
+        return Pfs(self, rootname=rootname)
+
+    def to_file(self, filename, rootname: str) -> None:
+        Pfs(self, rootname=rootname).write(filename)
+
     def to_dict(self):
         d = self.__dict__.copy()
         for key, value in d.items():
@@ -87,7 +93,7 @@ class PfsSection(SimpleNamespace):
                 d[key] = value.to_dict()
         return d
 
-    def to_dataframe(self, prefix=None):
+    def to_dataframe(self, prefix: str = None) -> pd.DataFrame:
         if prefix is not None:
             sections = [
                 k for k in self.keys() if k.startswith(prefix) and k[-1].isdigit()
@@ -114,7 +120,7 @@ class PfsSection(SimpleNamespace):
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
     @classmethod
-    def from_dataframe(cls, df, prefix):
+    def from_dataframe(cls, df: pd.DataFrame, prefix: str) -> "PfsSection":
         d = {}
         for idx in df.index:
             key = prefix + str(idx)
@@ -124,29 +130,40 @@ class PfsSection(SimpleNamespace):
 
 
 class Pfs:
-    def __init__(self, filename, encoding="cp1252"):
+    def __init__(self, input, encoding="cp1252", rootname=None):
+        if isinstance(input, PfsSection):
+            root_section = input
+        elif isinstance(input, dict):
+            d = PfsSection(input)
+            root_section = PfsSection(d)
+        else:
+            d, rootname = self._read_pfs_file_to_dict(input, encoding)
+            root_section = PfsSection(d)
+        self.data = root_section
+        self._rootname = rootname
+        if rootname is not None:
+            setattr(self, self._rootname, self.data)
+        self._add_all_FM_aliases()
 
+    def _read_pfs_file_to_dict(self, filename, encoding):
         self._filename = filename
-
         try:
-            _yaml = self._pfs2yaml(filename, encoding)
-            _data = yaml.load(_yaml, Loader=yaml.CLoader)
+            yml = self._pfs2yaml(filename, encoding)
+            d = yaml.load(yml, Loader=yaml.CLoader)
         except Exception:
             raise ValueError(
                 f"""Support for PFS files in mikeio is limited
                 and the file: {filename} could not be parsed."""
             )
-        targets = list(_data.keys())
-        if len(targets) == 1:
-            self._rootname = targets[0]
-            _data = _data[targets[0]]
-        else:
+        root_keys = list(d.keys())
+        if len(root_keys) != 1:
             raise ValueError("Only pfs files with a single root element are supported")
 
-        self.data = PfsSection(_data)
-        setattr(self, self._rootname, self.data)
+        _rootname = root_keys[0]
+        return d[_rootname], _rootname
 
-        # create MIKE FM aliases
+    def _add_all_FM_aliases(self) -> None:
+        """create MIKE FM module aliases"""
         self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
         self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
         self._add_FM_alias("TR", "TRANSPORT_MODULE")
@@ -157,7 +174,7 @@ class Pfs:
         self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
 
     def _add_FM_alias(self, alias: str, module: str) -> None:
-        """Add short hand alias for MIKE FM module, e.g. SW, but only if active!"""
+        """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
         if hasattr(self.data, module):
             mode_name = f"mode_of_{module.lower()}"
             mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
@@ -199,7 +216,7 @@ class Pfs:
     #         df = df[df.include == 1]
     #     return df
 
-    def _pfs2yaml(self, filename, encoding=None):
+    def _pfs2yaml(self, filename, encoding=None) -> str:
 
         with (open(filename, encoding=encoding)) as f:
             pfsstring = f.read()
@@ -217,7 +234,7 @@ class Pfs:
 
         return "\n".join(output)
 
-    def _parse_line(self, line):
+    def _parse_line(self, line: str) -> str:
         s = line.strip()
         s = re.sub(r"\s*//.*", "", s)  # remove comments
 
@@ -319,7 +336,7 @@ class Pfs:
                 v = self._prepare_value_for_write(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
-    def write(self, filename):
+    def write(self, filename, rootname: str = None):
         """Write to a pfs file
 
         Parameters
@@ -329,6 +346,10 @@ class Pfs:
         """
         from mikeio import __version__ as mikeio_version
 
+        rootname = self._rootname if rootname is None else rootname
+        if rootname is None:
+            raise ValueError("Name of root element has not been provided")
+
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             f.write(f"// Created     : {now}\n")
@@ -336,8 +357,8 @@ class Pfs:
             f.write("\n")
             f.write(rf"// Version     : {mikeio_version}")
             f.write("\n\n")
-            f.write(f"[{self._rootname}]\n")
+            f.write(f"[{rootname}]\n")
 
             self._write_nested_PfsSections(f, self.data, 1)
 
-            f.write(f"EndSect  // {self._rootname}\n")
+            f.write(f"EndSect  // {rootname}\n")
