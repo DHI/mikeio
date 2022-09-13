@@ -91,6 +91,15 @@ class PfsSection(SimpleNamespace):
             res.append(self[k].to_dict())
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
+    @classmethod
+    def from_dataframe(cls, df, prefix):
+        d = {}
+        for idx in df.index:
+            key = prefix + str(idx)
+            value = df.loc[idx].to_dict()
+            d[key] = value
+        return cls(d)
+
 
 class Pfs:
     def __init__(self, filename, encoding="cp1252"):
@@ -231,8 +240,7 @@ class Pfs:
 
         return adj_line
 
-    # added by clcr 12.Sept.2022
-    def catch_str_exceptions(self, v):
+    def _parse_value(self, v):
         """catch peculiarities of string formatted pfs data
 
         Args:
@@ -243,8 +251,8 @@ class Pfs:
         """
         # some crude checks and corrections
         if isinstance(v, str):
-            # catch scientific notation
             try:
+                # catch scientific notation
                 v = float(v)
             except ValueError:
                 # add either '' or || as pre- and suffix to strings depending on path definition
@@ -257,7 +265,8 @@ class Pfs:
 
         if isinstance(v, datetime):
             # v = v.strftime("%Y, %#m, %#d, %#H, %M, %S") # pfs-datetime output
-            v = v.strftime("%Y, %-m, %-d, %-H, %-M, %-S")  # no zero padding
+            # v = v.strftime("%Y, %-m, %-d, %-H, %-M, %-S")  # no zero padding
+            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
 
         if isinstance(v, list):
             v = str(v)[1:-1]  # strip [] from lists
@@ -265,7 +274,7 @@ class Pfs:
 
     def _write_nested_output(self, f, nested_data, lvl):
         """
-        similar to pibs write_nested_dict but able to handle pfs nested objects directly
+        handle pfs nested objects directly
         Args:
             f (file object): file object (to write to)
             nested_data (mikeio.pfs.NestedNamespace): object holding (modified or non-modified data)
@@ -278,7 +287,7 @@ class Pfs:
                 self._write_nested_output(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
             else:
-                v = self.catch_str_exceptions(v)
+                v = self._parse_value(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
     def write(self, filename):
