@@ -26,6 +26,17 @@ def test_pfssection(d1):
     assert len(sct.lst) == 2
 
 
+def test_pfssection_keys_values_items(d1):
+    sct = mikeio.PfsSection(d1)
+    vals = list(sct.values())
+    keys = list(sct.keys())
+    j = 0
+    for k, v in sct.items():
+        assert k == keys[j]
+        assert v == vals[j]
+        j += 1
+
+
 def test_pfssection_from_dataframe(df1):
     sct = mikeio.PfsSection.from_dataframe(df1, prefix="MEASUREMENT_")
     assert sct.MEASUREMENT_1.name == "Viken"
@@ -62,6 +73,16 @@ def test_pfssection_pop(d1):
 
     v99 = sct.pop("key99", None)
     assert v99 is None
+
+
+def test_pfssection_insert(d1):
+    sct = mikeio.PfsSection(d1)
+
+    assert not hasattr(sct, "key99")
+    sct["key99"] = 99
+    assert sct["key99"] == 99
+    assert sct.key99 == 99
+    assert hasattr(sct, "key99")
 
 
 def test_basic():
