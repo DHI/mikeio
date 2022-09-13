@@ -2,6 +2,7 @@ import sys
 import os
 import pytest
 import mikeio
+import pandas as pd
 
 
 @pytest.fixture
@@ -9,7 +10,15 @@ def d1():
     return dict(key1=1, lst=[0.3, 0.7], SMILE=r"|file\path.dfs|")
 
 
-def test_pfssection_from_dict(d1):
+@pytest.fixture
+def df1():
+    d = dict(
+        name=["Viken", "Drogden"], position=[[12.5817, 56.128], [12.7113, 55.5364]]
+    )
+    return pd.DataFrame(d, index=range(1, 3))
+
+
+def test_pfssection(d1):
     sct = mikeio.PfsSection(d1)
     assert sct.key1 == 1
     assert list(sct.keys()) == ["key1", "lst", "SMILE"]
@@ -17,10 +26,42 @@ def test_pfssection_from_dict(d1):
     assert len(sct.lst) == 2
 
 
+def test_pfssection_from_dataframe(df1):
+    sct = mikeio.PfsSection.from_dataframe(df1, prefix="MEASUREMENT_")
+    assert sct.MEASUREMENT_1.name == "Viken"
+    assert sct.MEASUREMENT_2.position == [12.7113, 55.5364]
+
+
 def test_pfssection_to_dict(d1):
     sct = mikeio.PfsSection(d1)
     d2 = sct.to_dict()
     assert d1 == d2
+
+
+def test_pfssection_get(d1):
+    sct = mikeio.PfsSection(d1)
+
+    v1 = sct.get("key1")
+    assert v1 == 1
+    assert hasattr(sct, "key1")
+
+    v99 = sct.get("key99")
+    assert v99 is None
+
+    v99 = sct.get("key99", "default")
+    assert v99 == "default"
+
+
+def test_pfssection_pop(d1):
+    sct = mikeio.PfsSection(d1)
+
+    assert hasattr(sct, "key1")
+    v1 = sct.pop("key1")
+    assert v1 == 1
+    assert not hasattr(sct, "key1")
+
+    v99 = sct.pop("key99", None)
+    assert v99 is None
 
 
 def test_basic():
@@ -88,7 +129,7 @@ def test_sw():
     #  i.e. FemEngineSW in this case
 
     assert data.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_frequencies == 25
-    assert data.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_frequencies == 25
+    assert data.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_directions == 16
 
     # use shorthand alias SW instead of SPECTRAL_WAVE_MODULE
     # assert data.SW.SPECTRAL.number_of_frequencies == 25
@@ -105,6 +146,13 @@ def test_outputs():
     pfs = mikeio.Pfs("tests/testdata/lake.sw")
     df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE")
 
+    assert df["file_name"][1] == "Wave_parameters.dfsu"
+
+
+def test_pfssection_to_dataframe():
+    pfs = mikeio.Pfs("tests/testdata/lake.sw")
+    sct = pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS
+    df = sct.to_dataframe()
     assert df["file_name"][1] == "Wave_parameters.dfsu"
 
 
