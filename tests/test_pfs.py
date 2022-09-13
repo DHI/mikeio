@@ -150,6 +150,32 @@ def test_pfssection_insert_pfssection(d1):
     assert sct.FILE_6.val == 5
 
 
+def test_pfssection_find_replace(d1):
+    sct = mikeio.PfsSection(d1)
+
+    for j in range(10):
+        dj = dict(val=j, lst=[0.3, 0.7])
+        key = f"FILE_{j+1}"
+        sct[key] = mikeio.PfsSection(dj)
+
+    assert sct.FILE_6.val == 5
+    sct.update_recursive("val", 44)
+    assert sct.FILE_6.val == 44
+
+
+def test_pfssection_find_replace(d1):
+    sct = mikeio.PfsSection(d1)
+
+    for j in range(10):
+        dj = dict(val=j, lst=[0.3, 0.7])
+        key = f"FILE_{j+1}"
+        sct[key] = mikeio.PfsSection(dj)
+
+    assert sct.FILE_6.lst == [0.3, 0.7]
+    sct.find_replace([0.3, 0.7], [0.11, 0.22, 0.33])
+    assert sct.FILE_6.lst == [0.11, 0.22, 0.33]
+
+
 def test_basic():
 
     pfs = mikeio.Pfs("tests/testdata/simple.pfs")
@@ -209,6 +235,7 @@ def test_read_write(tmpdir):
 def test_sw():
 
     pfs = mikeio.Pfs("tests/testdata/lake.sw")
+    assert pfs.data == pfs.FemEngineSW
     data = pfs.data
 
     # On a pfs file with a single target, the target is implicit,
@@ -227,19 +254,11 @@ def test_sw():
     assert data.TIME.start_time.month == 1
 
 
-def test_outputs():
-
-    pfs = mikeio.Pfs("tests/testdata/lake.sw")
-    df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE")
-
-    assert df["file_name"][1] == "Wave_parameters.dfsu"
-
-
 def test_pfssection_to_dataframe():
     pfs = mikeio.Pfs("tests/testdata/lake.sw")
-    sct = pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS
-    df = sct.to_dataframe()
+    df = pfs.SW.OUTPUTS.to_dataframe()
     assert df["file_name"][1] == "Wave_parameters.dfsu"
+    assert df.shape[0] == 4
 
 
 # def test_sw_outputs():
@@ -256,23 +275,21 @@ def test_pfssection_to_dataframe():
 #     assert df.shape[0] == 3
 
 
-# def test_hd_outputs():
+def test_hd_outputs():
 
-#     pfs = mikeio.Pfs("tests/testdata/lake.m21fm")
-#     df = pfs.data.HD.get_outputs()
+    pfs = mikeio.Pfs("tests/testdata/lake.m21fm")
+    df = pfs.HD.OUTPUTS.to_dataframe()
 
-#     assert df["file_name"][2] == "ts.dfs0"
-#     assert df.shape[0] == 3
-
-#     df = pfs.data.HD.get_outputs(included_only=True)
-
-#     assert df.shape[0] == 2
+    assert df["file_name"][2] == "ts.dfs0"
+    assert df.shape[0] == 3
 
 
 def test_included_outputs():
 
     pfs = mikeio.Pfs("tests/testdata/lake.sw")
-    df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
+    df = pfs.SW.OUTPUTS.to_dataframe()
+    df = df[df.include == 1]
+    # df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 3
@@ -283,17 +300,20 @@ def test_included_outputs():
 def test_output_by_id():
 
     pfs = mikeio.Pfs("tests/testdata/lake.sw")
-    df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=False)
+    df = pfs.SW.OUTPUTS.to_dataframe()
+    # df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=False)
     # .loc refers to output_id irrespective of included or not
     assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
 
-    df_inc = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
+    # df_inc = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
+    df_inc = df[df.include == 1]
     # .loc refers to output_id irrespective of included or not
     assert df_inc.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
 
 
 def test_encoding():
-    mikeio.Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm")
+    pfs = mikeio.Pfs("tests/testdata/OresundHD2D_EnKF10.m21fm")
+    assert hasattr(pfs, "DA")
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
