@@ -22,20 +22,31 @@ def test_mztoolbox():
     assert "tide1.dfs" in pfs.data.Setup.File_1.InputFile
     assert "|" in pfs.data.Setup.File_1.InputFile
 
+def assert_files_match(f1,f2):
+    with open(f1) as file:
+        file1txt = file.read()
 
-def check_txt_files_match(f1, f2, comment="//"):
+    with open(f2) as file:
+        file2txt = file.read()
+
+    assert file1txt == file2txt
+
+def assert_txt_files_match(f1, f2, comment="//") -> None:
+    """Checks non"""
     with open(f1) as file:
         file1lines = file.read().split("\n")
 
     with open(f2) as file:
         file2lines = file.read().split("\n")
 
-    for j in range(len(file1lines)):
-        s1 = file1lines[j].strip()
+    for a,b in zip(file1lines, file2lines):
+        s1 = a.strip()
+        s2 = b.strip()
         if s1 == "" or s1.startswith(comment):
             continue
+        if s2 == "" or s2.startswith(comment):
+            continue
 
-        s2 = file2lines[j].strip()
         assert s1 == s2
 
 
@@ -44,7 +55,7 @@ def test_read_write(tmpdir):
     pfs1 = Pfs(infilename)
     outfilename = os.path.join(tmpdir.dirname, "concat_out.mzt")
     pfs1.write(outfilename)
-    check_txt_files_match(infilename, outfilename)
+    assert_txt_files_match(infilename, outfilename)
     _ = Pfs(outfilename)  # try to parse it also
 
 
