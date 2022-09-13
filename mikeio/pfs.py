@@ -1,25 +1,95 @@
+from types import SimpleNamespace
 from datetime import datetime
 import re
 import yaml
 import pandas as pd
 
-import os  # TO BE DELETED LATER?
 
-
-from types import SimpleNamespace
-
-
-class NestedNamespace(SimpleNamespace):
+class PfsSection(SimpleNamespace):
     def __init__(self, dictionary, **kwargs):
         super().__init__(**kwargs)
         for key, value in dictionary.items():
-            if isinstance(value, dict):
-                self.__setattr__(key, NestedNamespace(value))
-            else:
-                self.__setattr__(key, value)
+            self.__set_key_value(key, value, copy=True)
 
     def __getitem__(self, key):
         return getattr(self, key)
+
+    def __setitem__(self, key, value):
+        self.__set_key_value(key, value)
+
+    def __delitem__(self, key):
+        if key in self.keys():
+            self.__delattr__(key)
+        else:
+            raise IndexError("Key not found")
+
+    def __set_key_value(self, key, value, copy=False):
+        if isinstance(value, dict):
+            d = value.copy() if copy else value
+            self.__setattr__(key, PfsSection(d))  #
+        else:
+            self.__setattr__(key, value)
+
+    def pop(self, key, *args):
+        # if key in self.keys():
+        #     self.__delattr__(key)
+        return self.__dict__.pop(key, *args)
+
+    def get(self, key, *args):
+        return self.__dict__.get(key, *args)
+
+    def clear(self):
+        return self.__dict__.clear()
+
+    def keys(self):
+        return self.__dict__.keys()
+
+    def values(self):
+        return self.__dict__.values()
+
+    def items(self):
+        return self.__dict__.items()
+
+    def copy(self):
+        # is all this necessary???
+        d = self.__dict__.copy()
+        for key, value in d.items():
+            if isinstance(value, self.__class__):
+                d[key] = value.to_dict().copy()
+        return self.__class__(d)
+
+    def to_dict(self):
+        d = self.__dict__.copy()
+        for key, value in d.items():
+            if isinstance(value, self.__class__):
+                d[key] = value.to_dict()
+        return d
+
+    def to_dataframe(self, prefix=None):
+        if prefix is not None:
+            sections = [
+                k for k in self.keys() if k.startswith(prefix) and k[-1].isdigit()
+            ]
+            n_sections = len(sections)
+        else:
+            n_sections = -1
+            for k in self.keys():
+                if isinstance(k, str) and k.startswith("number_of_"):
+                    n_sections = self[k]
+            if n_sections == -1:
+                raise ValueError("Could not find a number_of_... keyword")
+            sections = [k for k in self.keys() if k[-1].isdigit()]
+        if len(sections) == 0:
+            raise ValueError("No matching subsections found")
+        # if len(sections) != n:
+        #     raise ValueError("Number of subsections does match")
+
+        prefix = sections[0][:-1]
+        res = []
+        for j in range(n_sections):
+            k = f"{prefix}{j+1}"
+            res.append(self[k].to_dict())
+        return pd.DataFrame(res, index=range(1, n_sections + 1))
 
 
 class Pfs:
@@ -39,17 +109,17 @@ class Pfs:
                     "Only pfs files with a single root element are supported"
                 )
 
-            self.data = NestedNamespace(_data)
+            self.data = PfsSection(_data)
             setattr(self, self._rootname, self.data)
 
             # create aliases
             # if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
-            #    self.data.SW = self.data.SPECTRAL_WAVE_MODULE
-            #    self.data.SW.get_outputs = self._get_sw_outputs
+            #    self.SW = self.data.SPECTRAL_WAVE_MODULE
+            #    self.SW.get_outputs = self._get_sw_outputs
 
             # if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
-            #    self.data.HD = self.data.HYDRODYNAMIC_MODULE
-            #    self.data.HD.get_outputs = self._get_hd_outputs
+            #    self.HD = self.data.HYDRODYNAMIC_MODULE
+            #    self.HD.get_outputs = self._get_hd_outputs
 
         except Exception:
             raise ValueError(
@@ -134,7 +204,6 @@ class Pfs:
                 key = s[0:idx]
                 key = key.strip()
                 value = s[(idx + 1) :]
-                # key = key.lower()
 
                 if s.count("'") == 2:  # This is a quoted string and not a list
                     s = s
@@ -183,10 +252,6 @@ class Pfs:
                     v = "''"
                 elif v.count("|") == 2:
                     v = f"{v}"
-                # elif (
-                #     v[0:2] == ".."
-                # ):  # if it begins with . (hinting at relative path, use ||)
-                #     v = f"|{v}|"
                 else:
                     v = f"'{v}'"
 
@@ -198,7 +263,7 @@ class Pfs:
             v = str(v)[1:-1]  # strip [] from lists
         return v
 
-    def write_nested_output(self, f, nested_data, lvl):
+    def _write_nested_output(self, f, nested_data, lvl):
         """
         similar to pibs write_nested_dict but able to handle pfs nested objects directly
         Args:
@@ -206,44 +271,35 @@ class Pfs:
             nested_data (mikeio.pfs.NestedNamespace): object holding (modified or non-modified data)
             lvl (int): level of indentation, add a tab \t for each
         """
-        from types import SimpleNamespace
-
         lvl_prefix = "   "
         for k, v in vars(nested_data).items():
-            # check if values are again a namespace instance / new level
-            if isinstance(v, SimpleNamespace):
+            if isinstance(v, PfsSection):
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                self.write_nested_output(f, v, lvl + 1)
+                self._write_nested_output(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
-
             else:
-                # print(f"{lvl_prefix * lvl}{k} = {v}\n") # JUST FOR TESTING, TO BE REMOVED
-
                 v = self.catch_str_exceptions(v)
-
-                # write output
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
-    def write(self, fname_out):
-        """
-        similar to pibs write_nested_dict but able to handle pfs nested objects directly
-        Args:
-            fname_out (path): path and filename to write output to
-            lvl (int): level of indentation, add a tab \t for each
+    def write(self, filename):
+        """Write to a pfs file
+
+        Parameters
+        ----------
+        filename: str
+            Full path and filename of pfs to be created.
         """
         from mikeio import __version__ as mikeio_version
 
-        with open(fname_out, "w") as f:
-            # HEADER (TO BE MODIFIED LATER)
-            f.write(
-                f"// Created     : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-            )
+        with open(filename, "w") as f:
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f"// Created     : {now}\n")
             f.write(r"// By          : MIKE IO")
             f.write("\n")
             f.write(rf"// Version     : {mikeio_version}")
             f.write("\n\n")
             f.write(f"[{self._rootname}]\n")
 
-            self.write_nested_output(f, self.data, 1)
+            self._write_nested_output(f, self.data, 1)
 
             f.write(f"EndSect  // {self._rootname}\n")
