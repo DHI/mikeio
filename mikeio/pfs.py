@@ -191,7 +191,7 @@ class Pfs:
                     v = f"'{v}'"
 
         if isinstance(v, datetime):
-            #v = v.strftime("%Y, %#m, %#d, %#H, %M, %S") # pfs-datetime output
+            # v = v.strftime("%Y, %#m, %#d, %#H, %M, %S") # pfs-datetime output
             v = v.strftime("%Y, %-m, %-d, %-H, %-M, %-S")  # no zero padding
 
         if isinstance(v, list):

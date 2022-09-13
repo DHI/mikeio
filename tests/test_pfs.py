@@ -22,7 +22,8 @@ def test_mztoolbox():
     assert "tide1.dfs" in pfs.data.Setup.File_1.InputFile
     assert "|" in pfs.data.Setup.File_1.InputFile
 
-def assert_files_match(f1,f2):
+
+def assert_files_match(f1, f2):
     with open(f1) as file:
         file1txt = file.read()
 
@@ -30,6 +31,7 @@ def assert_files_match(f1,f2):
         file2txt = file.read()
 
     assert file1txt == file2txt
+
 
 def assert_txt_files_match(f1, f2, comment="//") -> None:
     """Checks non"""
@@ -39,7 +41,7 @@ def assert_txt_files_match(f1, f2, comment="//") -> None:
     with open(f2) as file:
         file2lines = file.read().split("\n")
 
-    for a,b in zip(file1lines, file2lines):
+    for a, b in zip(file1lines, file2lines):
         s1 = a.strip()
         s2 = b.strip()
         if s1 == "" or s1.startswith(comment):
