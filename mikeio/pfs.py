@@ -11,6 +11,11 @@ class PfsSection(SimpleNamespace):
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
 
+    # def __repr__(self):
+    #     return str(super().__repr__()).replace("namespace(", "PfsSection(")
+    # items = (f"{k}={v!r}" for k, v in self.items())
+    # return f"PfsSection({', '.join(items)})"
+
     def __getitem__(self, key):
         return getattr(self, key)
 
@@ -49,6 +54,23 @@ class PfsSection(SimpleNamespace):
 
     def items(self):
         return self.__dict__.items()
+
+    # TODO: better name
+    def update_recursive(self, key, value):
+        """Update recursively all matches of key with value"""
+        for k, v in self.items():
+            if isinstance(v, self.__class__):
+                self[k].update_recursive(key, value)
+            elif k == key:
+                self[k] = value
+
+    def find_replace(self, old_value, new_value):
+        """Update recursively all old_value with new_value"""
+        for k, v in self.items():
+            if isinstance(v, self.__class__):
+                self[k].find_replace(old_value, new_value)
+            elif self[k] == old_value:
+                self[k] = new_value
 
     def copy(self):
         # is all this necessary???
@@ -104,75 +126,82 @@ class PfsSection(SimpleNamespace):
 class Pfs:
     def __init__(self, filename, encoding="cp1252"):
 
+        self._filename = filename
+
         try:
-            self._filename = filename
-
-            _yaml = self._pfs2yaml(encoding=encoding)
+            _yaml = self._pfs2yaml(filename, encoding)
             _data = yaml.load(_yaml, Loader=yaml.CLoader)
-            targets = list(_data.keys())
-            if len(targets) == 1:
-                self._rootname = targets[0]
-                _data = _data[targets[0]]
-            else:
-                raise ValueError(
-                    "Only pfs files with a single root element are supported"
-                )
-
-            self.data = PfsSection(_data)
-            setattr(self, self._rootname, self.data)
-
-            # create aliases
-            # if hasattr(self.data, "SPECTRAL_WAVE_MODULE"):
-            #    self.SW = self.data.SPECTRAL_WAVE_MODULE
-            #    self.SW.get_outputs = self._get_sw_outputs
-
-            # if hasattr(self.data, "HYDRODYNAMIC_MODULE"):
-            #    self.HD = self.data.HYDRODYNAMIC_MODULE
-            #    self.HD.get_outputs = self._get_hd_outputs
-
         except Exception:
             raise ValueError(
                 f"""Support for PFS files in mikeio is limited
                 and the file: {filename} could not be parsed."""
             )
+        targets = list(_data.keys())
+        if len(targets) == 1:
+            self._rootname = targets[0]
+            _data = _data[targets[0]]
+        else:
+            raise ValueError("Only pfs files with a single root element are supported")
 
-    def _get_sw_outputs(self, included_only=False):
-        return self.get_outputs("SPECTRAL_WAVE_MODULE", included_only=included_only)
+        self.data = PfsSection(_data)
+        setattr(self, self._rootname, self.data)
 
-    def _get_hd_outputs(self, included_only=False):
-        return self.get_outputs("HYDRODYNAMIC_MODULE", included_only=included_only)
+        # create MIKE FM aliases
+        self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
+        self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
+        self._add_FM_alias("TR", "TRANSPORT_MODULE")
+        self._add_FM_alias("MT", "MUD_TRANSPORT_MODULE")
+        self._add_FM_alias("EL", "ECOLAB_MODULE")
+        self._add_FM_alias("ST", "SAND_TRANSPORT_MODULE")
+        self._add_FM_alias("PT", "PARTICLE_TRACKING_MODULE")
+        self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
 
-    def get_outputs(self, section, included_only=False):
+    def _add_FM_alias(self, alias: str, module: str) -> None:
+        """Add short hand alias for MIKE FM module, e.g. SW, but only if active!"""
+        if hasattr(self.data, module):
+            mode_name = f"mode_of_{module.lower()}"
+            mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
+            if mode_of > 0:
+                setattr(self, alias, self.data[module])
 
-        sub = self.data[section]["OUTPUTS"]
-        n = sub["number_of_outputs"]
+    # TOO SPECIFIC
+    # def _get_sw_outputs(self, included_only=False):
+    #     return self.get_outputs("SPECTRAL_WAVE_MODULE", included_only=included_only)
 
-        sel_keys = [
-            "file_name",
-            "include",
-            "type",
-            "format",
-            "first_time_step",
-            "last_time_step",
-            "use_end_time",
-            "time_step_frequency",
-        ]
-        rows = []
-        index = range(1, n + 1)
-        for i in range(n):
-            output = sub[f"OUTPUT_{i+1}"]
-            row = {key: output[key] for key in sel_keys}
+    # def _get_hd_outputs(self, included_only=False):
+    #     return self.get_outputs("HYDRODYNAMIC_MODULE", included_only=included_only)
 
-            rows.append(row)
-        df = pd.DataFrame(rows, index=index)
+    # def get_outputs(self, section, included_only=False):
 
-        if included_only:
-            df = df[df.include == 1]
-        return df
+    #     sub = self.data[section]["OUTPUTS"]
+    #     n = sub["number_of_outputs"]
 
-    def _pfs2yaml(self, encoding=None):
+    #     sel_keys = [
+    #         "file_name",
+    #         "include",
+    #         "type",
+    #         "format",
+    #         "first_time_step",
+    #         "last_time_step",
+    #         "use_end_time",
+    #         "time_step_frequency",
+    #     ]
+    #     rows = []
+    #     index = range(1, n + 1)
+    #     for i in range(n):
+    #         output = sub[f"OUTPUT_{i+1}"]
+    #         row = {key: output[key] for key in sel_keys}
 
-        with (open(self._filename, encoding=encoding)) as f:
+    #         rows.append(row)
+    #     df = pd.DataFrame(rows, index=index)
+
+    #     if included_only:
+    #         df = df[df.include == 1]
+    #     return df
+
+    def _pfs2yaml(self, filename, encoding=None):
+
+        with (open(filename, encoding=encoding)) as f:
             pfsstring = f.read()
 
         lines = pfsstring.split("\n")
@@ -240,7 +269,7 @@ class Pfs:
 
         return adj_line
 
-    def _parse_value(self, v):
+    def _prepare_value_for_write(self, v):
         """catch peculiarities of string formatted pfs data
 
         Args:
@@ -272,22 +301,22 @@ class Pfs:
             v = str(v)[1:-1]  # strip [] from lists
         return v
 
-    def _write_nested_output(self, f, nested_data, lvl):
+    def _write_nested_PfsSections(self, f, nested_data, lvl):
         """
-        handle pfs nested objects directly
+        write pfs nested objects
         Args:
             f (file object): file object (to write to)
-            nested_data (mikeio.pfs.NestedNamespace): object holding (modified or non-modified data)
+            nested_data (mikeio.pfs.PfsSection)
             lvl (int): level of indentation, add a tab \t for each
         """
         lvl_prefix = "   "
         for k, v in vars(nested_data).items():
             if isinstance(v, PfsSection):
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                self._write_nested_output(f, v, lvl + 1)
+                self._write_nested_PfsSections(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
             else:
-                v = self._parse_value(v)
+                v = self._prepare_value_for_write(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
     def write(self, filename):
@@ -309,6 +338,6 @@ class Pfs:
             f.write("\n\n")
             f.write(f"[{self._rootname}]\n")
 
-            self._write_nested_output(f, self.data, 1)
+            self._write_nested_PfsSections(f, self.data, 1)
 
             f.write(f"EndSect  // {self._rootname}\n")
