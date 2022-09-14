@@ -1,4 +1,6 @@
 from types import SimpleNamespace
+from typing import List
+from collections import Counter
 from datetime import datetime
 import re
 import yaml
@@ -32,6 +34,13 @@ class PfsSection(SimpleNamespace):
         if isinstance(value, dict):
             d = value.copy() if copy else value
             self.__setattr__(key, PfsSection(d))  #
+        elif isinstance(value, List) and isinstance(value[0], dict):
+            # multiple Sections with same name
+            sections = []
+            for v in value:
+                d = v.copy() if copy else v
+                sections.append(PfsSection(d))
+            self.__setattr__(key, sections)
         else:
             self.__setattr__(key, value)
 
@@ -101,14 +110,17 @@ class PfsSection(SimpleNamespace):
             n_sections = len(sections)
         else:
             n_sections = -1
+            # TODO: check that value is a PfsSection
+            sections = [k for k in self.keys() if k[-1].isdigit()]
             for k in self.keys():
                 if isinstance(k, str) and k.startswith("number_of_"):
                     n_sections = self[k]
             if n_sections == -1:
-                raise ValueError("Could not find a number_of_... keyword")
-            sections = [k for k in self.keys() if k[-1].isdigit()]
+                #raise ValueError("Could not find a number_of_... keyword")
+                n_sections = len(sections)
+
         if len(sections) == 0:
-            raise ValueError("No matching subsections found")
+            raise ValueError("No enumerated/matching subsections found")
         # if len(sections) != n:
         #     raise ValueError("Number of subsections does match")
 
@@ -129,38 +141,75 @@ class PfsSection(SimpleNamespace):
         return cls(d)
 
 
+def parse_yaml_preserving_duplicates(src):
+    class PreserveDuplicatesLoader(yaml.loader.Loader):
+        pass
+
+    def map_constructor(loader, node, deep=False):
+        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
+        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
+        key_count = Counter(keys)
+        data = {}
+        for key, val in zip(keys, vals):
+            if key_count[key] > 1:
+                if key not in data:
+                    data[key] = []
+                data[key].append(val)
+            else:
+                data[key] = val
+        return data
+
+    PreserveDuplicatesLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
+    )
+    return yaml.load(src, PreserveDuplicatesLoader)
+
+
 class Pfs:
     def __init__(self, input, encoding="cp1252", rootname=None):
+        n_roots = 1
         if isinstance(input, PfsSection):
             root_section = input
         elif isinstance(input, dict):
             d = PfsSection(input)
             root_section = PfsSection(d)
         else:
-            d, rootname = self._read_pfs_file_to_dict(input, encoding)
-            root_section = PfsSection(d)
+            d = self._read_pfs_file_to_dict(input, encoding)
+            rootname = list(d.keys())
+            if len(rootname) == 1:
+                rootname = rootname[0]
+                root_section = PfsSection(d[rootname])
+            else:
+                n_roots = len(rootname)
+                root_section = [PfsSection(d[k]) for k in rootname]
+
         self.data = root_section
         self._rootname = rootname
         if rootname is not None:
-            setattr(self, self._rootname, self.data)
+            if n_roots == 1:
+                setattr(self, rootname, self.data)
+            else:
+                for n, section in zip(rootname, root_section):
+                    setattr(self, n, section)
         self._add_all_FM_aliases()
 
     def _read_pfs_file_to_dict(self, filename, encoding):
         self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
-            d = yaml.load(yml, Loader=yaml.CLoader)
+            # d = yaml.load(yml, Loader=yaml.CLoader)
+            d = parse_yaml_preserving_duplicates(yml)
         except Exception:
             raise ValueError(
                 f"""Support for PFS files in mikeio is limited
                 and the file: {filename} could not be parsed."""
             )
-        root_keys = list(d.keys())
-        if len(root_keys) != 1:
-            raise ValueError("Only pfs files with a single root element are supported")
+        # root_keys = list(d.keys())
+        # if len(root_keys) != 1:
+        #    raise ValueError("Only pfs files with a single root element are supported")
 
-        _rootname = root_keys[0]
-        return d[_rootname], _rootname
+        # _rootname = root_keys[0]
+        return d  # , root_keys
 
     def _add_all_FM_aliases(self) -> None:
         """create MIKE FM module aliases"""
@@ -180,41 +229,6 @@ class Pfs:
             mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
             if mode_of > 0:
                 setattr(self, alias, self.data[module])
-
-    # TOO SPECIFIC
-    # def _get_sw_outputs(self, included_only=False):
-    #     return self.get_outputs("SPECTRAL_WAVE_MODULE", included_only=included_only)
-
-    # def _get_hd_outputs(self, included_only=False):
-    #     return self.get_outputs("HYDRODYNAMIC_MODULE", included_only=included_only)
-
-    # def get_outputs(self, section, included_only=False):
-
-    #     sub = self.data[section]["OUTPUTS"]
-    #     n = sub["number_of_outputs"]
-
-    #     sel_keys = [
-    #         "file_name",
-    #         "include",
-    #         "type",
-    #         "format",
-    #         "first_time_step",
-    #         "last_time_step",
-    #         "use_end_time",
-    #         "time_step_frequency",
-    #     ]
-    #     rows = []
-    #     index = range(1, n + 1)
-    #     for i in range(n):
-    #         output = sub[f"OUTPUT_{i+1}"]
-    #         row = {key: output[key] for key in sel_keys}
-
-    #         rows.append(row)
-    #     df = pd.DataFrame(rows, index=index)
-
-    #     if included_only:
-    #         df = df[df.include == 1]
-    #     return df
 
     def _pfs2yaml(self, filename, encoding=None) -> str:
 
@@ -328,7 +342,11 @@ class Pfs:
         """
         lvl_prefix = "   "
         for k, v in vars(nested_data).items():
-            if isinstance(v, PfsSection):
+            if isinstance(v, List) and isinstance(v[0], PfsSection):
+                # duplicate sections
+                for subv in v:
+                    self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
+            elif isinstance(v, PfsSection):
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 self._write_nested_PfsSections(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
