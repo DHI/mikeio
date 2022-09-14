@@ -116,7 +116,7 @@ class PfsSection(SimpleNamespace):
                 if isinstance(k, str) and k.startswith("number_of_"):
                     n_sections = self[k]
             if n_sections == -1:
-                #raise ValueError("Could not find a number_of_... keyword")
+                # raise ValueError("Could not find a number_of_... keyword")
                 n_sections = len(sections)
 
         if len(sections) == 0:
