@@ -286,6 +286,10 @@ class Pfs:
             if s[0] == "[":
                 s = s.replace("[", "")
 
+                # This could be an option to create always create a list to handle multiple identical root elements
+                # if self._level == 0:
+                #    s = f"- {s}"
+
             if s[-1] == "]":
                 s = s.replace("]", ":")
 
