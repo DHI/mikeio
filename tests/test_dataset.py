@@ -596,7 +596,7 @@ def test_interp_time():
     assert dsi[0].shape == (73, 10, 3)
 
     dsi2 = ds.interp_time(freq="2H")
-    assert dsi2.timestep == 2*3600
+    assert dsi2.timestep == 2 * 3600
 
 
 def test_interp_time_to_other_dataset():
@@ -1323,6 +1323,21 @@ def test_concat_by_time_2():
     assert len(dsall) == 8
     assert ds4.n_timesteps == 97
     assert ds4.is_equidistant
+
+
+def test_renamed_dataset_has_updated_attributes(ds1: mikeio.Dataset):
+    assert hasattr(ds1, "Foo")
+    assert isinstance(ds1.Foo, mikeio.DataArray)
+    ds2 = ds1.rename(dict(Foo="Baz"))
+    assert not hasattr(ds2, "Foo")
+    assert hasattr(ds2, "Baz")
+    assert isinstance(ds2.Baz, mikeio.DataArray)
+
+    # inplace version
+    ds1.rename(dict(Foo="Baz"), inplace=True)
+    assert not hasattr(ds1, "Foo")
+    assert hasattr(ds1, "Baz")
+    assert isinstance(ds1.Baz, mikeio.DataArray)
 
 
 def test_merge_by_item():
