@@ -7,16 +7,29 @@ import yaml
 import pandas as pd
 
 
+def read_pfs(filename, encoding="cp1252"):
+    """Read a pfs file to a Pfs object for further analysis/manipulation
+
+    Parameters
+    ----------
+    filename: str or Path
+        File name including full path to the pfs file.
+    encoding: str, optional
+        How is the pfs file encoded? By default 'cp1252'
+
+    Returns
+    -------
+    mikeio.Pfs
+        Pfs object which can be used for inspection, manipulation and writing
+    """
+    return Pfs(filename, encoding=encoding)
+
+
 class PfsSection(SimpleNamespace):
     def __init__(self, dictionary, **kwargs):
         super().__init__(**kwargs)
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
-
-    # def __repr__(self):
-    #     return str(super().__repr__()).replace("namespace(", "PfsSection(")
-    # items = (f"{k}={v!r}" for k, v in self.items())
-    # return f"PfsSection({', '.join(items)})"
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -120,9 +133,8 @@ class PfsSection(SimpleNamespace):
                 n_sections = len(sections)
 
         if len(sections) == 0:
-            raise ValueError("No enumerated/matching subsections found")
-        # if len(sections) != n:
-        #     raise ValueError("Number of subsections does match")
+            prefix_txt = "" if prefix is None else f"(starting with '{prefix}') "
+            raise ValueError(f"No enumerated subsections {prefix_txt}found")
 
         prefix = sections[0][:-1]
         res = []
@@ -133,6 +145,7 @@ class PfsSection(SimpleNamespace):
 
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame, prefix: str) -> "PfsSection":
+        """Create a PfsSection from a DataFrame"""
         d = {}
         for idx in df.index:
             key = prefix + str(idx)
@@ -166,6 +179,23 @@ def parse_yaml_preserving_duplicates(src):
 
 
 class Pfs:
+    """Create a Pfs object for reading, writing and manipulating pfs files
+
+    Parameters
+    ----------
+    input: dict, PfsSection, str or Path
+        Either a file name (including full path) to the pfs file
+        to be read or dictionary-like structure later to be written
+        to a pfs file.
+    encoding: str, optional
+        How is the pfs file encoded? By default cp1252
+    rootname: str, optional
+        If the input is dictionary or PfsSection object the
+        name of the root element can be specified
+        If the input is a file the rootname is read from the file,
+        by default None.
+    """
+
     def __init__(self, input, encoding="cp1252", rootname=None):
         n_roots = 1
         if isinstance(input, PfsSection):
@@ -355,12 +385,16 @@ class Pfs:
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
     def write(self, filename, rootname: str = None):
-        """Write to a pfs file
+        """Write object to a pfs file
 
         Parameters
         ----------
         filename: str
             Full path and filename of pfs to be created.
+        rootname: str, optional
+            If the Pfs object was not created by reading an existing
+            pfs file, then its root element may not have a name.
+            It can be provided here. By default None.
         """
         from mikeio import __version__ as mikeio_version
 
