@@ -338,9 +338,8 @@ def test_encoding_linux():
         mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None)
 
 
-# def test_multiple_roots():
-#    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
-#    pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
-#
-#    # What to return from this file List[Pfs]?
-#    # assert pfs[0].t1_t0.setup.X == 0
+def test_multiple_roots():
+    #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
+    pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
+    assert pfs.data[0].t1_t0.Setup.X == 0
+    assert pfs.data[1].t1_t0.Setup.X == 2

@@ -204,17 +204,24 @@ class Pfs:
             d = PfsSection(input)
             root_section = PfsSection(d)
         else:
-            d = self._read_pfs_file_to_dict(input, encoding)
-            rootname = list(d.keys())
-            if len(rootname) == 1:
-                rootname = rootname[0]
-                root_section = PfsSection(d[rootname])
+            roots = self._read_pfs_file_to_list(input, encoding)
+            if len(roots) > 1:
+                root_section = [PfsSection(d) for d in roots]
+                self.data = root_section
             else:
-                n_roots = len(rootname)
-                root_section = [PfsSection(d[k]) for k in rootname]
+                d = roots[0]
 
-        self.data = root_section
-        self._rootname = rootname
+                rootname = list(d.keys())
+                if len(rootname) == 1:
+                    rootname = rootname[0]
+                    root_section = PfsSection(d[rootname])
+                else:
+                    n_roots = len(rootname)
+                    root_section = [PfsSection(d[k]) for k in rootname]
+
+                self.data = root_section
+                self._rootname = rootname
+
         if rootname is not None:
             if n_roots == 1:
                 setattr(self, rootname, self.data)
@@ -223,7 +230,7 @@ class Pfs:
                     setattr(self, n, section)
         self._add_all_FM_aliases()
 
-    def _read_pfs_file_to_dict(self, filename, encoding):
+    def _read_pfs_file_to_list(self, filename, encoding):
         self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
@@ -279,16 +286,18 @@ class Pfs:
         return "\n".join(output)
 
     def _parse_line(self, line: str) -> str:
+        section_header = False
         s = line.strip()
         s = re.sub(r"\s*//.*", "", s)  # remove comments
 
         if len(s) > 0:
             if s[0] == "[":
+                section_header = True
                 s = s.replace("[", "")
 
                 # This could be an option to create always create a list to handle multiple identical root elements
-                # if self._level == 0:
-                #    s = f"- {s}"
+                if self._level == 0:
+                    s = f"- {s}"
 
             if s[-1] == "]":
                 s = s.replace("]", ":")
@@ -324,10 +333,13 @@ class Pfs:
             s = ""
 
         ws = " " * 2 * self._level
+        if self._level > 0:
+            ws = "  " + ws  # TODO
         adj_line = ws + s
 
         s = line.strip()
-        if len(s) > 0 and s[0] == "[":
+        # if len(s) > 0 and s[0] == "[":
+        if section_header:
             self._level += 1
         if "EndSect" in line:
             self._level -= 1
