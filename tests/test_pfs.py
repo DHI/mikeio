@@ -195,6 +195,15 @@ def test_basic():
     assert data.POINT_1.y == 50
 
 
+def test_ecolab():
+    pfs = mikeio.Pfs("tests/testdata/minimal.ecolab")
+    assert pfs.ECO_LAB_SETUP.MISC.DESCRIPTION == "Miscellaneous Description"
+    assert pfs.ECO_LAB_SETUP.PROCESSES.PROCESS_1.SCOPE == "WC"
+
+    d1 = pfs.ECO_LAB_SETUP.DERIVED_OUTPUTS.DERIVED_OUTPUT_1
+    assert d1.SPATIAL_VARIATION == "HORISONTAL_AND_VERTICAL"
+
+
 def test_mztoolbox():
     pfs = mikeio.Pfs("tests/testdata/concat.mzt")
     assert "tide1.dfs" in pfs.data.Setup.File_1.InputFile

@@ -1,0 +1,146 @@
+// Created     : 2022-09-14 10:5:4
+// DLL         : C:\Program Files (x86)\DHI\MIKE Zero\2022\bin\x64\pfs2004.dll
+// Version     : 20.1.0.16092
+// type = 2
+
+[ECO_LAB_SETUP]
+   DESCRIPTION = ''
+   ONLINE_HELP = ''
+   DOCUMENTATION = ''
+   [MISC]
+      DESCRIPTION = 'Miscellaneous Description'
+      ONLINE_HELP = 'Miscellaneous Online help'
+      DOCUMENTATION = 'Miscellaneous Documentation'
+      ECOLAB_VERSION = 2022.001
+      PARSER_VERSION = 2022.001
+      DOCUMENT_REVISION = 4
+      RANDSEED = 17245
+      DEBUG_LEVEL = 0
+      DEBUG_LOG = ''
+      RANDOM_PARTICLE_DIR = 'NO'
+      BUILD_SPATIAL_TREE = 'NO'
+      CHECKSUM = '0'
+      OPTIMISE = 'YES'
+      TRIGONOMETRICS = 'Degree'
+      [PH_SETTINGS]
+         MAIN_OPTION = 'User defined'
+         CONSTANT_SET = 4
+         KSO4_OPTION = 1
+         BORAT_OPTION = 1
+         PH_SCALE = 2
+      EndSect  // PH_SETTINGS
+
+   EndSect  // MISC
+
+   [STATE_VARIABLES]
+      DESCRIPTION = ''
+      ONLINE_HELP = ''
+      DOCUMENTATION = ''
+      [STATE_VARIABLE_1]
+         SYMBOL = 'StateVariable_1'
+         ID = 1
+         DESCRIPTION = 'StateVariable_1 Description'
+         ONLINE_HELP = 'StateVariable_1 Online help'
+         DOCUMENTATION = ''
+         EUM_TYPE = 999
+         EUM_UNIT = 0
+         SCOPE = 'WC'
+         TRANSPORT = 'ADVECTION_DISPERSION'
+         UNIT = 'undefined'
+         DEFAULT_VALUE = 0.0
+         MIN_VALUE = 0.0
+         MAX_VALUE = 100.0
+      EndSect  // STATE_VARIABLE_1
+
+      [STATE_VARIABLE_2]
+         SYMBOL = 'StateVariable_2'
+         ID = 2
+         DESCRIPTION = 'StateVariable_2 Description'
+         ONLINE_HELP = 'StateVariable_2 Online help'
+         DOCUMENTATION = 'StateVariable_2 Documentation'
+         EUM_TYPE = 999
+         EUM_UNIT = 0
+         SCOPE = 'WC'
+         TRANSPORT = 'ADVECTION_DISPERSION'
+         UNIT = 'undefined'
+         DEFAULT_VALUE = 0.0
+         MIN_VALUE = 0.0
+         MAX_VALUE = 100.0
+      EndSect  // STATE_VARIABLE_2
+
+   EndSect  // STATE_VARIABLES
+
+   [CONSTANTS]
+      DESCRIPTION = ''
+      ONLINE_HELP = ''
+      DOCUMENTATION = ''
+   EndSect  // CONSTANTS
+
+   [FORCINGS]
+      DESCRIPTION = ''
+      ONLINE_HELP = ''
+      DOCUMENTATION = ''
+   EndSect  // FORCINGS
+
+   [AUXILIARY_VARIABLES]
+      DESCRIPTION = ''
+      ONLINE_HELP = ''
+      DOCUMENTATION = ''
+   EndSect  // AUXILIARY_VARIABLES
+
+   [PROCESSES]
+      DESCRIPTION = ''
+      ONLINE_HELP = ''
+      DOCUMENTATION = ''
+      [PROCESS_1]
+         SYMBOL = 'Process_1'
+         ID = 3
+         DESCRIPTION = 'Process_1 Description'
+         ONLINE_HELP = 'Process_1 Online help'
+         DOCUMENTATION = ''
+         EUM_TYPE = 999
+         EUM_UNIT = 0
+         OUTPUT = 'YES'
+         PROCESS_TYPE = 'TRANSFORMATION'
+         SCOPE = 'WC'
+         SPATIAL_VARIATION = 'HORISONTAL_AND_VERTICAL'
+         UNIT = 'undefined'
+         EXPRESSION = '"MAX(StateVariable_1, StateVariable_2)"'
+      EndSect  // PROCESS_1
+
+   EndSect  // PROCESSES
+
+   [DERIVED_OUTPUTS]
+      DESCRIPTION = ''
+      ONLINE_HELP = ''
+      DOCUMENTATION = ''
+      [DERIVED_OUTPUT_1]
+         ID = 4
+         DESCRIPTION = 'TOTALSTUFF'
+         ONLINE_HELP = 'Derived Output 1 Online help'
+         DOCUMENTATION = ''
+         EUM_TYPE = 999
+         EUM_UNIT = 0
+         SCOPE = 'NOT_SPECIFIED'
+         SPATIAL_VARIATION = 'HORISONTAL_AND_VERTICAL'
+         UNIT = 'undefined'
+         FORMAT = 'INSTANTANEOUS'
+         EXPRESSION = '"StateVariable_1 + StateVariable_2"'
+      EndSect  // DERIVED_OUTPUT_1
+
+   EndSect  // DERIVED_OUTPUTS
+
+   [STATE_VARIABLE_EQUATIONS]
+      [STATE_VARIABLE_EQUATION_1]
+         StateVariable_1 = '"0"'
+      EndSect  // STATE_VARIABLE_EQUATION_1
+
+      [STATE_VARIABLE_EQUATION_2]
+         StateVariable_2 = '"0"'
+      EndSect  // STATE_VARIABLE_EQUATION_2
+
+   EndSect  // STATE_VARIABLE_EQUATIONS
+
+EndSect  // ECO_LAB_SETUP
+
+
