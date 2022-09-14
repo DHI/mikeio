@@ -673,8 +673,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             da = ds._data_vars.pop(old_name)
             da.name = new_name
             ds._data_vars[new_name] = da
-            self._del_name_attr(old_name)
-            self._set_name_attr(new_name, da)
+            ds._del_name_attr(old_name)
+            ds._set_name_attr(new_name, da)
 
         return ds
 
