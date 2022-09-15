@@ -223,6 +223,7 @@ class Pfs:
         elif isinstance(input, dict):
             sections = PfsSection(input)
         elif isinstance(input, (List, Tuple)):
+            n_targets = len(input)
             if isinstance(input[0], PfsSection):
                 sections = input
             elif isinstance(input[0], dict):
@@ -231,7 +232,6 @@ class Pfs:
                 raise ValueError("List input must contain either dict or PfsSection")
         else:
             targets = self._read_pfs_file_to_dict(input, encoding)
-            print(targets)
             if len(targets) > 1:
                 # multiple identical root elements
                 sections = [PfsSection(list(d.values())[0]) for d in targets]
@@ -241,11 +241,10 @@ class Pfs:
                 d = targets[0]
 
                 target_names = list(d.keys())
+                n_targets = len(target_names)
                 if len(target_names) == 1:
-                    # target_names = target_names[0]
                     sections = PfsSection(d[target_names[0]])
                 else:
-                    n_targets = len(target_names)
                     sections = [PfsSection(d[k]) for k in target_names]
 
         self.data = sections
@@ -255,25 +254,27 @@ class Pfs:
             if n_targets == 1:
                 setattr(self, target_names[0], self.data)
             else:
-                target_key_count = Counter(self.target_names)
-                d = dict()
-                for n, target in zip(self.target_names, self._targets_as_list):
-                    if target_key_count[n] > 1:
-                        if n not in d:
-                            d[n] = []
-                        d[n].append(target)
-                    else:
-                        d[n] = target
+                d = self._targets_as_dict
                 for n, section in d.items():
                     setattr(self, n, section)
-
-                # for n, section in zip(target_names, sections):
-                #     setattr(self, n, section)
         self._add_all_FM_aliases()
 
     @property
     def _targets_as_list(self):
         return [self.data] if isinstance(self.data, PfsSection) else self.data
+
+    @property
+    def _targets_as_dict(self):
+        target_key_count = Counter(self.target_names)
+        d = dict()
+        for n, target in zip(self.target_names, self._targets_as_list):
+            if target_key_count[n] > 1:
+                if n not in d:
+                    d[n] = []
+                d[n].append(target)
+            else:
+                d[n] = target
+        return d
 
     @property
     def n_targets(self):
@@ -316,7 +317,7 @@ class Pfs:
         return "\n".join(out)
 
     def to_dict(self):
-        """Convert to dictionary"""
+        """Convert to nested dictionary"""
         d = dict()
         target_key_count = Counter(self.target_names)
         for n, target in zip(self.target_names, self._targets_as_list):
