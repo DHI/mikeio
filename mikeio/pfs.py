@@ -1,8 +1,9 @@
 from types import SimpleNamespace
-from typing import List
+from typing import List, Tuple
 from collections import Counter
 from datetime import datetime
 import re
+import warnings
 import yaml
 import pandas as pd
 
@@ -158,7 +159,7 @@ def parse_yaml_preserving_duplicates(src):
     class PreserveDuplicatesLoader(yaml.loader.Loader):
         pass
 
-    def map_constructor(loader, node, deep=False):
+    def map_constructor_duplicates(loader, node, deep=False):
         keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
         vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
         key_count = Counter(keys)
@@ -172,8 +173,26 @@ def parse_yaml_preserving_duplicates(src):
                 data[key] = val
         return data
 
+    def map_constructor_duplicate_sections(loader, node, deep=False):
+        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
+        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
+        key_count = Counter(keys)
+        data = {}
+        for key, val in zip(keys, vals):
+            if key_count[key] > 1:
+                if isinstance(val, dict):
+                    if key not in data:
+                        data[key] = []
+                    data[key].append(val)
+                else:
+                    warnings.warn(f"Keyword {key} defined multiple times. Value: {val}")
+            else:
+                data[key] = val
+        return data
+
     PreserveDuplicatesLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG, map_constructor
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        map_constructor_duplicate_sections,
     )
     return yaml.load(src, PreserveDuplicatesLoader)
 
@@ -201,13 +220,21 @@ class Pfs:
         if isinstance(input, PfsSection):
             root_section = input
         elif isinstance(input, dict):
-            d = PfsSection(input)
-            root_section = PfsSection(d)
+            root_section = PfsSection(input)
+        elif isinstance(input, (List, Tuple)):
+            if isinstance(input[0], PfsSection):
+                root_section = input
+            elif isinstance(input[0], dict):
+                root_section = [PfsSection(d) for d in input]
+            else:
+                raise ValueError("List input must contain either dict or PfsSection")
         else:
-            roots = self._read_pfs_file_to_list(input, encoding)
+            roots = self._read_pfs_file_to_dict(input, encoding)
             if len(roots) > 1:
+                # multiple identical root elements
                 root_section = [PfsSection(d) for d in roots]
-                self.data = root_section
+                rootname = [list(d.keys())[0] for d in roots]
+                n_roots = len(rootname)
             else:
                 d = roots[0]
 
@@ -219,8 +246,8 @@ class Pfs:
                     n_roots = len(rootname)
                     root_section = [PfsSection(d[k]) for k in rootname]
 
-                self.data = root_section
-                self._rootname = rootname
+        self._rootname = rootname
+        self.data = root_section
 
         if rootname is not None:
             if n_roots == 1:
@@ -230,23 +257,15 @@ class Pfs:
                     setattr(self, n, section)
         self._add_all_FM_aliases()
 
-    def _read_pfs_file_to_list(self, filename, encoding):
+    def _read_pfs_file_to_dict(self, filename, encoding):
         self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
             # d = yaml.load(yml, Loader=yaml.CLoader)
             d = parse_yaml_preserving_duplicates(yml)
-        except Exception:
-            raise ValueError(
-                f"""Support for PFS files in mikeio is limited
-                and the file: {filename} could not be parsed."""
-            )
-        # root_keys = list(d.keys())
-        # if len(root_keys) != 1:
-        #    raise ValueError("Only pfs files with a single root element are supported")
-
-        # _rootname = root_keys[0]
-        return d  # , root_keys
+        except Exception as e:
+            raise ValueError(f"{filename} could not be parsed. " + str(e))
+        return d
 
     def _add_all_FM_aliases(self) -> None:
         """create MIKE FM module aliases"""
@@ -436,8 +455,8 @@ class Pfs:
             f.write("\n")
             f.write(rf"// Version     : {mikeio_version}")
             f.write("\n\n")
+
+            # TODO: handle multiple root elements
             f.write(f"[{rootname}]\n")
-
             self._write_nested_PfsSections(f, self.data, 1)
-
             f.write(f"EndSect  // {rootname}\n")
