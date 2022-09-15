@@ -355,11 +355,12 @@ class Pfs:
         Returns:
             v: modified value
         """
-        # some crude checks and corrections
+        # some crude checks and corrections       
         if isinstance(v, str):
             try:
                 # catch scientific notation
                 v = float(v)
+                
             except ValueError:
                 # add either '' or || as pre- and suffix to strings depending on path definition
                 if v == "":
@@ -368,13 +369,16 @@ class Pfs:
                     v = f"{v}"
                 else:
                     v = f"'{v}'"
-
-        if isinstance(v, datetime):
+                    
+        elif isinstance(v, bool):
+            v = str(v).lower() # stick to MIKE lowercase bool notation
+            
+        elif isinstance(v, datetime):
             # v = v.strftime("%Y, %#m, %#d, %#H, %M, %S") # pfs-datetime output
             # v = v.strftime("%Y, %-m, %-d, %-H, %-M, %-S")  # no zero padding
             v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
 
-        if isinstance(v, list):
+        elif isinstance(v, list):
             v = str(v)[1:-1]  # strip [] from lists
         return v
 
