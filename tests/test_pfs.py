@@ -13,6 +13,7 @@ def d1():
         lst=[0.3, 0.7],
         SMILE=r"|file\path.dfs|",
         dt=datetime(1979, 2, 3, 3, 5, 0),
+        empty=dict(),
     )
 
 
@@ -27,7 +28,7 @@ def df1():
 def test_pfssection(d1):
     sct = mikeio.PfsSection(d1)
     assert sct.key1 == 1
-    assert list(sct.keys()) == ["key1", "lst", "SMILE", "dt"]
+    assert list(sct.keys()) == ["key1", "lst", "SMILE", "dt", "empty"]
     assert sct["SMILE"] == r"|file\path.dfs|"
     assert len(sct.lst) == 2
     assert sct.dt == datetime(1979, 2, 3, 3, 5, 0)
@@ -181,6 +182,16 @@ def test_pfssection_find_replace(d1):
     assert sct.FILE_6.lst == [0.3, 0.7]
     sct.find_replace([0.3, 0.7], [0.11, 0.22, 0.33])
     assert sct.FILE_6.lst == [0.11, 0.22, 0.33]
+
+
+def test_pfssection_write(d1, tmpdir):
+    sct = mikeio.PfsSection(d1)
+    pfs = sct.to_Pfs(rootname="root")
+    fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
+    pfs.write(fn)
+
+    pfs2 = mikeio.Pfs(fn)
+    assert pfs2.data.key1 == sct.key1
 
 
 def test_basic():
