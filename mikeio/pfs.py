@@ -392,13 +392,13 @@ class Pfs:
         """
         lvl_prefix = "   "
         for k, v in vars(nested_data).items():
-            
-            # check for empty sections                    
-            NoneType = type(None)            
+
+            # check for empty sections
+            NoneType = type(None)
             if isinstance(v, NoneType):
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")                
-            
+                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
+
             elif isinstance(v, List) and isinstance(v[0], PfsSection):
                 # duplicate sections
                 for subv in v:
