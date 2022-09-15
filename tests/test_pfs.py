@@ -343,3 +343,9 @@ def test_multiple_roots():
     pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
     assert pfs.data[0].t1_t0.Setup.X == 0
     assert pfs.data[1].t1_t0.Setup.X == 2
+
+
+def test_illegal_pfs():
+    fn = "tests/testdata/pfs/illegal.pfs"
+    with pytest.raises(ValueError, match="]]"):
+        mikeio.Pfs(fn)

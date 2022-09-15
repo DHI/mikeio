@@ -1,0 +1,15 @@
+[BAD]
+
+  inputfile = |cmems_ukns_20190923.nc|
+  ]]fill = false
+
+  [POINT_1]
+    x = -12
+    y = 50
+   EndSect  // POINT_1
+
+   [POINT_2]
+     x = -12
+     y = 60
+    EndSect  // POINT_2
+EndSect
