@@ -103,11 +103,12 @@ class PfsSection(SimpleNamespace):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
-    def to_Pfs(self, rootname: str = None):
-        return Pfs(self, rootname=rootname)
+    def to_Pfs(self, target_name: str = None):
+        target_names = None if target_name is None else [target_name]
+        return Pfs(self, target_names=target_names)
 
-    def to_file(self, filename, rootname: str) -> None:
-        Pfs(self, rootname=rootname).write(filename)
+    def to_file(self, filename, target_name: str) -> None:
+        Pfs(self, target_names=[target_name]).write(filename)
 
     def to_dict(self):
         d = self.__dict__.copy()
@@ -208,54 +209,124 @@ class Pfs:
         to a pfs file.
     encoding: str, optional
         How is the pfs file encoded? By default cp1252
-    rootname: str, optional
+    target_names: List[str], optional
         If the input is dictionary or PfsSection object the
-        name of the root element can be specified
-        If the input is a file the rootname is read from the file,
+        name of the root element (=target) can be specified
+        If the input is a file the target_names are read from the file,
         by default None.
     """
 
-    def __init__(self, input, encoding="cp1252", rootname=None):
-        n_roots = 1
+    def __init__(self, input, encoding="cp1252", target_names=None):
+        n_targets = 1
         if isinstance(input, PfsSection):
-            root_section = input
+            sections = input
         elif isinstance(input, dict):
-            root_section = PfsSection(input)
+            sections = PfsSection(input)
         elif isinstance(input, (List, Tuple)):
             if isinstance(input[0], PfsSection):
-                root_section = input
+                sections = input
             elif isinstance(input[0], dict):
-                root_section = [PfsSection(d) for d in input]
+                sections = [PfsSection(d) for d in input]
             else:
                 raise ValueError("List input must contain either dict or PfsSection")
         else:
-            roots = self._read_pfs_file_to_dict(input, encoding)
-            if len(roots) > 1:
+            targets = self._read_pfs_file_to_dict(input, encoding)
+            print(targets)
+            if len(targets) > 1:
                 # multiple identical root elements
-                root_section = [PfsSection(d) for d in roots]
-                rootname = [list(d.keys())[0] for d in roots]
-                n_roots = len(rootname)
+                sections = [PfsSection(list(d.values())[0]) for d in targets]
+                target_names = [list(d.keys())[0] for d in targets]
+                n_targets = len(target_names)
             else:
-                d = roots[0]
+                d = targets[0]
 
-                rootname = list(d.keys())
-                if len(rootname) == 1:
-                    rootname = rootname[0]
-                    root_section = PfsSection(d[rootname])
+                target_names = list(d.keys())
+                if len(target_names) == 1:
+                    # target_names = target_names[0]
+                    sections = PfsSection(d[target_names[0]])
                 else:
-                    n_roots = len(rootname)
-                    root_section = [PfsSection(d[k]) for k in rootname]
+                    n_targets = len(target_names)
+                    sections = [PfsSection(d[k]) for k in target_names]
 
-        self._rootname = rootname
-        self.data = root_section
+        self.data = sections
+        self._target_names = target_names
 
-        if rootname is not None:
-            if n_roots == 1:
-                setattr(self, rootname, self.data)
+        if target_names is not None:
+            if n_targets == 1:
+                setattr(self, target_names[0], self.data)
             else:
-                for n, section in zip(rootname, root_section):
+                target_key_count = Counter(self.target_names)
+                d = dict()
+                for n, target in zip(self.target_names, self._targets_as_list):
+                    if target_key_count[n] > 1:
+                        if n not in d:
+                            d[n] = []
+                        d[n].append(target)
+                    else:
+                        d[n] = target
+                for n, section in d.items():
                     setattr(self, n, section)
+
+                # for n, section in zip(target_names, sections):
+                #     setattr(self, n, section)
         self._add_all_FM_aliases()
+
+    @property
+    def _targets_as_list(self):
+        return [self.data] if isinstance(self.data, PfsSection) else self.data
+
+    @property
+    def n_targets(self):
+        if self.data is None:
+            return 0
+        elif isinstance(self.data, PfsSection):
+            return 1
+        else:
+            return len(self.data)
+
+    @property
+    def target_names(self):
+        if self._target_names is None:
+            return [f"TARGET_{j+1}" for j in range(self.n_targets)]
+        else:
+            return self._target_names
+
+    @target_names.setter
+    def target_names(self, new_names):
+        new_names = [new_names] if isinstance(new_names, str) else new_names
+        if len(new_names) != self.n_targets:
+            raise ValueError(
+                f"Number of target names must match number of targets ({self.n_targets})"
+            )
+        # TODO: update attr: setattr(self, new, section), delattr(self, old)
+        self._target_names = new_names
+
+    @property
+    def is_unique(self):
+        """Are the target (root) names unique?"""
+        return len(set(self.target_names)) == len(self.target_names)
+
+    def __repr__(self) -> str:
+        out = ["<mikeio.Pfs>"]
+        for n, sct in zip(self.target_names, self._targets_as_list):
+            if len(str(sct)) < 50:
+                out.append(f"{n}: {str(sct)}")
+            else:
+                out.append(f"{n}: {str(sct)[:45]}...")
+        return "\n".join(out)
+
+    def to_dict(self):
+        """Convert to dictionary"""
+        d = dict()
+        target_key_count = Counter(self.target_names)
+        for n, target in zip(self.target_names, self._targets_as_list):
+            if target_key_count[n] > 1:
+                if n not in d:
+                    d[n] = []
+                d[n].append(target.to_dict())
+            else:
+                d[n] = target.to_dict()
+        return d
 
     def _read_pfs_file_to_dict(self, filename, encoding):
         self._filename = filename
@@ -430,23 +501,22 @@ class Pfs:
                 v = self._prepare_value_for_write(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
-    def write(self, filename, rootname: str = None):
+    def write(self, filename, target_names=None):
         """Write object to a pfs file
 
         Parameters
         ----------
         filename: str
             Full path and filename of pfs to be created.
-        rootname: str, optional
+        target_names: List[str], optional
             If the Pfs object was not created by reading an existing
-            pfs file, then its root element may not have a name.
+            pfs file, then its root elements (targets) may not have a name.
             It can be provided here. By default None.
         """
         from mikeio import __version__ as mikeio_version
 
-        rootname = self._rootname if rootname is None else rootname
-        if rootname is None:
-            raise ValueError("Name of root element has not been provided")
+        if target_names is not None:
+            self.target_names = target_names
 
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -456,7 +526,8 @@ class Pfs:
             f.write(rf"// Version     : {mikeio_version}")
             f.write("\n\n")
 
-            # TODO: handle multiple root elements
-            f.write(f"[{rootname}]\n")
-            self._write_nested_PfsSections(f, self.data, 1)
-            f.write(f"EndSect  // {rootname}\n")
+            for name, target in zip(self.target_names, self._targets_as_list):
+                print(f"{name}: {target}")
+                f.write(f"[{name}]\n")
+                self._write_nested_PfsSections(f, target, 1)
+                f.write(f"EndSect  // {name}\n\n")

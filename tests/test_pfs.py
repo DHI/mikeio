@@ -186,7 +186,7 @@ def test_pfssection_find_replace(d1):
 
 def test_pfssection_write(d1, tmpdir):
     sct = mikeio.PfsSection(d1)
-    pfs = sct.to_Pfs(rootname="root")
+    pfs = sct.to_Pfs(target_name="root")
     fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
     pfs.write(fn)
 
@@ -352,8 +352,14 @@ def test_encoding_linux():
 def test_multiple_roots():
     #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
-    assert pfs.data[0].t1_t0.Setup.X == 0
-    assert pfs.data[1].t1_t0.Setup.X == 2
+    # assert pfs.data[0].t1_t0.Setup.X == 0
+    # assert pfs.data[1].t1_t0.Setup.X == 2
+    assert pfs.data[0].Setup.X == 0
+    assert pfs.data[1].Setup.X == 2
+    assert pfs.t1_t0[0].Setup.X == 0
+    assert pfs.t1_t0[1].Setup.X == 2
+    assert pfs.target_names == ["t1_t0", "t1_t0"]
+    assert pfs.n_targets == 2
 
 
 def test_non_unique_keywords():
