@@ -345,6 +345,15 @@ def test_multiple_roots():
     assert pfs.data[1].t1_t0.Setup.X == 2
 
 
+def test_non_unique_keywords():
+    fn = "tests/testdata/pfs/nonunique.pfs"
+    with pytest.warns(match="Keyword z_min defined multiple times"):
+        pfs = mikeio.Pfs(fn)
+
+    assert len(pfs.BoundaryExtractor.POINT_1) == 2
+    assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
+
+
 def test_illegal_pfs():
     fn = "tests/testdata/pfs/illegal.pfs"
     with pytest.raises(ValueError, match="]]"):
