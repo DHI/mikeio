@@ -272,8 +272,8 @@ def test_sw():
     assert data.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_directions == 16
 
     # use shorthand alias SW instead of SPECTRAL_WAVE_MODULE
-    # assert data.SW.SPECTRAL.number_of_frequencies == 25
-    # assert data.SW.WIND.format == 1
+    assert pfs.SW.SPECTRAL.number_of_frequencies == 25
+    assert pfs.SW.WIND.format == 1
 
     assert data.TIME.number_of_time_steps == 450
 
@@ -288,23 +288,10 @@ def test_pfssection_to_dataframe():
     assert df.shape[0] == 4
 
 
-# def test_sw_outputs():
-
-#     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
-#     df = pfs.data.SW.get_outputs()
-
-#     assert df["file_name"][1] == "Wave_parameters.dfsu"
-#     assert df.shape[0] == 4
-
-#     df = pfs.data.SW.get_outputs(included_only=True)
-
-#     assert df["file_name"][1] == "Wave_parameters.dfsu"
-#     assert df.shape[0] == 3
-
-
 def test_hd_outputs():
 
-    pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm")
+    with pytest.warns(match="defined multiple times"):
+        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm")
     df = pfs.HD.OUTPUTS.to_dataframe()
 
     assert df["file_name"][2] == "ts.dfs0"
@@ -339,7 +326,8 @@ def test_output_by_id():
 
 
 def test_encoding():
-    pfs = mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm")
+    with pytest.warns(match="defined multiple times"):
+        pfs = mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm")
     assert hasattr(pfs, "DA")
 
 
@@ -349,7 +337,7 @@ def test_encoding_linux():
         mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None)
 
 
-def test_multiple_roots():
+def test_multiple_identical_roots():
     #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
     # assert pfs.data[0].t1_t0.Setup.X == 0
@@ -360,6 +348,23 @@ def test_multiple_roots():
     assert pfs.t1_t0[1].Setup.X == 2
     assert pfs.target_names == ["t1_t0", "t1_t0"]
     assert pfs.n_targets == 2
+
+
+def test_multiple_unique_roots():
+    #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
+    pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_unique_root_elements.pfs")
+    assert pfs.target_names == ["FIRST", "MZ_WAVE_SPECTRA_CONVERTER", "SYSTEM"]
+    assert pfs.n_targets == 3
+    assert not pfs.FIRST.Is_Useful
+    assert pfs.MZ_WAVE_SPECTRA_CONVERTER.Setup.Name == "Setup AB"
+    assert pfs.SYSTEM.Hi == "there"
+
+
+def test_multiple_roots_mixed():
+    #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
+    pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_root_elements.pfs")
+    # assert pfs.target_names == ["t1_t0", "t1_t0"]
+    assert pfs.n_targets == 3
 
 
 def test_non_unique_keywords():
