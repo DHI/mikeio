@@ -295,9 +295,9 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
         xn, yn = self._get_xn_yn()
         values = self._get_first_step_values()
-        
+
         label = label if label is not None else self._label_txt()
-        
+
         pos = ax.pcolormesh(xn, yn, values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry, yn)
