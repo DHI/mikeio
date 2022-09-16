@@ -186,7 +186,7 @@ def test_pfssection_find_replace(d1):
 
 def test_pfssection_write(d1, tmpdir):
     sct = mikeio.PfsSection(d1)
-    pfs = sct.to_Pfs(target_name="root")
+    pfs = sct.to_Pfs(name="root")
     fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
     pfs.write(fn)
 
@@ -346,14 +346,14 @@ def test_multiple_identical_roots():
     assert pfs.data[1].Setup.X == 2
     assert pfs.t1_t0[0].Setup.X == 0
     assert pfs.t1_t0[1].Setup.X == 2
-    assert pfs.target_names == ["t1_t0", "t1_t0"]
+    assert pfs.names == ["t1_t0", "t1_t0"]
     assert pfs.n_targets == 2
 
 
 def test_multiple_unique_roots():
-    #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
+    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_unique_root_elements.pfs")
-    assert pfs.target_names == ["FIRST", "MZ_WAVE_SPECTRA_CONVERTER", "SYSTEM"]
+    assert pfs.names == ["FIRST", "MZ_WAVE_SPECTRA_CONVERTER", "SYSTEM"]
     assert pfs.n_targets == 3
     assert not pfs.FIRST.Is_Useful
     assert pfs.MZ_WAVE_SPECTRA_CONVERTER.Setup.Name == "Setup AB"
@@ -361,7 +361,7 @@ def test_multiple_unique_roots():
 
 
 def test_multiple_roots_mixed():
-    #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
+    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_root_elements.pfs")
     # assert pfs.target_names == ["t1_t0", "t1_t0"]
     assert pfs.n_targets == 3

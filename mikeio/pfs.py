@@ -1,3 +1,4 @@
+from pathlib import Path
 from types import SimpleNamespace
 from typing import List, Tuple
 from collections import Counter
@@ -32,8 +33,9 @@ class PfsSection(SimpleNamespace):
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
 
-    # def __repr__(self) -> str:
-    #     return yaml.dump(self.to_dict(), sort_keys=False)
+    def __repr__(self) -> str:
+        # return json.dumps(self.to_dict(), indent=2)
+        return yaml.dump(self.to_dict(), sort_keys=False)
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -106,12 +108,11 @@ class PfsSection(SimpleNamespace):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
-    def to_Pfs(self, target_name: str = None):
-        target_names = None if target_name is None else [target_name]
-        return Pfs(self, target_names=target_names)
+    def to_Pfs(self, name: str):
+        return Pfs(self, names=[name])
 
-    def to_file(self, filename, target_name: str) -> None:
-        Pfs(self, target_names=[target_name]).write(filename)
+    def to_file(self, filename, name: str) -> None:
+        Pfs(self, names=[name]).write(filename)
 
     def to_dict(self):
         d = self.__dict__.copy()
@@ -163,19 +164,20 @@ def parse_yaml_preserving_duplicates(src):
     class PreserveDuplicatesLoader(yaml.loader.Loader):
         pass
 
-    def map_constructor_duplicates(loader, node, deep=False):
-        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
-        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
-        key_count = Counter(keys)
-        data = {}
-        for key, val in zip(keys, vals):
-            if key_count[key] > 1:
-                if key not in data:
-                    data[key] = []
-                data[key].append(val)
-            else:
-                data[key] = val
-        return data
+    # DOES NOT ALLOW DUPLICATES:
+    # def map_constructor_duplicates(loader, node, deep=False):
+    #     keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
+    #     vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
+    #     key_count = Counter(keys)
+    #     data = {}
+    #     for key, val in zip(keys, vals):
+    #         if key_count[key] > 1:
+    #             if key not in data:
+    #                 data[key] = []
+    #             data[key].append(val)
+    #         else:
+    #             data[key] = val
+    #     return data
 
     def map_constructor_duplicate_sections(loader, node, deep=False):
         keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
@@ -208,60 +210,39 @@ class Pfs:
     ----------
     input: dict, PfsSection, str or Path
         Either a file name (including full path) to the pfs file
-        to be read or dictionary-like structure later to be written
-        to a pfs file.
+        to be read or dictionary-like structure.
     encoding: str, optional
         How is the pfs file encoded? By default cp1252
-    target_names: List[str], optional
+    names: List[str], optional
         If the input is dictionary or PfsSection object the
-        name of the root element (=target) can be specified
-        If the input is a file the target_names are read from the file,
+        name of the root element (=target) MUST be specified.
+        If the input is a file the names are instead read from the file,
         by default None.
     """
 
-    def __init__(self, input, encoding="cp1252", target_names=None):
-        n_targets = 1
-        if isinstance(input, PfsSection):
-            sections = input
-        elif isinstance(input, dict):
-            sections = PfsSection(input)
-        elif isinstance(input, (List, Tuple)):
-            n_targets = len(input)
-            if isinstance(input[0], PfsSection):
-                sections = input
-            elif isinstance(input[0], dict):
-                sections = [PfsSection(d) for d in input]
-            else:
-                raise ValueError("List input must contain either dict or PfsSection")
+    def __init__(self, input, encoding="cp1252", names=None):
+        if isinstance(input, (str, Path)):
+            if names is not None:
+                raise ValueError("names cannot be given as argument if input is a file")
+            sections, names = self._read_pfs_file(input, encoding)
         else:
-            target_list = self._read_pfs_file_to_list_of_dicts(input, encoding)
-            sections = [PfsSection(list(d.values())[0]) for d in target_list]
-            target_names = [list(d.keys())[0] for d in target_list]
-            n_targets = len(target_names)
-            if len(target_list) == 1:
-                sections = sections[0]
+            sections, names = self._parse_non_file_input(input, names)
 
-        self.data = sections
-        self._target_names = target_names
+        self._targets = sections
+        self._names = names
+        self._set_all_target_attr()
 
-        if target_names is not None:
-            if n_targets == 1:
-                setattr(self, target_names[0], self.data)
-            else:
-                d = self._targets_as_dict
-                for n, section in d.items():
-                    setattr(self, n, section)
         self._add_all_FM_aliases()
 
     @property
-    def _targets_as_list(self):
-        return [self.data] if isinstance(self.data, PfsSection) else self.data
+    def data(self):
+        return self._targets[0] if self.n_targets == 1 else self._targets
 
     @property
     def _targets_as_dict(self):
-        target_key_count = Counter(self.target_names)
+        target_key_count = Counter(self.names)
         d = dict()
-        for n, target in zip(self.target_names, self._targets_as_list):
+        for n, target in zip(self.names, self._targets):
             if target_key_count[n] > 1:
                 if n not in d:
                     d[n] = []
@@ -271,50 +252,65 @@ class Pfs:
         return d
 
     @property
-    def n_targets(self):
-        if self.data is None:
-            return 0
-        elif isinstance(self.data, PfsSection):
-            return 1
-        else:
-            return len(self.data)
+    def n_targets(self) -> int:
+        """Number of targets (root sections)"""
+        return len(self._targets)
 
     @property
-    def target_names(self):
-        if self._target_names is None:
-            return [f"TARGET_{j+1}" for j in range(self.n_targets)]
-        else:
-            return self._target_names
+    def names(self) -> List[str]:
+        """Names of the targets (root sections) as a list"""
+        return self._names
 
-    @target_names.setter
-    def target_names(self, new_names):
+    @names.setter
+    def names(self, new_names):
         new_names = [new_names] if isinstance(new_names, str) else new_names
         if len(new_names) != self.n_targets:
             raise ValueError(
                 f"Number of target names must match number of targets ({self.n_targets})"
             )
-        # TODO: update attr: setattr(self, new, section), delattr(self, old)
-        self._target_names = new_names
+        self._remove_all_target_attr()
+        self._names = new_names
+        self._set_all_target_attr()
 
     @property
-    def is_unique(self):
+    def is_unique(self) -> bool:
         """Are the target (root) names unique?"""
-        return len(set(self.target_names)) == len(self.target_names)
+        return len(set(self.names)) == len(self.names)
+
+    def add_target(self, section, name):
+        if name is None:
+            raise ValueError("name must be provided")
+        section = PfsSection(section) if isinstance(section, dict) else section
+        if not isinstance(section, PfsSection):
+            raise ValueError("section wrong type; must be dict or PfsSection")
+        self._targets.append(section)
+        self._names.append(name)
+        self._set_all_target_attr()
+
+    def _remove_all_target_attr(self):
+        """When renaming targets we need to remove all old target attr"""
+        for n in set(self.names):
+            delattr(self, n)
+
+    def _set_all_target_attr(self):
+        for n, section in self._targets_as_dict.items():
+            setattr(self, n, section)
 
     def __repr__(self) -> str:
         out = ["<mikeio.Pfs>"]
-        for n, sct in zip(self.target_names, self._targets_as_list):
-            if len(str(sct)) < 50:
-                out.append(f"{n}: {str(sct)}")
+        for n, sct in zip(self.names, self._targets):
+            sct_str = str(sct).replace("\n ", "")
+            if len(sct_str) < 50:
+                out.append(f"{n}: {sct_str}")
             else:
-                out.append(f"{n}: {str(sct)[:45]}...")
+                out.append(f"{n}: {sct_str[:45]}...")
         return "\n".join(out)
 
     def to_dict(self):
         """Convert to nested dictionary"""
         d = dict()
-        target_key_count = Counter(self.target_names)
-        for n, target in zip(self.target_names, self._targets_as_list):
+        target_key_count = Counter(self.names)
+        for n, target in zip(self.names, self._targets):
             if target_key_count[n] > 1:
                 if n not in d:
                     d[n] = []
@@ -323,17 +319,47 @@ class Pfs:
                 d[n] = target.to_dict()
         return d
 
-    def _read_pfs_file_to_list_of_dicts(self, filename, encoding):
+    def _read_pfs_file(self, filename, encoding):
         self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
             # d = yaml.load(yml, Loader=yaml.CLoader)
-            d = parse_yaml_preserving_duplicates(yml)
+            target_list = parse_yaml_preserving_duplicates(yml)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
         except Exception as e:
             raise ValueError(f"{filename} could not be parsed. " + str(e))
-        return d
+        sections = [PfsSection(list(d.values())[0]) for d in target_list]
+        names = [list(d.keys())[0] for d in target_list]
+        return sections, names
+
+    @staticmethod
+    def _parse_non_file_input(input, names):
+        """dict/PfsSection or lists of these can be parsed"""
+        if names is None:
+            raise ValueError("'names' must be provided if input is not a file")
+        if isinstance(names, str):
+            names = [names]
+        if isinstance(input, PfsSection):
+            sections = [input]
+        elif isinstance(input, dict):
+            sections = [PfsSection(input)]
+        elif isinstance(input, (List, Tuple)):
+            if isinstance(input[0], PfsSection):
+                sections = input
+            elif isinstance(input[0], dict):
+                sections = [PfsSection(d) for d in input]
+            else:
+                raise ValueError("List input must contain either dict or PfsSection")
+        else:
+            raise ValueError(
+                f"Input of type ({type(input)}) could not be parsed (pfs file, dict, PfsSection, lists of dict or PfsSection)"
+            )
+        if len(names) != len(sections):
+            raise ValueError(
+                f"Length of names ({len(names)}) does not match length of target sections ({len(sections)})"
+            )
+        return sections, names
 
     def _add_all_FM_aliases(self) -> None:
         """create MIKE FM module aliases"""
@@ -461,8 +487,6 @@ class Pfs:
             v = str(v).lower()  # stick to MIKE lowercase bool notation
 
         elif isinstance(v, datetime):
-            # v = v.strftime("%Y, %#m, %#d, %#H, %M, %S") # pfs-datetime output
-            # v = v.strftime("%Y, %-m, %-d, %-H, %-M, %-S")  # no zero padding
             v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
 
         elif isinstance(v, list):
@@ -498,22 +522,15 @@ class Pfs:
                 v = self._prepare_value_for_write(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
-    def write(self, filename, target_names=None):
+    def write(self, filename):
         """Write object to a pfs file
 
         Parameters
         ----------
         filename: str
             Full path and filename of pfs to be created.
-        target_names: List[str], optional
-            If the Pfs object was not created by reading an existing
-            pfs file, then its root elements (targets) may not have a name.
-            It can be provided here. By default None.
         """
         from mikeio import __version__ as mikeio_version
-
-        if target_names is not None:
-            self.target_names = target_names
 
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -523,7 +540,7 @@ class Pfs:
             f.write(rf"// Version     : {mikeio_version}")
             f.write("\n\n")
 
-            for name, target in zip(self.target_names, self._targets_as_list):
+            for name, target in zip(self.names, self._targets):
                 f.write(f"[{name}]\n")
                 self._write_nested_PfsSections(f, target, 1)
                 f.write(f"EndSect  // {name}\n\n")
