@@ -273,29 +273,33 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_title(title)
         return ax
 
-    def contourf(self, ax=None, figsize=None, title=None, **kwargs):
+    def contourf(self, ax=None, figsize=None, label=None, title=None, **kwargs):
         """Plot data as filled contours"""
         fig, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
         values = self._get_first_step_values()
 
+        label = label if label is not None else self._label_txt()
+
         pos = ax.contourf(x, y, values, **kwargs)
-        fig.colorbar(pos, label=self._label_txt())
+        fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry, y)
         if title is not None:
             ax.set_title(title)
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
+    def pcolormesh(self, ax=None, figsize=None, label=None, title=None, **kwargs):
         """Plot data as coloured patches"""
         fig, ax = self._get_fig_ax(ax, figsize)
 
         xn, yn = self._get_xn_yn()
         values = self._get_first_step_values()
-
+        
+        label = label if label is not None else self._label_txt()
+        
         pos = ax.pcolormesh(xn, yn, values, **kwargs)
-        fig.colorbar(pos, label=self._label_txt())
+        fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry, yn)
         if title is not None:
             ax.set_title(title)
