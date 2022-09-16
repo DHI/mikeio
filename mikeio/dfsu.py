@@ -537,40 +537,6 @@ class _UnstructuredFile:
             projection=self.geometry.projection_string,
         )
 
-    @wraps(GeometryFM.get_2d_interpolant)
-    def get_2d_interpolant(
-        self, xy, n_nearest: int = 1, extrapolate=False, p=2, radius=None
-    ):
-        warnings.warn(
-            FutureWarning(
-                "get_2d_interpolant have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead"
-            )
-        )
-        return self.geometry.get_2d_interpolant(xy, n_nearest, extrapolate, p, radius)
-
-    @wraps(GeometryFM.interp2d)
-    def interp2d(self, data, elem_ids, weights=None, shape=None):
-
-        warnings.warn(
-            FutureWarning(
-                "interp2d have been deprecated, please use DataArray.interp() or DataArray.interp_like() instead"
-            )
-        )
-        return self.geometry.interp2d(data, elem_ids, weights, shape)
-
-    @wraps(GeometryFM.find_nearest_elements)
-    def find_nearest_elements(
-        self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
-    ):
-        warnings.warn(
-            FutureWarning(
-                "find_nearest_elements have been deprecated, please use .geometry.find_index() instead"
-            )
-        )
-        return self.geometry.find_nearest_elements(
-            x, y, z, layer, n_nearest, return_distances
-        )
-
     @wraps(GeometryFM.get_element_area)
     def get_element_area(self):
         return self.geometry.get_element_area()
@@ -725,7 +691,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         *,
         items=None,
         time=None,
-        time_steps=None,
         elements=None,
         area=None,
         x=None,
@@ -793,13 +758,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         # (could have been replaced in the meantime)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
@@ -960,9 +918,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         self,
         filename,
         data,
-        start_time=None,
         dt=None,
-        items=None,
         elements=None,
         title=None,
         keep_open=False,
@@ -973,13 +929,10 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         -----------
         filename: str
             full path to the new dfsu file
-        data: list[np.array] or Dataset
+        data: Dataset
             list of matrices, one for each item. Matrix dimension: time, x
-        start_time: datetime, optional, deprecated
-            start datetime, default is datetime.now()
         dt: float, optional, deprecated
             The time step (in seconds)
-        items: list[ItemInfo], optional, deprecated
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -990,33 +943,16 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if self.is_spectral:
             raise ValueError("write() is not supported for spectral dfsu!")
 
-        if start_time:
-            warnings.warn(
-                "setting start_time is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if dt:
             warnings.warn(
                 "setting dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
             )
 
-        if items:
-            warnings.warn(
-                "setting items is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if isinstance(data, list):
-            warnings.warn(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
+            raise TypeError(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
-            if self.is_layered:
-                raise ValueError(
-                    "Layered dfsu files can only be written by providing a Dataset"
-                )
 
         filename = str(filename)
 
@@ -1025,7 +961,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             start_time = data.time[0]
             if dt is None and len(data.time) > 1:
                 if not data.is_equidistant:
-                    raise Exception(
+                    raise ValueError(
                         "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
                     )
                 dt = (data.time[1] - data.time[0]).total_seconds()

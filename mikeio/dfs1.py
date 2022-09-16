@@ -76,13 +76,9 @@ class Dfs1(_Dfs123):
         self,
         filename,
         data,
-        start_time=None,
         dt=None,
-        datetimes=None,
-        items=None,
         dx=1,
         x0=0,
-        coordinate=None,
         title=None,
     ):
         """
@@ -92,19 +88,10 @@ class Dfs1(_Dfs123):
         ----------
         filename: str
             Location to write the dfs1 file
-        data: list[np.array]
+        data: Dataset
             list of matrices, one for each item. Matrix dimension: x, time
-        start_time: datetime, optional
-            start datetime
         dt: float
             The time step in seconds.
-        datetimes: List[datetime], optional, deprecated
-            The list of datetimes for the case of non-equidistant Timeaxis.
-        items: list[ItemInfo], optional
-            List of ItemInfo (e.g. Water Level).
-        coordinate:
-            list of [projection, origin_x, origin_y, orientation]
-            e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         x0:
             Lower right position
         dx:
@@ -116,33 +103,14 @@ class Dfs1(_Dfs123):
 
         self._x0 = x0
 
-        if start_time:
-            warnings.warn(
-                "setting start_time is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if datetimes:
-            warnings.warn(
-                "setting datetimes is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
-        if items:
-            warnings.warn(
-                "setting items is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
-
         if isinstance(data, list):
-            warnings.warn(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
+            raise TypeError(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
 
         self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         self._dx = dx
-        self._write(filename, data, start_time, dt, datetimes, items, coordinate, title)
+        self._write(filename=filename, data=data, dt=dt, title=title)
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(

@@ -337,8 +337,7 @@ def test_find_nearest_element_2d():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    with pytest.warns(FutureWarning):
-        elem_id = dfs.find_nearest_elements(606200, 6905480)
+    elem_id = dfs.geometry.find_nearest_elements(606200, 6905480)
     assert elem_id == 317
 
 
@@ -346,10 +345,9 @@ def test_find_nearest_element_2d_and_distance():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    with pytest.warns(FutureWarning):
-        (elem_id, dist) = dfs.find_nearest_elements(
-            606200, 6905480, return_distances=True
-        )
+    (elem_id, dist) = dfs.geometry.find_nearest_elements(
+        606200, 6905480, return_distances=True
+    )
     assert elem_id == 317
 
     assert dist > 0.0
@@ -373,8 +371,9 @@ def test_find_nearest_elements_2d_array():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    with pytest.warns(FutureWarning):
-        elem_ids = dfs.find_nearest_elements(x=[606200, 606200], y=[6905480, 6905480])
+    elem_ids = dfs.geometry.find_nearest_elements(
+        x=[606200, 606200], y=[6905480, 6905480]
+    )
     assert len(elem_ids) == 2
     assert elem_ids[0] == 317
     assert elem_ids[1] == 317
@@ -560,24 +559,29 @@ def test_write_big_file(tmpdir):
 
     dfs = Dfsu(meshfilename)
 
-    nt = 1000
+    nt = 5  # or some big number 50000
 
     n_items = 10
 
-    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+    das = [
+        DataArray(
+            data=np.random.random((1, n_elements)),
+            geometry=msh.geometry,
+            time="2000-1-1",
+            item=f"Item {i+1}",
+        )
+        for i in range(n_items)
+    ]
 
-    # with dfs.write(outfilename, [], items=items, keep_open=True) as f:
-    # TODO rewrite to use DataArray
-    with pytest.warns(FutureWarning):
-        with dfs.write_header(
-            outfilename, start_time=datetime(2000, 1, 1), dt=3600, items=items
-        ) as f:
-            for i in range(nt):
-                data = []
-                for i in range(n_items):
-                    d = np.random.random((1, n_elements))
-                    data.append(d)
-                f.append(data)
+    ds = Dataset(das)
+
+    with dfs.write(outfilename, data=ds, dt=3600, keep_open=True) as f:
+        for _ in range(1, nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((1, n_elements))
+                data.append(d)
+            f.append(data)
 
     dfsu = mikeio.open(outfilename)
 
@@ -606,31 +610,6 @@ def test_write_from_dfsu_2_time_steps(tmpdir):
     assert dfs.end_time != newdfs.end_time
 
 
-def test_write_invalid_data_closes_and_deletes_file(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple.dfsu")
-    meshfilename = os.path.join("tests", "testdata", "odense_rough.mesh")
-
-    msh = Mesh(meshfilename)
-
-    n_elements = msh.n_elements
-    d = np.zeros((1, n_elements - 1))
-
-    assert d.shape[1] != n_elements
-    data = []
-    data.append(d)
-
-    items = [ItemInfo("Bad data")]
-
-    dfs = Dfsu(meshfilename)
-
-    # TODO rewrite to use DataArray
-    with pytest.warns(FutureWarning):
-        dfs.write(filename, data, items=items)
-
-    assert not os.path.exists(filename)
-
-
 def test_write_non_equidistant_is_not_possible(tmpdir):
 
     sourcefilename = "tests/testdata/HD2D.dfsu"
@@ -639,10 +618,8 @@ def test_write_non_equidistant_is_not_possible(tmpdir):
 
     ds = dfs.read(time=[0, 1, 3])
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         dfs.write(outfilename, ds)
-
-    assert not os.path.exists(outfilename)
 
 
 def test_temporal_resample_by_reading_selected_timesteps(tmpdir):
@@ -828,61 +805,19 @@ def test_get_node_centered_data():
     assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
 
 
-def test_interp2d_time_invariant():
-    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
-    ds = dfs.read(items=["Wind speed"], time=-1)
-
-    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
-    with pytest.warns(FutureWarning):
-        interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
-        dsi = dfs.interp2d(ds, *interpolant)
-
-    assert dsi.shape == (20 * 10,)
-
-
-def test_interp2d():
-    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
-    ds = dfs.read(items=["Wind speed"])
-    nt = ds.n_timesteps
-
-    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
-    with pytest.warns(FutureWarning):
-        interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
-        dsi = dfs.interp2d(ds, *interpolant)
-
-    assert dsi.shape == (nt, 20 * 10)
-
-    with pytest.raises(Exception):
-        dfs.get_spatial_interpolant(g.xy, n_nearest=0)
-
-
 def test_interp2d_radius():
     dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"])
     nt = ds.n_timesteps
+    nx = 20
+    ny = 10
 
     g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
-    with pytest.warns(FutureWarning):
-        interpolant = dfs.get_2d_interpolant(
-            g.xy, extrapolate=True, n_nearest=1, radius=0.1
-        )
-        dsi = dfs.interp2d(ds, *interpolant)
 
-    assert dsi.shape == (nt, 20 * 10)
-    assert np.isnan(dsi["Wind speed"].to_numpy()[0][0])
+    dsi = ds.interp_like(g, extrapolate=True, n_nearest=1, radius=0.1)
 
-
-def test_interp2d_reshaped():
-    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
-    ds = dfs.read(items=["Wind speed"], time=[0, 1])
-    nt = ds.n_timesteps
-
-    g = dfs.get_overset_grid(nx=20, ny=10, buffer=-1e-2)
-    with pytest.warns(FutureWarning):
-        interpolant = dfs.get_2d_interpolant(g.xy, n_nearest=1)
-        dsi = dfs.interp2d(ds, *interpolant, shape=(g.ny, g.nx))
-
-    assert dsi.shape == (nt, g.ny, g.nx)
+    assert dsi.shape == (nt, ny, nx)
+    assert np.isnan(dsi["Wind speed"].to_numpy()[0, 0, 0])
 
 
 def test_extract_track():

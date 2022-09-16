@@ -136,33 +136,6 @@ class DataUtilsMixin:
         return re.sub("_+", "_", tmp)  # Collapse multiple underscores
 
     @staticmethod
-    def _keepdims_by_axis(axis):
-        # keepdims: input to numpy aggregate function
-        if axis == 0:
-            keepdims = True
-        else:
-            keepdims = False
-        return keepdims
-
-    @staticmethod
-    def _reshape_data_by_axis(data, orig_shape, axis):
-        if isinstance(axis, int):
-            return data
-        if len(orig_shape) == len(axis):
-            shape = (1,)
-            data = [d.reshape(shape) for d in data]
-        if len(orig_shape) - len(axis) == 1:
-            # e.g. (0,2) for for dfs2
-            shape = [1] if (0 in axis) else [orig_shape[0]]
-            ndims = len(orig_shape)
-            for j in range(1, ndims):
-                if j not in axis:
-                    shape.append(orig_shape[j])
-            data = [d.reshape(shape) for d in data]
-
-        return data
-
-    @staticmethod
     def _parse_interp_time(old_time, new_time):
         if isinstance(new_time, pd.DatetimeIndex):
             t_out_index = new_time

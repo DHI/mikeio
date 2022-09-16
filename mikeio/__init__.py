@@ -39,9 +39,7 @@ from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .eum import ItemInfo, EUMType, EUMUnit
 
 
-def read(
-    filename, *, items=None, time_steps=None, time=None, keepdims=False, **kwargs
-) -> Dataset:
+def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Dataset:
     """Read all or a subset of the data from a dfs file
 
     All dfs files can be subsetted with the *items* and *time* arguments. But
@@ -110,13 +108,11 @@ def read(
     _, ext = os.path.splitext(filename)
 
     if "dfs" not in ext:
-        raise ValueError("mikeio.read is only supported for Dfs files")
+        raise ValueError("mikeio.read() is only supported for Dfs files")
 
     dfs = open(filename)
 
-    return dfs.read(
-        items=items, time_steps=time_steps, time=time, keepdims=keepdims, **kwargs
-    )
+    return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
 
 def open(filename: str, **kwargs):

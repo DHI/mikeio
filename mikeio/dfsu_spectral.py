@@ -80,7 +80,6 @@ class DfsuSpectral(_Dfsu):
         x=None,
         y=None,
         keepdims=False,
-        time_steps=None,
         dtype=np.float32,
     ) -> Dataset:
         """
@@ -138,13 +137,6 @@ class DfsuSpectral(_Dfsu):
         dfs = DfsuFile.Open(self._filename)
 
         self._n_timesteps = dfs.NumberOfTimeSteps
-        if time_steps is not None:
-            warnings.warn(
-                FutureWarning(
-                    "time_steps have been renamed to time, and will be removed in a future release"
-                )
-            )
-            time = time_steps
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 

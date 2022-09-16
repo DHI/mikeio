@@ -390,14 +390,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             return True
         return len(self.time.to_series().diff().dropna().unique()) == 1
 
-    @property
-    def data(self) -> Sequence[np.ndarray]:
-        warnings.warn(
-            "property data is deprecated, use to_numpy() instead",
-            FutureWarning,
-        )
-        return [x.to_numpy() for x in self]
-
     def to_numpy(self) -> np.ndarray:
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
 
@@ -681,8 +673,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             da = ds._data_vars.pop(old_name)
             da.name = new_name
             ds._data_vars[new_name] = da
-            self._del_name_attr(old_name)
-            self._set_name_attr(new_name, da)
+            ds._del_name_attr(old_name)
+            ds._set_name_attr(new_name, da)
 
         return ds
 
@@ -1019,8 +1011,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def interp_time(
         self,
-        dt: Union[float, pd.DatetimeIndex, "Dataset"],
+        dt: Optional[Union[float, pd.DatetimeIndex, "Dataset"]] = None,
         *,
+        freq: Optional[str] = None,
         method="linear",
         extrapolate=True,
         fill_value=np.nan,
@@ -1035,6 +1028,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             output timestep in seconds or discrete time instances given
             as a pd.DatetimeIndex (typically from another Dataset
             ds2.time)
+        freq: str
+            pandas frequency
         method: str or int, optional
             Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
         extrapolate: bool, optional
@@ -1068,7 +1063,14 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         1:  U velocity <u velocity component> (meter per sec)
         2:  V velocity <v velocity component> (meter per sec)
         3:  Current speed <Current Speed> (meter per sec)
+        >>> dsi = ds.interp_time(freq='2H')
         """
+        if freq:
+            dt = pd.to_timedelta(freq).total_seconds()
+        else:
+            if dt is None:
+                raise ValueError("You must specify either dt or freq")
+
         t_out_index = self._parse_interp_time(self.time, dt)
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
@@ -1161,52 +1163,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return ds
 
     # ============= Combine/concat ===========
-
-    @classmethod
-    def combine(cls, *datasets):
-
-        warnings.warn(
-            "Dataset.combine is been deprecated, use Dataset.concat or Dataset.merge instead",
-            FutureWarning,
-        )
-
-        if isinstance(datasets[0], Iterable):
-            if isinstance(datasets[0][0], Dataset):  # (Dataset, DataArray)):
-                datasets = datasets[0]
-
-        # if isinstance(datasets[0], DataArray):
-        #     ds = datasets[0]._to_dataset()
-        #     print("to dataset")
-        # else:
-        ds = datasets[0].copy()
-
-        for dsj in datasets[1:]:
-            ds = ds._combine(dsj, copy=False)
-        return ds
-
-    def _combine(self, other, copy=True):
-        try:
-            ds = self._concat_time(other, copy=copy)
-        except ValueError:
-            ds = self._append_items(other, copy=copy)
-        return ds
-
-    def append(self, other, inplace=False):
-        warnings.warn(
-            "Dataset.append is deprecated, use Dataset.merge([ds1, ds2]) instead",
-            FutureWarning,
-        )
-        return self.append_items(other, inplace)
-
-    def append_items(self, other, inplace=False):
-        warnings.warn(
-            "Dataset.append_items is deprecated, use Dataset.merge([ds1, ds2]) instead",
-            FutureWarning,
-        )
-        if inplace:
-            self._append_items(other, copy=False)
-        else:
-            return self._append_items(other, copy=True)
 
     def _append_items(self, other, copy=True):
         if isinstance(other, DataArray):
