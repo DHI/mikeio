@@ -32,6 +32,9 @@ class PfsSection(SimpleNamespace):
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
 
+    # def __repr__(self) -> str:
+    #     return yaml.dump(self.to_dict(), sort_keys=False)
+
     def __getitem__(self, key):
         return getattr(self, key)
 
@@ -231,21 +234,12 @@ class Pfs:
             else:
                 raise ValueError("List input must contain either dict or PfsSection")
         else:
-            targets = self._read_pfs_file_to_dict(input, encoding)
-            if len(targets) > 1:
-                # multiple identical root elements
-                sections = [PfsSection(list(d.values())[0]) for d in targets]
-                target_names = [list(d.keys())[0] for d in targets]
-                n_targets = len(target_names)
-            else:
-                d = targets[0]
-
-                target_names = list(d.keys())
-                n_targets = len(target_names)
-                if len(target_names) == 1:
-                    sections = PfsSection(d[target_names[0]])
-                else:
-                    sections = [PfsSection(d[k]) for k in target_names]
+            target_list = self._read_pfs_file_to_list_of_dicts(input, encoding)
+            sections = [PfsSection(list(d.values())[0]) for d in target_list]
+            target_names = [list(d.keys())[0] for d in target_list]
+            n_targets = len(target_names)
+            if len(target_list) == 1:
+                sections = sections[0]
 
         self.data = sections
         self._target_names = target_names
@@ -329,12 +323,14 @@ class Pfs:
                 d[n] = target.to_dict()
         return d
 
-    def _read_pfs_file_to_dict(self, filename, encoding):
+    def _read_pfs_file_to_list_of_dicts(self, filename, encoding):
         self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
             # d = yaml.load(yml, Loader=yaml.CLoader)
             d = parse_yaml_preserving_duplicates(yml)
+        except FileNotFoundError as e:
+            raise FileNotFoundError(str(e))
         except Exception as e:
             raise ValueError(f"{filename} could not be parsed. " + str(e))
         return d
@@ -528,7 +524,6 @@ class Pfs:
             f.write("\n\n")
 
             for name, target in zip(self.target_names, self._targets_as_list):
-                print(f"{name}: {target}")
                 f.write(f"[{name}]\n")
                 self._write_nested_PfsSections(f, target, 1)
                 f.write(f"EndSect  // {name}\n\n")
