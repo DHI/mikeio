@@ -299,7 +299,7 @@ class Pfs:
     def __repr__(self) -> str:
         out = ["<mikeio.Pfs>"]
         for n, sct in zip(self.names, self._targets):
-            sct_str = str(sct).replace("\n ", "")
+            sct_str = str(sct).replace("\n", "")
             if len(sct_str) < 50:
                 out.append(f"{n}: {sct_str}")
             else:
@@ -340,6 +340,7 @@ class Pfs:
             raise ValueError("'names' must be provided if input is not a file")
         if isinstance(names, str):
             names = [names]
+
         if isinstance(input, PfsSection):
             sections = [input]
         elif isinstance(input, dict):
