@@ -9,7 +9,7 @@ When a PFS file is read with MIKE IO a Pfs object is created. It will contain on
 
 ```python
 >>> import mikeio
->>> pfs = mikeio.read_pfs(TODO)
+>>> pfs = mikeio.read_pfs("file.pfs")
 >>> pfs
 TODO
 ```
@@ -21,11 +21,24 @@ TODO
 
 ## Update
 
+The PfsSection object can be modified. Existing values can be changes, new key-value pairs can be added, subsections can added or removed. 
+
+### Modify existing keyword
+
+
+### Add new key-value pair
+
+
+### Add new section
+
 
 ## Write 
 
+A Pfs object can be written to a PFS file using the `write` method. 
 
-
+```python
+>>> pfs.write("new.pfs")
+```
 
 
 ## Create new Pfs files
@@ -40,7 +53,7 @@ A new PFS file can be created from dictionary in the following way:
         file_name=r"|path\file.dfs0|",
         start_time=datetime(2019, 7, 1, 0, 0, 0),        
     )
->>> pfs = mikeio.Pfs(d, target_names = "MYTOOL")
+>>> pfs = mikeio.Pfs(d, names="MYTOOL")
 >>> pfs.write("new.pfs")
 ```
 
