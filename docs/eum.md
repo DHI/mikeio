@@ -1,4 +1,4 @@
-# EUM and items
+# EUM
 
 The dfs items in MIKE IO are represented by the `ItemInfo` class. 
 An ItemInfo consists of:
@@ -39,11 +39,14 @@ mm per day
 2004
 ```
 
+## EUM type search
 
+It is also possible to do a string based search, e.g. to find all EUM types containing the substring 'period':
 
-## EUM example notebooks
-
-See the [Units notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Units.ipynb) for more examples.
+```python
+>>> EUMType.search("period")
+[Wave period, Return period, Update Period, Threshold period]
+```
 
 
 ## EUM API

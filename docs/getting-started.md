@@ -39,9 +39,7 @@ Viken <Water Level> (meter)
 >>> ItemInfo(EUMType.Wind_speed)
 Wind speed <Wind speed> (meter per sec)
 ```
-
-See the [Units notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Units.ipynb) for more examples.
-
+More info on the [EUM page](eum).
 
 ## Dfs0
 A dfs0 file is also called a time series file. 
