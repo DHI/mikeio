@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EUM and items &mdash; MIKE IO  documentation</title>
+  <title>EUM &mdash; MIKE IO  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -56,8 +56,8 @@
 <li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">EUM and items</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#eum-example-notebooks">EUM example notebooks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">EUM</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#eum-type-search">EUM type search</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-mikeio.eum">EUM API</a></li>
 </ul>
 </li>
@@ -78,7 +78,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>EUM and items</li>
+      <li>EUM</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/eum.md.txt" rel="nofollow"> View page source</a>
       </li>
@@ -88,8 +88,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="eum-and-items">
-<h1>EUM and items<a class="headerlink" href="#eum-and-items" title="Permalink to this heading"></a></h1>
+  <section id="eum">
+<h1>EUM<a class="headerlink" href="#eum" title="Permalink to this heading"></a></h1>
 <p>The dfs items in MIKE IO are represented by the <code class="docutils literal notranslate"><span class="pre">ItemInfo</span></code> class.
 An ItemInfo consists of:</p>
 <ul class="simple">
@@ -125,9 +125,13 @@ An ItemInfo consists of:</p>
 <span class="go">2004</span>
 </pre></div>
 </div>
-<section id="eum-example-notebooks">
-<h2>EUM example notebooks<a class="headerlink" href="#eum-example-notebooks" title="Permalink to this heading"></a></h2>
-<p>See the <a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Units.ipynb">Units notebook</a> for more examples.</p>
+<section id="eum-type-search">
+<h2>EUM type search<a class="headerlink" href="#eum-type-search" title="Permalink to this heading"></a></h2>
+<p>It is also possible to do a string based search, e.g. to find all EUM types containing the substring ‘period’:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">EUMType</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s2">&quot;period&quot;</span><span class="p">)</span>
+<span class="go">[Wave period, Return period, Update Period, Threshold period]</span>
+</pre></div>
+</div>
 </section>
 <section id="module-mikeio.eum">
 <span id="eum-api"></span><h2>EUM API<a class="headerlink" href="#module-mikeio.eum" title="Permalink to this heading"></a></h2>
