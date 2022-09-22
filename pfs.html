@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pfs &mdash; MIKE IO  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Generic" href="generic.html" />
+    <link rel="prev" title="EUM" href="eum.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> MIKE IO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs2.html">Dfs2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfs3.html">Dfs3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eum.html">EUM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Pfs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#read">Read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#update">Update</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#modify-existing-keyword">Modify existing keyword</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add-new-key-value-pair">Add new key-value pair</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#add-new-section">Add new section</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#write">Write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#create-new-pfs-files">Create new Pfs files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pfs-api">Pfs API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pfssection-api">PfsSection API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="generic.html">Generic</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">MIKE IO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Pfs</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/pfs.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pfs">
+<h1>Pfs<a class="headerlink" href="#pfs" title="Permalink to this heading"></a></h1>
+<p>A PFS file is a text file with a tree structure that contains parameters and settings for MIKE tools and engines. MIKE IO can read, modify and create PFS files.</p>
+<p>The content of the PFS file is similar to a nested dictionary. The root element is often called the <em>target</em>. Some PFS files have multiple root elements. The below sections are called <em>PFS Sections</em> which can be nested and contain key-value pairs called <em>keywords</em> and <em>parameters</em>.</p>
+<p>When a PFS file is read with MIKE IO a Pfs object is created. It will contain one or more PfsSection objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs. The PfsSection object is similar to a dictionary.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read_pfs</span><span class="p">(</span><span class="s2">&quot;file.pfs&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span>
+<span class="go">TODO</span>
+</pre></div>
+</div>
+<section id="read">
+<h2>Read<a class="headerlink" href="#read" title="Permalink to this heading"></a></h2>
+</section>
+<section id="update">
+<h2>Update<a class="headerlink" href="#update" title="Permalink to this heading"></a></h2>
+<p>The PfsSection object can be modified. Existing values can be changes, new key-value pairs can be added, subsections can added or removed.</p>
+<section id="modify-existing-keyword">
+<h3>Modify existing keyword<a class="headerlink" href="#modify-existing-keyword" title="Permalink to this heading"></a></h3>
+</section>
+<section id="add-new-key-value-pair">
+<h3>Add new key-value pair<a class="headerlink" href="#add-new-key-value-pair" title="Permalink to this heading"></a></h3>
+</section>
+<section id="add-new-section">
+<h3>Add new section<a class="headerlink" href="#add-new-section" title="Permalink to this heading"></a></h3>
+</section>
+</section>
+<section id="write">
+<h2>Write<a class="headerlink" href="#write" title="Permalink to this heading"></a></h2>
+<p>A Pfs object can be written to a PFS file using the <code class="docutils literal notranslate"><span class="pre">write</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;new.pfs&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="create-new-pfs-files">
+<h2>Create new Pfs files<a class="headerlink" href="#create-new-pfs-files" title="Permalink to this heading"></a></h2>
+<p>A new PFS file can be created from dictionary in the following way:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+<span class="go">        key1=1,</span>
+<span class="go">        lst=[0.3, 0.7],</span>
+<span class="go">        file_name=r&quot;|path\file.dfs0|&quot;,</span>
+<span class="go">        start_time=datetime(2019, 7, 1, 0, 0, 0),        </span>
+<span class="go">    )</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Pfs</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;MYTOOL&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;new.pfs&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Multiple targets can be achieved by providing list of dictionaries.</p>
+</section>
+<section id="pfs-api">
+<h2>Pfs API<a class="headerlink" href="#pfs-api" title="Permalink to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="mikeio.read_pfs">
+<span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">read_pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#read_pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.read_pfs" title="Permalink to this definition"></a></dt>
+<dd><p>Read a pfs file to a Pfs object for further analysis/manipulation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><em>Path</em>) – File name including full path to the pfs file.</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – How is the pfs file encoded? By default ‘cp1252’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pfs object which can be used for inspection, manipulation and writing</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Pfs" title="mikeio.Pfs">mikeio.Pfs</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.Pfs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs" title="Permalink to this definition"></a></dt>
+<dd><p>Create a Pfs object for reading, writing and manipulating pfs files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><a class="reference internal" href="#mikeio.PfsSection" title="mikeio.PfsSection"><em>PfsSection</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><em>Path</em>) – Either a file name (including full path) to the pfs file
+to be read or dictionary-like structure.</p></li>
+<li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – How is the pfs file encoded? By default cp1252</p></li>
+<li><p><strong>names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – If the input is dictionary or PfsSection object the
+name of the root element (=target) MUST be specified.
+If the input is a file the names are instead read from the file,
+by default None.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Pfs.is_unique">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_unique</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.Pfs.is_unique" title="Permalink to this definition"></a></dt>
+<dd><p>Are the target (root) names unique?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Pfs.n_targets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.Pfs.n_targets" title="Permalink to this definition"></a></dt>
+<dd><p>Number of targets (root sections)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Pfs.names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mikeio.Pfs.names" title="Permalink to this definition"></a></dt>
+<dd><p>Names of the targets (root sections) as a list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Pfs.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Convert to nested dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Pfs.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs.write" title="Permalink to this definition"></a></dt>
+<dd><p>Write object to a pfs file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Full path and filename of pfs to be created.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="pfssection-api">
+<h2>PfsSection API<a class="headerlink" href="#pfssection-api" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.PfsSection">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">PfsSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection" title="Permalink to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsSection.find_replace">
+<span class="sig-name descname"><span class="pre">find_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.find_replace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.find_replace" title="Permalink to this definition"></a></dt>
+<dd><p>Update recursively all old_value with new_value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsSection.from_dataframe">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.PfsSection" title="mikeio.pfs.PfsSection"><span class="pre">PfsSection</span></a></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.from_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Create a PfsSection from a DataFrame</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsSection.update_recursive">
+<span class="sig-name descname"><span class="pre">update_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.update_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.update_recursive" title="Permalink to this definition"></a></dt>
+<dd><p>Update recursively all matches of key with value</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="eum.html" class="btn btn-neutral float-left" title="EUM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="generic.html" class="btn btn-neutral float-right" title="Generic" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
