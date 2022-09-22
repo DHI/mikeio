@@ -19,8 +19,8 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.1.dev1"
-__dfs_version__: int = 110
+__version__ = "1.2.dev0"
+__dfs_version__: int = 120
 
 
 if "64" not in architecture()[0]:
@@ -32,7 +32,7 @@ from .dfs2 import Dfs2
 from .dfs3 import Dfs3
 from .dfsu_factory import Dfsu
 from .dfsu import Mesh
-from .pfs import Pfs
+from .pfs import read_pfs, Pfs, PfsSection
 from .xyz import read_xyz
 from .dataset import Dataset, DataArray
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D

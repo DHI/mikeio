@@ -1,0 +1,37 @@
+// Created     : 2012-05-9 9:32:26
+// DLL id      : C:\Program Files (x86)\DHI\2012\bin\pfs2004.dll
+// PFS version : May  2 2012 21:00:13
+
+[FIRST]
+   CLSID = '{24C75E1A-0F7C-4F93-B7FF-9679F988C79C}'
+   TypeName = 'FIRST'
+   Is_Useful = false
+EndSect  // FIRST
+
+[MZ_WAVE_SPECTRA_CONVERTER]
+   
+   [Setup]
+      Name = 'Setup AB'
+      [DATA]
+         data_format = 1
+         number_of_inputs = 2
+         [INPUT_1]
+            file_name = |.\2D_Wave_spectrum_A.txt|
+            item = 1
+         EndSect  // INPUT_1
+
+         [INPUT_2]
+            file_name = |.\2D_Wave_spectrum_B.txt|
+            item = 1
+         EndSect  // INPUT_2
+
+        EndSect  // DATA
+
+   EndSect  // Setup
+
+EndSect  // MZ_WAVE_SPECTRA_CONVERTER
+
+
+[SYSTEM]
+	Hi = "there"
+EndSect 

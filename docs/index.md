@@ -62,5 +62,6 @@ Where can I get help?
    dfsu-2dv-vertical-profile
    dfsu-spectral
    eum
+   pfs
    generic
 ```

@@ -1,0 +1,42 @@
+// Created     : 2022-09-14 15:20:35
+// DLL         : C:\Program Files (x86)\DHI\MIKE Zero\2022\bin\x64\pfs2004.dll
+// Version     : 20.1.0.16092
+
+[t1_t0]
+   CLSID = 't1_t0.dll'
+   TypeName = 't1_t0'
+   CREATEDTIME = '2022-09-14T15:17:04'
+   MODIFIEDTIME = '2022-09-14T15:17:04'
+   NOTES = ''
+   [Setup]
+      Name = 'Extract this'
+      InputFileName = |random.dfs1|
+      FirstTimeStep = 0
+      LastTimeStep = 99
+      ItemSelection = 0
+      X = 0
+      OutputFileName = |.\out.dfs0|
+      OutputTitle = ''
+   EndSect  // Setup
+
+EndSect  // t1_t0
+
+[t1_t0]
+   CLSID = 't1_t0.dll'
+   TypeName = 't1_t0'
+   CREATEDTIME = '2022-09-14T15:20:27'
+   MODIFIEDTIME = '2022-09-14T15:20:27'
+   NOTES = ''
+   [Setup]
+      Name = 'Extract that'
+      InputFileName = |random.dfs1|
+      FirstTimeStep = 0
+      LastTimeStep = 99
+      ItemSelection = 0
+      X = 2
+      OutputFileName = |.\out2.dfs0|
+      OutputTitle = ''
+   EndSect  // Setup
+
+EndSect  // t1_t0
+
