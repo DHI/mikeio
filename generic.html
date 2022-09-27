@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -59,7 +60,16 @@
 <li class="toctree-l1"><a class="reference internal" href="pfs.html">Pfs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Generic</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#generic-example-notebooks">Generic example notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-mikeio.generic">Generic API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mikeio.generic">Generic API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.generic.avg_time"><code class="docutils literal notranslate"><span class="pre">avg_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.generic.concat"><code class="docutils literal notranslate"><span class="pre">concat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.generic.diff"><code class="docutils literal notranslate"><span class="pre">diff()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.generic.extract"><code class="docutils literal notranslate"><span class="pre">extract()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.generic.quantile"><code class="docutils literal notranslate"><span class="pre">quantile()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.generic.scale"><code class="docutils literal notranslate"><span class="pre">scale()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.generic.sum"><code class="docutils literal notranslate"><span class="pre">sum()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -199,7 +209,7 @@ or datetime/str, by default -1 (end of file)</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>infilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – input filename</p></li>
 <li><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – output filename</p></li>
-<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+<li><p><strong>q</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Quantile or sequence of quantiles to compute,
 which must be between 0 and 1 inclusive.</p></li>
 <li><p><strong>items</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>] or </em><em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>optional</em>) – Process only selected items, by number (0-based) or name, by default: all</p></li>
 <li><p><strong>skipna</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – exclude NaN/delete values when computing the result, default True</p></li>

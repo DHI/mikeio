@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -57,10 +58,150 @@
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Dfsu Spectral</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#spectral-dfsu-example-notebooks">Spectral Dfsu example notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfsu-spectral-api">Dfsu Spectral API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-point-spectrum-api">FM Geometry Point Spectrum API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-line-spectrum-api">FM Geometry Line Spectrum API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-area-spectrum-api">FM Geometry Area Spectrum API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfsu-spectral-api">Dfsu Spectral API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.append"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.append()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.boundary_codes"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.boundary_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.calc_Hm0_from_spectrum"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.calc_Hm0_from_spectrum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.calc_element_coordinates"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.calc_element_coordinates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.close"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.contains"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.deletevalue"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.deletevalue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.directions"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.element_coordinates"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.element_table"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.elements_to_geometry"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.elements_to_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.end_time"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.frequencies"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.get_element_area"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.get_node_coords"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_node_coords()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.is_2d"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.is_geo"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.is_layered"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.is_spectral"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.is_tri_only"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.items"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.n_directions"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.n_elements"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.n_frequencies"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.n_items"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.n_nodes"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.n_timesteps"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.node_coordinates"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.plot_spectrum"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.plot_spectrum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.projection_string"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.read"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.start_time"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.time"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.timestep"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.to_mesh"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.to_shapely"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.type_name"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.type_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.valid_codes"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.valid_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.write"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu_spectral.DfsuSpectral.write_header"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.write_header()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-point-spectrum-api">FM Geometry Point Spectrum API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.n_directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.n_frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum.type_name"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.type_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-line-spectrum-api">FM Geometry Line Spectrum API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.codes"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.contains"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.element_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.element_table"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.elements_to_geometry"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.elements_to_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.find_index"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.find_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.find_nearest_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.find_nearest_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.get_2d_interpolant"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_2d_interpolant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.get_element_area"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.interp2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.interp2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.is_2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.is_layered"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.is_spectral"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.is_tri_only"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.isel"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.n_directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.n_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.n_frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.n_nodes"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.node_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.to_mesh"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.to_shapely"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMLineSpectrum.type_name"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.type_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-area-spectrum-api">FM Geometry Area Spectrum API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.codes"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.contains"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.element_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.element_table"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.elements_to_geometry"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.elements_to_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.find_index"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.find_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.find_nearest_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.find_nearest_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.get_2d_interpolant"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_2d_interpolant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.get_element_area"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.interp2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.interp2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.is_2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.is_layered"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.is_spectral"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.is_tri_only"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.isel"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.n_directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.n_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.n_frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.n_nodes"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.node_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.to_mesh"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.to_shapely"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.type_name"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.type_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="eum.html">EUM</a></li>

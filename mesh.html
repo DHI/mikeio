@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -54,9 +55,85 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Mesh</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#mesh-functionality">Mesh functionality</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#mesh-example-notebooks">Mesh example notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#mesh-api">Mesh API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#flexible-mesh-geometry-api">Flexible Mesh Geometry API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-plotter-api">FM Geometry Plotter API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#mesh-api">Mesh API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.Mesh"><code class="docutils literal notranslate"><span class="pre">Mesh</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.boundary_codes"><code class="docutils literal notranslate"><span class="pre">Mesh.boundary_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">Mesh.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.calc_element_coordinates"><code class="docutils literal notranslate"><span class="pre">Mesh.calc_element_coordinates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.contains"><code class="docutils literal notranslate"><span class="pre">Mesh.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.element_coordinates"><code class="docutils literal notranslate"><span class="pre">Mesh.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.element_table"><code class="docutils literal notranslate"><span class="pre">Mesh.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.elements_to_geometry"><code class="docutils literal notranslate"><span class="pre">Mesh.elements_to_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.get_element_area"><code class="docutils literal notranslate"><span class="pre">Mesh.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">Mesh.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.get_node_coords"><code class="docutils literal notranslate"><span class="pre">Mesh.get_node_coords()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">Mesh.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.is_2d"><code class="docutils literal notranslate"><span class="pre">Mesh.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.is_geo"><code class="docutils literal notranslate"><span class="pre">Mesh.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.is_layered"><code class="docutils literal notranslate"><span class="pre">Mesh.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">Mesh.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.is_spectral"><code class="docutils literal notranslate"><span class="pre">Mesh.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.is_tri_only"><code class="docutils literal notranslate"><span class="pre">Mesh.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">Mesh.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.n_elements"><code class="docutils literal notranslate"><span class="pre">Mesh.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.n_nodes"><code class="docutils literal notranslate"><span class="pre">Mesh.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.node_coordinates"><code class="docutils literal notranslate"><span class="pre">Mesh.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.projection_string"><code class="docutils literal notranslate"><span class="pre">Mesh.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.to_shapely"><code class="docutils literal notranslate"><span class="pre">Mesh.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.type_name"><code class="docutils literal notranslate"><span class="pre">Mesh.type_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.valid_codes"><code class="docutils literal notranslate"><span class="pre">Mesh.valid_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.write"><code class="docutils literal notranslate"><span class="pre">Mesh.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Mesh.zn"><code class="docutils literal notranslate"><span class="pre">Mesh.zn</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#flexible-mesh-geometry-api">Flexible Mesh Geometry API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM"><code class="docutils literal notranslate"><span class="pre">GeometryFM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">GeometryFM.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.codes"><code class="docutils literal notranslate"><span class="pre">GeometryFM.codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.contains"><code class="docutils literal notranslate"><span class="pre">GeometryFM.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.element_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFM.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.element_table"><code class="docutils literal notranslate"><span class="pre">GeometryFM.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.elements_to_geometry"><code class="docutils literal notranslate"><span class="pre">GeometryFM.elements_to_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.find_index"><code class="docutils literal notranslate"><span class="pre">GeometryFM.find_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.find_nearest_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFM.find_nearest_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.get_2d_interpolant"><code class="docutils literal notranslate"><span class="pre">GeometryFM.get_2d_interpolant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.get_element_area"><code class="docutils literal notranslate"><span class="pre">GeometryFM.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">GeometryFM.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">GeometryFM.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.interp2d"><code class="docutils literal notranslate"><span class="pre">GeometryFM.interp2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.is_2d"><code class="docutils literal notranslate"><span class="pre">GeometryFM.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFM.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.is_layered"><code class="docutils literal notranslate"><span class="pre">GeometryFM.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFM.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.is_spectral"><code class="docutils literal notranslate"><span class="pre">GeometryFM.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.is_tri_only"><code class="docutils literal notranslate"><span class="pre">GeometryFM.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.isel"><code class="docutils literal notranslate"><span class="pre">GeometryFM.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">GeometryFM.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.n_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFM.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.n_nodes"><code class="docutils literal notranslate"><span class="pre">GeometryFM.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.node_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFM.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFM.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFM.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.to_mesh"><code class="docutils literal notranslate"><span class="pre">GeometryFM.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.to_shapely"><code class="docutils literal notranslate"><span class="pre">GeometryFM.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry.GeometryFM.type_name"><code class="docutils literal notranslate"><span class="pre">GeometryFM.type_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-plotter-api">FM Geometry Plotter API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial.FM_geometry._GeometryFMPlotter"><code class="docutils literal notranslate"><span class="pre">_GeometryFMPlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry._GeometryFMPlotter.boundary_nodes"><code class="docutils literal notranslate"><span class="pre">_GeometryFMPlotter.boundary_nodes()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry._GeometryFMPlotter.contour"><code class="docutils literal notranslate"><span class="pre">_GeometryFMPlotter.contour()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry._GeometryFMPlotter.contourf"><code class="docutils literal notranslate"><span class="pre">_GeometryFMPlotter.contourf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry._GeometryFMPlotter.mesh"><code class="docutils literal notranslate"><span class="pre">_GeometryFMPlotter.mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial.FM_geometry._GeometryFMPlotter.outline"><code class="docutils literal notranslate"><span class="pre">_GeometryFMPlotter.outline()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>

@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -54,10 +55,67 @@
 <li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Dfsu 2D</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#dfsu-functionality">Dfsu functionality</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfsu-2dh-api">Dfsu 2DH API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfsu-2dh-api">Dfsu 2DH API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.append"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.append()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.boundary_codes"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.boundary_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.calc_element_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.calc_element_coordinates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.close"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.contains"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.deletevalue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.element_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.element_table"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.elements_to_geometry"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.elements_to_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.end_time"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.extract_track"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.extract_track()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.get_element_area"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.get_node_coords"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.get_node_coords()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.is_2d"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.is_geo"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.is_layered"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.is_spectral"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.is_tri_only"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.items"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.n_elements"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.n_items"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.n_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.n_nodes"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.n_timesteps"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.n_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.node_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.projection_string"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.read"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.start_time"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.time"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.timestep"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.to_mesh"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.to_shapely"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.type_name"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.type_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.valid_codes"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.valid_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.write"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.write_header"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.write_header()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#flexible-mesh-geometry-api">Flexible Mesh Geometry API</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#fm-geometry-plotter-api">FM Geometry Plotter API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-fm-api">DataArray Plotter FM API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-fm-api">DataArray Plotter FM API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM.contour"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM.contour()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM.contourf"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM.contourf()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM.hist"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM.hist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM.line"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM.line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM.mesh"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM.mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM.outline"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM.outline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterFM.patch"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFM.patch()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>

@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -50,8 +51,69 @@
 <li class="toctree-l2"><a class="reference internal" href="#plotting">Plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#properties">Properties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataset-api">Dataset API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataset-plotter-api">Dataset Plotter API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataset-api">Dataset API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.Dataset"><code class="docutils literal notranslate"><span class="pre">Dataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.aggregate"><code class="docutils literal notranslate"><span class="pre">Dataset.aggregate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.average"><code class="docutils literal notranslate"><span class="pre">Dataset.average()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.concat"><code class="docutils literal notranslate"><span class="pre">Dataset.concat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.copy"><code class="docutils literal notranslate"><span class="pre">Dataset.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.create_data_array"><code class="docutils literal notranslate"><span class="pre">Dataset.create_data_array()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dataset.deletevalue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.describe"><code class="docutils literal notranslate"><span class="pre">Dataset.describe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.dims"><code class="docutils literal notranslate"><span class="pre">Dataset.dims</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.dropna"><code class="docutils literal notranslate"><span class="pre">Dataset.dropna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.end_time"><code class="docutils literal notranslate"><span class="pre">Dataset.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.flipud"><code class="docutils literal notranslate"><span class="pre">Dataset.flipud()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.geometry"><code class="docutils literal notranslate"><span class="pre">Dataset.geometry</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.insert"><code class="docutils literal notranslate"><span class="pre">Dataset.insert()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.interp"><code class="docutils literal notranslate"><span class="pre">Dataset.interp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.interp_like"><code class="docutils literal notranslate"><span class="pre">Dataset.interp_like()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.interp_time"><code class="docutils literal notranslate"><span class="pre">Dataset.interp_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.is_equidistant"><code class="docutils literal notranslate"><span class="pre">Dataset.is_equidistant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.isel"><code class="docutils literal notranslate"><span class="pre">Dataset.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.items"><code class="docutils literal notranslate"><span class="pre">Dataset.items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.max"><code class="docutils literal notranslate"><span class="pre">Dataset.max()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.mean"><code class="docutils literal notranslate"><span class="pre">Dataset.mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.merge"><code class="docutils literal notranslate"><span class="pre">Dataset.merge()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.min"><code class="docutils literal notranslate"><span class="pre">Dataset.min()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.n_elements"><code class="docutils literal notranslate"><span class="pre">Dataset.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.n_items"><code class="docutils literal notranslate"><span class="pre">Dataset.n_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.n_timesteps"><code class="docutils literal notranslate"><span class="pre">Dataset.n_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.names"><code class="docutils literal notranslate"><span class="pre">Dataset.names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.nanmax"><code class="docutils literal notranslate"><span class="pre">Dataset.nanmax()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.nanmean"><code class="docutils literal notranslate"><span class="pre">Dataset.nanmean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.nanmin"><code class="docutils literal notranslate"><span class="pre">Dataset.nanmin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.nanquantile"><code class="docutils literal notranslate"><span class="pre">Dataset.nanquantile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.nanstd"><code class="docutils literal notranslate"><span class="pre">Dataset.nanstd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.ndim"><code class="docutils literal notranslate"><span class="pre">Dataset.ndim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.popitem"><code class="docutils literal notranslate"><span class="pre">Dataset.popitem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.ptp"><code class="docutils literal notranslate"><span class="pre">Dataset.ptp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.quantile"><code class="docutils literal notranslate"><span class="pre">Dataset.quantile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.remove"><code class="docutils literal notranslate"><span class="pre">Dataset.remove()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.rename"><code class="docutils literal notranslate"><span class="pre">Dataset.rename()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.sel"><code class="docutils literal notranslate"><span class="pre">Dataset.sel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.shape"><code class="docutils literal notranslate"><span class="pre">Dataset.shape</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.squeeze"><code class="docutils literal notranslate"><span class="pre">Dataset.squeeze()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.start_time"><code class="docutils literal notranslate"><span class="pre">Dataset.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.std"><code class="docutils literal notranslate"><span class="pre">Dataset.std()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.time"><code class="docutils literal notranslate"><span class="pre">Dataset.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.timestep"><code class="docutils literal notranslate"><span class="pre">Dataset.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.to_dataframe"><code class="docutils literal notranslate"><span class="pre">Dataset.to_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.to_dfs"><code class="docutils literal notranslate"><span class="pre">Dataset.to_dfs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.to_numpy"><code class="docutils literal notranslate"><span class="pre">Dataset.to_numpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.to_xarray"><code class="docutils literal notranslate"><span class="pre">Dataset.to_xarray()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.values"><code class="docutils literal notranslate"><span class="pre">Dataset.values</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dataset-plotter-api">Dataset Plotter API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dataset._DatasetPlotter"><code class="docutils literal notranslate"><span class="pre">_DatasetPlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._DatasetPlotter.scatter"><code class="docutils literal notranslate"><span class="pre">_DatasetPlotter.scatter()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
@@ -363,7 +425,7 @@ For convenience, the Dataset provides access to these common properties:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>datasets</strong> (<em>sequence of Datasets</em>) – </p></li>
+<li><p><strong>datasets</strong> (<em>sequence</em><em> of </em><em>Datasets</em>) – </p></li>
 <li><p><strong>keep</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – TODO Yet to be implemented, default: last</p></li>
 </ul>
 </dd>
@@ -717,7 +779,7 @@ to be selected, by default None</p></li>
 <dd><p>Merge Datasets along the item dimension</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>datasets</strong> (<em>sequence of Datasets</em>) – </p>
+<dd class="field-odd"><p><strong>datasets</strong> (<em>sequence</em><em> of </em><em>Datasets</em>) – </p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>merged dataset</p>
@@ -844,7 +906,7 @@ to be selected, by default None</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+<li><p><strong>q</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Quantile or sequence of quantiles to compute,
 which must be between 0 and 1 inclusive.</p></li>
 <li><p><strong>axis</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
 </ul>
@@ -930,7 +992,7 @@ which must be between 0 and 1 inclusive.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+<li><p><strong>q</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Quantile or sequence of quantiles to compute,
 which must be between 0 and 1 inclusive.</p></li>
 <li><p><strong>axis</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
 </ul>

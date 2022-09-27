@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -50,8 +51,59 @@
 <li class="toctree-l2"><a class="reference internal" href="#plotting">Plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#properties">Properties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataarray-api">DataArray API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-api">DataArray Plotter API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataarray-api">DataArray API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.DataArray"><code class="docutils literal notranslate"><span class="pre">DataArray</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.aggregate"><code class="docutils literal notranslate"><span class="pre">DataArray.aggregate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.average"><code class="docutils literal notranslate"><span class="pre">DataArray.average()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.concat"><code class="docutils literal notranslate"><span class="pre">DataArray.concat()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.copy"><code class="docutils literal notranslate"><span class="pre">DataArray.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.describe"><code class="docutils literal notranslate"><span class="pre">DataArray.describe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.dropna"><code class="docutils literal notranslate"><span class="pre">DataArray.dropna()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.dtype"><code class="docutils literal notranslate"><span class="pre">DataArray.dtype</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.end_time"><code class="docutils literal notranslate"><span class="pre">DataArray.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.flipud"><code class="docutils literal notranslate"><span class="pre">DataArray.flipud()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.interp"><code class="docutils literal notranslate"><span class="pre">DataArray.interp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.interp_like"><code class="docutils literal notranslate"><span class="pre">DataArray.interp_like()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.interp_time"><code class="docutils literal notranslate"><span class="pre">DataArray.interp_time()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.is_equidistant"><code class="docutils literal notranslate"><span class="pre">DataArray.is_equidistant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.isel"><code class="docutils literal notranslate"><span class="pre">DataArray.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.max"><code class="docutils literal notranslate"><span class="pre">DataArray.max()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.mean"><code class="docutils literal notranslate"><span class="pre">DataArray.mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.min"><code class="docutils literal notranslate"><span class="pre">DataArray.min()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.n_timesteps"><code class="docutils literal notranslate"><span class="pre">DataArray.n_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.name"><code class="docutils literal notranslate"><span class="pre">DataArray.name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.nanmax"><code class="docutils literal notranslate"><span class="pre">DataArray.nanmax()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.nanmean"><code class="docutils literal notranslate"><span class="pre">DataArray.nanmean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.nanmin"><code class="docutils literal notranslate"><span class="pre">DataArray.nanmin()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.nanquantile"><code class="docutils literal notranslate"><span class="pre">DataArray.nanquantile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.nanstd"><code class="docutils literal notranslate"><span class="pre">DataArray.nanstd()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.ndim"><code class="docutils literal notranslate"><span class="pre">DataArray.ndim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.ptp"><code class="docutils literal notranslate"><span class="pre">DataArray.ptp()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.quantile"><code class="docutils literal notranslate"><span class="pre">DataArray.quantile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.sel"><code class="docutils literal notranslate"><span class="pre">DataArray.sel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.shape"><code class="docutils literal notranslate"><span class="pre">DataArray.shape</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.squeeze"><code class="docutils literal notranslate"><span class="pre">DataArray.squeeze()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.start_time"><code class="docutils literal notranslate"><span class="pre">DataArray.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.std"><code class="docutils literal notranslate"><span class="pre">DataArray.std()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.timestep"><code class="docutils literal notranslate"><span class="pre">DataArray.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_dfs"><code class="docutils literal notranslate"><span class="pre">DataArray.to_dfs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_numpy"><code class="docutils literal notranslate"><span class="pre">DataArray.to_numpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_xarray"><code class="docutils literal notranslate"><span class="pre">DataArray.to_xarray()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.type"><code class="docutils literal notranslate"><span class="pre">DataArray.type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.unit"><code class="docutils literal notranslate"><span class="pre">DataArray.unit</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.values"><code class="docutils literal notranslate"><span class="pre">DataArray.values</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-api">DataArray Plotter API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotter"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotter.hist"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotter.hist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotter.line"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotter.line()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
@@ -300,7 +352,7 @@ including different ways of <em>selecting</em> data:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataarrays</strong> (<em>sequence of DataArrays</em>) – </p></li>
+<li><p><strong>dataarrays</strong> (<em>sequence</em><em> of </em><em>DataArrays</em>) – </p></li>
 <li><p><strong>keep</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – TODO Yet to be implemented, default: last</p></li>
 </ul>
 </dd>
@@ -734,7 +786,7 @@ to be selected, by default None</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+<li><p><strong>q</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Quantile or sequence of quantiles to compute,
 which must be between 0 and 1 inclusive.</p></li>
 <li><p><strong>axis</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
 </ul>
@@ -816,7 +868,7 @@ which must be between 0 and 1 inclusive.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>q</strong> (<em>array_like of float</em>) – Quantile or sequence of quantiles to compute,
+<li><p><strong>q</strong> (<em>array_like</em><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Quantile or sequence of quantiles to compute,
 which must be between 0 and 1 inclusive.</p></li>
 <li><p><strong>axis</strong> (<em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>None</em><em>)</em><em>, </em><em>optional</em>) – axis number or “time” or “space”, by default “time”=0</p></li>
 </ul>

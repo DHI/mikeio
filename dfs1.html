@@ -16,6 +16,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -49,9 +50,57 @@
 <li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Dfs1</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#grid-1d">Grid 1D</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfs1-api">Dfs1 API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#grid1d-api">Grid1D API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-grid1d-api">DataArray Plotter Grid1D API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfs1-api">Dfs1 API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.Dfs1"><code class="docutils literal notranslate"><span class="pre">Dfs1</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.append"><code class="docutils literal notranslate"><span class="pre">Dfs1.append()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.close"><code class="docutils literal notranslate"><span class="pre">Dfs1.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dfs1.deletevalue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.dx"><code class="docutils literal notranslate"><span class="pre">Dfs1.dx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.end_time"><code class="docutils literal notranslate"><span class="pre">Dfs1.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.items"><code class="docutils literal notranslate"><span class="pre">Dfs1.items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.latitude"><code class="docutils literal notranslate"><span class="pre">Dfs1.latitude</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.longitude"><code class="docutils literal notranslate"><span class="pre">Dfs1.longitude</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.n_items"><code class="docutils literal notranslate"><span class="pre">Dfs1.n_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.n_timesteps"><code class="docutils literal notranslate"><span class="pre">Dfs1.n_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.nx"><code class="docutils literal notranslate"><span class="pre">Dfs1.nx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.orientation"><code class="docutils literal notranslate"><span class="pre">Dfs1.orientation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.origin"><code class="docutils literal notranslate"><span class="pre">Dfs1.origin</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.read"><code class="docutils literal notranslate"><span class="pre">Dfs1.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.start_time"><code class="docutils literal notranslate"><span class="pre">Dfs1.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.time"><code class="docutils literal notranslate"><span class="pre">Dfs1.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.timestep"><code class="docutils literal notranslate"><span class="pre">Dfs1.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.write"><code class="docutils literal notranslate"><span class="pre">Dfs1.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs1.x0"><code class="docutils literal notranslate"><span class="pre">Dfs1.x0</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#grid1d-api">Grid1D API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.Grid1D"><code class="docutils literal notranslate"><span class="pre">Grid1D</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.dx"><code class="docutils literal notranslate"><span class="pre">Grid1D.dx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.find_index"><code class="docutils literal notranslate"><span class="pre">Grid1D.find_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.is_geo"><code class="docutils literal notranslate"><span class="pre">Grid1D.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">Grid1D.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.isel"><code class="docutils literal notranslate"><span class="pre">Grid1D.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.nx"><code class="docutils literal notranslate"><span class="pre">Grid1D.nx</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.projection"><code class="docutils literal notranslate"><span class="pre">Grid1D.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.projection_string"><code class="docutils literal notranslate"><span class="pre">Grid1D.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid1D.x"><code class="docutils literal notranslate"><span class="pre">Grid1D.x</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-grid1d-api">DataArray Plotter Grid1D API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterGrid1D"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid1D</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterGrid1D.hist"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid1D.hist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterGrid1D.imshow"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid1D.imshow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterGrid1D.line"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid1D.line()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterGrid1D.pcolormesh"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid1D.pcolormesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataarray._DataArrayPlotterGrid1D.timeseries"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid1D.timeseries()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dfs2.html">Dfs2</a></li>
