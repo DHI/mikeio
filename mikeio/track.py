@@ -123,10 +123,10 @@ def _extract_track(
             t1, t2 = t2, t1
 
             step = time_steps[dfsu_step]
-            for item in range(n_items):
+            for i, item in enumerate(item_numbers):
                 d, t2 = data_read_func(item, step)
                 d[d == deletevalue] = np.nan
-                d2[item, :] = d
+                d2[i, :] = d
 
             read_next = t_rel[i] > t2
 
