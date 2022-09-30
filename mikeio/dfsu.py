@@ -18,6 +18,7 @@ from mikeio.spatial.utils import xy_to_bbox
 
 from . import __dfs_version__
 from .base import EquidistantTimeSeries
+from .track import _extract_track
 from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
@@ -1165,6 +1166,12 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
 
 class Dfsu2DH(_Dfsu):
+    def _dfs_read_item_time_func(self, item: int, step: int):
+        dfs = DfsuFile.Open(self._filename)
+        itemdata = dfs.ReadItemTimeStep(item + 1, step)
+
+        return itemdata.Data, itemdata.Time
+
     def extract_track(self, track, items=None, method="nearest", dtype=np.float32):
         """
         Extract track data from a dfsu file
@@ -1203,157 +1210,25 @@ class Dfsu2DH(_Dfsu):
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
-        n_items = len(item_numbers)
-
         self._n_timesteps = dfs.NumberOfTimeSteps
         _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
-        deletevalue = self.deletevalue
-
-        if isinstance(track, str):
-            filename = track
-            if os.path.exists(filename):
-                _, ext = os.path.splitext(filename)
-                if ext == ".dfs0":
-                    df = Dfs0(filename).to_dataframe()
-                elif ext == ".csv":
-                    df = pd.read_csv(filename, index_col=0, parse_dates=True)
-                else:
-                    raise ValueError(f"{ext} files not supported (dfs0, csv)")
-
-                times = df.index
-                coords = df.iloc[:, 0:2].to_numpy(copy=True)
-            else:
-                raise ValueError(f"{filename} does not exist")
-        elif isinstance(track, Dataset):
-            times = track.time
-            coords = np.zeros(shape=(len(times), 2))
-            coords[:, 0] = track[0].to_numpy().copy()
-            coords[:, 1] = track[1].to_numpy().copy()
-        else:
-            assert isinstance(track, pd.DataFrame)
-            times = track.index
-            coords = track.iloc[:, 0:2].to_numpy(copy=True)
-
-        assert isinstance(
-            times, pd.DatetimeIndex
-        ), "The index must be a pandas.DatetimeIndex"
-        assert (
-            times.is_monotonic_increasing
-        ), "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
-
-        data_list = []
-        data_list.append(coords[:, 0])  # longitude
-        data_list.append(coords[:, 1])  # latitude
-        for item in range(n_items):
-            # Initialize an empty data block
-            data = np.empty(shape=(len(times)), dtype=dtype)
-            data[:] = np.nan
-            data_list.append(data)
-
-        if self.is_geo:
-            lon = coords[:, 0]
-            lon[lon < -180] = lon[lon < -180] + 360
-            lon[lon >= 180] = lon[lon >= 180] - 360
-            coords[:, 0] = lon
-
-        # track end (relative to dfsu)
-        t_rel = (times - self.end_time).total_seconds()
-        # largest idx for which (times - self.end_time)<=0
-        tmp = np.where(t_rel <= 0)[0]
-        if len(tmp) == 0:
-            raise ValueError("No time overlap! Track ends before dfsu starts!")
-        i_end = tmp[-1]
-
-        # track time relative to dfsu start
-        t_rel = (times - self.start_time).total_seconds()
-        tmp = np.where(t_rel >= 0)[0]
-        if len(tmp) == 0:
-            raise ValueError("No time overlap! Track starts after dfsu ends!")
-        i_start = tmp[0]  # smallest idx for which t_rel>=0
-
-        dfsu_step = int(np.floor(t_rel[i_start] / self.timestep))  # first step
-
-        # spatial interpolation
-        n_pts = 1 if method == "nearest" else 5
-        elem_ids, weights = self.geometry.get_2d_interpolant(
-            coords[i_start : (i_end + 1)], n_nearest=n_pts
+        return _extract_track(
+            deletevalue=self.deletevalue,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            timestep=self.timestep,
+            geometry=self.geometry,
+            n_elements=self.n_elements,
+            track=track,
+            items=items,
+            time_steps=time_steps,
+            item_numbers=item_numbers,
+            method=method,
+            dtype=dtype,
+            data_read_func=lambda item, step: self._dfs_read_item_time_func(item, step),
         )
-
-        # initialize dfsu data arrays
-        d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=dtype)
-        d2 = np.ndarray(shape=(n_items, self.n_elements), dtype=dtype)
-        t1 = 0.0
-        t2 = 0.0
-
-        # very first dfsu time step
-        step = time_steps[dfsu_step]
-        for item in range(n_items):
-            itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
-            t2 = itemdata.Time - 1e-10
-            # d = to_numpy(itemdata.Data)
-            d = itemdata.Data
-            d[d == deletevalue] = np.nan
-            d2[item, :] = d
-
-        def is_EOF(step):
-            return step >= self.n_timesteps
-
-        # loop over track points
-        for i_interp, i in enumerate(
-            trange(i_start, i_end + 1, disable=not self.show_progress)
-        ):
-            t_rel[i]  # time of point relative to dfsu start
-
-            read_next = t_rel[i] > t2
-
-            while (read_next == True) and (not is_EOF(dfsu_step + 1)):
-                dfsu_step = dfsu_step + 1
-
-                # swap new to old
-                d1, d2 = d2, d1
-                t1, t2 = t2, t1
-
-                step = time_steps[dfsu_step]
-                for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
-                    t2 = itemdata.Time
-                    # d = to_numpy(itemdata.Data)
-                    d = itemdata.Data
-                    d[d == deletevalue] = np.nan
-                    d2[item, :] = d
-
-                read_next = t_rel[i] > t2
-
-            if (read_next == True) and (is_EOF(dfsu_step)):
-                # cannot read next - no more timesteps in dfsu file
-                continue
-
-            w = (t_rel[i] - t1) / self.timestep  # time-weight
-            eid = elem_ids[i_interp]
-            if np.any(eid > 0):
-                dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
-                dati = dati + w * np.dot(d2[:, eid], weights[i_interp])
-            else:
-                dati = np.empty(shape=n_items, dtype=dtype)
-                dati[:] = np.nan
-
-            for item in range(n_items):
-                data_list[item + 2][i] = dati[item]
-
         dfs.Close()
-
-        items_out = []
-        if self.is_geo:
-            items_out.append(ItemInfo("Longitude"))
-            items_out.append(ItemInfo("Latitude"))
-        else:
-            items_out.append(ItemInfo("x"))
-            items_out.append(ItemInfo("y"))
-        for item in items:
-            items_out.append(item)
-
-        return Dataset(data_list, times, items_out)
 
 
 class Mesh(_UnstructuredFile):
