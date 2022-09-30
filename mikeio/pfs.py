@@ -172,21 +172,6 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=True):
     class PreserveDuplicatesLoader(yaml.loader.Loader):
         pass
 
-    # DOES NOT ALLOW DUPLICATES:
-    # def map_constructor_duplicates(loader, node, deep=False):
-    #     keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
-    #     vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
-    #     key_count = Counter(keys)
-    #     data = {}
-    #     for key, val in zip(keys, vals):
-    #         if key_count[key] > 1:
-    #             if key not in data:
-    #                 data[key] = []
-    #             data[key].append(val)
-    #         else:
-    #             data[key] = val
-    #     return data
-
     def map_constructor_duplicates(loader, node, deep=False):
         keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
         vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
