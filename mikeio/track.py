@@ -57,9 +57,7 @@ def _extract_track(
         times.is_monotonic_increasing
     ), "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
 
-    data_list = []
-    data_list.append(coords[:, 0])  # longitude
-    data_list.append(coords[:, 1])  # latitude
+    data_list = [coords[:, 0], coords[:, 1]]  # lon,lat
     for item in range(n_items):
         # Initialize an empty data block
         data = np.empty(shape=(len(times)), dtype=dtype)
@@ -72,19 +70,19 @@ def _extract_track(
         lon[lon >= 180] = lon[lon >= 180] - 360
         coords[:, 0] = lon
 
-    # track end (relative to dfsu)
+    # track end (relative time)
     t_rel = (times - end_time).total_seconds()
     # largest idx for which (times - self.end_time)<=0
     tmp = np.where(t_rel <= 0)[0]
     if len(tmp) == 0:
-        raise ValueError("No time overlap! Track ends before dfsu starts!")
+        raise ValueError("No time overlap!")
     i_end = tmp[-1]
 
-    # track time relative to dfsu start
+    # track time relative to start
     t_rel = (times - start_time).total_seconds()
     tmp = np.where(t_rel >= 0)[0]
     if len(tmp) == 0:
-        raise ValueError("No time overlap! Track starts after dfsu ends!")
+        raise ValueError("No time overlap!")
     i_start = tmp[0]  # smallest idx for which t_rel>=0
 
     dfsu_step = int(np.floor(t_rel[i_start] / timestep))  # first step
@@ -95,7 +93,7 @@ def _extract_track(
         coords[i_start : (i_end + 1)], n_nearest=n_pts
     )
 
-    # initialize dfsu data arrays
+    # initialize arrays
     d1 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
     d2 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
     t1 = 0.0
@@ -133,7 +131,7 @@ def _extract_track(
             read_next = t_rel[i] > t2
 
         if (read_next == True) and (is_EOF(dfsu_step)):
-            # cannot read next - no more timesteps in dfsu file
+            # cannot read next - no more timesteps
             continue
 
         w = (t_rel[i] - t1) / timestep  # time-weight
@@ -150,11 +148,10 @@ def _extract_track(
 
     items_out = []
     if geometry.is_geo:
-        items_out.append(ItemInfo("Longitude"))
-        items_out.append(ItemInfo("Latitude"))
+        items_out = [ItemInfo("Longitude"), ItemInfo("Latitude")]
     else:
-        items_out.append(ItemInfo("x"))
-        items_out.append(ItemInfo("y"))
+        items_out = [ItemInfo("x"), ItemInfo("y")]
+
     for item in items:
         items_out.append(item)
 
