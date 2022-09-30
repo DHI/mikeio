@@ -9,7 +9,7 @@ import yaml
 import pandas as pd
 
 
-def read_pfs(filename, encoding="cp1252"):
+def read_pfs(filename, encoding="cp1252", unique_keywords=True):
     """Read a pfs file to a Pfs object for further analysis/manipulation
 
     Parameters
@@ -18,13 +18,21 @@ def read_pfs(filename, encoding="cp1252"):
         File name including full path to the pfs file.
     encoding: str, optional
         How is the pfs file encoded? By default 'cp1252'
+    unique_keywords: bool, optional
+        Should the keywords in a section be unique? Some tools e.g. the
+        MIKE Plot Composer allows non-unique keywords.
+        by default True.
 
     Returns
     -------
     mikeio.Pfs
         Pfs object which can be used for inspection, manipulation and writing
     """
-    return Pfs(filename, encoding=encoding)
+    return Pfs(filename, encoding=encoding, unique_keywords=unique_keywords)
+
+
+class PfsRepeatedKeywordParams(list):
+    pass
 
 
 class PfsSection(SimpleNamespace):
@@ -160,7 +168,7 @@ class PfsSection(SimpleNamespace):
         return cls(d)
 
 
-def parse_yaml_preserving_duplicates(src):
+def parse_yaml_preserving_duplicates(src, unique_keywords=True):
     class PreserveDuplicatesLoader(yaml.loader.Loader):
         pass
 
@@ -179,6 +187,25 @@ def parse_yaml_preserving_duplicates(src):
     #             data[key] = val
     #     return data
 
+    def map_constructor_duplicates(loader, node, deep=False):
+        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
+        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
+        key_count = Counter(keys)
+        data = {}
+        for key, val in zip(keys, vals):
+            if key_count[key] > 1:
+                if isinstance(val, dict):
+                    if key not in data:
+                        data[key] = []
+                    data[key].append(val)
+                else:
+                    if key not in data:
+                        data[key] = PfsRepeatedKeywordParams()
+                    data[key].append(val)
+            else:
+                data[key] = val
+        return data
+
     def map_constructor_duplicate_sections(loader, node, deep=False):
         keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
         vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
@@ -196,6 +223,11 @@ def parse_yaml_preserving_duplicates(src):
                 data[key] = val
         return data
 
+    constructor = (
+        map_constructor_duplicate_sections
+        if unique_keywords
+        else map_constructor_duplicates
+    )
     PreserveDuplicatesLoader.add_constructor(
         yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
         map_constructor_duplicate_sections,
@@ -218,13 +250,17 @@ class Pfs:
         name of the root element (=target) MUST be specified.
         If the input is a file the names are instead read from the file,
         by default None.
+    unique_keywords: bool, optional
+        Should the keywords in a section be unique? Some tools e.g. the
+        MIKE Plot Composer allows non-unique keywords.
+        by default True.
     """
 
-    def __init__(self, input, encoding="cp1252", names=None):
+    def __init__(self, input, encoding="cp1252", names=None, unique_keywords=True):
         if isinstance(input, (str, Path)):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
-            sections, names = self._read_pfs_file(input, encoding)
+            sections, names = self._read_pfs_file(input, encoding, unique_keywords)
         else:
             sections, names = self._parse_non_file_input(input, names)
 
@@ -319,12 +355,11 @@ class Pfs:
                 d[n] = target.to_dict()
         return d
 
-    def _read_pfs_file(self, filename, encoding):
+    def _read_pfs_file(self, filename, encoding, unique_keywords=True):
         self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
-            # d = yaml.load(yml, Loader=yaml.CLoader)
-            target_list = parse_yaml_preserving_duplicates(yml)
+            target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
         except Exception as e:
@@ -519,6 +554,10 @@ class Pfs:
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 self._write_nested_PfsSections(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
+            elif isinstance(v, PfsRepeatedKeywordParams):
+                for subv in v:
+                    subv = self._prepare_value_for_write(subv)
+                    f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
             else:
                 v = self._prepare_value_for_write(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
