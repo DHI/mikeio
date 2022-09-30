@@ -219,6 +219,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=True):
                     data[key].append(val)
                 else:
                     warnings.warn(f"Keyword {key} defined multiple times. Value: {val}")
+                    data[key] = val
             else:
                 data[key] = val
         return data
@@ -230,7 +231,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=True):
     )
     PreserveDuplicatesLoader.add_constructor(
         yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        map_constructor_duplicate_sections,
+        constructor=constructor,
     )
     return yaml.load(src, PreserveDuplicatesLoader)
 
