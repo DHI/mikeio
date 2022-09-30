@@ -101,10 +101,10 @@ def _extract_track(
 
     # very first dfsu time step
     step = time_steps[dfsu_step]
-    for item in range(n_items):
+    for i, item in enumerate(item_numbers):
         d, t2 = data_read_func(item, step)
         d[d == deletevalue] = np.nan
-        d2[item, :] = d
+        d2[i, :] = d
 
     def is_EOF(step):
         return step >= len(time_steps)

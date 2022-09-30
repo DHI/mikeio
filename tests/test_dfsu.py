@@ -837,6 +837,7 @@ def test_extract_track():
     items = ["Sign. Wave Height", "Wind speed"]
     track2 = dfs.extract_track(csv_file, items=items)
     assert track2[2].values[23] == approx(3.6284972794399653)
+    assert track["Wind speed"].values[23] == approx(12.4430027008056)
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
     assert track3[2].values[23] == approx(3.6469911492412463)
