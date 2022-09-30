@@ -103,6 +103,7 @@ def _extract_track(
     step = time_steps[dfsu_step]
     for i, item in enumerate(item_numbers):
         d, t2 = data_read_func(item, step)
+        t2 = t2 - 1e-10  # TODO what is this operation doing?
         d[d == deletevalue] = np.nan
         d2[i, :] = d
 
@@ -110,10 +111,10 @@ def _extract_track(
         return step >= len(time_steps)
 
     # loop over track points
-    for i_interp, i in enumerate(range(i_start, i_end + 1)):
-        t_rel[i]  # time of point relative to dfsu start
+    for i_interp, t in enumerate(range(i_start, i_end + 1)):
+        t_rel[t]  # time of point relative to dfsu start
 
-        read_next = t_rel[i] > t2
+        read_next = t_rel[t] > t2
 
         while (read_next == True) and (not is_EOF(dfsu_step + 1)):
             dfsu_step = dfsu_step + 1
@@ -128,13 +129,13 @@ def _extract_track(
                 d[d == deletevalue] = np.nan
                 d2[i, :] = d
 
-            read_next = t_rel[i] > t2
+            read_next = t_rel[t] > t2
 
         if (read_next == True) and (is_EOF(dfsu_step)):
             # cannot read next - no more timesteps
             continue
 
-        w = (t_rel[i] - t1) / timestep  # time-weight
+        w = (t_rel[t] - t1) / timestep  # time-weight
         eid = elem_ids[i_interp]
         if np.any(eid > 0):
             dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
@@ -144,7 +145,7 @@ def _extract_track(
             dati[:] = np.nan
 
         for item in range(n_items):
-            data_list[item + 2][i] = dati[item]
+            data_list[item + 2][t] = dati[item]
 
     items_out = []
     if geometry.is_geo:
