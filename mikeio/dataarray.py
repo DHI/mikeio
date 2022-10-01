@@ -148,7 +148,7 @@ class _DataArrayPlotter:
         return ax
 
     def _label_txt(self):
-        return f"{self.da.name} [{self.da.unit.name}]"
+        return f"{self.da.name} [{self.da.unit.short_name}]"
 
     def _get_first_step_values(self):
         if self.da.n_timesteps > 1:
