@@ -417,6 +417,7 @@ class Pfs:
                 s = s.replace("]", ":")
 
         s = s.replace("//", "")
+        s = s.replace("\t", " ")
 
         # check for pipes in filenames
         if s.count("|") == 2:
