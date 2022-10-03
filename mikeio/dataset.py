@@ -1243,12 +1243,15 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def _concat_time(self, other, copy=True) -> "Dataset":
         self._check_all_items_match(other)
-        if not np.all(self.shape[1:] == other.shape[1:]): # CHECK DOES NOT WORK FOR SINGLE TIMESTEPS AS TIME DIM IS DROPPED
+        if not np.all(self.shape[1:] == other.shape[1:]):  # CHECK DOES NOT WORK FOR SINGLE TIMESTEPS AS TIME DIM IS DROPPED
             raise ValueError("Shape of the datasets must match (except time dimension)")
-        if "time" not in self.dims: # DIM CHECK DOES NOT WORK. USE ATTRIBUTE CHECK INSTEAD?
+        if hasattr(self, "time"): # using attribute instead of dim checking. Works
+            ds = self.copy() if copy else self
+        else:
             raise ValueError(
-                "Datasets cannot be concatenated as they have no time axis!"
+                "Datasets cannot be concatenated as they have no time attribute!"
             )
+
         ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
