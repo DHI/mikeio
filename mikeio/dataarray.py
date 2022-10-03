@@ -1512,7 +1512,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         return da
 
-    def __da_read_item_time_func(self, item: int, step: int):
+    def __dataarray_read_item_time_func(
+        self, item: int, step: int
+    ) -> Tuple[np.ndarray, float]:
+        "Used by _extract_track"
         # Ignore item argument
         data = self.isel(time=step).to_numpy()
         time = (self.time[step] - self.time[0]).total_seconds()
@@ -1542,25 +1545,22 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         from .track import _extract_track
 
-        if not isinstance(self.geometry, GeometryFM):
-            raise NotImplementedError(
-                "Only implemented for 2d flexible mesh geometries"
-            )
-
         return _extract_track(
             deletevalue=self.deletevalue,
             start_time=self.start_time,
             end_time=self.end_time,
             timestep=self.timestep,
             geometry=self.geometry,
-            n_elements=self.shape[1], # TODO is there a better way to find out this?
+            n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
             items=[self.item],
             time_steps=list(range(self.n_timesteps)),
             item_numbers=[0],
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__da_read_item_time_func(item, step),
+            data_read_func=lambda item, step: self.__dataarray_read_item_time_func(
+                item, step
+            ),
         )
 
     def interp_time(

@@ -1,27 +1,33 @@
+from datetime import datetime
 import os
+from typing import Callable, Optional, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
 from .dataset import Dataset
 from .dfs0 import Dfs0
 from .eum import ItemInfo
+from .spatial.FM_geometry import GeometryFM
 
 
 def _extract_track(
     *,
-    deletevalue,
-    start_time,
-    end_time,
-    timestep,
-    geometry,
-    track,
-    items,
-    item_numbers,
-    time_steps,
-    n_elements,
-    method,
+    deletevalue: float,
+    start_time: datetime,
+    end_time: datetime,
+    timestep: float,
+    geometry: GeometryFM,
+    track: Union[str, Dataset, pd.DataFrame],
+    items: Sequence[ItemInfo],
+    item_numbers: Sequence[int],
+    time_steps: Sequence[int],
+    n_elements: int,
+    method: str,
     dtype,
-    data_read_func,
+    data_read_func: Callable[[int, int], Tuple[np.ndarray, float]],
 ) -> Dataset:
+
+    if not isinstance(geometry, GeometryFM):
+        raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
 
     n_items = len(item_numbers)
 
@@ -147,13 +153,12 @@ def _extract_track(
         for item in range(n_items):
             data_list[item + 2][t] = dati[item]
 
-    items_out = []
     if geometry.is_geo:
         items_out = [ItemInfo("Longitude"), ItemInfo("Latitude")]
     else:
         items_out = [ItemInfo("x"), ItemInfo("y")]
 
-    for item in items:
-        items_out.append(item)
+    for item_info in items:
+        items_out.append(item_info)
 
     return Dataset(data_list, times, items_out)

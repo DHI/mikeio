@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Iterable, Sequence, Union, Mapping, Optional
+from typing import Iterable, Sequence, Tuple, Union, Mapping, Optional
 import warnings
 import numpy as np
 import pandas as pd
@@ -1009,7 +1009,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return ds
 
-    def __ds_read_item_time_func(self, item: int, step: int):
+    def __dataset_read_item_time_func(
+        self, item: int, step: int
+    ) -> Tuple[np.ndarray, float]:
+        "Used by _extract_track"
+
         data = self[item].isel(time=step).to_numpy()
         time = (self.time[step] - self.time[0]).total_seconds()
 
@@ -1038,11 +1042,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         from .track import _extract_track
 
-        if not isinstance(self.geometry, GeometryFM):
-            raise NotImplementedError(
-                "Only implemented for 2d flexible mesh geometries"
-            )
-
         item_numbers = list(range(self.n_items))
         time_steps = list(range(self.n_timesteps))
 
@@ -1059,7 +1058,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             item_numbers=item_numbers,
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__ds_read_item_time_func(item, step),
+            data_read_func=lambda item, step: self.__dataset_read_item_time_func(
+                item, step
+            ),
         )
 
     def interp_time(
