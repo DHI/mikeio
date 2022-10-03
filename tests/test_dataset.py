@@ -1260,7 +1260,7 @@ def test_concat_dataarray_by_time():
 
 def test_concat_by_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
-    ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset
+    ds2 = mikeio.read("tests/testdata/tide2.dfs1", time=0) + 0.5  # add offset
     ds3 = mikeio.Dataset.concat([ds1, ds2])
 
     assert isinstance(ds3, mikeio.Dataset)
