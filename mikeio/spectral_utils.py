@@ -137,6 +137,7 @@ def plot_2dspectrum(
 
     elif plot_type in ("patch", "shaded", "box"):
         shading = "gouraud" if plot_type == "shaded" else "auto"
+        ax.grid(False)  # Remove major grid
         colorax = ax.pcolormesh(
             dirs,
             freq,
