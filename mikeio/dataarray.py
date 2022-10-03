@@ -1516,6 +1516,57 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         return da
 
+    def __dataarray_read_item_time_func(
+        self, item: int, step: int
+    ) -> Tuple[np.ndarray, float]:
+        "Used by _extract_track"
+        # Ignore item argument
+        data = self.isel(time=step).to_numpy()
+        time = (self.time[step] - self.time[0]).total_seconds()
+
+        return data, time
+
+    def extract_track(self, track, method="nearest", dtype=np.float32):
+        """
+        Extract data along a moving track
+
+        Parameters
+        ---------
+        track: pandas.DataFrame
+            with DatetimeIndex and (x, y) of track points as first two columns
+            x,y coordinates must be in same coordinate system as dfsu
+        track: str
+            filename of csv or dfs0 file containing t,x,y
+        method: str, optional
+            Spatial interpolation method ('nearest' or 'inverse_distance')
+            default='nearest'
+
+        Returns
+        -------
+        Dataset
+            A dataset with data dimension t
+            The first two items will be x- and y- coordinates of track
+        """
+        from .track import _extract_track
+
+        return _extract_track(
+            deletevalue=self.deletevalue,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            timestep=self.timestep,
+            geometry=self.geometry,
+            n_elements=self.shape[1],  # TODO is there a better way to find out this?
+            track=track,
+            items=[self.item],
+            time_steps=list(range(self.n_timesteps)),
+            item_numbers=[0],
+            method=method,
+            dtype=dtype,
+            data_read_func=lambda item, step: self.__dataarray_read_item_time_func(
+                item, step
+            ),
+        )
+
     def interp_time(
         self,
         dt: Union[float, pd.DatetimeIndex, "DataArray"],

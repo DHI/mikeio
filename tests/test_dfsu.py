@@ -838,9 +838,49 @@ def test_extract_track():
     items = ["Sign. Wave Height", "Wind speed"]
     track2 = dfs.extract_track(csv_file, items=items)
     assert track2[2].values[23] == approx(3.6284972794399653)
+    assert track["Wind speed"].values[23] == approx(12.4430027008056)
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
     assert track3[2].values[23] == approx(3.6469911492412463)
+
+
+# TODO consider move to test_dataset.py
+def test_extract_track_from_dataset():
+    ds = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")
+    csv_file = "tests/testdata/track_extraction_case02_track.csv"
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
+    track = ds.extract_track(df)
+
+    assert track[2].values[23] == approx(3.6284972794399653)
+    assert sum(np.isnan(track[2].to_numpy())) == 26
+    assert np.all(track[1].to_numpy() == df.latitude.values)
+
+    ds2 = ds[["Sign. Wave Height", "Wind speed"]]
+    track2 = ds2.extract_track(csv_file)
+    assert track2[2].values[23] == approx(3.6284972794399653)
+
+    track3 = ds2.extract_track(csv_file, method="inverse_distance")
+    assert track3[2].values[23] == approx(3.6469911492412463)
+
+
+# TODO consider move to test_datarray.py
+def test_extract_track_from_dataarray():
+    da = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")[0]
+    csv_file = "tests/testdata/track_extraction_case02_track.csv"
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
+    track = da.extract_track(df)
+
+    assert track[2].values[23] == approx(3.6284972794399653)
+    assert sum(np.isnan(track[2].to_numpy())) == 26
+    assert np.all(track[1].to_numpy() == df.latitude.values)
 
 
 def test_extract_bad_track():
