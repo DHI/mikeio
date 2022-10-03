@@ -375,6 +375,34 @@ def test_non_unique_keywords():
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
+    # last value will be kept
+    assert pfs.BoundaryExtractor.z_min == 19
+
+
+def test_non_unique_keywords_allowed():
+    fn = "tests/testdata/pfs/nonunique.pfs"
+    pfs = mikeio.Pfs(fn, unique_keywords=False)
+
+    assert len(pfs.BoundaryExtractor.POINT_1) == 2
+    assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
+
+    assert len(pfs.BoundaryExtractor.z_min) == 3
+    assert pfs.BoundaryExtractor.z_min == [-3000, 9, 19]
+
+
+def test_non_unique_keywords_read_write(tmpdir):
+    fn1 = "tests/testdata/pfs/nonunique.pfs"
+    pfs1 = mikeio.Pfs(fn1, unique_keywords=False)
+
+    fn2 = os.path.join(tmpdir.dirname, "nonunique_out.pfs")
+    pfs1.write(fn2)
+
+    pfs2 = mikeio.Pfs(fn2, unique_keywords=False)
+
+    d1 = pfs1.BoundaryExtractor.to_dict()
+    d2 = pfs2.BoundaryExtractor.to_dict()
+    assert d1 == d2
+
 
 def test_illegal_pfs():
     fn = "tests/testdata/pfs/illegal.pfs"
