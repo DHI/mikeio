@@ -172,13 +172,16 @@
 <h2>Pfs API<a class="headerlink" href="#pfs-api" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.read_pfs">
-<span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">read_pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#read_pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.read_pfs" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">read_pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#read_pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.read_pfs" title="Permalink to this definition"></a></dt>
 <dd><p>Read a pfs file to a Pfs object for further analysis/manipulation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> or </em><em>Path</em>) – File name including full path to the pfs file.</p></li>
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – How is the pfs file encoded? By default ‘cp1252’</p></li>
+<li><p><strong>unique_keywords</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Should the keywords in a section be unique? Some tools e.g. the
+MIKE Plot Composer allows non-unique keywords.
+by default True.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -192,7 +195,7 @@
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Pfs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs" title="Permalink to this definition"></a></dt>
 <dd><p>Create a Pfs object for reading, writing and manipulating pfs files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -204,6 +207,9 @@ to be read or dictionary-like structure.</p></li>
 name of the root element (=target) MUST be specified.
 If the input is a file the names are instead read from the file,
 by default None.</p></li>
+<li><p><strong>unique_keywords</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Should the keywords in a section be unique? Some tools e.g. the
+MIKE Plot Composer allows non-unique keywords.
+by default True.</p></li>
 </ul>
 </dd>
 </dl>

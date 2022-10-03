@@ -96,7 +96,7 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 
-<div class="viewcode-block" id="read_pfs"><a class="viewcode-back" href="../../pfs.html#mikeio.read_pfs">[docs]</a><span class="k">def</span> <span class="nf">read_pfs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;cp1252&quot;</span><span class="p">):</span>
+<div class="viewcode-block" id="read_pfs"><a class="viewcode-back" href="../../pfs.html#mikeio.read_pfs">[docs]</a><span class="k">def</span> <span class="nf">read_pfs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;cp1252&quot;</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Read a pfs file to a Pfs object for further analysis/manipulation</span>
 
 <span class="sd">    Parameters</span>
@@ -105,13 +105,21 @@
 <span class="sd">        File name including full path to the pfs file.</span>
 <span class="sd">    encoding: str, optional</span>
 <span class="sd">        How is the pfs file encoded? By default &#39;cp1252&#39;</span>
+<span class="sd">    unique_keywords: bool, optional</span>
+<span class="sd">        Should the keywords in a section be unique? Some tools e.g. the</span>
+<span class="sd">        MIKE Plot Composer allows non-unique keywords.</span>
+<span class="sd">        by default True.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    mikeio.Pfs</span>
 <span class="sd">        Pfs object which can be used for inspection, manipulation and writing</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">Pfs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">Pfs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="n">unique_keywords</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">PfsRepeatedKeywordParams</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="k">pass</span>
 
 
 <div class="viewcode-block" id="PfsSection"><a class="viewcode-back" href="../../pfs.html#mikeio.PfsSection">[docs]</a><span class="k">class</span> <span class="nc">PfsSection</span><span class="p">(</span><span class="n">SimpleNamespace</span><span class="p">):</span>
@@ -247,24 +255,28 @@
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div></div>
 
 
-<span class="k">def</span> <span class="nf">parse_yaml_preserving_duplicates</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">parse_yaml_preserving_duplicates</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="k">class</span> <span class="nc">PreserveDuplicatesLoader</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">Loader</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="c1"># DOES NOT ALLOW DUPLICATES:</span>
-    <span class="c1"># def map_constructor_duplicates(loader, node, deep=False):</span>
-    <span class="c1">#     keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]</span>
-    <span class="c1">#     vals = [loader.construct_object(node, deep=deep) for _, node in node.value]</span>
-    <span class="c1">#     key_count = Counter(keys)</span>
-    <span class="c1">#     data = {}</span>
-    <span class="c1">#     for key, val in zip(keys, vals):</span>
-    <span class="c1">#         if key_count[key] &gt; 1:</span>
-    <span class="c1">#             if key not in data:</span>
-    <span class="c1">#                 data[key] = []</span>
-    <span class="c1">#             data[key].append(val)</span>
-    <span class="c1">#         else:</span>
-    <span class="c1">#             data[key] = val</span>
-    <span class="c1">#     return data</span>
+    <span class="k">def</span> <span class="nf">map_constructor_duplicates</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_object</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_object</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
+        <span class="n">key_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">vals</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">key_count</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">PfsRepeatedKeywordParams</span><span class="p">()</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">return</span> <span class="n">data</span>
 
     <span class="k">def</span> <span class="nf">map_constructor_duplicate_sections</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_object</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">value</span><span class="p">]</span>
@@ -279,13 +291,19 @@
                     <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> defined multiple times. Value: </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
         <span class="k">return</span> <span class="n">data</span>
 
+    <span class="n">constructor</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">map_constructor_duplicate_sections</span>
+        <span class="k">if</span> <span class="n">unique_keywords</span>
+        <span class="k">else</span> <span class="n">map_constructor_duplicates</span>
+    <span class="p">)</span>
     <span class="n">PreserveDuplicatesLoader</span><span class="o">.</span><span class="n">add_constructor</span><span class="p">(</span>
         <span class="n">yaml</span><span class="o">.</span><span class="n">resolver</span><span class="o">.</span><span class="n">BaseResolver</span><span class="o">.</span><span class="n">DEFAULT_MAPPING_TAG</span><span class="p">,</span>
-        <span class="n">map_constructor_duplicate_sections</span><span class="p">,</span>
+        <span class="n">constructor</span><span class="o">=</span><span class="n">constructor</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">PreserveDuplicatesLoader</span><span class="p">)</span>
 
@@ -305,13 +323,17 @@
 <span class="sd">        name of the root element (=target) MUST be specified.</span>
 <span class="sd">        If the input is a file the names are instead read from the file,</span>
 <span class="sd">        by default None.</span>
+<span class="sd">    unique_keywords: bool, optional</span>
+<span class="sd">        Should the keywords in a section be unique? Some tools e.g. the</span>
+<span class="sd">        MIKE Plot Composer allows non-unique keywords.</span>
+<span class="sd">        by default True.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;cp1252&quot;</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;cp1252&quot;</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;names cannot be given as argument if input is a file&quot;</span><span class="p">)</span>
-            <span class="n">sections</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pfs_file</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
+            <span class="n">sections</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_pfs_file</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">sections</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_non_file_input</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span>
 
@@ -406,12 +428,11 @@
                 <span class="n">d</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_pfs_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_read_pfs_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">yml</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pfs2yaml</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="p">)</span>
-            <span class="c1"># d = yaml.load(yml, Loader=yaml.CLoader)</span>
-            <span class="n">target_list</span> <span class="o">=</span> <span class="n">parse_yaml_preserving_duplicates</span><span class="p">(</span><span class="n">yml</span><span class="p">)</span>
+            <span class="n">target_list</span> <span class="o">=</span> <span class="n">parse_yaml_preserving_duplicates</span><span class="p">(</span><span class="n">yml</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -607,6 +628,10 @@
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lvl_prefix</span> <span class="o">*</span> <span class="n">lvl</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_write_nested_PfsSections</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">lvl</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lvl_prefix</span> <span class="o">*</span> <span class="n">lvl</span><span class="si">}</span><span class="s2">EndSect  // </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">PfsRepeatedKeywordParams</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">subv</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+                    <span class="n">subv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_value_for_write</span><span class="p">(</span><span class="n">subv</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lvl_prefix</span> <span class="o">*</span> <span class="n">lvl</span><span class="si">}{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">subv</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_value_for_write</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lvl_prefix</span> <span class="o">*</span> <span class="n">lvl</span><span class="si">}{</span><span class="n">k</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
