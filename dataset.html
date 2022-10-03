@@ -63,6 +63,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.dims"><code class="docutils literal notranslate"><span class="pre">Dataset.dims</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.dropna"><code class="docutils literal notranslate"><span class="pre">Dataset.dropna()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.end_time"><code class="docutils literal notranslate"><span class="pre">Dataset.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.extract_track"><code class="docutils literal notranslate"><span class="pre">Dataset.extract_track()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.flipud"><code class="docutils literal notranslate"><span class="pre">Dataset.flipud()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.geometry"><code class="docutils literal notranslate"><span class="pre">Dataset.geometry</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.insert"><code class="docutils literal notranslate"><span class="pre">Dataset.insert()</span></code></a></li>
@@ -497,6 +498,30 @@ For convenience, the Dataset provides access to these common properties:</p>
 <dt class="sig sig-object py" id="mikeio.Dataset.end_time">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.Dataset.end_time" title="Permalink to this definition"></a></dt>
 <dd><p>Last time instance (as datetime)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.Dataset.extract_track">
+<span class="sig-name descname"><span class="pre">extract_track</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">track</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method='nearest'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset.html#Dataset.extract_track"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dataset.extract_track" title="Permalink to this definition"></a></dt>
+<dd><p>Extract data along a moving track</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>track</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – with DatetimeIndex and (x, y) of track points as first two columns
+x,y coordinates must be in same coordinate system as dfsu</p></li>
+<li><p><strong>track</strong> – filename of csv or dfs0 file containing t,x,y</p></li>
+<li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Spatial interpolation method (‘nearest’ or ‘inverse_distance’)
+default=’nearest’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dataset with data dimension t
+The first two items will be x- and y- coordinates of track</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">

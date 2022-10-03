@@ -1603,6 +1603,57 @@
 
         <span class="k">return</span> <span class="n">da</span></div>
 
+    <span class="k">def</span> <span class="nf">__dataarray_read_item_time_func</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="s2">&quot;Used by _extract_track&quot;</span>
+        <span class="c1"># Ignore item argument</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">step</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">step</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">time</span>
+
+<div class="viewcode-block" id="DataArray.extract_track"><a class="viewcode-back" href="../../dataarray.html#mikeio.DataArray.extract_track">[docs]</a>    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract data along a moving track</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        track: pandas.DataFrame</span>
+<span class="sd">            with DatetimeIndex and (x, y) of track points as first two columns</span>
+<span class="sd">            x,y coordinates must be in same coordinate system as dfsu</span>
+<span class="sd">        track: str</span>
+<span class="sd">            filename of csv or dfs0 file containing t,x,y</span>
+<span class="sd">        method: str, optional</span>
+<span class="sd">            Spatial interpolation method (&#39;nearest&#39; or &#39;inverse_distance&#39;)</span>
+<span class="sd">            default=&#39;nearest&#39;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dataset</span>
+<span class="sd">            A dataset with data dimension t</span>
+<span class="sd">            The first two items will be x- and y- coordinates of track</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">.track</span> <span class="kn">import</span> <span class="n">_extract_track</span>
+
+        <span class="k">return</span> <span class="n">_extract_track</span><span class="p">(</span>
+            <span class="n">deletevalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">deletevalue</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span>
+            <span class="n">timestep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">,</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+            <span class="n">n_elements</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="c1"># TODO is there a better way to find out this?</span>
+            <span class="n">track</span><span class="o">=</span><span class="n">track</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">],</span>
+            <span class="n">time_steps</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">)),</span>
+            <span class="n">item_numbers</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">data_read_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dataarray_read_item_time_func</span><span class="p">(</span>
+                <span class="n">item</span><span class="p">,</span> <span class="n">step</span>
+            <span class="p">),</span>
+        <span class="p">)</span></div>
+
 <div class="viewcode-block" id="DataArray.interp_time"><a class="viewcode-back" href="../../dataarray.html#mikeio.DataArray.interp_time">[docs]</a>    <span class="k">def</span> <span class="nf">interp_time</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">],</span>

@@ -105,6 +105,7 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
 <span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">EquidistantTimeSeries</span>
+<span class="kn">from</span> <span class="nn">.track</span> <span class="kn">import</span> <span class="n">_extract_track</span>
 <span class="kn">from</span> <span class="nn">.dfsutil</span> <span class="kn">import</span> <span class="n">_get_item_info</span><span class="p">,</span> <span class="n">_valid_item_numbers</span><span class="p">,</span> <span class="n">_valid_timesteps</span>
 <span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span>
 <span class="kn">from</span> <span class="nn">.dfs0</span> <span class="kn">import</span> <span class="n">Dfs0</span>
@@ -1252,6 +1253,12 @@
 
 
 <div class="viewcode-block" id="Dfsu2DH"><a class="viewcode-back" href="../../dfsu-2d.html#mikeio.dfsu.Dfsu2DH">[docs]</a><span class="k">class</span> <span class="nc">Dfsu2DH</span><span class="p">(</span><span class="n">_Dfsu</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_dfs_read_item_time_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsuFile</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
+        <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span><span class="p">,</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
+
 <div class="viewcode-block" id="Dfsu2DH.extract_track"><a class="viewcode-back" href="../../dfsu-2d.html#mikeio.dfsu.Dfsu2DH.extract_track">[docs]</a>    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract track data from a dfsu file</span>
@@ -1290,157 +1297,25 @@
 
         <span class="n">item_numbers</span> <span class="o">=</span> <span class="n">_valid_item_numbers</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
         <span class="n">items</span> <span class="o">=</span> <span class="n">_get_item_info</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">item_numbers</span><span class="p">)</span>
-        <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">time_steps</span> <span class="o">=</span> <span class="n">_valid_timesteps</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">time_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 
-        <span class="n">deletevalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deletevalue</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">filename</span> <span class="o">=</span> <span class="n">track</span>
-            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.dfs0&quot;</span><span class="p">:</span>
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">Dfs0</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
-                <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s2">&quot;.csv&quot;</span><span class="p">:</span>
-                    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ext</span><span class="si">}</span><span class="s2"> files not supported (dfs0, csv)&quot;</span><span class="p">)</span>
-
-                <span class="n">times</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
-                <span class="n">coords</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
-            <span class="n">times</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">time</span>
-            <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">track</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-            <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">track</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">track</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
-            <span class="n">times</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">index</span>
-            <span class="n">coords</span> <span class="o">=</span> <span class="n">track</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">times</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span>
-        <span class="p">),</span> <span class="s2">&quot;The index must be a pandas.DatetimeIndex&quot;</span>
-        <span class="k">assert</span> <span class="p">(</span>
-            <span class="n">times</span><span class="o">.</span><span class="n">is_monotonic_increasing</span>
-        <span class="p">),</span> <span class="s2">&quot;The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track().&quot;</span>
-
-        <span class="n">data_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>  <span class="c1"># longitude</span>
-        <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>  <span class="c1"># latitude</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-            <span class="c1"># Initialize an empty data block</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">times</span><span class="p">)),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-            <span class="n">data</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-            <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_geo</span><span class="p">:</span>
-            <span class="n">lon</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
-            <span class="n">lon</span><span class="p">[</span><span class="n">lon</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">]</span> <span class="o">=</span> <span class="n">lon</span><span class="p">[</span><span class="n">lon</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mi">180</span><span class="p">]</span> <span class="o">+</span> <span class="mi">360</span>
-            <span class="n">lon</span><span class="p">[</span><span class="n">lon</span> <span class="o">&gt;=</span> <span class="mi">180</span><span class="p">]</span> <span class="o">=</span> <span class="n">lon</span><span class="p">[</span><span class="n">lon</span> <span class="o">&gt;=</span> <span class="mi">180</span><span class="p">]</span> <span class="o">-</span> <span class="mi">360</span>
-            <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">lon</span>
-
-        <span class="c1"># track end (relative to dfsu)</span>
-        <span class="n">t_rel</span> <span class="o">=</span> <span class="p">(</span><span class="n">times</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-        <span class="c1"># largest idx for which (times - self.end_time)&lt;=0</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t_rel</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No time overlap! Track ends before dfsu starts!&quot;</span><span class="p">)</span>
-        <span class="n">i_end</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="c1"># track time relative to dfsu start</span>
-        <span class="n">t_rel</span> <span class="o">=</span> <span class="p">(</span><span class="n">times</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-        <span class="n">tmp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">t_rel</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No time overlap! Track starts after dfsu ends!&quot;</span><span class="p">)</span>
-        <span class="n">i_start</span> <span class="o">=</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># smallest idx for which t_rel&gt;=0</span>
-
-        <span class="n">dfsu_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">t_rel</span><span class="p">[</span><span class="n">i_start</span><span class="p">]</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">))</span>  <span class="c1"># first step</span>
-
-        <span class="c1"># spatial interpolation</span>
-        <span class="n">n_pts</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;nearest&quot;</span> <span class="k">else</span> <span class="mi">5</span>
-        <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span>
-            <span class="n">coords</span><span class="p">[</span><span class="n">i_start</span> <span class="p">:</span> <span class="p">(</span><span class="n">i_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">n_nearest</span><span class="o">=</span><span class="n">n_pts</span>
+        <span class="k">return</span> <span class="n">_extract_track</span><span class="p">(</span>
+            <span class="n">deletevalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">deletevalue</span><span class="p">,</span>
+            <span class="n">start_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
+            <span class="n">end_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">end_time</span><span class="p">,</span>
+            <span class="n">timestep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">,</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
+            <span class="n">n_elements</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span>
+            <span class="n">track</span><span class="o">=</span><span class="n">track</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+            <span class="n">time_steps</span><span class="o">=</span><span class="n">time_steps</span><span class="p">,</span>
+            <span class="n">item_numbers</span><span class="o">=</span><span class="n">item_numbers</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+            <span class="n">data_read_func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs_read_item_time_func</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">step</span><span class="p">),</span>
         <span class="p">)</span>
-
-        <span class="c1"># initialize dfsu data arrays</span>
-        <span class="n">d1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">d2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_items</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-        <span class="n">t1</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="n">t2</span> <span class="o">=</span> <span class="mf">0.0</span>
-
-        <span class="c1"># very first dfsu time step</span>
-        <span class="n">step</span> <span class="o">=</span> <span class="n">time_steps</span><span class="p">[</span><span class="n">dfsu_step</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-            <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-            <span class="n">t2</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span> <span class="o">-</span> <span class="mf">1e-10</span>
-            <span class="c1"># d = to_numpy(itemdata.Data)</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
-            <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">==</span> <span class="n">deletevalue</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-            <span class="n">d2</span><span class="p">[</span><span class="n">item</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">d</span>
-
-        <span class="k">def</span> <span class="nf">is_EOF</span><span class="p">(</span><span class="n">step</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">step</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span>
-
-        <span class="c1"># loop over track points</span>
-        <span class="k">for</span> <span class="n">i_interp</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-            <span class="n">trange</span><span class="p">(</span><span class="n">i_start</span><span class="p">,</span> <span class="n">i_end</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_progress</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="n">t_rel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># time of point relative to dfsu start</span>
-
-            <span class="n">read_next</span> <span class="o">=</span> <span class="n">t_rel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">t2</span>
-
-            <span class="k">while</span> <span class="p">(</span><span class="n">read_next</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_EOF</span><span class="p">(</span><span class="n">dfsu_step</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
-                <span class="n">dfsu_step</span> <span class="o">=</span> <span class="n">dfsu_step</span> <span class="o">+</span> <span class="mi">1</span>
-
-                <span class="c1"># swap new to old</span>
-                <span class="n">d1</span><span class="p">,</span> <span class="n">d2</span> <span class="o">=</span> <span class="n">d2</span><span class="p">,</span> <span class="n">d1</span>
-                <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span> <span class="o">=</span> <span class="n">t2</span><span class="p">,</span> <span class="n">t1</span>
-
-                <span class="n">step</span> <span class="o">=</span> <span class="n">time_steps</span><span class="p">[</span><span class="n">dfsu_step</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-                    <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
-                    <span class="n">t2</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
-                    <span class="c1"># d = to_numpy(itemdata.Data)</span>
-                    <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
-                    <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">==</span> <span class="n">deletevalue</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-                    <span class="n">d2</span><span class="p">[</span><span class="n">item</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">d</span>
-
-                <span class="n">read_next</span> <span class="o">=</span> <span class="n">t_rel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">t2</span>
-
-            <span class="k">if</span> <span class="p">(</span><span class="n">read_next</span> <span class="o">==</span> <span class="kc">True</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">is_EOF</span><span class="p">(</span><span class="n">dfsu_step</span><span class="p">)):</span>
-                <span class="c1"># cannot read next - no more timesteps in dfsu file</span>
-                <span class="k">continue</span>
-
-            <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_rel</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span>  <span class="c1"># time-weight</span>
-            <span class="n">eid</span> <span class="o">=</span> <span class="n">elem_ids</span><span class="p">[</span><span class="n">i_interp</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">eid</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
-                <span class="n">dati</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">w</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d1</span><span class="p">[:,</span> <span class="n">eid</span><span class="p">],</span> <span class="n">weights</span><span class="p">[</span><span class="n">i_interp</span><span class="p">])</span>
-                <span class="n">dati</span> <span class="o">=</span> <span class="n">dati</span> <span class="o">+</span> <span class="n">w</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">d2</span><span class="p">[:,</span> <span class="n">eid</span><span class="p">],</span> <span class="n">weights</span><span class="p">[</span><span class="n">i_interp</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">dati</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">n_items</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
-                <span class="n">dati</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-
-            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-                <span class="n">data_list</span><span class="p">[</span><span class="n">item</span> <span class="o">+</span> <span class="mi">2</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">dati</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
-
-        <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
-
-        <span class="n">items_out</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_geo</span><span class="p">:</span>
-            <span class="n">items_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Longitude&quot;</span><span class="p">))</span>
-            <span class="n">items_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Latitude&quot;</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">items_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">))</span>
-            <span class="n">items_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;y&quot;</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
-            <span class="n">items_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">data_list</span><span class="p">,</span> <span class="n">times</span><span class="p">,</span> <span class="n">items_out</span><span class="p">)</span></div></div>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div></div>
 
 
 <div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../mesh.html#mikeio.dfsu.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">(</span><span class="n">_UnstructuredFile</span><span class="p">):</span>
