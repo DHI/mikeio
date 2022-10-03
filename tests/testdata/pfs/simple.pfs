@@ -9,7 +9,7 @@
 
   z_min = -3000
   z_max = 0
-  npoints_horizontal = 20
+  npoints_horizontal = 	20
   npoints_vertical = 300
   fill = false
 
