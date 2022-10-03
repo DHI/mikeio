@@ -390,7 +390,7 @@ class _UnstructuredFile:
     @property
     def valid_codes(self):
         """Unique list of node codes"""
-        return list(set(self.codes))
+        return list(set(self.geometry.codes))
 
     @property
     def boundary_codes(self):
@@ -476,12 +476,12 @@ class _UnstructuredFile:
         """
         nc = self.node_coordinates
         if code is not None:
-            if code not in self.valid_codes:
+            if code not in self.geometry.valid_codes:
                 print(
                     f"Selected code: {code} is not valid. Valid codes: {self.valid_codes}"
                 )
                 raise Exception
-            return nc[self.codes == code]
+            return nc[self.geometry.codes == code]
         return nc
 
     @wraps(GeometryFM.elements_to_geometry)

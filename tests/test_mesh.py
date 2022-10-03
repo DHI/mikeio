@@ -67,7 +67,7 @@ def test_get_land_node_coordinates(tri_mesh):
 
     msh = tri_mesh
 
-    nc = msh.node_coordinates[msh.codes == 1]
+    nc = msh.node_coordinates[msh.geometry.codes == 1]
 
     assert nc.shape == (134, 3)
 
@@ -98,15 +98,15 @@ def test_set_codes(tri_mesh):
 
     assert msh.geometry.codes[2] == 7
 
-    new_codes = msh.codes.copy()
+    new_codes = msh.geometry.codes.copy()
     new_codes[new_codes == 7] = 9
     msh.geometry.codes = new_codes  # assign from copy
 
-    assert msh.codes[2] == 9
+    assert msh.geometry.codes[2] == 9
 
     with pytest.raises(ValueError):
         # not same length
-        msh.codes = codes[0:4]
+        msh.geometry.codes = codes[0:4]
 
 
 def test_write(tri_mesh, tmpdir):
