@@ -428,7 +428,7 @@ def _to_polygons(node_coordinates, element_table):
             nidx = nodes[i]
             pcoords[i, :] = node_coordinates[nidx, 0:2]
 
-        polygon = Polygon(pcoords, True)
+        polygon = Polygon(pcoords, closed=True)
         polygons.append(polygon)
     return polygons
 
