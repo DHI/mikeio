@@ -375,8 +375,8 @@ def test_non_unique_keywords():
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
-    # last value will be kept
-    assert pfs.BoundaryExtractor.z_min == 19
+    # first value will be kept (like MIKE FM)
+    assert pfs.BoundaryExtractor.z_min == -3000
 
 
 def test_non_unique_keywords_allowed():
