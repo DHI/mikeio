@@ -456,7 +456,9 @@ class Pfs:
                 key = key.strip()
                 value = s[(idx + 1) :]
 
-                if s.count("'") == 2:  # This is a quoted string and not a list
+                if (
+                    s[0] == "'" and s[-1] == "'"
+                ):  # This is a quoted string and not a list
                     s = s
                 else:
                     if "," in value:

@@ -448,6 +448,23 @@ EndSect // ENGINE
     assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
     assert len(pfs.ENGINE.fill_list) == 2
     assert pfs.ENGINE.fill_list[0] == False
+    assert pfs.ENGINE.fill_list[1] == "TEST"
+
+
+def test_read_mixed_array2():
+
+    text = """
+[ENGINE]
+  fill_list = 'dsd', 0, 0.0, false
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 4
+    assert pfs.ENGINE.fill_list[0] == "dsd"
+    assert pfs.ENGINE.fill_list[1] == 0
+    assert pfs.ENGINE.fill_list[2] == 0.0
+    assert pfs.ENGINE.fill_list[3] == False
 
 
 def test_read_array():
