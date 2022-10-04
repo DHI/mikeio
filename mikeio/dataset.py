@@ -1245,10 +1245,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self._check_all_items_match(other)
         # assuming time is always first dimension we can skip / keep it by bool
         start_dim = int("time" in self.dims)
-        if not np.all(self.shape[start_dim:] == other.shape[int("time" in other.dims):]):  
-        #if not np.all(self.shape[1:] == other.shape[1:]):  
+        if not np.all(
+            self.shape[start_dim:] == other.shape[int("time" in other.dims) :]
+        ):
+            # if not np.all(self.shape[1:] == other.shape[1:]):
             raise ValueError("Shape of the datasets must match (except time dimension)")
-        if hasattr(self, "time"): # using attribute instead of dim checking. Works
+        if hasattr(self, "time"):  # using attribute instead of dim checking. Works
             ds = self.copy() if copy else self
         else:
             raise ValueError(
@@ -1266,7 +1268,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-        #    # if there is an overlap "other" data will be used!
+            #    # if there is an overlap "other" data will be used!
             newdata[j][idx1] = ds[j].to_numpy()
             newdata[j][idx2] = other[j].to_numpy()
 

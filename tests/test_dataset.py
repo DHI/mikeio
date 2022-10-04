@@ -1298,9 +1298,10 @@ def test_concat_by_time_inconsistent_shape_not_possible():
 # TODO: implement this
 def test_concat_by_time_no_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=0)
-    ds2 = mikeio.read("tests/testdata/tide2.dfs1", time=1) 
-    with pytest.raises(ValueError, match="no time axis"):
-        mikeio.Dataset.concat([ds1, ds2])
+    ds2 = mikeio.read("tests/testdata/tide2.dfs1", time=1)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds3.n_timesteps == 2
 
 
 def test_concat_by_time_2():
