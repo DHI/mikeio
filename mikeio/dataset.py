@@ -1243,7 +1243,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def _concat_time(self, other, copy=True) -> "Dataset":
         self._check_all_items_match(other)
-        if not np.all(self.shape[1:] == other.shape[1:]):  # CHECK DOES NOT WORK FOR SINGLE TIMESTEPS AS TIME DIM IS DROPPED
+        # assuming time is always first dimension we can skip / keep it by bool
+        start_dim = int("time" in self.dims)
+        if not np.all(self.shape[start_dim:] == other.shape[int("time" in other.dims):]):  
+        #if not np.all(self.shape[1:] == other.shape[1:]):  
             raise ValueError("Shape of the datasets must match (except time dimension)")
         if hasattr(self, "time"): # using attribute instead of dim checking. Works
             ds = self.copy() if copy else self
@@ -1252,20 +1255,18 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 "Datasets cannot be concatenated as they have no time attribute!"
             )
 
-        ds = self.copy() if copy else self
-
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
         s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
         df12 = pd.concat([s1, s2], axis=1)
 
         newtime = df12.index
         newdata = self.create_empty_data(
-            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
+            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[start_dim:]
         )
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            # if there is an overlap "other" data will be used!
+        #    # if there is an overlap "other" data will be used!
             newdata[j][idx1] = ds[j].to_numpy()
             newdata[j][idx2] = other[j].to_numpy()
 
