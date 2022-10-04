@@ -432,3 +432,34 @@ EndSect // ENGINE
     pfs = mikeio.Pfs(StringIO(text))
 
     assert pfs.ENGINE.option == ["foo", "bar"]
+
+
+def test_read_mixed_array():
+
+    text = """
+[ENGINE]
+  advanced= false
+  fill_list = false, 'TEST'
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert pfs.ENGINE.advanced == False
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 2
+    assert pfs.ENGINE.fill_list[0] == False
+
+
+def test_read_array():
+
+    text = """
+[ENGINE]
+  fill_list = 1, 2
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 2
+    assert pfs.ENGINE.fill_list[0] == 1
+    assert pfs.ENGINE.fill_list[1] == 2
