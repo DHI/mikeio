@@ -243,7 +243,7 @@ class Pfs:
     """
 
     def __init__(self, input, encoding="cp1252", names=None, unique_keywords=True):
-        if isinstance(input, (str, Path)):
+        if isinstance(input, (str, Path)) or hasattr(input, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
             sections, names = self._read_pfs_file(input, encoding, unique_keywords)
@@ -404,8 +404,11 @@ class Pfs:
 
     def _pfs2yaml(self, filename, encoding=None) -> str:
 
-        with (open(filename, encoding=encoding)) as f:
-            pfsstring = f.read()
+        if hasattr(filename, "read"):  # To read in memory strings StringIO
+            pfsstring = filename.read()
+        else:
+            with (open(filename, encoding=encoding)) as f:
+                pfsstring = f.read()
 
         lines = pfsstring.split("\n")
 
