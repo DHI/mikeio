@@ -1,3 +1,4 @@
+from io import StringIO
 import sys
 import os
 import pytest
@@ -419,3 +420,97 @@ def test_mdf():
         pfs.data[2].POLYGONS.Data
         == "8 8 Untitled 359236.79224376212 6168403.076453222 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 3 38 32 25 8 Untitled 367530.58488032949 6174892.7846391136 0 0 -1 -1 16711680 65535 3 1 700000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 14 34 25 32 39 1 37 35 31 23 26 17 30 22 24 8 Untitled 358191.86702583247 6164004.5695307152 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 2 1 36 8 Untitled 356300.2080261847 6198016.2887355704 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 2 9 0 9 Ndr Roese 355957.23455536627 6165986.6140259188 0 0 -1 -1 16711680 65535 3 1 180000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 6 33 37 36 39 38 34 16 Area of interest 355794.66401566722 6167799.1149176853 0 0 -1 -1 16711680 65535 3 1 50000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 1 40 8 Untitled 353529.91916129418 6214840.5979535272 0 0 -1 -1 16711680 65535 3 1 700000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 8 41 8 7 27 4 6 11 12 8 Untitled 351165.00127937191 6173083.0605236143 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 1 2 "
     )
+
+
+def test_read_in_memory_string():
+
+    text = """
+[ENGINE]
+  option = foo,bar
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert pfs.ENGINE.option == ["foo", "bar"]
+
+
+def test_read_mixed_array():
+
+    text = """
+[ENGINE]
+  advanced= false
+  fill_list = false, 'TEST'
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert pfs.ENGINE.advanced == False
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 2
+    assert pfs.ENGINE.fill_list[0] == False
+    assert pfs.ENGINE.fill_list[1] == "TEST"
+
+
+def test_read_mixed_array2():
+
+    text = """
+[ENGINE]
+  fill_list = 'dsd', 0, 0.0, false
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 4
+    assert pfs.ENGINE.fill_list[0] == "dsd"
+    assert pfs.ENGINE.fill_list[1] == 0
+    assert pfs.ENGINE.fill_list[2] == 0.0
+    assert pfs.ENGINE.fill_list[3] == False
+
+
+def test_read_mixed_array3():
+
+    text = """
+[ENGINE]
+  fill_list = 'dsd', 0, 0.0, "str2", false, 'str3'
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 6
+    assert pfs.ENGINE.fill_list[0] == "dsd"
+    assert pfs.ENGINE.fill_list[1] == 0
+    assert pfs.ENGINE.fill_list[2] == 0.0
+    assert pfs.ENGINE.fill_list[3] == "str2"
+    assert pfs.ENGINE.fill_list[4] == False
+    assert pfs.ENGINE.fill_list[5] == "str3"
+
+
+def test_read_array():
+
+    text = """
+[ENGINE]
+  fill_list = 1, 2
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 2
+    assert pfs.ENGINE.fill_list[0] == 1
+    assert pfs.ENGINE.fill_list[1] == 2
+
+
+def test_read_string_array():
+
+    text = """
+[ENGINE]
+  fill_list = 'foo', 'bar', 'baz'
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
+    assert len(pfs.ENGINE.fill_list) == 3
+    assert pfs.ENGINE.fill_list[0] == "foo"
+    assert pfs.ENGINE.fill_list[1] == "bar"
+    assert pfs.ENGINE.fill_list[2] == "baz"
