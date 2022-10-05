@@ -203,8 +203,11 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=True):
                         data[key] = []
                     data[key].append(val)
                 else:
-                    warnings.warn(f"Keyword {key} defined multiple times. Value: {val}")
-                    data[key] = val
+                    warnings.warn(
+                        f"Keyword {key} defined multiple times (first will be used). Value: {val}"
+                    )
+                    if key not in data:
+                        data[key] = val
             else:
                 data[key] = val
         return data
