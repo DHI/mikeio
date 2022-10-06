@@ -1409,6 +1409,18 @@ def test_concat_dfsu3d():
     assert np.all(ds3._zn == ds._zn)
 
 
+def test_concat_dfsu3d_single_timesteps():
+    filename = "tests/testdata/basin_3d.dfsu"
+    ds = mikeio.read(filename)
+    ds1 = mikeio.read(filename, time=0)
+    ds2 = mikeio.read(filename, time=2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.start_time == ds.start_time
+    assert ds3.end_time == ds.end_time
+
+
 def test_merge_same_name_error():
     filename = "tests/testdata/HD2D.dfsu"
     ds1 = mikeio.read(filename, items=0)
