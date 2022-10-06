@@ -1417,8 +1417,21 @@ def test_concat_dfsu3d_single_timesteps():
     ds3 = mikeio.Dataset.concat([ds1, ds2])
 
     assert ds1.n_items == ds2.n_items == ds3.n_items
-    assert ds3.start_time == ds.start_time
-    assert ds3.end_time == ds.end_time
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+
+
+def test_concat_dfs2_single_timesteps():
+    filename = "tests/testdata/single_row.dfs2"
+    ds = mikeio.read(filename)
+    ds1 = mikeio.read(filename, time=0)
+    ds2 = mikeio.read(filename, time=2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+    assert ds3.n_timesteps == 2
 
 
 def test_merge_same_name_error():
