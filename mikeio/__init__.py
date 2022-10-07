@@ -19,7 +19,7 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.2.rc0"
+__version__ = "1.2.0"
 __dfs_version__: int = 120
 
 

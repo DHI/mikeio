@@ -5,13 +5,13 @@ with open("mikeio/README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="mikeio",
-    version="1.2.rc0",
+    version="1.2.0",
     install_requires=[
         "mikecore>=0.2.1",
         "numpy>=1.15.0",  # first version with numpy.quantile
         "pandas>1.0",
         "scipy>1.0",
-        "pyyaml",
+        "PyYAML",
         "tqdm",
         "xarray",
     ],
