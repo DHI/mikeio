@@ -326,9 +326,9 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     The list of input files have to be sorted, i.e. in chronological order
     """
 
-    dfs_i_a = DfsFileFactory.DfsGenericOpen(infilenames[0])
+    dfs_i_a = DfsFileFactory.DfsGenericOpen(str(infilenames[0]))
 
-    dfs_o = _clone(infilenames[0], outfilename)
+    dfs_o = _clone(str(infilenames[0]), str(outfilename))
 
     n_items = len(dfs_i_a.ItemInfo)
     dfs_i_a.Close()
@@ -337,7 +337,7 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
 
     for i, infilename in enumerate(tqdm(infilenames, disable=not show_progress)):
 
-        dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+        dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
         t_axis = dfs_i.FileInfo.TimeAxis
         n_time_steps = t_axis.NumberOfTimeSteps
         dt = t_axis.TimeStep
@@ -353,7 +353,7 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
         if keep == "last":
 
             if i < (len(infilenames) - 1):
-                dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
+                dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
                 nf = dfs_n.FileInfo.TimeAxis.StartDateTime
                 next_start_time = datetime(
                     nf.year, nf.month, nf.day, nf.hour, nf.minute, nf.second
@@ -455,7 +455,7 @@ def extract(
     >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity")
     >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
     """
-    dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
+    dfs_i = DfsFileFactory.DfsGenericOpenEdit(str(infilename))
 
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
@@ -472,8 +472,8 @@ def extract(
         item_numbers.insert(0, 0)
 
     dfs_o = _clone(
-        infilename,
-        outfilename,
+        str(infilename),
+        str(outfilename),
         start_time=file_start_new,
         timestep=timestep,
         items=item_numbers,

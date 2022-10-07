@@ -1299,8 +1299,9 @@ def test_concat_by_time_inconsistent_shape_not_possible():
 def test_concat_by_time_no_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=0)
     ds2 = mikeio.read("tests/testdata/tide2.dfs1", time=1)
-    with pytest.raises(ValueError, match="no time axis"):
-        mikeio.Dataset.concat([ds1, ds2])
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds3.n_timesteps == 2
 
 
 def test_concat_by_time_2():
@@ -1406,6 +1407,31 @@ def test_concat_dfsu3d():
     assert ds3.geometry.n_elements == ds1.geometry.n_elements
     assert ds3._zn.shape == ds._zn.shape
     assert np.all(ds3._zn == ds._zn)
+
+
+def test_concat_dfsu3d_single_timesteps():
+    filename = "tests/testdata/basin_3d.dfsu"
+    ds = mikeio.read(filename)
+    ds1 = mikeio.read(filename, time=0)
+    ds2 = mikeio.read(filename, time=2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+
+
+def test_concat_dfs2_single_timesteps():
+    filename = "tests/testdata/single_row.dfs2"
+    ds = mikeio.read(filename)
+    ds1 = mikeio.read(filename, time=0)
+    ds2 = mikeio.read(filename, time=2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+    assert ds3.n_timesteps == 2
 
 
 def test_merge_same_name_error():

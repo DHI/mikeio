@@ -1297,13 +1297,19 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def _concat_time(self, other, copy=True) -> "Dataset":
         self._check_all_items_match(other)
-        if not np.all(self.shape[1:] == other.shape[1:]):
+        # assuming time is always first dimension we can skip / keep it by bool
+        start_dim = int("time" in self.dims)
+        if not np.all(
+            self.shape[start_dim:] == other.shape[int("time" in other.dims) :]
+        ):
+            # if not np.all(self.shape[1:] == other.shape[1:]):
             raise ValueError("Shape of the datasets must match (except time dimension)")
-        if "time" not in self.dims:
+        if hasattr(self, "time"):  # using attribute instead of dim checking. Works
+            ds = self.copy() if copy else self
+        else:
             raise ValueError(
-                "Datasets cannot be concatenated as they have no time axis!"
+                "Datasets cannot be concatenated as they have no time attribute!"
             )
-        ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
         s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
@@ -1311,18 +1317,18 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         newtime = df12.index
         newdata = self.create_empty_data(
-            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
+            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[start_dim:]
         )
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            # if there is an overlap "other" data will be used!
+            #    # if there is an overlap "other" data will be used!
             newdata[j][idx1] = ds[j].to_numpy()
             newdata[j][idx2] = other[j].to_numpy()
 
         zn = None
         if self._zn is not None:
-            zshape = (len(newtime), self._zn.shape[1])
+            zshape = (len(newtime), self._zn.shape[start_dim])
             zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
             zn[idx1, :] = self._zn
             zn[idx2, :] = other._zn
