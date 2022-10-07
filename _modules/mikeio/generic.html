@@ -413,9 +413,9 @@
 <span class="sd">    The list of input files have to be sorted, i.e. in chronological order</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">dfs_i_a</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilenames</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">dfs_i_a</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilenames</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-    <span class="n">dfs_o</span> <span class="o">=</span> <span class="n">_clone</span><span class="p">(</span><span class="n">infilenames</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outfilename</span><span class="p">)</span>
+    <span class="n">dfs_o</span> <span class="o">=</span> <span class="n">_clone</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilenames</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">outfilename</span><span class="p">))</span>
 
     <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dfs_i_a</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">)</span>
     <span class="n">dfs_i_a</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
@@ -424,7 +424,7 @@
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">infilename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">infilenames</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">show_progress</span><span class="p">)):</span>
 
-        <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilename</span><span class="p">)</span>
+        <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">))</span>
         <span class="n">t_axis</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span>
         <span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">t_axis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="n">t_axis</span><span class="o">.</span><span class="n">TimeStep</span>
@@ -440,7 +440,7 @@
         <span class="k">if</span> <span class="n">keep</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
 
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">infilenames</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">dfs_n</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilenames</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                <span class="n">dfs_n</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilenames</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
                 <span class="n">nf</span> <span class="o">=</span> <span class="n">dfs_n</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">StartDateTime</span>
                 <span class="n">next_start_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span>
                     <span class="n">nf</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="n">nf</span><span class="o">.</span><span class="n">month</span><span class="p">,</span> <span class="n">nf</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="n">nf</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span> <span class="n">nf</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span> <span class="n">nf</span><span class="o">.</span><span class="n">second</span>
@@ -542,7 +542,7 @@
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfsu&#39;, &#39;f_out.dfsu&#39;, items=&quot;Salinity&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; extract(&#39;f_in.dfsu&#39;, &#39;f_out.dfsu&#39;, end=&#39;2018-2-1 00:00&#39;, items=&quot;Salinity&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpenEdit</span><span class="p">(</span><span class="n">infilename</span><span class="p">)</span>
+    <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpenEdit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">))</span>
 
     <span class="n">is_layered_dfsu</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="s2">&quot;Z coordinate&quot;</span>
 
@@ -559,8 +559,8 @@
         <span class="n">item_numbers</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">dfs_o</span> <span class="o">=</span> <span class="n">_clone</span><span class="p">(</span>
-        <span class="n">infilename</span><span class="p">,</span>
-        <span class="n">outfilename</span><span class="p">,</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">outfilename</span><span class="p">),</span>
         <span class="n">start_time</span><span class="o">=</span><span class="n">file_start_new</span><span class="p">,</span>
         <span class="n">timestep</span><span class="o">=</span><span class="n">timestep</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="n">item_numbers</span><span class="p">,</span>
