@@ -260,6 +260,29 @@ def test_read_write(tmpdir):
     _ = mikeio.Pfs(outfilename)  # try to parse it also
 
 
+def test_read_write_filenames(tmpdir):
+    infilename = "tests/testdata/pfs/filenames.pfs"
+    pfs1 = mikeio.Pfs(infilename)
+    outfilename = os.path.join(tmpdir.dirname, "filenames_out.pfs")
+    pfs1.write(outfilename)
+    assert_txt_files_match(infilename, outfilename)
+    _ = mikeio.Pfs(outfilename)  # try to parse it also
+
+
+def test_read_write_filenames_modified(tmpdir):
+    infilename = "tests/testdata/pfs/filenames.pfs"
+    pfs1 = mikeio.Pfs(infilename)
+    pfs1.FILE_NAMES.file5 = r"..\..\newfile5.dfs0"
+    pfs1.FILE_NAMES.file6 = "|../newfile6.dfs0|"
+    outfilename = os.path.join(tmpdir.dirname, "filenames_out.pfs")
+    pfs1.write(outfilename)
+
+    pfs2 = mikeio.Pfs(outfilename)
+    d1 = pfs1.to_dict()
+    d2 = pfs2.to_dict()
+    assert d1 == d2
+
+
 def test_sw():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
