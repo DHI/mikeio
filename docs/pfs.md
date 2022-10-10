@@ -118,15 +118,40 @@ It is very simple to modify an existing keyword:
 ```
 
 
-
-
 ### Add new key-value pair
 
+A new key-value pair can be added, like in a dictionary, in this way: 
 
-### Add new section
+```python
+>>> pfs.txconc.Setup["NewKeyword"] = 12.0
+```
 
 
-## Write 
+### Add new section as a copy of another section
+
+Often a PfsSection is added using an existing PfsSection as a template. 
+
+```python
+>>> s = pfs.txconc.Setup.File_1.copy()
+>>> s.InputFile = '|.\tide3.dfs1|'
+>>> pfs.txconc.Setup["File_3"] = s
+```
+
+
+
+### Add new section from a dictionary
+
+A PfsSection can be created from a dictionary and then added to another PfsSection like any other key-value pair: 
+
+```python
+>>> d = {'InputFile': '|.\\tide4.dfs1|', 'Items': 1}
+>>> s = mikeio.PfsSection(d)
+>>> pfs.txconc.Setup["File_4"] = s
+```
+
+
+
+## Write to file
 
 A Pfs object can be written to a PFS file using the `write` method. 
 
