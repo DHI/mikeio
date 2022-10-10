@@ -114,6 +114,15 @@ def test_pfssection_copy(d1):
     assert sct3.key1 == 3
     assert sct1.key1 == 2
 
+def test_pfssection_len(d1):
+    sct = mikeio.PfsSection(d1)
+    assert len(sct) == 5
+
+def test_pfssection_contains(d1):
+    sct = mikeio.PfsSection(d1)
+    assert "key1" in sct
+    assert "key2" not in sct
+
 
 def test_pfssection_copy_nested(d1):
     sct1 = mikeio.PfsSection(d1)

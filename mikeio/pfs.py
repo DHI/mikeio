@@ -21,7 +21,7 @@ def read_pfs(filename, encoding="cp1252", unique_keywords=True):
     unique_keywords: bool, optional
         Should the keywords in a section be unique? Some tools e.g. the
         MIKE Plot Composer allows non-unique keywords.
-        by default True.
+        by default True (issue warnings if non-unique keywords are present and use only first)
 
     Returns
     -------
@@ -44,6 +44,12 @@ class PfsSection(SimpleNamespace):
     def __repr__(self) -> str:
         # return json.dumps(self.to_dict(), indent=2)
         return yaml.dump(self.to_dict(), sort_keys=False)
+
+    def __len__(self):
+        return len(self.__dict__)
+
+    def __contains__(self, key):
+        return key in self.keys()
 
     def __getitem__(self, key):
         return getattr(self, key)
@@ -72,23 +78,31 @@ class PfsSection(SimpleNamespace):
             self.__setattr__(key, value)
 
     def pop(self, key, *args):
-        # if key in self.keys():
-        #     self.__delattr__(key)
+        """If key is in the dictionary, remove it and return its 
+        value, else return default. If default is not given and 
+        key is not in the dictionary, a KeyError is raised."""
         return self.__dict__.pop(key, *args)
 
     def get(self, key, *args):
+        """Return the value for key if key is in the PfsSection,
+        else default. If default is not given, it defaults to None,
+        so that this method never raises a KeyError."""
         return self.__dict__.get(key, *args)
 
     def clear(self):
+        """Remove all items from the PfsSection."""
         return self.__dict__.clear()
 
     def keys(self):
+        """Return a new view of the PfsSection's keys"""
         return self.__dict__.keys()
 
     def values(self):
+        """Return a new view of the PfsSection's values."""
         return self.__dict__.values()
 
     def items(self):
+        """Return a new view of the PfsSection's items ((key, value) pairs)"""
         return self.__dict__.items()
 
     # TODO: better name
@@ -109,6 +123,7 @@ class PfsSection(SimpleNamespace):
                 self[k] = new_value
 
     def copy(self):
+        """Return a copy of the PfsSection."""
         # is all this necessary???
         d = self.__dict__.copy()
         for key, value in d.items():
@@ -117,12 +132,26 @@ class PfsSection(SimpleNamespace):
         return self.__class__(d)
 
     def to_Pfs(self, name: str):
+        """Convert to a Pfs object (with this PfsSection as the target)
+
+        Parameters
+        ----------
+        name : str
+            Name of the target (=key that refer to this PfsSection)
+
+        Returns
+        -------
+        Pfs
+            A Pfs object
+        """
         return Pfs(self, names=[name])
 
     def to_file(self, filename, name: str) -> None:
+        """Write to a Pfs file (providing a target name)"""
         Pfs(self, names=[name]).write(filename)
 
     def to_dict(self):
+        """Convert to (nested) dict (as a copy)"""
         d = self.__dict__.copy()
         for key, value in d.items():
             if isinstance(value, self.__class__):
@@ -130,6 +159,18 @@ class PfsSection(SimpleNamespace):
         return d
 
     def to_dataframe(self, prefix: str = None) -> pd.DataFrame:
+        """Output enumerated subsections to a DataFrame
+
+        Parameters
+        ----------
+        prefix : str, optional
+            The prefix of the enumerated sections, e.g. "File_", by default None
+
+        Returns
+        -------
+        pd.DataFrame
+            The enumerated subsections as a DataFrame
+        """
         if prefix is not None:
             sections = [
                 k for k in self.keys() if k.startswith(prefix) and k[-1].isdigit()
@@ -242,7 +283,7 @@ class Pfs:
     unique_keywords: bool, optional
         Should the keywords in a section be unique? Some tools e.g. the
         MIKE Plot Composer allows non-unique keywords.
-        by default True.
+        by default True (issue warnings if non-unique keywords are present and use only first)
     """
 
     def __init__(self, input, encoding="cp1252", names=None, unique_keywords=True):
