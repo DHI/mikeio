@@ -23,4 +23,4 @@ If applicable, add screenshots to help explain your problem.
 
 **System information:**
  - Python version
- - MIKE version
+ - MIKE IO version
