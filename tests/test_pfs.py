@@ -541,10 +541,9 @@ EndSect  // DERIVED_VARIABLE_106
     pfs.write(filename)
 
     with open(filename) as f:
-        lines = f.read().split("\n")
-
-    assert (
-        # TODO find line number
-        lines[8].strip()
-        == "description = 'alfa_PC_T, ''light'' adjusted alfa_PC, ugC/gC*m2/uE'"
-    )
+        for line in f:
+            if "description" in line:
+                assert (
+                    line.strip()
+                    == "description = 'alfa_PC_T, ''light'' adjusted alfa_PC, ugC/gC*m2/uE'"
+                )
