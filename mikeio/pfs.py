@@ -459,14 +459,13 @@ class Pfs:
                 key = key.strip()
                 value = s[(idx + 1) :].strip()
 
-                if (
-                    value[0] == "'" and value[-1] == "'"
-                ):  # This is a quoted string and not a list
+                if len(value) > 2:
+                    value = value.replace("''", '"')
 
-                    s = s
-                else:
-                    if "," in value:
-                        value = f"[{value}]"
+                if value[0] == "'" and value[-1] == "'" and value.count("'") == 2:
+                    pass
+                elif "," in value:
+                    value = f"[{value}]"
 
                 if key == "start_time":
                     v = eval(value)
@@ -514,6 +513,8 @@ class Pfs:
                     v = f"{v}"
                 else:
                     v = f"'{v}'"
+
+                v = v.replace('"', "''")
 
         elif isinstance(v, bool):
             v = str(v).lower()  # stick to MIKE lowercase bool notation

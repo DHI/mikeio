@@ -533,7 +533,7 @@ EndSect  // DERIVED_VARIABLE_106
     pfs = mikeio.Pfs(StringIO(text))
     assert (
         pfs.DERIVED_VARIABLE_106.description
-        == "alfa_PC_T, 'light' adjusted alfa_PC, ugC/gC*m2/uE"
+        == 'alfa_PC_T, "light" adjusted alfa_PC, ugC/gC*m2/uE'
     )
 
     filename = os.path.join(tmpdir, "quotes.pfs")
