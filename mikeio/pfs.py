@@ -459,17 +459,18 @@ class Pfs:
                 key = key.strip()
                 value = s[(idx + 1) :].strip()
 
-                if len(value) > 2:
+                if key == "start_time":
+                    value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+
+                if len(value) > 2:  # ignore foo = ''
                     value = value.replace("''", '"')
 
                 if value[0] == "'" and value[-1] == "'" and value.count("'") == 2:
-                    pass
-                elif "," in value:
+                    pass  # quoted single string
+                elif "," in value:  # array
                     value = f"[{value}]"
-
-                if key == "start_time":
-                    v = eval(value)
-                    value = datetime(*v)
 
                 s = f"{key}: {value}"
 
