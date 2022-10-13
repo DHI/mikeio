@@ -457,11 +457,12 @@ class Pfs:
 
                 key = s[0:idx]
                 key = key.strip()
-                value = s[(idx + 1) :]
+                value = s[(idx + 1) :].strip()
 
                 if (
-                    s[0] == "'" and s[-1] == "'"
+                    value[0] == "'" and value[-1] == "'"
                 ):  # This is a quoted string and not a list
+
                     s = s
                 else:
                     if "," in value:

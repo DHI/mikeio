@@ -514,3 +514,37 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[0] == "foo"
     assert pfs.ENGINE.fill_list[1] == "bar"
     assert pfs.ENGINE.fill_list[2] == "baz"
+
+
+def test_double_single_quotes_in_string(tmpdir):
+    text = """
+[DERIVED_VARIABLE_106]
+            name = 'alfa_PC_T'
+            type = 0
+            dimension = 3
+            description = 'alfa_PC_T, ''light'' adjusted alfa_PC, ugC/gC*m2/uE'
+            EUM_type = 999
+            EUM_unit = 0
+            unit = 'ugC/gC*m2/uE'
+            ID = 597
+EndSect  // DERIVED_VARIABLE_106
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert (
+        pfs.DERIVED_VARIABLE_106.description
+        == "alfa_PC_T, 'light' adjusted alfa_PC, ugC/gC*m2/uE"
+    )
+
+    filename = os.path.join(tmpdir, "quotes.pfs")
+
+    pfs.write(filename)
+
+    with open(filename) as f:
+        lines = f.read().split("\n")
+
+    assert (
+        # TODO find line number
+        lines[8].strip()
+        == "description = 'alfa_PC_T, ''light'' adjusted alfa_PC, ugC/gC*m2/uE'"
+    )
