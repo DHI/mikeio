@@ -498,19 +498,20 @@ class Pfs:
 
                 key = s[0:idx]
                 key = key.strip()
-                value = s[(idx + 1) :]
-
-                if (
-                    s[0] == "'" and s[-1] == "'"
-                ):  # This is a quoted string and not a list
-                    s = s
-                else:
-                    if "," in value:
-                        value = f"[{value}]"
+                value = s[(idx + 1) :].strip()
 
                 if key == "start_time":
-                    v = eval(value)
-                    value = datetime(*v)
+                    value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+
+                if len(value) > 2:  # ignore foo = ''
+                    value = value.replace("''", '"')
+
+                if value[0] == "'" and value[-1] == "'" and value.count("'") == 2:
+                    pass  # quoted single string
+                elif "," in value:  # array
+                    value = f"[{value}]"
 
                 s = f"{key}: {value}"
 
@@ -554,6 +555,8 @@ class Pfs:
                     v = f"{v}"
                 else:
                     v = f"'{v}'"
+
+                v = v.replace('"', "''")
 
         elif isinstance(v, bool):
             v = str(v).lower()  # stick to MIKE lowercase bool notation
