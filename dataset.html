@@ -321,7 +321,7 @@ including different ways of <em>selecting</em> data:</p>
 <p><em>Conversion</em> methods:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#mikeio.Dataset.to_dataframe" title="mikeio.Dataset.to_dataframe"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_dataframe()</span></code></span></a> - Convert Dataset to a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a></p></li>
-<li><p><a class="reference internal" href="#mikeio.Dataset.to_xarray" title="mikeio.Dataset.to_xarray"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_xarray()</span></code></span></a> - Convert Dataset to a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2022.9.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> (great for Dfs2)</p></li>
+<li><p><a class="reference internal" href="#mikeio.Dataset.to_xarray" title="mikeio.Dataset.to_xarray"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_xarray()</span></code></span></a> - Convert Dataset to a <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.Dataset.html#xarray.Dataset" title="(in xarray v2022.10.1.dev0)"><code class="xref py py-class docutils literal notranslate"><span class="pre">xarray.Dataset</span></code></a> (great for Dfs2)</p></li>
 <li><p><a class="reference internal" href="#mikeio.Dataset.to_dfs" title="mikeio.Dataset.to_dfs"><span class="xref myst py py-meth"><code class="docutils literal notranslate"><span class="pre">to_dfs()</span></code></span></a> - Write Dataset to a Dfs file</p></li>
 </ul>
 </section>
@@ -343,6 +343,8 @@ For convenience, the Dataset provides access to these common properties:</p>
 <li><p>shape - a tuple of array dimensions (for each DataArray)</p></li>
 <li><p>dims - a tuple of dimension labels</p></li>
 </ul>
+<section id="selecting-items">
+<h3>Selecting items<a class="headerlink" href="#selecting-items" title="Permalink to this heading"></a></h3>
 <p>Selecting a specific item “itemA” (at position 0) from a Dataset ds can be done with:</p>
 <ul class="simple">
 <li><p>ds[[“itemA”]] - returns a new Dataset with “itemA”</p></li>
@@ -1260,6 +1262,7 @@ to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)</p></li>
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#mikeio.Dataset.values" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
+</section>
 </dd></dl>
 
 </section>

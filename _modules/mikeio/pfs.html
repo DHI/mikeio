@@ -585,19 +585,20 @@
 
                 <span class="n">key</span> <span class="o">=</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span>
                 <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">s</span><span class="p">[(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:]</span>
-
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span> <span class="ow">and</span> <span class="n">s</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span>
-                <span class="p">):</span>  <span class="c1"># This is a quoted string and not a list</span>
-                    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="s2">&quot;,&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-                        <span class="n">value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">]&quot;</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">s</span><span class="p">[(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;start_time&quot;</span><span class="p">:</span>
-                    <span class="n">v</span> <span class="o">=</span> <span class="nb">eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="o">*</span><span class="n">v</span><span class="p">)</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;%Y, %m, </span><span class="si">%d</span><span class="s2">, %H, %M, %S&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span>
+                        <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># ignore foo = &#39;&#39;</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;&#39;&quot;</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">pass</span>  <span class="c1"># quoted single string</span>
+                <span class="k">elif</span> <span class="s2">&quot;,&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>  <span class="c1"># array</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">]&quot;</span>
 
                 <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span>
 
@@ -641,6 +642,8 @@
                     <span class="n">v</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">v</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+
+                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&#39;&quot;</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
             <span class="n">v</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>  <span class="c1"># stick to MIKE lowercase bool notation</span>
