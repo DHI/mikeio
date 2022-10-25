@@ -118,7 +118,7 @@ class Dfs0(TimeSeries):
         out = ["<mikeio.Dfs0>"]
 
         if os.path.isfile(self._filename):
-            out.append(f"timeaxis: {str(self._timeaxistype)}")
+            out.append(f"timeaxis: {repr(self._timeaxistype)}")
 
         if self._n_items is not None:
             if self._n_items < 10:
