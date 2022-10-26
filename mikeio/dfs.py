@@ -15,8 +15,33 @@ from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
 from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
 from mikecore.eum import eumQuantity
-from mikecore.DfsFile import DfsSimpleType, TimeAxisType
+from mikecore.DfsFile import DfsSimpleType, TimeAxisType, DfsFile
 from mikecore.DfsFactory import DfsFactory
+
+def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, first_dim: int) -> None:
+
+    deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
+    if ds.is_equidistant:
+        t_rel = np.zeros(ds.n_timesteps)
+    else:
+        t_rel = (ds.time - ds.time[0]).total_seconds()
+    
+    for i in range(ds.n_timesteps):
+        for item in range(ds.n_items):
+
+            if "time" not in ds.dims:
+                d = ds[item].values
+            else:
+                d = ds[item].values[i]
+            d = d.copy()  # to avoid modifying the input
+            d[np.isnan(d)] = deletevalue
+
+            d = d.reshape(ds.shape[-first_dim:])  # spatial axes
+            darray = d.flatten()
+
+            dfs.WriteItemTimeStepNext(t_rel[i], darray.astype(np.float32))
+
+    dfs.Close()
 
 
 class _Dfs123(TimeSeries):

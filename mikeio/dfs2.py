@@ -11,7 +11,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from . import __dfs_version__
-from .dfs import _Dfs123
+from .dfs import _Dfs123, _write_dfs_data
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
@@ -20,7 +20,7 @@ from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 
 def write_dfs2(filename: str, ds: Dataset, title="") -> None:
     dfs = _write_dfs2_header(filename, ds, title)
-    _write_dfs2_data(dfs, ds)
+    _write_dfs_data(dfs=dfs, ds=ds, first_dim=2)
 
 
 def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
@@ -94,32 +94,7 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
             geometry._dy,
         )
     )
-
-
-def _write_dfs2_data(dfs: DfsFile, ds: Dataset) -> None:
-
-    deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
-    if ds.is_equidistant:
-        t_rel = np.zeros(ds.n_timesteps)
-    else:
-        t_rel = (ds.time - ds.time[0]).total_seconds()
     
-    for i in range(ds.n_timesteps):
-        for item in range(ds.n_items):
-
-            if "time" not in ds.dims:
-                d = ds[item].values
-            else:
-                d = ds[item].values[i]
-            d = d.copy()  # to avoid modifying the input
-            d[np.isnan(d)] = deletevalue
-
-            d = d.reshape(ds.shape[-2:])  # spatial axes
-            darray = d.flatten()
-
-            dfs.WriteItemTimeStepNext(t_rel[i], darray.astype(np.float32))
-
-    dfs.Close()
 
 
 class Dfs2(_Dfs123):
