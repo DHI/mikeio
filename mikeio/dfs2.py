@@ -99,7 +99,11 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
 def _write_dfs2_data(dfs: DfsFile, ds: Dataset) -> None:
 
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
-    t_rel = 0
+    if ds.is_equidistant:
+        t_rel = np.zeros(ds.n_timesteps)
+    else:
+        t_rel = (ds.time - ds.time[0]).total_seconds()
+    
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
 
@@ -113,10 +117,7 @@ def _write_dfs2_data(dfs: DfsFile, ds: Dataset) -> None:
             d = d.reshape(ds.shape[-2:])  # spatial axes
             darray = d.flatten()
 
-            if not ds.is_equidistant:
-                t_rel = (ds.time[i] - ds.time[0]).total_seconds()
-
-            dfs.WriteItemTimeStepNext(t_rel, darray.astype(np.float32))
+            dfs.WriteItemTimeStepNext(t_rel[i], darray.astype(np.float32))
 
     dfs.Close()
 
