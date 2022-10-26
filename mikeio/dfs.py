@@ -21,6 +21,7 @@ from mikecore.DfsFactory import DfsFactory
 def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, first_dim: int) -> None:
 
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
+    has_no_time = "time" not in ds.dims
     if ds.is_equidistant:
         t_rel = np.zeros(ds.n_timesteps)
     else:
@@ -29,7 +30,7 @@ def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, first_dim: int) -> None:
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
 
-            if "time" not in ds.dims:
+            if has_no_time:
                 d = ds[item].values
             else:
                 d = ds[item].values[i]
