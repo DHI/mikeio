@@ -100,14 +100,14 @@
 <span class="kn">from</span> <span class="nn">.dfsutil</span> <span class="kn">import</span> <span class="n">_valid_item_numbers</span><span class="p">,</span> <span class="n">_valid_timesteps</span><span class="p">,</span> <span class="n">_get_item_info</span>
 <span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">TimeStepUnit</span>
-<span class="kn">from</span> <span class="nn">.dfs</span> <span class="kn">import</span> <span class="n">_Dfs123</span>
+<span class="kn">from</span> <span class="nn">.dfs</span> <span class="kn">import</span> <span class="n">_Dfs123</span><span class="p">,</span> <span class="n">_write_dfs_data</span>
 <span class="kn">from</span> <span class="nn">.spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">Grid3D</span>
 <span class="kn">from</span> <span class="nn">.spatial.geometry</span> <span class="kn">import</span> <span class="n">GeometryUndefined</span>
 
 
 <span class="k">def</span> <span class="nf">write_dfs3</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="n">dfs</span> <span class="o">=</span> <span class="n">_write_dfs3_header</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">ds</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
-    <span class="n">_write_dfs3_data</span><span class="p">(</span><span class="n">dfs</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span>
+    <span class="n">_write_dfs_data</span><span class="p">(</span><span class="n">dfs</span><span class="o">=</span><span class="n">dfs</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="n">ds</span><span class="p">,</span> <span class="n">first_dim</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_write_dfs3_header</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DfsFile</span><span class="p">:</span>
@@ -180,30 +180,6 @@
         <span class="p">)</span>
     <span class="p">)</span>
 
-
-<span class="k">def</span> <span class="nf">_write_dfs3_data</span><span class="p">(</span><span class="n">dfs</span><span class="p">:</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-
-    <span class="n">deletevalue</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueFloat</span>  <span class="c1"># ds.deletevalue</span>
-    <span class="n">t_rel</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">n_items</span><span class="p">):</span>
-
-            <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># to avoid modifying the input</span>
-            <span class="n">d</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">d</span><span class="p">)]</span> <span class="o">=</span> <span class="n">deletevalue</span>
-
-            <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])</span>  <span class="c1"># spatial axes</span>
-            <span class="n">darray</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">ds</span><span class="o">.</span><span class="n">is_equidistant</span><span class="p">:</span>
-                <span class="n">t_rel</span> <span class="o">=</span> <span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">ds</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
-
-            <span class="n">dfs</span><span class="o">.</span><span class="n">WriteItemTimeStepNext</span><span class="p">(</span><span class="n">t_rel</span><span class="p">,</span> <span class="n">darray</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
-
-    <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="Dfs3"><a class="viewcode-back" href="../../dfs3.html#mikeio.Dfs3">[docs]</a><span class="k">class</span> <span class="nc">Dfs3</span><span class="p">(</span><span class="n">_Dfs123</span><span class="p">):</span>

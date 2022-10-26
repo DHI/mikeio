@@ -12,7 +12,7 @@ See our sister library [MIKE IO 1D](https://github.com/DHI/mikeio1d) for .res1d 
 ## Requirements
 
 * Windows or Linux operating system
-* Python x64 3.7 - 3.10
+* Python x64 3.8 - 3.11
 * (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads>) (already installed if you have MIKE)
 
 ## Installation
