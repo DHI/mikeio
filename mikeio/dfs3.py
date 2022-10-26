@@ -13,14 +13,14 @@ from . import __dfs_version__
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
-from .dfs import _Dfs123
+from .dfs import _Dfs123, _write_dfs_data
 from .spatial.grid_geometry import Grid2D, Grid3D
 from .spatial.geometry import GeometryUndefined
 
 
 def write_dfs3(filename: str, ds: Dataset, title="") -> None:
     dfs = _write_dfs3_header(filename, ds, title)
-    _write_dfs3_data(dfs, ds)
+    _write_dfs_data(dfs=dfs, ds=ds, first_dim=3)
 
 
 def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
@@ -93,30 +93,6 @@ def _write_dfs3_spatial_axis(builder, factory, geometry: Grid3D):
         )
     )
 
-
-def _write_dfs3_data(dfs: DfsFile, ds: Dataset) -> None:
-
-    deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
-    t_rel = 0
-    for i in range(ds.n_timesteps):
-        for item in range(ds.n_items):
-
-            if "time" not in ds.dims:
-                d = ds[item].values
-            else:
-                d = ds[item].values[i]
-            d = d.copy()  # to avoid modifying the input
-            d[np.isnan(d)] = deletevalue
-
-            d = d.reshape(ds.shape[-3:])  # spatial axes
-            darray = d.flatten()
-
-            if not ds.is_equidistant:
-                t_rel = (ds.time[i] - ds.time[0]).total_seconds()
-
-            dfs.WriteItemTimeStepNext(t_rel, darray.astype(np.float32))
-
-    dfs.Close()
 
 
 class Dfs3(_Dfs123):

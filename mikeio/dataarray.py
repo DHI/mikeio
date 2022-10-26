@@ -1,4 +1,5 @@
 from datetime import datetime
+from functools import cached_property
 import warnings
 from typing import Optional, Sequence, Tuple, Union, Iterable
 import numpy as np
@@ -966,7 +967,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
 
-    @property
+    @cached_property
     def is_equidistant(self) -> bool:
         """Is DataArray equidistant in time?"""
         if len(self.time) < 3:
