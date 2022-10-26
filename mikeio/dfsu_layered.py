@@ -3,7 +3,6 @@ import pandas as pd
 import warnings
 from tqdm import trange
 from functools import wraps
-from scipy.spatial import cKDTree
 
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from .dfsu import _Dfsu
@@ -391,6 +390,9 @@ class Dfsu3D(DfsuLayered):
         --------
         >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu')
         """
+
+        from scipy.spatial import cKDTree
+       
         # validate input
         assert (
             self._type == DfsuFileType.Dfsu3DSigma

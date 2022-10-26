@@ -10,7 +10,6 @@ setuptools.setup(
         "mikecore>=0.2.1",
         "numpy>=1.15.0",  # first version with numpy.quantile
         "pandas>1.3",
-        "scipy>1.0",
         "PyYAML",
         "tqdm",
         "xarray",
@@ -29,7 +28,7 @@ setuptools.setup(
             "matplotlib",
             "jupyterlab",
         ],
-        "test": ["pytest", "matplotlib!=3.5.0", "xarray"],
+        "test": ["pytest", "matplotlib!=3.5.0", "xarray", "scipy>1.0"],
         "notebooks": [
             "nbformat",
             "nbconvert",

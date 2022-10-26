@@ -2,7 +2,6 @@ from typing import Sequence, Union
 import warnings
 import numpy as np
 from collections import namedtuple
-from scipy.spatial import cKDTree
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -669,6 +668,8 @@ class GeometryFM(_Geometry):
         return interp2d(data, elem_ids, weights, shape)
 
     def _create_tree2d(self):
+        from scipy.spatial import cKDTree
+        
         xy = self._geometry2d.element_coordinates[:, :2]
         self._tree2d = cKDTree(xy)
 
