@@ -1,7 +1,7 @@
 import setuptools
 
-with open("mikeio/README.md", "r", encoding="utf-8") as fh:
-    long_description = fh.read()
+
+long_description = "Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu, mesh and pfs files used by MIKE by DHI"
 
 setuptools.setup(
     name="mikeio",
