@@ -24,7 +24,7 @@ class Dfsu:
 
     @staticmethod
     def _get_DfsuFileType_n_Obj(filename: str):
-        ext = os.path.splitext(filename)[-1]
+        ext = os.path.splitext(filename)[-1].lower()
         if "dfs" in ext:
             dfs = DfsuFile.Open(filename)
             type = DfsuFileType(dfs.DfsuFileType)

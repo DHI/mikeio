@@ -1881,7 +1881,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @staticmethod
     def _validate_extension(filename, valid_extension):
-        _, ext = os.path.splitext(filename)
+        ext = os.path.splitext(filename)[1].lower()
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 

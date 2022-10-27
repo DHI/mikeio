@@ -172,7 +172,7 @@ class _UnstructuredFile:
         if not os.path.isfile(filename):
             raise Exception(f"file {filename} does not exist!")
 
-        _, ext = os.path.splitext(filename)
+        ext = os.path.splitext(filename)[1].lower()
 
         if ext == ".mesh":
             self._read_mesh_header(filename)
