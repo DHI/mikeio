@@ -18,7 +18,7 @@ from mikecore.eum import eumQuantity
 from mikecore.DfsFile import DfsSimpleType, TimeAxisType, DfsFile
 from mikecore.DfsFactory import DfsFactory
 
-def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, first_dim: int) -> None:
+def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
     has_no_time = "time" not in ds.dims
@@ -37,7 +37,7 @@ def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, first_dim: int) -> None:
             d = d.copy()  # to avoid modifying the input
             d[np.isnan(d)] = deletevalue
 
-            d = d.reshape(ds.shape[-first_dim:])  # spatial axes
+            d = d.reshape(ds.shape[-n_spatial_dims:])  # spatial axes
             darray = d.flatten()
 
             dfs.WriteItemTimeStepNext(t_rel[i], darray.astype(np.float32))

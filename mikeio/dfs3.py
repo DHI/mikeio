@@ -20,7 +20,7 @@ from .spatial.geometry import GeometryUndefined
 
 def write_dfs3(filename: str, ds: Dataset, title="") -> None:
     dfs = _write_dfs3_header(filename, ds, title)
-    _write_dfs_data(dfs=dfs, ds=ds, first_dim=3)
+    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
 
 
 def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:

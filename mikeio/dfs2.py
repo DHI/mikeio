@@ -20,7 +20,7 @@ from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 
 def write_dfs2(filename: str, ds: Dataset, title="") -> None:
     dfs = _write_dfs2_header(filename, ds, title)
-    _write_dfs_data(dfs=dfs, ds=ds, first_dim=2)
+    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
 
 
 def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
