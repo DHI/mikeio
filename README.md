@@ -15,23 +15,11 @@ MIKE IO facilitates common data processing workflows for [MIKE files in Python](
 
 [![YouTube](images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
 
-## MIKE IO 1.0
-MIKE IO 1.0 is now available and it has a lot of benefits to working with dfs files even easier than before.
-
 [![YouTube](images/youtube2.png)](http://www.youtube.com/watch?v=0oVedpx9zAQ)
-
-
-### Important changes
-* New class `mikeio.DataArray` which will be the main class to interact with, having these properties and methods
-  - item info
-  - geometry (grid coordinates)
-  - methods for plotting
-  - methods for aggreation in time and space
-* Indexing into a dataset e.g. `ds.Surface_elevation` to get a specific item, will not return a numpy array, but a `mikeio.DataArray`
 
 ## Requirements
 * Windows or Linux operating system
-* Python x64 3.7 - 3.10
+* Python x64 3.8 - 3.11
 * (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 [More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
