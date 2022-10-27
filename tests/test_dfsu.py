@@ -847,7 +847,7 @@ def test_extract_track():
 # TODO consider move to test_dataset.py
 def test_extract_track_from_dataset():
     ds = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")
-    csv_file = "tests/testdata/track_extraction_case02_track.csv"
+    csv_file = "tests/testdata/track_extraction_case02_track.CSV"
     df = pd.read_csv(
         csv_file,
         index_col=0,

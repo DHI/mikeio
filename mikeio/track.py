@@ -34,7 +34,7 @@ def _extract_track(
     if isinstance(track, str):
         filename = track
         if os.path.exists(filename):
-            ext = os.path.splitext(filename).lower()
+            ext = os.path.splitext(filename)[1].lower()
             if ext == ".dfs0":
                 df = Dfs0(filename).to_dataframe()
             elif ext == ".csv":
