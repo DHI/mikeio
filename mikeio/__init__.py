@@ -105,7 +105,7 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers=[-2,-1])
     """
 
-    _, ext = os.path.splitext(filename)
+    ext = os.path.splitext(filename)[1].lower()
 
     if "dfs" not in ext:
         raise ValueError("mikeio.read() is only supported for Dfs files")
@@ -144,7 +144,7 @@ def open(filename: str, **kwargs):
 
     >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
     """
-    _, ext = os.path.splitext(filename)
+    ext = os.path.splitext(filename)[1].lower()
 
     if ext == ".dfs0":
         return Dfs0(filename, **kwargs)
