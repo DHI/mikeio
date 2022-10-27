@@ -575,13 +575,13 @@ def test_quantile_dfsu_3d(tmpdir):
     assert qd.n_timesteps == 1
 
 def test_dfs_ext_capitalisation():
-    filename = os.path.join("tests", "testdata", "waves.DFS0")
+    filename = os.path.join("tests", "testdata", "waves2.DFS0")
     ds = mikeio.open(filename)
     ds = mikeio.read(filename)
     ds.to_dfs("void.DFS0")
-    filename = os.path.join("tests", "testdata", "odense_rough.MESH")
+    filename = os.path.join("tests", "testdata", "odense_rough2.MESH")
     ds = mikeio.open(filename)
-    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.DFSU")
+    filename = os.path.join("tests", "testdata", "oresund_vertical_slice2.DFSU")
     ds = mikeio.open(filename)
     assert(True)
 
