@@ -112,6 +112,13 @@ def test_read_all_time_steps_without_reading_items():
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 1000
 
+def test_items_dataframe():
+    dfs = mikeio.open("tests/testdata/random.dfs0")
+    df = dfs.items.to_dataframe()
+    assert "name" in df.columns
+    assert "type" in df.columns # or EUMType ?
+    assert df.type.iloc[1] == "Water_Level" # Is this the correct way to show it?
+
 
 def test_read_all_time_steps_without_reading_items_neq():
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
