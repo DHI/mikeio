@@ -1463,5 +1463,5 @@ class ItemInfoList(list):
         super().__init__(items)
 
     def to_dataframe(self):
-        data = [{"name": item.name, "type": item.type.name} for item in self]
+        data = [{"name": item.name, "type": item.type.name, "unit": item.unit.name} for item in self]
         return pd.DataFrame(data)

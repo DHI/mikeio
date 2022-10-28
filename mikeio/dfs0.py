@@ -482,20 +482,6 @@ class Dfs0(TimeSeries):
         return self._items
 
     @property
-    def items_dataframe(self):
-        "pd.DataFrame of items"
-        df = pd.DataFrame(
-            data = dict(
-                name = [i.name for i in self._items],
-                EUMUnitInt = [i.unit for i in self._items],
-                EUMUnit = [i.unit.display_name for i in self._items],
-                EUMTypeInt = [i.type for i in self._items],
-                EUMType = [i.type.display_name for i in self._items],
-            )
-        )
-        return df
-
-    @property
     def start_time(self):
         """File start time"""
         return self._start_time
