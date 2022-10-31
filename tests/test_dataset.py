@@ -1559,6 +1559,7 @@ def test_create_array_with_defaults_from_dataset():
     assert da_eum.geometry == ds.geometry
     assert da_eum.item.type == mikeio.EUMType.Temperature
 
+
 def test_dataset_plot(ds1):
-    ax = ds1.plot()
+    ax = ds1.isel(x=0).plot()
     assert ax is not None
