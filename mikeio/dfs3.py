@@ -94,7 +94,6 @@ def _write_dfs3_spatial_axis(builder, factory, geometry: Grid3D):
     )
 
 
-
 class Dfs3(_Dfs123):
 
     _ndim = 3
@@ -249,7 +248,7 @@ class Dfs3(_Dfs123):
                 d[d == deleteValue] = np.nan
 
                 if layers is None:
-                    data_list[item][it_number, :, :, :] = d
+                    data_list[item][it_number, ...] = d
                 elif len(layers) == 1:
                     if layers[0] == "bottom":
                         data_list[item][it_number, :, :] = self._get_bottom_values(d)
