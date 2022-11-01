@@ -226,13 +226,20 @@ class Dfs3(_Dfs123):
 
         if layers == "top":
             layers = -1
-        # if layers == "bottom":
-        #    return NotImplementedError()
         layers = None if layers is None else np.atleast_1d(layers)
         geometry = self.geometry._geometry_for_layers(layers)
 
-        nz = zNum if layers is None else len(layers)
-        shape = (nt, nz, yNum, xNum) if nz > 1 else (nt, yNum, xNum)
+        dims = ("time", "z", "y", "x")
+        if layers is None:
+            shape = (nt, zNum, yNum, xNum)
+        else:
+            nz = len(layers)
+            if nz == 1 and (not keepdims):
+                dims = ("time", "y", "x")
+                shape = (nt, yNum, xNum)
+            else:
+                shape = (nt, nz, yNum, xNum)
+
         for item in range(n_items):
             data = np.ndarray(shape=shape, dtype=float)
             data_list.append(data)
@@ -251,12 +258,12 @@ class Dfs3(_Dfs123):
                     data_list[item][it_number, ...] = d
                 elif len(layers) == 1:
                     if layers[0] == "bottom":
-                        data_list[item][it_number, :, :] = self._get_bottom_values(d)
+                        data_list[item][it_number, ...] = self._get_bottom_values(d)
                     else:
-                        data_list[item][it_number, :, :] = d[layers[0], :, :]
+                        data_list[item][it_number, ...] = d[layers[0], :, :]
                 else:
                     for l in range(len(layers)):
-                        data_list[item][it_number, l, :, :] = d[layers[l], :, :]
+                        data_list[item][it_number, l, ...] = d[layers[l], :, :]
 
             t_seconds[it_number] = itemdata.Time
 
@@ -265,7 +272,12 @@ class Dfs3(_Dfs123):
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
         return Dataset(
-            data_list, time=time, items=items, geometry=geometry, validate=False
+            data_list,
+            time=time,
+            items=items,
+            geometry=geometry,
+            dims=dims,
+            validate=False,
         )
 
     def write(
