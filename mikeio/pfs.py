@@ -78,8 +78,8 @@ class PfsSection(SimpleNamespace):
             self.__setattr__(key, value)
 
     def pop(self, key, *args):
-        """If key is in the dictionary, remove it and return its 
-        value, else return default. If default is not given and 
+        """If key is in the dictionary, remove it and return its
+        value, else return default. If default is not given and
         key is not in the dictionary, a KeyError is raised."""
         return self.__dict__.pop(key, *args)
 
@@ -390,6 +390,8 @@ class Pfs:
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
+        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
+            target_list = yaml.load(yml, Loader=yaml.CFullLoader)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
         except Exception as e:

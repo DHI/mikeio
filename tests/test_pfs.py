@@ -114,9 +114,11 @@ def test_pfssection_copy(d1):
     assert sct3.key1 == 3
     assert sct1.key1 == 2
 
+
 def test_pfssection_len(d1):
     sct = mikeio.PfsSection(d1)
     assert len(sct) == 5
+
 
 def test_pfssection_contains(d1):
     sct = mikeio.PfsSection(d1)
@@ -579,3 +581,13 @@ EndSect  // DERIVED_VARIABLE_106
                     line.strip()
                     == "description = 'alfa_PC_T, ''light'' adjusted alfa_PC, ugC/gC*m2/uE'"
                 )
+
+
+def test_parse_mike_she_pfs():
+
+    pfs = mikeio.Pfs("tests/testdata/pfs/Karup_basic.she")
+
+    assert pfs.n_targets == 2
+    assert (
+        pfs.MIKESHE_FLOWMODEL.SimSpec.ModelComp.River == 1
+    )  # TODO Is this sensible to check?
