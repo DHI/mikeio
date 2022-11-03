@@ -271,6 +271,15 @@ def test_read_write(tmpdir):
     _ = mikeio.Pfs(outfilename)  # try to parse it also
 
 
+def test_read_write_she(tmpdir):
+    infilename = "tests/testdata/pfs/Karup_mini.she"
+    pfs1 = mikeio.Pfs(infilename)
+    outfilename = os.path.join(tmpdir.dirname, "Karup_mini_out.she")
+    pfs1.write(outfilename)
+    assert_txt_files_match(infilename, outfilename)
+    _ = mikeio.Pfs(outfilename)  # try to parse it also
+
+
 def test_read_write_filenames(tmpdir):
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.Pfs(infilename)
