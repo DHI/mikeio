@@ -636,7 +636,8 @@ def test_number_in_str(tmpdir):
         for line in f:
             if "ID1" in line:
                 assert line.strip() == "ID1 = '1'"
-
+            if "ID2" in line:
+                assert line.strip() == "ID2 = '1'"
 
 def test_vertical_lines_in_list(tmpdir):
     text = """
