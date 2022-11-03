@@ -592,6 +592,29 @@ EndSect  // DERIVED_VARIABLE_106
                 )
 
 
+def test_number_in_str(tmpdir):
+    text = """
+   [ROOT]
+      ID1 = '1'
+      ID2 = "1"
+      Number = 1
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert isinstance(pfs.ROOT.ID1, str)
+    assert isinstance(pfs.ROOT.ID2, str)
+    assert not isinstance(pfs.ROOT.Number, str)
+
+    filename = os.path.join(tmpdir, "number_in_str.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "ID1" in line:
+                assert line.strip() == "ID1 = '1'"
+
+
 def test_vertical_lines_in_list(tmpdir):
     text = """
    [EcolabTemplateSpecification]
@@ -610,10 +633,7 @@ def test_vertical_lines_in_list(tmpdir):
     with open(filename) as f:
         for line in f:
             if "TemplateFile_OL" in line:
-                assert (
-                    line.strip()
-                    == "TemplateFile_OL = ||, -1, -1, -1, -1, -1, -1"
-                )
+                assert line.strip() == "TemplateFile_OL = ||, -1, -1, -1, -1, -1, -1"
 
 
 def test_parse_mike_she_pfs():
