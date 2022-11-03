@@ -67,12 +67,18 @@ class PfsSection(SimpleNamespace):
         if isinstance(value, dict):
             d = value.copy() if copy else value
             self.__setattr__(key, PfsSection(d))  #
-        elif isinstance(value, List) and isinstance(value[0], dict):
-            # multiple Sections with same name
+        elif isinstance(value, PfsRepeatedKeywordParams) or (
+            isinstance(value, List)
+            and sum(isinstance(subv, PfsSection) for subv in value) < len(value)
+        ):
+            # multiple keywords/Sections with same name
             sections = []
             for v in value:
-                d = v.copy() if copy else v
-                sections.append(PfsSection(d))
+                if isinstance(v, dict):
+                    d = v.copy() if copy else v
+                    sections.append(PfsSection(d))
+                else:
+                    sections.append(v)
             self.__setattr__(key, sections)
         else:
             self.__setattr__(key, value)
@@ -602,10 +608,16 @@ class Pfs:
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
 
-            elif isinstance(v, List) and isinstance(v[0], PfsSection):
+            elif isinstance(v, List) and any(
+                isinstance(subv, PfsSection) for subv in v
+            ):
                 # duplicate sections
                 for subv in v:
-                    self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
+                    if isinstance(subv, PfsSection):
+                        self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
+                    else:
+                        subv = self._prepare_value_for_write(subv)
+                        f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
             elif isinstance(v, PfsSection):
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 self._write_nested_PfsSections(f, v, lvl + 1)
