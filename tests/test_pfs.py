@@ -371,7 +371,9 @@ def test_output_by_id():
 
 def test_encoding():
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", unique_keywords=True)
+        pfs = mikeio.Pfs(
+            "tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", unique_keywords=True
+        )
     assert hasattr(pfs, "DA")
 
 
@@ -639,6 +641,7 @@ def test_number_in_str(tmpdir):
             if "ID2" in line:
                 assert line.strip() == "ID2 = '1'"
 
+
 def test_vertical_lines_in_list(tmpdir):
     text = """
    [EcolabTemplateSpecification]
@@ -658,6 +661,57 @@ def test_vertical_lines_in_list(tmpdir):
         for line in f:
             if "TemplateFile_OL" in line:
                 assert line.strip() == "TemplateFile_OL = ||, -1, -1, -1, -1, -1, -1"
+
+
+def test_nonunique_mixed_keywords_sections1(tmpdir):
+    text = """
+   [ROOT]
+      A = '1'
+      A = 0
+      [A]
+         B = 0
+      EndSect  // A
+      A = 3
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.ROOT.A) == 4
+    assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
+    assert pfs.ROOT.A[2].B == 0
+    assert pfs.ROOT.A[-1] == 3
+
+    filename = os.path.join(tmpdir, "nonunique_mixed_keywords_sections.pfs")
+    pfs.write(filename)
+
+
+def test_nonunique_mixed_keywords_sections2(tmpdir):
+    text = """
+   [ROOT]
+      [A]
+         B = 0
+         [B]
+            C = 4.5
+        EndSect  // B
+      EndSect  // A
+      A = 0
+      [A]
+         B = 0
+      EndSect  // A
+      A = 3
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.ROOT.A) == 4
+    assert isinstance(pfs.ROOT.A[0], mikeio.PfsSection)
+    assert isinstance(pfs.ROOT.A[0].B[1], mikeio.PfsSection)
+    assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
+    assert pfs.ROOT.A[2].B == 0
+    assert pfs.ROOT.A[-1] == 3
+
+    filename = os.path.join(tmpdir, "nonunique_mixed_keywords_sections.pfs")
+    pfs.write(filename)
 
 
 def test_parse_mike_she_pfs():
