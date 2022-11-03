@@ -555,7 +555,8 @@ class Pfs:
             else:
                 v = f"'{v}'"
 
-            v = v.replace('"', "''")
+            if len(v) > 5 and v[1:5] != "PROJ":
+                v = v.replace('"', "''")
 
         elif isinstance(v, bool):
             v = str(v).lower()  # stick to MIKE lowercase bool notation
