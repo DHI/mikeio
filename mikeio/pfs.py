@@ -568,11 +568,17 @@ class Pfs:
             v = v.replace("'|", "|").replace("|'", "|")
         return v
 
+    @staticmethod
     def str_is_scientific_float(s):
         if (
             s.count(".") <= 1
             and s.lower().count("e") == 1
-            and s.strip().lower().replace(".", "").replace("e", "").replace("-", "").isnumeric()
+            and s.strip()
+            .lower()
+            .replace(".", "")
+            .replace("e", "")
+            .replace("-", "")
+            .isnumeric()
         ):
             return True
         else:
