@@ -545,20 +545,17 @@ class Pfs:
         """
         # some crude checks and corrections
         if isinstance(v, str):
-            try:
-                # catch scientific notation
-                v = float(v)
-
-            except ValueError:
+            if v == "":
                 # add either '' or || as pre- and suffix to strings depending on path definition
-                if v == "":
-                    v = "''"
-                elif v.count("|") == 2:
-                    v = f"{v}"
-                else:
-                    v = f"'{v}'"
+                v = "''"
+            elif v.count("|") == 2:
+                v = f"{v}"
+            elif self.str_is_scientific_float(v):
+                v = float(v)
+            else:
+                v = f"'{v}'"
 
-                v = v.replace('"', "''")
+            v = v.replace('"', "''")
 
         elif isinstance(v, bool):
             v = str(v).lower()  # stick to MIKE lowercase bool notation
@@ -570,6 +567,16 @@ class Pfs:
             v = str(v)[1:-1]  # strip [] from lists
             v = v.replace("'|", "|").replace("|'", "|")
         return v
+
+    def str_is_scientific_float(s):
+        if (
+            s.count(".") <= 1
+            and s.lower().count("e") == 1
+            and s.strip().lower().replace(".", "").replace("e", "").replace("-", "").isnumeric()
+        ):
+            return True
+        else:
+            return False
 
     def _write_nested_PfsSections(self, f, nested_data, lvl):
         """
