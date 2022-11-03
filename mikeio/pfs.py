@@ -568,6 +568,7 @@ class Pfs:
 
         elif isinstance(v, list):
             v = str(v)[1:-1]  # strip [] from lists
+            v = v.replace("'|", "|").replace("|'", "|")
         return v
 
     def _write_nested_PfsSections(self, f, nested_data, lvl):
