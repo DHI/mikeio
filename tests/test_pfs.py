@@ -335,7 +335,7 @@ def test_pfssection_to_dataframe():
 def test_hd_outputs():
 
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm")
+        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm", unique_keywords=True)
     df = pfs.HD.OUTPUTS.to_dataframe()
 
     assert df["file_name"][2] == "ts.dfs0"
@@ -371,7 +371,7 @@ def test_output_by_id():
 
 def test_encoding():
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm")
+        pfs = mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", unique_keywords=True)
     assert hasattr(pfs, "DA")
 
 
@@ -414,7 +414,7 @@ def test_multiple_roots_mixed():
 def test_non_unique_keywords():
     fn = "tests/testdata/pfs/nonunique.pfs"
     with pytest.warns(match="Keyword z_min defined multiple times"):
-        pfs = mikeio.Pfs(fn)
+        pfs = mikeio.Pfs(fn, unique_keywords=True)
 
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
