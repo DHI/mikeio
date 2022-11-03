@@ -592,6 +592,29 @@ EndSect  // DERIVED_VARIABLE_106
                 )
 
 
+def test_str_in_str_projection(tmpdir):
+    text = """
+   [ROOT]
+      Proj = 'PROJCS["ETRS_1989",GEOGCS["GCS_1989",DATUM["D_ETRS_1"]]]'
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert isinstance(pfs.ROOT.Proj, str)
+    assert pfs.ROOT.Proj[8] == "E"
+
+    filename = os.path.join(tmpdir, "str_in_str.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "Proj" in line:
+                assert (
+                    line.strip()
+                    == 'Proj = \'PROJCS["ETRS_1989",GEOGCS["GCS_1989",DATUM["D_ETRS_1"]]]\''
+                )
+
+
 def test_number_in_str(tmpdir):
     text = """
    [ROOT]
