@@ -592,6 +592,30 @@ EndSect  // DERIVED_VARIABLE_106
                 )
 
 
+def test_vertical_lines_in_list(tmpdir):
+    text = """
+   [EcolabTemplateSpecification]
+      TemplateFile_OL = ||, -1, -1, -1, -1, -1, -1
+      Method_OL = 0
+   EndSect  // EcolabTemplateSpecification 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.EcolabTemplateSpecification.TemplateFile_OL) == 7
+    assert pfs.EcolabTemplateSpecification.TemplateFile_OL[0] == "||"
+
+    filename = os.path.join(tmpdir, "vertical_lines_in_list.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "TemplateFile_OL" in line:
+                assert (
+                    line.strip()
+                    == "TemplateFile_OL = ||, -1, -1, -1, -1, -1, -1"
+                )
+
+
 def test_parse_mike_she_pfs():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/Karup_basic.she")
