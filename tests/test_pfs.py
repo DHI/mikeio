@@ -272,7 +272,8 @@ def test_read_write(tmpdir):
 
 
 def test_read_write_she(tmpdir):
-    infilename = "tests/testdata/pfs/Karup_mini.she"
+    #infilename = "tests/testdata/pfs/Karup_mini.she"
+    infilename = "tests/testdata/pfs/Karup_basic.she"
     pfs1 = mikeio.Pfs(infilename, unique_keywords=False)
     outfilename = os.path.join(tmpdir.dirname, "Karup_mini_out.she")
     pfs1.write(outfilename)
