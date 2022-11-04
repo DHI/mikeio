@@ -291,9 +291,9 @@ class Pfs:
     unique_keywords: bool, optional
         Should the keywords in a section be unique? Some tools e.g. the
         MIKE Plot Composer allows non-unique keywords.
-        If True: warnings will be issued if non-unique keywords 
-        are present and the first occurence will be used 
-        by default False 
+        If True: warnings will be issued if non-unique keywords
+        are present and the first occurence will be used
+        by default False
     """
 
     def __init__(self, input, encoding="cp1252", names=None, unique_keywords=False):
@@ -555,6 +555,10 @@ class Pfs:
         """
         # some crude checks and corrections
         if isinstance(v, str):
+
+            if len(v) > 5 and not "PROJ" in v:
+                v = v.replace('"', "''")
+
             if v == "":
                 # add either '' or || as pre- and suffix to strings depending on path definition
                 v = "''"
@@ -564,9 +568,6 @@ class Pfs:
                 v = float(v)
             else:
                 v = f"'{v}'"
-
-            if len(v) > 5 and v[1:5] != "PROJ":
-                v = v.replace('"', "''")
 
         elif isinstance(v, bool):
             v = str(v).lower()  # stick to MIKE lowercase bool notation
