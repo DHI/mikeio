@@ -1,4 +1,6 @@
 
+[![](images/lastcall_mikeio_online_course.png)](https://events.dhigroup.com/getting-started-with-dfs-files-in-python-online-course/)
+
 ![logo](https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
 # MIKE IO: input/output of MIKE files in Python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
