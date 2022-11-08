@@ -12,12 +12,14 @@ Examples
 degree Kelvin
 
 """
-from typing import List
+from typing import List, Sequence
 from mikecore.DfsFile import DataValueType
 from mikecore.eum import eumWrapper
 from enum import IntEnum
 
 from mikeio.helpers import to_datatype
+
+import pandas as pd
 
 
 def type_list(search=None):
@@ -1454,3 +1456,12 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
+
+class ItemInfoList(list):
+
+    def __init__(self, items: Sequence[ItemInfo]):
+        super().__init__(items)
+
+    def to_dataframe(self):
+        data = [{"name": item.name, "type": item.type.name, "unit": item.unit.name} for item in self]
+        return pd.DataFrame(data)

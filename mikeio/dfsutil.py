@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Iterable, List, Tuple, Union
 import numpy as np
 import pandas as pd
-from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType
+from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType, ItemInfoList
 from .custom_exceptions import ItemsError
 
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFileInfo
@@ -159,7 +159,7 @@ def _get_item_info(
     dfsItemInfo: List[DfsDynamicItemInfo],
     item_numbers: List[int] = None,
     ignore_first: bool = False,
-) -> List[ItemInfo]:
+) -> ItemInfoList:
     """Read DFS ItemInfo for specific item numbers
 
     Parameters
@@ -186,4 +186,4 @@ def _get_item_info(
         data_value_type = dfsItemInfo[item].ValueType
         item = ItemInfo(name, itemtype, unit, data_value_type)
         items.append(item)
-    return items
+    return ItemInfoList(items)
