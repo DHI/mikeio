@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import py
 import pytest
 
 import mikeio
@@ -20,7 +19,7 @@ def ds1():
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    return mikeio.Dataset(data, time, items)
+    return mikeio.Dataset(data=data, time=time, items=items, geometry=mikeio.Grid1D(nx=7,dx=1))
 
 
 @pytest.fixture
@@ -94,7 +93,7 @@ def test_properties(ds1):
 
     assert ds1.shape == (nt, ne)
     assert ds1.dims == ("time", "x")
-    assert ds1.geometry is None
+    assert ds1.geometry.nx == 7
     assert ds1._zn is None
 
     # assert not hasattr(ds1, "keys")   # TODO: remove this
@@ -1558,3 +1557,11 @@ def test_create_array_with_defaults_from_dataset():
     assert isinstance(da_eum, mikeio.DataArray)
     assert da_eum.geometry == ds.geometry
     assert da_eum.item.type == mikeio.EUMType.Temperature
+
+
+def test_dataset_plot(ds1):
+    ax = ds1.isel(x=0).plot()
+    assert len(ax.lines) == 2
+    ds2 = ds1 + 0.01
+    ax = ds2.isel(x=-1).plot(ax=ax)
+    assert len(ax.lines) == 4

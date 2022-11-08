@@ -28,16 +28,15 @@ class _DatasetPlotter:
     def __init__(self, ds: "Dataset") -> None:
         self.ds = ds
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(self, figsize=None, **kwargs):
         """Plot multiple DataArrays as time series (only possible dfs0-type data)"""
         if self.ds.dims == ("time",):
             df = self.ds.to_dataframe()
-            df.plot(figsize=figsize, **kwargs)  # TODO ax
+            return df.plot(figsize=figsize, **kwargs)
         else:
             raise ValueError(
                 "Could not plot Dataset. Try plotting one of its DataArrays instead..."
-            )
-        # fig, ax = self._get_fig_ax(ax, figsize)
+            )        
 
     @staticmethod
     def _get_fig_ax(ax=None, figsize=None):
