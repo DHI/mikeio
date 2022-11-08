@@ -723,3 +723,19 @@ def test_parse_mike_she_pfs():
     assert (
         pfs.MIKESHE_FLOWMODEL.SimSpec.ModelComp.River == 1
     )  # TODO Is this sensible to check?
+
+
+def test_read_write_grid_editor_color_palette(tmpdir):
+    infile = "tests/testdata/pfs/grid1.gsf"
+    outfile = os.path.join(tmpdir, "grid.gsf")
+    pfs = mikeio.Pfs(infile)
+    pal = pfs.GRID_EDITOR.GRID_EDIT_VIEW.MIKEZero_Palette_Definition
+    assert len(pal.RGB_Color_Value) == 16
+
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
+    assert n_rgb_out == 16
