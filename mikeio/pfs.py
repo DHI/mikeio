@@ -627,7 +627,7 @@ class Pfs:
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 self._write_nested_PfsSections(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
-            elif isinstance(v, PfsRepeatedKeywordParams):
+            elif isinstance(v, PfsRepeatedKeywordParams) or (isinstance(v, list) and all([isinstance(vv,list) for vv in v])):
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
                     f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")

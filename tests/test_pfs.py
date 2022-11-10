@@ -561,6 +561,28 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[1] == "bar"
     assert pfs.ENGINE.fill_list[2] == "baz"
 
+def test_read_write_list_list(tmpdir):
+    text = """
+[ENGINE]
+  RGB_Color_Value = 128, 0, 128
+  RGB_Color_Value = 85, 0, 171
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text), unique_keywords=False)
+    assert len(pfs.ENGINE.RGB_Color_Value) == 2
+    assert len(pfs.ENGINE.RGB_Color_Value[0]) == 3
+
+    outfile = os.path.join(tmpdir, "mini.pal")
+    
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
+    assert n_rgb_out == 2
+
+    
 
 def test_double_single_quotes_in_string(tmpdir):
     text = """
