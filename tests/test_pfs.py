@@ -662,6 +662,18 @@ def test_difficult_chars_in_str2(tmpdir):
     # assert outlines[9].strip() == 'E = "|str,s\'+-s_d.dfs0|"'
 
 
+def test_end_of_stream():
+    text = """
+[Results]
+  hd = ||, 'm11EcoRes.res11', 1, 0
+  ad = ||, '', 1, 0
+  st = ||, '', 1, 0
+  rr = ||, '', 1, 0
+EndSect  // Results
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+
 def test_read_string_array():
 
     text = """
@@ -779,6 +791,63 @@ def test_number_in_str(tmpdir):
                 assert line.strip() == "ID1 = '1'"
             if "ID2" in line:
                 assert line.strip() == "ID2 = '1'"
+
+def test_floatlike_strings(tmpdir):
+    text = """
+    [WELLNO_424]
+      ID_A = '1E-3'
+      ID_B = '1-E'
+      ID_C = '1-E3'
+    EndSect  // WELLNO_424
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert pfs.WELLNO_424.ID_A == '1E-3'
+    assert pfs.WELLNO_424.ID_B == '1-E'
+    assert pfs.WELLNO_424.ID_C == '1-E3'
+
+    filename = os.path.join(tmpdir, "float_like_strings.pfs")
+    pfs.write(filename)
+    pfs = mikeio.read_pfs(filename)
+    assert pfs.WELLNO_424.ID_A == '1E-3'
+    assert pfs.WELLNO_424.ID_B == '1-E'
+    assert pfs.WELLNO_424.ID_C == '1-E3'
+
+def test_nested_quotes(tmpdir):
+    text = """
+  [Weir_0]
+    Properties = '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
+  EndSect  // Weir_0
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert pfs.Weir_0.Properties == '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
+
+    filename = os.path.join(tmpdir, "nested_quotes.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+      for line in f:
+        if "Properties" in line:
+          assert line.strip() == 'Properties = \'<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">\''
+
+
+def test_filename_in_list(tmpdir):
+    text = """
+   [EcolabTemplateSpecification]
+      TemplateFile_OL = |.\Test1_OLSZ_OL_WQsetups.ecolab|, 2019, 4, 25, 14, 51, 35
+      Method_OL = 0
+   EndSect  // EcolabTemplateSpecification 
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.EcolabTemplateSpecification.TemplateFile_OL) == 7
+    assert pfs.EcolabTemplateSpecification.TemplateFile_OL[0] == r"|.\Test1_OLSZ_OL_WQsetups.ecolab|"
+
+    filename = os.path.join(tmpdir, "filename_in_list.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "TemplateFile_OL" in line:
+                assert line.strip() == r"TemplateFile_OL = |.\Test1_OLSZ_OL_WQsetups.ecolab|, 2019, 4, 25, 14, 51, 35"
 
 
 def test_vertical_lines_in_list(tmpdir):
