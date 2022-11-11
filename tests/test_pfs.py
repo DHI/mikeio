@@ -546,6 +546,33 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[1] == 2
 
 
+def test_empty(tmpdir):
+
+    text = """
+[ENGINE]
+  A = 
+  [B]
+  EndSect // B  
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert isinstance(pfs.ENGINE.A, list)
+    assert len(pfs.ENGINE.A) == 0
+    assert isinstance(pfs.ENGINE.B, mikeio.PfsSection)
+    assert len(pfs.ENGINE.B) == 0
+
+    outfile = os.path.join(tmpdir, "empty.pfs")
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    assert len(outlines) > 2
+    assert outlines[5].strip() == "A ="
+    assert outlines[6].strip() == "[B]"
+    assert outlines[7].strip() == "EndSect  // B"
+
 def test_read_string_array():
 
     text = """
@@ -561,6 +588,7 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[1] == "bar"
     assert pfs.ENGINE.fill_list[2] == "baz"
 
+
 def test_read_write_list_list(tmpdir):
     text = """
 [ENGINE]
@@ -573,7 +601,7 @@ EndSect // ENGINE
     assert len(pfs.ENGINE.RGB_Color_Value[0]) == 3
 
     outfile = os.path.join(tmpdir, "mini.pal")
-    
+
     pfs.write(outfile)
 
     with open(outfile) as f:
@@ -582,7 +610,6 @@ EndSect // ENGINE
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 2
 
-    
 
 def test_double_single_quotes_in_string(tmpdir):
     text = """
