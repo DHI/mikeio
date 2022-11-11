@@ -206,6 +206,18 @@ def test_pfssection_write(d1, tmpdir):
     assert pfs2.data.key1 == sct.key1
 
 
+def test_str_is_scientific_float(d1):
+    pfs = mikeio.Pfs(d1, names=["A"])
+    func = pfs.str_is_scientific_float
+    assert func("-1.0e2")
+    assert func("1E-4")
+    assert func("-0.1E+0.5")
+    assert func("-0.123213e-23")
+    assert not func("E12")
+    assert not func("E-4")
+    assert not func("-1.0e2e")
+    assert not func("e-1.0e2")
+
 def test_basic():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/simple.pfs")
