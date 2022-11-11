@@ -218,6 +218,7 @@ def test_str_is_scientific_float(d1):
     assert not func("-1.0e2e")
     assert not func("e-1.0e2")
 
+
 def test_basic():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/simple.pfs")
@@ -583,6 +584,69 @@ EndSect // ENGINE
     assert outlines[5].strip() == "A ="
     assert outlines[6].strip() == "[B]"
     assert outlines[7].strip() == "EndSect  // B"
+
+
+def test_difficult_chars_in_str(tmpdir):
+    # Not everything is working here!
+
+    text = """
+[ENGINE]
+  A = 'str,s/d\sd.dfs0'
+  B = "str,sd'sd.dfs0"
+  C = |sd's\d.dfs0|
+  D = |str'd.dfs0|
+  // E = |str,s'+-s_d.dfs0|
+EndSect // ENGINE
+"""
+    with pytest.warns(match="contains a single quote character"):
+        pfs = mikeio.Pfs(StringIO(text))
+
+    assert isinstance(pfs.ENGINE.A, str)
+    assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
+    # assert isinstance(pfs.ENGINE.B, str)
+    # assert pfs.ENGINE.B == "str,sd\U0001F600sd.dfs0"
+    assert isinstance(pfs.ENGINE.C, str)
+    # assert pfs.ENGINE.C == "|sd\U0001F600sd.dfs0|"
+    # assert isinstance(pfs.ENGINE.D, str)
+    # assert pfs.ENGINE.D == "|str,sd\U0001F600+-s_d.dfs0|"
+
+    outfile = os.path.join(tmpdir, "difficult_chars_in_str.pfs")
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
+    # assert outlines[6].strip() == 'B = "str,sd\'sd.dfs0"'
+    assert outlines[7].strip() == "C = |sd's\d.dfs0|"
+    assert outlines[8].strip() == "D = |str'd.dfs0|"
+    # assert outlines[9].strip() == 'E = |str,s\'+-s_d.dfs0|'
+
+
+def test_difficult_chars_in_str2(tmpdir):
+    with pytest.warns(match="contains a single quote character"):
+        pfs = mikeio.Pfs("tests/testdata/pfs/tricky_characters_in_str.pfs")
+
+    assert isinstance(pfs.ENGINE.A, str)
+    assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
+    # assert isinstance(pfs.ENGINE.B, str)
+    # assert pfs.ENGINE.B == "str,sd\U0001F600sd.dfs0"
+    assert isinstance(pfs.ENGINE.C, str)
+    # assert pfs.ENGINE.C == "|sd\U0001F600sd.dfs0|"
+    # assert isinstance(pfs.ENGINE.D, str)
+    # assert pfs.ENGINE.D == "|str,sd\U0001F600+-s_d.dfs0|"
+
+    outfile = os.path.join(tmpdir, "difficult_chars_in_str2.pfs")
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
+    # assert outlines[6].strip() == 'B = "str,sd\'sd.dfs0"'
+    assert outlines[7].strip() == "C = '|sd'sd.dfs0|'"
+    assert outlines[8].strip() == "D = |str'd.dfs0|"
+    # assert outlines[9].strip() == 'E = "|str,s\'+-s_d.dfs0|"'
 
 
 def test_read_string_array():

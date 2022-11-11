@@ -1,0 +1,7 @@
+[ENGINE]
+  A = 'str,s/d\sd.dfs0'
+  B = "str,sd'sd.dfs0"
+  C = "|sd'sd.dfs0|"
+  D = |str'd.dfs0|
+  // E = |str,s'+-s_d.dfs0|
+EndSect // ENGINE
