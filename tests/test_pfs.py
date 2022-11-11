@@ -568,10 +568,10 @@ EndSect // ENGINE
     with open(outfile) as f:
         outlines = f.readlines()
 
-    assert len(outlines) > 2
     assert outlines[5].strip() == "A ="
     assert outlines[6].strip() == "[B]"
     assert outlines[7].strip() == "EndSect  // B"
+
 
 def test_read_string_array():
 
