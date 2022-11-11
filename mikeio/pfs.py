@@ -66,6 +66,9 @@ class PfsSection(SimpleNamespace):
             raise IndexError("Key not found")
 
     def __set_key_value(self, key, value, copy=False):
+        if value is None:
+            value = {}
+
         if isinstance(value, dict):
             d = value.copy() if copy else value
             self.__setattr__(key, PfsSection(d))  #
@@ -517,10 +520,15 @@ class Pfs:
                         "%Y-%m-%d %H:%M:%S"
                     )
 
+                if len(value) == 0:
+                    value = "[]"
+
                 if len(value) > 2:  # ignore foo = ''
                     value = value.replace("''", '"')
 
-                if value[0] == "'" and value[-1] == "'" and value.count("'") == 2:
+                if len(value) > 1 and (
+                    value[0] == "'" and value[-1] == "'" and value.count("'") == 2
+                ):
                     pass  # quoted single string
                 elif "," in value:  # array
                     value = f"[{value}]"
@@ -582,14 +590,19 @@ class Pfs:
 
     @staticmethod
     def str_is_scientific_float(s):
+        """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4"""
+        if len(s) < 3:
+            return False
         if (
-            s.count(".") <= 1
+            s.count(".") <= 2
             and s.lower().count("e") == 1
+            and s.lower()[0] != "e"
             and s.strip()
             .lower()
             .replace(".", "")
             .replace("e", "")
             .replace("-", "")
+            .replace("+", "")
             .isnumeric()
         ):
             return True
@@ -627,7 +640,12 @@ class Pfs:
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 self._write_nested_PfsSections(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
-            elif isinstance(v, PfsRepeatedKeywordParams) or (isinstance(v, list) and all([isinstance(vv,list) for vv in v])):
+            elif isinstance(v, PfsRepeatedKeywordParams) or (
+                isinstance(v, list) and all([isinstance(vv, list) for vv in v])
+            ):
+                if len(v) == 0:
+                    # empty list -> keyword with no parameter
+                    f.write(f"{lvl_prefix * lvl}{k} = \n")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
                     f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
