@@ -285,13 +285,26 @@ def test_read_write(tmpdir):
 
 
 def test_read_write_she(tmpdir):
-    # infilename = "tests/testdata/pfs/Karup_mini.she"
     infilename = "tests/testdata/pfs/Karup_basic.she"
     pfs1 = mikeio.Pfs(infilename, unique_keywords=False)
-    outfilename = os.path.join(tmpdir.dirname, "Karup_mini_out.she")
+    outfilename = os.path.join(tmpdir.dirname, "Karup_basic_out.she")
     pfs1.write(outfilename)
     # assert_txt_files_match(infilename, outfilename)
-    _ = mikeio.Pfs(outfilename)  # try to parse it also
+    pfs2 = mikeio.Pfs(outfilename)
+    assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
+
+
+def test_read_write_she2(tmpdir):
+    infilename = "tests/testdata/pfs/Karup_mini.she"
+    with pytest.warns(match="contains a single quote character"):
+        pfs1 = mikeio.Pfs(infilename)
+
+    outfilename = os.path.join(tmpdir.dirname, "Karup_mini_out.she")
+    pfs1.write(outfilename)
+
+    with pytest.warns(match="contains a single quote character"):
+        pfs2 = mikeio.Pfs(outfilename)
+    assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
 
 def test_read_write_filenames(tmpdir):

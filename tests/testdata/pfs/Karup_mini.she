@@ -18,13 +18,30 @@
 
    [LandUse]
       Irrigation = 0
+	  ID = 'E4'
+	  FILE_NAME = |.\Inputs\11_Storing of results\ouvrages\Pont de l'Angle 1h.dfs0|
       Priorities = 1
       [Priorities]
          IsDataUsedInSetup = 0
          Type = 1
       EndSect  // Priorities
 
-   EndSect  // LandUse
+      [EmptySection]         
+      EndSect  // EmptySection
+
+	  [CommandArea]
+	    AreaCodeID = '120476'
+		AreaCode = 120476
+		EValue = 0.342e-3
+	  	[DFS_2D_DATA_FILE]
+		  FILE_NAME = ||
+		  ITEM_COUNT = 0
+		  ITEM_NUMBERS = 
+	   EndSect  // DFS_2D_DATA_FILE
+	   
+    EndSect  // CommandArea
+	
+  EndSect  // LandUse
 
 EndSect  // MIKESHE_FLOWMODEL
 
