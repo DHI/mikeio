@@ -530,6 +530,22 @@ class Pfs:
                     value[0] == "'" and value[-1] == "'" and value.count("'") == 2
                 ):
                     pass  # quoted single string
+                elif (
+                    (len(value) > 5)
+                    and ("," not in value)  #
+                    and (
+                        value[:2] == "'|"
+                        and value[-2:] == "|'"
+                        and value.count("'") > 2
+                    )
+                ):
+                    # string containing single quotes that needs escaping
+                    warnings.warn(
+                        f"The string {value} contains a single quote character which will be temporarily converted to \U0001F600 . If you write back to a pfs file again it will be converted back."
+                    )
+                    value = (
+                        value[0] + value[1:-1].replace("'", "\U0001F600") + value[-1]
+                    )
                 elif "," in value:  # array
                     value = f"[{value}]"
 
@@ -566,6 +582,7 @@ class Pfs:
 
             if len(v) > 5 and not "PROJ" in v:
                 v = v.replace('"', "''")
+                v = v.replace("\U0001F600", "'")
 
             if v == "":
                 # add either '' or || as pre- and suffix to strings depending on path definition
