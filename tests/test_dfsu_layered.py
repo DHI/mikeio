@@ -642,3 +642,4 @@ def test_read_wildcard_items():
     
     ds = dfs.read(items="Sal*")
     assert ds.items[0].name == "Salinity"
+    assert ds.n_items == 1
