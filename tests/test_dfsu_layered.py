@@ -635,3 +635,10 @@ def test_dataset_write_dfsu3d_max(tmp_path):
     ds2 = mikeio.read(outfilename)
     assert ds2.n_timesteps == 1
     assert ds2.geometry.is_layered
+
+def test_read_wildcard_items():
+    dfs = mikeio.open("tests/testdata/oresund_sigma_z.dfsu")
+    assert dfs.items[1].name == "Salinity"
+    
+    ds = dfs.read(items="Sal*")
+    assert ds.items[0].name == "Salinity"
