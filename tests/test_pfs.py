@@ -114,9 +114,11 @@ def test_pfssection_copy(d1):
     assert sct3.key1 == 3
     assert sct1.key1 == 2
 
+
 def test_pfssection_len(d1):
     sct = mikeio.PfsSection(d1)
     assert len(sct) == 5
+
 
 def test_pfssection_contains(d1):
     sct = mikeio.PfsSection(d1)
@@ -579,3 +581,14 @@ EndSect  // DERIVED_VARIABLE_106
                     line.strip()
                     == "description = 'alfa_PC_T, ''light'' adjusted alfa_PC, ugC/gC*m2/uE'"
                 )
+
+
+def test_read_write_repeated_keyword_pfs(tmpdir):
+    pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm", unique_keywords=False)
+    filename = os.path.join(tmpdir, "lake_out.m21fm")
+    pfs.write(filename)
+    pfs = mikeio.Pfs(filename, unique_keywords=False)
+    assert pfs.data.DOMAIN.BOUNDARY_NAMES[1].Touched == [0, "new"]
+    assert isinstance(pfs.data.DOMAIN.BOUNDARY_NAMES[1], mikeio.PfsSection)
+    assert isinstance(pfs.data.DOMAIN.BOUNDARY_NAMES, list)
+    assert isinstance(pfs.data.DOMAIN.BOUNDARY_NAMES[1].Touched, list)

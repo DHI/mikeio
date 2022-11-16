@@ -30,6 +30,7 @@
       minimum_layer_thickness_zlevel = 0.0
       type_of_mesh = 0
       type_of_gauss = 3
+      BOUNDARY_NAMES = 'something'
       [BOUNDARY_NAMES]
          Touched = 0
          MzSEPfsListItemCount = 1
@@ -37,7 +38,7 @@
             Touched = 0
             name = 'Code 2'
          EndSect  // CODE_2
-
+         Touched = 'new'
       EndSect  // BOUNDARY_NAMES
 
    EndSect  // DOMAIN

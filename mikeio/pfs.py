@@ -78,8 +78,8 @@ class PfsSection(SimpleNamespace):
             self.__setattr__(key, value)
 
     def pop(self, key, *args):
-        """If key is in the dictionary, remove it and return its 
-        value, else return default. If default is not given and 
+        """If key is in the dictionary, remove it and return its
+        value, else return default. If default is not given and
         key is not in the dictionary, a KeyError is raised."""
         return self.__dict__.pop(key, *args)
 
@@ -223,7 +223,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=True):
                 if isinstance(val, dict):
                     if key not in data:
                         data[key] = []
-                    data[key].append(val)
+                    data[key].append(PfsSection(val))
                 else:
                     if key not in data:
                         data[key] = PfsRepeatedKeywordParams()
@@ -566,6 +566,9 @@ class Pfs:
 
         elif isinstance(v, list):
             v = str(v)[1:-1]  # strip [] from lists
+
+        elif isinstance(v, dict):
+            v = PfsSection(v)
         return v
 
     def _write_nested_PfsSections(self, f, nested_data, lvl):
@@ -596,7 +599,12 @@ class Pfs:
             elif isinstance(v, PfsRepeatedKeywordParams):
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
-                    f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
+                    if isinstance(subv, PfsSection):
+                        f.write(f"{lvl_prefix * lvl}[{k}]\n")
+                        self._write_nested_PfsSections(f, subv, lvl + 1)
+                        f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
+                    else:
+                        f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
             else:
                 v = self._prepare_value_for_write(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
