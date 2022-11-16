@@ -324,7 +324,6 @@ def test_pfssection_to_dataframe():
 
 
 def test_hd_outputs():
-
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm", unique_keywords=False)
     df = pfs.HD.OUTPUTS.to_dataframe()
 
