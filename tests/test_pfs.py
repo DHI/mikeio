@@ -326,7 +326,7 @@ def test_pfssection_to_dataframe():
 def test_hd_outputs():
 
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm")
+        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm", unique_keywords=False)
     df = pfs.HD.OUTPUTS.to_dataframe()
 
     assert df["file_name"][2] == "ts.dfs0"
