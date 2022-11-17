@@ -1,11 +1,7 @@
 import os
-from shutil import copyfile
-from datetime import datetime
-import numpy as np
 import pytest
 
 import mikeio
-from mikeio.eum import EUMType, ItemInfo
 from mikeio.spatial.geometry import GeometryUndefined
 from mikeio.spatial.grid_geometry import Grid2D, Grid3D
 
@@ -151,10 +147,26 @@ def test_sel_bottom_layer():
 
 
 def test_read_single_layer_dfs3():
-    ds = mikeio.read("tests/testdata/single_layer.dfs3")
+    fn = "tests/testdata/single_layer.dfs3"
+    ds = mikeio.read(fn, keepdims=True)
     assert isinstance(ds.geometry, Grid3D)
     assert ds.dims == ("time", "z", "y", "x")
 
-    # ds = mikeio.read("tests/testdata/single_layer.dfs3", keepdims=False)
-    # assert isinstance(ds.geometry, Grid2D)
-    # assert ds.dims == ("time", "y", "x")
+    ds = mikeio.read(fn, keepdims=False)
+    assert isinstance(ds.geometry, Grid2D)
+    assert ds.dims == ("time", "y", "x")
+
+
+def test_read_single_timestep_dfs3():
+    fn = "tests/testdata/single_timestep.dfs3"
+    ds = mikeio.read(fn, keepdims=True)
+    assert ds.dims == ("time", "z", "y", "x")
+    assert ds.shape == (1, 5, 17, 21)
+
+    ds = mikeio.read(fn, time=0, keepdims=False)
+    assert ds.dims == ("z", "y", "x")
+    assert ds.shape == (5, 17, 21)
+
+    ds = mikeio.read(fn, time=0)
+    assert ds.dims == ("z", "y", "x")
+    assert ds.shape == (5, 17, 21)
