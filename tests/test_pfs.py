@@ -866,10 +866,38 @@ def test_filename_in_list(tmpdir):
                 )
 
 
+def test_multiple_empty_strings_in_list(tmpdir):
+    text = """
+   [Engine]
+      A = '', '', '', ''
+      B = '', '', ||, ||, "", ""
+   EndSect  // Engine 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.Engine.A) == 4
+    assert pfs.Engine.A[0] == ""
+    assert pfs.Engine.A[-1] == ""
+    assert len(pfs.Engine.B) == 6
+    assert pfs.Engine.B[0] == ""
+    assert pfs.Engine.B[2] == "||"
+    assert pfs.Engine.B[-1] == ""
+
+    filename = os.path.join(tmpdir, "multiple_empty_strings_in_list.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "A =" in line:
+                assert line.strip() == "A = '', '', '', ''"
+            if "B =" in line:
+                assert line.strip() == "B = '', '', ||, ||, '', ''"
+
+
 def test_vertical_lines_in_list(tmpdir):
     text = """
    [EcolabTemplateSpecification]
-      TemplateFile_OL = ||, -1, -1, -1, -1, -1, -1
+      TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||
       Method_OL = 0
    EndSect  // EcolabTemplateSpecification 
 """
@@ -877,6 +905,8 @@ def test_vertical_lines_in_list(tmpdir):
     pfs = mikeio.Pfs(StringIO(text))
     assert len(pfs.EcolabTemplateSpecification.TemplateFile_OL) == 7
     assert pfs.EcolabTemplateSpecification.TemplateFile_OL[0] == "||"
+    assert pfs.EcolabTemplateSpecification.TemplateFile_OL[3] == "||"
+    assert pfs.EcolabTemplateSpecification.TemplateFile_OL[-1] == "||"
 
     filename = os.path.join(tmpdir, "vertical_lines_in_list.pfs")
     pfs.write(filename)
@@ -884,7 +914,7 @@ def test_vertical_lines_in_list(tmpdir):
     with open(filename) as f:
         for line in f:
             if "TemplateFile_OL" in line:
-                assert line.strip() == "TemplateFile_OL = ||, -1, -1, -1, -1, -1, -1"
+                assert line.strip() == "TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||"
 
 
 def test_nonunique_mixed_keywords_sections1(tmpdir):
