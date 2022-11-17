@@ -619,7 +619,7 @@ class Pfs:
         # some crude checks and corrections
         if isinstance(v, str):
 
-            if len(v) > 5 and not "PROJ" in v:
+            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
                 v = v.replace('"', "''")
                 v = v.replace("\U0001F600", "'")
 
