@@ -374,23 +374,18 @@ def test_included_outputs():
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
     df = df[df.include == 1]
-    # df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 3
-
-    # df.to_csv("outputs.csv")
 
 
 def test_output_by_id():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
-    # df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=False)
     # .loc refers to output_id irrespective of included or not
     assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
 
-    # df_inc = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
     df_inc = df[df.include == 1]
     # .loc refers to output_id irrespective of included or not
     assert df_inc.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
@@ -411,10 +406,8 @@ def test_encoding_linux():
 
 
 def test_multiple_identical_roots():
-    #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
+    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
-    # assert pfs.data[0].t1_t0.Setup.X == 0
-    # assert pfs.data[1].t1_t0.Setup.X == 2
     assert pfs.data[0].Setup.X == 0
     assert pfs.data[1].Setup.X == 2
     assert pfs.t1_t0[0].Setup.X == 0
@@ -436,7 +429,11 @@ def test_multiple_unique_roots():
 def test_multiple_roots_mixed():
     """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_root_elements.pfs")
-    # assert pfs.target_names == ["t1_t0", "t1_t0"]
+    assert pfs.names == [
+        "MZ_WAVE_SPECTRA_CONVERTER",
+        "MZ_WAVE_SPECTRA_CONVERTER",
+        "SYSTEM",
+    ]
     assert pfs.n_targets == 3
 
 
@@ -600,7 +597,6 @@ EndSect // ENGINE
 
 
 def test_difficult_chars_in_str(tmpdir):
-    # Not everything is working here!
 
     text = """
 [ENGINE]
@@ -608,7 +604,7 @@ def test_difficult_chars_in_str(tmpdir):
   B = "str,sd'sd.dfs0"
   C = |sd's\d.dfs0|
   D = |str'd.dfs0|
-  // E = |str,s'+-s_d.dfs0|
+  E = |str,s'+-s_d.dfs0|
 EndSect // ENGINE
 """
     with pytest.warns(match="contains a single quote character"):
@@ -616,12 +612,14 @@ EndSect // ENGINE
 
     assert isinstance(pfs.ENGINE.A, str)
     assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
-    # assert isinstance(pfs.ENGINE.B, str)
-    # assert pfs.ENGINE.B == "str,sd\U0001F600sd.dfs0"
+
+    # NOTE: B will appear wrong as a list with one item
+    assert isinstance(pfs.ENGINE.B[0], str)
+    assert pfs.ENGINE.B[0] == "str,sd'sd.dfs0"
     assert isinstance(pfs.ENGINE.C, str)
-    # assert pfs.ENGINE.C == "|sd\U0001F600sd.dfs0|"
-    # assert isinstance(pfs.ENGINE.D, str)
-    # assert pfs.ENGINE.D == "|str,sd\U0001F600+-s_d.dfs0|"
+    assert pfs.ENGINE.C == "|sd\U0001F600s\d.dfs0|"
+    assert isinstance(pfs.ENGINE.D, str)
+    assert pfs.ENGINE.E == "|str,s\U0001F600+-s_d.dfs0|"
 
     outfile = os.path.join(tmpdir, "difficult_chars_in_str.pfs")
     pfs.write(outfile)
@@ -630,24 +628,15 @@ EndSect // ENGINE
         outlines = f.readlines()
 
     assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
-    # assert outlines[6].strip() == 'B = "str,sd\'sd.dfs0"'
+    assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
     assert outlines[7].strip() == "C = |sd's\d.dfs0|"
     assert outlines[8].strip() == "D = |str'd.dfs0|"
-    # assert outlines[9].strip() == 'E = |str,s\'+-s_d.dfs0|'
+    assert outlines[9].strip() == "E = |str,s'+-s_d.dfs0|"
 
 
 def test_difficult_chars_in_str2(tmpdir):
     with pytest.warns(match="contains a single quote character"):
         pfs = mikeio.Pfs("tests/testdata/pfs/tricky_characters_in_str.pfs")
-
-    assert isinstance(pfs.ENGINE.A, str)
-    assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
-    # assert isinstance(pfs.ENGINE.B, str)
-    # assert pfs.ENGINE.B == "str,sd\U0001F600sd.dfs0"
-    assert isinstance(pfs.ENGINE.C, str)
-    # assert pfs.ENGINE.C == "|sd\U0001F600sd.dfs0|"
-    # assert isinstance(pfs.ENGINE.D, str)
-    # assert pfs.ENGINE.D == "|str,sd\U0001F600+-s_d.dfs0|"
 
     outfile = os.path.join(tmpdir, "difficult_chars_in_str2.pfs")
     pfs.write(outfile)
@@ -656,10 +645,9 @@ def test_difficult_chars_in_str2(tmpdir):
         outlines = f.readlines()
 
     assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
-    # assert outlines[6].strip() == 'B = "str,sd\'sd.dfs0"'
-    assert outlines[7].strip() == "C = '|sd'sd.dfs0|'"
-    assert outlines[8].strip() == "D = |str'd.dfs0|"
-    # assert outlines[9].strip() == 'E = "|str,s\'+-s_d.dfs0|"'
+    assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
+    assert outlines[7].strip() == "C = |str'd.dfs0|"
+    assert outlines[8].strip() == "D = |str,s'+-s_d.dfs0|"
 
 
 def test_end_of_stream():
@@ -809,7 +797,7 @@ def test_floatlike_strings(tmpdir):
     filename = os.path.join(tmpdir, "float_like_strings.pfs")
     pfs.write(filename)
     pfs = mikeio.read_pfs(filename)
-    # assert pfs.WELLNO_424.ID_A == "1E-3"
+    # assert pfs.WELLNO_424.ID_A == "1E-3"  # not possible to distinguish
     assert pfs.WELLNO_424.ID_B == "1-E"
     assert pfs.WELLNO_424.ID_C == "1-E3"
 
