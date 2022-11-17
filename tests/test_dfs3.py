@@ -143,8 +143,18 @@ def test_read_bottom_layer():
 def test_sel_bottom_layer():
     dsall = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
     with pytest.raises(NotImplementedError) as excinfo:
-        dsall.sel(layers="bottom")  # TODO layers vs layer
+        dsall.sel(layers="bottom")
     assert "mikeio.read" in str(excinfo.value)
     # assert "z" not in ds.dims
     # assert isinstance(ds.geometry, Grid2D)
     # assert pytest.approx(ds[0].to_numpy()[0, 58, 52]) == 0.05738005042076111
+
+
+def test_read_single_layer_dfs3():
+    ds = mikeio.read("tests/testdata/single_layer.dfs3")
+    assert isinstance(ds.geometry, Grid3D)
+    assert ds.dims == ("time", "z", "y", "x")
+
+    # ds = mikeio.read("tests/testdata/single_layer.dfs3", keepdims=False)
+    # assert isinstance(ds.geometry, Grid2D)
+    # assert ds.dims == ("time", "y", "x")
