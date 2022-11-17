@@ -188,9 +188,10 @@ class Dfs3(_Dfs123):
             Read only selected items, by number (0-based), or by name
         time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
             Read only selected time steps, by default None (=all)
-        area: array[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper) coordinates
+        keepdims: bool, optional
+            When reading a single time step or a single layer only,
+            should the singleton dimension be kept
+            in the returned Dataset? by default: False
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
 
