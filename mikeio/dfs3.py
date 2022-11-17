@@ -227,26 +227,28 @@ class Dfs3(_Dfs123):
         if layers == "top":
             layers = -1
         layers = None if layers is None else np.atleast_1d(layers)
-        geometry = self.geometry._geometry_for_layers(layers)
 
-        dims = ("time", "z", "y", "x")
-        if layers is None:
-            shape = (nt, zNum, yNum, xNum)
+        nz = zNum if layers is None else len(layers)
+        if nz == 1 and (not keepdims):
+            geometry = self.geometry._geometry_for_layers([0])
+            dims = ("time", "y", "x")
+            shape = (nt, yNum, xNum)
         else:
-            nz = len(layers)
-            if nz == 1 and (not keepdims):
-                dims = ("time", "y", "x")
-                shape = (nt, yNum, xNum)
-            else:
-                shape = (nt, nz, yNum, xNum)
+            geometry = self.geometry._geometry_for_layers(layers)
+            dims = ("time", "z", "y", "x")
+            shape = (nt, nz, yNum, xNum)
 
         for item in range(n_items):
             data = np.ndarray(shape=shape, dtype=float)
             data_list.append(data)
 
+        if single_time_selected and not keepdims:
+            shape = shape[1:]
+            dims = tuple([d for d in dims if d is not "time"])
+
         t_seconds = np.zeros(nt, dtype=float)
 
-        for it_number, it in enumerate(time_steps):
+        for i, it in enumerate(time_steps):
             for item in range(n_items):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data
@@ -255,17 +257,21 @@ class Dfs3(_Dfs123):
                 d[d == deleteValue] = np.nan
 
                 if layers is None:
-                    data_list[item][it_number, ...] = d
+                    dd = d
                 elif len(layers) == 1:
                     if layers[0] == "bottom":
-                        data_list[item][it_number, ...] = self._get_bottom_values(d)
+                        dd = self._get_bottom_values(d)
                     else:
-                        data_list[item][it_number, ...] = d[layers[0], :, :]
+                        dd = d[layers[0], :, :]
                 else:
-                    for l in range(len(layers)):
-                        data_list[item][it_number, l, ...] = d[layers[l], :, :]
+                    dd = d[layers, :, :]
 
-            t_seconds[it_number] = itemdata.Time
+                if single_time_selected and not keepdims:
+                    data_list[item] = dd
+                else:
+                    data_list[item][i, ...] = dd
+
+            t_seconds[i] = itemdata.Time
 
         dfs.Close()
 
