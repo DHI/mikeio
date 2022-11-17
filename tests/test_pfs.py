@@ -814,7 +814,6 @@ def test_floatlike_strings(tmpdir):
     assert pfs.WELLNO_424.ID_C == "1-E3"
 
 
-@pytest.mark.skip(reason="will be handled in future PR")
 def test_nested_quotes(tmpdir):
     text = """
   [Weir_0]
