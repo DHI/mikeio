@@ -244,7 +244,7 @@ class Dfs3(_Dfs123):
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
-            dims = tuple([d for d in dims if d is not "time"])
+            dims = tuple([d for d in dims if d != "time"])
 
         t_seconds = np.zeros(nt, dtype=float)
 
