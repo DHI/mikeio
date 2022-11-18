@@ -5,7 +5,7 @@ long_description = "Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu, mes
 
 setuptools.setup(
     name="mikeio",
-    version="1.2.2",
+    version="1.2.3",
     install_requires=[
         "mikecore>=0.2.1",
         "numpy>=1.15.0",  # first version with numpy.quantile
