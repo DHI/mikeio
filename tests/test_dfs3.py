@@ -170,3 +170,16 @@ def test_read_single_timestep_dfs3():
     ds = mikeio.read(fn, time=0)
     assert ds.dims == ("z", "y", "x")
     assert ds.shape == (5, 17, 21)
+
+def test_read_write_single_layer_as_dfs3(tmpdir):
+    fn = "tests/testdata/single_layer.dfs3"
+    ds1 = mikeio.read(fn, keepdims=True)
+    assert isinstance(ds1.geometry, Grid3D)
+    assert ds1.dims == ("time", "z", "y", "x")
+    ds2 = mikeio.read(fn, layers=0, keepdims=True)
+    assert ds2.dims == ("time", "z", "y", "x")
+    assert isinstance(ds2.geometry, Grid3D)
+    
+    outfile = os.path.join(tmpdir, "single_layer.dfs3")
+
+    ds2.to_dfs(outfile)

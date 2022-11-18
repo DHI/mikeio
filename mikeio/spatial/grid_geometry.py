@@ -992,12 +992,12 @@ class Grid3D(_Geometry):
     def __str__(self):
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"
 
-    def _geometry_for_layers(self, layers) -> Union[Grid2D, "Grid3D"]:
+    def _geometry_for_layers(self, layers, keepdims=False) -> Union[Grid2D, "Grid3D"]:
         if layers is None:
             return self
 
         g = self
-        if len(layers) == 1:
+        if len(layers) == 1 and not keepdims:
             geometry = Grid2D(
                 dx=g._dx,
                 dy=g._dy,
@@ -1009,18 +1009,20 @@ class Grid3D(_Geometry):
                 projection=g._projstr,
                 orientation=g.orientation,
             )
-        else:
-            d = np.diff(g.z[layers])
+            return geometry
+        
+        d = np.diff(g.z[layers])
+        if len(d) > 0:
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 warnings.warn("Extracting non-equidistant layers! Cannot use Grid3D.")
-                geometry = GeometryUndefined()
-            else:
-                geometry = Grid3D(
-                    x=g.x,
-                    y=g.y,
-                    z=g.z[layers],
-                    origin=g._origin,
-                    projection=g.projection,
-                    orientation=g.orientation,
-                )
+                return GeometryUndefined()
+        
+        geometry = Grid3D(
+            x=g.x,
+            y=g.y,
+            z=g.z[layers],
+            origin=g._origin,
+            projection=g.projection,
+            orientation=g.orientation,
+        )
         return geometry
