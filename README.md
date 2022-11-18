@@ -1,6 +1,4 @@
 
-[![](images/lastcall_mikeio_online_course.png)](https://events.dhigroup.com/getting-started-with-dfs-files-in-python-online-course/)
-
 ![logo](https://raw.githubusercontent.com/DHI/mikeio/main/images/logo/PNG/MIKE-IO-Logo-Pos-RGB-nomargin.png)
 # MIKE IO: input/output of MIKE files in Python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
@@ -11,9 +9,6 @@
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
 MIKE IO facilitates common data processing workflows for [MIKE files in Python](https://www.mikepoweredbydhi.com/products/mike-for-developers#io).
-
-## MIKE IO Course | November 2022
-:loudspeaker: **Sign up for the online instructor-led course [here](https://events.dhigroup.com/getting-started-with-dfs-files-in-python-online-course/)!**
 
 [![YouTube](images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
 
