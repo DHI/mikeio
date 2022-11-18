@@ -181,7 +181,6 @@
     <span class="p">)</span>
 
 
-
 <div class="viewcode-block" id="Dfs3"><a class="viewcode-back" href="../../dfs3.html#mikeio.Dfs3">[docs]</a><span class="k">class</span> <span class="nc">Dfs3</span><span class="p">(</span><span class="n">_Dfs123</span><span class="p">):</span>
 
     <span class="n">_ndim</span> <span class="o">=</span> <span class="mi">3</span>
@@ -276,9 +275,10 @@
 <span class="sd">            Read only selected items, by number (0-based), or by name</span>
 <span class="sd">        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional</span>
 <span class="sd">            Read only selected time steps, by default None (=all)</span>
-<span class="sd">        area: array[float], optional</span>
-<span class="sd">            Read only data inside (horizontal) area given as a</span>
-<span class="sd">            bounding box (tuple with left, lower, right, upper) coordinates</span>
+<span class="sd">        keepdims: bool, optional</span>
+<span class="sd">            When reading a single time step or a single layer only,</span>
+<span class="sd">            should the singleton dimension be kept</span>
+<span class="sd">            in the returned Dataset? by default: False</span>
 <span class="sd">        layers: int, str, list[int], optional</span>
 <span class="sd">            Read only data for specific layers, by default None</span>
 
@@ -314,20 +314,29 @@
 
         <span class="k">if</span> <span class="n">layers</span> <span class="o">==</span> <span class="s2">&quot;top&quot;</span><span class="p">:</span>
             <span class="n">layers</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="c1"># if layers == &quot;bottom&quot;:</span>
-        <span class="c1">#    return NotImplementedError()</span>
         <span class="n">layers</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
-        <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_geometry_for_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
 
         <span class="n">nz</span> <span class="o">=</span> <span class="n">zNum</span> <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
-        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">yNum</span><span class="p">,</span> <span class="n">xNum</span><span class="p">)</span> <span class="k">if</span> <span class="n">nz</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">yNum</span><span class="p">,</span> <span class="n">xNum</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nz</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">keepdims</span><span class="p">):</span>
+            <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_geometry_for_layers</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">yNum</span><span class="p">,</span> <span class="n">xNum</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_geometry_for_layers</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">)</span>
+            <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">yNum</span><span class="p">,</span> <span class="n">xNum</span><span class="p">)</span>
+
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
             <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">single_time_selected</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">dims</span> <span class="k">if</span> <span class="n">d</span> <span class="o">!=</span> <span class="s2">&quot;time&quot;</span><span class="p">])</span>
+
         <span class="n">t_seconds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">it_number</span><span class="p">,</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">time_steps</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">it</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">time_steps</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
                 <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">it</span><span class="p">))</span>
                 <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
@@ -336,24 +345,33 @@
                 <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">==</span> <span class="n">deleteValue</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
 
                 <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">data_list</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="n">it_number</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">d</span>
+                    <span class="n">dd</span> <span class="o">=</span> <span class="n">d</span>
                 <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;bottom&quot;</span><span class="p">:</span>
-                        <span class="n">data_list</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="n">it_number</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_bottom_values</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                        <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_bottom_values</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">data_list</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="n">it_number</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:,</span> <span class="p">:]</span>
+                        <span class="n">dd</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:,</span> <span class="p">:]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)):</span>
-                        <span class="n">data_list</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="n">it_number</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">layers</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="p">:,</span> <span class="p">:]</span>
+                    <span class="n">dd</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">layers</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span>
 
-            <span class="n">t_seconds</span><span class="p">[</span><span class="n">it_number</span><span class="p">]</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
+                <span class="k">if</span> <span class="n">single_time_selected</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
+                    <span class="n">data_list</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">data_list</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+
+            <span class="n">t_seconds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
 
         <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
 
         <span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">t_seconds</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
         <span class="n">items</span> <span class="o">=</span> <span class="n">_get_item_info</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">item_numbers</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span>
-            <span class="n">data_list</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span>
+            <span class="n">data_list</span><span class="p">,</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+            <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+            <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span>
+            <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
+            <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Dfs3.write"><a class="viewcode-back" href="../../dfs3.html#mikeio.Dfs3.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>

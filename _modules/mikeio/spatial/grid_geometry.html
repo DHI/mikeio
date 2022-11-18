@@ -1079,12 +1079,12 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Grid3D(nz=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nz</span><span class="si">}</span><span class="s2">, ny=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ny</span><span class="si">}</span><span class="s2">, nx=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="si">}</span><span class="s2">)&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_geometry_for_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Grid2D</span><span class="p">,</span> <span class="s2">&quot;Grid3D&quot;</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_geometry_for_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Grid2D</span><span class="p">,</span> <span class="s2">&quot;Grid3D&quot;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
 
         <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
             <span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span>
                 <span class="n">dx</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">_dx</span><span class="p">,</span>
                 <span class="n">dy</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">_dy</span><span class="p">,</span>
@@ -1096,20 +1096,22 @@
                 <span class="n">projection</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">_projstr</span><span class="p">,</span>
                 <span class="n">orientation</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
             <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">z</span><span class="p">[</span><span class="n">layers</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">geometry</span>
+        
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">z</span><span class="p">[</span><span class="n">layers</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">d</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Extracting non-equidistant layers! Cannot use Grid3D.&quot;</span><span class="p">)</span>
-                <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid3D</span><span class="p">(</span>
-                    <span class="n">x</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
-                    <span class="n">y</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
-                    <span class="n">z</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">z</span><span class="p">[</span><span class="n">layers</span><span class="p">],</span>
-                    <span class="n">origin</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">_origin</span><span class="p">,</span>
-                    <span class="n">projection</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
-                    <span class="n">orientation</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
-                <span class="p">)</span>
+                <span class="k">return</span> <span class="n">GeometryUndefined</span><span class="p">()</span>
+        
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid3D</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">x</span><span class="p">,</span>
+            <span class="n">y</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+            <span class="n">z</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">z</span><span class="p">[</span><span class="n">layers</span><span class="p">],</span>
+            <span class="n">origin</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">_origin</span><span class="p">,</span>
+            <span class="n">projection</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">geometry</span></div>
 </pre></div>
 
