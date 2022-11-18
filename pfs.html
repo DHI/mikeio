@@ -210,12 +210,12 @@
 </section>
 <section id="unique-or-non-unique-keywords">
 <h3>Unique or non-unique keywords<a class="headerlink" href="#unique-or-non-unique-keywords" title="Permalink to this heading"></a></h3>
-<p>Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does <em>not</em> support non-unique keywords—if on-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g. MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the <code class="docutils literal notranslate"><span class="pre">unique_keywords</span></code> argument in the <code class="docutils literal notranslate"><span class="pre">read_pfs()</span></code> method:</p>
+<p>Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does <em>not</em> support non-unique keywords—if non-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g. MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the <code class="docutils literal notranslate"><span class="pre">unique_keywords</span></code> argument in the <code class="docutils literal notranslate"><span class="pre">read_pfs()</span></code> method:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read_pfs</span><span class="p">(</span><span class="s2">&quot;myplot.plt&quot;</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If a PfsSection contains non-unique PfsSections or keywords, the repeated key will only appear once and the corresponding value will be a list.</p>
+<p>If a PfsSection contains non-unique PfsSections or keywords and <code class="docutils literal notranslate"><span class="pre">unique_keywords=False</span></code>, the repeated key will only appear once and the corresponding value will be a list.</p>
 </section>
 </section>
 <section id="update">
@@ -281,7 +281,7 @@
 <h2>Pfs API<a class="headerlink" href="#pfs-api" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.read_pfs">
-<span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">read_pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#read_pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.read_pfs" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">read_pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#read_pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.read_pfs" title="Permalink to this definition"></a></dt>
 <dd><p>Read a pfs file to a Pfs object for further analysis/manipulation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -290,7 +290,9 @@
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – How is the pfs file encoded? By default ‘cp1252’</p></li>
 <li><p><strong>unique_keywords</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Should the keywords in a section be unique? Some tools e.g. the
 MIKE Plot Composer allows non-unique keywords.
-by default True (issue warnings if non-unique keywords are present and use only first)</p></li>
+If True: warnings will be issued if non-unique keywords
+are present and the first occurence will be used
+by default False</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -304,7 +306,7 @@ by default True (issue warnings if non-unique keywords are present and use only 
 
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Pfs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs" title="Permalink to this definition"></a></dt>
 <dd><p>Create a Pfs object for reading, writing and manipulating pfs files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -318,7 +320,9 @@ If the input is a file the names are instead read from the file,
 by default None.</p></li>
 <li><p><strong>unique_keywords</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Should the keywords in a section be unique? Some tools e.g. the
 MIKE Plot Composer allows non-unique keywords.
-by default True (issue warnings if non-unique keywords are present and use only first)</p></li>
+If True: warnings will be issued if non-unique keywords
+are present and the first occurence will be used
+by default False</p></li>
 </ul>
 </dd>
 </dl>
