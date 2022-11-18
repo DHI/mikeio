@@ -170,7 +170,7 @@ def test_pfssection_insert_pfssection(d1):
     assert sct.FILE_6.val == 5
 
 
-def test_pfssection_find_replace(d1):
+def test_pfssection_find_replace_remember_to_give_your_function_a_unique_name_python_is_an_interpreted_language(d1):
     sct = mikeio.PfsSection(d1)
 
     for j in range(10):
