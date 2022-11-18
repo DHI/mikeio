@@ -8,6 +8,7 @@ from mikeio import generic
 from mikeio.generic import scale, diff, sum, extract, avg_time
 import pytest
 
+
 def test_add_constant(tmpdir):
 
     infilename = "tests/testdata/random.dfs0"
@@ -574,14 +575,14 @@ def test_quantile_dfsu_3d(tmpdir):
     qd = mikeio.open(outfilename)
     assert qd.n_timesteps == 1
 
-def test_dfs_ext_capitalisation():
+
+def test_dfs_ext_capitalisation(tmpdir):
     filename = os.path.join("tests", "testdata", "waves2.DFS0")
     ds = mikeio.open(filename)
     ds = mikeio.read(filename)
-    ds.to_dfs("void.DFS0")
+    ds.to_dfs(os.path.join(tmpdir, "void.DFS0"))
     filename = os.path.join("tests", "testdata", "odense_rough2.MESH")
     ds = mikeio.open(filename)
     filename = os.path.join("tests", "testdata", "oresund_vertical_slice2.DFSU")
     ds = mikeio.open(filename)
-    assert(True)
-
+    assert True

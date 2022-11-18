@@ -114,9 +114,11 @@ def test_pfssection_copy(d1):
     assert sct3.key1 == 3
     assert sct1.key1 == 2
 
+
 def test_pfssection_len(d1):
     sct = mikeio.PfsSection(d1)
     assert len(sct) == 5
+
 
 def test_pfssection_contains(d1):
     sct = mikeio.PfsSection(d1)
@@ -204,6 +206,19 @@ def test_pfssection_write(d1, tmpdir):
     assert pfs2.data.key1 == sct.key1
 
 
+def test_str_is_scientific_float(d1):
+    sect = mikeio.PfsSection(d1)  # dummy
+    func = sect._str_is_scientific_float
+    assert func("-1.0e2")
+    assert func("1E-4")
+    assert func("-0.123213e-23")
+    assert not func("-0.1E+0.5")
+    assert not func("E12")
+    assert not func("E-4")
+    assert not func("-1.0e2e")
+    assert not func("e-1.0e2")
+
+
 def test_basic():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/simple.pfs")
@@ -269,6 +284,29 @@ def test_read_write(tmpdir):
     _ = mikeio.Pfs(outfilename)  # try to parse it also
 
 
+def test_read_write_she(tmpdir):
+    infilename = "tests/testdata/pfs/Karup_basic.she"
+    pfs1 = mikeio.Pfs(infilename, unique_keywords=False)
+    outfilename = os.path.join(tmpdir.dirname, "Karup_basic_out.she")
+    pfs1.write(outfilename)
+    # assert_txt_files_match(infilename, outfilename)
+    pfs2 = mikeio.Pfs(outfilename)
+    assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
+
+
+def test_read_write_she2(tmpdir):
+    infilename = "tests/testdata/pfs/Karup_mini.she"
+    with pytest.warns(match="contains a single quote character"):
+        pfs1 = mikeio.Pfs(infilename)
+
+    outfilename = os.path.join(tmpdir.dirname, "Karup_mini_out.she")
+    pfs1.write(outfilename)
+
+    with pytest.warns(match="contains a single quote character"):
+        pfs2 = mikeio.Pfs(outfilename)
+    assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
+
+
 def test_read_write_filenames(tmpdir):
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.Pfs(infilename)
@@ -324,7 +362,7 @@ def test_pfssection_to_dataframe():
 def test_hd_outputs():
 
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm")
+        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm", unique_keywords=True)
     df = pfs.HD.OUTPUTS.to_dataframe()
 
     assert df["file_name"][2] == "ts.dfs0"
@@ -336,23 +374,18 @@ def test_included_outputs():
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
     df = df[df.include == 1]
-    # df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 3
-
-    # df.to_csv("outputs.csv")
 
 
 def test_output_by_id():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
-    # df = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=False)
     # .loc refers to output_id irrespective of included or not
     assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
 
-    # df_inc = pfs.get_outputs(section="SPECTRAL_WAVE_MODULE", included_only=True)
     df_inc = df[df.include == 1]
     # .loc refers to output_id irrespective of included or not
     assert df_inc.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
@@ -360,7 +393,9 @@ def test_output_by_id():
 
 def test_encoding():
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm")
+        pfs = mikeio.Pfs(
+            "tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", unique_keywords=True
+        )
     assert hasattr(pfs, "DA")
 
 
@@ -371,10 +406,8 @@ def test_encoding_linux():
 
 
 def test_multiple_identical_roots():
-    #    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
+    """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
-    # assert pfs.data[0].t1_t0.Setup.X == 0
-    # assert pfs.data[1].t1_t0.Setup.X == 2
     assert pfs.data[0].Setup.X == 0
     assert pfs.data[1].Setup.X == 2
     assert pfs.t1_t0[0].Setup.X == 0
@@ -396,14 +429,18 @@ def test_multiple_unique_roots():
 def test_multiple_roots_mixed():
     """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_root_elements.pfs")
-    # assert pfs.target_names == ["t1_t0", "t1_t0"]
+    assert pfs.names == [
+        "MZ_WAVE_SPECTRA_CONVERTER",
+        "MZ_WAVE_SPECTRA_CONVERTER",
+        "SYSTEM",
+    ]
     assert pfs.n_targets == 3
 
 
 def test_non_unique_keywords():
     fn = "tests/testdata/pfs/nonunique.pfs"
     with pytest.warns(match="Keyword z_min defined multiple times"):
-        pfs = mikeio.Pfs(fn)
+        pfs = mikeio.Pfs(fn, unique_keywords=True)
 
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
@@ -532,6 +569,108 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[1] == 2
 
 
+def test_empty(tmpdir):
+
+    text = """
+[ENGINE]
+  A = 
+  [B]
+  EndSect // B  
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert isinstance(pfs.ENGINE.A, list)
+    assert len(pfs.ENGINE.A) == 0
+    assert isinstance(pfs.ENGINE.B, mikeio.PfsSection)
+    assert len(pfs.ENGINE.B) == 0
+
+    outfile = os.path.join(tmpdir, "empty.pfs")
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    assert outlines[5].strip() == "A ="
+    assert outlines[6].strip() == "[B]"
+    assert outlines[7].strip() == "EndSect  // B"
+
+
+def test_difficult_chars_in_str(tmpdir):
+
+    text = """
+[ENGINE]
+  A = 'str,s/d\sd.dfs0'
+  B = "str,sd'sd.dfs0"
+  C = |sd's\d.dfs0|
+  D = |str'd.dfs0|
+  E = |str,s'+-s_d.dfs0|
+EndSect // ENGINE
+"""
+    with pytest.warns(match="contains a single quote character"):
+        pfs = mikeio.Pfs(StringIO(text))
+
+    assert isinstance(pfs.ENGINE.A, str)
+    assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
+
+    # NOTE: B will appear wrong as a list with one item
+    assert isinstance(pfs.ENGINE.B[0], str)
+    assert pfs.ENGINE.B[0] == "str,sd'sd.dfs0"
+    assert isinstance(pfs.ENGINE.C, str)
+    assert pfs.ENGINE.C == "|sd\U0001F600s\d.dfs0|"
+    assert isinstance(pfs.ENGINE.D, str)
+    assert pfs.ENGINE.E == "|str,s\U0001F600+-s_d.dfs0|"
+
+    outfile = os.path.join(tmpdir, "difficult_chars_in_str.pfs")
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
+    assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
+    assert outlines[7].strip() == "C = |sd's\d.dfs0|"
+    assert outlines[8].strip() == "D = |str'd.dfs0|"
+    assert outlines[9].strip() == "E = |str,s'+-s_d.dfs0|"
+
+
+def test_difficult_chars_in_str2(tmpdir):
+
+    text = """
+[ENGINE]
+   A = 'str,s/d\sd.dfs0'
+   B = "str,sd'sd.dfs0"
+   C = |str'd.dfs0|
+   D = |str,s'+-s_d.dfs0|
+EndSect // ENGINE"""
+
+    with pytest.warns(match="contains a single quote character"):
+        pfs = mikeio.Pfs(StringIO(text))
+
+    outfile = os.path.join(tmpdir, "difficult_chars_in_str2.pfs")
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
+    assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
+    assert outlines[7].strip() == "C = |str'd.dfs0|"
+    assert outlines[8].strip() == "D = |str,s'+-s_d.dfs0|"
+
+
+def test_end_of_stream():
+    text = """
+[Results]
+  hd = ||, 'm11EcoRes.res11', 1, 0
+  ad = ||, '', 1, 0
+  st = ||, '', 1, 0
+  rr = ||, '', 1, 0
+EndSect  // Results
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+
 def test_read_string_array():
 
     text = """
@@ -546,6 +685,28 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[0] == "foo"
     assert pfs.ENGINE.fill_list[1] == "bar"
     assert pfs.ENGINE.fill_list[2] == "baz"
+
+
+def test_read_write_list_list(tmpdir):
+    text = """
+[ENGINE]
+  RGB_Color_Value = 128, 0, 128
+  RGB_Color_Value = 85, 0, 171
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text), unique_keywords=False)
+    assert len(pfs.ENGINE.RGB_Color_Value) == 2
+    assert len(pfs.ENGINE.RGB_Color_Value[0]) == 3
+
+    outfile = os.path.join(tmpdir, "mini.pal")
+
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
+    assert n_rgb_out == 2
 
 
 def test_double_single_quotes_in_string(tmpdir):
@@ -579,3 +740,251 @@ EndSect  // DERIVED_VARIABLE_106
                     line.strip()
                     == "description = 'alfa_PC_T, ''light'' adjusted alfa_PC, ugC/gC*m2/uE'"
                 )
+
+
+def test_str_in_str_projection(tmpdir):
+    text = """
+   [ROOT]
+      Proj = 'PROJCS["ETRS_1989",GEOGCS["GCS_1989",DATUM["D_ETRS_1"]]]'
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert isinstance(pfs.ROOT.Proj, str)
+    assert pfs.ROOT.Proj[8] == "E"
+
+    filename = os.path.join(tmpdir, "str_in_str.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "Proj" in line:
+                assert (
+                    line.strip()
+                    == 'Proj = \'PROJCS["ETRS_1989",GEOGCS["GCS_1989",DATUM["D_ETRS_1"]]]\''
+                )
+
+
+def test_number_in_str(tmpdir):
+    text = """
+   [ROOT]
+      ID1 = '1'
+      ID2 = "1"
+      Number = 1
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert isinstance(pfs.ROOT.ID1, str)
+    assert isinstance(pfs.ROOT.ID2, str)
+    assert not isinstance(pfs.ROOT.Number, str)
+
+    filename = os.path.join(tmpdir, "number_in_str.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "ID1" in line:
+                assert line.strip() == "ID1 = '1'"
+            if "ID2" in line:
+                assert line.strip() == "ID2 = '1'"
+
+
+def test_floatlike_strings(tmpdir):
+    text = """
+    [WELLNO_424]
+      ID_A = '1E-3'
+      ID_B = '1-E'
+      ID_C = '1-E3'
+    EndSect  // WELLNO_424
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    # assert pfs.WELLNO_424.ID_A == "1E-3"  # not possible to distinguish
+    assert pfs.WELLNO_424.ID_B == "1-E"
+    assert pfs.WELLNO_424.ID_C == "1-E3"
+
+    filename = os.path.join(tmpdir, "float_like_strings.pfs")
+    pfs.write(filename)
+    pfs = mikeio.read_pfs(filename)
+    # assert pfs.WELLNO_424.ID_A == "1E-3"  # not possible to distinguish
+    assert pfs.WELLNO_424.ID_B == "1-E"
+    assert pfs.WELLNO_424.ID_C == "1-E3"
+
+
+def test_nested_quotes(tmpdir):
+    text = """
+  [Weir_0]
+    Properties = '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
+  EndSect  // Weir_0
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert (
+        pfs.Weir_0.Properties
+        == '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
+    )
+
+    filename = os.path.join(tmpdir, "nested_quotes.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "Properties" in line:
+                assert (
+                    line.strip()
+                    == 'Properties = \'<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">\''
+                )
+
+
+def test_filename_in_list(tmpdir):
+    text = """
+   [EcolabTemplateSpecification]
+      TemplateFile_A = |.\Test1_OLSZ_OL_WQsetups.ecolab|
+      TemplateFile_OL = |.\Test1_OLSZ_OL_WQsetups.ecolab|, 2019, 4, 25, 14, 51, 35
+      Method_OL = 0
+   EndSect  // EcolabTemplateSpecification 
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.EcolabTemplateSpecification.TemplateFile_OL) == 7
+    assert (
+        pfs.EcolabTemplateSpecification.TemplateFile_OL[0]
+        == r"|.\Test1_OLSZ_OL_WQsetups.ecolab|"
+    )
+
+    filename = os.path.join(tmpdir, "filename_in_list.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "TemplateFile_OL" in line:
+                assert (
+                    line.strip()
+                    == r"TemplateFile_OL = |.\Test1_OLSZ_OL_WQsetups.ecolab|, 2019, 4, 25, 14, 51, 35"
+                )
+
+
+def test_multiple_empty_strings_in_list(tmpdir):
+    text = """
+   [Engine]
+      A = '', '', '', ''
+      B = '', '', ||, ||, "", ""
+   EndSect  // Engine 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.Engine.A) == 4
+    assert pfs.Engine.A[0] == ""
+    assert pfs.Engine.A[-1] == ""
+    assert len(pfs.Engine.B) == 6
+    assert pfs.Engine.B[0] == ""
+    assert pfs.Engine.B[2] == "||"
+    assert pfs.Engine.B[-1] == ""
+
+    filename = os.path.join(tmpdir, "multiple_empty_strings_in_list.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "A =" in line:
+                assert line.strip() == "A = '', '', '', ''"
+            if "B =" in line:
+                assert line.strip() == "B = '', '', ||, ||, '', ''"
+
+
+def test_vertical_lines_in_list(tmpdir):
+    text = """
+   [EcolabTemplateSpecification]
+      TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||
+      Method_OL = 0
+   EndSect  // EcolabTemplateSpecification 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.EcolabTemplateSpecification.TemplateFile_OL) == 7
+    assert pfs.EcolabTemplateSpecification.TemplateFile_OL[0] == "||"
+    assert pfs.EcolabTemplateSpecification.TemplateFile_OL[3] == "||"
+    assert pfs.EcolabTemplateSpecification.TemplateFile_OL[-1] == "||"
+
+    filename = os.path.join(tmpdir, "vertical_lines_in_list.pfs")
+    pfs.write(filename)
+
+    with open(filename) as f:
+        for line in f:
+            if "TemplateFile_OL" in line:
+                assert line.strip() == "TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||"
+
+
+def test_nonunique_mixed_keywords_sections1(tmpdir):
+    text = """
+   [ROOT]
+      A = '1'
+      A = 0
+      [A]
+         B = 0
+      EndSect  // A
+      A = 3
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.ROOT.A) == 4
+    assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
+    assert pfs.ROOT.A[2].B == 0
+    assert pfs.ROOT.A[-1] == 3
+
+    filename = os.path.join(tmpdir, "nonunique_mixed_keywords_sections.pfs")
+    pfs.write(filename)
+
+
+def test_nonunique_mixed_keywords_sections2(tmpdir):
+    text = """
+   [ROOT]
+      [A]
+         B = 0
+         [B]
+            C = 4.5
+        EndSect  // B
+      EndSect  // A
+      A = 0
+      [A]
+         B = 0
+      EndSect  // A
+      A = 3
+   EndSect  // ROOT 
+"""
+
+    pfs = mikeio.Pfs(StringIO(text))
+    assert len(pfs.ROOT.A) == 4
+    assert isinstance(pfs.ROOT.A[0], mikeio.PfsSection)
+    assert isinstance(pfs.ROOT.A[0].B[1], mikeio.PfsSection)
+    assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
+    assert pfs.ROOT.A[2].B == 0
+    assert pfs.ROOT.A[-1] == 3
+
+    filename = os.path.join(tmpdir, "nonunique_mixed_keywords_sections.pfs")
+    pfs.write(filename)
+
+
+def test_parse_mike_she_pfs():
+
+    pfs = mikeio.Pfs("tests/testdata/pfs/Karup_basic.she")
+
+    assert pfs.n_targets == 2
+    assert (
+        pfs.MIKESHE_FLOWMODEL.SimSpec.ModelComp.River == 1
+    )  # TODO Is this sensible to check?
+
+
+def test_read_write_grid_editor_color_palette(tmpdir):
+    infile = "tests/testdata/pfs/grid1.gsf"
+    outfile = os.path.join(tmpdir, "grid.gsf")
+    pfs = mikeio.Pfs(infile)
+    pal = pfs.GRID_EDITOR.GRID_EDIT_VIEW.MIKEZero_Palette_Definition
+    assert len(pal.RGB_Color_Value) == 16
+
+    pfs.write(outfile)
+
+    with open(outfile) as f:
+        outlines = f.readlines()
+
+    n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
+    assert n_rgb_out == 16

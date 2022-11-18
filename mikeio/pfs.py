@@ -9,7 +9,7 @@ import yaml
 import pandas as pd
 
 
-def read_pfs(filename, encoding="cp1252", unique_keywords=True):
+def read_pfs(filename, encoding="cp1252", unique_keywords=False):
     """Read a pfs file to a Pfs object for further analysis/manipulation
 
     Parameters
@@ -21,7 +21,9 @@ def read_pfs(filename, encoding="cp1252", unique_keywords=True):
     unique_keywords: bool, optional
         Should the keywords in a section be unique? Some tools e.g. the
         MIKE Plot Composer allows non-unique keywords.
-        by default True (issue warnings if non-unique keywords are present and use only first)
+        If True: warnings will be issued if non-unique keywords
+        are present and the first occurence will be used
+        by default False
 
     Returns
     -------
@@ -64,22 +66,61 @@ class PfsSection(SimpleNamespace):
             raise IndexError("Key not found")
 
     def __set_key_value(self, key, value, copy=False):
+        if value is None:
+            value = {}
+
         if isinstance(value, dict):
             d = value.copy() if copy else value
             self.__setattr__(key, PfsSection(d))  #
-        elif isinstance(value, List) and isinstance(value[0], dict):
-            # multiple Sections with same name
+        elif isinstance(value, PfsRepeatedKeywordParams) or (
+            isinstance(value, List)
+            and sum(isinstance(subv, PfsSection) for subv in value) < len(value)
+        ):
+            # multiple keywords/Sections with same name
             sections = []
             for v in value:
-                d = v.copy() if copy else v
-                sections.append(PfsSection(d))
+                if isinstance(v, dict):
+                    d = v.copy() if copy else v
+                    sections.append(PfsSection(d))
+                else:
+                    sections.append(self._parse_value(v))
             self.__setattr__(key, sections)
         else:
-            self.__setattr__(key, value)
+            self.__setattr__(key, self._parse_value(value))
+
+    def _parse_value(self, v):
+        if isinstance(v, str) and self._str_is_scientific_float(v):
+            return float(v)
+        return v
+
+    @staticmethod
+    def _str_is_scientific_float(s):
+        """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4"""
+        if len(s) < 3:
+            return False
+        if (
+            s.count(".") <= 2
+            and s.lower().count("e") == 1
+            and s.lower()[0] != "e"
+            and s.strip()
+            .lower()
+            .replace(".", "")
+            .replace("e", "")
+            .replace("-", "")
+            .replace("+", "")
+            .isnumeric()
+        ):
+            try:
+                float(s)
+                return True
+            except:
+                return False
+        else:
+            return False
 
     def pop(self, key, *args):
-        """If key is in the dictionary, remove it and return its 
-        value, else return default. If default is not given and 
+        """If key is in the dictionary, remove it and return its
+        value, else return default. If default is not given and
         key is not in the dictionary, a KeyError is raised."""
         return self.__dict__.pop(key, *args)
 
@@ -209,7 +250,7 @@ class PfsSection(SimpleNamespace):
         return cls(d)
 
 
-def parse_yaml_preserving_duplicates(src, unique_keywords=True):
+def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     class PreserveDuplicatesLoader(yaml.loader.Loader):
         pass
 
@@ -283,10 +324,15 @@ class Pfs:
     unique_keywords: bool, optional
         Should the keywords in a section be unique? Some tools e.g. the
         MIKE Plot Composer allows non-unique keywords.
-        by default True (issue warnings if non-unique keywords are present and use only first)
+        If True: warnings will be issued if non-unique keywords
+        are present and the first occurence will be used
+        by default False
     """
 
-    def __init__(self, input, encoding="cp1252", names=None, unique_keywords=True):
+    def __init__(self, input, encoding="cp1252", names=None, unique_keywords=False):
+        self._names = []
+        self._targets = []
+
         if isinstance(input, (str, Path)) or hasattr(input, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
@@ -385,11 +431,13 @@ class Pfs:
                 d[n] = target.to_dict()
         return d
 
-    def _read_pfs_file(self, filename, encoding, unique_keywords=True):
+    def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
+        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
+            target_list = yaml.load(yml, Loader=yaml.CFullLoader)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
         except Exception as e:
@@ -487,11 +535,6 @@ class Pfs:
         s = s.replace("//", "")
         s = s.replace("\t", " ")
 
-        # check for pipes in filenames
-        if s.count("|") == 2:
-            parts = s.split("|")
-            s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
-
         if len(s) > 0 and s[0] != "!":
             if "=" in s:
                 idx = s.index("=")
@@ -504,15 +547,7 @@ class Pfs:
                     value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
                         "%Y-%m-%d %H:%M:%S"
                     )
-
-                if len(value) > 2:  # ignore foo = ''
-                    value = value.replace("''", '"')
-
-                if value[0] == "'" and value[-1] == "'" and value.count("'") == 2:
-                    pass  # quoted single string
-                elif "," in value:  # array
-                    value = f"[{value}]"
-
+                value = self._parse_param(value)
                 s = f"{key}: {value}"
 
         if "EndSect" in line:
@@ -523,14 +558,54 @@ class Pfs:
             ws = "  " + ws  # TODO
         adj_line = ws + s
 
-        s = line.strip()
-        # if len(s) > 0 and s[0] == "[":
         if section_header:
             self._level += 1
         if "EndSect" in line:
             self._level -= 1
 
         return adj_line
+
+    def _parse_param(self, value: str) -> str:
+        if len(value) == 0:
+            return "[]"
+
+        if "," in value:
+            tokens = self._split_line_by_comma(value)
+            for j in range(len(tokens)):
+                tokens[j] = self._parse_token(tokens[j])
+            value = f"[{','.join(tokens)}]" if len(tokens) > 1 else tokens[0]
+        else:
+            value = self._parse_token(value)
+        return value
+
+    _COMMA_MATCHER = re.compile(r",(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)")
+
+    def _split_line_by_comma(self, s: str):
+        return self._COMMA_MATCHER.split(s)
+        # import shlex
+        # lexer = shlex.shlex(s)
+        # lexer.whitespace += ","
+        # lexer.quotes += "|"
+        # lexer.wordchars += ".-"
+        # return list(lexer)
+
+    def _parse_token(self, token: str) -> str:
+        s = token.strip()
+
+        if s.count("|") == 2:
+            parts = s.split("|")
+            if len(parts[1]) > 1 and parts[1].count("'") > 0:
+                # string containing single quotes that needs escaping
+                warnings.warn(
+                    f"The string {s} contains a single quote character which will be temporarily converted to \U0001F600 . If you write back to a pfs file again it will be converted back."
+                )
+                parts[1] = parts[1].replace("'", "\U0001F600")
+            s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
+
+        if len(s) > 2:  # ignore foo = ''
+            s = s.replace("''", '"')
+
+        return s
 
     def _prepare_value_for_write(self, v):
         """catch peculiarities of string formatted pfs data
@@ -543,20 +618,18 @@ class Pfs:
         """
         # some crude checks and corrections
         if isinstance(v, str):
-            try:
-                # catch scientific notation
-                v = float(v)
 
-            except ValueError:
-                # add either '' or || as pre- and suffix to strings depending on path definition
-                if v == "":
-                    v = "''"
-                elif v.count("|") == 2:
-                    v = f"{v}"
-                else:
-                    v = f"'{v}'"
-
+            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
                 v = v.replace('"', "''")
+                v = v.replace("\U0001F600", "'")
+
+            if v == "":
+                # add either '' or || as pre- and suffix to strings depending on path definition
+                v = "''"
+            elif v.count("|") == 2:
+                v = f"{v}"
+            else:
+                v = f"'{v}'"
 
         elif isinstance(v, bool):
             v = str(v).lower()  # stick to MIKE lowercase bool notation
@@ -565,7 +638,11 @@ class Pfs:
             v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
 
         elif isinstance(v, list):
-            v = str(v)[1:-1]  # strip [] from lists
+            out = []
+            for subv in v:
+                out.append(str(self._prepare_value_for_write(subv)))
+            v = ", ".join(out)
+
         return v
 
     def _write_nested_PfsSections(self, f, nested_data, lvl):
@@ -585,15 +662,26 @@ class Pfs:
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
 
-            elif isinstance(v, List) and isinstance(v[0], PfsSection):
+            elif isinstance(v, List) and any(
+                isinstance(subv, PfsSection) for subv in v
+            ):
                 # duplicate sections
                 for subv in v:
-                    self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
+                    if isinstance(subv, PfsSection):
+                        self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
+                    else:
+                        subv = self._prepare_value_for_write(subv)
+                        f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
             elif isinstance(v, PfsSection):
                 f.write(f"{lvl_prefix * lvl}[{k}]\n")
                 self._write_nested_PfsSections(f, v, lvl + 1)
                 f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
-            elif isinstance(v, PfsRepeatedKeywordParams):
+            elif isinstance(v, PfsRepeatedKeywordParams) or (
+                isinstance(v, list) and all([isinstance(vv, list) for vv in v])
+            ):
+                if len(v) == 0:
+                    # empty list -> keyword with no parameter
+                    f.write(f"{lvl_prefix * lvl}{k} = \n")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
                     f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")

@@ -93,14 +93,14 @@ If a PfsSection contains enumerated subsections, they can be converted to a pand
 
 ### Unique or non-unique keywords
 
-Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does *not* support non-unique keywords---if on-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g. MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the `unique_keywords` argument in the `read_pfs()` method: 
+Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does *not* support non-unique keywords---if non-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g. MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the `unique_keywords` argument in the `read_pfs()` method: 
 
 ```python
 >>> import mikeio
 >>> pfs = mikeio.read_pfs("myplot.plt", unique_keywords=False)
 ```
 
-If a PfsSection contains non-unique PfsSections or keywords, the repeated key will only appear once and the corresponding value will be a list. 
+If a PfsSection contains non-unique PfsSections or keywords and `unique_keywords=False`, the repeated key will only appear once and the corresponding value will be a list. 
 
 
 ## Update
