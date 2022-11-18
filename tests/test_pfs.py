@@ -635,8 +635,17 @@ EndSect // ENGINE
 
 
 def test_difficult_chars_in_str2(tmpdir):
+
+    text = """
+[ENGINE]
+   A = 'str,s/d\sd.dfs0'
+   B = "str,sd'sd.dfs0"
+   C = |str'd.dfs0|
+   D = |str,s'+-s_d.dfs0|
+EndSect // ENGINE"""
+
     with pytest.warns(match="contains a single quote character"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/tricky_characters_in_str.pfs")
+        pfs = mikeio.Pfs(StringIO(text))
 
     outfile = os.path.join(tmpdir, "difficult_chars_in_str2.pfs")
     pfs.write(outfile)
