@@ -45,7 +45,21 @@ class PfsSection(SimpleNamespace):
 
     def __repr__(self) -> str:
         # return json.dumps(self.to_dict(), indent=2)
-        return yaml.dump(self.to_dict(), sort_keys=False)
+        # return yaml.dump(self.to_dict(), sort_keys=False)
+        return "\n".join(self._to_txt_lines())
+
+    def _to_txt_lines(self):
+        lines = []
+        self._write_with_func(lines.append, newline="")
+        return lines
+
+    def head(self, n=10):
+        lines = self._to_txt_lines()
+        print("\n".join(lines[:n]))
+
+    def tail(self, n=10):
+        lines = self._to_txt_lines()
+        print("\n".join(lines[-n:]))
 
     def __len__(self):
         return len(self.__dict__)
@@ -172,7 +186,7 @@ class PfsSection(SimpleNamespace):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
-    def _write_with_func(self, write: Callable, level: int = 0):
+    def _write_with_func(self, write: Callable, level: int = 0, newline: str = "\n"):
         """
         write pfs nested objects
         Args:
@@ -185,8 +199,8 @@ class PfsSection(SimpleNamespace):
             # check for empty sections
             NoneType = type(None)
             if isinstance(v, NoneType):
-                write(f"{lvl_prefix * level}[{k}]\n")
-                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
+                write(f"{lvl_prefix * level}[{k}]{newline}")
+                write(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
 
             elif isinstance(v, List) and any(
                 isinstance(subv, PfsSection) for subv in v
@@ -195,26 +209,26 @@ class PfsSection(SimpleNamespace):
                 for subv in v:
                     if isinstance(subv, PfsSection):
                         subsec = PfsSection({k: subv})
-                        subsec._write_with_func(write, level=level)
+                        subsec._write_with_func(write, level=level, newline=newline)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        write(f"{lvl_prefix * level}{k} = {subv}\n")
+                        write(f"{lvl_prefix * level}{k} = {subv}{newline}")
             elif isinstance(v, PfsSection):
-                write(f"{lvl_prefix * level}[{k}]\n")
-                v._write_with_func(write, level=(level + 1))
-                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
+                write(f"{lvl_prefix * level}[{k}]{newline}")
+                v._write_with_func(write, level=(level + 1), newline=newline)
+                write(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
             elif isinstance(v, PfsRepeatedKeywordParams) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    write(f"{lvl_prefix * level}{k} = \n")
+                    write(f"{lvl_prefix * level}{k} = {newline}")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
-                    write(f"{lvl_prefix * level}{k} = {subv}\n")
+                    write(f"{lvl_prefix * level}{k} = {subv}{newline}")
             else:
                 v = self._prepare_value_for_write(v)
-                write(f"{lvl_prefix * level}{k} = {v}\n")
+                write(f"{lvl_prefix * level}{k} = {v}{newline}")
 
     def _prepare_value_for_write(self, v):
         """catch peculiarities of string formatted pfs data
