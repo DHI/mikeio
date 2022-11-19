@@ -605,6 +605,7 @@ def test_difficult_chars_in_str(tmpdir):
   C = |sd's\d.dfs0|
   D = |str'd.dfs0|
   E = |str,s'+-s_d.dfs0|
+  F = |DT,M.dfs2|
 EndSect // ENGINE
 """
     with pytest.warns(match="contains a single quote character"):
