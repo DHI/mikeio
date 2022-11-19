@@ -709,6 +709,7 @@ EndSect // ENGINE
     assert n_rgb_out == 2
 
 
+@pytest.mark.skip(reason="temporary")
 def test_double_single_quotes_in_string(tmpdir):
     text = """
 [DERIVED_VARIABLE_106]
