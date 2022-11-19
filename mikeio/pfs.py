@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 from collections import Counter
 from datetime import datetime
 import re
@@ -645,22 +645,22 @@ class Pfs:
 
         return v
 
-    def _write_nested_PfsSections(self, f, nested_data, lvl):
+    def _write_PfsSection(self, write: Callable, section: PfsSection, level: int):
         """
         write pfs nested objects
         Args:
-            f (file object): file object (to write to)
-            nested_data (mikeio.pfs.PfsSection)
-            lvl (int): level of indentation, add a tab \t for each
+            write: a function that performs the writing e.g. to a file
+            section: mikeio.PfsSection
+            level (int): level of indentation, add 3 spaces for each
         """
         lvl_prefix = "   "
-        for k, v in vars(nested_data).items():
+        for k, v in vars(section).items():
 
             # check for empty sections
             NoneType = type(None)
             if isinstance(v, NoneType):
-                f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
+                write(f"{lvl_prefix * level}[{k}]\n")
+                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
 
             elif isinstance(v, List) and any(
                 isinstance(subv, PfsSection) for subv in v
@@ -668,26 +668,28 @@ class Pfs:
                 # duplicate sections
                 for subv in v:
                     if isinstance(subv, PfsSection):
-                        self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
+                        self._write_PfsSection(
+                            write, section=PfsSection({k: subv}), level=level
+                        )
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
+                        write(f"{lvl_prefix * level}{k} = {subv}\n")
             elif isinstance(v, PfsSection):
-                f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                self._write_nested_PfsSections(f, v, lvl + 1)
-                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
+                write(f"{lvl_prefix * level}[{k}]\n")
+                self._write_PfsSection(write, section=v, level=(level + 1))
+                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
             elif isinstance(v, PfsRepeatedKeywordParams) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    f.write(f"{lvl_prefix * lvl}{k} = \n")
+                    write(f"{lvl_prefix * level}{k} = \n")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
-                    f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
+                    write(f"{lvl_prefix * level}{k} = {subv}\n")
             else:
                 v = self._prepare_value_for_write(v)
-                f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
+                write(f"{lvl_prefix * level}{k} = {v}\n")
 
     def write(self, filename):
         """Write object to a pfs file
@@ -709,5 +711,5 @@ class Pfs:
 
             for name, target in zip(self.names, self._targets):
                 f.write(f"[{name}]\n")
-                self._write_nested_PfsSections(f, target, 1)
+                self._write_PfsSection(f.write, section=target, level=1)
                 f.write(f"EndSect  // {name}\n\n")
