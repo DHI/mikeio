@@ -443,9 +443,7 @@ def test_non_unique_keywords():
         pfs = mikeio.Pfs(fn, unique_keywords=True)
 
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
-    assert isinstance(
-        pfs.BoundaryExtractor.POINT_1, mikeio.pfs.PfsRepeatedKeywordParams
-    )
+    assert isinstance(pfs.BoundaryExtractor.POINT_1, mikeio.pfs.PfsNonUniqueList)
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
     # first value will be kept (like MIKE FM)
@@ -460,7 +458,7 @@ def test_non_unique_keywords_allowed():
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
     assert len(pfs.BoundaryExtractor.z_min) == 3
-    assert isinstance(pfs.BoundaryExtractor.z_min, mikeio.pfs.PfsRepeatedKeywordParams)
+    assert isinstance(pfs.BoundaryExtractor.z_min, mikeio.pfs.PfsNonUniqueList)
     assert pfs.BoundaryExtractor.z_min == [-3000, 9, 19]
 
 
@@ -933,7 +931,7 @@ def test_nonunique_mixed_keywords_sections1(tmpdir):
     pfs = mikeio.Pfs(StringIO(text))
     assert len(pfs.ROOT.A) == 4
     assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
-    assert isinstance(pfs.ROOT.A[2].B, mikeio.pfs.PfsRepeatedKeywordParams)
+    assert isinstance(pfs.ROOT.A[2].B, mikeio.pfs.PfsNonUniqueList)
     assert pfs.ROOT.A[2].B[0] == 0
     assert pfs.ROOT.A[-1] == 3
 
