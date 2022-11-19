@@ -614,9 +614,8 @@ EndSect // ENGINE
     assert isinstance(pfs.ENGINE.A, str)
     assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
 
-    # NOTE: B will appear wrong as a list with one item
-    assert isinstance(pfs.ENGINE.B[0], str)
-    assert pfs.ENGINE.B[0] == "str,sd'sd.dfs0"
+    assert isinstance(pfs.ENGINE.B, str)
+    assert pfs.ENGINE.B == "str,sd'sd.dfs0"
     assert isinstance(pfs.ENGINE.C, str)
     assert pfs.ENGINE.C == "|sd\U0001F600s\d.dfs0|"
     assert isinstance(pfs.ENGINE.D, str)
