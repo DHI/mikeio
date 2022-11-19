@@ -967,6 +967,7 @@ def test_nonunique_mixed_keywords_sections2(tmpdir):
 
     pfs = mikeio.Pfs(StringIO(text))
     assert len(pfs.ROOT.A) == 4
+    assert isinstance(pfs.ROOT.A, mikeio.pfs.PfsNonUniqueList)
     assert isinstance(pfs.ROOT.A[0], mikeio.PfsSection)
     assert isinstance(pfs.ROOT.A[0].B[1], mikeio.PfsSection)
     assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
