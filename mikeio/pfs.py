@@ -172,6 +172,88 @@ class PfsSection(SimpleNamespace):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
+    def _write_with_func(self, write: Callable, level: int = 0):
+        """
+        write pfs nested objects
+        Args:
+            write: a function that performs the writing e.g. to a file
+            level (int): level of indentation, add 3 spaces for each
+        """
+        lvl_prefix = "   "
+        for k, v in vars(self).items():
+
+            # check for empty sections
+            NoneType = type(None)
+            if isinstance(v, NoneType):
+                write(f"{lvl_prefix * level}[{k}]\n")
+                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
+
+            elif isinstance(v, List) and any(
+                isinstance(subv, PfsSection) for subv in v
+            ):
+                # duplicate sections
+                for subv in v:
+                    if isinstance(subv, PfsSection):
+                        subsec = PfsSection({k: subv})
+                        subsec._write_with_func(write, level=level)
+                    else:
+                        subv = self._prepare_value_for_write(subv)
+                        write(f"{lvl_prefix * level}{k} = {subv}\n")
+            elif isinstance(v, PfsSection):
+                write(f"{lvl_prefix * level}[{k}]\n")
+                v._write_with_func(write, level=(level + 1))
+                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
+            elif isinstance(v, PfsRepeatedKeywordParams) or (
+                isinstance(v, list) and all([isinstance(vv, list) for vv in v])
+            ):
+                if len(v) == 0:
+                    # empty list -> keyword with no parameter
+                    write(f"{lvl_prefix * level}{k} = \n")
+                for subv in v:
+                    subv = self._prepare_value_for_write(subv)
+                    write(f"{lvl_prefix * level}{k} = {subv}\n")
+            else:
+                v = self._prepare_value_for_write(v)
+                write(f"{lvl_prefix * level}{k} = {v}\n")
+
+    def _prepare_value_for_write(self, v):
+        """catch peculiarities of string formatted pfs data
+
+        Args:
+            v (str): value from one pfs line
+
+        Returns:
+            v: modified value
+        """
+        # some crude checks and corrections
+        if isinstance(v, str):
+
+            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
+                v = v.replace('"', "''")
+                v = v.replace("\U0001F600", "'")
+
+            if v == "":
+                # add either '' or || as pre- and suffix to strings depending on path definition
+                v = "''"
+            elif v.count("|") == 2:
+                v = f"{v}"
+            else:
+                v = f"'{v}'"
+
+        elif isinstance(v, bool):
+            v = str(v).lower()  # stick to MIKE lowercase bool notation
+
+        elif isinstance(v, datetime):
+            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
+
+        elif isinstance(v, list):
+            out = []
+            for subv in v:
+                out.append(str(self._prepare_value_for_write(subv)))
+            v = ", ".join(out)
+
+        return v
+
     def to_Pfs(self, name: str):
         """Convert to a Pfs object (with this PfsSection as the target)
 
@@ -607,90 +689,6 @@ class Pfs:
 
         return s
 
-    def _prepare_value_for_write(self, v):
-        """catch peculiarities of string formatted pfs data
-
-        Args:
-            v (str): value from one pfs line
-
-        Returns:
-            v: modified value
-        """
-        # some crude checks and corrections
-        if isinstance(v, str):
-
-            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
-                v = v.replace('"', "''")
-                v = v.replace("\U0001F600", "'")
-
-            if v == "":
-                # add either '' or || as pre- and suffix to strings depending on path definition
-                v = "''"
-            elif v.count("|") == 2:
-                v = f"{v}"
-            else:
-                v = f"'{v}'"
-
-        elif isinstance(v, bool):
-            v = str(v).lower()  # stick to MIKE lowercase bool notation
-
-        elif isinstance(v, datetime):
-            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
-
-        elif isinstance(v, list):
-            out = []
-            for subv in v:
-                out.append(str(self._prepare_value_for_write(subv)))
-            v = ", ".join(out)
-
-        return v
-
-    def _write_PfsSection(self, write: Callable, section: PfsSection, level: int):
-        """
-        write pfs nested objects
-        Args:
-            write: a function that performs the writing e.g. to a file
-            section: mikeio.PfsSection
-            level (int): level of indentation, add 3 spaces for each
-        """
-        lvl_prefix = "   "
-        for k, v in vars(section).items():
-
-            # check for empty sections
-            NoneType = type(None)
-            if isinstance(v, NoneType):
-                write(f"{lvl_prefix * level}[{k}]\n")
-                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
-
-            elif isinstance(v, List) and any(
-                isinstance(subv, PfsSection) for subv in v
-            ):
-                # duplicate sections
-                for subv in v:
-                    if isinstance(subv, PfsSection):
-                        self._write_PfsSection(
-                            write, section=PfsSection({k: subv}), level=level
-                        )
-                    else:
-                        subv = self._prepare_value_for_write(subv)
-                        write(f"{lvl_prefix * level}{k} = {subv}\n")
-            elif isinstance(v, PfsSection):
-                write(f"{lvl_prefix * level}[{k}]\n")
-                self._write_PfsSection(write, section=v, level=(level + 1))
-                write(f"{lvl_prefix * level}EndSect  // {k}\n\n")
-            elif isinstance(v, PfsRepeatedKeywordParams) or (
-                isinstance(v, list) and all([isinstance(vv, list) for vv in v])
-            ):
-                if len(v) == 0:
-                    # empty list -> keyword with no parameter
-                    write(f"{lvl_prefix * level}{k} = \n")
-                for subv in v:
-                    subv = self._prepare_value_for_write(subv)
-                    write(f"{lvl_prefix * level}{k} = {subv}\n")
-            else:
-                v = self._prepare_value_for_write(v)
-                write(f"{lvl_prefix * level}{k} = {v}\n")
-
     def write(self, filename):
         """Write object to a pfs file
 
@@ -711,5 +709,5 @@ class Pfs:
 
             for name, target in zip(self.names, self._targets):
                 f.write(f"[{name}]\n")
-                self._write_PfsSection(f.write, section=target, level=1)
+                target._write_with_func(f.write, level=1)
                 f.write(f"EndSect  // {name}\n\n")
