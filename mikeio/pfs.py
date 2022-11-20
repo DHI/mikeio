@@ -155,6 +155,46 @@ class PfsSection(SimpleNamespace):
             elif k == key:
                 self[k] = value
 
+    def find_keys(self, pattern):
+        """Find recursively all keys matching a pattern"""
+        results = {}
+        for item in self._find_keys_generator(pattern):
+            k = list(item.keys())[0]
+            v = list(item.values())[0]
+            results[k] = v
+        return self.__class__(results)
+
+    def _find_keys_generator(self, pattern, keylist=[]):
+        for k, v in self.items():
+            if isinstance(v, self.__class__):
+                yield from v._find_keys_generator(pattern, keylist + [k])
+            elif pattern in k:
+                yield from self._yield_deep_dict(keylist + [k], v)
+
+    @staticmethod
+    def _yield_deep_dict(keys, val):
+        """yield a deep nested dict with keys with a single deep value val"""
+        for j in range(len(keys) - 1, -1, -1):
+            d = {keys[j]: val}
+            val = d
+        yield d
+
+    def find_params(self, pattern):
+        """Find recursively all parameters matching a pattern"""
+        results = {}
+        for item in self._find_params_generator(pattern):
+            k = list(item.keys())[0]
+            v = list(item.values())[0]
+            results[k] = v
+        return self.__class__(results)
+
+    def _find_params_generator(self, pattern, keylist=[]):
+        for k, v in self.items():
+            if isinstance(v, self.__class__):
+                yield from v._find_params_generator(pattern, keylist + [k])
+            elif pattern in str(v):
+                yield from self._yield_deep_dict(keylist + [k], v)
+
     def find_replace(self, old_value, new_value):
         """Update recursively all old_value with new_value"""
         for k, v in self.items():
