@@ -54,10 +54,12 @@ class PfsSection(SimpleNamespace):
         return lines
 
     def head(self, n=10):
+        """Print the first n lines"""
         lines = self._to_txt_lines()
         print("\n".join(lines[:n]))
 
     def tail(self, n=10):
+        """Print the last n lines"""
         lines = self._to_txt_lines()
         print("\n".join(lines[-n:]))
 
@@ -415,7 +417,7 @@ class Pfs:
     names: List[str], optional
         If the input is dictionary or PfsSection object the
         name of the root element (=target) MUST be specified.
-        If the input is a file the names are instead read from the file,
+        If the input is a file, the names are instead read from the file,
         by default None.
     unique_keywords: bool, optional
         Should the keywords in a section be unique? Some tools e.g. the
@@ -513,6 +515,16 @@ class Pfs:
             else:
                 out.append(f"{n}: {sct_str[:45]}...")
         return "\n".join(out)
+
+    def head(self, n=10):
+        """Print the first n lines"""
+        lines = self._to_txt_lines()
+        print("\n".join(lines[:n]))
+
+    def tail(self, n=10):
+        """Print the last n lines"""
+        lines = self._to_txt_lines()
+        print("\n".join(lines[-n:]))
 
     def to_dict(self):
         """Convert to nested dictionary"""
@@ -725,3 +737,11 @@ class Pfs:
                 f.write(f"[{name}]\n")
                 target._write_with_func(f.write, level=1)
                 f.write(f"EndSect  // {name}\n\n")
+
+    def _to_txt_lines(self):
+        lines = []
+        for name, target in zip(self.names, self._targets):
+            lines.append(f"[{name}]")
+            target._write_with_func(lines.append, level=1, newline="")
+            lines.append(f"EndSect  // {name}")
+        return lines
