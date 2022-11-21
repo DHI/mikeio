@@ -90,9 +90,11 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
 
     if isinstance(time_steps, slice):
-
-        s = time.slice_indexer(time_steps.start, time_steps.stop)
-        time_steps = list(range(s.start, s.stop))
+        if isinstance(time_steps.start, int) or isinstance(time_steps.stop, int):
+            time_steps = list(range(*time_steps.indices(n_steps_file)))
+        else:
+            s = time.slice_indexer(time_steps.start, time_steps.stop)
+            time_steps = list(range(s.start, s.stop))
     elif isinstance(time_steps, Iterable) and isinstance(time_steps[0], int):
         time_steps = np.array(time_steps)
         time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
