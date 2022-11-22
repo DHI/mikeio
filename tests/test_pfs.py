@@ -443,6 +443,7 @@ def test_non_unique_keywords():
         pfs = mikeio.Pfs(fn, unique_keywords=True)
 
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
+    assert isinstance(pfs.BoundaryExtractor.POINT_1, mikeio.pfs.PfsNonUniqueList)
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
     # first value will be kept (like MIKE FM)
@@ -457,6 +458,7 @@ def test_non_unique_keywords_allowed():
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
     assert len(pfs.BoundaryExtractor.z_min) == 3
+    assert isinstance(pfs.BoundaryExtractor.z_min, mikeio.pfs.PfsNonUniqueList)
     assert pfs.BoundaryExtractor.z_min == [-3000, 9, 19]
 
 
@@ -920,6 +922,7 @@ def test_nonunique_mixed_keywords_sections1(tmpdir):
       A = 0
       [A]
          B = 0
+         B = 2
       EndSect  // A
       A = 3
    EndSect  // ROOT 
@@ -928,11 +931,21 @@ def test_nonunique_mixed_keywords_sections1(tmpdir):
     pfs = mikeio.Pfs(StringIO(text))
     assert len(pfs.ROOT.A) == 4
     assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
-    assert pfs.ROOT.A[2].B == 0
+    assert isinstance(pfs.ROOT.A[2].B, mikeio.pfs.PfsNonUniqueList)
+    assert pfs.ROOT.A[2].B[0] == 0
     assert pfs.ROOT.A[-1] == 3
 
     filename = os.path.join(tmpdir, "nonunique_mixed_keywords_sections.pfs")
     pfs.write(filename)
+
+    with open(filename) as f:
+        outlines = f.readlines()
+
+    assert outlines[5].strip() == "A = '1'"
+    assert outlines[6].strip() == "A = 0"
+    assert outlines[7].strip() == "[A]"
+    assert outlines[8].strip() == "B = 0"
+    assert outlines[9].strip() == "B = 2"
 
 
 def test_nonunique_mixed_keywords_sections2(tmpdir):
@@ -954,6 +967,7 @@ def test_nonunique_mixed_keywords_sections2(tmpdir):
 
     pfs = mikeio.Pfs(StringIO(text))
     assert len(pfs.ROOT.A) == 4
+    assert isinstance(pfs.ROOT.A, mikeio.pfs.PfsNonUniqueList)
     assert isinstance(pfs.ROOT.A[0], mikeio.PfsSection)
     assert isinstance(pfs.ROOT.A[0].B[1], mikeio.PfsSection)
     assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
