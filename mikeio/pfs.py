@@ -219,6 +219,23 @@ class PfsSection(SimpleNamespace):
             elif pattern in vv:
                 yield from self._yield_deep_dict(keylist + [k], v)
 
+    def find_sections(self, pattern:str, case:bool=False):
+        """Find recursively all sections matching a pattern"""
+        results = []
+        pattern = pattern if case else pattern.lower()
+        for item in self._find_sections_generator(pattern, case=case):
+            results.append(item)
+        return merge_PfsSections(results) if len(results) > 0 else None
+
+    def _find_sections_generator(self, pattern, keylist=[], case=False):
+        for k, v in self.items():
+            kk = str(k) if case else str(k).lower()
+            if isinstance(v, self.__class__):
+                if pattern in kk:
+                    yield from self._yield_deep_dict(keylist + [k], v)
+                else:
+                    yield from v._find_sections_generator(pattern, keylist + [k], case=case)
+
     def find_replace(self, old_value, new_value):
         """Update recursively all old_value with new_value"""
         for k, v in self.items():
