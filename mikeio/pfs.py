@@ -534,6 +534,15 @@ class Pfs:
                 d[n] = target.to_dict()
         return d
 
+    def search(self, key:str=None, *, section:str=None, param:str=None, case:bool=False) -> PfsSection:
+        """Find recursively all keys, sections or parameters matching a pattern"""        
+        results = []
+        for n, target in zip(self.names, self._targets):
+            res = target.search(key=key, section=section, param=param, case=case)
+            if res:
+                results.append({n:res})
+        return merge_PfsSections(results) if len(results) > 0 else None    
+
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         self._filename = filename
         try:
