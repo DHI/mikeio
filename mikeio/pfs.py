@@ -58,7 +58,7 @@ def _merge_dict(a: Mapping, b: Mapping, path: Sequence = None):
             #     pass  # same leaf value
             else:
                 ab = list(a[key]) + list(b[key])
-                a[key] = PfsRepeatedKeywordParams(ab)
+                a[key] = PfsNonUniqueList(ab)
         else:
             a[key] = b[key]
     return a
