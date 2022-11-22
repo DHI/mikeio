@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Tuple
+from typing import List, Tuple, Sequence, Mapping
 from collections import Counter
 from datetime import datetime
 import re
@@ -35,6 +35,33 @@ def read_pfs(filename, encoding="cp1252", unique_keywords=False):
 
 class PfsRepeatedKeywordParams(list):
     pass
+
+
+def merge_PfsSections(sections: Sequence[Mapping]):
+    """Merge a list of PfsSections/dict"""
+    assert len(sections) > 0
+    a = sections[0]
+    for b in sections[1:]:
+        a = _merge_dict(a, b)
+    return PfsSection(a)
+
+
+def _merge_dict(a: Mapping, b: Mapping, path: Sequence = None):
+    """merges dict b into dict a; handling non-unique keys"""
+    if path is None:
+        path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                _merge_dict(a[key], b[key], path + [str(key)])
+            # elif a[key] == b[key]:
+            #     pass  # same leaf value
+            else:
+                ab = list(a[key]) + list(b[key])
+                a[key] = PfsRepeatedKeywordParams(ab)
+        else:
+            a[key] = b[key]
+    return a
 
 
 class PfsSection(SimpleNamespace):
@@ -157,12 +184,10 @@ class PfsSection(SimpleNamespace):
 
     def find_keys(self, pattern):
         """Find recursively all keys matching a pattern"""
-        results = {}
+        results = []
         for item in self._find_keys_generator(pattern):
-            k = list(item.keys())[0]
-            v = list(item.values())[0]
-            results[k] = v
-        return self.__class__(results)
+            results.append(item)
+        return merge_PfsSections(results)
 
     def _find_keys_generator(self, pattern, keylist=[]):
         for k, v in self.items():
