@@ -33,7 +33,7 @@ def read_pfs(filename, encoding="cp1252", unique_keywords=False):
     return Pfs(filename, encoding=encoding, unique_keywords=unique_keywords)
 
 
-class PfsRepeatedKeywordParams(list):
+class PfsNonUniqueList(list):
     pass
 
 
@@ -87,13 +87,10 @@ class PfsSection(SimpleNamespace):
 
         if isinstance(value, dict):
             d = value.copy() if copy else value
-            self.__setattr__(key, PfsSection(d))  #
-        elif isinstance(value, PfsRepeatedKeywordParams) or (
-            isinstance(value, List)
-            and sum(isinstance(subv, PfsSection) for subv in value) < len(value)
-        ):
+            self.__setattr__(key, PfsSection(d))
+        elif isinstance(value, PfsNonUniqueList):
             # multiple keywords/Sections with same name
-            sections = []
+            sections = PfsNonUniqueList()
             for v in value:
                 if isinstance(v, dict):
                     d = v.copy() if copy else v
@@ -219,7 +216,7 @@ class PfsSection(SimpleNamespace):
                 write(f"{lvl_prefix * level}[{k}]{newline}")
                 v._write_with_func(write, level=(level + 1), newline=newline)
                 write(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
-            elif isinstance(v, PfsRepeatedKeywordParams) or (
+            elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
@@ -359,14 +356,9 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
         data = {}
         for key, val in zip(keys, vals):
             if key_count[key] > 1:
-                if isinstance(val, dict):
-                    if key not in data:
-                        data[key] = []
-                    data[key].append(val)
-                else:
-                    if key not in data:
-                        data[key] = PfsRepeatedKeywordParams()
-                    data[key].append(val)
+                if key not in data:
+                    data[key] = PfsNonUniqueList()
+                data[key].append(val)
             else:
                 data[key] = val
         return data
@@ -380,7 +372,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
             if key_count[key] > 1:
                 if isinstance(val, dict):
                     if key not in data:
-                        data[key] = []
+                        data[key] = PfsNonUniqueList()
                     data[key].append(val)
                 else:
                     warnings.warn(
@@ -694,7 +686,7 @@ class Pfs:
         # lexer = shlex.shlex(s)
         # lexer.whitespace += ","
         # lexer.quotes += "|"
-        # lexer.wordchars += ".-"
+        # lexer.wordchars += ",.-"
         # return list(lexer)
 
     def _parse_token(self, token: str) -> str:
@@ -714,6 +706,79 @@ class Pfs:
             s = s.replace("''", '"')
 
         return s
+
+    def _prepare_value_for_write(self, v):
+        """catch peculiarities of string formatted pfs data
+
+        Args:
+            v (str): value from one pfs line
+
+        Returns:
+            v: modified value
+        """
+        # some crude checks and corrections
+        if isinstance(v, str):
+
+            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
+                v = v.replace('"', "''")
+                v = v.replace("\U0001F600", "'")
+
+            if v == "":
+                # add either '' or || as pre- and suffix to strings depending on path definition
+                v = "''"
+            elif v.count("|") == 2:
+                v = f"{v}"
+            else:
+                v = f"'{v}'"
+
+        elif isinstance(v, bool):
+            v = str(v).lower()  # stick to MIKE lowercase bool notation
+
+        elif isinstance(v, datetime):
+            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
+
+        elif isinstance(v, list):
+            out = []
+            for subv in v:
+                out.append(str(self._prepare_value_for_write(subv)))
+            v = ", ".join(out)
+
+        return v
+
+    def _write_nested_PfsSections(self, f, nested_data, lvl):
+        """
+        write pfs nested objects
+        Args:
+            f (file object): file object (to write to)
+            nested_data (mikeio.pfs.PfsSection)
+            lvl (int): level of indentation, add a tab \t for each
+        """
+        lvl_prefix = "   "
+        for k, v in vars(nested_data).items():
+
+            # check for empty sections
+            NoneType = type(None)
+            if isinstance(v, NoneType):
+                f.write(f"{lvl_prefix * lvl}[{k}]\n")
+                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
+
+            elif isinstance(v, PfsSection):
+                f.write(f"{lvl_prefix * lvl}[{k}]\n")
+                self._write_nested_PfsSections(f, v, lvl + 1)
+                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
+            elif isinstance(v, PfsNonUniqueList):
+                if len(v) == 0:
+                    # empty list -> keyword with no parameter
+                    f.write(f"{lvl_prefix * lvl}{k} = \n")
+                for subv in v:
+                    if isinstance(subv, PfsSection):
+                        self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
+                    else:
+                        subv = self._prepare_value_for_write(subv)
+                        f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
+            else:
+                v = self._prepare_value_for_write(v)
+                f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
     def write(self, filename):
         """Write object to a pfs file
