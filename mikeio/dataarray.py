@@ -2245,6 +2245,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
             coords["element"] = xr.DataArray(
                 data=self.geometry.element_ids, dims="element"
             )
+        elif isinstance(self.geometry, GeometryPoint2D):
+            coords["x"] = self.geometry.x
+            coords["y"] = self.geometry.y
+        elif isinstance(self.geometry, GeometryPoint3D):
+            coords["x"] = self.geometry.x
+            coords["y"] = self.geometry.y
+            coords["z"] = self.geometry.z
 
         xr_da = xr.DataArray(
             data=self.values,

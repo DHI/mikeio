@@ -931,6 +931,23 @@ def test_dataset_interp():
     assert dai.geometry.x == x
     assert dai.geometry.y == y
 
+def test_dataset_interp_to_xarray():
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+
+    assert not ds.geometry.is_geo
+
+    x = 360000
+    y = 6184000
+
+    dsi = ds.interp(x=x, y=y)
+
+    xr_dsi = dsi.to_xarray()
+    assert float(xr_dsi.x) == pytest.approx(x)
+    assert float(xr_dsi.y) == pytest.approx(y)
+
+
+
+
 
 def test_interp_like_grid():
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
