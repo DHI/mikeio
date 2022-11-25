@@ -1054,7 +1054,7 @@ def test_search_param(pfs_ABC_text):
     r1 = pfs.search(param=0) 
     assert len(r1.ROOT) == 2
     assert r1.ROOT.A1.int_1 == 0
-    assert r1.ROOT.C.int_2 == 0
+    assert r1.ROOT.A2.int_2 == 0
     
     r2 = pfs.ROOT.search(param=0)
     assert r2 == r1.ROOT
@@ -1077,3 +1077,13 @@ def test_search_section(pfs_ABC_text):
     r2 = pfs.ROOT.search(section='A')
     assert r2 == r1.ROOT
    
+def test_search_and_modify(pfs_ABC_text):
+    # does the original remain un-chan 
+    pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
+    assert pfs.ROOT.A1.B.float_1 == 4.5
+
+    r1 = pfs.search("float")
+    assert r1.ROOT.A1.B.float_1 == 4.5
+    r1.ROOT.A1.B.float_1 = 99.9
+    assert r1.ROOT.A1.B.float_1 == 99.9
+    assert pfs.ROOT.A1.B.float_1 == 4.5
