@@ -242,7 +242,7 @@ class PfsSection(SimpleNamespace):
         results = []
         key = key if (key is None or case) else key.lower()
         section = section if (section is None or case) else section.lower()
-        param = param if (param is None or case) else param.lower()
+        param = param if (param is None or not isinstance(param, str) or case) else param.lower()
         for item in self._find_patterns_generator(keypat=key, parampat=param, secpat=section, case=case):
             results.append(item)
         return merge_PfsSections(results) if len(results) > 0 else None
@@ -251,8 +251,7 @@ class PfsSection(SimpleNamespace):
         """Look for patterns in either keys, params or sections"""
         for k, v in self.items():
             kk = str(k) if case else str(k).lower()
-            if parampat is not None:
-                vv = str(v) if case else str(v).lower()
+
             if isinstance(v, self.__class__):
                 if secpat and secpat in kk:
                     yield from self._yield_deep_dict(keylist + [k], v)
@@ -260,8 +259,20 @@ class PfsSection(SimpleNamespace):
                     yield from v._find_patterns_generator(keypat, parampat, secpat, keylist=keylist + [k], case=case)
             elif keypat and keypat in kk:
                 yield from self._yield_deep_dict(keylist + [k], v)   
-            elif parampat and parampat in vv:
+            elif self._param_match(parampat, v, case):
                 yield from self._yield_deep_dict(keylist + [k], v)                    
+
+    @staticmethod
+    def _param_match(parampat, v, case):
+        if parampat is None:
+            return False
+        if type(v) != type(parampat):
+            return False
+        if isinstance(v, str):
+            vv = str(v) if case else str(v).lower()
+            return parampat in vv
+        else:
+            return parampat == v 
 
     def find_replace(self, old_value, new_value):
         """Update recursively all old_value with new_value"""
