@@ -2297,11 +2297,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return f"geometry: {self.geometry}"
 
     def _values_txt(self) -> str:
-
-        if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
-            return f"values: {self.values}"
-        elif self.ndim == 1 and len(self.values) < 5:
-            valtxt = ", ".join([f"{v:0.4g}" for v in self.values])
-            return f"values: [{valtxt}]"
-        elif self.ndim == 1:
-            return f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
+        try:
+            # this fails for lazy loading 
+            if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
+                return f"values: {self.values}"
+            elif self.ndim == 1 and len(self.values) < 5:
+                valtxt = ", ".join([f"{v:0.4g}" for v in self.values])
+                return f"values: [{valtxt}]"
+            elif self.ndim == 1:
+                return f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
+        except:
+            pass
