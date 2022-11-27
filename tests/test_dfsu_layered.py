@@ -225,6 +225,7 @@ def test_read_dfsu3d_xyz():
     ds = dfs.read()  # all data in file
     dspt1 = ds.sel(x=x, y=y, z=z)
     assert isinstance(dspt1.geometry, GeometryPoint3D)
+    assert dspt1.geometry.projection == ds.geometry.projection
 
     dspt2 = dfs.read(x=x, y=y, z=z)
     assert isinstance(dspt2.geometry, GeometryPoint3D)
