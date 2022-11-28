@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Tuple
+from typing import List, Sequence, Tuple
 from collections import Counter
 from datetime import datetime
 import re
@@ -361,40 +361,42 @@ class Pfs:
         return len(self._targets)
 
     @property
-    def names(self) -> List[str]:
+    def names(self) -> Sequence[str]:
         """Names of the targets (root sections) as a list"""
         return self._names
 
-    @names.setter
-    def names(self, new_names):
-        new_names = [new_names] if isinstance(new_names, str) else new_names
-        if len(new_names) != self.n_targets:
-            raise ValueError(
-                f"Number of target names must match number of targets ({self.n_targets})"
-            )
-        self._remove_all_target_attr()
-        self._names = new_names
-        self._set_all_target_attr()
+    # TODO remove?
+    #@names.setter
+    #def names(self, new_names: Union[str, Sequence[str]]) -> None:
+    #    new_names = [new_names] if isinstance(new_names, str) else new_names
+    #    if len(new_names) != self.n_targets:
+    #        raise ValueError(
+    #            f"Number of target names must match number of targets ({self.n_targets})"
+    #        )
+    #    self._remove_all_target_attr()
+    #    self._names = new_names
+    #    self._set_all_target_attr()
 
     @property
     def is_unique(self) -> bool:
         """Are the target (root) names unique?"""
         return len(set(self.names)) == len(self.names)
 
-    def add_target(self, section, name):
-        if name is None:
-            raise ValueError("name must be provided")
-        section = PfsSection(section) if isinstance(section, dict) else section
-        if not isinstance(section, PfsSection):
-            raise ValueError("section wrong type; must be dict or PfsSection")
-        self._targets.append(section)
-        self._names.append(name)
-        self._set_all_target_attr()
+    # TODO consider the best way to create a Pfs with multiple targets
+    #def add_target(self, section: PfsSection, name: str) -> None:
+    #    if name is None:
+    #        raise ValueError("name must be provided")
+    #    section = PfsSection(section) if isinstance(section, dict) else section
+    #    if not isinstance(section, PfsSection):
+    #        raise ValueError("section wrong type; must be dict or PfsSection")
+    #    self._targets.append(section)
+    #    self._names.append(name)
+    #    self._set_all_target_attr()
 
-    def _remove_all_target_attr(self):
-        """When renaming targets we need to remove all old target attr"""
-        for n in set(self.names):
-            delattr(self, n)
+    #def _remove_all_target_attr(self):
+    #    """When renaming targets we need to remove all old target attr"""
+    #    for n in set(self.names):
+    #        delattr(self, n)
 
     def _set_all_target_attr(self):
         for n, section in self._targets_as_dict.items():

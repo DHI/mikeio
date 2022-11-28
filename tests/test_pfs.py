@@ -414,6 +414,7 @@ def test_multiple_identical_roots():
     assert pfs.t1_t0[1].Setup.X == 2
     assert pfs.names == ["t1_t0", "t1_t0"]
     assert pfs.n_targets == 2
+    assert not pfs.is_unique
 
 
 def test_multiple_unique_roots():
@@ -710,6 +711,18 @@ EndSect // ENGINE
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 2
 
+def test_pfs_repr_contains_name_of_target():
+    text = """
+[ENGINE]
+  RGB_Color_Value = 128, 0, 128
+  RGB_Color_Value = 85, 0, 171
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text), unique_keywords=False)
+    text = repr(pfs)
+
+    # TODO should we be more specific i.e. [ENGINE] ?
+    assert "ENGINE" in text
 
 def test_double_single_quotes_in_string(tmpdir):
     text = """
