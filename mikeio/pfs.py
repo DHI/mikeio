@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Sequence, Tuple
+from typing import List, Sequence, Tuple, Union
 from collections import Counter
 from datetime import datetime
 import re
@@ -339,7 +339,7 @@ class Pfs:
         self._add_all_FM_aliases()
 
     @property
-    def data(self):
+    def data(self) -> Union[PfsSection, List[PfsSection]]:
         return self._targets[0] if self.n_targets == 1 else self._targets
 
     @property
@@ -361,7 +361,7 @@ class Pfs:
         return len(self._targets)
 
     @property
-    def names(self) -> Sequence[str]:
+    def names(self) -> List[str]:
         """Names of the targets (root sections) as a list"""
         return self._names
 
