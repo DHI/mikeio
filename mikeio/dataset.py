@@ -1937,4 +1937,60 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
 
-        return str.join("\n", out)
+        return "\n".join(out)
+
+    def _repr_html_(self) -> str:
+        if len(self) == 0:
+            return "Empty <mikeio.Dataset>"
+        out = []
+
+        css_style = """
+        <style>
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        input+label:before {
+            content: '►  ';
+            font-size: 11px;
+            color: #777;
+            width: 20px;
+        }
+
+        input:checked+label:before {
+            content: '▼  ';
+        }
+
+        input~ul {
+            display: none;
+        }
+
+        input:checked~ul {
+            display: block;
+        }
+        div.mi-title {
+            font-weight: bold;
+            border-bottom: solid 1px;
+        }
+
+        ul.mi-item-list{ 
+            list-style-type: none;
+            padding: 0px 0px 0px 10px;
+            margin: 0px;
+        }
+        </style>
+        """
+
+        da = self[0]
+        out = [css_style,"<div class='mi-title'>mikeio.Dataset</div>",
+        f"<div>{da._dims_txt()}</div>", 
+        f"<div>{da._time_txt()}</div>", 
+        f"<div>{da._geometry_txt()}</div>",
+        "<input id='items' type='checkbox' checked>",
+        "<label for='items'>items:</label><ul class='mi-item-list'>"
+        ]
+        for i, item in enumerate(self.items):
+            out.append(f"<li 'mi-item-item'><span>{i}</span>:  {item}</li>")
+        out.append("</ul>")
+
+        return "\n".join(out)

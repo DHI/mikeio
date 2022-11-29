@@ -74,6 +74,7 @@ def test_get_names():
     assert ds["Foo"].name == "Foo"
     assert ds["Foo"].type == EUMType.Undefined
     assert repr(ds["Foo"].unit) == "undefined"
+    assert repr(ds["Foo"].unit) == "undefined"
     assert ds.names == ["Foo"]
 
 
@@ -1035,6 +1036,9 @@ def test_dfsu3d_dataset():
     ds = dfsu.read()
 
     text = repr(ds)
+    assert "mikeio.Dataset" in text
+    html = ds._repr_html_() # basic test to make sure it runs without error
+    assert "mikeio.Dataset" in html
 
     assert len(ds) == 2  # Salinity, Temperature
 
