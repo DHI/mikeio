@@ -37,7 +37,7 @@ class PfsNonUniqueList(list):
     pass
 
 
-def merge_PfsSections(sections: Sequence[Mapping]):
+def _merge_PfsSections(sections: Sequence[Mapping]):
     """Merge a list of PfsSections/dict"""
     assert len(sections) > 0
     a = sections[0]
@@ -179,73 +179,44 @@ class PfsSection(SimpleNamespace):
             elif k == key:
                 self[k] = value
 
-    # def find_keys(self, pattern:str, case:bool=False):
-    #     """Find recursively all keys matching a pattern"""
-    #     results = []
-    #     pattern = pattern if case else pattern.lower()
-    #     for item in self._find_keys_generator(pattern, case=case):
-    #         results.append(item)
-    #     return merge_PfsSections(results) if len(results) > 0 else None
+    def search(self, text:str=None, *, key:str=None, section:str=None, param=None, case:bool=False):
+        """Find recursively all keys, sections or parameters 
+           matching a pattern
+        
+        NOTE: logical OR between multiple conditions
 
-    # def _find_keys_generator(self, pattern, keylist=[], case=False):
-    #     for k, v in self.items():
-    #         kk = str(k) if case else str(k).lower()
-    #         if isinstance(v, self.__class__):
-    #             yield from v._find_keys_generator(pattern, keylist + [k], case=case)
-    #         elif pattern in kk:
-    #             yield from self._yield_deep_dict(keylist + [k], v)
+        Parameters
+        ----------
+        text : str, optional
+            Search for text in either key, section or parameter, by default None
+        key : str, optional
+            text pattern to seach for in keywords, by default None
+        section : str, optional
+            text pattern to seach for in sections, by default None
+        param : str, bool, float, int, optional
+            text or value in a parameter, by default None
+        case : bool, optional
+            should the text search be case-sensitive?, by default False
 
-    @staticmethod
-    def _yield_deep_dict(keys, val):
-        """yield a deep nested dict with keys with a single deep value val"""
-        for j in range(len(keys) - 1, -1, -1):
-            d = {keys[j]: val}
-            val = d
-        yield d
-
-    # def find_params(self, pattern:str, case:bool=False):
-    #     """Find recursively all parameters matching a pattern"""
-    #     results = []
-    #     pattern = pattern if case else pattern.lower()
-    #     for item in self._find_params_generator(pattern, case=case):
-    #         results.append(item)
-    #     return merge_PfsSections(results) if len(results) > 0 else None
-
-    # def _find_params_generator(self, pattern, keylist=[], case=False):
-    #     for k, v in self.items():
-    #         vv = str(v) if case else str(v).lower()
-    #         if isinstance(v, self.__class__):
-    #             yield from v._find_params_generator(pattern, keylist + [k], case=case)
-    #         elif pattern in vv:
-    #             yield from self._yield_deep_dict(keylist + [k], v)
-
-    # def find_sections(self, pattern:str, case:bool=False):
-    #     """Find recursively all sections matching a pattern"""
-    #     results = []
-    #     pattern = pattern if case else pattern.lower()
-    #     for item in self._find_sections_generator(pattern, case=case):
-    #         results.append(item)
-    #     return merge_PfsSections(results) if len(results) > 0 else None
-
-    def _find_sections_generator(self, pattern, keylist=[], case=False):
-        for k, v in self.items():
-            kk = str(k) if case else str(k).lower()
-            if isinstance(v, self.__class__):
-                if pattern in kk:
-                    yield from self._yield_deep_dict(keylist + [k], v)
-                else:
-                    yield from v._find_sections_generator(pattern, keylist + [k], case=case)
-
-    def search(self, key:str=None, *, section:str=None, param:str=None, case:bool=False):
-        """Find recursively all keys, sections or parameters matching a pattern"""
-        # NOTE: logically OR if mulitple conditions
+        Returns
+        -------
+        PfsSection
+            Search result as a nested PfsSection
+        """
         results = []
+        if text is not None:
+            assert key is None, "text and key cannot both be provided!"
+            assert section is None, "text and section cannot both be provided!"
+            assert param is None, "text and param cannot both be provided!"
+            key = text
+            section = text
+            param = text
         key = key if (key is None or case) else key.lower()
         section = section if (section is None or case) else section.lower()
         param = param if (param is None or not isinstance(param, str) or case) else param.lower()
         for item in self._find_patterns_generator(keypat=key, parampat=param, secpat=section, case=case):
             results.append(item)
-        return merge_PfsSections(results) if len(results) > 0 else None
+        return _merge_PfsSections(results) if len(results) > 0 else None
     
     def _find_patterns_generator(self, keypat=None, parampat=None, secpat=None, keylist=[], case=False):
         """Look for patterns in either keys, params or sections"""
@@ -262,7 +233,15 @@ class PfsSection(SimpleNamespace):
                     yield from self._yield_deep_dict(keylist + [k], v)   
                 if self._param_match(parampat, v, case):
                     yield from self._yield_deep_dict(keylist + [k], v)                    
-
+    
+    @staticmethod
+    def _yield_deep_dict(keys, val):
+        """yield a deep nested dict with keys with a single deep value val"""
+        for j in range(len(keys) - 1, -1, -1):
+            d = {keys[j]: val}
+            val = d
+        yield d
+                
     @staticmethod
     def _param_match(parampat, v, case):
         if parampat is None:
@@ -546,14 +525,36 @@ class Pfs:
                 d[n] = target.to_dict()
         return d
 
-    def search(self, key:str=None, *, section:str=None, param:str=None, case:bool=False) -> PfsSection:
-        """Find recursively all keys, sections or parameters matching a pattern"""        
+    def search(self, text:str=None, *, key:str=None, section:str=None, param=None, case:bool=False) -> PfsSection:
+        """Find recursively all keys, sections or parameters 
+           matching a pattern
+        
+        NOTE: logical OR between multiple conditions
+
+        Parameters
+        ----------
+        text : str, optional
+            Search for text in either key, section or parameter, by default None
+        key : str, optional
+            text pattern to seach for in keywords, by default None
+        section : str, optional
+            text pattern to seach for in sections, by default None
+        param : str, bool, float, int, optional
+            text or value in a parameter, by default None
+        case : bool, optional
+            should the text search be case-sensitive?, by default False
+
+        Returns
+        -------
+        PfsSection
+            Search result as a nested PfsSection
+        """
         results = []
         for n, target in zip(self.names, self._targets):
-            res = target.search(key=key, section=section, param=param, case=case)
+            res = target.search(text=text, key=key, section=section, param=param, case=case)
             if res:
                 results.append({n:res})
-        return merge_PfsSections(results) if len(results) > 0 else None    
+        return _merge_PfsSections(results) if len(results) > 0 else None    
 
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         self._filename = filename
