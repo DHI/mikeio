@@ -1946,26 +1946,26 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         css_style = """
         <style>
-        input[type="checkbox"] {
+        li input[type="checkbox"] {
             display: none;
         }
 
-        input+label:before {
+        li input+label:before {
             content: '►  ';
             font-size: 11px;
             color: #777;
             width: 20px;
         }
 
-        input:checked+label:before {
+        li input:checked+label:before {
             content: '▼  ';
         }
 
-        input~ul {
+        li input~ul {
             display: none;
         }
 
-        input:checked~ul {
+        li input:checked~ul {
             display: block;
         }
         div.mi-title {
@@ -1973,7 +1973,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             border-bottom: solid 1px;
         }
 
-        ul.mi-item-list{ 
+
+        ul{ 
             list-style-type: none;
             padding: 0px 0px 0px 10px;
             margin: 0px;
@@ -1990,11 +1991,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         f"<div>{da._dims_txt()}</div>", 
         f"<div>{da._time_txt()}</div>", 
         f"<div>{da._geometry_txt()}</div>",
-        f"<input id='{index_id}' type='checkbox' checked>",
+        "<ul><li>"
+        f"<input id='{index_id}' type='checkbox' {'checked' if self.n_items < 10 else ''}>", # TODO what is a reasonable # of item to display by default?
         f"<label for='{index_id}'>items:</label><ul class='mi-item-list'>"
         ]
         for i, item in enumerate(self.items):
-            out.append(f"<li 'mi-item-item'><span>{i}</span>:  {item}</li>")
+            out.append(f"<li><span>{i}</span>:<span>{item.name}</span>&nbsp;<span>({item.unit.name})</li>")
         out.append("</ul>")
+        out.append("</li></ul>")
 
         return "\n".join(out)
