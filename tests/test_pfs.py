@@ -1030,18 +1030,18 @@ def test_search_keyword(pfs_ABC_text):
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
     assert "A2" in pfs.ROOT
 
-    r0 = pfs.search("not_there")
+    r0 = pfs.search(key="not_there")
     assert r0 is None
     
-    r1 = pfs.search("float")
+    r1 = pfs.search(key="float")
     assert r1.ROOT.A1.B.float_1 == 4.5
     assert "A2" not in r1.ROOT
 
-    r2 = pfs.ROOT.search("float")
+    r2 = pfs.ROOT.search(key="float")
     assert r2.A1.B.float_1 == 4.5
     assert "A2" not in r2
 
-    r3 = pfs.ROOT.search(key="float")
+    r3 = pfs.ROOT.search("float")
     assert r2 == r3
     
 
@@ -1090,16 +1090,16 @@ def test_search_keyword_or_param(pfs_ABC_text):
     assert r1 != r2
     assert r1 != r3
 
-    r4 = mikeio.pfs.merge_PfsSections([r2, r3])
-    assert r1 == r4
+    # r4 = mikeio.pfs._merge_PfsSections([r2, r3])
+    # assert r1 == r4
 
 
 def test_search_and_modify(pfs_ABC_text):
-    # does the original remain un-chan 
+    # does the original remain un-changed? 
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
     assert pfs.ROOT.A1.B.float_1 == 4.5
 
-    r1 = pfs.search("float")
+    r1 = pfs.search(key="float")
     assert r1.ROOT.A1.B.float_1 == 4.5
     r1.ROOT.A1.B.float_1 = 99.9
     assert r1.ROOT.A1.B.float_1 == 99.9
