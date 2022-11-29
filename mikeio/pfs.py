@@ -53,16 +53,6 @@ class PfsSection(SimpleNamespace):
         self._write_with_func(lines.append, newline="")
         return lines
 
-    def head(self, n=10):
-        """Print the first n lines"""
-        lines = self._to_txt_lines()
-        print("\n".join(lines[:n]))
-
-    def tail(self, n=10):
-        """Print the last n lines"""
-        lines = self._to_txt_lines()
-        print("\n".join(lines[-n:]))
-
     def __len__(self):
         return len(self.__dict__)
 
@@ -185,12 +175,17 @@ class PfsSection(SimpleNamespace):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
-    def _write_with_func(self, write: Callable, level: int = 0, newline: str = "\n"):
-        """
-        write pfs nested objects
-        Args:
-            write: a function that performs the writing e.g. to a file
-            level (int): level of indentation, add 3 spaces for each
+    def _write_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
+        """Write pfs nested objects
+        
+        Parameters
+        ----------
+        func : Callable
+            A function that performs the writing e.g. to a file
+        level : int, optional
+            Level of indentation (add 3 spaces for each), by default 0
+        newline : str, optional
+            newline string, by default "\n"
         """
         lvl_prefix = "   "
         for k, v in vars(self).items():
@@ -198,8 +193,8 @@ class PfsSection(SimpleNamespace):
             # check for empty sections
             NoneType = type(None)
             if isinstance(v, NoneType):
-                write(f"{lvl_prefix * level}[{k}]{newline}")
-                write(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                func(f"{lvl_prefix * level}[{k}]{newline}")
+                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
 
             elif isinstance(v, List) and any(
                 isinstance(subv, PfsSection) for subv in v
@@ -208,32 +203,34 @@ class PfsSection(SimpleNamespace):
                 for subv in v:
                     if isinstance(subv, PfsSection):
                         subsec = PfsSection({k: subv})
-                        subsec._write_with_func(write, level=level, newline=newline)
+                        subsec._write_with_func(func, level=level, newline=newline)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        write(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                        func(f"{lvl_prefix * level}{k} = {subv}{newline}")
             elif isinstance(v, PfsSection):
-                write(f"{lvl_prefix * level}[{k}]{newline}")
-                v._write_with_func(write, level=(level + 1), newline=newline)
-                write(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                func(f"{lvl_prefix * level}[{k}]{newline}")
+                v._write_with_func(func, level=(level + 1), newline=newline)
+                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
             elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    write(f"{lvl_prefix * level}{k} = {newline}")
+                    func(f"{lvl_prefix * level}{k} = {newline}")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
-                    write(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                    func(f"{lvl_prefix * level}{k} = {subv}{newline}")
             else:
                 v = self._prepare_value_for_write(v)
-                write(f"{lvl_prefix * level}{k} = {v}{newline}")
+                func(f"{lvl_prefix * level}{k} = {v}{newline}")
 
     def _prepare_value_for_write(self, v):
         """catch peculiarities of string formatted pfs data
 
-        Args:
-            v (str): value from one pfs line
+        Parameters
+        ----------
+        v : str 
+            value from one pfs line
 
         Returns:
             v: modified value
@@ -508,16 +505,6 @@ class Pfs:
                 out.append(f"{n}: {sct_str[:45]}...")
         return "\n".join(out)
 
-    def head(self, n=10):
-        """Print the first n lines"""
-        lines = self._to_txt_lines()
-        print("\n".join(lines[:n]))
-
-    def tail(self, n=10):
-        """Print the last n lines"""
-        lines = self._to_txt_lines()
-        print("\n".join(lines[-n:]))
-
     def to_dict(self):
         """Convert to nested dictionary"""
         d = dict()
@@ -780,15 +767,20 @@ class Pfs:
                 v = self._prepare_value_for_write(v)
                 f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
 
-    def write(self, filename):
+    def write(self, filename=None):
         """Write object to a pfs file
 
         Parameters
         ----------
-        filename: str
+        filename: str, optional
             Full path and filename of pfs to be created.
+            If filename is None, the content will be returned 
+            as a list of strings. 
         """
         from mikeio import __version__ as mikeio_version
+
+        if filename is None:
+            return self._to_txt_lines()            
 
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
