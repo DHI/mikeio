@@ -1981,13 +1981,17 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         </style>
         """
 
+        import uuid
+
+        index_id = f"index-{uuid.uuid4()}"
+
         da = self[0]
         out = [css_style,"<div class='mi-title'>mikeio.Dataset</div>",
         f"<div>{da._dims_txt()}</div>", 
         f"<div>{da._time_txt()}</div>", 
         f"<div>{da._geometry_txt()}</div>",
-        "<input id='items' type='checkbox' checked>",
-        "<label for='items'>items:</label><ul class='mi-item-list'>"
+        f"<input id='{index_id}' type='checkbox' checked>",
+        f"<label for='{index_id}'>items:</label><ul class='mi-item-list'>"
         ]
         for i, item in enumerate(self.items):
             out.append(f"<li 'mi-item-item'><span>{i}</span>:  {item}</li>")
