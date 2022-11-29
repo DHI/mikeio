@@ -48,11 +48,6 @@ class PfsSection(SimpleNamespace):
         # return yaml.dump(self.to_dict(), sort_keys=False)
         return "\n".join(self._to_txt_lines())
 
-    def _to_txt_lines(self):
-        lines = []
-        self._write_with_func(lines.append, newline="")
-        return lines
-
     def __len__(self):
         return len(self.__dict__)
 
@@ -174,6 +169,11 @@ class PfsSection(SimpleNamespace):
             if isinstance(value, self.__class__):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
+
+    def _to_txt_lines(self):
+        lines = []
+        self._write_with_func(lines.append, newline="")
+        return lines
 
     def _write_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
         """Write pfs nested objects
