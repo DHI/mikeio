@@ -1,4 +1,5 @@
 from pathlib import Path
+import uuid
 from types import SimpleNamespace
 from typing import List, Sequence, Tuple, Union, Callable
 from collections import Counter
@@ -47,6 +48,53 @@ class PfsSection(SimpleNamespace):
         # return json.dumps(self.to_dict(), indent=2)
         # return yaml.dump(self.to_dict(), sort_keys=False)
         return "\n".join(self._to_txt_lines())
+
+    def _repr_html_(self) -> str:
+
+        css_style = """
+        <style>
+        li input[type="checkbox"] {
+            display: none;
+        }
+
+        li input+label:before {
+            content: '➕  ';
+            font-size: 11px;
+            color: #777;
+            width: 20px;
+        }
+
+        li input:checked+label:before {
+            content: '➖ ';
+        }
+
+        li input~ul {
+            display: none;
+        }
+
+        li input:checked~ul {
+            display: block;
+        }
+        div.mi-title {
+            font-weight: bold;
+            border-bottom: solid 1px;
+        }
+
+
+        ul{ 
+            list-style-type: none;
+            padding: 0px 0px 0px 10px;
+            margin: 0px;
+        }
+
+        li
+        {
+            padding: 0px 0px 0px 10px;
+        }
+        </style>
+        """
+
+        return css_style + "<ul>" + "\n".join(self._to_html_lines()) + "</ul>"
 
     def __len__(self):
         return len(self.__dict__)
@@ -175,6 +223,11 @@ class PfsSection(SimpleNamespace):
         self._write_with_func(lines.append, newline="")
         return lines
 
+    def _to_html_lines(self):
+        lines = []
+        self._write_html_with_func(lines.append, newline="")
+        return lines
+
     def _write_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
         """Write pfs nested objects
         
@@ -223,6 +276,58 @@ class PfsSection(SimpleNamespace):
             else:
                 v = self._prepare_value_for_write(v)
                 func(f"{lvl_prefix * level}{k} = {v}{newline}")
+
+    def _write_html_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
+        """Write pfs nested objects
+        
+        Parameters
+        ----------
+        func : Callable
+            A function that performs the writing e.g. to a file
+        level : int, optional
+            Level of indentation (add 3 spaces for each), by default 0
+        newline : str, optional
+            newline string, by default "\n"
+        """
+        lvl_prefix = ""
+
+
+        for k, v in vars(self).items():
+
+            # check for empty sections
+            #NoneType = type(None)
+            #if isinstance(v, NoneType):
+            #    func(f"{lvl_prefix * level}<strong>[{k}]</strong><ul>{newline}")
+            #    func(f"</ul>{newline}")
+
+            if isinstance(v, List) and any(
+                isinstance(subv, PfsSection) for subv in v
+            ):
+                # duplicate sections
+                for subv in v:
+                    if isinstance(subv, PfsSection):
+                        subsec = PfsSection({k: subv})
+                        subsec._write_html_with_func(func, level=level, newline=newline)
+                    else:
+                        subv = self._prepare_value_for_write(subv)
+                        func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+            elif isinstance(v, PfsSection):
+                index_id = f"index-{uuid.uuid4()}"
+                func(f"{lvl_prefix * level}<li><input id='{index_id}' type='checkbox'><label for='{index_id}'>[{k}]</label><ul>{newline}")
+                v._write_html_with_func(func, level=(level + 1), newline=newline)
+                func(f"</ul></li>{newline}")
+            elif isinstance(v, PfsNonUniqueList) or (
+                isinstance(v, list) and all([isinstance(vv, list) for vv in v])
+            ):
+                if len(v) == 0:
+                    # empty list -> keyword with no parameter
+                    func(f"{lvl_prefix * level}{k} = {newline}")
+                for subv in v:
+                    subv = self._prepare_value_for_write(subv)
+                    func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+            else:
+                v = self._prepare_value_for_write(v)
+                func(f"<li>{lvl_prefix * level}{k} = {v}</li>{newline}")
 
     def _prepare_value_for_write(self, v):
         """catch peculiarities of string formatted pfs data
