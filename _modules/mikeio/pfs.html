@@ -87,7 +87,7 @@
   <h1>Source code for mikeio.pfs</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -521,7 +521,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_all_FM_aliases</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">PfsSection</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PfsSection</span><span class="p">]]:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_targets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_targets</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_targets</span>
 
     <span class="nd">@property</span>
@@ -547,36 +547,38 @@
         <span class="sd">&quot;&quot;&quot;Names of the targets (root sections) as a list&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span>
 
-    <span class="nd">@names</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_names</span><span class="p">):</span>
-        <span class="n">new_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">new_names</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">new_names</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_names</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_targets</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Number of target names must match number of targets (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_targets</span><span class="si">}</span><span class="s2">)&quot;</span>
-            <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_remove_all_target_attr</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="n">new_names</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_all_target_attr</span><span class="p">()</span>
+    <span class="c1"># TODO remove?</span>
+    <span class="c1">#@names.setter</span>
+    <span class="c1">#def names(self, new_names: Union[str, Sequence[str]]) -&gt; None:</span>
+    <span class="c1">#    new_names = [new_names] if isinstance(new_names, str) else new_names</span>
+    <span class="c1">#    if len(new_names) != self.n_targets:</span>
+    <span class="c1">#        raise ValueError(</span>
+    <span class="c1">#            f&quot;Number of target names must match number of targets ({self.n_targets})&quot;</span>
+    <span class="c1">#        )</span>
+    <span class="c1">#    self._remove_all_target_attr()</span>
+    <span class="c1">#    self._names = new_names</span>
+    <span class="c1">#    self._set_all_target_attr()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_unique</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Are the target (root) names unique?&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">))</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">add_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;name must be provided&quot;</span><span class="p">)</span>
-        <span class="n">section</span> <span class="o">=</span> <span class="n">PfsSection</span><span class="p">(</span><span class="n">section</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="k">else</span> <span class="n">section</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">section</span><span class="p">,</span> <span class="n">PfsSection</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;section wrong type; must be dict or PfsSection&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_targets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_set_all_target_attr</span><span class="p">()</span>
+    <span class="c1"># TODO consider the best way to create a Pfs with multiple targets</span>
+    <span class="c1">#def add_target(self, section: PfsSection, name: str) -&gt; None:</span>
+    <span class="c1">#    if name is None:</span>
+    <span class="c1">#        raise ValueError(&quot;name must be provided&quot;)</span>
+    <span class="c1">#    section = PfsSection(section) if isinstance(section, dict) else section</span>
+    <span class="c1">#    if not isinstance(section, PfsSection):</span>
+    <span class="c1">#        raise ValueError(&quot;section wrong type; must be dict or PfsSection&quot;)</span>
+    <span class="c1">#    self._targets.append(section)</span>
+    <span class="c1">#    self._names.append(name)</span>
+    <span class="c1">#    self._set_all_target_attr()</span>
 
-    <span class="k">def</span> <span class="nf">_remove_all_target_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;When renaming targets we need to remove all old target attr&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
-            <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="c1">#def _remove_all_target_attr(self):</span>
+    <span class="c1">#    &quot;&quot;&quot;When renaming targets we need to remove all old target attr&quot;&quot;&quot;</span>
+    <span class="c1">#    for n in set(self.names):</span>
+    <span class="c1">#        delattr(self, n)</span>
 
     <span class="k">def</span> <span class="nf">_set_all_target_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">section</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_targets_as_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
