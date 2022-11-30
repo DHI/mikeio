@@ -39,6 +39,10 @@ class PfsNonUniqueList(list):
 
 class PfsSection(SimpleNamespace):
     def __init__(self, dictionary, **kwargs):
+
+        if "parent" in kwargs:
+            self._parent = kwargs.pop("parent")
+
         super().__init__(**kwargs)
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
@@ -72,7 +76,7 @@ class PfsSection(SimpleNamespace):
 
         if isinstance(value, dict):
             d = value.copy() if copy else value
-            self.__setattr__(key, PfsSection(d))
+            self.__setattr__(key, PfsSection(d,parent=self))
         elif isinstance(value, PfsNonUniqueList):
             # multiple keywords/Sections with same name
             sections = PfsNonUniqueList()
@@ -286,6 +290,7 @@ class PfsSection(SimpleNamespace):
     def to_dict(self):
         """Convert to (nested) dict (as a copy)"""
         d = self.__dict__.copy()
+        if "_parent" in d: d.pop("_parent")
         for key, value in d.items():
             if isinstance(value, self.__class__):
                 d[key] = value.to_dict()

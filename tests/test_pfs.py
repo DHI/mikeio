@@ -1027,3 +1027,23 @@ def test_read_write_grid_editor_color_palette(tmpdir):
 
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 16
+
+
+def test_pfs_section_parent():
+
+    text = """
+[ENGINE]
+  option = foo
+  [SUBSECTION]
+    setting = 'advanced'
+    [SUBSUBSECTION]
+      subsetting = 'not so advanced'
+  EndSect // SUBSECTION
+  EndSect // SUBSECTION
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text))
+
+    assert pfs.ENGINE.SUBSECTION.setting == 'advanced'
+    assert pfs.ENGINE.SUBSECTION._parent == pfs.ENGINE
+    assert pfs.ENGINE.SUBSECTION.SUBSUBSECTION._parent == pfs.ENGINE.SUBSECTION
