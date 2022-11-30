@@ -42,28 +42,26 @@ def _merge_PfsSections(sections: Sequence[Mapping]):
     assert len(sections) > 0
     a = sections[0]
     for b in sections[1:]:
-        a = {**a, **b}
-        #a = _merge_dict(a, b)
+        a = _merge_dict(a, b)
     return PfsSection(a)
 
 
-# TODO necessary?
-#def _merge_dict(a: Mapping, b: Mapping, path: Sequence = None):
-#    """merges dict b into dict a; handling non-unique keys"""
-#    if path is None:
-#        path = []
-#    for key in b:
-#        if key in a:
-#            if isinstance(a[key], dict) and isinstance(b[key], dict):
-#                _merge_dict(a[key], b[key], path + [str(key)])
-#            # elif a[key] == b[key]:
-#            #     pass  # same leaf value
-#            else:
-#                ab = list(a[key]) + list(b[key])
-#                a[key] = PfsNonUniqueList(ab)
-#        else:
-#            a[key] = b[key]
-#    return a
+def _merge_dict(a: Mapping, b: Mapping, path: Sequence = None):
+    """merges dict b into dict a; handling non-unique keys"""
+    if path is None:
+        path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                _merge_dict(a[key], b[key], path + [str(key)])
+            # elif a[key] == b[key]:
+            #     pass  # same leaf value
+            else:
+                ab = list(a[key]) + list(b[key])
+                a[key] = PfsNonUniqueList(ab)
+        else:
+            a[key] = b[key]
+    return a
 
 
 class PfsSection(SimpleNamespace):

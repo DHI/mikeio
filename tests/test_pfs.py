@@ -1068,6 +1068,15 @@ def test_search_keyword(pfs_ABC_text):
 
     r3 = pfs.ROOT.search("float")
     assert r2 == r3
+
+def test_search_keyword_found_in_multiple_places():
+    pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
+    subset = pfs.search("charnock")
+    # the string "Charnock" occurs 6 times in this file
+    len(subset.FemEngineSW.SPECTRAL_WAVE_MODULE.WIND.keys()) ==2 
+    len(subset.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS) == 4
+    
+
     
 
 def test_search_param(pfs_ABC_text):
