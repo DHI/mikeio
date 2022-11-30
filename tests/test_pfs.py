@@ -34,6 +34,18 @@ def test_pfssection(d1):
     assert len(sct.lst) == 2
     assert sct.dt == datetime(1979, 2, 3, 3, 5, 0)
 
+def test_pfssection_repr(d1):
+    sct = mikeio.PfsSection(d1)
+    txt = repr(sct)
+    assert len(txt)>1
+    assert "dt = 1979, 2, 3, 3, 5, 0" in txt
+    assert "EndSect" in txt
+
+def test_pfs_repr(d1):
+    pfs = mikeio.Pfs(d1, names="ROOT")
+    txt = repr(pfs)
+    assert len(txt)>1
+    assert "SMILE = |file" in txt
 
 def test_pfssection_keys_values_items(d1):
     sct = mikeio.PfsSection(d1)
