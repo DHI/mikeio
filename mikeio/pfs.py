@@ -392,8 +392,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     )
     return yaml.load(src, PreserveDuplicatesLoader)
 
-
-class Pfs:
+class Pfs(PfsSection):
     """Create a Pfs object for reading, writing and manipulating pfs files
 
     Parameters
@@ -417,9 +416,7 @@ class Pfs:
     """
 
     def __init__(self, input, encoding="cp1252", names=None, unique_keywords=False):
-        self._names = []
-        self._targets = []
-
+        
         if isinstance(input, (str, Path)) or hasattr(input, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
@@ -427,101 +424,33 @@ class Pfs:
         else:
             sections, names = self._parse_non_file_input(input, names)
 
-        self._targets = sections
-        self._names = names
-        self._set_all_target_attr()
+        d = dict(zip(names, sections))   # TODO: what about repeated names?
+        super().__init__(d)
 
         self._add_all_FM_aliases()
 
+    # TODO: deprecated warning
     @property
     def data(self) -> Union[PfsSection, List[PfsSection]]:
-        return self._targets[0] if self.n_targets == 1 else self._targets
+        return self.targets[0] if self.n_targets == 1 else self.targets
 
     @property
-    def _targets_as_dict(self):
-        target_key_count = Counter(self.names)
-        d = dict()
-        for n, target in zip(self.names, self._targets):
-            if target_key_count[n] > 1:
-                if n not in d:
-                    d[n] = []
-                d[n].append(target)
-            else:
-                d[n] = target
-        return d
+    def targets(self) -> List[PfsSection]:
+        """List of targets (root sections)"""
+        return list(self.values())
 
     @property
     def n_targets(self) -> int:
         """Number of targets (root sections)"""
-        return len(self._targets)
+        return len(self.targets)
 
+    # TODO: deprecate or unravel keys? 
     @property
     def names(self) -> List[str]:
         """Names of the targets (root sections) as a list"""
-        return self._names
-
-    # TODO remove?
-    #@names.setter
-    #def names(self, new_names: Union[str, Sequence[str]]) -> None:
-    #    new_names = [new_names] if isinstance(new_names, str) else new_names
-    #    if len(new_names) != self.n_targets:
-    #        raise ValueError(
-    #            f"Number of target names must match number of targets ({self.n_targets})"
-    #        )
-    #    self._remove_all_target_attr()
-    #    self._names = new_names
-    #    self._set_all_target_attr()
-
-    @property
-    def is_unique(self) -> bool:
-        """Are the target (root) names unique?"""
-        return len(set(self.names)) == len(self.names)
-
-    # TODO consider the best way to create a Pfs with multiple targets
-    #def add_target(self, section: PfsSection, name: str) -> None:
-    #    if name is None:
-    #        raise ValueError("name must be provided")
-    #    section = PfsSection(section) if isinstance(section, dict) else section
-    #    if not isinstance(section, PfsSection):
-    #        raise ValueError("section wrong type; must be dict or PfsSection")
-    #    self._targets.append(section)
-    #    self._names.append(name)
-    #    self._set_all_target_attr()
-
-    #def _remove_all_target_attr(self):
-    #    """When renaming targets we need to remove all old target attr"""
-    #    for n in set(self.names):
-    #        delattr(self, n)
-
-    def _set_all_target_attr(self):
-        for n, section in self._targets_as_dict.items():
-            setattr(self, n, section)
-
-    def __repr__(self) -> str:
-        out = ["<mikeio.Pfs>"]
-        for n, sct in zip(self.names, self._targets):
-            sct_str = str(sct).replace("\n", "")
-            if len(sct_str) < 50:
-                out.append(f"{n}: {sct_str}")
-            else:
-                out.append(f"{n}: {sct_str[:45]}...")
-        return "\n".join(out)
-
-    def to_dict(self):
-        """Convert to nested dictionary"""
-        d = dict()
-        target_key_count = Counter(self.names)
-        for n, target in zip(self.names, self._targets):
-            if target_key_count[n] > 1:
-                if n not in d:
-                    d[n] = []
-                d[n].append(target.to_dict())
-            else:
-                d[n] = target.to_dict()
-        return d
+        return list(self.keys())
 
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
-        self._filename = filename
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
@@ -596,15 +525,15 @@ class Pfs:
         output = []
         output.append("---")
 
-        self._level = 0
+        _level = 0
 
         for line in lines:
-            adj_line = self._parse_line(line)
+            adj_line, _level = self._parse_line(line, _level)
             output.append(adj_line)
 
         return "\n".join(output)
 
-    def _parse_line(self, line: str) -> str:
+    def _parse_line(self, line: str, level: int = 0) -> str:
         section_header = False
         s = line.strip()
         s = re.sub(r"\s*//.*", "", s)  # remove comments
@@ -615,7 +544,7 @@ class Pfs:
                 s = s.replace("[", "")
 
                 # This could be an option to create always create a list to handle multiple identical root elements
-                if self._level == 0:
+                if level == 0:
                     s = f"- {s}"
 
             if s[-1] == "]":
@@ -642,17 +571,17 @@ class Pfs:
         if "EndSect" in line:
             s = ""
 
-        ws = " " * 2 * self._level
-        if self._level > 0:
+        ws = " " * 2 * level
+        if level > 0:
             ws = "  " + ws  # TODO
         adj_line = ws + s
 
         if section_header:
-            self._level += 1
+            level += 1
         if "EndSect" in line:
-            self._level -= 1
+            level -= 1
 
-        return adj_line
+        return adj_line, level
 
     def _parse_param(self, value: str) -> str:
         if len(value) == 0:
@@ -696,79 +625,6 @@ class Pfs:
 
         return s
 
-    def _prepare_value_for_write(self, v):
-        """catch peculiarities of string formatted pfs data
-
-        Args:
-            v (str): value from one pfs line
-
-        Returns:
-            v: modified value
-        """
-        # some crude checks and corrections
-        if isinstance(v, str):
-
-            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
-                v = v.replace('"', "''")
-                v = v.replace("\U0001F600", "'")
-
-            if v == "":
-                # add either '' or || as pre- and suffix to strings depending on path definition
-                v = "''"
-            elif v.count("|") == 2:
-                v = f"{v}"
-            else:
-                v = f"'{v}'"
-
-        elif isinstance(v, bool):
-            v = str(v).lower()  # stick to MIKE lowercase bool notation
-
-        elif isinstance(v, datetime):
-            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
-
-        elif isinstance(v, list):
-            out = []
-            for subv in v:
-                out.append(str(self._prepare_value_for_write(subv)))
-            v = ", ".join(out)
-
-        return v
-
-    def _write_nested_PfsSections(self, f, nested_data, lvl):
-        """
-        write pfs nested objects
-        Args:
-            f (file object): file object (to write to)
-            nested_data (mikeio.pfs.PfsSection)
-            lvl (int): level of indentation, add a tab \t for each
-        """
-        lvl_prefix = "   "
-        for k, v in vars(nested_data).items():
-
-            # check for empty sections
-            NoneType = type(None)
-            if isinstance(v, NoneType):
-                f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
-
-            elif isinstance(v, PfsSection):
-                f.write(f"{lvl_prefix * lvl}[{k}]\n")
-                self._write_nested_PfsSections(f, v, lvl + 1)
-                f.write(f"{lvl_prefix * lvl}EndSect  // {k}\n\n")
-            elif isinstance(v, PfsNonUniqueList):
-                if len(v) == 0:
-                    # empty list -> keyword with no parameter
-                    f.write(f"{lvl_prefix * lvl}{k} = \n")
-                for subv in v:
-                    if isinstance(subv, PfsSection):
-                        self._write_nested_PfsSections(f, PfsSection({k: subv}), lvl)
-                    else:
-                        subv = self._prepare_value_for_write(subv)
-                        f.write(f"{lvl_prefix * lvl}{k} = {subv}\n")
-            else:
-                v = self._prepare_value_for_write(v)
-                f.write(f"{lvl_prefix * lvl}{k} = {v}\n")
-
     def write(self, filename=None):
         """Write object to a pfs file
 
@@ -792,15 +648,4 @@ class Pfs:
             f.write(rf"// Version     : {mikeio_version}")
             f.write("\n\n")
 
-            for name, target in zip(self.names, self._targets):
-                f.write(f"[{name}]\n")
-                target._write_with_func(f.write, level=1)
-                f.write(f"EndSect  // {name}\n\n")
-
-    def _to_txt_lines(self):
-        lines = []
-        for name, target in zip(self.names, self._targets):
-            lines.append(f"[{name}]")
-            target._write_with_func(lines.append, level=1, newline="")
-            lines.append(f"EndSect  // {name}")
-        return lines
+            self._write_with_func(f.write, level=0)
