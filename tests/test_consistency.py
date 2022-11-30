@@ -471,6 +471,34 @@ def test_read_dfs_time_list_int():
         assert all(dsr[0].time == dsgetitem.time)
         assert dsr[0].shape == dsgetitem.shape
 
+def test_read_dfs_time_slice_int():
+
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        
+        time = slice(1,3) # 1,2 (not 3)
+        dssel = mikeio.read(filename=filename).isel(time=time)
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dssel.n_timesteps == 2
+
+        time = slice(None,-1) # Skip last step
+        dssel = mikeio.read(filename=filename).isel(time=time)
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dssel.n_timesteps == 4
+        
+        time = slice(1,None) # Skip first step
+        dssel = mikeio.read(filename=filename).isel(time=time)
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dssel.n_timesteps == 4
+
+        dsr = mikeio.read(filename=filename, time=time)
+        assert all(dsr.time == dssel.time)
+        assert dsr.shape == dssel.shape
+
 
 def test_filter_items_dfs0():
 

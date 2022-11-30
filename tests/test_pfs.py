@@ -34,6 +34,18 @@ def test_pfssection(d1):
     assert len(sct.lst) == 2
     assert sct.dt == datetime(1979, 2, 3, 3, 5, 0)
 
+def test_pfssection_repr(d1):
+    sct = mikeio.PfsSection(d1)
+    txt = repr(sct)
+    assert len(txt)>1
+    assert "dt = 1979, 2, 3, 3, 5, 0" in txt
+    assert "EndSect" in txt
+
+def test_pfs_repr(d1):
+    pfs = mikeio.Pfs(d1, names="ROOT")
+    txt = repr(pfs)
+    assert len(txt)>1
+    assert "SMILE = |file" in txt
 
 def test_pfssection_keys_values_items(d1):
     sct = mikeio.PfsSection(d1)
@@ -170,7 +182,7 @@ def test_pfssection_insert_pfssection(d1):
     assert sct.FILE_6.val == 5
 
 
-def test_pfssection_find_replace(d1):
+def test_pfssection_find_replace_recursive(d1):
     sct = mikeio.PfsSection(d1)
 
     for j in range(10):
@@ -414,6 +426,7 @@ def test_multiple_identical_roots():
     assert pfs.t1_t0[1].Setup.X == 2
     assert pfs.names == ["t1_t0", "t1_t0"]
     assert pfs.n_targets == 2
+    assert not pfs.is_unique
 
 
 def test_multiple_unique_roots():
@@ -710,6 +723,18 @@ EndSect // ENGINE
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 2
 
+def test_pfs_repr_contains_name_of_target():
+    text = """
+[ENGINE]
+  RGB_Color_Value = 128, 0, 128
+  RGB_Color_Value = 85, 0, 171
+EndSect // ENGINE
+"""
+    pfs = mikeio.Pfs(StringIO(text), unique_keywords=False)
+    text = repr(pfs)
+
+    # TODO should we be more specific i.e. [ENGINE] ?
+    assert "ENGINE" in text
 
 def test_double_single_quotes_in_string(tmpdir):
     text = """
