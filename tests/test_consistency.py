@@ -80,6 +80,16 @@ def test_dfs1_interp_x():
     assert isinstance(ds1.geometry, GeometryUndefined)
     assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
 
+def test_dfs1_2nodes_interp_x():
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
+    dss = ds.isel(x=[0,1])
+    assert dss.geometry.nx == 2
+    ds1 = dss.interp(x=7.75)
+    assert ds1.dims == ("time",)
+    assert isinstance(ds1.geometry, GeometryUndefined)
+    #assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
+
+
 
 # Nice to have...
 # def test_dfs1_interp_like():
