@@ -924,12 +924,29 @@ def test_dataset_interp():
     y = 6184000
 
     dai = da.interp(x=x, y=y)
-
     assert isinstance(dai, DataArray)
     assert dai.shape == (ds.n_timesteps,)
     assert dai.name == da.name
     assert dai.geometry.x == x
     assert dai.geometry.y == y
+    assert dai.geometry.projection == ds.geometry.projection
+
+def test_dataset_interp_to_xarray():
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+
+    assert not ds.geometry.is_geo
+
+    x = 360000
+    y = 6184000
+
+    dsi = ds.interp(x=x, y=y)
+
+    xr_dsi = dsi.to_xarray()
+    assert float(xr_dsi.x) == pytest.approx(x)
+    assert float(xr_dsi.y) == pytest.approx(y)
+
+
+
 
 
 def test_interp_like_grid():
