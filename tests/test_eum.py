@@ -76,7 +76,3 @@ def test_eum_conversion():
 
     assert True
 
-# TODO delete
-def test_get_item_name():
-
-    assert True
