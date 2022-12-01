@@ -395,7 +395,7 @@
 <div class="viewcode-block" id="concat"><a class="viewcode-back" href="../../generic.html#mikeio.generic.concat">[docs]</a><span class="k">def</span> <span class="nf">concat</span><span class="p">(</span><span class="n">infilenames</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Concatenates files along the time axis</span>
 
-<span class="sd">    If files are overlapping, the last one will be used.</span>
+<span class="sd">    Overlap handling is defined by the `keep` argument,  by default the last one will be used.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
