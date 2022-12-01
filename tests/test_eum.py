@@ -75,3 +75,8 @@ def test_eum_conversion():
         EUMUnit(code)
 
     assert True
+
+# TODO delete
+def test_get_item_name():
+
+    assert True
