@@ -1029,3 +1029,19 @@ def test_interp_like_fm_dataset():
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM)
+
+def test_write_header(tmpdir):
+    meshfilename = "tests/testdata/north_sea_2.mesh"
+    outfilename = os.path.join(tmpdir, "NS_write_header.dfsu")
+    dfs = mikeio.Dfsu(meshfilename)
+    n_elements = dfs.n_elements
+    nt = 3
+    n_items = 2
+    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+    with dfs.write_header(outfilename, items=items) as f:
+        for _ in range(nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((1, n_elements))
+                data.append(d)
+                f.append(data)
