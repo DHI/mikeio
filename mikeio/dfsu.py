@@ -889,16 +889,17 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         Examples
         --------
-        >>> msh = Mesh("foo.mesh")
-        >>> n_elements = msh.n_elements
+        >>> meshfilename = "foo.mesh"
+        >>> outfilename = "bigfile.dfsu"
         >>> dfs = Dfsu(meshfilename)
+        >>> n_elements = dfs.n_elements
         >>> nt = 1000
         >>> n_items = 10
         >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
         >>> with dfs.write_header(outfilename, items=items) as f:
-        >>>     for i in range(1, nt):
+        >>>     for _ in range(nt):
         >>>         data = []
-        >>>         for i in range(n_items):
+        >>>         for _ in range(n_items):
         >>>             d = np.random.random((1, n_elements))
         >>>             data.append(d)
         >>>             f.append(data)
