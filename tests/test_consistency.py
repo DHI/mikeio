@@ -189,9 +189,10 @@ def test_interp_x_y_dfs2():
     assert das.geometry.y == y
 
     dss = ds.interp(x=x, y=y)
-
+    
     assert dss.geometry.x == x
     assert dss.geometry.y == y
+    assert dss.geometry.projection == ds.geometry.projection
 
 
 def test_sel_x_y_dfsu2d():
