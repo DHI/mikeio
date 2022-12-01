@@ -308,7 +308,7 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
 def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     """Concatenates files along the time axis
 
-    If files are overlapping, the last one will be used.
+    Overlap handling is defined by the `keep` argument,  by default the last one will be used.
 
     Parameters
     ----------
