@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from datetime import datetime
 import pytest
@@ -45,7 +46,7 @@ def test_dfs1_isel_x():
     ds1 = ds.isel(8, axis="x")
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
 
 def test_dfs1_sel_t():
@@ -63,13 +64,13 @@ def test_dfs1_sel_x():
     ds1 = ds.sel(x=7.8)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
     da: DataArray = ds[0]
     da1 = da.sel(x=7.8)
     assert da1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert da1.isel(0, axis="time").values == pytest.approx(0.203246)
+    assert da1.isel(time=0).values == pytest.approx(0.203246)
 
 
 def test_dfs1_interp_x():
@@ -78,16 +79,18 @@ def test_dfs1_interp_x():
     ds1 = ds.interp(x=7.75)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.20202248)
 
 def test_dfs1_2nodes_interp_x():
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
     dss = ds.isel(x=[0,1])
     assert dss.geometry.nx == 2
-    ds1 = dss.interp(x=7.75)
+    ds1 = dss.interp(x=0.75)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.271449185907840)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    #assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
+    dsi = dss.interp(x=7.75)
+    assert np.isnan(dsi[0].isel(time=0).values)
 
 
 
