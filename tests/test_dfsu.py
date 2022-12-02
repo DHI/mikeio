@@ -1037,7 +1037,7 @@ def test_write_header(tmpdir):
     nt = 3
     n_items = 2
     items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-    with dfs.write_header(outfilename, items=items) as f:
+    with dfs.write_header(outfilename, items=items, start_time="2021-1-1", dt=3600) as f:
         for _ in range(nt):
             data = []
             for _ in range(n_items):
