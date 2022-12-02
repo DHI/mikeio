@@ -575,14 +575,13 @@ def test_write_big_file(tmpdir):
 
     ds = Dataset(das)
 
-    with pytest.warns(match="dt"):  # TODO should dt be handled in a different way
-        with dfs.write(outfilename, data=ds, dt=3600, keep_open=True) as f:
-            for _ in range(1, nt):
-                data = []
-                for _ in range(n_items):
-                    d = np.random.random((1, n_elements))
-                    data.append(d)
-                f.append(data)
+    with dfs.write(outfilename, data=ds, dt=3600, keep_open=True) as f:
+        for _ in range(1, nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((1, n_elements))
+                data.append(d)
+            f.append(data)
 
     dfsu = mikeio.open(outfilename)
 
