@@ -479,6 +479,8 @@ def test_write(tmpdir):
 
     assert dfs._source.ApplicationTitle == "mikeio"
 
+    dfs.write(outfilename, ds.isel(time=0))  # without time axis
+
 
 def test_write_from_dfsu(tmpdir):
 
@@ -1037,10 +1039,21 @@ def test_write_header(tmpdir):
     nt = 3
     n_items = 2
     items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-    with dfs.write_header(outfilename, items=items, start_time="2021-1-1", dt=3600) as f:
+    time0 = datetime(2021,1,1)
+    with dfs.write_header(outfilename, items=items, start_time=time0, dt=3600) as f:
         for _ in range(nt):
             data = []
             for _ in range(n_items):
-                d = np.random.random((1, n_elements))
+                d = np.random.random((1, n_elements))  # 2d
+                data.append(d)
+                f.append(data)
+
+    # append also works for data without time axis
+    outfilename = os.path.join(tmpdir, "NS_write_header2.dfsu")
+    with dfs.write_header(outfilename, items=items, start_time=time0, dt=3600) as f:
+        for _ in range(nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((n_elements))  # 1d
                 data.append(d)
                 f.append(data)
