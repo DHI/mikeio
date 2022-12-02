@@ -947,7 +947,14 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
 
-        return self._write(filename=filename, data=data, dt=dt, elements=elements, title=title, keep_open=keep_open)
+        return self._write(
+            filename=filename, 
+            data=data, 
+            dt=dt, 
+            elements=elements, 
+            title=title, 
+            keep_open=keep_open
+            )
 
 
     def _write(
@@ -984,7 +991,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if self.is_spectral:
             raise ValueError("write() is not supported for spectral dfsu!")
 
-        if dt:
+        if dt and not keep_open:
             warnings.warn(
                 "setting dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
@@ -1005,7 +1012,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 zn_dynamic = data[0]._zn
 
             # data needs to be a list so we can fit zn later
-            data = [x.to_numpy() for x in data]
+            data = [np.atleast_2d(x.to_numpy()) for x in data]
 
         n_items = len(data)
         n_time_steps = 0
