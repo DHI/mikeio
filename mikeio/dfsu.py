@@ -905,7 +905,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         >>>             f.append(data)
         """
 
-        return self.write(
+        return self._write(
             filename=filename,
             data=[],
             start_time=start_time,
@@ -933,8 +933,47 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             full path to the new dfsu file
         data: Dataset
             list of matrices, one for each item. Matrix dimension: time, x
+        dt: float, optional
+            The time step (in seconds)
+        elements: list[int], optional
+            write only these element ids to file
+        title: str
+            title of the dfsu file. Default is blank.
+        keep_open: bool, optional
+            Keep file open for appending
+        """        
+        if isinstance(data, list):
+            raise TypeError(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
+            )
+
+        return self._write(filename=filename, data=data, dt=dt, elements=elements, title=title, keep_open=keep_open)
+
+
+    def _write(
+        self,
+        filename,
+        data,
+        start_time=None,
+        dt=None,
+        items=None,
+        elements=None,
+        title=None,
+        keep_open=False,
+    ):
+        """Write a new dfsu file
+
+        Parameters
+        -----------
+        filename: str
+            full path to the new dfsu file
+        data: list[np.array] or Dataset
+            list of matrices, one for each item. Matrix dimension: time, x
+        start_time: datetime, optional, deprecated
+            start date of type datetime.    
         dt: float, optional, deprecated
             The time step (in seconds)
+        items: list[ItemInfo], optional, deprecated
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -949,11 +988,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             warnings.warn(
                 "setting dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
-            )
-
-        if isinstance(data, list):
-            raise TypeError(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
 
         filename = str(filename)
