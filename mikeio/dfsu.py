@@ -1,4 +1,5 @@
 import os
+from typing import List, Union
 import numpy as np
 import pandas as pd
 import warnings
@@ -993,8 +994,12 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         if dt and not keep_open:
             warnings.warn(
-                "setting dt is deprecated, please supply data in the form of a Dataset",
+                "argument dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
+            )
+        if keep_open and not dt:
+            warnings.warn(
+                "argument dt missing, should be provided when keep_open=True"
             )
 
         filename = str(filename)
@@ -1158,23 +1163,25 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             self._dfs.Close()
             os.remove(filename)
 
-    def append(self, data: Dataset) -> None:
+    def append(self, data: Union[Dataset, List[np.ndarray]]) -> None:
         """Append to a dfsu file opened with `write(...,keep_open=True)`
 
         Parameters
         -----------
-        data: Dataset
+        data: list[np.array] or Dataset
+            list of matrices, one for each item. Matrix dimension: time, x
         """
 
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
-        n_time_steps = np.shape(data[0])[0]
-        for i in trange(n_time_steps, disable=not self.show_progress):
+        has_time_axis = len(np.shape(data[0])) == 2
+        n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
+        for i in trange(n_timesteps, disable=not self.show_progress):
             for item in range(n_items):
                 di = data[item]
                 if isinstance(data, Dataset):
                     di = di.to_numpy()
-                d = di[i, :]
+                d = di[i, :] if has_time_axis else di
                 d[np.isnan(d)] = deletevalue
                 darray = d.astype(np.float32)
                 self._dfs.WriteItemTimeStepNext(0, darray)
