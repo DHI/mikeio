@@ -890,20 +890,20 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         Examples
         --------
-        >>> meshfilename = "foo.mesh"
+        >>> import numpy as np
+        >>> import mikeio
+        >>> meshfilename = "tests/testdata/north_sea_2.mesh"
         >>> outfilename = "bigfile.dfsu"
-        >>> dfs = Dfsu(meshfilename)
+        >>> dfs = mikeio.Dfsu(meshfilename)
         >>> n_elements = dfs.n_elements
         >>> nt = 1000
         >>> n_items = 10
-        >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+        >>> items = [mikeio.ItemInfo(f"Item {i+1}") for i in range(n_items)]
         >>> with dfs.write_header(outfilename, items=items) as f:
-        >>>     for _ in range(nt):
-        >>>         data = []
-        >>>         for _ in range(n_items):
-        >>>             d = np.random.random((1, n_elements))
-        >>>             data.append(d)
-        >>>             f.append(data)
+        ...     for _ in range(nt):
+        ...         # get a list of data
+        ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]
+        ...         f.append(data)
         """
 
         return self._write(
