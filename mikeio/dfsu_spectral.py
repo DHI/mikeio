@@ -113,21 +113,22 @@ class DfsuSpectral(_Dfsu):
 
         Examples
         --------
-        >>> mikeio.read("line_spectra.dfsu")
+        >>> import mikeio
+        >>> mikeio.read("tests/testdata/line_spectra.dfsu")
         <mikeio.Dataset>
-        Geometry: DfsuSpectral1D
-        Dimensions: (time:4, node:10, frequency:16, direction:25)
-        Time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (4 records)
-        Items:
-        0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
+        dims: (time:4, node:10, direction:16, frequency:25)
+        time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (4 records)
+        geometry: DfsuSpectral1D (9 elements, 10 nodes)
+        items:
+          0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
 
-        >>> mikeio.read("area_spectra.dfsu", time=-1)
+        >>> mikeio.read("tests/testdata/area_spectra.dfsu", time=-1)
         <mikeio.Dataset>
-        Geometry: DfsuSpectral2D
-        Dimensions: (element:40, frequency:16, direction:25)
-        Time: 2017-10-27 05:00:00 (time-invariant)
-        Items:
-        0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
+        dims: (element:40, direction:16, frequency:25)
+        time: 2017-10-27 05:00:00 (time-invariant)
+        geometry: DfsuSpectral2D (40 elements, 33 nodes)
+        items:
+          0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -292,12 +293,12 @@ class DfsuSpectral(_Dfsu):
 
         Examples
         --------
-        >>> dfs = Dfsu("area_spectrum.dfsu")
+        >>> import mikeio
+        >>> dfs = mikeio.Dfsu("tests/testdata/area_spectra.dfsu")
         >>> ds = dfs.read(items="Energy density")
         >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
-        >>> dfs.plot_spectrum(spectrum, plot_type="patch")
-
-        >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
+        >>> ax = dfs.plot_spectrum(spectrum, plot_type="patch")
+        >>> ax = dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s");
         """
         if isinstance(spectrum, DataArray):
             spectrum = spectrum.to_numpy()
