@@ -248,5 +248,12 @@ def test_interp_dfs1():
     dai = da.interp(x=-10) # outside the domain
     assert np.isnan(dai[-1].values)
 
-    
+
+def test_interp_onepoint_dfs1():
+
+    ds = mikeio.read("tests/testdata/nx1.dfs1")    
+    assert ds.geometry.nx == 1
+
+    with pytest.raises(match="not possible for Grid1D with one point"):
+        ds[0].interp(x=0)
 

@@ -105,6 +105,7 @@ class Grid1D(_Geometry):
 
         x = coords[0][0]  # TODO accept list of points
         
+        assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
         
