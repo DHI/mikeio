@@ -869,6 +869,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         Examples
         --------
+        >>> from datetime import datetime
         >>> import numpy as np
         >>> import mikeio
         >>> meshfilename = "tests/testdata/north_sea_2.mesh"
@@ -878,7 +879,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         >>> nt = 1000
         >>> n_items = 10
         >>> items = [mikeio.ItemInfo(f"Item {i+1}") for i in range(n_items)]
-        >>> with dfs.write_header(outfilename, items=items) as f:
+        >>> with dfs.write_header(outfilename, items=items, start_time=datetime(2000,1,1), dt=3600) as f:
         ...     for _ in range(nt):
         ...         # get a list of data
         ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]
