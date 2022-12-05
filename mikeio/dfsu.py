@@ -726,27 +726,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
-
-        Examples
-        --------
-        >>> dfsu.read()
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
-        >>> dfsu.read(time="1985-08-06 12:00,1985-08-07 00:00")
-        <mikeio.Dataset>
-        Dimensions: (5, 884)
-        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -1246,11 +1225,18 @@ class Dfsu2DH(_Dfsu):
 
         Examples
         --------
-        >>> ds = dfsu.extract_track(times, xy, items=['u','v'])
-
-        >>> ds = dfsu.extract_track('track_file.dfs0')
-
-        >>> ds = dfsu.extract_track('track_file.csv', items=0)
+        >>> import mikeio
+        >>> dfsu = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
+        >>> ds = dfsu.extract_track("tests/testdata/altimetry_NorthSea_20171027.csv")
+        >>> ds
+        <mikeio.Dataset>
+        dims: (time:1115)
+        time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
+        items:
+          0:  Longitude <Undefined> (undefined)
+          1:  Latitude <Undefined> (undefined)
+          2:  Surface elevation <Surface Elevation> (meter)
+          3:  Wind speed <Wind speed> (meter per sec)
         """
         if self.is_spectral:
             raise ValueError("Method not supported for spectral dfsu!")
@@ -1292,12 +1278,13 @@ class Mesh(_UnstructuredFile):
     Examples
     --------
 
-    >>> msh = Mesh("../tests/testdata/odense_rough.mesh")
+    >>> import mikeio
+    >>> msh = mikeio.Mesh("tests/testdata/odense_rough.mesh")
     >>> msh
-    Number of elements: 654
-    Number of nodes: 399
-    Projection: UTM-33
-
+    Flexible Mesh
+    number of elements: 654
+    number of nodes: 399
+    projection: UTM-33
     """
 
     def __init__(self, filename):
