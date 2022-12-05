@@ -86,6 +86,7 @@
              
   <h1>Source code for mikeio.dfsu</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
@@ -976,22 +977,23 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; msh = Mesh(&quot;foo.mesh&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; n_elements = msh.n_elements</span>
-<span class="sd">        &gt;&gt;&gt; dfs = Dfsu(meshfilename)</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; import mikeio</span>
+<span class="sd">        &gt;&gt;&gt; meshfilename = &quot;tests/testdata/north_sea_2.mesh&quot;</span>
+<span class="sd">        &gt;&gt;&gt; outfilename = &quot;bigfile.dfsu&quot;</span>
+<span class="sd">        &gt;&gt;&gt; dfs = mikeio.Dfsu(meshfilename)</span>
+<span class="sd">        &gt;&gt;&gt; n_elements = dfs.n_elements</span>
 <span class="sd">        &gt;&gt;&gt; nt = 1000</span>
 <span class="sd">        &gt;&gt;&gt; n_items = 10</span>
-<span class="sd">        &gt;&gt;&gt; items = [ItemInfo(f&quot;Item {i+1}&quot;) for i in range(n_items)]</span>
+<span class="sd">        &gt;&gt;&gt; items = [mikeio.ItemInfo(f&quot;Item {i+1}&quot;) for i in range(n_items)]</span>
 <span class="sd">        &gt;&gt;&gt; with dfs.write_header(outfilename, items=items) as f:</span>
-<span class="sd">        &gt;&gt;&gt;     for i in range(1, nt):</span>
-<span class="sd">        &gt;&gt;&gt;         data = []</span>
-<span class="sd">        &gt;&gt;&gt;         for i in range(n_items):</span>
-<span class="sd">        &gt;&gt;&gt;             d = np.random.random((1, n_elements))</span>
-<span class="sd">        &gt;&gt;&gt;             data.append(d)</span>
-<span class="sd">        &gt;&gt;&gt;             f.append(data)</span>
+<span class="sd">        ...     for _ in range(nt):</span>
+<span class="sd">        ...         # get a list of data</span>
+<span class="sd">        ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]</span>
+<span class="sd">        ...         f.append(data)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span>
             <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">start_time</span><span class="o">=</span><span class="n">start_time</span><span class="p">,</span>
@@ -1019,8 +1021,54 @@
 <span class="sd">            full path to the new dfsu file</span>
 <span class="sd">        data: Dataset</span>
 <span class="sd">            list of matrices, one for each item. Matrix dimension: time, x</span>
+<span class="sd">        dt: float, optional</span>
+<span class="sd">            The time step (in seconds)</span>
+<span class="sd">        elements: list[int], optional</span>
+<span class="sd">            write only these element ids to file</span>
+<span class="sd">        title: str</span>
+<span class="sd">            title of the dfsu file. Default is blank.</span>
+<span class="sd">        keep_open: bool, optional</span>
+<span class="sd">            Keep file open for appending</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> 
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> 
+            <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> 
+            <span class="n">elements</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span> 
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> 
+            <span class="n">keep_open</span><span class="o">=</span><span class="n">keep_open</span>
+            <span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">keep_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write a new dfsu file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        -----------</span>
+<span class="sd">        filename: str</span>
+<span class="sd">            full path to the new dfsu file</span>
+<span class="sd">        data: list[np.array] or Dataset</span>
+<span class="sd">            list of matrices, one for each item. Matrix dimension: time, x</span>
+<span class="sd">        start_time: datetime, optional, deprecated</span>
+<span class="sd">            start date of type datetime.    </span>
 <span class="sd">        dt: float, optional, deprecated</span>
 <span class="sd">            The time step (in seconds)</span>
+<span class="sd">        items: list[ItemInfo], optional, deprecated</span>
 <span class="sd">        elements: list[int], optional</span>
 <span class="sd">            write only these element ids to file</span>
 <span class="sd">        title: str</span>
@@ -1031,15 +1079,14 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_spectral</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;write() is not supported for spectral dfsu!&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">dt</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dt</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keep_open</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;setting dt is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;argument dt is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
                 <span class="ne">FutureWarning</span><span class="p">,</span>
             <span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span>
+        <span class="k">if</span> <span class="n">keep_open</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dt</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;argument dt missing, should be provided when keep_open=True&quot;</span>
             <span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -1057,7 +1104,7 @@
                 <span class="n">zn_dynamic</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_zn</span>
 
             <span class="c1"># data needs to be a list so we can fit zn later</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span>
 
         <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">n_time_steps</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1203,23 +1250,25 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Append to a dfsu file opened with `write(...,keep_open=True)`</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        -----------</span>
-<span class="sd">        data: Dataset</span>
+<span class="sd">        data: list[np.array] or Dataset</span>
+<span class="sd">            list of matrices, one for each item. Matrix dimension: time, x</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">deletevalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">DeleteValueFloat</span>
         <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_progress</span><span class="p">):</span>
+        <span class="n">has_time_axis</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="n">n_timesteps</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">has_time_axis</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_timesteps</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_progress</span><span class="p">):</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
                 <span class="n">di</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
                     <span class="n">di</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">has_time_axis</span> <span class="k">else</span> <span class="n">di</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">d</span><span class="p">)]</span> <span class="o">=</span> <span class="n">deletevalue</span>
                 <span class="n">darray</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">WriteItemTimeStepNext</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">darray</span><span class="p">)</span>
