@@ -870,8 +870,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         Examples
         --------
         >>> from datetime import datetime
-        >>> import numpy as np
-        >>> import mikeio
         >>> meshfilename = "tests/testdata/north_sea_2.mesh"
         >>> outfilename = "bigfile.dfsu"
         >>> dfs = mikeio.Dfsu(meshfilename)
@@ -1226,7 +1224,6 @@ class Dfsu2DH(_Dfsu):
 
         Examples
         --------
-        >>> import mikeio
         >>> dfsu = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
         >>> ds = dfsu.extract_track("tests/testdata/altimetry_NorthSea_20171027.csv")
         >>> ds

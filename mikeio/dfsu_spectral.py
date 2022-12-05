@@ -113,7 +113,6 @@ class DfsuSpectral(_Dfsu):
 
         Examples
         --------
-        >>> import mikeio
         >>> mikeio.read("tests/testdata/line_spectra.dfsu")
         <mikeio.Dataset>
         dims: (time:4, node:10, direction:16, frequency:25)
@@ -293,7 +292,6 @@ class DfsuSpectral(_Dfsu):
 
         Examples
         --------
-        >>> import mikeio
         >>> dfs = mikeio.Dfsu("tests/testdata/area_spectra.dfsu")
         >>> ds = dfs.read(items="Energy density")
         >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
