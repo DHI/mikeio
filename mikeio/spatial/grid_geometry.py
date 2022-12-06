@@ -104,12 +104,18 @@ class Grid1D(_Geometry):
     def get_spatial_interpolant(self, coords, **kwargs):
 
         x = coords[0][0]  # TODO accept list of points
+        
+        assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
-        weights = 1 - d[ids]
-
-        assert np.allclose(weights.sum(), 1.0)
+        
+        if x > self.x.max() or x < self.x.min():
+            weights = np.array([np.nan, np.nan])
+        else:
+            weights = (1 - d[ids]/d[ids].sum())
+            assert np.allclose(weights.sum(), 1.0)
         assert len(ids) == 2
+        assert len(weights) == 2
         return ids, weights
 
     def interp(self, data, ids, weights):
