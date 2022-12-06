@@ -813,7 +813,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
         ):
-            # raise ValueError("Geometry is required for ndim >=1")
+            if dims == ("time","x"):
+                return Grid1D(nx=shape[1], dx=1.0/(shape[1]-1))
+            
             warnings.warn("Geometry is required for ndim >=1")
 
         axis = 1 if "time" in dims else 0
