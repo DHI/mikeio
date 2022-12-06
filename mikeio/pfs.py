@@ -494,7 +494,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     )
     return yaml.load(src, PreserveDuplicatesLoader)
 
-class Pfs(PfsSection):
+class PfsDocument(PfsSection):
     """Create a Pfs object for reading, writing and manipulating pfs files
 
     Parameters
@@ -526,10 +526,25 @@ class Pfs(PfsSection):
         else:
             sections, names = self._parse_non_file_input(input, names)
 
-        d = dict(zip(names, sections))   # TODO: what about repeated names?
+        #d = dict(zip(names, sections))   # TODO: what about repeated names?
+        d = self._to_nonunique_key_dict(names, sections)
         super().__init__(d)
 
-        self._add_all_FM_aliases()
+        # not possible as aliases will look like keys... 
+        # self._add_all_FM_aliases()
+
+    @staticmethod
+    def _to_nonunique_key_dict(keys, vals):
+        key_count = Counter(keys)
+        data = {}
+        for key, val in zip(keys, vals):
+            if key_count[key] > 1:
+                if key not in data:
+                    data[key] = PfsNonUniqueList()
+                data[key].append(val)
+            else:
+                data[key] = val
+        return data
 
     # TODO: deprecated warning
     @property
@@ -577,7 +592,7 @@ class Pfs(PfsSection):
             Search result as a nested PfsSection
         """
         results = []
-        for n, target in zip(self.names, self._targets):
+        for n, target in zip(self.names, self.targets):
             res = target.search(text=text, key=key, section=section, param=param, case=case)
             if res:
                 results.append({n:res})
@@ -626,24 +641,24 @@ class Pfs(PfsSection):
             )
         return sections, names
 
-    def _add_all_FM_aliases(self) -> None:
-        """create MIKE FM module aliases"""
-        self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
-        self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
-        self._add_FM_alias("TR", "TRANSPORT_MODULE")
-        self._add_FM_alias("MT", "MUD_TRANSPORT_MODULE")
-        self._add_FM_alias("EL", "ECOLAB_MODULE")
-        self._add_FM_alias("ST", "SAND_TRANSPORT_MODULE")
-        self._add_FM_alias("PT", "PARTICLE_TRACKING_MODULE")
-        self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
+    # def _add_all_FM_aliases(self) -> None:
+    #     """create MIKE FM module aliases"""
+    #     self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
+    #     self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
+    #     self._add_FM_alias("TR", "TRANSPORT_MODULE")
+    #     self._add_FM_alias("MT", "MUD_TRANSPORT_MODULE")
+    #     self._add_FM_alias("EL", "ECOLAB_MODULE")
+    #     self._add_FM_alias("ST", "SAND_TRANSPORT_MODULE")
+    #     self._add_FM_alias("PT", "PARTICLE_TRACKING_MODULE")
+    #     self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
 
-    def _add_FM_alias(self, alias: str, module: str) -> None:
-        """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
-        if hasattr(self.data, module):
-            mode_name = f"mode_of_{module.lower()}"
-            mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
-            if mode_of > 0:
-                setattr(self, alias, self.data[module])
+    # def _add_FM_alias(self, alias: str, module: str) -> None:
+    #     """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
+    #     if hasattr(self.data, module):
+    #         mode_name = f"mode_of_{module.lower()}"
+    #         mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
+    #         if mode_of > 0:
+    #             setattr(self, alias, self.data[module])
 
     def _pfs2yaml(self, filename, encoding=None) -> str:
 
@@ -782,3 +797,6 @@ class Pfs(PfsSection):
             f.write("\n\n")
 
             self._write_with_func(f.write, level=0)
+
+class Pfs(PfsDocument):
+    pass
