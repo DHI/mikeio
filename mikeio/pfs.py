@@ -175,7 +175,7 @@ class PfsSection(SimpleNamespace):
     def update_recursive(self, key, value):
         """Update recursively all matches of key with value"""
         for k, v in self.items():
-            if isinstance(v, self.__class__):
+            if isinstance(v, PfsSection):
                 self[k].update_recursive(key, value)
             elif k == key:
                 self[k] = value
@@ -224,7 +224,7 @@ class PfsSection(SimpleNamespace):
         for k, v in self.items():
             kk = str(k) if case else str(k).lower()
 
-            if isinstance(v, self.__class__):
+            if isinstance(v, PfsSection):
                 if secpat and secpat in kk:
                     yield from self._yield_deep_dict(keylist + [k], v)
                 else:
@@ -258,7 +258,7 @@ class PfsSection(SimpleNamespace):
     def find_replace(self, old_value, new_value):
         """Update recursively all old_value with new_value"""
         for k, v in self.items():
-            if isinstance(v, self.__class__):
+            if isinstance(v, PfsSection):
                 self[k].find_replace(old_value, new_value)
             elif self[k] == old_value:
                 self[k] = new_value
@@ -268,7 +268,7 @@ class PfsSection(SimpleNamespace):
         # is all this necessary???
         d = self.__dict__.copy()
         for key, value in d.items():
-            if isinstance(value, self.__class__):
+            if isinstance(value, PfsSection):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
@@ -546,6 +546,19 @@ class PfsDocument(PfsSection):
                 data[key] = val
         return data
 
+    def _unravel_items(self):
+        rkeys = []
+        rvals = []
+        for k in self.keys():
+            if isinstance(self[k], PfsNonUniqueList):
+                for subval in self[k]:
+                    rkeys.append(k)
+                    rvals.append(subval)
+            else:
+                rkeys.append(k)
+                rvals.append(self[k])
+        return rkeys, rvals
+
     # TODO: deprecated warning
     @property
     def data(self) -> Union[PfsSection, List[PfsSection]]:
@@ -554,49 +567,56 @@ class PfsDocument(PfsSection):
     @property
     def targets(self) -> List[PfsSection]:
         """List of targets (root sections)"""
-        return list(self.values())
+        _, rvals = self._unravel_items()
+        return rvals
 
     @property
     def n_targets(self) -> int:
         """Number of targets (root sections)"""
         return len(self.targets)
 
+    @property
+    def is_unique(self) -> bool:
+        """Are the target (root) names unique?"""
+        return len(self.keys()) == len(self.names)
+
     # TODO: deprecate or unravel keys? 
     @property
     def names(self) -> List[str]:
         """Names of the targets (root sections) as a list"""
-        return list(self.keys())
+        rkeys, _ = self._unravel_items()
+        return rkeys
 
-    def search(self, text:str=None, *, key:str=None, section:str=None, param=None, case:bool=False) -> PfsSection:
-        """Find recursively all keys, sections or parameters 
-           matching a pattern
+    # def search(self, text:str=None, *, key:str=None, section:str=None, param=None, case:bool=False) -> PfsSection:
+    #     """Find recursively all keys, sections or parameters 
+    #        matching a pattern
         
-        NOTE: logical OR between multiple conditions
+    #     NOTE: logical OR between multiple conditions
 
-        Parameters
-        ----------
-        text : str, optional
-            Search for text in either key, section or parameter, by default None
-        key : str, optional
-            text pattern to seach for in keywords, by default None
-        section : str, optional
-            text pattern to seach for in sections, by default None
-        param : str, bool, float, int, optional
-            text or value in a parameter, by default None
-        case : bool, optional
-            should the text search be case-sensitive?, by default False
+    #     Parameters
+    #     ----------
+    #     text : str, optional
+    #         Search for text in either key, section or parameter, by default None
+    #     key : str, optional
+    #         text pattern to seach for in keywords, by default None
+    #     section : str, optional
+    #         text pattern to seach for in sections, by default None
+    #     param : str, bool, float, int, optional
+    #         text or value in a parameter, by default None
+    #     case : bool, optional
+    #         should the text search be case-sensitive?, by default False
 
-        Returns
-        -------
-        PfsSection
-            Search result as a nested PfsSection
-        """
-        results = []
-        for n, target in zip(self.names, self.targets):
-            res = target.search(text=text, key=key, section=section, param=param, case=case)
-            if res:
-                results.append({n:res})
-        return _merge_PfsSections(results) if len(results) > 0 else None    
+    #     Returns
+    #     -------
+    #     PfsSection
+    #         Search result as a nested PfsSection
+    #     """
+    #     results = []
+    #     for n, target in zip(self.names, self.targets):
+    #         res = target.search(text=text, key=key, section=section, param=param, case=case)
+    #         if res:
+    #             results.append({n:res})
+    #     return _merge_PfsSections(results) if len(results) > 0 else None    
 
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         try:

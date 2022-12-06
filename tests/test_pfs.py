@@ -424,8 +424,8 @@ def test_multiple_identical_roots():
     assert pfs.data[1].Setup.X == 2
     assert pfs.t1_t0[0].Setup.X == 0
     assert pfs.t1_t0[1].Setup.X == 2
-    assert pfs.names == ["t1_t0"]#, "t1_t0"]
-    assert pfs.n_targets == 1 # 2
+    assert pfs.names == ["t1_t0", "t1_t0"]
+    assert pfs.n_targets == 2
     assert not pfs.is_unique
 
 
@@ -442,12 +442,16 @@ def test_multiple_unique_roots():
 def test_multiple_roots_mixed():
     """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_root_elements.pfs")
-    assert pfs.names == [
+    assert list(pfs.keys()) == [
         "MZ_WAVE_SPECTRA_CONVERTER",
-        #"MZ_WAVE_SPECTRA_CONVERTER",
         "SYSTEM",
     ]
-    assert pfs.n_targets == 2 #3
+    assert pfs.names == [
+        "MZ_WAVE_SPECTRA_CONVERTER",
+        "MZ_WAVE_SPECTRA_CONVERTER",
+        "SYSTEM",
+    ]
+    assert pfs.n_targets == 3
 
 
 def test_non_unique_keywords():
