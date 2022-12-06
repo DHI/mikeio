@@ -412,10 +412,6 @@ to a new 2d dfsu file with a surface elevation item.</p>
 </ul>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">extract_surface_elevation_from_3d</span><span class="p">(</span><span class="s1">&#39;ex_surf.dfsu&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -685,27 +681,6 @@ by default None</p></li>
 <dd class="field-odd"><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (9, 884)</span>
-<span class="go">Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
-<span class="go">Items:</span>
-<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="s2">&quot;1985-08-06 12:00,1985-08-07 00:00&quot;</span><span class="p">)</span>
-<span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Dimensions: (5, 884)</span>
-<span class="go">Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00</span>
-<span class="go">Items:</span>
-<span class="go">0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="go">1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="go">2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="go">3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py property">
@@ -818,8 +793,7 @@ by default None</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">meshfilename</span> <span class="o">=</span> <span class="s2">&quot;tests/testdata/north_sea_2.mesh&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">outfilename</span> <span class="o">=</span> <span class="s2">&quot;bigfile.dfsu&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Dfsu</span><span class="p">(</span><span class="n">meshfilename</span><span class="p">)</span>
@@ -827,7 +801,7 @@ by default None</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nt</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">n_items</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">mikeio</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">dfs</span><span class="o">.</span><span class="n">write_header</span><span class="p">(</span><span class="n">outfilename</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">dfs</span><span class="o">.</span><span class="n">write_header</span><span class="p">(</span><span class="n">outfilename</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="c1"># get a list of data</span>
 <span class="gp">... </span>        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>

@@ -813,27 +813,6 @@
 <span class="sd">        -------</span>
 <span class="sd">        Dataset</span>
 <span class="sd">            A Dataset with data dimensions [t,elements]</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; dfsu.read()</span>
-<span class="sd">        &lt;mikeio.Dataset&gt;</span>
-<span class="sd">        Dimensions: (9, 884)</span>
-<span class="sd">        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
-<span class="sd">        Items:</span>
-<span class="sd">        0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="sd">        1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="sd">        2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="sd">        3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
-<span class="sd">        &gt;&gt;&gt; dfsu.read(time=&quot;1985-08-06 12:00,1985-08-07 00:00&quot;)</span>
-<span class="sd">        &lt;mikeio.Dataset&gt;</span>
-<span class="sd">        Dimensions: (5, 884)</span>
-<span class="sd">        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00</span>
-<span class="sd">        Items:</span>
-<span class="sd">        0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="sd">        1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="sd">        2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="sd">        3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data type. Choose np.float32 or np.float64&quot;</span><span class="p">)</span>
@@ -977,8 +956,7 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">        &gt;&gt;&gt; import mikeio</span>
+<span class="sd">        &gt;&gt;&gt; from datetime import datetime</span>
 <span class="sd">        &gt;&gt;&gt; meshfilename = &quot;tests/testdata/north_sea_2.mesh&quot;</span>
 <span class="sd">        &gt;&gt;&gt; outfilename = &quot;bigfile.dfsu&quot;</span>
 <span class="sd">        &gt;&gt;&gt; dfs = mikeio.Dfsu(meshfilename)</span>
@@ -986,7 +964,7 @@
 <span class="sd">        &gt;&gt;&gt; nt = 1000</span>
 <span class="sd">        &gt;&gt;&gt; n_items = 10</span>
 <span class="sd">        &gt;&gt;&gt; items = [mikeio.ItemInfo(f&quot;Item {i+1}&quot;) for i in range(n_items)]</span>
-<span class="sd">        &gt;&gt;&gt; with dfs.write_header(outfilename, items=items) as f:</span>
+<span class="sd">        &gt;&gt;&gt; with dfs.write_header(outfilename, items=items, start_time=datetime(2000,1,1), dt=3600) as f:</span>
 <span class="sd">        ...     for _ in range(nt):</span>
 <span class="sd">        ...         # get a list of data</span>
 <span class="sd">        ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]</span>
@@ -1333,11 +1311,17 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; ds = dfsu.extract_track(times, xy, items=[&#39;u&#39;,&#39;v&#39;])</span>
-
-<span class="sd">        &gt;&gt;&gt; ds = dfsu.extract_track(&#39;track_file.dfs0&#39;)</span>
-
-<span class="sd">        &gt;&gt;&gt; ds = dfsu.extract_track(&#39;track_file.csv&#39;, items=0)</span>
+<span class="sd">        &gt;&gt;&gt; dfsu = mikeio.open(&quot;tests/testdata/NorthSea_HD_and_windspeed.dfsu&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; ds = dfsu.extract_track(&quot;tests/testdata/altimetry_NorthSea_20171027.csv&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; ds</span>
+<span class="sd">        &lt;mikeio.Dataset&gt;</span>
+<span class="sd">        dims: (time:1115)</span>
+<span class="sd">        time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)</span>
+<span class="sd">        items:</span>
+<span class="sd">          0:  Longitude &lt;Undefined&gt; (undefined)</span>
+<span class="sd">          1:  Latitude &lt;Undefined&gt; (undefined)</span>
+<span class="sd">          2:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
+<span class="sd">          3:  Wind speed &lt;Wind speed&gt; (meter per sec)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_spectral</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Method not supported for spectral dfsu!&quot;</span><span class="p">)</span>
@@ -1379,12 +1363,13 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 
-<span class="sd">    &gt;&gt;&gt; msh = Mesh(&quot;../tests/testdata/odense_rough.mesh&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; import mikeio</span>
+<span class="sd">    &gt;&gt;&gt; msh = mikeio.Mesh(&quot;tests/testdata/odense_rough.mesh&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; msh</span>
-<span class="sd">    Number of elements: 654</span>
-<span class="sd">    Number of nodes: 399</span>
-<span class="sd">    Projection: UTM-33</span>
-
+<span class="sd">    Flexible Mesh</span>
+<span class="sd">    number of elements: 654</span>
+<span class="sd">    number of nodes: 399</span>
+<span class="sd">    projection: UTM-33</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>

@@ -593,13 +593,11 @@ or a list of discrete levels e.g. [0.03, 0.04, 0.05]</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;area_spectrum.dfsu&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;tests/testdata/area_spectra.dfsu&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Energy density&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="c1"># first timestep, element 0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;patch&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Wave spectrum T&lt;9s&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;patch&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Wave spectrum T&lt;9s&quot;</span><span class="p">);</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -640,22 +638,22 @@ by default None</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;line_spectra.dfsu&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/line_spectra.dfsu&quot;</span><span class="p">)</span>
 <span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Geometry: DfsuSpectral1D</span>
-<span class="go">Dimensions: (time:4, node:10, frequency:16, direction:25)</span>
-<span class="go">Time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (4 records)</span>
-<span class="go">Items:</span>
-<span class="go">0:  Energy density &lt;Wave energy density&gt; (meter pow 2 sec per deg)</span>
+<span class="go">dims: (time:4, node:10, direction:16, frequency:25)</span>
+<span class="go">time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (4 records)</span>
+<span class="go">geometry: DfsuSpectral1D (9 elements, 10 nodes)</span>
+<span class="go">items:</span>
+<span class="go">  0:  Energy density &lt;Wave energy density&gt; (meter pow 2 sec per deg)</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;area_spectra.dfsu&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/area_spectra.dfsu&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
 <span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">Geometry: DfsuSpectral2D</span>
-<span class="go">Dimensions: (element:40, frequency:16, direction:25)</span>
-<span class="go">Time: 2017-10-27 05:00:00 (time-invariant)</span>
-<span class="go">Items:</span>
-<span class="go">0:  Energy density &lt;Wave energy density&gt; (meter pow 2 sec per deg)</span>
+<span class="go">dims: (element:40, direction:16, frequency:25)</span>
+<span class="go">time: 2017-10-27 05:00:00 (time-invariant)</span>
+<span class="go">geometry: DfsuSpectral2D (40 elements, 33 nodes)</span>
+<span class="go">items:</span>
+<span class="go">  0:  Energy density &lt;Wave energy density&gt; (meter pow 2 sec per deg)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -750,8 +748,7 @@ by default None</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">meshfilename</span> <span class="o">=</span> <span class="s2">&quot;tests/testdata/north_sea_2.mesh&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">outfilename</span> <span class="o">=</span> <span class="s2">&quot;bigfile.dfsu&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Dfsu</span><span class="p">(</span><span class="n">meshfilename</span><span class="p">)</span>
@@ -759,7 +756,7 @@ by default None</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">nt</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">n_items</span> <span class="o">=</span> <span class="mi">10</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">mikeio</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">dfs</span><span class="o">.</span><span class="n">write_header</span><span class="p">(</span><span class="n">outfilename</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">dfs</span><span class="o">.</span><span class="n">write_header</span><span class="p">(</span><span class="n">outfilename</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
 <span class="gp">... </span>        <span class="c1"># get a list of data</span>
 <span class="gp">... </span>        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>

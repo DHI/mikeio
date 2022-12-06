@@ -215,27 +215,6 @@
 <span class="sd">        -------</span>
 <span class="sd">        Dataset</span>
 <span class="sd">            A Dataset with data dimensions [t,elements]</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; dfsu.read()</span>
-<span class="sd">        &lt;mikeio.Dataset&gt;</span>
-<span class="sd">        Dimensions: (9, 884)</span>
-<span class="sd">        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00</span>
-<span class="sd">        Items:</span>
-<span class="sd">        0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="sd">        1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="sd">        2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="sd">        3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
-<span class="sd">        &gt;&gt;&gt; dfsu.read(time=&quot;1985-08-06 12:00,1985-08-07 00:00&quot;)</span>
-<span class="sd">        &lt;mikeio.Dataset&gt;</span>
-<span class="sd">        Dimensions: (5, 884)</span>
-<span class="sd">        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00</span>
-<span class="sd">        Items:</span>
-<span class="sd">        0:  Surface elevation &lt;Surface Elevation&gt; (meter)</span>
-<span class="sd">        1:  U velocity &lt;u velocity component&gt; (meter per sec)</span>
-<span class="sd">        2:  V velocity &lt;v velocity component&gt; (meter per sec)</span>
-<span class="sd">        3:  Current speed &lt;Current Speed&gt; (meter per sec)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data type. Choose np.float32 or np.float64&quot;</span><span class="p">)</span>
@@ -473,10 +452,6 @@
 <span class="sd">            Output file name</span>
 <span class="sd">        n_nearest: int, optional</span>
 <span class="sd">            number of points for spatial interpolation (inverse_distance), default=4</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; dfsu.extract_surface_elevation_from_3d(&#39;ex_surf.dfsu&#39;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># validate input</span>
         <span class="k">assert</span> <span class="p">(</span>
