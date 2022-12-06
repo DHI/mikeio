@@ -45,3 +45,5 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
+    - name: Test docstrings with doctest
+      run: make doctest
