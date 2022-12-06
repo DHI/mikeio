@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Sequence, Tuple, Union, Callable
+from typing import Any, List, Sequence, Tuple, Union, Callable
 from collections import Counter
 from datetime import datetime
 import re
@@ -52,8 +52,11 @@ class PfsSection(SimpleNamespace):
         # return yaml.dump(self.to_dict(), sort_keys=False)
         return "\n".join(self._to_txt_lines())
 
+    def __eq__(self, __o: "PfsSection") -> bool:
+        return self.to_dict() == __o.to_dict()
+
     def __len__(self):
-        return len(self.__dict__)
+        return len(self.items())
 
     def __contains__(self, key):
         return key in self.keys()
@@ -76,7 +79,7 @@ class PfsSection(SimpleNamespace):
 
         if isinstance(value, dict):
             d = value.copy() if copy else value
-            self.__setattr__(key, PfsSection(d,parent=self))
+            self.__setattr__(key, PfsSection(d, parent=self))
         elif isinstance(value, PfsNonUniqueList):
             # multiple keywords/Sections with same name
             sections = PfsNonUniqueList()
@@ -136,17 +139,17 @@ class PfsSection(SimpleNamespace):
         """Remove all items from the PfsSection."""
         return self.__dict__.clear()
 
-    def keys(self):
+    def keys(self) -> List[str]:
         """Return a new view of the PfsSection's keys"""
-        return self.__dict__.keys()
+        return [k for k, _ in self.items()]
 
-    def values(self):
-        """Return a new view of the PfsSection's values."""
-        return self.__dict__.values()
+    def values(self) -> List[Any]:
+        """Return a list of the PfsSection's values."""
+        return [v for _, v in self.items()]
 
-    def items(self):
+    def items(self) -> List[Tuple[str, Any]]:
         """Return a new view of the PfsSection's items ((key, value) pairs)"""
-        return self.__dict__.items()
+        return [(k, v) for k, v in self.__dict__.items() if k != "_parent"]
 
     # TODO: better name
     def update_recursive(self, key, value):
@@ -181,7 +184,7 @@ class PfsSection(SimpleNamespace):
 
     def _write_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
         """Write pfs nested objects
-        
+
         Parameters
         ----------
         func : Callable
@@ -192,7 +195,7 @@ class PfsSection(SimpleNamespace):
             newline string, by default "\n"
         """
         lvl_prefix = "   "
-        for k, v in vars(self).items():
+        for k, v in self.items():
 
             # check for empty sections
             NoneType = type(None)
@@ -233,7 +236,7 @@ class PfsSection(SimpleNamespace):
 
         Parameters
         ----------
-        v : str 
+        v : str
             value from one pfs line
 
         Returns:
@@ -290,7 +293,8 @@ class PfsSection(SimpleNamespace):
     def to_dict(self):
         """Convert to (nested) dict (as a copy)"""
         d = self.__dict__.copy()
-        if "_parent" in d: d.pop("_parent")
+        if "_parent" in d:
+            d.pop("_parent")
         for key, value in d.items():
             if isinstance(value, self.__class__):
                 d[key] = value.to_dict()
@@ -466,8 +470,8 @@ class Pfs:
         return self._names
 
     # TODO remove?
-    #@names.setter
-    #def names(self, new_names: Union[str, Sequence[str]]) -> None:
+    # @names.setter
+    # def names(self, new_names: Union[str, Sequence[str]]) -> None:
     #    new_names = [new_names] if isinstance(new_names, str) else new_names
     #    if len(new_names) != self.n_targets:
     #        raise ValueError(
@@ -483,7 +487,7 @@ class Pfs:
         return len(set(self.names)) == len(self.names)
 
     # TODO consider the best way to create a Pfs with multiple targets
-    #def add_target(self, section: PfsSection, name: str) -> None:
+    # def add_target(self, section: PfsSection, name: str) -> None:
     #    if name is None:
     #        raise ValueError("name must be provided")
     #    section = PfsSection(section) if isinstance(section, dict) else section
@@ -493,7 +497,7 @@ class Pfs:
     #    self._names.append(name)
     #    self._set_all_target_attr()
 
-    #def _remove_all_target_attr(self):
+    # def _remove_all_target_attr(self):
     #    """When renaming targets we need to remove all old target attr"""
     #    for n in set(self.names):
     #        delattr(self, n)
@@ -781,13 +785,13 @@ class Pfs:
         ----------
         filename: str, optional
             Full path and filename of pfs to be created.
-            If filename is None, the content will be returned 
-            as a list of strings. 
+            If filename is None, the content will be returned
+            as a list of strings.
         """
         from mikeio import __version__ as mikeio_version
 
         if filename is None:
-            return self._to_txt_lines()            
+            return self._to_txt_lines()
 
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
