@@ -87,7 +87,7 @@
   <h1>Source code for mikeio.pfs</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -122,6 +122,33 @@
 
 <span class="k">class</span> <span class="nc">PfsNonUniqueList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
     <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">_merge_PfsSections</span><span class="p">(</span><span class="n">sections</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Mapping</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Merge a list of PfsSections/dict&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">sections</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">sections</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">_merge_dict</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">PfsSection</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_merge_dict</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Sequence</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;merges dict b into dict a; handling non-unique keys&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">_merge_dict</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">path</span> <span class="o">+</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)])</span>
+            <span class="c1"># elif a[key] == b[key]:</span>
+            <span class="c1">#     pass  # same leaf value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ab</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">PfsNonUniqueList</span><span class="p">(</span><span class="n">ab</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">a</span>
 
 
 <div class="viewcode-block" id="PfsSection"><a class="viewcode-back" href="../../pfs.html#mikeio.PfsSection">[docs]</a><span class="k">class</span> <span class="nc">PfsSection</span><span class="p">(</span><span class="n">SimpleNamespace</span><span class="p">):</span>
@@ -239,6 +266,81 @@
                 <span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">update_recursive</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">k</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
                 <span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="PfsSection.search"><a class="viewcode-back" href="../../pfs.html#mikeio.PfsSection.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find recursively all keys, sections or parameters </span>
+<span class="sd">           matching a pattern</span>
+<span class="sd">        </span>
+<span class="sd">        NOTE: logical OR between multiple conditions</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text : str, optional</span>
+<span class="sd">            Search for text in either key, section or parameter, by default None</span>
+<span class="sd">        key : str, optional</span>
+<span class="sd">            text pattern to seach for in keywords, by default None</span>
+<span class="sd">        section : str, optional</span>
+<span class="sd">            text pattern to seach for in sections, by default None</span>
+<span class="sd">        param : str, bool, float, int, optional</span>
+<span class="sd">            text or value in a parameter, by default None</span>
+<span class="sd">        case : bool, optional</span>
+<span class="sd">            should the text search be case-sensitive?, by default False</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PfsSection</span>
+<span class="sd">            Search result as a nested PfsSection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;text and key cannot both be provided!&quot;</span>
+            <span class="k">assert</span> <span class="n">section</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;text and section cannot both be provided!&quot;</span>
+            <span class="k">assert</span> <span class="n">param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;text and param cannot both be provided!&quot;</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">text</span>
+            <span class="n">section</span> <span class="o">=</span> <span class="n">text</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="n">text</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span> <span class="k">if</span> <span class="p">(</span><span class="n">key</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">case</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">section</span> <span class="o">=</span> <span class="n">section</span> <span class="k">if</span> <span class="p">(</span><span class="n">section</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">case</span><span class="p">)</span> <span class="k">else</span> <span class="n">section</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="n">param</span> <span class="k">if</span> <span class="p">(</span><span class="n">param</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">case</span><span class="p">)</span> <span class="k">else</span> <span class="n">param</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_patterns_generator</span><span class="p">(</span><span class="n">keypat</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">parampat</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">secpat</span><span class="o">=</span><span class="n">section</span><span class="p">,</span> <span class="n">case</span><span class="o">=</span><span class="n">case</span><span class="p">):</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_merge_PfsSections</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span></div>
+    
+    <span class="k">def</span> <span class="nf">_find_patterns_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keypat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parampat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">secpat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keylist</span><span class="o">=</span><span class="p">[],</span> <span class="n">case</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Look for patterns in either keys, params or sections&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">kk</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">if</span> <span class="n">case</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">secpat</span> <span class="ow">and</span> <span class="n">secpat</span> <span class="ow">in</span> <span class="n">kk</span><span class="p">:</span>
+                    <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yield_deep_dict</span><span class="p">(</span><span class="n">keylist</span> <span class="o">+</span> <span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">yield from</span> <span class="n">v</span><span class="o">.</span><span class="n">_find_patterns_generator</span><span class="p">(</span><span class="n">keypat</span><span class="p">,</span> <span class="n">parampat</span><span class="p">,</span> <span class="n">secpat</span><span class="p">,</span> <span class="n">keylist</span><span class="o">=</span><span class="n">keylist</span> <span class="o">+</span> <span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">case</span><span class="o">=</span><span class="n">case</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">keypat</span> <span class="ow">and</span> <span class="n">keypat</span> <span class="ow">in</span> <span class="n">kk</span><span class="p">:</span>
+                    <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yield_deep_dict</span><span class="p">(</span><span class="n">keylist</span> <span class="o">+</span> <span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span>   
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_param_match</span><span class="p">(</span><span class="n">parampat</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">case</span><span class="p">):</span>
+                    <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_yield_deep_dict</span><span class="p">(</span><span class="n">keylist</span> <span class="o">+</span> <span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">v</span><span class="p">)</span>                    
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_yield_deep_dict</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;yield a deep nested dict with keys with a single deep value val&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">keys</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span> <span class="n">val</span><span class="p">}</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="k">yield</span> <span class="n">d</span>
+                
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_param_match</span><span class="p">(</span><span class="n">parampat</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">case</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">parampat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">parampat</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">vv</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">if</span> <span class="n">case</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">parampat</span> <span class="ow">in</span> <span class="n">vv</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parampat</span> <span class="o">==</span> <span class="n">v</span> 
 
 <div class="viewcode-block" id="PfsSection.find_replace"><a class="viewcode-back" href="../../pfs.html#mikeio.PfsSection.find_replace">[docs]</a>    <span class="k">def</span> <span class="nf">find_replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_value</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Update recursively all old_value with new_value&quot;&quot;&quot;</span>
@@ -606,6 +708,37 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">d</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">d</span></div>
+
+<div class="viewcode-block" id="Pfs.search"><a class="viewcode-back" href="../../pfs.html#mikeio.Pfs.search">[docs]</a>    <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">case</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PfsSection</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Find recursively all keys, sections or parameters </span>
+<span class="sd">           matching a pattern</span>
+<span class="sd">        </span>
+<span class="sd">        NOTE: logical OR between multiple conditions</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text : str, optional</span>
+<span class="sd">            Search for text in either key, section or parameter, by default None</span>
+<span class="sd">        key : str, optional</span>
+<span class="sd">            text pattern to seach for in keywords, by default None</span>
+<span class="sd">        section : str, optional</span>
+<span class="sd">            text pattern to seach for in sections, by default None</span>
+<span class="sd">        param : str, bool, float, int, optional</span>
+<span class="sd">            text or value in a parameter, by default None</span>
+<span class="sd">        case : bool, optional</span>
+<span class="sd">            should the text search be case-sensitive?, by default False</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        PfsSection</span>
+<span class="sd">            Search result as a nested PfsSection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_targets</span><span class="p">):</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">text</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span> <span class="n">section</span><span class="o">=</span><span class="n">section</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">param</span><span class="p">,</span> <span class="n">case</span><span class="o">=</span><span class="n">case</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">n</span><span class="p">:</span><span class="n">res</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">_merge_PfsSections</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>    </div>
 
     <span class="k">def</span> <span class="nf">_read_pfs_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_filename</span> <span class="o">=</span> <span class="n">filename</span>
