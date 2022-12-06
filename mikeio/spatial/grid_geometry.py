@@ -54,6 +54,15 @@ def _print_axis_txt(name, x, dx) -> str:
 class Grid1D(_Geometry):
     """1D grid (node-based)
     axis is increasing and equidistant
+
+    Examples
+    --------
+    >>> mikeio.Grid1D(nx=3,dx=0.1)
+    <mikeio.Grid1D>
+    x: [0, 0.1, 0.2] (nx=3, dx=0.1)
+    >>> mikeio.Grid1D(x=[0.1, 0.5, 0.9])
+    <mikeio.Grid1D>
+    x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)
     """
 
     _dx: float
