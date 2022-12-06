@@ -128,27 +128,6 @@ class DfsuLayered(_Dfsu):
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
-
-        Examples
-        --------
-        >>> dfsu.read()
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
-        >>> dfsu.read(time="1985-08-06 12:00,1985-08-07 00:00")
-        <mikeio.Dataset>
-        Dimensions: (5, 884)
-        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -386,10 +365,6 @@ class Dfsu3D(DfsuLayered):
             Output file name
         n_nearest: int, optional
             number of points for spatial interpolation (inverse_distance), default=4
-
-        Examples
-        --------
-        >>> dfsu.extract_surface_elevation_from_3d('ex_surf.dfsu')
         """
         # validate input
         assert (

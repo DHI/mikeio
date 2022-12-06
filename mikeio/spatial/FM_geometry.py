@@ -1004,9 +1004,9 @@ class GeometryFM(_Geometry):
             coords = self.element_coordinates[idx].flatten()
 
             if self.is_layered:
-                return GeometryPoint3D(*coords)
+                return GeometryPoint3D(*coords, projection=self.projection)
             else:
-                return GeometryPoint2D(coords[0], coords[1])
+                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
         else:
             if self._type == DfsuFileType.DfsuSpectral1D:
                 return self._nodes_to_geometry(nodes=idx)

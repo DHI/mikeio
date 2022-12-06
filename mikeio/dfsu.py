@@ -1,4 +1,5 @@
 import os
+from typing import List, Union
 import numpy as np
 import pandas as pd
 import warnings
@@ -725,27 +726,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
-
-        Examples
-        --------
-        >>> dfsu.read()
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
-        >>> dfsu.read(time="1985-08-06 12:00,1985-08-07 00:00")
-        <mikeio.Dataset>
-        Dimensions: (5, 884)
-        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -889,22 +869,22 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         Examples
         --------
-        >>> msh = Mesh("foo.mesh")
-        >>> n_elements = msh.n_elements
-        >>> dfs = Dfsu(meshfilename)
+        >>> from datetime import datetime
+        >>> meshfilename = "tests/testdata/north_sea_2.mesh"
+        >>> outfilename = "bigfile.dfsu"
+        >>> dfs = mikeio.Dfsu(meshfilename)
+        >>> n_elements = dfs.n_elements
         >>> nt = 1000
         >>> n_items = 10
-        >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-        >>> with dfs.write_header(outfilename, items=items) as f:
-        >>>     for i in range(1, nt):
-        >>>         data = []
-        >>>         for i in range(n_items):
-        >>>             d = np.random.random((1, n_elements))
-        >>>             data.append(d)
-        >>>             f.append(data)
+        >>> items = [mikeio.ItemInfo(f"Item {i+1}") for i in range(n_items)]
+        >>> with dfs.write_header(outfilename, items=items, start_time=datetime(2000,1,1), dt=3600) as f:
+        ...     for _ in range(nt):
+        ...         # get a list of data
+        ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]
+        ...         f.append(data)
         """
 
-        return self.write(
+        return self._write(
             filename=filename,
             data=[],
             start_time=start_time,
@@ -932,8 +912,54 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             full path to the new dfsu file
         data: Dataset
             list of matrices, one for each item. Matrix dimension: time, x
+        dt: float, optional
+            The time step (in seconds)
+        elements: list[int], optional
+            write only these element ids to file
+        title: str
+            title of the dfsu file. Default is blank.
+        keep_open: bool, optional
+            Keep file open for appending
+        """        
+        if isinstance(data, list):
+            raise TypeError(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
+            )
+
+        return self._write(
+            filename=filename, 
+            data=data, 
+            dt=dt, 
+            elements=elements, 
+            title=title, 
+            keep_open=keep_open
+            )
+
+
+    def _write(
+        self,
+        filename,
+        data,
+        start_time=None,
+        dt=None,
+        items=None,
+        elements=None,
+        title=None,
+        keep_open=False,
+    ):
+        """Write a new dfsu file
+
+        Parameters
+        -----------
+        filename: str
+            full path to the new dfsu file
+        data: list[np.array] or Dataset
+            list of matrices, one for each item. Matrix dimension: time, x
+        start_time: datetime, optional, deprecated
+            start date of type datetime.    
         dt: float, optional, deprecated
             The time step (in seconds)
+        items: list[ItemInfo], optional, deprecated
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -944,15 +970,14 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if self.is_spectral:
             raise ValueError("write() is not supported for spectral dfsu!")
 
-        if dt:
+        if dt and not keep_open:
             warnings.warn(
-                "setting dt is deprecated, please supply data in the form of a Dataset",
+                "argument dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
             )
-
-        if isinstance(data, list):
-            raise TypeError(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
+        if keep_open and not dt:
+            warnings.warn(
+                "argument dt missing, should be provided when keep_open=True"
             )
 
         filename = str(filename)
@@ -970,7 +995,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 zn_dynamic = data[0]._zn
 
             # data needs to be a list so we can fit zn later
-            data = [x.to_numpy() for x in data]
+            data = [np.atleast_2d(x.to_numpy()) for x in data]
 
         n_items = len(data)
         n_time_steps = 0
@@ -1116,23 +1141,25 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             self._dfs.Close()
             os.remove(filename)
 
-    def append(self, data: Dataset) -> None:
+    def append(self, data: Union[Dataset, List[np.ndarray]]) -> None:
         """Append to a dfsu file opened with `write(...,keep_open=True)`
 
         Parameters
         -----------
-        data: Dataset
+        data: list[np.array] or Dataset
+            list of matrices, one for each item. Matrix dimension: time, x
         """
 
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
-        n_time_steps = np.shape(data[0])[0]
-        for i in trange(n_time_steps, disable=not self.show_progress):
+        has_time_axis = len(np.shape(data[0])) == 2
+        n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
+        for i in trange(n_timesteps, disable=not self.show_progress):
             for item in range(n_items):
                 di = data[item]
                 if isinstance(data, Dataset):
                     di = di.to_numpy()
-                d = di[i, :]
+                d = di[i, :] if has_time_axis else di
                 d[np.isnan(d)] = deletevalue
                 darray = d.astype(np.float32)
                 self._dfs.WriteItemTimeStepNext(0, darray)
@@ -1197,11 +1224,17 @@ class Dfsu2DH(_Dfsu):
 
         Examples
         --------
-        >>> ds = dfsu.extract_track(times, xy, items=['u','v'])
-
-        >>> ds = dfsu.extract_track('track_file.dfs0')
-
-        >>> ds = dfsu.extract_track('track_file.csv', items=0)
+        >>> dfsu = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
+        >>> ds = dfsu.extract_track("tests/testdata/altimetry_NorthSea_20171027.csv")
+        >>> ds
+        <mikeio.Dataset>
+        dims: (time:1115)
+        time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
+        items:
+          0:  Longitude <Undefined> (undefined)
+          1:  Latitude <Undefined> (undefined)
+          2:  Surface elevation <Surface Elevation> (meter)
+          3:  Wind speed <Wind speed> (meter per sec)
         """
         if self.is_spectral:
             raise ValueError("Method not supported for spectral dfsu!")
@@ -1243,12 +1276,13 @@ class Mesh(_UnstructuredFile):
     Examples
     --------
 
-    >>> msh = Mesh("../tests/testdata/odense_rough.mesh")
+    >>> import mikeio
+    >>> msh = mikeio.Mesh("tests/testdata/odense_rough.mesh")
     >>> msh
-    Number of elements: 654
-    Number of nodes: 399
-    Projection: UTM-33
-
+    Flexible Mesh
+    number of elements: 654
+    number of nodes: 399
+    projection: UTM-33
     """
 
     def __init__(self, filename):

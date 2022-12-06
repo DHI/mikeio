@@ -95,7 +95,8 @@ class GeometryUndefined(_Geometry):
 
 
 class GeometryPoint2D(_Geometry):
-    def __init__(self, x: float, y: float):
+    def __init__(self, x: float, y: float, projection = None):
+        self._projstr = projection
         self.x = x
         self.y = y
 
@@ -108,7 +109,8 @@ class GeometryPoint2D(_Geometry):
 
 
 class GeometryPoint3D(_Geometry):
-    def __init__(self, x: float, y: float, z: float):
+    def __init__(self, x: float, y: float, z: float, projection = None):
+        self._projstr = projection
         self.x = x
         self.y = y
         self.z = z

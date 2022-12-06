@@ -3,13 +3,17 @@
 
 Examples
 --------
->>> from mikeio.eum import EUMType, EUMUnit
->>> EUMType.Temperature
-<EUMType.Temperature: 100006>
->>> EUMType.Temperature.units
+>>> mikeio.EUMType.Temperature
+Temperature
+>>> mikeio.EUMType.Temperature.value
+100006
+>>> mikeio.EUMType.Temperature.units
 [degree Celsius, degree Fahrenheit, degree Kelvin]
->>> EUMUnit.degree_Kelvin
-degree Kelvin
+>>> mikeio.EUMUnit.degree_Celsius
+degree Celsius
+>>> mikeio.EUMUnit.degree_Celsius.value
+2800
+>>>
 
 """
 from typing import List, Sequence
@@ -113,9 +117,8 @@ class EUMType(IntEnum):
 
     Examples
     --------
-    >>> from mikeio.eum import EUMType
-    >>> EUMType.Temperature
-    <EUMType.Temperature: 100006>
+    >>> mikeio.EUMType.Temperature
+    Temperature
     >>> EUMType.Temperature.units
     [degree Celsius, degree Fahrenheit, degree Kelvin]
     """

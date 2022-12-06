@@ -1027,3 +1027,114 @@ def test_read_write_grid_editor_color_palette(tmpdir):
 
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 16
+
+
+
+@pytest.fixture
+def pfs_ABC_text() -> str:
+    text = """
+   [ROOT]
+      [A1]
+         int_1 = 0
+         [B]
+            float_1 = 4.5
+        EndSect  // B
+      EndSect  // A1
+      str_1 = '0'
+      [A2]
+         int_2 = 0
+      EndSect  // A2
+      int_3 = 3
+   EndSect  // ROOT 
+"""
+    return text
+
+    
+
+def test_search_keyword(pfs_ABC_text):
+    pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
+    assert "A2" in pfs.ROOT
+
+    r0 = pfs.search(key="not_there")
+    assert r0 is None
+    
+    r1 = pfs.search(key="float")
+    assert r1.ROOT.A1.B.float_1 == 4.5
+    assert "A2" not in r1.ROOT
+
+    r2 = pfs.ROOT.search(key="float")
+    assert r2.A1.B.float_1 == 4.5
+    assert "A2" not in r2
+
+    r3 = pfs.ROOT.search("float")
+    assert r2 == r3
+
+def test_search_keyword_found_in_multiple_places():
+    pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
+    subset = pfs.search("charnock")
+    # the string "Charnock" occurs 6 times in this file
+    len(subset.FemEngineSW.SPECTRAL_WAVE_MODULE.WIND.keys()) ==2 
+    len(subset.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS) == 4
+    
+
+    
+
+def test_search_param(pfs_ABC_text):
+    pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
+    
+    r0 = pfs.search(param="not_there")
+    assert r0 is None
+    
+    r1 = pfs.search(param=0) 
+    assert len(r1.ROOT) == 2
+    assert r1.ROOT.A1.int_1 == 0
+    assert r1.ROOT.A2.int_2 == 0
+    
+    r2 = pfs.ROOT.search(param=0)
+    assert r2 == r1.ROOT
+
+    r3 = pfs.ROOT.search(param='0')
+    assert len(r3) == 1
+    assert r3.str_1 == '0'
+
+def test_search_section(pfs_ABC_text):
+    pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
+    
+    r0 = pfs.search(section="not_there")
+    assert r0 is None
+    
+    r1 = pfs.search(section='A') 
+    assert len(r1.ROOT) == 2
+    assert r1.ROOT.A1 == pfs.ROOT.A1
+    assert r1.ROOT.A2 == pfs.ROOT.A2
+    
+    r2 = pfs.ROOT.search(section='A')
+    assert r2 == r1.ROOT
+   
+def test_search_keyword_or_param(pfs_ABC_text):
+    pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
+    # assert pfs.ROOT.A1.B.float_1 == 4.5
+
+    r1 = pfs.search(key="float", param=3)
+    assert r1.ROOT.A1.B.float_1 == 4.5
+    assert r1.ROOT.int_3 == 3
+
+    r2 = pfs.search(key="float")
+    r3 = pfs.search(param=3)
+    assert r1 != r2
+    assert r1 != r3
+
+    # r4 = mikeio.pfs._merge_PfsSections([r2, r3])
+    # assert r1 == r4
+
+
+def test_search_and_modify(pfs_ABC_text):
+    # does the original remain un-changed? 
+    pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
+    assert pfs.ROOT.A1.B.float_1 == 4.5
+
+    r1 = pfs.search(key="float")
+    assert r1.ROOT.A1.B.float_1 == 4.5
+    r1.ROOT.A1.B.float_1 = 99.9
+    assert r1.ROOT.A1.B.float_1 == 99.9
+    assert pfs.ROOT.A1.B.float_1 == 4.5

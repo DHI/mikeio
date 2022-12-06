@@ -172,6 +172,16 @@ def test_data_0d(da0):
     assert "geometry" not in repr(da0)
 
 
+def test_create_data_1d_default_grid():
+    
+    da = mikeio.DataArray(
+            data=np.zeros((10, 5)),
+            time=pd.date_range(start="2000-01-01", freq="H", periods=10),
+            item=ItemInfo("Foo"),
+        )
+    assert isinstance(da.geometry, mikeio.Grid1D)
+
+
 def test_data_2d_no_geometry_not_allowed():
 
     nt = 10
