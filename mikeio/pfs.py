@@ -1,6 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import List, Sequence, Tuple, Sequence, Mapping, Union, Callable
+from typing import Any, List, Sequence, Tuple, Sequence, Mapping, Union, Callable
 from collections import Counter
 from datetime import datetime
 import re
@@ -30,7 +30,7 @@ def read_pfs(filename, encoding="cp1252", unique_keywords=False):
     mikeio.Pfs
         Pfs object which can be used for inspection, manipulation and writing
     """
-    return Pfs(filename, encoding=encoding, unique_keywords=unique_keywords)
+    return PfsDocument(filename, encoding=encoding, unique_keywords=unique_keywords)
 
 
 class PfsNonUniqueList(list):
@@ -290,7 +290,7 @@ class PfsSection(SimpleNamespace):
             newline string, by default "\n"
         """
         lvl_prefix = "   "
-        for k, v in vars(self).items():
+        for k, v in self.items():
 
             # check for empty sections
             NoneType = type(None)
@@ -379,11 +379,11 @@ class PfsSection(SimpleNamespace):
         Pfs
             A Pfs object
         """
-        return Pfs(self, names=[name])
+        return PfsDocument(self, names=[name])
 
     def to_file(self, filename, name: str) -> None:
         """Write to a Pfs file (providing a target name)"""
-        Pfs(self, names=[name]).write(filename)
+        PfsDocument(self, names=[name]).write(filename)
 
     def to_dict(self):
         """Convert to (nested) dict (as a copy)"""
@@ -495,7 +495,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     return yaml.load(src, PreserveDuplicatesLoader)
 
 class PfsDocument(PfsSection):
-    """Create a Pfs object for reading, writing and manipulating pfs files
+    """Create a PfsDocument object for reading, writing and manipulating pfs files
 
     Parameters
     ----------
@@ -526,12 +526,12 @@ class PfsDocument(PfsSection):
         else:
             sections, names = self._parse_non_file_input(input, names)
 
-        #d = dict(zip(names, sections))   # TODO: what about repeated names?
         d = self._to_nonunique_key_dict(names, sections)
         super().__init__(d)
 
-        # not possible as aliases will look like keys... 
-        # self._add_all_FM_aliases()
+        self._ALIAS_LIST = ["_ALIAS_LIST"]  # ignore list
+        if self._is_FM_engine:
+            self._add_all_FM_aliases()
 
     @staticmethod
     def _to_nonunique_key_dict(keys, vals):
@@ -546,6 +546,18 @@ class PfsDocument(PfsSection):
                 data[key] = val
         return data
 
+    def keys(self) -> List[str]:
+        """Return a list of the PfsDocument's keys (target names)"""
+        return [k for k, _ in self.items()]
+
+    def values(self) -> List[Any]:
+        """Return a list of the PfsDocument's values (targets)."""
+        return [v for _, v in self.items()]
+
+    def items(self) -> List[Tuple[str, Any]]:
+        """Return a new view of the PfsDocument's items ((key, value) pairs)"""
+        return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
+
     def _unravel_items(self):
         rkeys = []
         rvals = []
@@ -559,9 +571,13 @@ class PfsDocument(PfsSection):
                 rvals.append(self[k])
         return rkeys, rvals
 
-    # TODO: deprecated warning
     @property
     def data(self) -> Union[PfsSection, List[PfsSection]]:
+        warnings.warn(
+            FutureWarning(
+                "The data attribute has been deprecated, please access the targets by their names instead."
+            )
+        )
         return self.targets[0] if self.n_targets == 1 else self.targets
 
     @property
@@ -580,43 +596,11 @@ class PfsDocument(PfsSection):
         """Are the target (root) names unique?"""
         return len(self.keys()) == len(self.names)
 
-    # TODO: deprecate or unravel keys? 
     @property
     def names(self) -> List[str]:
         """Names of the targets (root sections) as a list"""
         rkeys, _ = self._unravel_items()
         return rkeys
-
-    # def search(self, text:str=None, *, key:str=None, section:str=None, param=None, case:bool=False) -> PfsSection:
-    #     """Find recursively all keys, sections or parameters 
-    #        matching a pattern
-        
-    #     NOTE: logical OR between multiple conditions
-
-    #     Parameters
-    #     ----------
-    #     text : str, optional
-    #         Search for text in either key, section or parameter, by default None
-    #     key : str, optional
-    #         text pattern to seach for in keywords, by default None
-    #     section : str, optional
-    #         text pattern to seach for in sections, by default None
-    #     param : str, bool, float, int, optional
-    #         text or value in a parameter, by default None
-    #     case : bool, optional
-    #         should the text search be case-sensitive?, by default False
-
-    #     Returns
-    #     -------
-    #     PfsSection
-    #         Search result as a nested PfsSection
-    #     """
-    #     results = []
-    #     for n, target in zip(self.names, self.targets):
-    #         res = target.search(text=text, key=key, section=section, param=param, case=case)
-    #         if res:
-    #             results.append({n:res})
-    #     return _merge_PfsSections(results) if len(results) > 0 else None    
 
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         try:
@@ -661,24 +645,29 @@ class PfsDocument(PfsSection):
             )
         return sections, names
 
-    # def _add_all_FM_aliases(self) -> None:
-    #     """create MIKE FM module aliases"""
-    #     self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
-    #     self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
-    #     self._add_FM_alias("TR", "TRANSPORT_MODULE")
-    #     self._add_FM_alias("MT", "MUD_TRANSPORT_MODULE")
-    #     self._add_FM_alias("EL", "ECOLAB_MODULE")
-    #     self._add_FM_alias("ST", "SAND_TRANSPORT_MODULE")
-    #     self._add_FM_alias("PT", "PARTICLE_TRACKING_MODULE")
-    #     self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
+    @property
+    def _is_FM_engine(self):
+        return "FemEngine" in self.names[0]
 
-    # def _add_FM_alias(self, alias: str, module: str) -> None:
-    #     """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
-    #     if hasattr(self.data, module):
-    #         mode_name = f"mode_of_{module.lower()}"
-    #         mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
-    #         if mode_of > 0:
-    #             setattr(self, alias, self.data[module])
+    def _add_all_FM_aliases(self) -> None:
+        """create MIKE FM module aliases"""
+        self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
+        self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
+        self._add_FM_alias("TR", "TRANSPORT_MODULE")
+        self._add_FM_alias("MT", "MUD_TRANSPORT_MODULE")
+        self._add_FM_alias("EL", "ECOLAB_MODULE")
+        self._add_FM_alias("ST", "SAND_TRANSPORT_MODULE")
+        self._add_FM_alias("PT", "PARTICLE_TRACKING_MODULE")
+        self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
+
+    def _add_FM_alias(self, alias: str, module: str) -> None:
+        """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
+        if hasattr(self.data, module):
+            mode_name = f"mode_of_{module.lower()}"
+            mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
+            if mode_of > 0:
+                setattr(self, alias, self.data[module])
+                self._ALIAS_LIST.append(alias)
 
     def _pfs2yaml(self, filename, encoding=None) -> str:
 
@@ -800,7 +789,7 @@ class PfsDocument(PfsSection):
         ----------
         filename: str, optional
             Full path and filename of pfs to be created.
-            If filename is None, the content will be returned 
+            If None, the content will be returned 
             as a list of strings. 
         """
         from mikeio import __version__ as mikeio_version
