@@ -803,8 +803,15 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             for item in range(n_items):
 
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                d = itemdata.Data
-                d[d == deletevalue] = np.nan
+                if itemdata is not None:
+                    d = itemdata.Data
+                    d[d == deletevalue] = np.nan
+                else:
+                    print(f"Error reading: {self.time[it]}")
+                    d = np.zeros(shape[1])
+                    d[:] = np.nan
+                    dfs.Close()
+                    dfs = DfsuFile.Open(self._filename)
 
                 if elements is not None:
                     d = d[elements]
@@ -814,9 +821,10 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 else:
                     data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
+            #t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        #time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = self.time[time_steps]
 
         dfs.Close()
 
