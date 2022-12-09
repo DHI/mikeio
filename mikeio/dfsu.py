@@ -699,6 +699,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         y=None,
         keepdims=False,
         dtype=np.float32,
+        error_bad_data=True,
+        fill_bad_data_value=np.nan
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -721,6 +723,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             by default None
         elements: list[int], optional
             Read only selected element ids, by default None
+        error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+        fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
 
         Returns
         -------
@@ -802,16 +809,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             it = time_steps[i]
             for item in range(n_items):
 
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                if itemdata is not None:
-                    d = itemdata.Data
-                    d[d == deletevalue] = np.nan
-                else:
-                    print(f"Error reading: {self.time[it]}")
-                    d = np.zeros(shape[1])
-                    d[:] = np.nan
-                    dfs.Close()
-                    dfs = DfsuFile.Open(self._filename)
+                dfs, d = self.read_item_time_step(dfs=dfs, item_numbers=item_numbers, deletevalue=deletevalue, shape=shape, item=item, it=it, error_bad_data=error_bad_data, fill_bad_data_value=fill_bad_data_value)
 
                 if elements is not None:
                     d = d[elements]
@@ -841,6 +839,22 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         return Dataset(
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
+
+    def read_item_time_step(self, *, dfs, item_numbers, deletevalue, shape, item, it, error_bad_data=True, fill_bad_data_value=np.nan):
+        itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+        if itemdata is not None:
+            d = itemdata.Data
+            d[d == deletevalue] = np.nan
+        else:
+            if error_bad_data:
+                raise ValueError(f"Error reading: {self.time[it]}")
+            else:
+                warnings.warn(f"Error reading: {self.time[it]}")
+                d = np.zeros(shape[1])
+                d[:] = fill_bad_data_value
+                dfs.Close()
+                dfs = DfsuFile.Open(self._filename)
+        return dfs, d
 
     def _validate_elements_and_geometry_sel(self, elements, **kwargs):
         used_kwargs = []
