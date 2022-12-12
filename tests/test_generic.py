@@ -5,7 +5,7 @@ import pandas as pd
 import mikeio
 from mikeio import Dfsu
 from mikeio import generic
-from mikeio.generic import scale, diff, sum, extract, avg_time
+from mikeio.generic import scale, diff, sum, extract, avg_time, fill_corrupt
 import pytest
 
 
@@ -586,3 +586,15 @@ def test_dfs_ext_capitalisation(tmpdir):
     filename = os.path.join("tests", "testdata", "oresund_vertical_slice2.DFSU")
     ds = mikeio.open(filename)
     assert True
+
+
+def test_fill_corrupt_data(tmpdir):
+    """This test doesn't verify much..."""
+
+    infile = "tests/testdata/waves.dfs2"
+    outfile = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
+
+    fill_corrupt(infilename=infile, outfilename=outfile)
+    orig = mikeio.read(infile)
+    extracted = mikeio.read(outfile)
+    assert extracted.n_timesteps == orig.n_timesteps
