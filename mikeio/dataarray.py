@@ -1627,6 +1627,15 @@ class DataArray(DataUtilsMixin, TimeSeries):
             zn=zn,
         )
 
+    def interp_na(self, axis="time", **kwargs):
+        """Fill in NaNs by interpolating according to different methods.
+
+        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`"""
+
+        xr_da = self.to_xarray().interpolate_na(dim=axis, **kwargs)
+        self.values = xr_da.values
+        return self
+
     def interp_like(
         self,
         other: Union["DataArray", Grid2D, GeometryFM, pd.DatetimeIndex],
