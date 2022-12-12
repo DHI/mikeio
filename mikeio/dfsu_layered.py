@@ -222,8 +222,6 @@ class DfsuLayered(_Dfsu):
                 data = np.ndarray(shape=(n_steps, n_elems), dtype=dtype)
             data_list.append(data)
 
-        t_seconds = np.zeros(n_steps, dtype=float)
-
         if single_time_selected and not keepdims:
             data = data[0]
 
@@ -255,9 +253,6 @@ class DfsuLayered(_Dfsu):
                 else:
                     data_list[item][i] = d
 
-            # t_seconds[i] = itemdata.Time
-
-        # time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = self.time[time_steps]
 
         dfs.Close()

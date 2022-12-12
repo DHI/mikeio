@@ -808,8 +808,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
-        t_seconds = np.zeros(n_steps, dtype=float)
-
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
@@ -835,9 +833,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 else:
                     data_list[item][i] = d
 
-            # t_seconds[i] = itemdata.Time
-
-        # time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = self.time[time_steps]
 
         dfs.Close()
