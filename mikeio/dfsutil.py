@@ -1,4 +1,5 @@
 from datetime import datetime
+import warnings
 from typing import Iterable, List, Tuple, Union
 import numpy as np
 import pandas as pd
@@ -6,9 +7,11 @@ from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType, ItemInfoList
 from .custom_exceptions import ItemsError
 
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFileInfo
+from mikecore.DfsFileFactory import DfsFileFactory
 
 
-def _read_item_time_step(*,
+def _read_item_time_step(
+    *,
     dfs,
     filename,
     time,
@@ -32,7 +35,7 @@ def _read_item_time_step(*,
             d = np.zeros(shape[1])
             d[:] = fill_bad_data_value
             dfs.Close()
-            dfs = DfsuFile.Open(filename)
+            dfs = DfsFileFactory.DfsGenericOpen(filename)
     return dfs, d
 
 

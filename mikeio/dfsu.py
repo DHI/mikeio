@@ -815,7 +815,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 dfs, d = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=time,
+                    time=self.time,
                     item_numbers=item_numbers,
                     deletevalue=deletevalue,
                     shape=shape,
