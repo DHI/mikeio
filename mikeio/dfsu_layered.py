@@ -10,7 +10,12 @@ from .dfsu import _Dfsu
 from .dataset import Dataset, DataArray
 from .spatial.FM_geometry import GeometryFM3D
 from .custom_exceptions import InvalidGeometry
-from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
+from .dfsutil import (
+    _get_item_info,
+    _valid_item_numbers,
+    _valid_timesteps,
+    _read_item_time_step,
+)
 from .spatial.FM_utils import _plot_vertical_profile
 from .interpolation import get_idw_interpolant, interp2d
 from .eum import ItemInfo, EUMType
@@ -98,7 +103,9 @@ class DfsuLayered(_Dfsu):
         z=None,
         layers=None,
         keepdims=False,
-        dtype=np.float32
+        dtype=np.float32,
+        error_bad_data=True,
+        fill_bad_data_value=np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -123,6 +130,11 @@ class DfsuLayered(_Dfsu):
             Read only data for specific layers, by default None
         elements: list[int], optional
             Read only selected element ids, by default None
+        error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+        fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
 
         Returns
         -------
@@ -219,9 +231,18 @@ class DfsuLayered(_Dfsu):
             it = time_steps[i]
             for item in range(n_items):
 
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                d = itemdata.Data
-                d[d == deletevalue] = np.nan
+                dfs, d = _read_item_time_step(
+                    dfs=dfs,
+                    filename=self._filename,
+                    time=time,
+                    item_numbers=item_numbers,
+                    deletevalue=deletevalue,
+                    shape=(data.shape[-1],),
+                    item=item,
+                    it=it,
+                    error_bad_data=error_bad_data,
+                    fill_bad_data_value=fill_bad_data_value,
+                )
 
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
@@ -234,9 +255,10 @@ class DfsuLayered(_Dfsu):
                 else:
                     data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
+            # t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        # time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = self.time[time_steps]
 
         dfs.Close()
 

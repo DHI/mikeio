@@ -20,7 +20,12 @@ from mikeio.spatial.utils import xy_to_bbox
 from . import __dfs_version__
 from .base import EquidistantTimeSeries
 from .track import _extract_track
-from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
+from .dfsutil import (
+    _get_item_info,
+    _valid_item_numbers,
+    _valid_timesteps,
+    _read_item_time_step,
+)
 from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
 from .eum import ItemInfo, EUMType, EUMUnit
@@ -700,7 +705,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         keepdims=False,
         dtype=np.float32,
         error_bad_data=True,
-        fill_bad_data_value=np.nan
+        fill_bad_data_value=np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -809,7 +814,18 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             it = time_steps[i]
             for item in range(n_items):
 
-                dfs, d = self.read_item_time_step(dfs=dfs, item_numbers=item_numbers, deletevalue=deletevalue, shape=shape, item=item, it=it, error_bad_data=error_bad_data, fill_bad_data_value=fill_bad_data_value)
+                dfs, d = _read_item_time_step(
+                    dfs=dfs,
+                    filename=self._filename,
+                    time=time,
+                    item_numbers=item_numbers,
+                    deletevalue=deletevalue,
+                    shape=shape,
+                    item=item,
+                    it=it,
+                    error_bad_data=error_bad_data,
+                    fill_bad_data_value=fill_bad_data_value,
+                )
 
                 if elements is not None:
                     d = d[elements]
@@ -819,9 +835,9 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 else:
                     data_list[item][i] = d
 
-            #t_seconds[i] = itemdata.Time
+            # t_seconds[i] = itemdata.Time
 
-        #time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        # time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = self.time[time_steps]
 
         dfs.Close()
@@ -839,22 +855,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         return Dataset(
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
-
-    def read_item_time_step(self, *, dfs, item_numbers, deletevalue, shape, item, it, error_bad_data=True, fill_bad_data_value=np.nan):
-        itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-        if itemdata is not None:
-            d = itemdata.Data
-            d[d == deletevalue] = np.nan
-        else:
-            if error_bad_data:
-                raise ValueError(f"Error reading: {self.time[it]}")
-            else:
-                warnings.warn(f"Error reading: {self.time[it]}")
-                d = np.zeros(shape[1])
-                d[:] = fill_bad_data_value
-                dfs.Close()
-                dfs = DfsuFile.Open(self._filename)
-        return dfs, d
 
     def _validate_elements_and_geometry_sel(self, elements, **kwargs):
         used_kwargs = []
@@ -964,21 +964,20 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             title of the dfsu file. Default is blank.
         keep_open: bool, optional
             Keep file open for appending
-        """        
+        """
         if isinstance(data, list):
             raise TypeError(
                 "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
 
         return self._write(
-            filename=filename, 
-            data=data, 
-            dt=dt, 
-            elements=elements, 
-            title=title, 
-            keep_open=keep_open
-            )
-
+            filename=filename,
+            data=data,
+            dt=dt,
+            elements=elements,
+            title=title,
+            keep_open=keep_open,
+        )
 
     def _write(
         self,
@@ -1000,7 +999,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, x
         start_time: datetime, optional, deprecated
-            start date of type datetime.    
+            start date of type datetime.
         dt: float, optional, deprecated
             The time step (in seconds)
         items: list[ItemInfo], optional, deprecated
@@ -1020,9 +1019,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 FutureWarning,
             )
         if keep_open and not dt:
-            warnings.warn(
-                "argument dt missing, should be provided when keep_open=True"
-            )
+            warnings.warn("argument dt missing, should be provided when keep_open=True")
 
         filename = str(filename)
 
