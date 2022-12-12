@@ -813,9 +813,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
         ):
-            if dims == ("time","x"):
-                return Grid1D(nx=shape[1], dx=1.0/(shape[1]-1))
-            
+            if dims == ("time", "x"):
+                return Grid1D(nx=shape[1], dx=1.0 / (shape[1] - 1))
+
             warnings.warn("Geometry is required for ndim >=1")
 
         axis = 1 if "time" in dims else 0
@@ -1490,7 +1490,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if isinstance(self.geometry, Grid2D):  # TODO DIY bilinear interpolation
                 xr_da = self.to_xarray()
                 dai = xr_da.interp(x=x, y=y).values
-                geometry = GeometryPoint2D(x=x, y=y, projection=self.geometry.projection)
+                geometry = GeometryPoint2D(
+                    x=x, y=y, projection=self.geometry.projection
+                )
             elif isinstance(self.geometry, Grid1D):
                 if interpolant is None:
                     interpolant = self.geometry.get_spatial_interpolant(coords)
@@ -1503,9 +1505,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
                     )
                 dai = self.geometry.interp2d(self, *interpolant).flatten()
                 if z is None:
-                    geometry = GeometryPoint2D(x=x, y=y, projection=self.geometry.projection)
+                    geometry = GeometryPoint2D(
+                        x=x, y=y, projection=self.geometry.projection
+                    )
                 else:
-                    geometry = GeometryPoint3D(x=x, y=y, z=z, projection=self.geometry.projection)
+                    geometry = GeometryPoint3D(
+                        x=x, y=y, z=z, projection=self.geometry.projection
+                    )
 
             da = DataArray(
                 data=dai, time=self.time, geometry=geometry, item=deepcopy(self.item)
