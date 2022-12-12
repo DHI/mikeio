@@ -225,6 +225,8 @@ class DfsuLayered(_Dfsu):
         if single_time_selected and not keepdims:
             data = data[0]
 
+        time=self.time
+
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
@@ -232,7 +234,7 @@ class DfsuLayered(_Dfsu):
                 dfs, d = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=self.time,
+                    time=time,
                     item_numbers=item_numbers,
                     deletevalue=deletevalue,
                     shape=(data.shape[-1],),

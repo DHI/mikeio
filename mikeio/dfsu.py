@@ -808,6 +808,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
+        time = self.time
+
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
@@ -815,7 +817,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 dfs, d = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=self.time,
+                    time=time,
                     item_numbers=item_numbers,
                     deletevalue=deletevalue,
                     shape=shape,
