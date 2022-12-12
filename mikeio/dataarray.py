@@ -1627,7 +1627,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             zn=zn,
         )
 
-    def interp_na(self, axis="time", **kwargs):
+    def interp_na(self, axis="time", **kwargs) -> "DataArray":
         """Fill in NaNs by interpolating according to different methods.
 
         Wrapper of :py:meth:`xarray.DataArray.interpolate_na`"""

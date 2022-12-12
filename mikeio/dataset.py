@@ -36,7 +36,7 @@ class _DatasetPlotter:
         else:
             raise ValueError(
                 "Could not plot Dataset. Try plotting one of its DataArrays instead..."
-            )        
+            )
 
     @staticmethod
     def _get_fig_ax(ax=None, figsize=None):
@@ -1151,6 +1151,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             geometry=self.geometry,
             zn=zn,
         )
+
+    def interp_na(self, axis="time", **kwargs) -> "Dataset":
+        ds = self.copy()
+        for da in ds:
+            da.values = da.interp_na(axis=axis, **kwargs).values
+
+        return ds
 
     def interp_like(
         self,
