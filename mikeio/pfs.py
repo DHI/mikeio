@@ -366,18 +366,21 @@ class PfsSection(SimpleNamespace):
 
         return v
 
-    def to_Pfs(self, name: str):
-        """Convert to a Pfs object (with this PfsSection as the target)
+    def to_Pfs(self, name: str=None) -> "PfsDocument":
+        """Convert to a PfsDocument in one of two ways:
+
+        1) All key:value pairs will be targets (require all values to be PfsSections)
+        2) Make this PfsSection the only target (requires a name)
 
         Parameters
         ----------
-        name : str
+        name : str, optional 
             Name of the target (=key that refer to this PfsSection)
 
         Returns
         -------
-        Pfs
-            A Pfs object
+        PfsDocument
+            A PfsDocument object
         """
         return PfsDocument(self, names=[name])
 
@@ -522,14 +525,14 @@ class PfsDocument(PfsSection):
         if isinstance(input, (str, Path)) or hasattr(input, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
-            sections, names = self._read_pfs_file(input, encoding, unique_keywords)
+            names, sections = self._read_pfs_file(input, encoding, unique_keywords)
         else:
-            sections, names = self._parse_non_file_input(input, names)
+            names, sections = self._parse_non_file_input(input, names)
 
         d = self._to_nonunique_key_dict(names, sections)
         super().__init__(d)
 
-        self._ALIAS_LIST = ["_ALIAS_LIST"]  # ignore list
+        self._ALIAS_LIST = ["_ALIAS_LIST"]  # ignore these in key list
         if self._is_FM_engine:
             self._add_all_FM_aliases()
 
@@ -558,17 +561,18 @@ class PfsDocument(PfsSection):
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
-    def _unravel_items(self):
+    @staticmethod
+    def _unravel_items(items):
         rkeys = []
         rvals = []
-        for k in self.keys():
-            if isinstance(self[k], PfsNonUniqueList):
-                for subval in self[k]:
+        for k, v in items():
+            if isinstance(v, PfsNonUniqueList):
+                for subval in v:
                     rkeys.append(k)
                     rvals.append(subval)
             else:
                 rkeys.append(k)
-                rvals.append(self[k])
+                rvals.append(v)
         return rkeys, rvals
 
     @property
@@ -583,7 +587,7 @@ class PfsDocument(PfsSection):
     @property
     def targets(self) -> List[PfsSection]:
         """List of targets (root sections)"""
-        _, rvals = self._unravel_items()
+        _, rvals = self._unravel_items(self.items)
         return rvals
 
     @property
@@ -599,7 +603,7 @@ class PfsDocument(PfsSection):
     @property
     def names(self) -> List[str]:
         """Names of the targets (root sections) as a list"""
-        rkeys, _ = self._unravel_items()
+        rkeys, _ = self._unravel_items(self.items)
         return rkeys
 
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
@@ -614,13 +618,18 @@ class PfsDocument(PfsSection):
             raise ValueError(f"{filename} could not be parsed. " + str(e))
         sections = [PfsSection(list(d.values())[0]) for d in target_list]
         names = [list(d.keys())[0] for d in target_list]
-        return sections, names
+        return names, sections
 
     @staticmethod
-    def _parse_non_file_input(input, names):
+    def _parse_non_file_input(input, names=None):
         """dict/PfsSection or lists of these can be parsed"""
         if names is None:
-            raise ValueError("'names' must be provided if input is not a file")
+            #raise ValueError("'names' must be provided if input is not a file")
+            assert isinstance(input, Mapping), "input must be a mapping"
+            names, sections = PfsDocument._unravel(input.items)
+            assert all(isinstance(sections, dict)), "all targets must be PfsSections (no key-value pairs allowed in the root)"
+            return names, sections
+        
         if isinstance(names, str):
             names = [names]
 
@@ -643,7 +652,7 @@ class PfsDocument(PfsSection):
             raise ValueError(
                 f"Length of names ({len(names)}) does not match length of target sections ({len(sections)})"
             )
-        return sections, names
+        return names, sections
 
     @property
     def _is_FM_engine(self):
