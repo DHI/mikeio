@@ -60,6 +60,33 @@ geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
 values: [0.4591, 0.8078, ..., -0.6311]
 ```
 
+## Modifying values
+
+You can modify the values of a DataArray by changing its `values`: 
+
+```python
+>>> da.values[0, 3] = 5.0
+```
+
+If you wish to change values of a subset of the DataArray you should be aware of the difference between a _view_ and a _copy_ of the data. Similar to NumPy, MIKE IO selection method will return a _view_ of the data when using single index and slices, but a _copy_ of the data using fancy indexing (a list of indicies or boolean indexing). Note that prior to release 1.3, MIKE IO would always return a copy. 
+
+It is recommended to change the values using `values` property directly on the original DataArray (like above), but it is also possible to change the values of the original DataArray by working on a subset DataArray if it is selected with single index or slice as explained above. 
+
+```python
+>>> da_sub = da.isel(time=0)
+>>> da_sub.values[:] = 5.0    # will change da
+```
+
+Fancy indexing will return a _copy_ and therefore not change the original:
+
+```python
+>>> da_sub = da.isel(time=[0,1,2])
+>>> da_sub.values[:] = 5.0    # will NOT change da
+```
+
+
+
+
 ## Plotting
 
 The plotting of a DataArray is context-aware meaning that plotting behaviour depends on the geometry of the DataArray being plotted. 

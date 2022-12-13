@@ -48,6 +48,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">DataArray</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#temporal-selection">Temporal selection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#spatial-selection">Spatial selection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#modifying-values">Modifying values</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#plotting">Plotting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#properties">Properties</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#methods">Methods</a></li>
@@ -202,6 +203,24 @@ The <a class="reference internal" href="dfs-overview.html#mikeio.read" title="mi
 <span class="go">time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)</span>
 <span class="go">geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)</span>
 <span class="go">values: [0.4591, 0.8078, ..., -0.6311]</span>
+</pre></div>
+</div>
+</section>
+<section id="modifying-values">
+<h2>Modifying values<a class="headerlink" href="#modifying-values" title="Permalink to this heading"></a></h2>
+<p>You can modify the values of a DataArray by changing its <code class="docutils literal notranslate"><span class="pre">values</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mf">5.0</span>
+</pre></div>
+</div>
+<p>If you wish to change values of a subset of the DataArray you should be aware of the difference between a <em>view</em> and a <em>copy</em> of the data. Similar to NumPy, MIKE IO selection method will return a <em>view</em> of the data when using single index and slices, but a <em>copy</em> of the data using fancy indexing (a list of indicies or boolean indexing). Note that prior to release 1.3, MIKE IO would always return a copy.</p>
+<p>It is recommended to change the values using <code class="docutils literal notranslate"><span class="pre">values</span></code> property directly on the original DataArray (like above), but it is also possible to change the values of the original DataArray by working on a subset DataArray if it is selected with single index or slice as explained above.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">da_sub</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da_sub</span><span class="o">.</span><span class="n">values</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">5.0</span>    <span class="c1"># will change da</span>
+</pre></div>
+</div>
+<p>Fancy indexing will return a <em>copy</em> and therefore not change the original:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">da_sub</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da_sub</span><span class="o">.</span><span class="n">values</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">5.0</span>    <span class="c1"># will NOT change da</span>
 </pre></div>
 </div>
 </section>
@@ -583,6 +602,9 @@ be used, by default: 3</p></li>
 <span class="sig-name descname"><span class="pre">isel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">DataArray</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.isel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.isel" title="Permalink to this definition"></a></dt>
 <dd><p>Return a new DataArray whose data is given by
 integer indexing along the specified dimension(s).</p>
+<p>Note that the data will be a _view_ of the original data
+if possible (single index or slice), otherwise a copy (fancy indexing)
+following NumPy convention.</p>
 <p>The spatial parameters available depend on the dims
 (i.e. geometry) of the DataArray:</p>
 <ul class="simple">
