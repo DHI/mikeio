@@ -1013,7 +1013,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @values.setter
     def values(self, value):
-        if value.shape != self._values.shape:
+        if np.isscalar(self._values):
+            if not np.isscalar(value):
+                raise ValueError("Shape of new data is wrong (should be scalar)")
+        elif value.shape != self._values.shape:
             raise ValueError("Shape of new data is wrong")
 
         self._values = value
@@ -1238,7 +1241,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         axis = self._parse_axis(self.shape, self.dims, axis)
 
+        idx_slice = None
         if isinstance(idx, slice):
+            idx_slice = idx
             idx = list(range(*idx.indices(self.shape[axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             return None
@@ -1264,12 +1269,22 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 )
                 zn = self._zn[:, node_ids]
 
+        # reduce dims only if singleton idx
+        dims = tuple([d for i, d in enumerate(self.dims) if i != axis]) if single_index else self.dims
         if single_index:
-            # reduce dims only if singleton idx
-            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
-            dat = np.take(self.values, int(idx), axis=axis)
+            idx = int(idx)
+        elif idx_slice is not None:
+            idx = idx_slice
+
+        if axis == 0:
+            dat = self.values[idx]
+        elif axis == 1:
+            dat = self.values[:,idx]
+        elif axis == 2:
+            dat = self.values[:,:,idx]
+        elif axis == 3:
+            dat = self.values[:,:,:,idx]
         else:
-            dims = self.dims
             dat = np.take(self.values, idx, axis=axis)
 
         return DataArray(
