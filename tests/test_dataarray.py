@@ -839,6 +839,98 @@ def test_modify_values(da1):
     da1.values = np.zeros_like(da1.values) + 2.0
 
 
+def test_modify_values_1d(da1):
+    assert da1.values[4] == 14.0
+
+    # selecting a slice will return a view. The original is changed.
+    da1.isel(slice(4,6)).values[0] = 13.0 
+    assert da1.values[4] == 13.0
+
+    # __getitem__ uses isel()
+    da1[4:6].values[0] = 12.0 
+    assert da1.values[4] == 12.0
+
+    # values is scalar, therefore copy by definition. Original is not changed.
+    da1.isel(4).values = 11.0    
+    assert da1.values[4] != 11.0  
+
+    # fancy indexing will return copy! Original is *not* changed.
+    da1.isel([0,4,7]).values[1] = 10.0  
+    assert da1.values[4] != 10.0  
+
+
+def test_modify_values_2d_all(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    da2 += 0.1
+    assert da2.values[2,5] == 0.2
+
+    vals = 0.3*np.ones(da2.shape)
+    da2.values = vals
+    assert da2.values[2,5] == 0.3
+
+
+def test_modify_values_2d_idx(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    # selecting a single index will return a view. The original is changed.
+    da2.isel(time=2).values[5] = 0.2
+    assert da2.values[2,5] == 0.2
+
+    da2.isel(x=5).values[2] = 0.3
+    assert da2.values[2,5] == 0.3
+
+    da2.values[2,5] = 0.4
+    assert da2.values[2,5] == 0.4
+
+    # __getitem__ uses isel()
+    da2[2].values[5] = 0.5
+    assert da2.values[2,5] == 0.5
+
+    da2[:,5].values[2] = 0.6
+    assert da2.values[2,5] == 0.6
+
+
+def test_modify_values_2d_slice(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    # selecting a slice will return a view. The original is changed.
+    da2.isel(time=slice(2,6)).values[0,5] = 0.4
+    assert da2.values[2,5] == 0.4
+
+    da2.isel(x=slice(5,7)).values[2,0] = 0.5
+    assert da2.values[2,5] == 0.5
+
+    # __getitem__ uses isel()
+    da2[2:5].values[0,5] = 0.6
+    assert da2.values[2,5] == 0.6
+
+    da2[:,5:7].values[2,0] = 0.7
+    assert da2.values[2,5] == 0.7
+
+
+def test_modify_values_2d_fancy(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    # fancy indexing will return a *copy*. The original is NOT changed.
+    da2.isel(time=[2,3,4,5]).values[0,5] = 0.4
+    assert da2.values[2,5] != 0.4
+
+    da2.isel(x=[5,6]).values[2,0] = 0.5
+    assert da2.values[2,5] != 0.5
+
+    # __getitem__ uses isel()
+    da2[[2,3,4,5]].values[0,5] = 0.6
+    assert da2.values[2,5] != 0.6
+
+    da2[:,[5,6]].values[2,0] = 0.7
+    assert da2.values[2,5] != 0.7
+
+
 def test_add_scalar(da1):
     da2 = da1 + 10.0
     assert isinstance(da2, mikeio.DataArray)
