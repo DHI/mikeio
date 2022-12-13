@@ -1140,6 +1140,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
 
+        Note that the data will be a _view_ of the original data 
+        if possible (single index or slice), otherwise a copy (fancy indexing) 
+        following NumPy convention. 
+
         The spatial parameters available depend on the dims
         (i.e. geometry) of the DataArray:
 
