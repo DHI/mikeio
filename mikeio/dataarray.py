@@ -1630,7 +1630,26 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def interp_na(self, axis="time", **kwargs) -> "DataArray":
         """Fill in NaNs by interpolating according to different methods.
 
-        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`"""
+        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`
+        
+        Examples
+        --------
+
+        >>> time = pd.date_range("2000", periods=3, freq="D")
+        >>> da = mikeio.DataArray(data=np.array([0.0, np.nan, 2.0]), time=time)
+        >>> da
+        <mikeio.DataArray>
+        name: NoName
+        dims: (time:3)
+        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
+        values: [0, nan, 2]
+        >>> da.interp_na()
+        <mikeio.DataArray>
+        name: NoName
+        dims: (time:3)
+        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
+        values: [0, 1, 2]
+        """
 
         xr_da = self.to_xarray().interpolate_na(dim=axis, **kwargs)
         self.values = xr_da.values
