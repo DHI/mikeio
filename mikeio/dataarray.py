@@ -1098,7 +1098,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 if dims[j] == "time":
                     # getitem accepts fancy indexing only for time
                     k = self._get_time_idx_list(self.time, k)
-                    if len(k) == 0:
+                    if self._n_selected_timesteps(self.time, k) == 0:
                         raise IndexError("No timesteps found!")
                 da = da.isel(k, axis=dims[j])
         return da
