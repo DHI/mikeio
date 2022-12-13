@@ -273,7 +273,7 @@ def test_select_subset_isel_axis_out_of_range_error(ds2):
     # After subsetting there is only one dimension
     assert len(dss.shape) == 1
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         dss.isel(idx=0, axis=1)
 
 
