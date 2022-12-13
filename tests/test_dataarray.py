@@ -858,6 +858,18 @@ def test_modify_values_1d(da1):
     assert da1.values[4] != 10.0  
 
 
+def test_modify_values_2d_all(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    da2 += 0.1
+    assert da2.values[2,5] == 0.2
+
+    vals = 0.3*np.ones(da2.shape)
+    da2.values = vals
+    assert da2.values[2,5] == 0.3
+
+
 def test_modify_values_2d_idx(da2):
     assert da2.shape == (10,7)
     assert da2.values[2,5] == 0.1
@@ -868,6 +880,16 @@ def test_modify_values_2d_idx(da2):
 
     da2.isel(x=5).values[2] = 0.3
     assert da2.values[2,5] == 0.3
+
+    da2.values[2,5] = 0.4
+    assert da2.values[2,5] == 0.4
+
+    # __getitem__ uses isel()
+    da2[2].values[5] = 0.5
+    assert da2.values[2,5] == 0.5
+
+    da2[:,5].values[2] = 0.6
+    assert da2.values[2,5] == 0.6
 
 
 def test_modify_values_2d_slice(da2):
@@ -880,18 +902,30 @@ def test_modify_values_2d_slice(da2):
 
     da2.isel(x=slice(5,7)).values[2,0] = 0.5
     assert da2.values[2,5] == 0.5
-    
+
+    # da2[2:5].values[0,5] = 0.6
+    # assert da2.values[2,5] == 0.6
+
+    # da2[:,5:7].values[2,0] = 0.7
+    # assert da2.values[2,5] == 0.7
+
 
 def test_modify_values_2d_fancy(da2):
     assert da2.shape == (10,7)
     assert da2.values[2,5] == 0.1
 
-    # fancy indexing will return a copy. The original is NOT changed.
+    # fancy indexing will return a *copy*. The original is NOT changed.
     da2.isel(time=[2,3,4,5]).values[0,5] = 0.4
     assert da2.values[2,5] != 0.4
 
     da2.isel(x=[5,6]).values[2,0] = 0.5
     assert da2.values[2,5] != 0.5
+
+    da2[[2,3,4,5]].values[0,5] = 0.6
+    assert da2.values[2,5] != 0.6
+
+    da2[:,[5,6]].values[2,0] = 0.7
+    assert da2.values[2,5] != 0.7
 
 
 def test_add_scalar(da1):
