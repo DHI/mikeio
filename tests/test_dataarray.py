@@ -846,6 +846,7 @@ def test_modify_values_1d(da1):
     da1.isel(slice(4,6)).values[0] = 13.0 
     assert da1.values[4] == 13.0
 
+    # __getitem__ uses isel()
     # da1[4:6].values[0] = 12.0 
     # assert da1.values[4] == 12.0
 
@@ -903,11 +904,12 @@ def test_modify_values_2d_slice(da2):
     da2.isel(x=slice(5,7)).values[2,0] = 0.5
     assert da2.values[2,5] == 0.5
 
-    # da2[2:5].values[0,5] = 0.6
-    # assert da2.values[2,5] == 0.6
+    # __getitem__ uses isel()
+    da2[2:5].values[0,5] = 0.6
+    assert da2.values[2,5] == 0.6
 
-    # da2[:,5:7].values[2,0] = 0.7
-    # assert da2.values[2,5] == 0.7
+    da2[:,5:7].values[2,0] = 0.7
+    assert da2.values[2,5] == 0.7
 
 
 def test_modify_values_2d_fancy(da2):
@@ -921,6 +923,7 @@ def test_modify_values_2d_fancy(da2):
     da2.isel(x=[5,6]).values[2,0] = 0.5
     assert da2.values[2,5] != 0.5
 
+    # __getitem__ uses isel()
     da2[[2,3,4,5]].values[0,5] = 0.6
     assert da2.values[2,5] != 0.6
 
