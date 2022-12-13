@@ -19,7 +19,9 @@ def ds1():
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    return mikeio.Dataset(data=data, time=time, items=items, geometry=mikeio.Grid1D(nx=7,dx=1))
+    return mikeio.Dataset(
+        data=data, time=time, items=items, geometry=mikeio.Grid1D(nx=7, dx=1)
+    )
 
 
 @pytest.fixture
@@ -1565,3 +1567,28 @@ def test_dataset_plot(ds1):
     ds2 = ds1 + 0.01
     ax = ds2.isel(x=-1).plot(ax=ax)
     assert len(ax.lines) == 4
+
+
+def test_interp_na():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.array([np.nan, 1.0, np.nan, np.nan, 4.0]),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+    da2 = mikeio.DataArray(
+        data=np.array([np.nan, np.nan, np.nan, 4.0, 4.0]),
+        time=time,
+        item=ItemInfo(name="Bar"),
+    )
+
+    ds = mikeio.Dataset([da, da2])
+
+    dsi = ds.interp_na()
+    assert np.isnan(dsi[0].to_numpy()[0])
+    assert dsi.Foo.to_numpy()[2] == pytest.approx(2.0)
+    assert np.isnan(dsi.Foo.to_numpy()[0])
+
+    dsi = ds.interp_na(fill_value="extrapolate")
+    assert dsi.Foo.to_numpy()[0] == pytest.approx(0.0)
+    assert dsi.Bar.to_numpy()[2] == pytest.approx(4.0)

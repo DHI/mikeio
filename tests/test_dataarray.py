@@ -173,12 +173,12 @@ def test_data_0d(da0):
 
 
 def test_create_data_1d_default_grid():
-    
+
     da = mikeio.DataArray(
-            data=np.zeros((10, 5)),
-            time=pd.date_range(start="2000-01-01", freq="H", periods=10),
-            item=ItemInfo("Foo"),
-        )
+        data=np.zeros((10, 5)),
+        time=pd.date_range(start="2000-01-01", freq="H", periods=10),
+        item=ItemInfo("Foo"),
+    )
     assert isinstance(da.geometry, mikeio.Grid1D)
 
 
@@ -1198,3 +1198,20 @@ def test_time_selection():
     with pytest.raises(IndexError):
         # not in time
         ds.sel(time="1997-09-15 00:00")
+
+
+def test_interp_na():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.array([np.nan, 1.0, np.nan, np.nan, 4.0]),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+
+    dai = da.interp_na()
+    assert np.isnan(dai.to_numpy()[0])
+    assert dai.to_numpy()[2] == pytest.approx(2.0)
+
+    dai = da.interp_na(fill_value="extrapolate")
+    assert dai.to_numpy()[0] == pytest.approx(0.0)
+    assert dai.to_numpy()[2] == pytest.approx(2.0)

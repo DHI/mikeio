@@ -71,6 +71,11 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     layers: int, str or sequence, optional
         Dfs3/Dfsu-layered: read only data from specific layers,
         by default None (=all layers)
+    error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+    fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
 
     Returns
     -------
@@ -103,6 +108,8 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", elements=lst_of_elems)
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers="bottom")
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers=[-2,-1])
+    >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False) # replace corrupt data with np.nan
+    >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False, fill_bad_data_value=0.0) # replace corrupt data with 0.0
     """
 
     ext = os.path.splitext(filename)[1].lower()
