@@ -157,6 +157,11 @@
 <span class="sd">    layers: int, str or sequence, optional</span>
 <span class="sd">        Dfs3/Dfsu-layered: read only data from specific layers,</span>
 <span class="sd">        by default None (=all layers)</span>
+<span class="sd">    error_bad_data: bool, optional</span>
+<span class="sd">            raise error if data is corrupt, by default True,</span>
+<span class="sd">    fill_bad_data_value:</span>
+<span class="sd">            fill value for to impute corrupt data, used in conjunction with error_bad_data=False</span>
+<span class="sd">            default np.nan</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -189,6 +194,8 @@
 <span class="sd">    &gt;&gt;&gt; ds = mikeio.read(&quot;MT3D_sigma_z.dfsu&quot;, elements=lst_of_elems)</span>
 <span class="sd">    &gt;&gt;&gt; ds = mikeio.read(&quot;MT3D_sigma_z.dfsu&quot;, layers=&quot;bottom&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; ds = mikeio.read(&quot;MT3D_sigma_z.dfsu&quot;, layers=[-2,-1])</span>
+<span class="sd">    &gt;&gt;&gt; ds = mikeio.read(&quot;HD2D.dfsu&quot;, error_bad_data=False) # replace corrupt data with np.nan</span>
+<span class="sd">    &gt;&gt;&gt; ds = mikeio.read(&quot;HD2D.dfsu&quot;, error_bad_data=False, fill_bad_data_value=0.0) # replace corrupt data with 0.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>

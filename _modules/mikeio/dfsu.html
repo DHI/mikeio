@@ -107,7 +107,12 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
 <span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">EquidistantTimeSeries</span>
 <span class="kn">from</span> <span class="nn">.track</span> <span class="kn">import</span> <span class="n">_extract_track</span>
-<span class="kn">from</span> <span class="nn">.dfsutil</span> <span class="kn">import</span> <span class="n">_get_item_info</span><span class="p">,</span> <span class="n">_valid_item_numbers</span><span class="p">,</span> <span class="n">_valid_timesteps</span>
+<span class="kn">from</span> <span class="nn">.dfsutil</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_get_item_info</span><span class="p">,</span>
+    <span class="n">_valid_item_numbers</span><span class="p">,</span>
+    <span class="n">_valid_timesteps</span><span class="p">,</span>
+    <span class="n">_read_item_time_step</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span>
 <span class="kn">from</span> <span class="nn">.dfs0</span> <span class="kn">import</span> <span class="n">Dfs0</span>
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
@@ -786,6 +791,8 @@
         <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">error_bad_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fill_bad_data_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read data from a dfsu file</span>
@@ -808,6 +815,11 @@
 <span class="sd">            by default None</span>
 <span class="sd">        elements: list[int], optional</span>
 <span class="sd">            Read only selected element ids, by default None</span>
+<span class="sd">        error_bad_data: bool, optional</span>
+<span class="sd">            raise error if data is corrupt, by default True,</span>
+<span class="sd">        fill_bad_data_value:</span>
+<span class="sd">            fill value for to impute corrupt data, used in conjunction with error_bad_data=False</span>
+<span class="sd">            default np.nan</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -862,15 +874,24 @@
             <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
             <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-        <span class="n">t_seconds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_progress</span><span class="p">):</span>
             <span class="n">it</span> <span class="o">=</span> <span class="n">time_steps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
 
-                <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">it</span><span class="p">)</span>
-                <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
-                <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">==</span> <span class="n">deletevalue</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">dfs</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">_read_item_time_step</span><span class="p">(</span>
+                    <span class="n">dfs</span><span class="o">=</span><span class="n">dfs</span><span class="p">,</span>
+                    <span class="n">filename</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">,</span>
+                    <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+                    <span class="n">item_numbers</span><span class="o">=</span><span class="n">item_numbers</span><span class="p">,</span>
+                    <span class="n">deletevalue</span><span class="o">=</span><span class="n">deletevalue</span><span class="p">,</span>
+                    <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+                    <span class="n">item</span><span class="o">=</span><span class="n">item</span><span class="p">,</span>
+                    <span class="n">it</span><span class="o">=</span><span class="n">it</span><span class="p">,</span>
+                    <span class="n">error_bad_data</span><span class="o">=</span><span class="n">error_bad_data</span><span class="p">,</span>
+                    <span class="n">fill_bad_data_value</span><span class="o">=</span><span class="n">fill_bad_data_value</span><span class="p">,</span>
+                <span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">d</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">elements</span><span class="p">]</span>
@@ -880,9 +901,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">data_list</span><span class="p">[</span><span class="n">item</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span>
 
-            <span class="n">t_seconds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
-
-        <span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">t_seconds</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">)</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">time_steps</span><span class="p">]</span>
 
         <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
 
@@ -1007,21 +1026,20 @@
 <span class="sd">            title of the dfsu file. Default is blank.</span>
 <span class="sd">        keep_open: bool, optional</span>
 <span class="sd">            Keep file open for appending</span>
-<span class="sd">        &quot;&quot;&quot;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
                 <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span>
-            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> 
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> 
-            <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span> 
-            <span class="n">elements</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span> 
-            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> 
-            <span class="n">keep_open</span><span class="o">=</span><span class="n">keep_open</span>
-            <span class="p">)</span>
-
+            <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
+            <span class="n">elements</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">keep_open</span><span class="o">=</span><span class="n">keep_open</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1043,7 +1061,7 @@
 <span class="sd">        data: list[np.array] or Dataset</span>
 <span class="sd">            list of matrices, one for each item. Matrix dimension: time, x</span>
 <span class="sd">        start_time: datetime, optional, deprecated</span>
-<span class="sd">            start date of type datetime.    </span>
+<span class="sd">            start date of type datetime.</span>
 <span class="sd">        dt: float, optional, deprecated</span>
 <span class="sd">            The time step (in seconds)</span>
 <span class="sd">        items: list[ItemInfo], optional, deprecated</span>
@@ -1063,9 +1081,7 @@
                 <span class="ne">FutureWarning</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">keep_open</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dt</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s2">&quot;argument dt missing, should be provided when keep_open=True&quot;</span>
-            <span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;argument dt missing, should be provided when keep_open=True&quot;</span><span class="p">)</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 

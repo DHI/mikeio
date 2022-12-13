@@ -106,7 +106,7 @@
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">ItemInfo</span>
 
 
-<span class="n">show_progress</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">show_progress</span> <span class="o">=</span> <span class="kc">True</span>
 
 
 <span class="k">class</span> <span class="nc">_ChunkInfo</span><span class="p">:</span>
@@ -293,6 +293,68 @@
 
             <span class="n">dfs</span><span class="o">.</span><span class="n">WriteItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">darray</span><span class="p">)</span>
 
+    <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="fill_corrupt"><a class="viewcode-back" href="../../generic.html#mikeio.generic.fill_corrupt">[docs]</a><span class="k">def</span> <span class="nf">fill_corrupt</span><span class="p">(</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Replace corrupt (unreadable) data with fill_value, default delete value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    infilename: str</span>
+<span class="sd">        full path to the input file</span>
+<span class="sd">    outfilename: str</span>
+<span class="sd">        full path to the output file</span>
+<span class="sd">    fill_value: float, optional</span>
+<span class="sd">        value to use where data is corrupt, default delete value</span>
+<span class="sd">    items: List[str] or List[int], optional</span>
+<span class="sd">        Process only selected items, by number (0-based) or name, by default: all</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilename</span><span class="p">)</span>
+
+    <span class="n">item_numbers</span> <span class="o">=</span> <span class="n">_valid_item_numbers</span><span class="p">(</span><span class="n">dfs_i</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+    <span class="n">n_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">)</span>
+
+    <span class="n">dfs</span> <span class="o">=</span> <span class="n">_clone</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">outfilename</span><span class="p">),</span>
+        <span class="n">items</span><span class="o">=</span><span class="n">item_numbers</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
+
+    <span class="n">deletevalue</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueFloat</span>
+
+    <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">show_progress</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
+
+            <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">itemdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">iteminfo</span><span class="p">:</span> <span class="n">DfsDynamicItemInfo</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">iteminfo</span><span class="o">.</span><span class="n">ElementCount</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">fill_value</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">d</span> <span class="o">==</span> <span class="n">deletevalue</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+                <span class="c1"># close and re-open file to solve problem with reading</span>
+                <span class="n">dfs_i</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+                <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilename</span><span class="p">)</span>
+
+            <span class="n">d</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">d</span><span class="p">)]</span> <span class="o">=</span> <span class="n">deletevalue</span>
+            <span class="n">darray</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+            <span class="n">dfs</span><span class="o">.</span><span class="n">WriteItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">darray</span><span class="p">)</span>
+
+    <span class="n">dfs_i</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
     <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
 
 

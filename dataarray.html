@@ -65,6 +65,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.flipud"><code class="docutils literal notranslate"><span class="pre">DataArray.flipud()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.interp"><code class="docutils literal notranslate"><span class="pre">DataArray.interp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.interp_like"><code class="docutils literal notranslate"><span class="pre">DataArray.interp_like()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.interp_na"><code class="docutils literal notranslate"><span class="pre">DataArray.interp_na()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.interp_time"><code class="docutils literal notranslate"><span class="pre">DataArray.interp_time()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.is_equidistant"><code class="docutils literal notranslate"><span class="pre">DataArray.is_equidistant</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.isel"><code class="docutils literal notranslate"><span class="pre">DataArray.isel()</span></code></a></li>
@@ -525,6 +526,30 @@ be used, by default: 3</p></li>
 <dd class="field-even"><p><a class="reference internal" href="#mikeio.DataArray" title="mikeio.DataArray">DataArray</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.interp_na">
+<span class="sig-name descname"><span class="pre">interp_na</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'time'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.DataArray" title="mikeio.dataarray.DataArray"><span class="pre">DataArray</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.interp_na"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.interp_na" title="Permalink to this definition"></a></dt>
+<dd><p>Fill in NaNs by interpolating according to different methods.</p>
+<p>Wrapper of <a class="reference external" href="https://docs.xarray.dev/en/stable/generated/xarray.DataArray.interpolate_na.html#xarray.DataArray.interpolate_na" title="(in xarray v2022.12.1.dev0)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">xarray.DataArray.interpolate_na()</span></code></a></p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s2">&quot;2000&quot;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;D&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">]),</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span>
+<span class="go">&lt;mikeio.DataArray&gt;</span>
+<span class="go">name: NoName</span>
+<span class="go">dims: (time:3)</span>
+<span class="go">time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)</span>
+<span class="go">values: [0, nan, 2]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">interp_na</span><span class="p">()</span>
+<span class="go">&lt;mikeio.DataArray&gt;</span>
+<span class="go">name: NoName</span>
+<span class="go">dims: (time:3)</span>
+<span class="go">time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)</span>
+<span class="go">values: [0, 1, 2]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">

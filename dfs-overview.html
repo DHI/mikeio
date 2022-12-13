@@ -184,6 +184,9 @@ or (x,y,z) points(s), by default None</p></li>
 box of coordinates (left, lower, right, upper), by default None (=all)</p></li>
 <li><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>sequence</em><em>, </em><em>optional</em>) – Dfs3/Dfsu-layered: read only data from specific layers,
 by default None (=all layers)</p></li>
+<li><p><strong>error_bad_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – raise error if data is corrupt, by default True,</p></li>
+<li><p><strong>fill_bad_data_value</strong> – fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+default np.nan</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -218,6 +221,8 @@ by default None (=all layers)</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="n">lst_of_elems</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;MT3D_sigma_z.dfsu&quot;</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">error_bad_data</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># replace corrupt data with np.nan</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;HD2D.dfsu&quot;</span><span class="p">,</span> <span class="n">error_bad_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fill_bad_data_value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span> <span class="c1"># replace corrupt data with 0.0</span>
 </pre></div>
 </div>
 </dd></dl>

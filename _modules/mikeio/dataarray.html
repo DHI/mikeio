@@ -900,9 +900,9 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryUndefined</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="k">if</span> <span class="n">dims</span> <span class="o">==</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span><span class="s2">&quot;x&quot;</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">Grid1D</span><span class="p">(</span><span class="n">nx</span><span class="o">=</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dx</span><span class="o">=</span><span class="mf">1.0</span><span class="o">/</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-            
+            <span class="k">if</span> <span class="n">dims</span> <span class="o">==</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">Grid1D</span><span class="p">(</span><span class="n">nx</span><span class="o">=</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dx</span><span class="o">=</span><span class="mf">1.0</span> <span class="o">/</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Geometry is required for ndim &gt;=1&quot;</span><span class="p">)</span>
 
         <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="n">dims</span> <span class="k">else</span> <span class="mi">0</span>
@@ -1577,7 +1577,9 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">):</span>  <span class="c1"># TODO DIY bilinear interpolation</span>
                 <span class="n">xr_da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span>
                 <span class="n">dai</span> <span class="o">=</span> <span class="n">xr_da</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-                <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+                <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryPoint2D</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span>
+                <span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">Grid1D</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">interpolant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">interpolant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_spatial_interpolant</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
@@ -1590,9 +1592,13 @@
                     <span class="p">)</span>
                 <span class="n">dai</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">interp2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">interpolant</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+                    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryPoint2D</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryPoint3D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+                    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryPoint3D</span><span class="p">(</span>
+                        <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span>
+                    <span class="p">)</span>
 
             <span class="n">da</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">dai</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">)</span>
@@ -1707,6 +1713,34 @@
             <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
             <span class="n">zn</span><span class="o">=</span><span class="n">zn</span><span class="p">,</span>
         <span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataArray.interp_na"><a class="viewcode-back" href="../../dataarray.html#mikeio.DataArray.interp_na">[docs]</a>    <span class="k">def</span> <span class="nf">interp_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Fill in NaNs by interpolating according to different methods.</span>
+
+<span class="sd">        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        &gt;&gt;&gt; time = pd.date_range(&quot;2000&quot;, periods=3, freq=&quot;D&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; da = mikeio.DataArray(data=np.array([0.0, np.nan, 2.0]), time=time)</span>
+<span class="sd">        &gt;&gt;&gt; da</span>
+<span class="sd">        &lt;mikeio.DataArray&gt;</span>
+<span class="sd">        name: NoName</span>
+<span class="sd">        dims: (time:3)</span>
+<span class="sd">        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)</span>
+<span class="sd">        values: [0, nan, 2]</span>
+<span class="sd">        &gt;&gt;&gt; da.interp_na()</span>
+<span class="sd">        &lt;mikeio.DataArray&gt;</span>
+<span class="sd">        name: NoName</span>
+<span class="sd">        dims: (time:3)</span>
+<span class="sd">        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)</span>
+<span class="sd">        values: [0, 1, 2]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">xr_da</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_xarray</span><span class="p">()</span><span class="o">.</span><span class="n">interpolate_na</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">xr_da</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="DataArray.interp_like"><a class="viewcode-back" href="../../dataarray.html#mikeio.DataArray.interp_like">[docs]</a>    <span class="k">def</span> <span class="nf">interp_like</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
