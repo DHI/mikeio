@@ -847,8 +847,8 @@ def test_modify_values_1d(da1):
     assert da1.values[4] == 13.0
 
     # __getitem__ uses isel()
-    # da1[4:6].values[0] = 12.0 
-    # assert da1.values[4] == 12.0
+    da1[4:6].values[0] = 12.0 
+    assert da1.values[4] == 12.0
 
     # values is scalar, therefore copy by definition. Original is not changed.
     da1.isel(4).values = 11.0    
