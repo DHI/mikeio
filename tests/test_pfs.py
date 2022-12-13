@@ -366,7 +366,7 @@ def test_sw():
 
 def test_pfssection_to_dataframe():
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
-    df = pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS.to_dataframe()
+    df = pfs.SW.OUTPUTS.to_dataframe()
     assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 4
 
@@ -375,7 +375,7 @@ def test_hd_outputs():
 
     with pytest.warns(match="defined multiple times"):
         pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm", unique_keywords=True)
-    df = pfs.FemEngineHD.HYDRODYNAMIC_MODULE.OUTPUTS.to_dataframe()
+    df = pfs.HD.OUTPUTS.to_dataframe()
 
     assert df["file_name"][2] == "ts.dfs0"
     assert df.shape[0] == 3
@@ -384,7 +384,7 @@ def test_hd_outputs():
 def test_included_outputs():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
-    df = pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS.to_dataframe()
+    df = pfs.SW.OUTPUTS.to_dataframe()
     df = df[df.include == 1]
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
@@ -394,7 +394,7 @@ def test_included_outputs():
 def test_output_by_id():
 
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
-    df = pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS.to_dataframe()
+    df = pfs.SW.OUTPUTS.to_dataframe()
     # .loc refers to output_id irrespective of included or not
     assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
 
@@ -1077,8 +1077,8 @@ def test_search_keyword_found_in_multiple_places():
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
     subset = pfs.search("charnock")
     # the string "Charnock" occurs 6 times in this file
-    len(subset.FemEngineSW.SPECTRAL_WAVE_MODULE.WIND.keys()) ==2 
-    len(subset.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS) == 4
+    len(subset.SW.WIND.keys()) ==2 
+    len(subset.SW.OUTPUTS) == 4
     
 
     
