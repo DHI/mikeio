@@ -591,13 +591,11 @@ def test_dfs_ext_capitalisation(tmpdir):
 def test_fill_corrupt_data(tmpdir):
     """This test doesn't verify much..."""
 
-    # infile = "tests/testdata/waves.dfs2"
-    infile = "F:/2d.dfsu"
+    infile = "tests/testdata/waves.dfs2"
 
-    # outfile = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
-    outfile = "F:/2d_testing.dfsu"
+    outfile = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
 
-    fill_corrupt(infilename=infile, outfilename=outfile, items=[4, 5])
+    fill_corrupt(infilename=infile, outfilename=outfile, items=[1])
     orig = mikeio.read(infile)
     extracted = mikeio.read(outfile)
     assert extracted.n_timesteps == orig.n_timesteps
