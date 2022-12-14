@@ -1785,13 +1785,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     # ============= Aggregation methods ===========
 
-    def max(self, axis="time", **kwargs) -> "DataArray":
+    def max(self, axis=0, **kwargs) -> "DataArray":
         """Max value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1804,13 +1804,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis="time", **kwargs) -> "DataArray":
+    def min(self, axis=0, **kwargs) -> "DataArray":
         """Min value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1823,13 +1823,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis="time", **kwargs) -> "DataArray":
+    def mean(self, axis=0, **kwargs) -> "DataArray":
         """Mean value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1842,13 +1842,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis="time", **kwargs) -> "DataArray":
+    def std(self, axis=0, **kwargs) -> "DataArray":
         """Standard deviation values along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1861,13 +1861,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis="time", **kwargs) -> "DataArray":
+    def ptp(self, axis=0, **kwargs) -> "DataArray":
         """Range (max - min) a.k.a Peak to Peak along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1876,13 +1876,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis="time", **kwargs) -> "DataArray":
+    def average(self, weights, axis=0, **kwargs) -> "DataArray":
         """Compute the weighted average along the specified axis.
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1909,13 +1909,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis="time", **kwargs) -> "DataArray":
+    def nanmax(self, axis=0, **kwargs) -> "DataArray":
         """Max value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1928,13 +1928,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis="time", **kwargs) -> "DataArray":
+    def nanmin(self, axis=0, **kwargs) -> "DataArray":
         """Min value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1947,13 +1947,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis="time", **kwargs) -> "DataArray":
+    def nanmean(self, axis=0, **kwargs) -> "DataArray":
         """Mean value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1966,13 +1966,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis="time", **kwargs) -> "DataArray":
+    def nanstd(self, axis=0, **kwargs) -> "DataArray":
         """Standard deviation value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1985,13 +1985,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
-    def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "DataArray":
+    def aggregate(self, axis=0, func=np.nanmean, **kwargs) -> "DataArray":
         """Aggregate along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
         func: function, optional
             default np.nanmean
 
@@ -2022,7 +2022,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             warnings.simplefilter("ignore", category=RuntimeWarning)
             data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
-        if axis == 0:  # time
+        if axis == 0 and "time" in self.dims:  # time
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[0]
 
@@ -2039,7 +2039,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             zn=zn,
         )
 
-    def quantile(self, q, *, axis="time", **kwargs):
+    def quantile(self, q, *, axis=0, **kwargs):
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -2050,7 +2050,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -2069,7 +2069,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis="time", **kwargs):
+    def nanquantile(self, q, *, axis=0, **kwargs):
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -2080,7 +2080,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
