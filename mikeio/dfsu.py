@@ -20,7 +20,12 @@ from mikeio.spatial.utils import xy_to_bbox
 from . import __dfs_version__
 from .base import EquidistantTimeSeries
 from .track import _extract_track
-from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
+from .dfsutil import (
+    _get_item_info,
+    _valid_item_numbers,
+    _valid_timesteps,
+    _read_item_time_step,
+)
 from .dataset import Dataset, DataArray
 from .dfs0 import Dfs0
 from .eum import ItemInfo, EUMType, EUMUnit
@@ -699,6 +704,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         y=None,
         keepdims=False,
         dtype=np.float32,
+        error_bad_data=True,
+        fill_bad_data_value=np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -721,6 +728,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             by default None
         elements: list[int], optional
             Read only selected element ids, by default None
+        error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+        fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
 
         Returns
         -------
@@ -775,15 +787,24 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
-        t_seconds = np.zeros(n_steps, dtype=float)
+        time = self.time
 
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
 
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                d = itemdata.Data
-                d[d == deletevalue] = np.nan
+                dfs, d = _read_item_time_step(
+                    dfs=dfs,
+                    filename=self._filename,
+                    time=time,
+                    item_numbers=item_numbers,
+                    deletevalue=deletevalue,
+                    shape=shape,
+                    item=item,
+                    it=it,
+                    error_bad_data=error_bad_data,
+                    fill_bad_data_value=fill_bad_data_value,
+                )
 
                 if elements is not None:
                     d = d[elements]
@@ -793,9 +814,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 else:
                     data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
-
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = self.time[time_steps]
 
         dfs.Close()
 
@@ -920,21 +939,20 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             title of the dfsu file. Default is blank.
         keep_open: bool, optional
             Keep file open for appending
-        """        
+        """
         if isinstance(data, list):
             raise TypeError(
                 "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
 
         return self._write(
-            filename=filename, 
-            data=data, 
-            dt=dt, 
-            elements=elements, 
-            title=title, 
-            keep_open=keep_open
-            )
-
+            filename=filename,
+            data=data,
+            dt=dt,
+            elements=elements,
+            title=title,
+            keep_open=keep_open,
+        )
 
     def _write(
         self,
@@ -956,7 +974,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, x
         start_time: datetime, optional, deprecated
-            start date of type datetime.    
+            start date of type datetime.
         dt: float, optional, deprecated
             The time step (in seconds)
         items: list[ItemInfo], optional, deprecated
@@ -976,9 +994,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 FutureWarning,
             )
         if keep_open and not dt:
-            warnings.warn(
-                "argument dt missing, should be provided when keep_open=True"
-            )
+            warnings.warn("argument dt missing, should be provided when keep_open=True")
 
         filename = str(filename)
 

@@ -19,7 +19,7 @@ from .dfsutil import _valid_item_numbers, _get_item_info
 from .eum import EUMType, ItemInfo
 
 
-show_progress = False
+show_progress = True
 
 
 class _ChunkInfo:
@@ -206,6 +206,68 @@ def scale(
 
             dfs.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
 
+    dfs.Close()
+
+
+def fill_corrupt(
+    infilename: str,
+    outfilename: str,
+    fill_value: float = np.nan,
+    items: Union[List[str], List[int]] = None,
+) -> None:
+    """
+    Replace corrupt (unreadable) data with fill_value, default delete value.
+
+    Parameters
+    ----------
+
+    infilename: str
+        full path to the input file
+    outfilename: str
+        full path to the output file
+    fill_value: float, optional
+        value to use where data is corrupt, default delete value
+    items: List[str] or List[int], optional
+        Process only selected items, by number (0-based) or name, by default: all
+    """
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+    n_items = len(item_numbers)
+
+    dfs = _clone(
+        str(infilename),
+        str(outfilename),
+        items=item_numbers,
+    )
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    deletevalue = dfs.FileInfo.DeleteValueFloat
+
+    for timestep in trange(n_time_steps, disable=not show_progress):
+        for item in range(n_items):
+
+            itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+            if itemdata is not None:
+                time = itemdata.Time
+                d = itemdata.Data
+            else:
+                iteminfo: DfsDynamicItemInfo = dfs_i.ItemInfo[item]
+                d = np.zeros(iteminfo.ElementCount)
+                d[:] = fill_value
+                d[d == deletevalue] = np.nan
+
+                # close and re-open file to solve problem with reading
+                dfs_i.Close()
+                dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+            d[np.isnan(d)] = deletevalue
+            darray = d.astype(np.float32)
+
+            dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
+
+    dfs_i.Close()
     dfs.Close()
 
 
