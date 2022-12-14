@@ -1041,6 +1041,14 @@ def test_daarray_aggregation():
     assert pytest.approx(da_ptp.values[0]) == 0.0529321208596229
 
 
+def test_daarray_aggregation_no_time():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds = mikeio.read(filename, items=[3], time=-1)
+    da = ds["Current speed"]
+    assert da.dims == ("element",) 
+
+    assert da.max().values == pytest.approax(1.6463733)
+
 def test_daarray_aggregation_nan_versions():
 
     # TODO find better file, e.g. with flood/dry
