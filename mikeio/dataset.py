@@ -1363,7 +1363,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
         func: function, optional
             default np.nanmean
 
@@ -1420,7 +1420,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1450,7 +1450,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Examples
         --------
@@ -1512,7 +1512,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1531,7 +1531,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1550,7 +1550,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1570,7 +1570,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1588,7 +1588,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1603,7 +1603,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1637,7 +1637,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         See Also
         --------
@@ -1656,7 +1656,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1671,7 +1671,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1686,7 +1686,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
