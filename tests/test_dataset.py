@@ -776,7 +776,7 @@ def test_aggregation_dataset_no_time():
     ds = dfs.read(time=-1, items=["Surface elevation", "Current speed"])
     
     ds2 = ds.max()
-    assert ds2["Current speed"].values == pytest.approax(1.6463733)
+    assert ds2["Current speed"].values == pytest.approx(1.6463733)
 
 
 def test_aggregations():

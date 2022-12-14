@@ -1047,7 +1047,7 @@ def test_daarray_aggregation_no_time():
     da = ds["Current speed"]
     assert da.dims == ("element",) 
 
-    assert da.max().values == pytest.approax(1.6463733)
+    assert da.max().values == pytest.approx(1.6463733)
 
 def test_daarray_aggregation_nan_versions():
 
