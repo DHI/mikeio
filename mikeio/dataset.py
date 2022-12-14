@@ -1357,13 +1357,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     # ============ aggregate =============
 
-    def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "Dataset":
+    def aggregate(self, axis=0, func=np.nanmean, **kwargs) -> "Dataset":
         """Aggregate along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
         func: function, optional
             default np.nanmean
 
@@ -1409,7 +1409,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         )
         return ItemInfo(name, it_type, it_unit)
 
-    def quantile(self, q, *, axis="time", **kwargs) -> "Dataset":
+    def quantile(self, q, *, axis=0, **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1420,7 +1420,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1439,7 +1439,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis="time", **kwargs) -> "Dataset":
+    def nanquantile(self, q, *, axis=0, **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1450,7 +1450,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Examples
         --------
@@ -1506,13 +1506,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
             return Dataset(data=res, validate=False)
 
-    def max(self, axis="time", **kwargs) -> "Dataset":
+    def max(self, axis=0, **kwargs) -> "Dataset":
         """Max value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1525,13 +1525,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis="time", **kwargs) -> "Dataset":
+    def min(self, axis=0, **kwargs) -> "Dataset":
         """Min value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1544,13 +1544,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis="time", **kwargs) -> "Dataset":
+    def mean(self, axis=0, **kwargs) -> "Dataset":
         """Mean value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1564,13 +1564,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis="time", **kwargs) -> "Dataset":
+    def std(self, axis=0, **kwargs) -> "Dataset":
         """Standard deviation along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1583,12 +1583,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis="time", **kwargs) -> "Dataset":
+    def ptp(self, axis=0, **kwargs) -> "Dataset":
         """Range (max - min) a.k.a Peak to Peak along an axis
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1597,13 +1597,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis="time", **kwargs) -> "Dataset":
+    def average(self, weights, axis=0, **kwargs) -> "Dataset":
         """Compute the weighted average along the specified axis.
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1631,13 +1631,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis="time", **kwargs) -> "Dataset":
+    def nanmax(self, axis=0, **kwargs) -> "Dataset":
         """Max value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         See Also
         --------
@@ -1650,13 +1650,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis="time", **kwargs) -> "Dataset":
+    def nanmin(self, axis=0, **kwargs) -> "Dataset":
         """Min value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1665,13 +1665,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis="time", **kwargs) -> "Dataset":
+    def nanmean(self, axis=0, **kwargs) -> "Dataset":
         """Mean value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1680,13 +1680,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis="time", **kwargs) -> "Dataset":
+    def nanstd(self, axis=0, **kwargs) -> "Dataset":
         """Standard deviation along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
