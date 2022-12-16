@@ -562,6 +562,50 @@ def test_statistics_dfsu_3d(tmpdir):
     assert np.allclose(dsa2.Mean_Temperature.values, dsa.Mean_Temperature.values)
 
 
+def test_aggregate(tmpdir):
+
+    infilename = "tests/testdata/NorthSea_HD_and_windspeed.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "NorthSea_HD_and_windspeed_stats.dfsu")
+    generic.aggregate(infilename, outfilename, func=[np.mean, np.min, np.max])
+
+    dso = mikeio.read(infilename)
+    dsa = mikeio.read(outfilename)
+
+    assert dso.time[0] == dsa.time[0]
+    assert dso.shape[1] == dsa.shape[1]
+    assert dsa.shape[0] == 1
+    assert np.allclose(dso[0].mean().values, dsa[0].values)
+    assert np.allclose(dso[0].min().values, dsa[1].values)
+    assert np.allclose(dso[0].max().values, dsa[2].values)
+    
+    # select items
+    generic.aggregate(infilename, outfilename, func=np.mean, name="Mean", items=0)
+    dsa2 = mikeio.read(outfilename)
+    assert np.allclose(dsa2[0].values, dsa[0].values)
+    assert dsa2.items[0].name == "Mean, Surface elevation"
+    assert dsa2.n_items == 1
+
+
+def test_aggregate_dfsu_3d(tmpdir):
+    infilename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = os.path.join(tmpdir, "oresund_sigma_z_stats.dfsu")
+    generic.aggregate(infilename, outfilename, func=[np.mean, np.min, np.max])
+
+    dso = mikeio.read(infilename)
+    dsa = mikeio.read(outfilename)
+
+    assert dsa.n_timesteps == 1
+    assert dso.start_time == dsa.start_time
+    assert dso.n_items*3 == dsa.n_items
+    assert np.allclose(dso.Temperature.min().values, dsa.amin_Temperature.values)
+
+    # select items
+    generic.aggregate(infilename, outfilename, func=np.mean, name="mymean", items=0)
+    dsa2 = mikeio.read(outfilename)    
+    assert dsa2.items[0].name == "mymean, Temperature"
+    assert np.allclose(dsa2.mymean_Temperature.values, dsa.mean_Temperature.values)
+
+
 def test_quantile_dfsu(tmpdir):
 
     infilename = "tests/testdata/oresundHD_run1.dfsu"
