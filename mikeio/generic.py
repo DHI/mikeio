@@ -519,7 +519,7 @@ def extract(
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(str(infilename))
 
-    is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
+    is_layered_dfsu = _is_layered_dfsu(dfs_i.ItemInfo[0])
 
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i, start, end
@@ -570,6 +570,12 @@ def extract(
     dfs_i.Close()
     dfs_o.Close()
 
+
+def _is_layered_dfsu(iteminfo0):
+    if (iteminfo0.Name == "Z coordinate") and (EUMType(iteminfo0.Quantity.Item) == EUMType.ItemGeometry3D):
+        return True
+    else:
+        return False
 
 def _parse_start_end(dfs_i, start, end):
     """Helper function for parsing start and end arguments"""
@@ -721,6 +727,84 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
         ) / steps_list[item][has_value].astype(np.float32)
         darray[~has_value] = deletevalue
         dfs_o.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_o.Close()
+
+
+def statistics(infilename: str, outfilename: str, items=None):
+    """Calculate time statistics: mean, min, and max
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+    items: List[str] or List[int], optional
+        Process only selected items, by number (0-based) 
+        or name, by default: all    
+    """
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+    is_layered_dfsu = _is_layered_dfsu(dfs_i.ItemInfo[0])
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu)
+    if is_layered_dfsu:
+        item_numbers = [it + 1 for it in item_numbers]
+    
+    n_items_in = len(item_numbers)
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+    
+    functxt = ["Mean", "Minimum", "Maximum"]
+    core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
+    items = _get_repeated_items(core_items, prefixes=functxt)
+    
+    if is_layered_dfsu:
+        items.insert(0, dfs_i.ItemInfo[0])
+
+    dfs_o = _clone(infilename, outfilename, items=items)
+
+    sumlist = []
+    minlist = []
+    maxlist = []
+    steplist = []
+
+    # step 0
+    for item in item_numbers:
+        d = _read_item(dfs_i, item, 0)
+        sumlist.append(d)
+        minlist.append(d.copy())
+        maxlist.append(d.copy())
+        
+        step0 = np.zeros_like(d, dtype=np.int32)
+        step0[~np.isnan(d)] = 1
+        steplist.append(step0)        
+
+    for timestep in trange(1, n_time_steps, disable=not show_progress):
+        for item in range(n_items_in):
+            d = _read_item(dfs_i, item_numbers[item], timestep)
+            
+            smaller = d < minlist[item]
+            minlist[item][smaller] = d[smaller]
+            larger = d > maxlist[item]
+            maxlist[item][larger] = d[larger]
+
+            sumlist[item][~np.isnan(d)] += d[~np.isnan(d)]
+            steplist[item][~np.isnan(d)] += 1 
+
+    if is_layered_dfsu:
+        znitemdata = dfs_i.ReadItemTimeStep(1, 0)
+        # TODO should this be static Z coordinates instead?
+        dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
+
+    for item in range(n_items_in):
+        n = steplist[item]
+        mean = sumlist[item]
+        mean[n>0] = mean[n>0]/n[n>0]
+        dfs_o.WriteItemTimeStepNext(0.0, mean.astype(np.float32))
+        dfs_o.WriteItemTimeStepNext(0.0, minlist[item].astype(np.float32))
+        dfs_o.WriteItemTimeStepNext(0.0, maxlist[item].astype(np.float32))
 
     dfs_o.Close()
 
