@@ -1,5 +1,5 @@
 import os
-from typing import Iterable, List, Union
+from typing import Iterable, List, Union, Callable
 import math
 import numpy as np
 import pandas as pd
@@ -809,6 +809,109 @@ def statistics(infilename: str, outfilename: str, items=None):
     dfs_o.Close()
 
 
+def aggregate(
+    infilename: str, outfilename: str, func: Callable, name: str=None, *, items=None, buffer_size=1.0e9, **kwargs
+) -> None:
+    """Create temporal aggregation of items in dfs file
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+    func : function
+        Aggregation function, e.g. np.nanmean 
+    name : str, optional
+        function name
+    items : List[str] or List[int], optional
+        Process only selected items, by number (0-based) or name, by default: all
+    buffer_size: float, optional
+        for huge files the quantiles need to be calculated for chunks of
+        elements. buffer_size gives the maximum amount of memory available
+        for the computation in bytes, by default 1e9 (=1GB)
+
+    Examples
+    --------
+    >>> aggregate("in.dfsu", "time_min_max.dfsu", [np.argmin, np.argmax])
+    """
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+    is_layered_dfsu = _is_layered_dfsu(dfs_i.ItemInfo[0])
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu)
+    if is_layered_dfsu:
+        item_numbers = [it + 1 for it in item_numbers]
+
+    n_items_in = len(item_numbers)
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
+
+    fvec = [func] if callable(func) else func
+    if name is None:
+        ftxt = [getattr(f, '__name__', 'Aggregate') for f in fvec] 
+    else:
+        ftxt = [name]  # TODO check if list... etc
+    core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
+    items = _get_repeated_items(core_items, prefixes=ftxt)
+
+    if is_layered_dfsu:
+        items.insert(0, dfs_i.ItemInfo[0])
+
+    dfs_o = _clone(infilename, outfilename, items=items)
+
+    n_items_out = len(items)
+    if is_layered_dfsu:
+        n_items_out = n_items_out - 1
+
+    datalist = []
+    outdatalist = []
+
+    for item in item_numbers:
+        indata = _read_item(dfs_i, item, 0)
+        for _ in fvec:
+            outdatalist.append(np.zeros_like(indata))
+        datalist.append(np.zeros((n_time_steps, ci.chunk_size)))
+
+    e1 = 0
+    for _ in range(ci.n_chunks):
+        e2 = ci.stop(e1)
+        # the last chunk may be smaller than the rest:
+        chunk_end = ci.chunk_end(e1)
+
+        # read all data for this chunk
+        for timestep in range(n_time_steps):
+            item_out = 0
+            for item_no in item_numbers:
+                itemdata = _read_item(dfs_i, item_no, timestep)
+                data_chunk = itemdata[e1:e2]
+                datalist[item_out][timestep, 0:chunk_end] = data_chunk
+                item_out += 1
+
+        # calculate aggregates (for this chunk)
+        item_out = 0
+        for item in range(n_items_in):
+            for f in fvec:
+                data = f(datalist[item][:, 0:chunk_end], axis=0, keepdims=False, **kwargs)
+                outdatalist[item_out][e1:e2] = data
+                item_out += 1
+
+        e1 = e2
+
+    if is_layered_dfsu:
+        znitemdata = dfs_i.ReadItemTimeStep(1, 0)
+        # TODO should this be static Z coordinates instead?
+        dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
+
+    for item in range(n_items_out):
+        darray = outdatalist[item].astype(np.float32)
+        dfs_o.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_o.Close()
+
+
 def quantile(
     infilename: str, outfilename: str, q, *, items=None, skipna=True, buffer_size=1.0e9
 ):
@@ -844,12 +947,11 @@ def quantile(
 
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
-    is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
+    is_layered_dfsu = _is_layered_dfsu(dfs_i.ItemInfo[0])    
 
-    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
-
-    if is_dfsu_3d and 0 in item_numbers:
-        item_numbers.remove(0)  # Remove Zn item for special treatment
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu)
+    if is_layered_dfsu:
+        item_numbers = [it + 1 for it in item_numbers]
 
     n_items_in = len(item_numbers)
 
@@ -864,13 +966,13 @@ def quantile(
     core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
     items = _get_repeated_items(core_items, prefixes=qtxt)
 
-    if is_dfsu_3d:
+    if is_layered_dfsu:
         items.insert(0, dfs_i.ItemInfo[0])
 
     dfs_o = _clone(infilename, outfilename, items=items)
 
     n_items_out = len(items)
-    if is_dfsu_3d:
+    if is_layered_dfsu:
         n_items_out = n_items_out - 1
 
     datalist = []
@@ -908,7 +1010,7 @@ def quantile(
 
         e1 = e2
 
-    if is_dfsu_3d:
+    if is_layered_dfsu:
         znitemdata = dfs_i.ReadItemTimeStep(1, 0)
         # TODO should this be static Z coordinates instead?
         dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
