@@ -159,7 +159,7 @@ The <a class="reference internal" href="dfs-overview.html#mikeio.read" title="mi
 <li><p><strong>item</strong> - an  <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">mikeio.eum.ItemInfo</span></code></a> with name, type and unit</p></li>
 <li><p><strong>time</strong> - a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v1.5.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a> with the time instances of the data</p></li>
 <li><p><strong>geometry</strong> - a Geometry object with the spatial description of the data</p></li>
-<li><p><strong>values</strong> - a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></p></li>
+<li><p><strong>values</strong> - a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></p></li>
 </ul>
 <p>Use DataArray’s string representation to get an overview of the DataArray</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
@@ -1147,7 +1147,7 @@ to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.DataArray.to_numpy">
-<span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.to_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.to_numpy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.to_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.to_numpy" title="Permalink to this definition"></a></dt>
 <dd><p>Values as a np.ndarray (equivalent to values)</p>
 </dd></dl>
 
@@ -1171,7 +1171,7 @@ to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)</p></li>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.DataArray.values">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.23)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#mikeio.DataArray.values" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">values</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a></em><a class="headerlink" href="#mikeio.DataArray.values" title="Permalink to this definition"></a></dt>
 <dd><p>Values as a np.ndarray (equivalent to to_numpy())</p>
 </dd></dl>
 
