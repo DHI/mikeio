@@ -588,6 +588,9 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
+    def __contains__(self, pt) -> bool:
+        return self.contains(pt)
+
     def find_index(self, x: float = None, y: float = None, coords=None, area=None):
         """Find nearest index (i,j) of point(s)
 

@@ -897,6 +897,9 @@ class GeometryFM(_Geometry):
 
         return cnts
 
+    def __contains__(self, pt) -> bool:
+        return self.contains(pt)
+
     def _get_boundary_polylines_uncategorized(self):
         """Construct closed polylines for all boundary faces"""
         boundary_faces = self._get_boundary_faces()

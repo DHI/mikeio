@@ -307,6 +307,21 @@ def test_contains():
     assert inside[0] == True
     assert inside[1] == False
 
+def test_point_in_domain():
+    filename = "tests/testdata/wind_north_sea.dfsu"
+    dfs = mikeio.open(filename)
+
+    pt = [4, 54]
+    assert pt in dfs.geometry
+
+    pt2 = [0, 50]
+    assert pt2 not in dfs.geometry
+
+    pts = [pt, pt2]
+    inside = [pt in dfs.geometry for pt in pts]
+    assert inside[0] == True
+    assert inside[1] == False
+
 
 def test_get_overset_grid():
     filename = "tests/testdata/FakeLake.dfsu"
