@@ -984,6 +984,9 @@
 
         <span class="k">return</span> <span class="n">cnts</span></div>
 
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_get_boundary_polylines_uncategorized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct closed polylines for all boundary faces&quot;&quot;&quot;</span>
         <span class="n">boundary_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_boundary_faces</span><span class="p">()</span>
