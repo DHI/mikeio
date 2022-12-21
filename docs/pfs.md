@@ -37,7 +37,9 @@ A PFS file is read using `mikeio.read_pfs()`:
 >>> pfs = mikeio.read_pfs("concat.mzt")
 ```
 
-The targets can be accessed by their name (as properties), like this:  
+### PfsDocument
+
+The `PfsDocument` is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:  
 
 ```python
 >>> pfs.txconc
@@ -49,10 +51,12 @@ CREATEDTIME: '2020-03-11T15:24:45'
 
 Or by the `pfs.targets` object (which is a list of PfsSections). Each of the targets is a `PfsSection` object consisting of key-value pairs (keyword-parameter) and other PfsSections. 
 
+The `PfsDocument` object is similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
+
 
 ### PfsSection
 
-The PfsSection object is similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
+The `PfsSection` object is also similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
 
 ```python
 >>> pfs.txconc.keys()
