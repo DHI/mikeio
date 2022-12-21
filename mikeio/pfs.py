@@ -398,12 +398,18 @@ class _PfsBase(SimpleNamespace, MutableMapping):
         Parameters
         ----------
         prefix : str, optional
-            The prefix of the enumerated sections, e.g. "File_", by default None
+            The prefix of the enumerated sections, e.g. "File_",
+            by default None (will try to "guess" the prefix)
 
         Returns
         -------
         pd.DataFrame
             The enumerated subsections as a DataFrame
+
+        Examples
+        --------
+        >>> pfs = mikeio.read_pfs("lake.sw")
+        >>> df = pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
         """
         if prefix is not None:
             sections = [
