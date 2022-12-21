@@ -464,10 +464,6 @@ class PfsSection(_PfsBase):
         else:
             return PfsDocument({name: self})
 
-    def to_file(self, filename, name: str = None) -> None:
-        """Write to a Pfs file (providing a target name)"""
-        self.to_PfsDocument(name=name).write(filename)
-
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame, prefix: str) -> "PfsSection":
         """Create a PfsSection from a DataFrame"""
