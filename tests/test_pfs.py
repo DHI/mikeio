@@ -50,6 +50,17 @@ def test_pfs_repr(d1):
     assert "SMILE = |file" in txt
 
 
+def test_create_pfsdocument_from_dict(d1):
+    sct = mikeio.PfsDocument({"root": d1})
+    assert sct.root.key1 == 1
+
+    with pytest.raises(AssertionError, match="all targets must be PfsSections"):
+        mikeio.PfsDocument(d1)
+
+    sct = mikeio.PfsDocument(d1, names="root")
+    assert sct.root.key1 == 1
+
+
 def test_pfssection_keys_values_items(d1):
     sct = mikeio.PfsSection(d1)
     vals = list(sct.values())
