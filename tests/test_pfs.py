@@ -34,18 +34,21 @@ def test_pfssection(d1):
     assert len(sct.lst) == 2
     assert sct.dt == datetime(1979, 2, 3, 3, 5, 0)
 
+
 def test_pfssection_repr(d1):
     sct = mikeio.PfsSection(d1)
     txt = repr(sct)
-    assert len(txt)>1
+    assert len(txt) > 1
     assert "dt = 1979, 2, 3, 3, 5, 0" in txt
     assert "EndSect" in txt
+
 
 def test_pfs_repr(d1):
     pfs = mikeio.Pfs(d1, names="ROOT")
     txt = repr(pfs)
-    assert len(txt)>1
+    assert len(txt) > 1
     assert "SMILE = |file" in txt
+
 
 def test_pfssection_keys_values_items(d1):
     sct = mikeio.PfsSection(d1)
@@ -727,6 +730,7 @@ EndSect // ENGINE
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 2
 
+
 def test_pfs_repr_contains_name_of_target():
     text = """
 [ENGINE]
@@ -739,6 +743,7 @@ EndSect // ENGINE
 
     # TODO should we be more specific i.e. [ENGINE] ?
     assert "ENGINE" in text
+
 
 def test_double_single_quotes_in_string(tmpdir):
     text = """
@@ -1033,7 +1038,6 @@ def test_read_write_grid_editor_color_palette(tmpdir):
     assert n_rgb_out == 16
 
 
-
 @pytest.fixture
 def pfs_ABC_text() -> str:
     text = """
@@ -1053,7 +1057,6 @@ def pfs_ABC_text() -> str:
 """
     return text
 
-    
 
 def test_search_keyword(pfs_ABC_text):
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
@@ -1061,7 +1064,7 @@ def test_search_keyword(pfs_ABC_text):
 
     r0 = pfs.search(key="not_there")
     assert r0 is None
-    
+
     r1 = pfs.search(key="float")
     assert r1.ROOT.A1.B.float_1 == 4.5
     assert "A2" not in r1.ROOT
@@ -1073,48 +1076,49 @@ def test_search_keyword(pfs_ABC_text):
     r3 = pfs.ROOT.search("float")
     assert r2 == r3
 
+
 def test_search_keyword_found_in_multiple_places():
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
     subset = pfs.search("charnock")
     # the string "Charnock" occurs 6 times in this file
-    len(subset.SW.WIND.keys()) ==2 
+    len(subset.SW.WIND.keys()) == 2
     len(subset.SW.OUTPUTS) == 4
-    
 
-    
 
 def test_search_param(pfs_ABC_text):
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
-    
+
     r0 = pfs.search(param="not_there")
     assert r0 is None
-    
-    r1 = pfs.search(param=0) 
+
+    r1 = pfs.search(param=0)
     assert len(r1.ROOT) == 2
     assert r1.ROOT.A1.int_1 == 0
     assert r1.ROOT.A2.int_2 == 0
-    
+
     r2 = pfs.ROOT.search(param=0)
     assert r2 == r1.ROOT
 
-    r3 = pfs.ROOT.search(param='0')
+    r3 = pfs.ROOT.search(param="0")
     assert len(r3) == 1
-    assert r3.str_1 == '0'
+    assert r3.str_1 == "0"
+
 
 def test_search_section(pfs_ABC_text):
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
-    
+
     r0 = pfs.search(section="not_there")
     assert r0 is None
-    
-    r1 = pfs.search(section='A') 
+
+    r1 = pfs.search(section="A")
     assert len(r1.ROOT) == 2
     assert r1.ROOT.A1 == pfs.ROOT.A1
     assert r1.ROOT.A2 == pfs.ROOT.A2
-    
-    r2 = pfs.ROOT.search(section='A')
+
+    r2 = pfs.ROOT.search(section="A")
     assert r2 == r1.ROOT
-   
+
+
 def test_search_keyword_or_param(pfs_ABC_text):
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
     # assert pfs.ROOT.A1.B.float_1 == 4.5
@@ -1133,7 +1137,7 @@ def test_search_keyword_or_param(pfs_ABC_text):
 
 
 def test_search_and_modify(pfs_ABC_text):
-    # does the original remain un-changed? 
+    # does the original remain un-changed?
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
     assert pfs.ROOT.A1.B.float_1 == 4.5
 
