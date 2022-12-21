@@ -398,7 +398,7 @@ class _PfsBase(SimpleNamespace, MutableMapping):
         Parameters
         ----------
         prefix : str, optional
-            The prefix of the enumerated sections, e.g. "File_",
+            The prefix of the enumerated sections, e.g. "File\_",
             which can be supplied if it fails without this argument,
             by default None (will try to "guess" the prefix)
 
