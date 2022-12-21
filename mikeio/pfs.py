@@ -652,7 +652,6 @@ class PfsDocument(_PfsBase):
     def _parse_non_file_input(input, names=None):
         """dict/PfsSection or lists of these can be parsed"""
         if names is None:
-            # raise ValueError("'names' must be provided if input is not a file")
             assert isinstance(input, Mapping), "input must be a mapping"
             names, sections = PfsDocument._unravel_items(input.items)
             for sec in sections:
@@ -660,11 +659,11 @@ class PfsDocument(_PfsBase):
                     sec, Mapping
                 ), "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
             return names, sections
-        else:
-            warnings.warn(
-                "Creating a PfsDocument with names argument is deprecated, provide instead the names as keys in a dictionary",
-                FutureWarning,
-            )
+        # else:
+        #     warnings.warn(
+        #         "Creating a PfsDocument with names argument is deprecated, provide instead the names as keys in a dictionary",
+        #         FutureWarning,
+        #     )
 
         if isinstance(names, str):
             names = [names]
@@ -707,11 +706,13 @@ class PfsDocument(_PfsBase):
 
     def _add_FM_alias(self, alias: str, module: str) -> None:
         """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
-        if hasattr(self.data, module) and hasattr(self.data, "MODULE_SELECTION"):
+        if hasattr(self.targets[0], module) and hasattr(
+            self.targets[0], "MODULE_SELECTION"
+        ):
             mode_name = f"mode_of_{module.lower()}"
-            mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
+            mode_of = int(self.targets[0].MODULE_SELECTION.get(mode_name, 0))
             if mode_of > 0:
-                setattr(self, alias, self.data[module])
+                setattr(self, alias, self.targets[0][module])
                 self._ALIAS_LIST.append(alias)
 
     def _pfs2yaml(self, filename, encoding=None) -> str:
