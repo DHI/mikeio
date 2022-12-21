@@ -395,7 +395,7 @@ def test_hd_outputs():
 def test_included_outputs():
 
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
-    df = pfs.SW.OUTPUTS.to_dataframe()
+    df = pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
     df = df[df.include == 1]
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
