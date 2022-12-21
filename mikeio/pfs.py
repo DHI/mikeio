@@ -1,6 +1,16 @@
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, List, Sequence, Tuple, Sequence, Mapping, Union, Callable
+from typing import (
+    Any,
+    List,
+    MutableMapping,
+    Sequence,
+    Tuple,
+    Sequence,
+    Mapping,
+    Union,
+    Callable,
+)
 from collections import Counter
 from datetime import datetime
 import re
@@ -37,15 +47,6 @@ class PfsNonUniqueList(list):
     pass
 
 
-def _merge_PfsSections(sections: Sequence[Mapping]):
-    """Merge a list of PfsSections/dict"""
-    assert len(sections) > 0
-    a = sections[0]
-    for b in sections[1:]:
-        a = _merge_dict(a, b)
-    return PfsSection(a)
-
-
 def _merge_dict(a: Mapping, b: Mapping, path: Sequence = None):
     """merges dict b into dict a; handling non-unique keys"""
     if path is None:
@@ -64,7 +65,7 @@ def _merge_dict(a: Mapping, b: Mapping, path: Sequence = None):
     return a
 
 
-class PfsSection(SimpleNamespace):
+class _PfsBase(SimpleNamespace, MutableMapping):
     def __init__(self, dictionary, **kwargs):
         super().__init__(**kwargs)
         for key, value in dictionary.items():
@@ -175,7 +176,7 @@ class PfsSection(SimpleNamespace):
     def update_recursive(self, key, value):
         """Update recursively all matches of key with value"""
         for k, v in self.items():
-            if isinstance(v, PfsSection):
+            if isinstance(v, _PfsBase):
                 self[k].update_recursive(key, value)
             elif k == key:
                 self[k] = value
@@ -231,7 +232,7 @@ class PfsSection(SimpleNamespace):
             keypat=key, parampat=param, secpat=section, case=case
         ):
             results.append(item)
-        return _merge_PfsSections(results) if len(results) > 0 else None
+        return self.__class__._merge_PfsSections(results) if len(results) > 0 else None
 
     def _find_patterns_generator(
         self, keypat=None, parampat=None, secpat=None, keylist=[], case=False
@@ -240,7 +241,7 @@ class PfsSection(SimpleNamespace):
         for k, v in self.items():
             kk = str(k) if case else str(k).lower()
 
-            if isinstance(v, PfsSection):
+            if isinstance(v, _PfsBase):
                 if secpat and secpat in kk:
                     yield from self._yield_deep_dict(keylist + [k], v)
                 else:
@@ -276,17 +277,17 @@ class PfsSection(SimpleNamespace):
     def find_replace(self, old_value, new_value):
         """Update recursively all old_value with new_value"""
         for k, v in self.items():
-            if isinstance(v, PfsSection):
+            if isinstance(v, _PfsBase):
                 self[k].find_replace(old_value, new_value)
             elif self[k] == old_value:
                 self[k] = new_value
 
-    def copy(self):
+    def copy(self) -> "_PfsBase":
         """Return a copy of the PfsSection."""
         # is all this necessary???
         d = self.__dict__.copy()
         for key, value in d.items():
-            if isinstance(value, PfsSection):
+            if isinstance(value, _PfsBase):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
@@ -316,18 +317,16 @@ class PfsSection(SimpleNamespace):
                 func(f"{lvl_prefix * level}[{k}]{newline}")
                 func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
 
-            elif isinstance(v, List) and any(
-                isinstance(subv, PfsSection) for subv in v
-            ):
+            elif isinstance(v, List) and any(isinstance(subv, _PfsBase) for subv in v):
                 # duplicate sections
                 for subv in v:
-                    if isinstance(subv, PfsSection):
+                    if isinstance(subv, _PfsBase):
                         subsec = PfsSection({k: subv})
                         subsec._write_with_func(func, level=level, newline=newline)
                     else:
                         subv = self._prepare_value_for_write(subv)
                         func(f"{lvl_prefix * level}{k} = {subv}{newline}")
-            elif isinstance(v, PfsSection):
+            elif isinstance(v, _PfsBase):
                 func(f"{lvl_prefix * level}[{k}]{newline}")
                 v._write_with_func(func, level=(level + 1), newline=newline)
                 func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
@@ -385,32 +384,7 @@ class PfsSection(SimpleNamespace):
 
         return v
 
-    def to_Pfs(self, name: str = None) -> "PfsDocument":
-        """Convert to a PfsDocument in one of two ways:
-
-        1) All key:value pairs will be targets (require all values to be PfsSections)
-        2) Make this PfsSection the only target (requires a name)
-
-        Parameters
-        ----------
-        name : str, optional
-            Name of the target (=key that refer to this PfsSection)
-
-        Returns
-        -------
-        PfsDocument
-            A PfsDocument object
-        """
-        if name is None:
-            return PfsDocument(self)
-        else:
-            return PfsDocument({name: self})
-
-    def to_file(self, filename, name: str = None) -> None:
-        """Write to a Pfs file (providing a target name)"""
-        self.to_Pfs(name=name).write(filename)
-
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """Convert to (nested) dict (as a copy)"""
         d = self.__dict__.copy()
         for key, value in d.items():
@@ -457,6 +431,42 @@ class PfsSection(SimpleNamespace):
             k = f"{prefix}{j+1}"
             res.append(self[k].to_dict())
         return pd.DataFrame(res, index=range(1, n_sections + 1))
+
+    @classmethod
+    def _merge_PfsSections(cls, sections: Sequence[Mapping]) -> "_PfsBase":
+        """Merge a list of PfsSections/dict"""
+        assert len(sections) > 0
+        a = sections[0]
+        for b in sections[1:]:
+            a = _merge_dict(a, b)
+        return cls(a)
+
+
+class PfsSection(_PfsBase):
+    def to_PfsDocument(self, name: str = None) -> "PfsDocument":
+        """Convert to a PfsDocument in one of two ways:
+
+        1) All key:value pairs will be targets (require all values to be PfsSections)
+        2) Make this PfsSection the only target (requires a name)
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the target (=key that refer to this PfsSection)
+
+        Returns
+        -------
+        PfsDocument
+            A PfsDocument object
+        """
+        if name is None:
+            return PfsDocument(self)
+        else:
+            return PfsDocument({name: self})
+
+    def to_file(self, filename, name: str = None) -> None:
+        """Write to a Pfs file (providing a target name)"""
+        self.to_PfsDocument(name=name).write(filename)
 
     @classmethod
     def from_dataframe(cls, df: pd.DataFrame, prefix: str) -> "PfsSection":
@@ -520,7 +530,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     return yaml.load(src, PreserveDuplicatesLoader)
 
 
-class PfsDocument(PfsSection):
+class PfsDocument(_PfsBase):
     """Create a PfsDocument object for reading, writing and manipulating pfs files
 
     Parameters
@@ -647,7 +657,7 @@ class PfsDocument(PfsSection):
             names, sections = PfsDocument._unravel_items(input.items)
             for sec in sections:
                 assert isinstance(
-                    sec, dict
+                    sec, Mapping
                 ), "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
             return names, sections
         else:
@@ -659,12 +669,12 @@ class PfsDocument(PfsSection):
         if isinstance(names, str):
             names = [names]
 
-        if isinstance(input, PfsSection):
+        if isinstance(input, _PfsBase):
             sections = [input]
         elif isinstance(input, dict):
             sections = [PfsSection(input)]
         elif isinstance(input, (List, Tuple)):
-            if isinstance(input[0], PfsSection):
+            if isinstance(input[0], _PfsBase):
                 sections = input
             elif isinstance(input[0], dict):
                 sections = [PfsSection(d) for d in input]
@@ -697,7 +707,7 @@ class PfsDocument(PfsSection):
 
     def _add_FM_alias(self, alias: str, module: str) -> None:
         """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
-        if hasattr(self.data, module):
+        if hasattr(self.data, module) and hasattr(self.data, "MODULE_SELECTION"):
             mode_name = f"mode_of_{module.lower()}"
             mode_of = int(self.data.MODULE_SELECTION.get(mode_name, 0))
             if mode_of > 0:
