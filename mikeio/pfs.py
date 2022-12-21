@@ -180,10 +180,18 @@ class PfsSection(SimpleNamespace):
             elif k == key:
                 self[k] = value
 
-    def search(self, text:str=None, *, key:str=None, section:str=None, param=None, case:bool=False):
-        """Find recursively all keys, sections or parameters 
+    def search(
+        self,
+        text: str = None,
+        *,
+        key: str = None,
+        section: str = None,
+        param=None,
+        case: bool = False,
+    ):
+        """Find recursively all keys, sections or parameters
            matching a pattern
-        
+
         NOTE: logical OR between multiple conditions
 
         Parameters
@@ -214,12 +222,20 @@ class PfsSection(SimpleNamespace):
             param = text
         key = key if (key is None or case) else key.lower()
         section = section if (section is None or case) else section.lower()
-        param = param if (param is None or not isinstance(param, str) or case) else param.lower()
-        for item in self._find_patterns_generator(keypat=key, parampat=param, secpat=section, case=case):
+        param = (
+            param
+            if (param is None or not isinstance(param, str) or case)
+            else param.lower()
+        )
+        for item in self._find_patterns_generator(
+            keypat=key, parampat=param, secpat=section, case=case
+        ):
             results.append(item)
         return _merge_PfsSections(results) if len(results) > 0 else None
-    
-    def _find_patterns_generator(self, keypat=None, parampat=None, secpat=None, keylist=[], case=False):
+
+    def _find_patterns_generator(
+        self, keypat=None, parampat=None, secpat=None, keylist=[], case=False
+    ):
         """Look for patterns in either keys, params or sections"""
         for k, v in self.items():
             kk = str(k) if case else str(k).lower()
@@ -228,13 +244,15 @@ class PfsSection(SimpleNamespace):
                 if secpat and secpat in kk:
                     yield from self._yield_deep_dict(keylist + [k], v)
                 else:
-                    yield from v._find_patterns_generator(keypat, parampat, secpat, keylist=keylist + [k], case=case)
+                    yield from v._find_patterns_generator(
+                        keypat, parampat, secpat, keylist=keylist + [k], case=case
+                    )
             else:
                 if keypat and keypat in kk:
-                    yield from self._yield_deep_dict(keylist + [k], v)   
+                    yield from self._yield_deep_dict(keylist + [k], v)
                 if self._param_match(parampat, v, case):
-                    yield from self._yield_deep_dict(keylist + [k], v)                    
-    
+                    yield from self._yield_deep_dict(keylist + [k], v)
+
     @staticmethod
     def _yield_deep_dict(keys, val):
         """yield a deep nested dict with keys with a single deep value val"""
@@ -242,7 +260,7 @@ class PfsSection(SimpleNamespace):
             d = {keys[j]: val}
             val = d
         yield d
-                
+
     @staticmethod
     def _param_match(parampat, v, case):
         if parampat is None:
@@ -253,7 +271,7 @@ class PfsSection(SimpleNamespace):
             vv = str(v) if case else str(v).lower()
             return parampat in vv
         else:
-            return parampat == v 
+            return parampat == v
 
     def find_replace(self, old_value, new_value):
         """Update recursively all old_value with new_value"""
@@ -279,7 +297,7 @@ class PfsSection(SimpleNamespace):
 
     def _write_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
         """Write pfs nested objects
-        
+
         Parameters
         ----------
         func : Callable
@@ -331,7 +349,7 @@ class PfsSection(SimpleNamespace):
 
         Parameters
         ----------
-        v : str 
+        v : str
             value from one pfs line
 
         Returns
@@ -367,7 +385,7 @@ class PfsSection(SimpleNamespace):
 
         return v
 
-    def to_Pfs(self, name: str=None) -> "PfsDocument":
+    def to_Pfs(self, name: str = None) -> "PfsDocument":
         """Convert to a PfsDocument in one of two ways:
 
         1) All key:value pairs will be targets (require all values to be PfsSections)
@@ -375,7 +393,7 @@ class PfsSection(SimpleNamespace):
 
         Parameters
         ----------
-        name : str, optional 
+        name : str, optional
             Name of the target (=key that refer to this PfsSection)
 
         Returns
@@ -383,11 +401,14 @@ class PfsSection(SimpleNamespace):
         PfsDocument
             A PfsDocument object
         """
-        return PfsDocument(self, names=[name])
+        if name is None:
+            return PfsDocument(self)
+        else:
+            return PfsDocument({name: self})
 
-    def to_file(self, filename, name: str) -> None:
+    def to_file(self, filename, name: str = None) -> None:
         """Write to a Pfs file (providing a target name)"""
-        PfsDocument(self, names=[name]).write(filename)
+        self.to_Pfs(name=name).write(filename)
 
     def to_dict(self):
         """Convert to (nested) dict (as a copy)"""
@@ -498,6 +519,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     )
     return yaml.load(src, PreserveDuplicatesLoader)
 
+
 class PfsDocument(PfsSection):
     """Create a PfsDocument object for reading, writing and manipulating pfs files
 
@@ -508,11 +530,6 @@ class PfsDocument(PfsSection):
         to be read or dictionary-like structure.
     encoding: str, optional
         How is the pfs file encoded? By default cp1252
-    names: List[str], optional
-        If the input is dictionary or PfsSection object the
-        name of the root element (=target) MUST be specified.
-        If the input is a file, the names are instead read from the file,
-        by default None.
     unique_keywords: bool, optional
         Should the keywords in a section be unique? Some tools e.g. the
         MIKE Plot Composer allows non-unique keywords.
@@ -522,7 +539,7 @@ class PfsDocument(PfsSection):
     """
 
     def __init__(self, input, encoding="cp1252", names=None, unique_keywords=False):
-        
+
         if isinstance(input, (str, Path)) or hasattr(input, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
@@ -625,12 +642,20 @@ class PfsDocument(PfsSection):
     def _parse_non_file_input(input, names=None):
         """dict/PfsSection or lists of these can be parsed"""
         if names is None:
-            #raise ValueError("'names' must be provided if input is not a file")
+            # raise ValueError("'names' must be provided if input is not a file")
             assert isinstance(input, Mapping), "input must be a mapping"
-            names, sections = PfsDocument._unravel(input.items)
-            assert all(isinstance(sections, dict)), "all targets must be PfsSections (no key-value pairs allowed in the root)"
+            names, sections = PfsDocument._unravel_items(input.items)
+            for sec in sections:
+                assert isinstance(
+                    sec, dict
+                ), "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
             return names, sections
-        
+        else:
+            warnings.warn(
+                "Creating a PfsDocument with names argument is deprecated, provide instead the names as keys in a dictionary",
+                FutureWarning,
+            )
+
         if isinstance(names, str):
             names = [names]
 
@@ -799,13 +824,13 @@ class PfsDocument(PfsSection):
         ----------
         filename: str, optional
             Full path and filename of pfs to be created.
-            If None, the content will be returned 
-            as a list of strings. 
+            If None, the content will be returned
+            as a list of strings.
         """
         from mikeio import __version__ as mikeio_version
 
         if filename is None:
-            return self._to_txt_lines()            
+            return self._to_txt_lines()
 
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -816,6 +841,7 @@ class PfsDocument(PfsSection):
             f.write("\n\n")
 
             self._write_with_func(f.write, level=0)
+
 
 class Pfs(PfsDocument):
     pass
