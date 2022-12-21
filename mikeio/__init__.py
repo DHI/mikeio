@@ -19,8 +19,8 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.2.5"
-__dfs_version__: int = 124
+__version__ = "1.2.6"
+__dfs_version__: int = 126
 
 
 if "64" not in architecture()[0]:
