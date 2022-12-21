@@ -32,7 +32,7 @@ from .dfs2 import Dfs2
 from .dfs3 import Dfs3
 from .dfsu_factory import Dfsu
 from .dfsu import Mesh
-from .pfs import read_pfs, Pfs, PfsSection
+from .pfs import read_pfs, Pfs, PfsSection, PfsDocument
 from .xyz import read_xyz
 from .dataset import Dataset, DataArray
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
