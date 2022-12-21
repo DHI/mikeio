@@ -224,7 +224,7 @@ def test_pfssection_find_replace(d1):
 
 def test_pfssection_write(d1, tmpdir):
     sct = mikeio.PfsSection(d1)
-    pfs = sct.to_Pfs(name="root")
+    pfs = sct.to_PfsDocument(name="root")
     fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
     pfs.write(fn)
 
@@ -1092,9 +1092,11 @@ def test_search_keyword_found_in_multiple_places():
     pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
     subset = pfs.search("charnock")
     # the string "Charnock" occurs 6 times in this file
-    len(subset.SW.WIND.keys()) == 2
-    len(subset.SW.OUTPUTS) == 4
-
+    
+    # NOTE: aliases not possible for search output 
+    SW = subset.FemEngineSW.SPECTRAL_WAVE_MODULE
+    assert len(SW.WIND.keys()) == 2
+    assert len(SW.OUTPUTS) == 4
 
 def test_search_param(pfs_ABC_text):
     pfs = mikeio.Pfs(StringIO(pfs_ABC_text))
