@@ -334,8 +334,9 @@ class PfsSection(SimpleNamespace):
         v : str 
             value from one pfs line
 
-        Returns:
-            v: modified value
+        Returns
+        -------
+            modified value
         """
         # some crude checks and corrections
         if isinstance(v, str):
