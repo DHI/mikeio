@@ -28,16 +28,18 @@ EndSect  // TARGET2
 
 ## Read
 
-When a PFS file is read with MIKE IO, a `Pfs` object is created. It will contain one or more `PfsSection` objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs. 
+When a PFS file is read with MIKE IO, a `PfsDocument` object is created. It will contain one or more `PfsSection` objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs. 
 
-A PFS file is read using `mikeio.read_pfs()` (or equivalently `mikeio.Pfs()`):
+A PFS file is read using `mikeio.read_pfs()`:
 
 ```python
 >>> import mikeio
 >>> pfs = mikeio.read_pfs("concat.mzt")
 ```
 
-The targets can be accessed by their name (as properties), like this:  
+### PfsDocument
+
+The `PfsDocument` is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:  
 
 ```python
 >>> pfs.txconc
@@ -47,12 +49,14 @@ CREATEDTIME: '2020-03-11T15:24:45'
 (...)
 ```
 
-Or by the `pfs.data` object (which will be a list of PfsSections if the PFS file contains multiple targets). Each of the targets is a `PfsSection` object consisting of key-value pairs (keyword-parameter) and other PfsSections. 
+Or by the `pfs.targets` object (which is a list of PfsSections). Each of the targets is a `PfsSection` object consisting of key-value pairs (keyword-parameter) and other PfsSections. 
+
+The `PfsDocument` object is similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
 
 
 ### PfsSection
 
-The PfsSection object is similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
+The `PfsSection` object is also similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
 
 ```python
 >>> pfs.txconc.keys()
@@ -172,7 +176,7 @@ A new PFS file can be created from dictionary in the following way:
         file_name=r"|path\file.dfs0|",
         start_time=datetime(2019, 7, 1, 0, 0, 0),        
     )
->>> pfs = mikeio.Pfs(d, names="MYTOOL")
+>>> pfs = mikeio.PfsDocument({"MYTOOL": d})
 >>> pfs.write("new.pfs")
 ```
 
@@ -181,11 +185,11 @@ Multiple targets can be achieved by providing list of dictionaries.
 
 
 
-## Pfs API
+## PfsDocument API
 
 ```{eval-rst}
 .. autofunction:: mikeio.read_pfs
-.. autoclass:: mikeio.Pfs
+.. autoclass:: mikeio.PfsDocument
 	:members:
 	:inherited-members:
 ```

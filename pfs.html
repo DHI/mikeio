@@ -61,6 +61,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Pfs</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#the-pfs-file">The PFS file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#read">Read</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pfsdocument">PfsDocument</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#pfssection">PfsSection</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#unique-or-non-unique-keywords">Unique or non-unique keywords</a></li>
 </ul>
@@ -74,15 +75,29 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#write-to-file">Write to file</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-new-pfs-files">Create new Pfs files</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pfs-api">Pfs API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pfsdocument-api">PfsDocument API</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mikeio.read_pfs"><code class="docutils literal notranslate"><span class="pre">read_pfs()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mikeio.Pfs"><code class="docutils literal notranslate"><span class="pre">Pfs</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Pfs.is_unique"><code class="docutils literal notranslate"><span class="pre">Pfs.is_unique</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Pfs.n_targets"><code class="docutils literal notranslate"><span class="pre">Pfs.n_targets</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Pfs.names"><code class="docutils literal notranslate"><span class="pre">Pfs.names</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Pfs.search"><code class="docutils literal notranslate"><span class="pre">Pfs.search()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Pfs.to_dict"><code class="docutils literal notranslate"><span class="pre">Pfs.to_dict()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Pfs.write"><code class="docutils literal notranslate"><span class="pre">Pfs.write()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.PfsDocument"><code class="docutils literal notranslate"><span class="pre">PfsDocument</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.clear"><code class="docutils literal notranslate"><span class="pre">PfsDocument.clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.copy"><code class="docutils literal notranslate"><span class="pre">PfsDocument.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.find_replace"><code class="docutils literal notranslate"><span class="pre">PfsDocument.find_replace()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.get"><code class="docutils literal notranslate"><span class="pre">PfsDocument.get()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.is_unique"><code class="docutils literal notranslate"><span class="pre">PfsDocument.is_unique</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.items"><code class="docutils literal notranslate"><span class="pre">PfsDocument.items()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.keys"><code class="docutils literal notranslate"><span class="pre">PfsDocument.keys()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.n_targets"><code class="docutils literal notranslate"><span class="pre">PfsDocument.n_targets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.names"><code class="docutils literal notranslate"><span class="pre">PfsDocument.names</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.pop"><code class="docutils literal notranslate"><span class="pre">PfsDocument.pop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.popitem"><code class="docutils literal notranslate"><span class="pre">PfsDocument.popitem()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.search"><code class="docutils literal notranslate"><span class="pre">PfsDocument.search()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.setdefault"><code class="docutils literal notranslate"><span class="pre">PfsDocument.setdefault()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.targets"><code class="docutils literal notranslate"><span class="pre">PfsDocument.targets</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.to_dataframe"><code class="docutils literal notranslate"><span class="pre">PfsDocument.to_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.to_dict"><code class="docutils literal notranslate"><span class="pre">PfsDocument.to_dict()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.update"><code class="docutils literal notranslate"><span class="pre">PfsDocument.update()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.update_recursive"><code class="docutils literal notranslate"><span class="pre">PfsDocument.update_recursive()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.values"><code class="docutils literal notranslate"><span class="pre">PfsDocument.values()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsDocument.write"><code class="docutils literal notranslate"><span class="pre">PfsDocument.write()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -97,11 +112,13 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.items"><code class="docutils literal notranslate"><span class="pre">PfsSection.items()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.keys"><code class="docutils literal notranslate"><span class="pre">PfsSection.keys()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.pop"><code class="docutils literal notranslate"><span class="pre">PfsSection.pop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.popitem"><code class="docutils literal notranslate"><span class="pre">PfsSection.popitem()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.search"><code class="docutils literal notranslate"><span class="pre">PfsSection.search()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.to_Pfs"><code class="docutils literal notranslate"><span class="pre">PfsSection.to_Pfs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.setdefault"><code class="docutils literal notranslate"><span class="pre">PfsSection.setdefault()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.to_PfsDocument"><code class="docutils literal notranslate"><span class="pre">PfsSection.to_PfsDocument()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.to_dataframe"><code class="docutils literal notranslate"><span class="pre">PfsSection.to_dataframe()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.to_dict"><code class="docutils literal notranslate"><span class="pre">PfsSection.to_dict()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.to_file"><code class="docutils literal notranslate"><span class="pre">PfsSection.to_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.update"><code class="docutils literal notranslate"><span class="pre">PfsSection.update()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.update_recursive"><code class="docutils literal notranslate"><span class="pre">PfsSection.update_recursive()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.PfsSection.values"><code class="docutils literal notranslate"><span class="pre">PfsSection.values()</span></code></a></li>
 </ul>
@@ -165,13 +182,15 @@
 </section>
 <section id="read">
 <h2>Read<a class="headerlink" href="#read" title="Permalink to this heading"></a></h2>
-<p>When a PFS file is read with MIKE IO, a <code class="docutils literal notranslate"><span class="pre">Pfs</span></code> object is created. It will contain one or more <code class="docutils literal notranslate"><span class="pre">PfsSection</span></code> objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs.</p>
-<p>A PFS file is read using <code class="docutils literal notranslate"><span class="pre">mikeio.read_pfs()</span></code> (or equivalently <code class="docutils literal notranslate"><span class="pre">mikeio.Pfs()</span></code>):</p>
+<p>When a PFS file is read with MIKE IO, a <code class="docutils literal notranslate"><span class="pre">PfsDocument</span></code> object is created. It will contain one or more <code class="docutils literal notranslate"><span class="pre">PfsSection</span></code> objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs.</p>
+<p>A PFS file is read using <code class="docutils literal notranslate"><span class="pre">mikeio.read_pfs()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read_pfs</span><span class="p">(</span><span class="s2">&quot;concat.mzt&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The targets can be accessed by their name (as properties), like this:</p>
+<section id="pfsdocument">
+<h3>PfsDocument<a class="headerlink" href="#pfsdocument" title="Permalink to this heading"></a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">PfsDocument</span></code> is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span><span class="o">.</span><span class="n">txconc</span>
 <span class="go">CLSID: TxConc.dll</span>
 <span class="go">TypeName: txconc</span>
@@ -179,10 +198,12 @@
 <span class="go">(...)</span>
 </pre></div>
 </div>
-<p>Or by the <code class="docutils literal notranslate"><span class="pre">pfs.data</span></code> object (which will be a list of PfsSections if the PFS file contains multiple targets). Each of the targets is a <code class="docutils literal notranslate"><span class="pre">PfsSection</span></code> object consisting of key-value pairs (keyword-parameter) and other PfsSections.</p>
+<p>Or by the <code class="docutils literal notranslate"><span class="pre">pfs.targets</span></code> object (which is a list of PfsSections). Each of the targets is a <code class="docutils literal notranslate"><span class="pre">PfsSection</span></code> object consisting of key-value pairs (keyword-parameter) and other PfsSections.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">PfsDocument</span></code> object is similar to a dictionary. You can loop over its contents with <code class="docutils literal notranslate"><span class="pre">items()</span></code>, <code class="docutils literal notranslate"><span class="pre">keys()</span></code> and <code class="docutils literal notranslate"><span class="pre">values()</span></code> like a dictionary.</p>
+</section>
 <section id="pfssection">
 <h3>PfsSection<a class="headerlink" href="#pfssection" title="Permalink to this heading"></a></h3>
-<p>The PfsSection object is similar to a dictionary. You can loop over its contents with <code class="docutils literal notranslate"><span class="pre">items()</span></code>, <code class="docutils literal notranslate"><span class="pre">keys()</span></code> and <code class="docutils literal notranslate"><span class="pre">values()</span></code> like a dictionary.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">PfsSection</span></code> object is also similar to a dictionary. You can loop over its contents with <code class="docutils literal notranslate"><span class="pre">items()</span></code>, <code class="docutils literal notranslate"><span class="pre">keys()</span></code> and <code class="docutils literal notranslate"><span class="pre">values()</span></code> like a dictionary.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span><span class="o">.</span><span class="n">txconc</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 <span class="go">dict_keys([&#39;CLSID&#39;, &#39;TypeName&#39;, &#39;CREATEDTIME&#39;, &#39;MODIFIEDTIME&#39;, &#39;NOTES&#39;, &#39;Setup&#39;])</span>
 </pre></div>
@@ -273,14 +294,14 @@
 <span class="go">        file_name=r&quot;|path\file.dfs0|&quot;,</span>
 <span class="go">        start_time=datetime(2019, 7, 1, 0, 0, 0),        </span>
 <span class="go">    )</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Pfs</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="s2">&quot;MYTOOL&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">PfsDocument</span><span class="p">({</span><span class="s2">&quot;MYTOOL&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">})</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;new.pfs&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Multiple targets can be achieved by providing list of dictionaries.</p>
 </section>
-<section id="pfs-api">
-<h2>Pfs API<a class="headerlink" href="#pfs-api" title="Permalink to this heading"></a></h2>
+<section id="pfsdocument-api">
+<h2>PfsDocument API<a class="headerlink" href="#pfsdocument-api" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="mikeio.read_pfs">
 <span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">read_pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#read_pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.read_pfs" title="Permalink to this definition"></a></dt>
@@ -301,25 +322,21 @@ by default False</p></li>
 <dd class="field-even"><p>Pfs object which can be used for inspection, manipulation and writing</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Pfs" title="mikeio.Pfs">mikeio.Pfs</a></p>
+<dd class="field-odd"><p>mikeio.Pfs</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="mikeio.Pfs">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs" title="Permalink to this definition"></a></dt>
-<dd><p>Create a Pfs object for reading, writing and manipulating pfs files</p>
+<dt class="sig sig-object py" id="mikeio.PfsDocument">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">PfsDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cp1252'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unique_keywords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Create a PfsDocument object for reading, writing and manipulating pfs files</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>, </em><a class="reference internal" href="#mikeio.PfsSection" title="mikeio.PfsSection"><em>PfsSection</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><em>Path</em>) – Either a file name (including full path) to the pfs file
 to be read or dictionary-like structure.</p></li>
 <li><p><strong>encoding</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – How is the pfs file encoded? By default cp1252</p></li>
-<li><p><strong>names</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – If the input is dictionary or PfsSection object the
-name of the root element (=target) MUST be specified.
-If the input is a file, the names are instead read from the file,
-by default None.</p></li>
 <li><p><strong>unique_keywords</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – Should the keywords in a section be unique? Some tools e.g. the
 MIKE Plot Composer allows non-unique keywords.
 If True: warnings will be issued if non-unique keywords
@@ -328,27 +345,79 @@ by default False</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Pfs.is_unique">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_unique</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.Pfs.is_unique" title="Permalink to this definition"></a></dt>
-<dd><p>Are the target (root) names unique?</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsDocument.clear" title="Permalink to this definition"></a></dt>
+<dd><p>Remove all items from the PfsSection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_PfsBase</span></span></span><a class="headerlink" href="#mikeio.PfsDocument.copy" title="Permalink to this definition"></a></dt>
+<dd><p>Return a copy of the PfsSection.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.find_replace">
+<span class="sig-name descname"><span class="pre">find_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsDocument.find_replace" title="Permalink to this definition"></a></dt>
+<dd><p>Update recursively all old_value with new_value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsDocument.get" title="Permalink to this definition"></a></dt>
+<dd><p>Return the value for key if key is in the PfsSection,
+else default. If default is not given, it defaults to None,
+so that this method never raises a KeyError.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Pfs.n_targets">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.Pfs.n_targets" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mikeio.PfsDocument.is_unique">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_unique</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#mikeio.PfsDocument.is_unique" title="Permalink to this definition"></a></dt>
+<dd><p>Are the target (root) names unique?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.11)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsDocument.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsDocument.items" title="Permalink to this definition"></a></dt>
+<dd><p>Return a new view of the PfsDocument’s items ((key, value) pairs)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsDocument.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsDocument.keys" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of the PfsDocument’s keys (target names)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.n_targets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.PfsDocument.n_targets" title="Permalink to this definition"></a></dt>
 <dd><p>Number of targets (root sections)</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Pfs.names">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mikeio.Pfs.names" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mikeio.PfsDocument.names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mikeio.PfsDocument.names" title="Permalink to this definition"></a></dt>
 <dd><p>Names of the targets (root sections) as a list</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Pfs.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.PfsSection" title="mikeio.pfs.PfsSection"><span class="pre">PfsSection</span></a></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs.search" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mikeio.PfsDocument.pop">
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsDocument.pop" title="Permalink to this definition"></a></dt>
+<dd><p>If key is in the dictionary, remove it and return its
+value, else return default. If default is not given and
+key is not in the dictionary, a KeyError is raised.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.popitem">
+<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">(k,</span> <span class="pre">v),</span> <span class="pre">remove</span> <span class="pre">and</span> <span class="pre">return</span> <span class="pre">some</span> <span class="pre">(key,</span> <span class="pre">value)</span> <span class="pre">pair</span></span></span><a class="headerlink" href="#mikeio.PfsDocument.popitem" title="Permalink to this definition"></a></dt>
+<dd><p>as a 2-tuple; but raise KeyError if D is empty.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.search">
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsDocument.search" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Find recursively all keys, sections or parameters</dt><dd><p>matching a pattern</p>
 </dd>
@@ -374,19 +443,74 @@ by default False</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Pfs.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs.to_dict" title="Permalink to this definition"></a></dt>
-<dd><p>Convert to nested dictionary</p>
+<dt class="sig sig-object py" id="mikeio.PfsDocument.setdefault">
+<span class="sig-name descname"><span class="pre">setdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">D.get(k,d),</span> <span class="pre">also</span> <span class="pre">set</span> <span class="pre">D[k]=d</span> <span class="pre">if</span> <span class="pre">k</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">D</span></span></span><a class="headerlink" href="#mikeio.PfsDocument.setdefault" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.targets">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.PfsSection" title="mikeio.pfs.PfsSection"><span class="pre">PfsSection</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#mikeio.PfsDocument.targets" title="Permalink to this definition"></a></dt>
+<dd><p>List of targets (root sections)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Pfs.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#Pfs.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Pfs.write" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="mikeio.PfsDocument.to_dataframe">
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#mikeio.PfsDocument.to_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Output enumerated subsections to a DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The prefix of the enumerated sections, e.g. “<a href="#id1"><span class="problematic" id="id2">File_</span></a>”,
+which can be supplied if it fails without this argument,
+by default None (will try to “guess” the prefix)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The enumerated subsections as a DataFrame</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read_pfs</span><span class="p">(</span><span class="s2">&quot;lake.sw&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pfs</span><span class="o">.</span><span class="n">SW</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;OUTPUT_&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#mikeio.PfsDocument.to_dict" title="Permalink to this definition"></a></dt>
+<dd><p>Convert to (nested) dict (as a copy)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <span class="optional">]</span><em class="sig-param"><span class="n"><span class="pre">**F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Update</span> <span class="pre">D</span> <span class="pre">from</span> <span class="pre">mapping/iterable</span> <span class="pre">E</span> <span class="pre">and</span> <span class="pre">F.</span></span></span><a class="headerlink" href="#mikeio.PfsDocument.update" title="Permalink to this definition"></a></dt>
+<dd><p>If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.update_recursive">
+<span class="sig-name descname"><span class="pre">update_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsDocument.update_recursive" title="Permalink to this definition"></a></dt>
+<dd><p>Update recursively all matches of key with value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.values">
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.11)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsDocument.values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsDocument.values" title="Permalink to this definition"></a></dt>
+<dd><p>Return a list of the PfsDocument’s values (targets).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsDocument.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsDocument.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsDocument.write" title="Permalink to this definition"></a></dt>
 <dd><p>Write object to a pfs file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – Full path and filename of pfs to be created.
-If filename is None, the content will be returned
+If None, the content will be returned
 as a list of strings.</p>
 </dd>
 </dl>
@@ -402,19 +526,19 @@ as a list of strings.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">PfsSection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dictionary</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection" title="Permalink to this definition"></a></dt>
 <dd><dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.clear">
-<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.clear" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.clear" title="Permalink to this definition"></a></dt>
 <dd><p>Remove all items from the PfsSection.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.copy">
-<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.copy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.copy" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_PfsBase</span></span></span><a class="headerlink" href="#mikeio.PfsSection.copy" title="Permalink to this definition"></a></dt>
 <dd><p>Return a copy of the PfsSection.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.find_replace">
-<span class="sig-name descname"><span class="pre">find_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.find_replace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.find_replace" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">find_replace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.find_replace" title="Permalink to this definition"></a></dt>
 <dd><p>Update recursively all old_value with new_value</p>
 </dd></dl>
 
@@ -426,7 +550,7 @@ as a list of strings.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.get" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.get" title="Permalink to this definition"></a></dt>
 <dd><p>Return the value for key if key is in the PfsSection,
 else default. If default is not given, it defaults to None,
 so that this method never raises a KeyError.</p>
@@ -434,27 +558,33 @@ so that this method never raises a KeyError.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.items">
-<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.items"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.items" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.items" title="Permalink to this definition"></a></dt>
 <dd><p>Return a new view of the PfsSection’s items ((key, value) pairs)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.keys">
-<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.keys" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.keys" title="Permalink to this definition"></a></dt>
 <dd><p>Return a new view of the PfsSection’s keys</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.pop">
-<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.pop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.pop" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">pop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.pop" title="Permalink to this definition"></a></dt>
 <dd><p>If key is in the dictionary, remove it and return its
 value, else return default. If default is not given and
 key is not in the dictionary, a KeyError is raised.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsSection.popitem">
+<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">(k,</span> <span class="pre">v),</span> <span class="pre">remove</span> <span class="pre">and</span> <span class="pre">return</span> <span class="pre">some</span> <span class="pre">(key,</span> <span class="pre">value)</span> <span class="pre">pair</span></span></span><a class="headerlink" href="#mikeio.PfsSection.popitem" title="Permalink to this definition"></a></dt>
+<dd><p>as a 2-tuple; but raise KeyError if D is empty.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.search">
-<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.search" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.search" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Find recursively all keys, sections or parameters</dt><dd><p>matching a pattern</p>
 </dd>
@@ -480,29 +610,40 @@ key is not in the dictionary, a KeyError is raised.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.PfsSection.to_Pfs">
-<span class="sig-name descname"><span class="pre">to_Pfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.to_Pfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.to_Pfs" title="Permalink to this definition"></a></dt>
-<dd><p>Convert to a Pfs object (with this PfsSection as the target)</p>
+<dt class="sig sig-object py" id="mikeio.PfsSection.setdefault">
+<span class="sig-name descname"><span class="pre">setdefault</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="optional">[</span>, <em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="optional">]</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">D.get(k,d),</span> <span class="pre">also</span> <span class="pre">set</span> <span class="pre">D[k]=d</span> <span class="pre">if</span> <span class="pre">k</span> <span class="pre">not</span> <span class="pre">in</span> <span class="pre">D</span></span></span><a class="headerlink" href="#mikeio.PfsSection.setdefault" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.PfsSection.to_PfsDocument">
+<span class="sig-name descname"><span class="pre">to_PfsDocument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#mikeio.PfsDocument" title="mikeio.pfs.PfsDocument"><span class="pre">PfsDocument</span></a></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.to_PfsDocument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.to_PfsDocument" title="Permalink to this definition"></a></dt>
+<dd><p>Convert to a PfsDocument in one of two ways:</p>
+<ol class="arabic simple">
+<li><p>All key:value pairs will be targets (require all values to be PfsSections)</p></li>
+<li><p>Make this PfsSection the only target (requires a name)</p></li>
+</ol>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Name of the target (=key that refer to this PfsSection)</p>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – Name of the target (=key that refer to this PfsSection)</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A Pfs object</p>
+<dd class="field-even"><p>A PfsDocument object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#mikeio.Pfs" title="mikeio.Pfs">Pfs</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.PfsDocument" title="mikeio.PfsDocument">PfsDocument</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.to_dataframe">
-<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.to_dataframe" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.2)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#mikeio.PfsSection.to_dataframe" title="Permalink to this definition"></a></dt>
 <dd><p>Output enumerated subsections to a DataFrame</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The prefix of the enumerated sections, e.g. “<a href="#id1"><span class="problematic" id="id2">File_</span></a>”, by default None</p>
+<dd class="field-odd"><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – The prefix of the enumerated sections, e.g. “<a href="#id3"><span class="problematic" id="id4">File_</span></a>”,
+which can be supplied if it fails without this argument,
+by default None (will try to “guess” the prefix)</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>The enumerated subsections as a DataFrame</p>
@@ -511,29 +652,36 @@ key is not in the dictionary, a KeyError is raised.</p>
 <dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">pfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read_pfs</span><span class="p">(</span><span class="s2">&quot;lake.sw&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pfs</span><span class="o">.</span><span class="n">SW</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;OUTPUT_&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.to_dict">
-<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.to_dict" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#mikeio.PfsSection.to_dict" title="Permalink to this definition"></a></dt>
 <dd><p>Convert to (nested) dict (as a copy)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.PfsSection.to_file">
-<span class="sig-name descname"><span class="pre">to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.to_file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.to_file" title="Permalink to this definition"></a></dt>
-<dd><p>Write to a Pfs file (providing a target name)</p>
+<dt class="sig sig-object py" id="mikeio.PfsSection.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><span class="optional">[</span><em class="sig-param"><span class="n"><span class="pre">E</span></span></em>, <span class="optional">]</span><em class="sig-param"><span class="n"><span class="pre">**F</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None.</span>&#160; <span class="pre">Update</span> <span class="pre">D</span> <span class="pre">from</span> <span class="pre">mapping/iterable</span> <span class="pre">E</span> <span class="pre">and</span> <span class="pre">F.</span></span></span><a class="headerlink" href="#mikeio.PfsSection.update" title="Permalink to this definition"></a></dt>
+<dd><p>If E present and has a .keys() method, does:     for k in E: D[k] = E[k]
+If E present and lacks .keys() method, does:     for (k, v) in E: D[k] = v
+In either case, this is followed by: for k, v in F.items(): D[k] = v</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.update_recursive">
-<span class="sig-name descname"><span class="pre">update_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.update_recursive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.update_recursive" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update_recursive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.update_recursive" title="Permalink to this definition"></a></dt>
 <dd><p>Update recursively all matches of key with value</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.PfsSection.values">
-<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/pfs.html#PfsSection.values"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.PfsSection.values" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">values</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.PfsSection.values" title="Permalink to this definition"></a></dt>
 <dd><p>Return a new view of the PfsSection’s values.</p>
 </dd></dl>
 
