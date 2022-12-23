@@ -112,15 +112,15 @@ class PfsDocument(PfsSection):
                 data[key] = val
         return data
 
-    def keys(self) -> List[str]:
+    def keys(self):
         """Return a list of the PfsDocument's keys (target names)"""
         return [k for k, _ in self.items()]
 
-    def values(self) -> List[Any]:
+    def values(self):
         """Return a list of the PfsDocument's values (targets)."""
         return [v for _, v in self.items()]
 
-    def items(self) -> List[Tuple[str, Any]]:
+    def items(self):
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
@@ -271,7 +271,7 @@ class PfsDocument(PfsSection):
 
         return "\n".join(output)
 
-    def _parse_line(self, line: str, level: int = 0) -> str:
+    def _parse_line(self, line: str, level: int = 0) -> Tuple[str,int]:
         section_header = False
         s = line.strip()
         s = re.sub(r"\s*//.*", "", s)  # remove comments
