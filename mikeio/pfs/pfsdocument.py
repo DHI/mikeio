@@ -1,7 +1,9 @@
 from pathlib import Path
 from typing import (
     Any,
+    Dict,
     List,
+    TextIO,
     Tuple,
 
     Mapping,
@@ -70,7 +72,7 @@ class PfsDocument(PfsSection):
 
     Parameters
     ----------
-    input: dict, PfsSection, str or Path
+    data: dict, PfsSection, str or Path
         Either a file name (including full path) to the pfs file
         to be read or dictionary-like structure.
     encoding: str, optional
@@ -83,14 +85,14 @@ class PfsDocument(PfsSection):
         by default False
     """
 
-    def __init__(self, input, encoding="cp1252", names=None, unique_keywords=False):
+    def __init__(self, data: Union[TextIO,PfsSection, Dict],*, encoding="cp1252", names=None, unique_keywords=False):
 
-        if isinstance(input, (str, Path)) or hasattr(input, "read"):
+        if isinstance(data, TextIO):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
-            names, sections = self._read_pfs_file(input, encoding, unique_keywords)
+            names, sections = self._read_pfs_file(data, encoding, unique_keywords)
         else:
-            names, sections = self._parse_non_file_input(input, names)
+            names, sections = self._parse_non_file_input(data, names)
 
         d = self._to_nonunique_key_dict(names, sections)
         super().__init__(d)
