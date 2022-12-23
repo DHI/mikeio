@@ -72,10 +72,10 @@ def test_pfssection_keys_values_items(d1):
         j += 1
 
 
-def test_pfssection_from_dataframe(df1):
-    sct = mikeio.PfsSection.from_dataframe(df1, prefix="MEASUREMENT_")
-    assert sct.MEASUREMENT_1.name == "Viken"
-    assert sct.MEASUREMENT_2.position == [12.7113, 55.5364]
+#def test_pfssection_from_dataframe(df1):
+#    sct = mikeio.PfsSection.from_dataframe(df1, prefix="MEASUREMENT_")
+#    assert sct.MEASUREMENT_1.name == "Viken"
+#    assert sct.MEASUREMENT_2.position == [12.7113, 55.5364]
 
 
 def test_pfssection_to_dict(d1):
@@ -224,7 +224,7 @@ def test_pfssection_find_replace(d1):
 
 def test_pfssection_write(d1, tmpdir):
     sct = mikeio.PfsSection(d1)
-    pfs = sct.to_PfsDocument(name="root")
+    pfs = mikeio.PfsDocument({"root":sct})
     fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
     pfs.write(fn)
 
