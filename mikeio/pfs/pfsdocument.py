@@ -87,7 +87,7 @@ class PfsDocument(PfsSection):
 
     def __init__(self, data: Union[TextIO,PfsSection, Dict],*, encoding="cp1252", names=None, unique_keywords=False):
 
-        if isinstance(data, TextIO):
+        if isinstance(data, (str, Path)) or hasattr(data,"read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
             names, sections = self._read_pfs_file(data, encoding, unique_keywords)
