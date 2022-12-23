@@ -250,9 +250,8 @@ def test_basic():
     pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
 
     data = pfs.targets[0]
-    # On a pfs file with a single target, the target is implicit,
-    #  i.e. BoundaryExtractor in this case
-
+    assert pfs.targets[0] == pfs.BoundaryExtractor
+    
     assert data.z_min == -3000
     assert data.POINT_1.y == 50
 
