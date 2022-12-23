@@ -1,7 +1,9 @@
 from types import SimpleNamespace
 from typing import (
+    Any,
     List,
     MutableMapping,
+    Optional,
     Sequence,
     Sequence,
     Mapping,
@@ -11,16 +13,12 @@ from typing import (
 from datetime import datetime
 import pandas as pd
 
-def _merge_dict(a: Mapping, b: Mapping, path: Sequence = None):
+def _merge_dict(a: MutableMapping[str,Any], b: Mapping[str, Any]) -> Mapping[str,Any]:
     """merges dict b into dict a; handling non-unique keys"""
-    if path is None:
-        path = []
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
-                _merge_dict(a[key], b[key], path + [str(key)])
-            # elif a[key] == b[key]:
-            #     pass  # same leaf value
+                _merge_dict(a[key], b[key])
             else:
                 ab = list(a[key]) + list(b[key])
                 a[key] = PfsNonUniqueList(ab)
@@ -38,12 +36,13 @@ class PfsSection(SimpleNamespace, MutableMapping):
             self.__set_key_value(key, value, copy=True)
 
     def __repr__(self) -> str:
-        # return json.dumps(self.to_dict(), indent=2)
-        # return yaml.dump(self.to_dict(), sort_keys=False)
         return "\n".join(self._to_txt_lines())
 
     def __len__(self):
         return len(self.__dict__)
+
+    def __iter__(self):
+        iter(self)
 
     def __contains__(self, key):
         return key in self.keys()
@@ -149,10 +148,10 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
     def search(
         self,
-        text: str = None,
+        text: Optional[str] = None,
         *,
-        key: str = None,
-        section: str = None,
+        key: Optional[str] = None,
+        section: Optional[str] = None,
         param=None,
         case: bool = False,
     ):
@@ -278,8 +277,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         for k, v in self.items():
 
             # check for empty sections
-            NoneType = type(None)
-            if isinstance(v, NoneType):
+            if v is None:
                 func(f"{lvl_prefix * level}[{k}]{newline}")
                 func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
 
@@ -358,7 +356,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 d[key] = value.to_dict()
         return d
 
-    def to_dataframe(self, prefix: str = None) -> pd.DataFrame:
+    def to_dataframe(self, prefix: Optional[str] = None) -> pd.DataFrame:
         """Output enumerated subsections to a DataFrame
 
         Parameters
@@ -406,7 +404,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
     @classmethod
-    def _merge_PfsSections(cls, sections: Sequence[Mapping]) -> "PfsSection":
+    def _merge_PfsSections(cls, sections: Sequence) -> "PfsSection":
         """Merge a list of PfsSections/dict"""
         assert len(sections) > 0
         a = sections[0]
