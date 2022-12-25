@@ -16,9 +16,10 @@ degree Celsius
 >>>
 
 """
-from typing import List, Sequence, Union
+import warnings
+from typing import Dict, List, Sequence, Union
 from mikecore.DfsFile import DataValueType
-from mikecore.eum import eumWrapper
+from mikecore.eum import eumWrapper, eumUnit
 from enum import IntEnum
 
 from .exceptions import InvalidDataValueType
@@ -26,7 +27,7 @@ from .exceptions import InvalidDataValueType
 import pandas as pd
 
 
-def type_list(search=None):
+def _type_list(search=None):
     """Get a dictionary of the EUM items
 
     Notes
@@ -66,8 +67,11 @@ def type_list(search=None):
 
     return items
 
+def type_list(search=None):
+    warnings.warn("type_list is deprecated use EUMType.search instead",FutureWarning)
+    return _type_list(search=search)
 
-def unit_list(type_enum):
+def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
     """Get a dictionary of valid units
 
     Parameters
@@ -81,13 +85,16 @@ def unit_list(type_enum):
         names and codes for valid units
     """
     items = {}
-    # units = GetItemAllowedUnits(type_enum)
-    for i in range(eumWrapper.eumGetItemUnitCount(type_enum)):
-        d = eumWrapper.eumGetItemUnitSeq(type_enum, i + 1)
-        if d[0] is True:
-            items[d[2]] = d[1]
-
+    n_units_for_eum_type = eumWrapper.eumGetItemUnitCount(eum_type)
+    for i in range(n_units_for_eum_type):
+        _, value, key = eumWrapper.eumGetItemUnitSeq(eum_type, i + 1)
+        items[key] = value
+        
     return items
+
+def unit_list(type_eum):
+    warnings.warn("unit_list is deprecated use EUMType.units instead",FutureWarning)
+    return _type_list(type_eum)
 
 
 class TimeAxisType(IntEnum):
@@ -729,12 +736,12 @@ class EUMType(IntEnum):
     @property
     def units(self):
         """List valid units for this EUM type"""
-        temp = unit_list(self.code).items()
+        temp = _unit_list(self.code).items()
         return [EUMUnit(value) for _, value in temp]
 
     @staticmethod
     def search(pattern) -> List["EUMType"]:
-        temp = type_list(pattern).items()
+        temp = _type_list(pattern).items()
         return [EUMType(key) for key, _ in temp]
 
 
