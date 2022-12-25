@@ -1,12 +1,10 @@
 import os
-import warnings
 import numpy as np
 from mikecore.eum import eumUnit, eumQuantity
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsFactory import DfsFactory
-from mikecore.DfsFile import DfsSimpleType, DataValueType, DfsFile
+from mikecore.DfsFile import DfsSimpleType, DfsFile
 from mikecore.DfsBuilder import DfsBuilder
-from mikecore.Projections import Cartography
 import pandas as pd
 
 from . import __dfs_version__
@@ -14,8 +12,7 @@ from .dfs import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .dfs import _Dfs123, _write_dfs_data
-from .spatial.grid_geometry import Grid2D, Grid3D
-from .spatial.geometry import GeometryUndefined
+from .spatial.grid_geometry import Grid3D
 
 
 def write_dfs3(filename: str, ds: Dataset, title="") -> None:

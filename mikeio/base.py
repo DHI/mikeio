@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Sequence
 import pandas as pd
-
-from .dataset import ItemInfo
 
 
 class TimeSeries(ABC):

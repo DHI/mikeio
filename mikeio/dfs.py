@@ -269,6 +269,7 @@ def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 
 
 class _Dfs123(TimeSeries):
+    _ndim = None
 
     show_progress = False
 
@@ -289,7 +290,6 @@ class _Dfs123(TimeSeries):
         self.geometry = GeometryUndefined()
         self._dfs = None
         self._source = None
-        self._ndim = None
 
     def read(
         self,

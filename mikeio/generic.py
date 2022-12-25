@@ -4,7 +4,6 @@ import math
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-import warnings
 from shutil import copyfile
 from copy import deepcopy
 
@@ -16,7 +15,7 @@ from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
 from mikecore.eum import eumQuantity
 from . import __dfs_version__
 from .dfs import _valid_item_numbers, _get_item_info
-from .eum import EUMType, ItemInfo
+from .eum import ItemInfo
 
 
 show_progress = True

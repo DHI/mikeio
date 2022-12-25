@@ -1,7 +1,6 @@
 from copy import deepcopy
 import os
 import numpy as np
-import warnings
 from mikecore.eum import eumUnit, eumQuantity
 from mikecore.DfsFile import DfsSimpleType, DfsFile
 from mikecore.DfsFileFactory import DfsFileFactory
