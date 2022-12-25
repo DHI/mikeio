@@ -7,8 +7,8 @@ test:
 	pytest --disable-warnings
 
 doctest:
-	pytest mikeio/dfs*.py mikeio/eum.py --doctest-modules
-	rm *.dfs* # remove temporary files, created from doctests
+	pytest mikeio/dfs*.py mikeio/dfsu/*.py mikeio/eum.py --doctest-modules
+	rm -f *.dfs* # remove temporary files, created from doctests
 
 coverage: 
 	pytest --cov-report html --cov=mikeio tests/
