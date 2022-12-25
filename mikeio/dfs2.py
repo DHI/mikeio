@@ -15,7 +15,7 @@ from .dfs import _Dfs123, _write_dfs_data
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
-from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
+from .dfs import _valid_item_numbers, _valid_timesteps, _get_item_info
 
 
 def write_dfs2(filename: str, ds: Dataset, title="") -> None:

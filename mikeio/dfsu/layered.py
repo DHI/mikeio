@@ -10,7 +10,7 @@ from .dfsu import _Dfsu
 from ..dataset import Dataset, DataArray
 from ..spatial.FM_geometry import GeometryFM3D
 from ..exceptions import InvalidGeometry
-from ..dfsutil import (
+from ..dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,

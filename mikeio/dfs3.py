@@ -10,7 +10,7 @@ from mikecore.Projections import Cartography
 import pandas as pd
 
 from . import __dfs_version__
-from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
+from .dfs import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
 from .eum import TimeStepUnit
 from .dfs import _Dfs123, _write_dfs_data

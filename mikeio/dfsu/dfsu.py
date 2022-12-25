@@ -20,7 +20,7 @@ from mikeio.spatial.utils import xy_to_bbox
 from .. import __dfs_version__
 from ..base import EquidistantTimeSeries
 from ..track import _extract_track
-from ..dfsutil import (
+from ..dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,

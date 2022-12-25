@@ -17,7 +17,7 @@ from mikecore.DfsFile import (
 )
 
 from . import __dfs_version__
-from .dfsutil import _valid_item_numbers, _get_item_info, _valid_timesteps
+from .dfs import _valid_item_numbers, _get_item_info, _valid_timesteps
 from .dataset import Dataset
 from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries

@@ -15,7 +15,7 @@ from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
 from mikecore.eum import eumQuantity
 from . import __dfs_version__
-from .dfsutil import _valid_item_numbers, _get_item_info
+from .dfs import _valid_item_numbers, _get_item_info
 from .eum import EUMType, ItemInfo
 
 
