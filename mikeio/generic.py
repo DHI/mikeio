@@ -1,22 +1,21 @@
-import os
-from typing import Iterable, List, Optional, Union
 import math
-import numpy as np
-import pandas as pd
+import os
+from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from copy import deepcopy
+from typing import Iterable, List, Optional, Union
 
-from tqdm import trange, tqdm
-
-from mikecore.DfsFileFactory import DfsFileFactory
+import numpy as np
+import pandas as pd
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
+from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
-from . import __dfs_version__
-from .dfs import _valid_item_numbers, _get_item_info
-from .eum import ItemInfo
+from tqdm import tqdm, trange
 
+from . import __dfs_version__
+from .dfs import _get_item_info, _valid_item_numbers
+from .eum import ItemInfo
 
 show_progress = True
 

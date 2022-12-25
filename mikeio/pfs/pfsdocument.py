@@ -1,21 +1,14 @@
-from pathlib import Path
-from typing import (
-    Any,
-    Dict,
-    List,
-    TextIO,
-    Tuple,
-
-    Mapping,
-    Union,
-)
-from collections import Counter
-from datetime import datetime
 import re
 import warnings
+from collections import Counter
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Mapping, TextIO, Tuple, Union
+
 import yaml
 
-from .pfssection import PfsSection, PfsNonUniqueList
+from .pfssection import PfsNonUniqueList, PfsSection
+
 
 def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     class PreserveDuplicatesLoader(yaml.loader.Loader):
@@ -67,6 +60,7 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
     )
     return yaml.load(src, PreserveDuplicatesLoader)
 
+
 class PfsDocument(PfsSection):
     """Create a PfsDocument object for reading, writing and manipulating pfs files
 
@@ -85,9 +79,16 @@ class PfsDocument(PfsSection):
         by default False
     """
 
-    def __init__(self, data: Union[TextIO,PfsSection, Dict],*, encoding="cp1252", names=None, unique_keywords=False):
+    def __init__(
+        self,
+        data: Union[TextIO, PfsSection, Dict],
+        *,
+        encoding="cp1252",
+        names=None,
+        unique_keywords=False,
+    ):
 
-        if isinstance(data, (str, Path)) or hasattr(data,"read"):
+        if isinstance(data, (str, Path)) or hasattr(data, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
             names, sections = self._read_pfs_file(data, encoding, unique_keywords)
@@ -273,7 +274,7 @@ class PfsDocument(PfsSection):
 
         return "\n".join(output)
 
-    def _parse_line(self, line: str, level: int = 0) -> Tuple[str,int]:
+    def _parse_line(self, line: str, level: int = 0) -> Tuple[str, int]:
         section_header = False
         s = line.strip()
         s = re.sub(r"\s*//.*", "", s)  # remove comments

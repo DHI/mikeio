@@ -1,27 +1,29 @@
-from typing import Sequence, Union
 import warnings
-import numpy as np
 from collections import namedtuple
-from scipy.spatial import cKDTree
+from typing import Sequence, Union
+
+import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
+from scipy.spatial import cKDTree
+
+import mikeio.data_utils as du
 
 from ..eum import EUMType, EUMUnit
-from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
-from .grid_geometry import Grid2D
-from ..interpolation import get_idw_interpolant, interp2d
 from ..exceptions import InvalidGeometry
-from .utils import _relative_cumulative_distance, xy_to_bbox
+from ..interpolation import get_idw_interpolant, interp2d
 from .FM_utils import (
     _get_node_centered_data,
-    _to_polygons,
     _plot_map,
-    _set_xy_label_by_projection,
-    _point_in_polygon,
     _plot_vertical_profile,
+    _point_in_polygon,
+    _set_xy_label_by_projection,
+    _to_polygons,
 )
-import mikeio.data_utils as du
+from .geometry import BoundingBox, GeometryPoint2D, GeometryPoint3D, _Geometry
+from .grid_geometry import Grid2D
+from .utils import _relative_cumulative_distance, xy_to_bbox
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -1361,7 +1363,7 @@ class GeometryFM(_Geometry):
         shapely.geometry.MultiPolygon
             polygons with mesh elements
         """
-        from shapely.geometry import Polygon, MultiPolygon
+        from shapely.geometry import MultiPolygon, Polygon
 
         polygons = []
         for j in range(self.n_elements):

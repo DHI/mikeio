@@ -1,8 +1,9 @@
 import os
+
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 
 from .dfsu import Dfsu2DH
-from .layered import Dfsu3D, Dfsu2DV
+from .layered import Dfsu2DV, Dfsu3D
 from .spectral import DfsuSpectral
 
 

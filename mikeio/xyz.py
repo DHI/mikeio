@@ -1,9 +1,10 @@
-from typing import Union
 from pathlib import Path
+from typing import Union
+
 import pandas as pd
 
 
-def read_xyz(filename: Union[str,Path]) -> pd.DataFrame:
+def read_xyz(filename: Union[str, Path]) -> pd.DataFrame:
 
     df = pd.read_csv(filename, sep="\t", header=None)
     if df.shape[1] == 1:

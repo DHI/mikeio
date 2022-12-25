@@ -17,14 +17,14 @@ degree Celsius
 
 """
 import warnings
-from typing import Dict, List, Sequence, Union
-from mikecore.DfsFile import DataValueType
-from mikecore.eum import eumWrapper, eumUnit
 from enum import IntEnum
-
-from .exceptions import InvalidDataValueType
+from typing import Dict, List, Sequence, Union
 
 import pandas as pd
+from mikecore.DfsFile import DataValueType
+from mikecore.eum import eumUnit, eumWrapper
+
+from .exceptions import InvalidDataValueType
 
 
 def _type_list(search=None):
@@ -67,9 +67,11 @@ def _type_list(search=None):
 
     return items
 
+
 def type_list(search=None):
-    warnings.warn("type_list is deprecated use EUMType.search instead",FutureWarning)
+    warnings.warn("type_list is deprecated use EUMType.search instead", FutureWarning)
     return _type_list(search=search)
+
 
 def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
     """Get a dictionary of valid units
@@ -89,11 +91,12 @@ def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
     for i in range(n_units_for_eum_type):
         _, value, key = eumWrapper.eumGetItemUnitSeq(eum_type, i + 1)
         items[key] = value
-        
+
     return items
 
+
 def unit_list(type_eum):
-    warnings.warn("unit_list is deprecated use EUMType.units instead",FutureWarning)
+    warnings.warn("unit_list is deprecated use EUMType.units instead", FutureWarning)
     return _type_list(type_eum)
 
 
@@ -1467,14 +1470,18 @@ class ItemInfo:
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
 
-class ItemInfoList(list):
 
+class ItemInfoList(list):
     def __init__(self, items: Sequence[ItemInfo]):
         super().__init__(items)
 
     def to_dataframe(self):
-        data = [{"name": item.name, "type": item.type.name, "unit": item.unit.name} for item in self]
+        data = [
+            {"name": item.name, "type": item.type.name, "unit": item.unit.name}
+            for item in self
+        ]
         return pd.DataFrame(data)
+
 
 def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
     string_datatype_mapping = {
@@ -1506,4 +1513,3 @@ def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
         raise ValueError("Data value type not supported")
 
     return datatype
-

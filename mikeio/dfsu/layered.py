@@ -1,24 +1,25 @@
+import warnings
+from functools import wraps
+
 import numpy as np
 import pandas as pd
-import warnings
-from tqdm import trange
-from functools import wraps
-from scipy.spatial import cKDTree
-
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from .dfsu import _Dfsu
-from ..dataset import Dataset, DataArray
-from ..spatial.FM_geometry import GeometryFM3D
-from ..exceptions import InvalidGeometry
+from scipy.spatial import cKDTree
+from tqdm import trange
+
+from ..dataset import DataArray, Dataset
 from ..dfs import (
     _get_item_info,
+    _read_item_time_step,
     _valid_item_numbers,
     _valid_timesteps,
-    _read_item_time_step,
 )
-from ..spatial.FM_utils import _plot_vertical_profile
+from ..eum import EUMType, ItemInfo
+from ..exceptions import InvalidGeometry
 from ..interpolation import get_idw_interpolant, interp2d
-from ..eum import ItemInfo, EUMType
+from ..spatial.FM_geometry import GeometryFM3D
+from ..spatial.FM_utils import _plot_vertical_profile
+from .dfsu import _Dfsu
 
 
 class DfsuLayered(_Dfsu):
@@ -204,7 +205,7 @@ class DfsuLayered(_Dfsu):
         if single_time_selected and not keepdims:
             data = data[0]
 
-        time=self.time
+        time = self.time
 
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]

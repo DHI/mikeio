@@ -1,5 +1,6 @@
-from .pfsdocument import PfsDocument, Pfs
-from .pfssection import PfsSection, PfsNonUniqueList
+from .pfsdocument import Pfs, PfsDocument
+from .pfssection import PfsNonUniqueList, PfsSection
+
 
 def read_pfs(filename, encoding="cp1252", unique_keywords=False):
     """Read a pfs file to a Pfs object for further analysis/manipulation

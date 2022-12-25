@@ -1,20 +1,26 @@
-from copy import deepcopy
 import os
+from copy import deepcopy
+
 import numpy as np
-from mikecore.eum import eumUnit, eumQuantity
-from mikecore.DfsFile import DfsSimpleType, DfsFile
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.DfsFactory import DfsBuilder, DfsFactory
-from mikecore.Projections import Cartography
 import pandas as pd
+from mikecore.DfsFactory import DfsBuilder, DfsFactory
+from mikecore.DfsFile import DfsFile, DfsSimpleType
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity, eumUnit
+from mikecore.Projections import Cartography
 from tqdm import tqdm
 
 from . import __dfs_version__
-from .dfs import _Dfs123, _write_dfs_data
 from .dataset import Dataset
+from .dfs import (
+    _Dfs123,
+    _get_item_info,
+    _valid_item_numbers,
+    _valid_timesteps,
+    _write_dfs_data,
+)
 from .eum import TimeStepUnit
 from .spatial.grid_geometry import Grid2D
-from .dfs import _valid_item_numbers, _valid_timesteps, _get_item_info
 
 
 def write_dfs2(filename: str, ds: Dataset, title="") -> None:
@@ -93,7 +99,6 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
             geometry._dy,
         )
     )
-    
 
 
 class Dfs2(_Dfs123):

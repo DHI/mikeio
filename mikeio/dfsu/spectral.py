@@ -1,15 +1,15 @@
+import warnings
 from typing import Union
+
 import numpy as np
 import pandas as pd
-import warnings
+from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from tqdm import trange
 
-from mikecore.DfsuFile import DfsuFile, DfsuFileType
-
-from .dfsu import _Dfsu
-from ..dataset import Dataset, DataArray
+from ..dataset import DataArray, Dataset
 from ..dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
-from ..spectral import plot_2dspectrum, calc_m0_from_spectrum
+from ..spectral import calc_m0_from_spectrum, plot_2dspectrum
+from .dfsu import _Dfsu
 
 
 class DfsuSpectral(_Dfsu):

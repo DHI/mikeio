@@ -1,17 +1,23 @@
 import os
+
 import numpy as np
-from mikecore.eum import eumUnit, eumQuantity
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.DfsFactory import DfsFactory
-from mikecore.DfsFile import DfsSimpleType, DfsFile
-from mikecore.DfsBuilder import DfsBuilder
 import pandas as pd
+from mikecore.DfsBuilder import DfsBuilder
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsFile import DfsFile, DfsSimpleType
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity, eumUnit
 
 from . import __dfs_version__
-from .dfs import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
+from .dfs import (
+    _Dfs123,
+    _get_item_info,
+    _valid_item_numbers,
+    _valid_timesteps,
+    _write_dfs_data,
+)
 from .eum import TimeStepUnit
-from .dfs import _Dfs123, _write_dfs_data
 from .spatial.grid_geometry import Grid3D
 
 

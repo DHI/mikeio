@@ -1,19 +1,11 @@
-from types import SimpleNamespace
-from typing import (
-    Any,
-    List,
-    MutableMapping,
-    Optional,
-    Sequence,
-    Sequence,
-    Mapping,
-    Callable,
-)
-
 from datetime import datetime
+from types import SimpleNamespace
+from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Sequence
+
 import pandas as pd
 
-def _merge_dict(a: MutableMapping[str,Any], b: Mapping[str, Any]) -> Mapping[str,Any]:
+
+def _merge_dict(a: MutableMapping[str, Any], b: Mapping[str, Any]) -> Mapping[str, Any]:
     """merges dict b into dict a; handling non-unique keys"""
     for key in b:
         if key in a:
@@ -26,8 +18,10 @@ def _merge_dict(a: MutableMapping[str,Any], b: Mapping[str, Any]) -> Mapping[str
             a[key] = b[key]
     return a
 
+
 class PfsNonUniqueList(list):
     pass
+
 
 class PfsSection(SimpleNamespace, MutableMapping):
     def __init__(self, dictionary, **kwargs):
@@ -281,7 +275,9 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 func(f"{lvl_prefix * level}[{k}]{newline}")
                 func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
 
-            elif isinstance(v, List) and any(isinstance(subv, PfsSection) for subv in v):
+            elif isinstance(v, List) and any(
+                isinstance(subv, PfsSection) for subv in v
+            ):
                 # duplicate sections
                 for subv in v:
                     if isinstance(subv, PfsSection):

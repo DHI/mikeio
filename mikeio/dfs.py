@@ -1,24 +1,27 @@
-from datetime import datetime, timedelta
-from abc import abstractmethod
-from typing import Iterable, List, Optional, Tuple, Union
 import warnings
+from abc import abstractmethod
+from datetime import datetime, timedelta
+from typing import Iterable, List, Optional, Tuple, Union
+
 import numpy as np
 import pandas as pd
-
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsFile import (
+    DfsDynamicItemInfo,
+    DfsFile,
+    DfsFileInfo,
+    DfsSimpleType,
+    TimeAxisType,
+)
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
 
-from mikecore.eum import eumQuantity
-from mikecore.DfsFile import DfsSimpleType, TimeAxisType, DfsFile
-from mikecore.DfsFactory import DfsFactory
-
-from .spatial.geometry import GeometryUndefined
-from .dataset import Dataset
 from .base import TimeSeries
-from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit, ItemInfoList
+from .dataset import Dataset
+from .eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
 from .exceptions import DataDimensionMismatch, ItemNumbersError, ItemsError
-
-from mikecore.DfsFile import DfsDynamicItemInfo, DfsFileInfo
-from mikecore.DfsFileFactory import DfsFileFactory
+from .spatial.geometry import GeometryUndefined
 
 
 def _read_item_time_step(
@@ -239,8 +242,6 @@ def _get_item_info(
     return ItemInfoList(items)
 
 
-
-
 def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
@@ -249,7 +250,7 @@ def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
         t_rel = np.zeros(ds.n_timesteps)
     else:
         t_rel = (ds.time - ds.time[0]).total_seconds()
-    
+
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
 
