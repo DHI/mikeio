@@ -11,7 +11,7 @@ from ..eum import EUMType, EUMUnit
 from .geometry import _Geometry, BoundingBox, GeometryPoint2D, GeometryPoint3D
 from .grid_geometry import Grid2D
 from ..interpolation import get_idw_interpolant, interp2d
-from ..custom_exceptions import InvalidGeometry
+from ..exceptions import InvalidGeometry
 from .utils import _relative_cumulative_distance, xy_to_bbox
 from .FM_utils import (
     _get_node_centered_data,

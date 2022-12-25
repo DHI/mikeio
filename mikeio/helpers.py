@@ -1,8 +1,8 @@
 from typing import Union
 from mikecore.DfsFile import DataValueType
-from mikeio.custom_exceptions import InvalidDataValueType
+from .exceptions import InvalidDataValueType
 
-
+# TODO relocate this to some more appropriately named file
 def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
     string_datatype_mapping = {
         "Instantaneous": DataValueType.Instantaneous,

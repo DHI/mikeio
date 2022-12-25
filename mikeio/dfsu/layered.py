@@ -7,18 +7,18 @@ from scipy.spatial import cKDTree
 
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from .dfsu import _Dfsu
-from .dataset import Dataset, DataArray
-from .spatial.FM_geometry import GeometryFM3D
-from .custom_exceptions import InvalidGeometry
-from .dfsutil import (
+from ..dataset import Dataset, DataArray
+from ..spatial.FM_geometry import GeometryFM3D
+from ..exceptions import InvalidGeometry
+from ..dfsutil import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
     _read_item_time_step,
 )
-from .spatial.FM_utils import _plot_vertical_profile
-from .interpolation import get_idw_interpolant, interp2d
-from .eum import ItemInfo, EUMType
+from ..spatial.FM_utils import _plot_vertical_profile
+from ..interpolation import get_idw_interpolant, interp2d
+from ..eum import ItemInfo, EUMType
 
 
 class DfsuLayered(_Dfsu):

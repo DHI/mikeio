@@ -391,5 +391,5 @@ class PfsDocument(PfsSection):
             self._write_with_func(f.write, level=0)
 
 
-class Pfs(PfsDocument):
-    pass
+# TODO remove this alias
+Pfs = PfsDocument

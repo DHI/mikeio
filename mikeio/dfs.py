@@ -13,7 +13,7 @@ from .base import TimeSeries
 
 from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .eum import ItemInfo, TimeStepUnit, EUMType, EUMUnit
-from .custom_exceptions import DataDimensionMismatch, ItemNumbersError
+from .exceptions import DataDimensionMismatch, ItemNumbersError
 from mikecore.eum import eumQuantity
 from mikecore.DfsFile import DfsSimpleType, TimeAxisType, DfsFile
 from mikecore.DfsFactory import DfsFactory

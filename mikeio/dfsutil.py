@@ -4,7 +4,7 @@ from typing import Iterable, List, Tuple, Union
 import numpy as np
 import pandas as pd
 from .eum import EUMType, EUMUnit, ItemInfo, TimeAxisType, ItemInfoList
-from .custom_exceptions import ItemsError
+from .exceptions import ItemsError
 
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFileInfo
 from mikecore.DfsFileFactory import DfsFileFactory

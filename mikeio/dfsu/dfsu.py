@@ -17,19 +17,18 @@ from mikecore.MeshBuilder import MeshBuilder
 
 from mikeio.spatial.utils import xy_to_bbox
 
-from . import __dfs_version__
-from .base import EquidistantTimeSeries
-from .track import _extract_track
-from .dfsutil import (
+from .. import __dfs_version__
+from ..base import EquidistantTimeSeries
+from ..track import _extract_track
+from ..dfsutil import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
     _read_item_time_step,
 )
-from .dataset import Dataset, DataArray
-from .dfs0 import Dfs0
-from .eum import ItemInfo, EUMType, EUMUnit
-from .spatial.FM_geometry import (
+from ..dataset import Dataset, DataArray
+from ..eum import ItemInfo, EUMType, EUMUnit
+from ..spatial.FM_geometry import (
     GeometryFM,
     GeometryFM3D,
     GeometryFMVerticalProfile,
@@ -38,8 +37,8 @@ from .spatial.FM_geometry import (
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
 )
-from .spatial.FM_utils import _plot_map
-from .spatial.grid_geometry import Grid2D
+from ..spatial.FM_utils import _plot_map
+from ..spatial.grid_geometry import Grid2D
 
 
 def _write_dfsu(filename: str, data: Dataset):
