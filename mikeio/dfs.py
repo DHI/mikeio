@@ -68,7 +68,7 @@ def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
     items: Optional[Union[str, int, List[int], List[str]]] = None,
     ignore_first: bool = False,
-) -> Iterable[int]:
+) -> List[int]:
     start_idx = 1 if ignore_first else 0
     n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
@@ -272,6 +272,7 @@ class _Dfs123(TimeSeries):
 
     show_progress = False
 
+    # TODO add all common arguments
     def __init__(self, filename=None):
         self._filename = str(filename)
         self._projstr = None
@@ -288,6 +289,7 @@ class _Dfs123(TimeSeries):
         self.geometry = GeometryUndefined()
         self._dfs = None
         self._source = None
+        self._ndim = None
 
     def read(
         self,

@@ -1,5 +1,5 @@
 import os
-from typing import Iterable, List, Union
+from typing import Iterable, List, Optional, Union
 import math
 import numpy as np
 import pandas as pd
@@ -163,7 +163,7 @@ def scale(
     outfilename: str,
     offset: float = 0.0,
     factor: float = 1.0,
-    items: Union[List[str], List[int]] = None,
+    items: Optional[Union[List[str], List[int]]] = None,
 ) -> None:
     """Apply scaling to any dfs file
 
@@ -213,7 +213,7 @@ def fill_corrupt(
     infilename: str,
     outfilename: str,
     fill_value: float = np.nan,
-    items: Union[List[str], List[int]] = None,
+    items: Optional[Union[List[str], List[int]]] = None,
 ) -> None:
     """
     Replace corrupt (unreadable) data with fill_value, default delete value.

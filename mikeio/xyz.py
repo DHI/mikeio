@@ -1,9 +1,10 @@
+from typing import Union
+from pathlib import Path
 import pandas as pd
 
 
-def read_xyz(filename):
+def read_xyz(filename: Union[str,Path]) -> pd.DataFrame:
 
-    # try:
     df = pd.read_csv(filename, sep="\t", header=None)
     if df.shape[1] == 1:
         df = pd.read_csv(filename, sep=" ", header=None)
@@ -16,9 +17,10 @@ def read_xyz(filename):
     return df
 
 
-def dataframe_to_xyz(self, filename):
-
+def dataframe_to_xyz(self, filename: Union[str, Path]) -> None:
+    # TODO validation
     self.to_csv(filename, sep="\t", header=False, index=False)
 
 
+# TODO should we keep this?
 pd.DataFrame.to_xyz = dataframe_to_xyz
