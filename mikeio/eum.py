@@ -16,12 +16,12 @@ degree Celsius
 >>>
 
 """
-from typing import List, Sequence
+from typing import List, Sequence, Union
 from mikecore.DfsFile import DataValueType
 from mikecore.eum import eumWrapper
 from enum import IntEnum
 
-from mikeio.helpers import to_datatype
+from .exceptions import InvalidDataValueType
 
 import pandas as pd
 
@@ -1468,3 +1468,35 @@ class ItemInfoList(list):
     def to_dataframe(self):
         data = [{"name": item.name, "type": item.type.name, "unit": item.unit.name} for item in self]
         return pd.DataFrame(data)
+
+def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
+    string_datatype_mapping = {
+        "Instantaneous": DataValueType.Instantaneous,
+        "Accumulated": DataValueType.Accumulated,
+        "StepAccumulated": DataValueType.StepAccumulated,
+        "MeanStepBackward": DataValueType.MeanStepBackward,
+        "MeanStepForward": DataValueType.MeanStepForward,
+        0: DataValueType.Instantaneous,
+        1: DataValueType.Accumulated,
+        2: DataValueType.StepAccumulated,
+        3: DataValueType.MeanStepBackward,
+        4: DataValueType.MeanStepForward,
+    }
+
+    if isinstance(datatype, str):
+        if datatype not in string_datatype_mapping.keys():
+            raise InvalidDataValueType
+
+        return string_datatype_mapping[datatype]
+
+    if isinstance(datatype, int):
+        if datatype not in string_datatype_mapping.keys():
+            raise InvalidDataValueType
+
+        return string_datatype_mapping[datatype]
+
+    if not isinstance(DataValueType):
+        raise ValueError("Data value type not supported")
+
+    return datatype
+
