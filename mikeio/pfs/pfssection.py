@@ -24,6 +24,43 @@ class PfsNonUniqueList(list):
 
 
 class PfsSection(SimpleNamespace, MutableMapping):
+
+    @staticmethod
+    def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
+        """Create a PfsSection from a DataFrame
+        
+        Parameters
+        ----------
+        df: dataframe
+            data
+        prefix: str
+            section header prefix
+        
+        Examples
+        --------
+        >>> df = pd.DataFrame(dict(station=["Foo", "Bar"],include=[0,1]), index=[1,2])
+        >>> df
+          station  include
+        1     Foo        0
+        2     Bar        1
+        >>> mikeio.PfsSection.from_dataframe(df,"STATION_")
+        ... # doctest: +NORMALIZE_WHITESPACE
+        [STATION_1]
+            station = 'Foo'
+            include = 0
+        EndSect  // STATION_1
+        [STATION_2]
+            station = 'Bar'
+            include = 1
+        EndSect  // STATION_2
+        """
+        d = {}
+        for idx in df.index:
+            key = prefix + str(idx)
+            value = df.loc[idx].to_dict()
+            d[key] = value
+        return PfsSection(d)
+
     def __init__(self, dictionary, **kwargs):
         super().__init__(**kwargs)
         for key, value in dictionary.items():
@@ -369,7 +406,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
         Examples
         --------
-        >>> pfs = mikeio.read_pfs("lake.sw")
+        >>> pfs = mikeio.read_pfs("tests/testdata/pfs/lake.sw")
         >>> df = pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
         """
         if prefix is not None:

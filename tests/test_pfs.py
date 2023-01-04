@@ -17,15 +17,6 @@ def d1():
         empty=dict(),
     )
 
-
-@pytest.fixture
-def df1():
-    d = dict(
-        name=["Viken", "Drogden"], position=[[12.5817, 56.128], [12.7113, 55.5364]]
-    )
-    return pd.DataFrame(d, index=range(1, 3))
-
-
 def test_pfssection(d1):
     sct = mikeio.PfsSection(d1)
     assert sct.key1 == 1
@@ -72,10 +63,47 @@ def test_pfssection_keys_values_items(d1):
         j += 1
 
 
-#def test_pfssection_from_dataframe(df1):
-#    sct = mikeio.PfsSection.from_dataframe(df1, prefix="MEASUREMENT_")
-#    assert sct.MEASUREMENT_1.name == "Viken"
-#    assert sct.MEASUREMENT_2.position == [12.7113, 55.5364]
+def test_pfssection_from_dataframe():
+    stations = dict(
+        name=["Viken", "Drogden"],
+        position=[[12.5817, 56.128], [12.7113, 55.5364]]) 
+    df = pd.DataFrame(stations, index=range(1, 3))
+    sct = mikeio.PfsSection.from_dataframe(df, prefix="MEASUREMENT_")
+    assert sct.MEASUREMENT_1.name == "Viken"
+    assert sct.MEASUREMENT_2.position == [12.7113, 55.5364]
+
+    with pytest.raises(AttributeError):
+        sct.MEASUREMENT_0
+
+def test_pfssection_output_to_and_from_dataframe():
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
+    sct_orig = pfs.SW.OUTPUTS
+    df = sct_orig.to_dataframe()
+    sct = mikeio.PfsSection.from_dataframe(df, prefix="OUTPUT_")
+
+    # The lines that belong to the [OUTPUTS] is lost in the transformation to a dataframe
+    """
+       [OUTPUTS]
+         Touched = 1
+         MzSEPfsListItemCount = 4
+         number_of_outputs = 4
+         [OUTPUT_1]
+            ...
+         [OUTPUT_2]
+            ...
+    """
+    orig_lines = str(sct_orig).splitlines()
+    new_lines = str(sct).splitlines()
+
+    assert "number_of_outputs" in orig_lines[2]
+
+    n_new_lines = len(new_lines)
+    n_orig_lines = len(orig_lines)
+    n_missing_lines = n_orig_lines - n_new_lines
+    
+    assert orig_lines[n_missing_lines:] == new_lines
+
+
 
 
 def test_pfssection_to_dict(d1):
