@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 from platform import architecture
 
 # PEP0440 compatible formatted version, see:
@@ -26,17 +26,16 @@ __dfs_version__: int = 130
 if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
 
+from .dataset import DataArray, Dataset
 from .dfs0 import Dfs0
 from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
-from .dfsu_factory import Dfsu
-from .dfsu import Mesh
-from .pfs import read_pfs, Pfs, PfsSection, PfsDocument
-from .xyz import read_xyz
-from .dataset import Dataset, DataArray
+from .dfsu import Dfsu, Mesh
+from .eum import EUMType, EUMUnit, ItemInfo
+from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from .eum import ItemInfo, EUMType, EUMUnit
+from .xyz import read_xyz
 
 
 def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Dataset:

@@ -1,14 +1,15 @@
+import warnings
 from dataclasses import dataclass
 from typing import Sequence, Tuple, Union
-import warnings
+
 import numpy as np
 
 from .geometry import (
-    _Geometry,
+    BoundingBox,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
-    BoundingBox,
+    _Geometry,
 )
 
 
@@ -113,15 +114,15 @@ class Grid1D(_Geometry):
     def get_spatial_interpolant(self, coords, **kwargs):
 
         x = coords[0][0]  # TODO accept list of points
-        
+
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
-        
+
         if x > self.x.max() or x < self.x.min():
             weights = np.array([np.nan, np.nan])
         else:
-            weights = (1 - d[ids]/d[ids].sum())
+            weights = 1 - d[ids] / d[ids].sum()
             assert np.allclose(weights.sum(), 1.0)
         assert len(ids) == 2
         assert len(weights) == 2
@@ -1028,13 +1029,13 @@ class Grid3D(_Geometry):
                 orientation=g.orientation,
             )
             return geometry
-        
+
         d = np.diff(g.z[layers])
         if len(d) > 0:
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 warnings.warn("Extracting non-equidistant layers! Cannot use Grid3D.")
                 return GeometryUndefined()
-        
+
         geometry = Grid3D(
             x=g.x,
             y=g.y,

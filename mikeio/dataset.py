@@ -1,25 +1,24 @@
+import collections.abc
 import os
-from datetime import datetime
-from typing import Iterable, Sequence, Tuple, Union, Mapping, Optional
 import warnings
+from copy import deepcopy
+from datetime import datetime
+from typing import Iterable, Mapping, Optional, Sequence, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from copy import deepcopy
-
-import collections.abc
-
 from mikecore.DfsFile import DfsSimpleType
 
-from .eum import EUMType, EUMUnit, ItemInfo
-from .data_utils import DataUtilsMixin
-from .spatial.FM_geometry import GeometryFM
 from .base import TimeSeries
+from .data_utils import DataUtilsMixin
 from .dataarray import DataArray
+from .eum import EUMType, EUMUnit, ItemInfo
+from .spatial.FM_geometry import GeometryFM
 from .spatial.geometry import (
-    _Geometry,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
+    _Geometry,
 )
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 

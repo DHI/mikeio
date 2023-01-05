@@ -1,34 +1,34 @@
+import warnings
+from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-import warnings
-from typing import Optional, Sequence, Tuple, Union, Iterable
+from typing import Iterable, Optional, Sequence, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from copy import deepcopy
+from mikecore.DfsuFile import DfsuFileType
 
 from .base import TimeSeries
+from .data_utils import DataUtilsMixin
 from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.geometry import (
-    _Geometry,
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryUndefined,
-)
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .spatial.FM_geometry import (
-    _GeometryFMLayered,
     GeometryFM,
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
-    GeometryFMLineSpectrum,
-    GeometryFMAreaSpectrum,
+    _GeometryFMLayered,
 )
-from mikecore.DfsuFile import DfsuFileType
 from .spatial.FM_utils import _plot_map, _plot_vertical_profile
-from mikecore.DfsuFile import DfsuFileType
-from .spectral_utils import plot_2dspectrum, calc_m0_from_spectrum
-from .data_utils import DataUtilsMixin
+from .spatial.geometry import (
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+    _Geometry,
+)
+from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
+from .spectral import calc_m0_from_spectrum, plot_2dspectrum
 
 
 class _DataArrayPlotter:
@@ -1140,9 +1140,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
 
-        Note that the data will be a _view_ of the original data 
-        if possible (single index or slice), otherwise a copy (fancy indexing) 
-        following NumPy convention. 
+        Note that the data will be a _view_ of the original data
+        if possible (single index or slice), otherwise a copy (fancy indexing)
+        following NumPy convention.
 
         The spatial parameters available depend on the dims
         (i.e. geometry) of the DataArray:
@@ -1274,7 +1274,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 zn = self._zn[:, node_ids]
 
         # reduce dims only if singleton idx
-        dims = tuple([d for i, d in enumerate(self.dims) if i != axis]) if single_index else self.dims
+        dims = (
+            tuple([d for i, d in enumerate(self.dims) if i != axis])
+            if single_index
+            else self.dims
+        )
         if single_index:
             idx = int(idx)
         elif idx_slice is not None:
@@ -1283,11 +1287,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if axis == 0:
             dat = self.values[idx]
         elif axis == 1:
-            dat = self.values[:,idx]
+            dat = self.values[:, idx]
         elif axis == 2:
-            dat = self.values[:,:,idx]
+            dat = self.values[:, :, idx]
         elif axis == 3:
-            dat = self.values[:,:,:,idx]
+            dat = self.values[:, :, :, idx]
         else:
             dat = np.take(self.values, idx, axis=axis)
 
@@ -1650,7 +1654,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """Fill in NaNs by interpolating according to different methods.
 
         Wrapper of :py:meth:`xarray.DataArray.interpolate_na`
-        
+
         Examples
         --------
 
