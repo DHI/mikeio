@@ -409,7 +409,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         lvl_prefix = ""
 
 
-        for k, v in vars(self).items():
+        for k, v in self.items():
 
             # check for empty sections
             #NoneType = type(None)
