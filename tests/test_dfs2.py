@@ -12,7 +12,7 @@ import mikeio
 from mikeio.dataset import Dataset
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
-from mikeio.custom_exceptions import ItemsError
+from mikeio.exceptions import ItemsError
 from mikeio.spatial.geometry import GeometryPoint2D
 from mikeio.spatial.grid_geometry import Grid2D
 

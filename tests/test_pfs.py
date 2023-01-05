@@ -17,15 +17,6 @@ def d1():
         empty=dict(),
     )
 
-
-@pytest.fixture
-def df1():
-    d = dict(
-        name=["Viken", "Drogden"], position=[[12.5817, 56.128], [12.7113, 55.5364]]
-    )
-    return pd.DataFrame(d, index=range(1, 3))
-
-
 def test_pfssection(d1):
     sct = mikeio.PfsSection(d1)
     assert sct.key1 == 1
@@ -34,18 +25,32 @@ def test_pfssection(d1):
     assert len(sct.lst) == 2
     assert sct.dt == datetime(1979, 2, 3, 3, 5, 0)
 
+
 def test_pfssection_repr(d1):
     sct = mikeio.PfsSection(d1)
     txt = repr(sct)
-    assert len(txt)>1
+    assert len(txt) > 1
     assert "dt = 1979, 2, 3, 3, 5, 0" in txt
     assert "EndSect" in txt
 
+
 def test_pfs_repr(d1):
-    pfs = mikeio.Pfs(d1, names="ROOT")
+    pfs = mikeio.PfsDocument(d1, names="ROOT")
     txt = repr(pfs)
-    assert len(txt)>1
+    assert len(txt) > 1
     assert "SMILE = |file" in txt
+
+
+def test_create_pfsdocument_from_dict(d1):
+    sct = mikeio.PfsDocument({"root": d1})
+    assert sct.root.key1 == 1
+
+    with pytest.raises(AssertionError, match="all targets must be PfsSections"):
+        mikeio.PfsDocument(d1)
+
+    sct = mikeio.PfsDocument(d1, names="root")
+    assert sct.root.key1 == 1
+
 
 def test_pfssection_keys_values_items(d1):
     sct = mikeio.PfsSection(d1)
@@ -58,10 +63,47 @@ def test_pfssection_keys_values_items(d1):
         j += 1
 
 
-def test_pfssection_from_dataframe(df1):
-    sct = mikeio.PfsSection.from_dataframe(df1, prefix="MEASUREMENT_")
+def test_pfssection_from_dataframe():
+    stations = dict(
+        name=["Viken", "Drogden"],
+        position=[[12.5817, 56.128], [12.7113, 55.5364]]) 
+    df = pd.DataFrame(stations, index=range(1, 3))
+    sct = mikeio.PfsSection.from_dataframe(df, prefix="MEASUREMENT_")
     assert sct.MEASUREMENT_1.name == "Viken"
     assert sct.MEASUREMENT_2.position == [12.7113, 55.5364]
+
+    with pytest.raises(AttributeError):
+        sct.MEASUREMENT_0
+
+def test_pfssection_output_to_and_from_dataframe():
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
+    sct_orig = pfs.SW.OUTPUTS
+    df = sct_orig.to_dataframe()
+    sct = mikeio.PfsSection.from_dataframe(df, prefix="OUTPUT_")
+
+    # The lines that belong to the [OUTPUTS] is lost in the transformation to a dataframe
+    """
+       [OUTPUTS]
+         Touched = 1
+         MzSEPfsListItemCount = 4
+         number_of_outputs = 4
+         [OUTPUT_1]
+            ...
+         [OUTPUT_2]
+            ...
+    """
+    orig_lines = str(sct_orig).splitlines()
+    new_lines = str(sct).splitlines()
+
+    assert "number_of_outputs" in orig_lines[2]
+
+    n_new_lines = len(new_lines)
+    n_orig_lines = len(orig_lines)
+    n_missing_lines = n_orig_lines - n_new_lines
+    
+    assert orig_lines[n_missing_lines:] == new_lines
+
+
 
 
 def test_pfssection_to_dict(d1):
@@ -210,12 +252,12 @@ def test_pfssection_find_replace(d1):
 
 def test_pfssection_write(d1, tmpdir):
     sct = mikeio.PfsSection(d1)
-    pfs = sct.to_Pfs(name="root")
+    pfs = mikeio.PfsDocument({"root":sct})
     fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
     pfs.write(fn)
 
-    pfs2 = mikeio.Pfs(fn)
-    assert pfs2.data.key1 == sct.key1
+    pfs2 = mikeio.PfsDocument(fn)
+    assert pfs2.root.key1 == sct.key1
 
 
 def test_str_is_scientific_float(d1):
@@ -233,18 +275,17 @@ def test_str_is_scientific_float(d1):
 
 def test_basic():
 
-    pfs = mikeio.Pfs("tests/testdata/pfs/simple.pfs")
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
 
-    data = pfs.data
-    # On a pfs file with a single target, the target is implicit,
-    #  i.e. BoundaryExtractor in this case
-
+    data = pfs.targets[0]
+    assert pfs.targets[0] == pfs.BoundaryExtractor
+    
     assert data.z_min == -3000
     assert data.POINT_1.y == 50
 
 
 def test_ecolab():
-    pfs = mikeio.Pfs("tests/testdata/pfs/minimal.ecolab")
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/minimal.ecolab")
     assert pfs.ECO_LAB_SETUP.MISC.DESCRIPTION == "Miscellaneous Description"
     assert pfs.ECO_LAB_SETUP.PROCESSES.PROCESS_1.SCOPE == "WC"
 
@@ -253,9 +294,9 @@ def test_ecolab():
 
 
 def test_mztoolbox():
-    pfs = mikeio.Pfs("tests/testdata/pfs/concat.mzt")
-    assert "tide1.dfs" in pfs.data.Setup.File_1.InputFile
-    assert "|" in pfs.data.Setup.File_1.InputFile
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/concat.mzt")
+    assert "tide1.dfs" in pfs.txconc.Setup.File_1.InputFile
+    assert "|" in pfs.txconc.Setup.File_1.InputFile
 
 
 def assert_files_match(f1, f2):
@@ -289,54 +330,54 @@ def assert_txt_files_match(f1, f2, comment="//") -> None:
 
 def test_read_write(tmpdir):
     infilename = "tests/testdata/pfs/concat.mzt"
-    pfs1 = mikeio.Pfs(infilename)
+    pfs1 = mikeio.PfsDocument(infilename)
     outfilename = os.path.join(tmpdir.dirname, "concat_out.mzt")
     pfs1.write(outfilename)
     assert_txt_files_match(infilename, outfilename)
-    _ = mikeio.Pfs(outfilename)  # try to parse it also
+    _ = mikeio.PfsDocument(outfilename)  # try to parse it also
 
 
 def test_read_write_she(tmpdir):
     infilename = "tests/testdata/pfs/Karup_basic.she"
-    pfs1 = mikeio.Pfs(infilename, unique_keywords=False)
+    pfs1 = mikeio.PfsDocument(infilename, unique_keywords=False)
     outfilename = os.path.join(tmpdir.dirname, "Karup_basic_out.she")
     pfs1.write(outfilename)
     # assert_txt_files_match(infilename, outfilename)
-    pfs2 = mikeio.Pfs(outfilename)
+    pfs2 = mikeio.PfsDocument(outfilename)
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
 
 def test_read_write_she2(tmpdir):
     infilename = "tests/testdata/pfs/Karup_mini.she"
     with pytest.warns(match="contains a single quote character"):
-        pfs1 = mikeio.Pfs(infilename)
+        pfs1 = mikeio.PfsDocument(infilename)
 
     outfilename = os.path.join(tmpdir.dirname, "Karup_mini_out.she")
     pfs1.write(outfilename)
 
     with pytest.warns(match="contains a single quote character"):
-        pfs2 = mikeio.Pfs(outfilename)
+        pfs2 = mikeio.PfsDocument(outfilename)
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
 
 def test_read_write_filenames(tmpdir):
     infilename = "tests/testdata/pfs/filenames.pfs"
-    pfs1 = mikeio.Pfs(infilename)
+    pfs1 = mikeio.PfsDocument(infilename)
     outfilename = os.path.join(tmpdir.dirname, "filenames_out.pfs")
     pfs1.write(outfilename)
     assert_txt_files_match(infilename, outfilename)
-    _ = mikeio.Pfs(outfilename)  # try to parse it also
+    _ = mikeio.PfsDocument(outfilename)  # try to parse it also
 
 
 def test_read_write_filenames_modified(tmpdir):
     infilename = "tests/testdata/pfs/filenames.pfs"
-    pfs1 = mikeio.Pfs(infilename)
+    pfs1 = mikeio.PfsDocument(infilename)
     pfs1.FILE_NAMES.file5 = r"..\..\newfile5.dfs0"
     pfs1.FILE_NAMES.file6 = "|../newfile6.dfs0|"
     outfilename = os.path.join(tmpdir.dirname, "filenames_out.pfs")
     pfs1.write(outfilename)
 
-    pfs2 = mikeio.Pfs(outfilename)
+    pfs2 = mikeio.PfsDocument(outfilename)
     d1 = pfs1.to_dict()
     d2 = pfs2.to_dict()
     assert d1 == d2
@@ -344,28 +385,25 @@ def test_read_write_filenames_modified(tmpdir):
 
 def test_sw():
 
-    pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
-    assert pfs.data == pfs.FemEngineSW
-    data = pfs.data
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
+    assert pfs.targets[0] == pfs.FemEngineSW
+    root = pfs.targets[0]
 
-    # On a pfs file with a single target, the target is implicit,
-    #  i.e. FemEngineSW in this case
-
-    assert data.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_frequencies == 25
-    assert data.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_directions == 16
+    assert root.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_frequencies == 25
+    assert root.SPECTRAL_WAVE_MODULE.SPECTRAL.number_of_directions == 16
 
     # use shorthand alias SW instead of SPECTRAL_WAVE_MODULE
     assert pfs.SW.SPECTRAL.number_of_frequencies == 25
     assert pfs.SW.WIND.format == 1
 
-    assert data.TIME.number_of_time_steps == 450
+    assert root.TIME.number_of_time_steps == 450
 
-    assert data.TIME.start_time.year == 2002
-    assert data.TIME.start_time.month == 1
+    assert root.TIME.start_time.year == 2002
+    assert root.TIME.start_time.month == 1
 
 
 def test_pfssection_to_dataframe():
-    pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
     assert df["file_name"][1] == "Wave_parameters.dfsu"
     assert df.shape[0] == 4
@@ -374,7 +412,7 @@ def test_pfssection_to_dataframe():
 def test_hd_outputs():
 
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs("tests/testdata/pfs/lake.m21fm", unique_keywords=True)
+        pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.m21fm", unique_keywords=True)
     df = pfs.HD.OUTPUTS.to_dataframe()
 
     assert df["file_name"][2] == "ts.dfs0"
@@ -383,8 +421,8 @@ def test_hd_outputs():
 
 def test_included_outputs():
 
-    pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
-    df = pfs.SW.OUTPUTS.to_dataframe()
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
+    df = pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
     df = df[df.include == 1]
 
     assert df["file_name"][1] == "Wave_parameters.dfsu"
@@ -393,7 +431,7 @@ def test_included_outputs():
 
 def test_output_by_id():
 
-    pfs = mikeio.Pfs("tests/testdata/pfs/lake.sw")
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
     # .loc refers to output_id irrespective of included or not
     assert df.loc[3]["file_name"] == "Waves_x20km_y20km.dfs0"
@@ -405,23 +443,23 @@ def test_output_by_id():
 
 def test_encoding():
     with pytest.warns(match="defined multiple times"):
-        pfs = mikeio.Pfs(
+        pfs = mikeio.PfsDocument(
             "tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", unique_keywords=True
         )
-    assert hasattr(pfs, "DA")
+    assert len(pfs.keys()) == 1
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_encoding_linux():
     with pytest.raises(ValueError):
-        mikeio.Pfs("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None)
+        mikeio.PfsDocument("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None)
 
 
 def test_multiple_identical_roots():
     """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/t1_t0.mzt")
-    assert pfs.data[0].Setup.X == 0
-    assert pfs.data[1].Setup.X == 2
+    assert pfs.targets[0].Setup.X == 0
+    assert pfs.targets[1].Setup.X == 2
     assert pfs.t1_t0[0].Setup.X == 0
     assert pfs.t1_t0[1].Setup.X == 2
     assert pfs.names == ["t1_t0", "t1_t0"]
@@ -442,6 +480,10 @@ def test_multiple_unique_roots():
 def test_multiple_roots_mixed():
     """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_root_elements.pfs")
+    assert list(pfs.keys()) == [
+        "MZ_WAVE_SPECTRA_CONVERTER",
+        "SYSTEM",
+    ]
     assert pfs.names == [
         "MZ_WAVE_SPECTRA_CONVERTER",
         "MZ_WAVE_SPECTRA_CONVERTER",
@@ -453,7 +495,7 @@ def test_multiple_roots_mixed():
 def test_non_unique_keywords():
     fn = "tests/testdata/pfs/nonunique.pfs"
     with pytest.warns(match="Keyword z_min defined multiple times"):
-        pfs = mikeio.Pfs(fn, unique_keywords=True)
+        pfs = mikeio.PfsDocument(fn, unique_keywords=True)
 
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
     assert isinstance(pfs.BoundaryExtractor.POINT_1, mikeio.pfs.PfsNonUniqueList)
@@ -465,7 +507,7 @@ def test_non_unique_keywords():
 
 def test_non_unique_keywords_allowed():
     fn = "tests/testdata/pfs/nonunique.pfs"
-    pfs = mikeio.Pfs(fn, unique_keywords=False)
+    pfs = mikeio.PfsDocument(fn, unique_keywords=False)
 
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
@@ -477,12 +519,12 @@ def test_non_unique_keywords_allowed():
 
 def test_non_unique_keywords_read_write(tmpdir):
     fn1 = "tests/testdata/pfs/nonunique.pfs"
-    pfs1 = mikeio.Pfs(fn1, unique_keywords=False)
+    pfs1 = mikeio.PfsDocument(fn1, unique_keywords=False)
 
     fn2 = os.path.join(tmpdir.dirname, "nonunique_out.pfs")
     pfs1.write(fn2)
 
-    pfs2 = mikeio.Pfs(fn2, unique_keywords=False)
+    pfs2 = mikeio.PfsDocument(fn2, unique_keywords=False)
 
     d1 = pfs1.BoundaryExtractor.to_dict()
     d2 = pfs2.BoundaryExtractor.to_dict()
@@ -492,16 +534,16 @@ def test_non_unique_keywords_read_write(tmpdir):
 def test_illegal_pfs():
     fn = "tests/testdata/pfs/illegal.pfs"
     with pytest.raises(ValueError, match="]]"):
-        mikeio.Pfs(fn)
+        mikeio.PfsDocument(fn)
 
 
 def test_mdf():
     """MDF with multiline polygon"""
     fn = "tests/testdata/pfs/oresund.mdf"
 
-    pfs = mikeio.Pfs(fn)
+    pfs = mikeio.PfsDocument(fn)
     assert (
-        pfs.data[2].POLYGONS.Data
+        pfs.targets[2].POLYGONS.Data
         == "8 8 Untitled 359236.79224376212 6168403.076453222 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 3 38 32 25 8 Untitled 367530.58488032949 6174892.7846391136 0 0 -1 -1 16711680 65535 3 1 700000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 14 34 25 32 39 1 37 35 31 23 26 17 30 22 24 8 Untitled 358191.86702583247 6164004.5695307152 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 2 1 36 8 Untitled 356300.2080261847 6198016.2887355704 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 2 9 0 9 Ndr Roese 355957.23455536627 6165986.6140259188 0 0 -1 -1 16711680 65535 3 1 180000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 6 33 37 36 39 38 34 16 Area of interest 355794.66401566722 6167799.1149176853 0 0 -1 -1 16711680 65535 3 1 50000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 1 40 8 Untitled 353529.91916129418 6214840.5979535272 0 0 -1 -1 16711680 65535 3 1 700000 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 8 41 8 7 27 4 6 11 12 8 Untitled 351165.00127937191 6173083.0605236143 1 0 -1 -1 16711680 65535 3 0 1 0 1 1000 1000 0 0 0 0 0 1 1000 2 2 0 10 1 2 "
     )
 
@@ -513,7 +555,7 @@ def test_read_in_memory_string():
   option = foo,bar
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
 
     assert pfs.ENGINE.option == ["foo", "bar"]
 
@@ -526,7 +568,7 @@ def test_read_mixed_array():
   fill_list = false, 'TEST'
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
 
     assert pfs.ENGINE.advanced == False
     assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
@@ -542,7 +584,7 @@ def test_read_mixed_array2():
   fill_list = 'dsd', 0, 0.0, false
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
     assert len(pfs.ENGINE.fill_list) == 4
     assert pfs.ENGINE.fill_list[0] == "dsd"
@@ -558,7 +600,7 @@ def test_read_mixed_array3():
   fill_list = 'dsd', 0, 0.0, "str2", false, 'str3'
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
     assert len(pfs.ENGINE.fill_list) == 6
     assert pfs.ENGINE.fill_list[0] == "dsd"
@@ -576,7 +618,7 @@ def test_read_array():
   fill_list = 1, 2
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
 
     assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
     assert len(pfs.ENGINE.fill_list) == 2
@@ -593,7 +635,7 @@ def test_empty(tmpdir):
   EndSect // B  
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
 
     assert isinstance(pfs.ENGINE.A, list)
     assert len(pfs.ENGINE.A) == 0
@@ -623,7 +665,7 @@ def test_difficult_chars_in_str(tmpdir):
 EndSect // ENGINE
 """
     with pytest.warns(match="contains a single quote character"):
-        pfs = mikeio.Pfs(StringIO(text))
+        pfs = mikeio.PfsDocument(StringIO(text))
 
     assert isinstance(pfs.ENGINE.A, str)
     assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
@@ -660,7 +702,7 @@ def test_difficult_chars_in_str2(tmpdir):
 EndSect // ENGINE"""
 
     with pytest.warns(match="contains a single quote character"):
-        pfs = mikeio.Pfs(StringIO(text))
+        pfs = mikeio.PfsDocument(StringIO(text))
 
     outfile = os.path.join(tmpdir, "difficult_chars_in_str2.pfs")
     pfs.write(outfile)
@@ -683,7 +725,7 @@ def test_end_of_stream():
   rr = ||, '', 1, 0
 EndSect  // Results
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
 
 
 def test_read_string_array():
@@ -693,7 +735,7 @@ def test_read_string_array():
   fill_list = 'foo', 'bar', 'baz'
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
 
     assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
     assert len(pfs.ENGINE.fill_list) == 3
@@ -709,7 +751,7 @@ def test_read_write_list_list(tmpdir):
   RGB_Color_Value = 85, 0, 171
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text), unique_keywords=False)
+    pfs = mikeio.PfsDocument(StringIO(text), unique_keywords=False)
     assert len(pfs.ENGINE.RGB_Color_Value) == 2
     assert len(pfs.ENGINE.RGB_Color_Value[0]) == 3
 
@@ -723,6 +765,7 @@ EndSect // ENGINE
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 2
 
+
 def test_pfs_repr_contains_name_of_target():
     text = """
 [ENGINE]
@@ -730,11 +773,12 @@ def test_pfs_repr_contains_name_of_target():
   RGB_Color_Value = 85, 0, 171
 EndSect // ENGINE
 """
-    pfs = mikeio.Pfs(StringIO(text), unique_keywords=False)
+    pfs = mikeio.PfsDocument(StringIO(text), unique_keywords=False)
     text = repr(pfs)
 
     # TODO should we be more specific i.e. [ENGINE] ?
     assert "ENGINE" in text
+
 
 def test_double_single_quotes_in_string(tmpdir):
     text = """
@@ -750,7 +794,7 @@ def test_double_single_quotes_in_string(tmpdir):
 EndSect  // DERIVED_VARIABLE_106
 """
 
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert (
         pfs.DERIVED_VARIABLE_106.description
         == 'alfa_PC_T, "light" adjusted alfa_PC, ugC/gC*m2/uE'
@@ -776,7 +820,7 @@ def test_str_in_str_projection(tmpdir):
    EndSect  // ROOT 
 """
 
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert isinstance(pfs.ROOT.Proj, str)
     assert pfs.ROOT.Proj[8] == "E"
 
@@ -801,7 +845,7 @@ def test_number_in_str(tmpdir):
    EndSect  // ROOT 
 """
 
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert isinstance(pfs.ROOT.ID1, str)
     assert isinstance(pfs.ROOT.ID2, str)
     assert not isinstance(pfs.ROOT.Number, str)
@@ -825,7 +869,7 @@ def test_floatlike_strings(tmpdir):
       ID_C = '1-E3'
     EndSect  // WELLNO_424
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     # assert pfs.WELLNO_424.ID_A == "1E-3"  # not possible to distinguish
     assert pfs.WELLNO_424.ID_B == "1-E"
     assert pfs.WELLNO_424.ID_C == "1-E3"
@@ -844,7 +888,7 @@ def test_nested_quotes(tmpdir):
     Properties = '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
   EndSect  // Weir_0
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert (
         pfs.Weir_0.Properties
         == '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
@@ -870,7 +914,7 @@ def test_filename_in_list(tmpdir):
       Method_OL = 0
    EndSect  // EcolabTemplateSpecification 
 """
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert len(pfs.EcolabTemplateSpecification.TemplateFile_OL) == 7
     assert (
         pfs.EcolabTemplateSpecification.TemplateFile_OL[0]
@@ -897,7 +941,7 @@ def test_multiple_empty_strings_in_list(tmpdir):
    EndSect  // Engine 
 """
 
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert len(pfs.Engine.A) == 4
     assert pfs.Engine.A[0] == ""
     assert pfs.Engine.A[-1] == ""
@@ -925,7 +969,7 @@ def test_vertical_lines_in_list(tmpdir):
    EndSect  // EcolabTemplateSpecification 
 """
 
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert len(pfs.EcolabTemplateSpecification.TemplateFile_OL) == 7
     assert pfs.EcolabTemplateSpecification.TemplateFile_OL[0] == "||"
     assert pfs.EcolabTemplateSpecification.TemplateFile_OL[3] == "||"
@@ -953,7 +997,7 @@ def test_nonunique_mixed_keywords_sections1(tmpdir):
    EndSect  // ROOT 
 """
 
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert len(pfs.ROOT.A) == 4
     assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
     assert isinstance(pfs.ROOT.A[2].B, mikeio.pfs.PfsNonUniqueList)
@@ -990,7 +1034,7 @@ def test_nonunique_mixed_keywords_sections2(tmpdir):
    EndSect  // ROOT 
 """
 
-    pfs = mikeio.Pfs(StringIO(text))
+    pfs = mikeio.PfsDocument(StringIO(text))
     assert len(pfs.ROOT.A) == 4
     assert isinstance(pfs.ROOT.A, mikeio.pfs.PfsNonUniqueList)
     assert isinstance(pfs.ROOT.A[0], mikeio.PfsSection)
@@ -1005,7 +1049,7 @@ def test_nonunique_mixed_keywords_sections2(tmpdir):
 
 def test_parse_mike_she_pfs():
 
-    pfs = mikeio.Pfs("tests/testdata/pfs/Karup_basic.she")
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/Karup_basic.she")
 
     assert pfs.n_targets == 2
     assert (
@@ -1016,7 +1060,7 @@ def test_parse_mike_she_pfs():
 def test_read_write_grid_editor_color_palette(tmpdir):
     infile = "tests/testdata/pfs/grid1.gsf"
     outfile = os.path.join(tmpdir, "grid.gsf")
-    pfs = mikeio.Pfs(infile)
+    pfs = mikeio.PfsDocument(infile)
     pal = pfs.GRID_EDITOR.GRID_EDIT_VIEW.MIKEZero_Palette_Definition
     assert len(pal.RGB_Color_Value) == 16
 
@@ -1027,3 +1071,116 @@ def test_read_write_grid_editor_color_palette(tmpdir):
 
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 16
+
+
+@pytest.fixture
+def pfs_ABC_text() -> str:
+    text = """
+   [ROOT]
+      [A1]
+         int_1 = 0
+         [B]
+            float_1 = 4.5
+        EndSect  // B
+      EndSect  // A1
+      str_1 = '0'
+      [A2]
+         int_2 = 0
+      EndSect  // A2
+      int_3 = 3
+   EndSect  // ROOT 
+"""
+    return text
+
+
+def test_search_keyword(pfs_ABC_text):
+    pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
+    assert "A2" in pfs.ROOT
+
+    r0 = pfs.search(key="not_there")
+    assert r0 is None
+
+    r1 = pfs.search(key="float")
+    assert r1.ROOT.A1.B.float_1 == 4.5
+    assert "A2" not in r1.ROOT
+
+    r2 = pfs.ROOT.search(key="float")
+    assert r2.A1.B.float_1 == 4.5
+    assert "A2" not in r2
+
+    r3 = pfs.ROOT.search("float")
+    assert r2 == r3
+
+
+def test_search_keyword_found_in_multiple_places():
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
+    subset = pfs.search("charnock")
+    # the string "Charnock" occurs 6 times in this file
+
+    # NOTE: aliases not possible for search output
+    SW = subset.FemEngineSW.SPECTRAL_WAVE_MODULE
+    assert len(SW.WIND.keys()) == 2
+    assert len(SW.OUTPUTS) == 4
+
+
+def test_search_param(pfs_ABC_text):
+    pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
+
+    r0 = pfs.search(param="not_there")
+    assert r0 is None
+
+    r1 = pfs.search(param=0)
+    assert len(r1.ROOT) == 2
+    assert r1.ROOT.A1.int_1 == 0
+    assert r1.ROOT.A2.int_2 == 0
+
+    r2 = pfs.ROOT.search(param=0)
+    assert r2 == r1.ROOT
+
+    r3 = pfs.ROOT.search(param="0")
+    assert len(r3) == 1
+    assert r3.str_1 == "0"
+
+
+def test_search_section(pfs_ABC_text):
+    pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
+
+    r0 = pfs.search(section="not_there")
+    assert r0 is None
+
+    r1 = pfs.search(section="A")
+    assert len(r1.ROOT) == 2
+    assert r1.ROOT.A1 == pfs.ROOT.A1
+    assert r1.ROOT.A2 == pfs.ROOT.A2
+
+    r2 = pfs.ROOT.search(section="A")
+    assert r2 == r1.ROOT
+
+
+def test_search_keyword_or_param(pfs_ABC_text):
+    pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
+    # assert pfs.ROOT.A1.B.float_1 == 4.5
+
+    r1 = pfs.search(key="float", param=3)
+    assert r1.ROOT.A1.B.float_1 == 4.5
+    assert r1.ROOT.int_3 == 3
+
+    r2 = pfs.search(key="float")
+    r3 = pfs.search(param=3)
+    assert r1 != r2
+    assert r1 != r3
+
+    # r4 = mikeio.pfs._merge_PfsSections([r2, r3])
+    # assert r1 == r4
+
+
+def test_search_and_modify(pfs_ABC_text):
+    # does the original remain un-changed?
+    pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
+    assert pfs.ROOT.A1.B.float_1 == 4.5
+
+    r1 = pfs.search(key="float")
+    assert r1.ROOT.A1.B.float_1 == 4.5
+    r1.ROOT.A1.B.float_1 = 99.9
+    assert r1.ROOT.A1.B.float_1 == 99.9
+    assert pfs.ROOT.A1.B.float_1 == 4.5

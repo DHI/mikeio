@@ -1,5 +1,6 @@
 import numpy as np
-from mikeio.eum import ItemInfo
+
+from .spatial.geometry import GeometryUndefined
 
 
 # class Interpolation2D:
@@ -63,7 +64,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     >>> elem_ids, weights = dfs.get_spatial_interpolant(coords)
     >>> dsi = interp2d(ds, elem_ids, weights)
     """
-    from .dataset import Dataset, DataArray
+    from .dataset import DataArray, Dataset
 
     if isinstance(data, Dataset):
         ds = data.copy()
@@ -88,7 +89,15 @@ def interp2d(data, elem_ids, weights=None, shape=None):
                     )
                 if shape:
                     idatitem = idatitem.reshape((nt, *shape))
-            interp_data_vars[key] = DataArray(data=idatitem, time=da.time, item=da.item)
+
+            dims = ("time", "element")  # TODO is this the best?
+            interp_data_vars[key] = DataArray(
+                data=idatitem,
+                time=da.time,
+                dims=dims,
+                item=da.item,
+                geometry=GeometryUndefined(),
+            )
 
         new_ds = Dataset(interp_data_vars, validate=False)
         return new_ds
