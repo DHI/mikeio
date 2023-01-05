@@ -522,7 +522,7 @@ def test_quantile_dfsu(tmpdir):
 
     infilename = "tests/testdata/oresundHD_run1.dfsu"
     outfilename = os.path.join(tmpdir.dirname, "oresund_q10.dfsu")
-    generic.quantile(infilename, outfilename, q=0.1)
+    generic.quantile(infilename, outfilename, q=0.1, items=["Surface elevation"])
 
     org = mikeio.read(infilename).quantile(q=0.1, axis=0)
     q10 = mikeio.read(outfilename)
@@ -534,7 +534,7 @@ def test_quantile_dfsu_buffer_size(tmpdir):
 
     infilename = "tests/testdata/oresundHD_run1.dfsu"
     outfilename = os.path.join(tmpdir.dirname, "oresund_q10.dfsu")
-    generic.quantile(infilename, outfilename, q=0.1, buffer_size=1e5)
+    generic.quantile(infilename, outfilename, q=0.1, buffer_size=1e5, items=0)
 
     org = mikeio.read(infilename).quantile(q=0.1, axis=0)
     q10 = mikeio.read(outfilename)
@@ -570,7 +570,7 @@ def test_quantile_dfs0(tmpdir):
 def test_quantile_dfsu_3d(tmpdir):
     infilename = "tests/testdata/oresund_sigma_z.dfsu"
     outfilename = os.path.join(tmpdir, "oresund_sigma_z_avg.dfsu")
-    generic.quantile(infilename, outfilename, q=[0.1, 0.9])
+    generic.quantile(infilename, outfilename, q=[0.1,0.9], items=["Temperature"])
 
     qd = mikeio.open(outfilename)
     assert qd.n_timesteps == 1
