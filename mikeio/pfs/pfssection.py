@@ -114,8 +114,11 @@ class PfsSection(SimpleNamespace, MutableMapping):
         }
         </style>
         """
+        lines = []
+        
+        self._write_html_with_func(lambda x : lines.append(f"{x}\n"), level=0)
 
-        return css_style + "<ul>" + "\n".join(self._to_html_lines()) + "</ul>"
+        return css_style + "<ul>" + "\n".join(lines) + "</ul>"
 
     def __len__(self):
         return len(self.__dict__)
@@ -337,12 +340,8 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
     def _to_txt_lines(self):
         lines = []
-        self._write_with_func(lines.append, newline="")
-        return lines
 
-    def _to_html_lines(self):
-        lines = []
-        self._write_html_with_func(lines.append, newline="")
+        self._write_with_func(lines.append, newline="")
         return lines
 
 
@@ -394,29 +393,15 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 v = self._prepare_value_for_write(v)
                 func(f"{lvl_prefix * level}{k} = {v}{newline}")
 
-    def _write_html_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
-        """Write pfs nested objects
+    def _write_html_with_func(self, func: Callable, level: int):
+        """Write pfs nested objects as html
         
         Parameters
         ----------
         func : Callable
-            A function that performs the writing e.g. to a file
-        level : int, optional
-            Level of indentation (add 3 spaces for each), by default 0
-        newline : str, optional
-            newline string, by default "\n"
+        level : int
         """
-        lvl_prefix = ""
-
-
         for k, v in self.items():
-
-            # check for empty sections
-            #NoneType = type(None)
-            #if isinstance(v, NoneType):
-            #    func(f"{lvl_prefix * level}<strong>[{k}]</strong><ul>{newline}")
-            #    func(f"</ul>{newline}")
-
             if isinstance(v, List) and any(
                 isinstance(subv, PfsSection) for subv in v
             ):
@@ -424,27 +409,27 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 for subv in v:
                     if isinstance(subv, PfsSection):
                         subsec = PfsSection({k: subv})
-                        subsec._write_html_with_func(func, level=level, newline=newline)
+                        subsec._write_html_with_func(func, level=level)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                        func(f"{k} = {subv}")
             elif isinstance(v, PfsSection):
                 index_id = f"index-{uuid.uuid4()}"
-                func(f"{lvl_prefix * level}<li><input id='{index_id}' type='checkbox'><label for='{index_id}'>[{k}]</label><ul>{newline}")
-                v._write_html_with_func(func, level=(level + 1), newline=newline)
-                func(f"</ul></li>{newline}")
+                func(f"<li><input id='{index_id}' type='checkbox' data-level='{level}'><label for='{index_id}'>[{k}]</label><ul>")
+                v._write_html_with_func(func, level=(level + 1))
+                func(f"</ul></li>")
             elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    func(f"{lvl_prefix * level}{k} = {newline}")
+                    func(f"{k} = ")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
-                    func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                    func(f"{k} = {subv}")
             else:
                 v = self._prepare_value_for_write(v)
-                func(f"<li>{lvl_prefix * level}{k} = {v}</li>{newline}")
+                func(f"<li>{k} = {v}</li>")
 
     def _prepare_value_for_write(self, v):
         """catch peculiarities of string formatted pfs data
