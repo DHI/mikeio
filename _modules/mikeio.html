@@ -84,8 +84,8 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">platform</span> <span class="kn">import</span> <span class="n">architecture</span>
 
 <span class="c1"># PEP0440 compatible formatted version, see:</span>
@@ -112,21 +112,20 @@
 <span class="k">if</span> <span class="s2">&quot;64&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">architecture</span><span class="p">()[</span><span class="mi">0</span><span class="p">]:</span>
     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;This library has not been tested for a 32 bit system.&quot;</span><span class="p">)</span>
 
+<span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
 <span class="kn">from</span> <span class="nn">.dfs0</span> <span class="kn">import</span> <span class="n">Dfs0</span>
 <span class="kn">from</span> <span class="nn">.dfs1</span> <span class="kn">import</span> <span class="n">Dfs1</span>
 <span class="kn">from</span> <span class="nn">.dfs2</span> <span class="kn">import</span> <span class="n">Dfs2</span>
 <span class="kn">from</span> <span class="nn">.dfs3</span> <span class="kn">import</span> <span class="n">Dfs3</span>
-<span class="kn">from</span> <span class="nn">.dfsu_factory</span> <span class="kn">import</span> <span class="n">Dfsu</span>
-<span class="kn">from</span> <span class="nn">.dfsu</span> <span class="kn">import</span> <span class="n">Mesh</span>
-<span class="kn">from</span> <span class="nn">.pfs</span> <span class="kn">import</span> <span class="n">read_pfs</span><span class="p">,</span> <span class="n">Pfs</span><span class="p">,</span> <span class="n">PfsSection</span><span class="p">,</span> <span class="n">PfsDocument</span>
-<span class="kn">from</span> <span class="nn">.xyz</span> <span class="kn">import</span> <span class="n">read_xyz</span>
-<span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span>
+<span class="kn">from</span> <span class="nn">.dfsu</span> <span class="kn">import</span> <span class="n">Dfsu</span><span class="p">,</span> <span class="n">Mesh</span>
+<span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">,</span> <span class="n">ItemInfo</span>
+<span class="kn">from</span> <span class="nn">.pfs</span> <span class="kn">import</span> <span class="n">Pfs</span><span class="p">,</span> <span class="n">PfsDocument</span><span class="p">,</span> <span class="n">PfsSection</span><span class="p">,</span> <span class="n">read_pfs</span>
 <span class="kn">from</span> <span class="nn">.spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid1D</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">Grid3D</span>
-<span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
+<span class="kn">from</span> <span class="nn">.xyz</span> <span class="kn">import</span> <span class="n">read_xyz</span>
 
 
 <div class="viewcode-block" id="read"><a class="viewcode-back" href="../dfs-overview.html#mikeio.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Read all or a subset of the data from a dfs file</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read all or a subset of the data from a dfs file</span>
 
 <span class="sd">    All dfs files can be subsetted with the *items* and *time* arguments. But</span>
 <span class="sd">    the following file types also have the shown additional arguments:</span>
@@ -209,7 +208,7 @@
 
 
 <div class="viewcode-block" id="open"><a class="viewcode-back" href="../dfs-overview.html#mikeio.open">[docs]</a><span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Open a dfs/mesh file (and read the header)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a dfs/mesh file (and read the header)</span>
 
 <span class="sd">    The typical workflow for small dfs files is to read all data</span>
 <span class="sd">    with *mikeio.read* instead of using this function. For big files, however,</span>

@@ -86,23 +86,26 @@
              
   <h1>Source code for mikeio.dfs3</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumUnit</span><span class="p">,</span> <span class="n">eumQuantity</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsSimpleType</span><span class="p">,</span> <span class="n">DataValueType</span><span class="p">,</span> <span class="n">DfsFile</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsBuilder</span> <span class="kn">import</span> <span class="n">DfsBuilder</span>
-<span class="kn">from</span> <span class="nn">mikecore.Projections</span> <span class="kn">import</span> <span class="n">Cartography</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsBuilder</span> <span class="kn">import</span> <span class="n">DfsBuilder</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">DfsSimpleType</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>
+<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span><span class="p">,</span> <span class="n">eumUnit</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
-<span class="kn">from</span> <span class="nn">.dfsutil</span> <span class="kn">import</span> <span class="n">_valid_item_numbers</span><span class="p">,</span> <span class="n">_valid_timesteps</span><span class="p">,</span> <span class="n">_get_item_info</span>
 <span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">.dfs</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_Dfs123</span><span class="p">,</span>
+    <span class="n">_get_item_info</span><span class="p">,</span>
+    <span class="n">_valid_item_numbers</span><span class="p">,</span>
+    <span class="n">_valid_timesteps</span><span class="p">,</span>
+    <span class="n">_write_dfs_data</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">TimeStepUnit</span>
-<span class="kn">from</span> <span class="nn">.dfs</span> <span class="kn">import</span> <span class="n">_Dfs123</span><span class="p">,</span> <span class="n">_write_dfs_data</span>
-<span class="kn">from</span> <span class="nn">.spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">Grid3D</span>
-<span class="kn">from</span> <span class="nn">.spatial.geometry</span> <span class="kn">import</span> <span class="n">GeometryUndefined</span>
+<span class="kn">from</span> <span class="nn">.spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid3D</span>
 
 
 <span class="k">def</span> <span class="nf">write_dfs3</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ds</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -266,7 +269,7 @@
         <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Read data from a dfs3 file</span>
 
 <span class="sd">        Parameters</span>
@@ -385,7 +388,7 @@
         <span class="n">coordinate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a dfs3 file</span>
 
 <span class="sd">        Parameters</span>
@@ -474,17 +477,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Step size in x direction&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Step size in x direction&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Step size in y direction&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Step size in y direction&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Step size in y direction&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Step size in y direction&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dz</span>
 
     <span class="nd">@property</span>

@@ -103,18 +103,19 @@
 <span class="sd">&gt;&gt;&gt;</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DataValueType</span>
-<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumWrapper</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
-
-<span class="kn">from</span> <span class="nn">mikeio.helpers</span> <span class="kn">import</span> <span class="n">to_datatype</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DataValueType</span>
+<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumUnit</span><span class="p">,</span> <span class="n">eumWrapper</span>
+
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">InvalidDataValueType</span>
 
 
-<div class="viewcode-block" id="type_list"><a class="viewcode-back" href="../../eum.html#mikeio.eum.type_list">[docs]</a><span class="k">def</span> <span class="nf">type_list</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get a dictionary of the EUM items</span>
+<span class="k">def</span> <span class="nf">_type_list</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a dictionary of the EUM items</span>
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
@@ -151,11 +152,16 @@
             <span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">items</span></div>
+    <span class="k">return</span> <span class="n">items</span>
 
 
-<div class="viewcode-block" id="unit_list"><a class="viewcode-back" href="../../eum.html#mikeio.eum.unit_list">[docs]</a><span class="k">def</span> <span class="nf">unit_list</span><span class="p">(</span><span class="n">type_enum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get a dictionary of valid units</span>
+<span class="k">def</span> <span class="nf">type_list</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;type_list is deprecated use EUMType.search instead&quot;</span><span class="p">,</span> <span class="ne">FutureWarning</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_type_list</span><span class="p">(</span><span class="n">search</span><span class="o">=</span><span class="n">search</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_unit_list</span><span class="p">(</span><span class="n">eum_type</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">eumUnit</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a dictionary of valid units</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -168,13 +174,17 @@
 <span class="sd">        names and codes for valid units</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">items</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="c1"># units = GetItemAllowedUnits(type_enum)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">eumWrapper</span><span class="o">.</span><span class="n">eumGetItemUnitCount</span><span class="p">(</span><span class="n">type_enum</span><span class="p">)):</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">eumWrapper</span><span class="o">.</span><span class="n">eumGetItemUnitSeq</span><span class="p">(</span><span class="n">type_enum</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">items</span><span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">n_units_for_eum_type</span> <span class="o">=</span> <span class="n">eumWrapper</span><span class="o">.</span><span class="n">eumGetItemUnitCount</span><span class="p">(</span><span class="n">eum_type</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_units_for_eum_type</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">eumWrapper</span><span class="o">.</span><span class="n">eumGetItemUnitSeq</span><span class="p">(</span><span class="n">eum_type</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">items</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="k">return</span> <span class="n">items</span></div>
+    <span class="k">return</span> <span class="n">items</span>
+
+
+<span class="k">def</span> <span class="nf">unit_list</span><span class="p">(</span><span class="n">type_eum</span><span class="p">):</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;unit_list is deprecated use EUMType.units instead&quot;</span><span class="p">,</span> <span class="ne">FutureWarning</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_type_list</span><span class="p">(</span><span class="n">type_eum</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="TimeAxisType"><a class="viewcode-back" href="../../eum.html#mikeio.eum.TimeAxisType">[docs]</a><span class="k">class</span> <span class="nc">TimeAxisType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
@@ -200,7 +210,7 @@
 
 
 <div class="viewcode-block" id="EUMType"><a class="viewcode-back" href="../../eum.html#mikeio.eum.EUMType">[docs]</a><span class="k">class</span> <span class="nc">EUMType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;EUM type</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;EUM type</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -804,7 +814,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Display friendly name&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display friendly name&quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">name</span>
@@ -815,18 +825,18 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List valid units for this EUM type&quot;&quot;&quot;</span>
-        <span class="n">temp</span> <span class="o">=</span> <span class="n">unit_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List valid units for this EUM type&quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">_unit_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">EUMUnit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s2">&quot;EUMType&quot;</span><span class="p">]:</span>
-        <span class="n">temp</span> <span class="o">=</span> <span class="n">type_list</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">_type_list</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">EUMType</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="EUMUnit"><a class="viewcode-back" href="../../eum.html#mikeio.eum.EUMUnit">[docs]</a><span class="k">class</span> <span class="nc">EUMUnit</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;EUM unit</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;EUM unit</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -1445,7 +1455,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">display_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Display friendly name&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Display friendly name&quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">name</span>
@@ -1456,7 +1466,7 @@
 
 
 <div class="viewcode-block" id="ItemInfo"><a class="viewcode-back" href="../../eum.html#mikeio.eum.ItemInfo">[docs]</a><span class="k">class</span> <span class="nc">ItemInfo</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;ItemInfo</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;ItemInfo</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1547,14 +1557,49 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">&gt; (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_value_type</span><span class="si">}</span><span class="s2">&quot;</span></div>
 
-<div class="viewcode-block" id="ItemInfoList"><a class="viewcode-back" href="../../eum.html#mikeio.eum.ItemInfoList">[docs]</a><span class="k">class</span> <span class="nc">ItemInfoList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
 
+<div class="viewcode-block" id="ItemInfoList"><a class="viewcode-back" href="../../eum.html#mikeio.eum.ItemInfoList">[docs]</a><span class="k">class</span> <span class="nc">ItemInfoList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">name</span><span class="p">}</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="n">item</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">name</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span>
+        <span class="p">]</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">to_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">DataValueType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DataValueType</span><span class="p">:</span>
+    <span class="n">string_datatype_mapping</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Instantaneous&quot;</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">Instantaneous</span><span class="p">,</span>
+        <span class="s2">&quot;Accumulated&quot;</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">Accumulated</span><span class="p">,</span>
+        <span class="s2">&quot;StepAccumulated&quot;</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">StepAccumulated</span><span class="p">,</span>
+        <span class="s2">&quot;MeanStepBackward&quot;</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">MeanStepBackward</span><span class="p">,</span>
+        <span class="s2">&quot;MeanStepForward&quot;</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">MeanStepForward</span><span class="p">,</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">Instantaneous</span><span class="p">,</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">Accumulated</span><span class="p">,</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">StepAccumulated</span><span class="p">,</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">MeanStepBackward</span><span class="p">,</span>
+        <span class="mi">4</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">MeanStepForward</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">string_datatype_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">InvalidDataValueType</span>
+
+        <span class="k">return</span> <span class="n">string_datatype_mapping</span><span class="p">[</span><span class="n">datatype</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">datatype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">string_datatype_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">InvalidDataValueType</span>
+
+        <span class="k">return</span> <span class="n">string_datatype_mapping</span><span class="p">[</span><span class="n">datatype</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">DataValueType</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Data value type not supported&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">datatype</span>
 </pre></div>
 
            </div>

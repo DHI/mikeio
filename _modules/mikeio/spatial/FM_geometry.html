@@ -85,30 +85,32 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio.spatial.FM_geometry</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFileType</span>
 <span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span>
 <span class="kn">from</span> <span class="nn">mikecore.MeshBuilder</span> <span class="kn">import</span> <span class="n">MeshBuilder</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
+
+<span class="kn">import</span> <span class="nn">mikeio.data_utils</span> <span class="k">as</span> <span class="nn">du</span>
 
 <span class="kn">from</span> <span class="nn">..eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
-<span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="n">_Geometry</span><span class="p">,</span> <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span>
-<span class="kn">from</span> <span class="nn">.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span>
+<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="n">InvalidGeometry</span>
 <span class="kn">from</span> <span class="nn">..interpolation</span> <span class="kn">import</span> <span class="n">get_idw_interpolant</span><span class="p">,</span> <span class="n">interp2d</span>
-<span class="kn">from</span> <span class="nn">..custom_exceptions</span> <span class="kn">import</span> <span class="n">InvalidGeometry</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_relative_cumulative_distance</span><span class="p">,</span> <span class="n">xy_to_bbox</span>
 <span class="kn">from</span> <span class="nn">.FM_utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_get_node_centered_data</span><span class="p">,</span>
-    <span class="n">_to_polygons</span><span class="p">,</span>
     <span class="n">_plot_map</span><span class="p">,</span>
-    <span class="n">_set_xy_label_by_projection</span><span class="p">,</span>
-    <span class="n">_point_in_polygon</span><span class="p">,</span>
     <span class="n">_plot_vertical_profile</span><span class="p">,</span>
+    <span class="n">_point_in_polygon</span><span class="p">,</span>
+    <span class="n">_set_xy_label_by_projection</span><span class="p">,</span>
+    <span class="n">_to_polygons</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">import</span> <span class="nn">mikeio.data_utils</span> <span class="k">as</span> <span class="nn">du</span>
+<span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">_Geometry</span>
+<span class="kn">from</span> <span class="nn">.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_relative_cumulative_distance</span><span class="p">,</span> <span class="n">xy_to_bbox</span>
 
 
 <div class="viewcode-block" id="GeometryFMPointSpectrum"><a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum">[docs]</a><span class="k">class</span> <span class="nc">GeometryFMPointSpectrum</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
@@ -126,7 +128,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">type_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Type name: DfsuSpectral0D&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type name: DfsuSpectral0D&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -142,27 +144,27 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Number of frequencies&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of frequencies&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Frequency axis&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Frequency axis&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frequencies</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Number of directions&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of directions&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">directions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directions</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Directional axis&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Directional axis&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_directions</span></div>
 
 
 <div class="viewcode-block" id="_GeometryFMPlotter"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter">[docs]</a><span class="k">class</span> <span class="nc">_GeometryFMPlotter</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Plot GeometryFM</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot GeometryFM</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -180,18 +182,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">geometry</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Plot bathymetry as coloured patches&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot bathymetry as coloured patches&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.contour"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.contour">[docs]</a>    <span class="k">def</span> <span class="nf">contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Plot bathymetry as contour lines&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot bathymetry as contour lines&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;plot_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;contour&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.contourf"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.contourf">[docs]</a>    <span class="k">def</span> <span class="nf">contourf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Plot bathymetry as filled contours&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot bathymetry as filled contours&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;plot_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;contourf&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -223,7 +225,7 @@
         <span class="p">)</span>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.mesh">[docs]</a>    <span class="k">def</span> <span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Mesh&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Plot mesh only&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot mesh only&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PatchCollection</span>
 
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
@@ -243,7 +245,7 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.outline"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.outline">[docs]</a>    <span class="k">def</span> <span class="nf">outline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Outline&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Plot domain outline (using the boundary_polylines property)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot domain outline (using the boundary_polylines property)&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_aspect</span><span class="p">())</span>
 
@@ -259,7 +261,7 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.boundary_nodes"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.boundary_nodes">[docs]</a>    <span class="k">def</span> <span class="nf">boundary_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boundary_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Plot mesh boundary nodes and their code values&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot mesh boundary nodes and their code values&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
@@ -481,12 +483,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">node_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Coordinates (x,y,z) of all nodes&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Coordinates (x,y,z) of all nodes&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nc</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Number of nodes&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of nodes&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_node_ids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_node_ids</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -495,7 +497,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Number of elements&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of elements&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_ids</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_element_ids</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -504,13 +506,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">element_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Element to node connectivity&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Element to node connectivity&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_table</span>
 
     <span class="c1"># cache this?</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">max_nodes_per_element</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The maximum number of nodes for an element&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The maximum number of nodes for an element&quot;&quot;&quot;</span>
         <span class="n">maxnodes</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">local_nodes</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">:</span>
             <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_nodes</span><span class="p">)</span>
@@ -520,12 +522,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">type_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Type name, e.g. Mesh, Dfsu2D&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type name, e.g. Mesh, Dfsu2D&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="k">else</span> <span class="s2">&quot;Mesh&quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Type is either mesh or Dfsu2D (2 horizontal dimensions)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type is either mesh or Dfsu2D (2 horizontal dimensions)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu2D</span><span class="p">,</span>
             <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral2D</span><span class="p">,</span>
@@ -534,7 +536,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_layered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Type is layered dfsu (3d, vertical profile or vertical column)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type is layered dfsu (3d, vertical profile or vertical column)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuVerticalColumn</span><span class="p">,</span>
             <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuVerticalProfileSigma</span><span class="p">,</span>
@@ -545,7 +547,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_spectral</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Type is spectral dfsu (point, line or area spectrum)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Type is spectral dfsu (point, line or area spectrum)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral0D</span><span class="p">,</span>
             <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral1D</span><span class="p">,</span>
@@ -554,12 +556,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">is_tri_only</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Does the mesh consist of triangles only?&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Does the mesh consist of triangles only?&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_nodes_per_element</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_nodes_per_element</span> <span class="o">==</span> <span class="mi">6</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">element_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Center coordinates of each element&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Center coordinates of each element&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_element_coordinates</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ec</span>
@@ -610,7 +612,7 @@
 <div class="viewcode-block" id="GeometryFM.find_nearest_elements"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.find_nearest_elements">[docs]</a>    <span class="k">def</span> <span class="nf">find_nearest_elements</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_distances</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find index of nearest elements (optionally for a list)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find index of nearest elements (optionally for a list)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -685,7 +687,7 @@
         <span class="n">p</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
         <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;IDW interpolant for list of coordinates</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;IDW interpolant for list of coordinates</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -728,7 +730,7 @@
         <span class="k">return</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span></div>
 
 <div class="viewcode-block" id="GeometryFM.interp2d"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.interp2d">[docs]</a>    <span class="k">def</span> <span class="nf">interp2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;interp spatially in data (2d only)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;interp spatially in data (2d only)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -838,7 +840,7 @@
 <div class="viewcode-block" id="GeometryFM.get_overset_grid"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.get_overset_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_overset_grid</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grid2D</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;get a 2d grid that covers the domain by specifying spacing or shape</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get a 2d grid that covers the domain by specifying spacing or shape</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -867,7 +869,7 @@
         <span class="k">return</span> <span class="n">Grid2D</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeometryFM.get_element_area"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.get_element_area">[docs]</a>    <span class="k">def</span> <span class="nf">get_element_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate the horizontal area of each element.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the horizontal area of each element.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -935,7 +937,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">codes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Node codes of all nodes (0=water, 1=land, 2...=open boundaries)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Node codes of all nodes (0=water, 1=land, 2...=open boundaries)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_codes</span>
 
     <span class="nd">@codes</span><span class="o">.</span><span class="n">setter</span>
@@ -946,13 +948,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Lists of closed polylines defining domain outline&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lists of closed polylines defining domain outline&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_polylines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_polylines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_boundary_polylines</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_polylines</span>
 
 <div class="viewcode-block" id="GeometryFM.contains"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;test if a list of points are contained by mesh</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;test if a list of points are contained by mesh</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -988,7 +990,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_boundary_polylines_uncategorized</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct closed polylines for all boundary faces&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct closed polylines for all boundary faces&quot;&quot;&quot;</span>
         <span class="n">boundary_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_boundary_faces</span><span class="p">()</span>
         <span class="n">face_remains</span> <span class="o">=</span> <span class="n">boundary_faces</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">polylines</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1014,7 +1016,7 @@
         <span class="k">return</span> <span class="n">polylines</span>
 
     <span class="k">def</span> <span class="nf">_get_boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get boundary polylines and categorize as inner or outer by</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get boundary polylines and categorize as inner or outer by</span>
 <span class="sd">        assessing the signed area</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">polylines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_boundary_polylines_uncategorized</span><span class="p">()</span>
@@ -1046,7 +1048,7 @@
         <span class="k">return</span> <span class="n">BoundaryPolylines</span><span class="p">(</span><span class="n">n_ext</span><span class="p">,</span> <span class="n">poly_lines_ext</span><span class="p">,</span> <span class="n">n_int</span><span class="p">,</span> <span class="n">poly_lines_int</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_boundary_faces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Construct list of faces&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct list of faces&quot;&quot;&quot;</span>
         <span class="n">element_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">element_table</span>
 
         <span class="n">all_faces</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1067,7 +1069,7 @@
         <span class="k">return</span> <span class="n">all_faces</span><span class="p">[</span><span class="n">uf_id</span><span class="p">[</span><span class="n">bnd_face_id</span><span class="p">]]</span>
 
 <div class="viewcode-block" id="GeometryFM.isel"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.isel">[docs]</a>    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;elements&quot;</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;export a selection of elements to a new geometry</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of elements to a new geometry</span>
 
 <span class="sd">        Typically not called directly, but by Dataset/DataArray&#39;s</span>
 <span class="sd">        isel() or sel() methods.</span>
@@ -1104,7 +1106,7 @@
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="GeometryFM.find_index"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.find_index">[docs]</a>    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find element indicies for a number of points or within an area</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find element indicies for a number of points or within an area</span>
 
 <span class="sd">        This method will return elements *containing* the argument</span>
 <span class="sd">        points/area, which is not necessarily the same as the nearest.</span>
@@ -1159,7 +1161,7 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide either coordinates or area&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_find_elem3d_from_elem2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem2d</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find 3d element ids from 2d element ids and z-values&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find 3d element ids from 2d element ids and z-values&quot;&quot;&quot;</span>
 
         <span class="c1"># TODO: coordinate with _find_3d_from_2d_points()</span>
 
@@ -1188,14 +1190,14 @@
         <span class="k">return</span> <span class="n">idx</span>
 
     <span class="k">def</span> <span class="nf">_elements_in_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find element ids of elements inside area&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find element ids of elements inside area&quot;&quot;&quot;</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_2d_elements_in_area</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_layered</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">idx</span>
 
     <span class="k">def</span> <span class="nf">_2d_elements_in_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find 2d element ids of elements inside area&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find 2d element ids of elements inside area&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area_is_bbox</span><span class="p">(</span><span class="n">area</span><span class="p">):</span>
             <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">area</span>
             <span class="n">xc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
@@ -1211,7 +1213,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_nodes_to_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeometryFM&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;export a selection of nodes to new flexible file geometry</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of nodes to new flexible file geometry</span>
 
 <span class="sd">        Note: takes only the elements for which all nodes are selected</span>
 
@@ -1259,7 +1261,7 @@
 <div class="viewcode-block" id="GeometryFM.elements_to_geometry"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.elements_to_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">elements_to_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeometryFM&quot;</span><span class="p">,</span> <span class="s2">&quot;GeometryFM3D&quot;</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;export a selection of elements to new flexible file geometry</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of elements to new flexible file geometry</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1371,7 +1373,7 @@
         <span class="k">return</span> <span class="n">geom</span></div>
 
     <span class="k">def</span> <span class="nf">_get_nodes_and_table_for_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;list of nodes and element table for a list of elements</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list of nodes and element table for a list of elements</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1411,7 +1413,7 @@
         <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elem_tbl</span>
 
 <div class="viewcode-block" id="GeometryFM.get_node_centered_data"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.get_node_centered_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_centered_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;convert cell-centered data to node-centered by pseudo-laplacian method</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;convert cell-centered data to node-centered by pseudo-laplacian method</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1433,7 +1435,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_geometry2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The 2d geometry for a 3d object&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The 2d geometry for a 3d object&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom2d</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1441,14 +1443,14 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geom2d</span>
 
 <div class="viewcode-block" id="GeometryFM.to_shapely"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.to_shapely">[docs]</a>    <span class="k">def</span> <span class="nf">to_shapely</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Export mesh as shapely MultiPolygon</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export mesh as shapely MultiPolygon</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        shapely.geometry.MultiPolygon</span>
 <span class="sd">            polygons with mesh elements</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">MultiPolygon</span>
+        <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="kn">import</span> <span class="n">MultiPolygon</span><span class="p">,</span> <span class="n">Polygon</span>
 
         <span class="n">polygons</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">):</span>
@@ -1464,7 +1466,7 @@
         <span class="k">return</span> <span class="n">mp</span></div>
 
 <div class="viewcode-block" id="GeometryFM.to_mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.to_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Export geometry to new mesh file</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Export geometry to new mesh file</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1530,7 +1532,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">layer_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The layer number (0=bottom, 1, 2, ...) for each 3d element&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The layer number (0=bottom, 1, 2, ...) for each 3d element&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InvalidGeometry</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot return layer_ids&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layer_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1542,24 +1544,24 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Maximum number of layers&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum number of layers&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_sigma_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Number of sigma layers&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of sigma layers&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_sigma</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_z_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Maximum number of z-layers&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum number of z-layers&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">top_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of 3d element ids of surface layer&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of 3d element ids of surface layer&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot find top_elements&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1611,7 +1613,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_findTopLayerElements</span><span class="p">(</span><span class="n">elementTable</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find element indices (zero based) of the elements being the upper-most element</span>
 <span class="sd">        in its column.</span>
 <span class="sd">        Each column is identified by matching node id numbers. For 3D elements the</span>
@@ -1675,7 +1677,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_layers_per_column</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of number of layers for each column&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of number of layers for each column&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot find n_layers_per_column&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1690,7 +1692,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">bottom_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;List of 3d element ids of bottom layer&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of 3d element ids of bottom layer&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot find bottom_elements&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1699,7 +1701,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bot_elems</span>
 
     <span class="k">def</span> <span class="nf">get_layer_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;3d element ids for one (or more) specific layer(s)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;3d element ids for one (or more) specific layer(s)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1752,7 +1754,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">e2_e3_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The 2d-to-3d element connectivity table for a 3d object&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The 2d-to-3d element connectivity table for a 3d object&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot return e2_e3_table&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -1765,7 +1767,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">elem2d_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The associated 2d element id for each 3d element&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The associated 2d element id for each 3d element&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">InvalidGeometry</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot return elem2d_ids&quot;</span><span class="p">)</span>
             <span class="c1"># or return self._2d_ids ??</span>
@@ -1854,7 +1856,7 @@
         <span class="k">return</span> <span class="n">idx</span>
 
     <span class="k">def</span> <span class="nf">calc_element_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculates the coordinates of the center of each element.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculates the coordinates of the center of each element.</span>
 
 <span class="sd">        Only necessary for dynamic vertical coordinates,</span>
 <span class="sd">        otherwise use the property *element_coordinates* instead</span>
@@ -1878,13 +1880,13 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_dz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Height of each 3d element (using static zn information)&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Height of each 3d element (using static zn information)&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dz</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__dz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_dz</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dz</span>
 
     <span class="k">def</span> <span class="nf">_calc_dz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Height of 3d elements using static or dynamic zn information&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Height of 3d elements using static or dynamic zn information&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">element_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1927,11 +1929,11 @@
 <div class="viewcode-block" id="GeometryFM3D"><a class="viewcode-back" href="../../../dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D">[docs]</a><span class="k">class</span> <span class="nc">GeometryFM3D</span><span class="p">(</span><span class="n">_GeometryFMLayered</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">geometry2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The 2d geometry for a 3d object&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The 2d geometry for a 3d object&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span>
 
 <div class="viewcode-block" id="GeometryFM3D.to_2d_geometry"><a class="viewcode-back" href="../../../dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D.to_2d_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">to_2d_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;extract 2d geometry from 3d geometry</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;extract 2d geometry from 3d geometry</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2043,7 +2045,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rel_elem_dist</span>
 
 <div class="viewcode-block" id="GeometryFMVerticalProfile.get_nearest_relative_distance"><a class="viewcode-back" href="../../../dfsu-2dv-vertical-profile.html#mikeio.spatial.FM_geometry.GeometryFMVerticalProfile.get_nearest_relative_distance">[docs]</a>    <span class="k">def</span> <span class="nf">get_nearest_relative_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;For a point near a transect, find the nearest relative distance</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;For a point near a transect, find the nearest relative distance</span>
 <span class="sd">        for showing position on transect plot.</span>
 
 <span class="sd">        Parameters</span>
@@ -2127,7 +2129,7 @@
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_interp_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zn</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Interpolate to other z values, allow linear extrapolation&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate to other z values, allow linear extrapolation&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
 
         <span class="n">opt</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;bounds_error&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;fill_value&quot;</span><span class="p">:</span> <span class="s2">&quot;extrapolate&quot;</span><span class="p">}</span>
@@ -2205,22 +2207,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Number of frequencies&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of frequencies&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">frequencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Frequency axis&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Frequency axis&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frequencies</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Number of directions&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of directions&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">directions</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directions</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Directional axis&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Directional axis&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_directions</span>
 
 
@@ -2231,7 +2233,7 @@
 <div class="viewcode-block" id="GeometryFMAreaSpectrum.elements_to_geometry"><a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum.elements_to_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">elements_to_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeometryFMAreaSpectrum&quot;</span><span class="p">,</span> <span class="n">GeometryFMPointSpectrum</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;export a selection of elements to new flexible file geometry</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of elements to new flexible file geometry</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        elements : list(int)</span>
@@ -2276,7 +2278,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_geometry</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_nodes_to_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeometryFM&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;export a selection of nodes to new flexible file geometry</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of nodes to new flexible file geometry</span>
 <span class="sd">        Note: takes only the elements for which all nodes are selected</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
