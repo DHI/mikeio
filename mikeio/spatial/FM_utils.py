@@ -198,23 +198,20 @@ def _plot_map(
     elif plot_type == "patch":
         patches = _to_polygons(nc, element_table)
         # do plot as patches (like MZ "box contour")
-        # with (constant) element center values
+        # with (constant) element values
         if show_mesh:
-            fig_obj = PatchCollection(
-                patches,
-                cmap=cmap,
-                norm=cmap_norm,
-                edgecolor=mesh_col,
-                linewidths=0.4,
-            )
+            edgecolor = mesh_col
+            linewidth = 0.4
         else:
-            fig_obj = PatchCollection(
+            edgecolor = "face"
+            linewidth = None
+        
+        fig_obj = PatchCollection(
                 patches,
                 cmap=cmap,
                 norm=cmap_norm,
-                edgecolor="face",
-                alpha=None,
-                linewidths=None,
+                edgecolor=edgecolor,
+                linewidths=linewidth,
             )
 
         fig_obj.set_array(z)
@@ -293,7 +290,7 @@ def _plot_map(
             )
 
         if show_mesh and (not _is_tri_only(element_table)):
-            _add_non_tri_mesh(ax, nc, element_table,plot_type)
+            _add_non_tri_mesh(ax, nc, element_table,plot_type, mesh_col_dark)
 
     if show_outline:
         _add_outline(ax, boundary_polylines=boundary_polylines, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
