@@ -341,6 +341,8 @@ def _add_non_tri_mesh(ax, nc, element_table,plot_type, mesh_col_dark) -> None:
     mesh_linewidth = 0.4
     if plot_type == "contour":
         mesh_col = mesh_col_dark
+    else:
+        mesh_col = "0.95" # TODO
     p = PatchCollection(
             patches,
                 edgecolor=mesh_col,
