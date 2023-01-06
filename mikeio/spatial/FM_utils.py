@@ -91,7 +91,6 @@ def _plot_map(
     import matplotlib.colors as mplc
     import matplotlib.pyplot as plt
     from matplotlib.collections import PatchCollection
-    from matplotlib.patches import Polygon
     from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     mesh_col = "0.95"
@@ -114,22 +113,14 @@ def _plot_map(
     ec = element_coordinates
     ne = ec.shape[0]
 
-    is_bathy = False
     if z is None:
-        is_bathy = True
         if plot_data:
             z = ec[:, 2]
             if label is None:
                 label = "Bathymetry (m)"
     else:
-        # if isinstance(z, DataArray):
-        #     z = z.to_numpy().copy()
-        # if isinstance(z, Dataset) and len(z) == 1:  # if single-item Dataset
-        #     z = z[0].to_numpy().copy()
         if len(z) != ne:
-            z = np.squeeze(z).copy()  # handles single time step
-            if len(z) != ne:
-                raise Exception(
+            raise Exception(
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
                 )
         if label is None:
@@ -373,17 +364,8 @@ def _plot_map(
             ax.add_collection(p)
 
     if show_outline:
-        linwid = 1.2
-        out_col = "0.4"
-        for exterior in boundary_polylines.exteriors:
-            ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-            xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
-            xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
-            ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
-
-        for interior in boundary_polylines.interiors:
-            ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
-
+        _add_outline(ax, boundary_polylines, xmin, xmax, ymin, ymax)
+        
     # set plot limits
     xybuf = 6e-3 * (xmax - xmin)
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
@@ -394,6 +376,17 @@ def _plot_map(
 
     return ax
 
+def _add_outline(ax, boundary_polylines, xmin, xmax, ymin, ymax) -> None:
+    linwid = 1.2
+    out_col = "0.4"
+    for exterior in boundary_polylines.exteriors:
+        ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
+        xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
+        xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
+        ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
+
+    for interior in boundary_polylines.interiors:
+        ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
 
 def _set_xy_label_by_projection(ax, projection):
     if (not projection) or projection == "NON-UTM":
