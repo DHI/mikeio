@@ -175,38 +175,27 @@ def _plot_map(
 
     # plot in existing or new axes?
     if ax is None:
-        fig, ax = plt.subplots(figsize=figsize)
+        _, ax = plt.subplots(figsize=figsize)
 
     # set aspect ratio
-    is_geo = projection == "LONG/LAT"
-    if is_geo:
-        mean_lat = np.mean(nc[:, 1])
-        ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
-    else:
-        ax.set_aspect("equal")
-
+    _set_aspect_ratio(ax, nc, projection)
     _set_xy_label_by_projection(ax, projection)
 
     # set plot limits
     xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
     ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
 
-    # scale height of colorbar
-    cbar_frac = 0.046 * nc[:, 1].ptp() / nc[:, 0].ptp()
-
     if plot_type == "outline_only":
         fig_obj = None
 
     elif plot_type == "mesh_only":
-        if show_mesh == False:
-            print("Not possible to use show_mesh=False on a mesh_only plot!")
         patches = _to_polygons(nc, element_table)
         fig_obj = PatchCollection(
             patches, edgecolor=mesh_col_dark, facecolor="none", linewidths=0.3
         )
         ax.add_collection(fig_obj)
 
-    elif plot_type == "patch" or plot_type == "box":
+    elif plot_type == "patch":
         patches = _to_polygons(nc, element_table)
         # do plot as patches (like MZ "box contour")
         # with (constant) element center values
@@ -244,9 +233,7 @@ def _plot_map(
         mesh_linewidth = 0.0
         if show_mesh and _is_tri_only(element_table):
             mesh_linewidth = 0.4
-            if n_refinements > 0:
-                n_refinements = 0
-                print("Warning: mesh refinement is not possible if plot_mesh=True")
+            n_refinements = 0
 
         elem_table, ec, z = _create_tri_only_element_table(
             nc, element_table, ec, data=z
@@ -260,41 +247,28 @@ def _plot_map(
             refiner = tri.UniformTriRefiner(triang)
             triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
 
-        if plot_type == "shaded" or plot_type == "smooth":
+        if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
             if cmap_norm is None:
-                fig_obj = ax.tripcolor(
-                    triang,
-                    zn,
-                    edgecolors="face",
-                    vmin=vmin,
-                    vmax=vmax,
-                    cmap=cmap,
-                    linewidths=0.3,
-                    shading="gouraud",
-                )
+                vmin = None
+                vmax = None
             else:
-                fig_obj = ax.tripcolor(
-                    triang,
-                    zn,
-                    edgecolors="face",
-                    cmap=cmap,
-                    norm=cmap_norm,
-                    linewidths=0.3,
-                    shading="gouraud",
-                )
+                cmap_norm = None
+            
+            fig_obj = ax.tripcolor(
+                triang,
+                zn,
+                edgecolors="face",
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                norm=cmap_norm,
+                linewidths=0.3,
+                shading="gouraud",
+            )
 
             if add_colorbar:
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-
-                plt.colorbar(
-                    cmap_sm,
-                    label=label,
-                    cax=cax,
-                    boundaries=levels,
-                    extend=cbar_extend,
-                )
+                _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
 
         elif plot_type == "contour" or plot_type == "contour_lines":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
@@ -355,10 +329,33 @@ def _plot_map(
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
-    if title is not None:
-        ax.set_title(title)
+    ax.set_title(title)
 
     return ax
+
+def _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> None:
+
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    import matplotlib.pyplot as plt
+
+    cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+    cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
+
+    plt.colorbar(
+                cmap_sm,
+                label=label,
+                cax=cax,
+                boundaries=levels,
+                extend=cbar_extend,
+            )
+
+def _set_aspect_ratio(ax, nc, projection):
+    is_geo = projection == "LONG/LAT"
+    if is_geo:
+        mean_lat = np.mean(nc[:, 1])
+        ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
+    else:
+        ax.set_aspect("equal")
 
 def _add_non_tri_mesh(ax, nc, element_table,plot_type, mesh_col_dark) -> None:
     # if mesh is not tri only, we need to add it manually on top
