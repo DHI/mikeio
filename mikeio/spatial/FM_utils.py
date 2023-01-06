@@ -96,18 +96,19 @@ def _plot_map(
     mesh_col = "0.95"
     mesh_col_dark = "0.6"
 
-    if plot_type is None:
-        plot_type = "outline_only"
+    VALID_PLOT_TYPES = (None, 'mesh_only', 'outline_only', 'contour', 'contourf', 'patch', 'shaded')
+    if plot_type not in VALID_PLOT_TYPES:
+        raise Exception(f"plot_type {plot_type} unknown!")
 
-    plot_data = True
-    if plot_type == "mesh_only" or plot_type == "outline_only":
-        plot_data = False
+    plot_type = plot_type or "outline_only"
 
+    plot_data_options = dict(mesh_only= False, outline_only= False)
+    plot_data = plot_data_options.get(plot_type, True)
+    
     if plot_type == "mesh_only":
         show_mesh = True
 
-    if cmap is None:
-        cmap = cm.viridis
+    cmap = cmap or cm.viridis 
 
     nc = node_coordinates
     ec = element_coordinates
@@ -123,10 +124,7 @@ def _plot_map(
             raise Exception(
                     f"Length of z ({len(z)}) does not match geometry ({ne})"
                 )
-        if label is None:
-            label = ""
-        if not plot_data:
-            print(f"Cannot plot data in {plot_type} plot!")
+        label = label or ""
 
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
@@ -345,26 +343,12 @@ def _plot_map(
                     except:
                         warnings.warn("Cannot add colorbar")
 
-        else:
-            if (plot_type is not None) and plot_type != "outline_only":
-                raise Exception(f"plot_type {plot_type} unknown!")
-
+        
         if show_mesh and (not _is_tri_only(element_table)):
-            # if mesh is not tri only, we need to add it manually on top
-            patches = _to_polygons(nc, element_table)
-            mesh_linewidth = 0.4
-            if plot_type == "contour":
-                mesh_col = mesh_col_dark
-            p = PatchCollection(
-                patches,
-                edgecolor=mesh_col,
-                facecolor="none",
-                linewidths=mesh_linewidth,
-            )
-            ax.add_collection(p)
+            _add_non_tri_mesh(ax, nc, element_table,plot_type)
 
     if show_outline:
-        _add_outline(ax, boundary_polylines, xmin, xmax, ymin, ymax)
+        _add_outline(ax, boundary_polylines=boundary_polylines, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         
     # set plot limits
     xybuf = 6e-3 * (xmax - xmin)
@@ -376,7 +360,23 @@ def _plot_map(
 
     return ax
 
-def _add_outline(ax, boundary_polylines, xmin, xmax, ymin, ymax) -> None:
+def _add_non_tri_mesh(ax, nc, element_table,plot_type, mesh_col_dark) -> None:
+    # if mesh is not tri only, we need to add it manually on top
+    from matplotlib.collections import PatchCollection
+    
+    patches = _to_polygons(nc, element_table)
+    mesh_linewidth = 0.4
+    if plot_type == "contour":
+        mesh_col = mesh_col_dark
+    p = PatchCollection(
+            patches,
+                edgecolor=mesh_col,
+                facecolor="none",
+                linewidths=mesh_linewidth,
+            )
+    ax.add_collection(p)
+
+def _add_outline(ax,*, boundary_polylines, xmin, xmax, ymin, ymax) -> None:
     linwid = 1.2
     out_col = "0.4"
     for exterior in boundary_polylines.exteriors:
