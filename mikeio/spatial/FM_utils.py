@@ -221,11 +221,6 @@ def _plot_map(
         fig_obj.set_clim(vmin, vmax)
         ax.add_collection(fig_obj)
 
-        if add_colorbar:
-            cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-            cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-            plt.colorbar(cmap_sm, label=label, cax=cax, extend=cbar_extend)
-
     else:
         # do node-based triangular plot
         import matplotlib.tri as tri
@@ -267,9 +262,6 @@ def _plot_map(
                 shading="gouraud",
             )
 
-            if add_colorbar:
-                _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
-
         elif plot_type == "contour" or plot_type == "contour_lines":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
             fig_obj = ax.tricontour(
@@ -300,34 +292,20 @@ def _plot_map(
                 vmax=vmax,
             )
 
-            # colorbar
-            if add_colorbar:
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                if cmap_ScMappable is None:
-                    plt.colorbar(fig_obj, label=label, cax=cax)
-                else:
-                    try:
-                        plt.colorbar(
-                            cmap_ScMappable,
-                            label=label,
-                            cax=cax,
-                            ticks=levels,
-                            extend=cbar_extend,
-                        )
-                    except:
-                        warnings.warn("Cannot add colorbar")
-
-        
         if show_mesh and (not _is_tri_only(element_table)):
             _add_non_tri_mesh(ax, nc, element_table,plot_type)
 
     if show_outline:
         _add_outline(ax, boundary_polylines=boundary_polylines, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
         
+    if add_colorbar and (plot_type != "outline_only"): # TODO extract outline_only plot to separate function
+        _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
+    
     # set plot limits
     xybuf = 6e-3 * (xmax - xmin)
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
+
 
     ax.set_title(title)
 
@@ -345,6 +323,7 @@ def _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> N
                 cmap_sm,
                 label=label,
                 cax=cax,
+                ticks=levels,
                 boundaries=levels,
                 extend=cbar_extend,
             )
