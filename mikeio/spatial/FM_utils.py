@@ -91,12 +91,9 @@ def _plot_map(
     >>> dfs.plot(z=ds) # plot surface elevation
     """
 
-    import matplotlib.cm as cm
-    import matplotlib.colors as mplc
     import matplotlib.pyplot as plt
-    from matplotlib.collections import PatchCollection
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
-
+    import matplotlib.cm as cm
+    
     VALID_PLOT_TYPES = (None, 'mesh_only', 'outline_only', 'contour', 'contourf', 'patch', 'shaded')
     if plot_type not in VALID_PLOT_TYPES:
         raise Exception(f"plot_type {plot_type} unknown!")
@@ -146,45 +143,16 @@ def _plot_map(
     # At this point we are sure that we are plotting some data, at least bathymetry
     if z is None:
         z = ec[:, 2]
-        if label is None:
-            label = "Bathymetry (m)"
-    else:
-        if len(z) != ne:
-            raise Exception(
-                    f"Length of z ({len(z)}) does not match geometry ({ne})"
-                )
-        label = label or ""
+        label = label or "Bathymetry (m)"
+    
+    if len(z) != ne:
+        raise Exception(
+                f"Length of z ({len(z)}) does not match geometry ({ne})"
+            )
+    
+    label = label or ""
 
-    vmin = vmin or np.nanmin(z)
-    vmax = vmax or np.nanmax(z)
-
-    if vmin == vmax:
-        vmin = vmin - 0.1
-        vmax = vmin + 0.2
-
-
-    # set levels
-    cmap_norm = None
-    cmap_ScMappable = None
-    if levels is not None:
-        if np.isscalar(levels):
-            n_levels = levels
-            levels = np.linspace(vmin, vmax, n_levels)
-        else:
-            n_levels = len(levels)
-            vmin = min(levels)
-            vmax = max(levels)
-
-        levels = np.array(levels)
-
-        if isinstance(cmap, str):
-            cmap = cm.get_cmap(cmap)
-        cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
-        cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
-    if ("contour" in plot_type) and (levels is None):
-        n_levels = 10
-        levels = np.linspace(vmin, vmax, n_levels)
-
+    vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels = _set_colormap_levels(cmap, vmin,vmax, levels, z)
     cbar_extend = _cbar_extend(z, vmin, vmax)
 
 
@@ -259,6 +227,42 @@ def _plot_map(
     ax.set_title(title)
 
     return ax
+
+def _set_colormap_levels(cmap, vmin, vmax, levels, z):
+    import matplotlib.cm as cm
+    import matplotlib.colors as mplc
+
+    vmin = vmin or np.nanmin(z)
+    vmax = vmax or np.nanmax(z)
+
+    if vmin == vmax:
+        vmin = vmin - 0.1
+        vmax = vmin + 0.2
+
+
+    cmap_norm = None
+    cmap_ScMappable = None
+    if levels is not None:
+        if np.isscalar(levels):
+            n_levels = levels
+            levels = np.linspace(vmin, vmax, n_levels)
+        else:
+            n_levels = len(levels)
+            vmin = min(levels)
+            vmax = max(levels)
+
+        levels = np.array(levels)
+
+        if isinstance(cmap, str):
+            cmap = cm.get_cmap(cmap)
+        cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
+        cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
+    
+    if levels is None:
+        levels = np.linspace(vmin, vmax, 10)
+    
+    return vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels
+
 
 def _set_plot_limits(ax, nc) -> None:
     """Set default plot limits
