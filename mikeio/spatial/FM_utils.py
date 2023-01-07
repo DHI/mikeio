@@ -220,25 +220,12 @@ def _plot_map(
 
     else:
         # do node-based triangular plot
-        import matplotlib.tri as tri
-
         mesh_linewidth = 0.0
         if show_mesh and _is_tri_only(element_table):
             mesh_linewidth = 0.4
             n_refinements = 0
-
-        elem_table, ec, z = _create_tri_only_element_table(
-            nc, element_table, ec, data=z
-        )
-        triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
-
-        zn = _get_node_centered_data(nc, elem_table, ec, z)
-
-        if n_refinements > 0:
-            # TODO: refinements doesn't seem to work for 3d files?
-            refiner = tri.UniformTriRefiner(triang)
-            triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
-
+        triang, zn = _get_tris(nc, element_table, ec, z,n_refinements)
+        
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
             if cmap_norm is None:
@@ -259,7 +246,7 @@ def _plot_map(
                 shading="gouraud",
             )
 
-        elif plot_type == "contour" or plot_type == "contour_lines":
+        elif plot_type == "contour":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
             fig_obj = ax.tricontour(
                 triang,
@@ -273,11 +260,8 @@ def _plot_map(
             if len(label) > 0:
                 ax.set_title(label)
 
-        elif plot_type == "contourf" or plot_type == "contour_filled":
+        elif plot_type == "contourf":
             ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-            # vbuf = 0.01 * (vmax - vmin) / n_levels
-            # avoid white outside limits
-            # zn = np.clip(zn, vmin + vbuf, vmax - vbuf) # # THIS LINE SEEMS TO CAUSE TROUBLE
             fig_obj = ax.tricontourf(
                 triang,
                 zn,
@@ -303,10 +287,25 @@ def _plot_map(
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
-
     ax.set_title(title)
 
     return ax
+
+def _get_tris(nc, element_table, ec, z,n_refinements):
+    import matplotlib.tri as tri
+    elem_table, ec, z = _create_tri_only_element_table(
+            nc, element_table, ec, data=z
+        )
+    triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
+
+    zn = _get_node_centered_data(nc, elem_table, ec, z)
+
+    if n_refinements > 0:
+        # TODO: refinements doesn't seem to work for 3d files?
+        refiner = tri.UniformTriRefiner(triang)
+        triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
+
+    return triang, zn
 
 def _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> None:
 
