@@ -130,7 +130,7 @@ def _plot_map(
 
     # set aspect ratio
     __set_aspect_ratio(ax, nc, projection)
-    __set_xy_label_by_projection(ax, projection)
+    _set_xy_label_by_projection(ax, projection)
 
     if plot_type == "outline_only":
         __plot_outline_only(ax, boundary_polylines)
@@ -279,7 +279,7 @@ def __set_plot_limits(ax, nc) -> None:
 def __plot_mesh_only(ax,nc, element_table):
     from matplotlib.collections import PatchCollection
 
-    patches = __to_polygons(nc, element_table)
+    patches = _to_polygons(nc, element_table)
     fig_obj = PatchCollection(
             patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3)
     ax.add_collection(fig_obj)
@@ -295,7 +295,7 @@ def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vma
 
     from matplotlib.collections import PatchCollection
 
-    patches = __to_polygons(nc, element_table)
+    patches = _to_polygons(nc, element_table)
         
     if show_mesh:
         edgecolor = MESH_COL
@@ -325,7 +325,7 @@ def __get_tris(nc, element_table, ec, z,n_refinements):
         )
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
-    zn = __get_node_centered_data(nc, elem_table, ec, z)
+    zn = _get_node_centered_data(nc, elem_table, ec, z)
 
     if n_refinements > 0:
         # TODO: refinements doesn't seem to work for 3d files?
@@ -363,7 +363,7 @@ def __add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
     # if mesh is not tri only, we need to add it manually on top
     from matplotlib.collections import PatchCollection
     
-    patches = __to_polygons(nc, element_table)
+    patches = _to_polygons(nc, element_table)
     mesh_linewidth = 0.4
     if plot_type == "contour":
         mesh_col = MESH_COL_DARK
@@ -382,7 +382,7 @@ def __add_outline(ax,boundary_polylines) -> None:
     for line in lines:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
         
-def __set_xy_label_by_projection(ax, projection):
+def _set_xy_label_by_projection(ax, projection):
     if (not projection) or projection == "NON-UTM":
         ax.set_xlabel("x [m]")
         ax.set_ylabel("y [m]")
@@ -398,7 +398,7 @@ def __is_tri_only(element_table):
     return max([len(el) for el in element_table]) == 3
 
 
-def __to_polygons(node_coordinates, element_table):
+def _to_polygons(node_coordinates, element_table):
     """generate matplotlib polygons from element table for plotting
 
     Returns
@@ -422,7 +422,7 @@ def __to_polygons(node_coordinates, element_table):
     return polygons
 
 
-def __get_node_centered_data(
+def _get_node_centered_data(
     node_coordinates, element_table, element_coordinates, data, extrapolate=True
 ):
     """convert cell-centered data to node-centered by pseudo-laplacian method

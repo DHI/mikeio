@@ -8,19 +8,18 @@ from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
 from scipy.spatial import cKDTree
 
-import mikeio.data_utils as du
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import InvalidGeometry
 from ..interpolation import get_idw_interpolant, interp2d
 from .FM_utils import (
-    __get_node_centered_data,
+    _get_node_centered_data,
     _plot_map,
     _plot_vertical_profile,
-    __set_xy_label_by_projection,
-    __to_polygons,
+    _set_xy_label_by_projection, # TODO remove
+    _to_polygons, # TODO remove
 )
-from .geometry import BoundingBox, GeometryPoint2D, GeometryPoint3D, _Geometry
+from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
 
@@ -157,7 +156,7 @@ class _GeometryFMPlotter:
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
-        patches = __to_polygons(
+        patches = _to_polygons(
             self.g._geometry2d.node_coordinates, self.g._geometry2d.element_table
         )
         fig_obj = PatchCollection(
@@ -167,7 +166,7 @@ class _GeometryFMPlotter:
         self.outline(ax=ax)
         ax.set_title(title)
         ax = self._set_plot_limits(ax)
-        __set_xy_label_by_projection(ax, self.g.projection)
+        _set_xy_label_by_projection(ax, self.g.projection)
         return ax
 
     def outline(self, title="Outline", figsize=None, ax=None):
@@ -1361,7 +1360,7 @@ class GeometryFM(_Geometry):
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates
         elem_table = geometry.element_table
-        return __get_node_centered_data(nc, elem_table, ec, data, extrapolate)
+        return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
 
     @property
     def _geometry2d(self):
