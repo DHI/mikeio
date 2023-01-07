@@ -103,9 +103,6 @@ def _plot_map(
 
     plot_type = plot_type or "outline_only"
 
-    plot_data_options = dict(mesh_only= False, outline_only= False)
-    plot_data = plot_data_options.get(plot_type, True)
-    
     if plot_type == "mesh_only":
         show_mesh = True
 
@@ -114,18 +111,6 @@ def _plot_map(
     nc = node_coordinates
     ec = element_coordinates
     ne = ec.shape[0]
-
-    if z is None:
-        if plot_data:
-            z = ec[:, 2]
-            if label is None:
-                label = "Bathymetry (m)"
-    else:
-        if len(z) != ne:
-            raise Exception(
-                    f"Length of z ({len(z)}) does not match geometry ({ne})"
-                )
-        label = label or ""
 
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
@@ -141,18 +126,47 @@ def _plot_map(
         newz[elements] = z[elements]
         z = newz
     
-    if plot_data:
-        vmin = vmin or np.nanmin(z)
-        vmax = vmax or np.nanmax(z)
+    
+    # plot in existing or new axes?
+    if ax is None:
+        _, ax = plt.subplots(figsize=figsize)
 
-        if vmin == vmax:
-            vmin = vmin - 0.1
-            vmax = vmin + 0.2
+    # set aspect ratio
+    _set_aspect_ratio(ax, nc, projection)
+    _set_xy_label_by_projection(ax, projection)
+
+    if plot_type == "outline_only":
+        _plot_outline_only(ax, boundary_polylines)
+        return ax
+
+    if plot_type == "mesh_only":
+        _plot_mesh_only(ax, nc, element_table)
+        return ax
+
+    # At this point we are sure that we are plotting some data, at least bathymetry
+    if z is None:
+        z = ec[:, 2]
+        if label is None:
+            label = "Bathymetry (m)"
+    else:
+        if len(z) != ne:
+            raise Exception(
+                    f"Length of z ({len(z)}) does not match geometry ({ne})"
+                )
+        label = label or ""
+
+    vmin = vmin or np.nanmin(z)
+    vmax = vmax or np.nanmax(z)
+
+    if vmin == vmax:
+        vmin = vmin - 0.1
+        vmax = vmin + 0.2
+
 
     # set levels
     cmap_norm = None
     cmap_ScMappable = None
-    if ("only" not in plot_type) and (levels is not None):
+    if levels is not None:
         if np.isscalar(levels):
             n_levels = levels
             levels = np.linspace(vmin, vmax, n_levels)
@@ -173,22 +187,8 @@ def _plot_map(
 
     cbar_extend = _cbar_extend(z, vmin, vmax)
 
-    # plot in existing or new axes?
-    if ax is None:
-        _, ax = plt.subplots(figsize=figsize)
 
-    # set aspect ratio
-    _set_aspect_ratio(ax, nc, projection)
-    _set_xy_label_by_projection(ax, projection)
-
-    if plot_type == "outline_only":
-        _plot_outline_only(ax, boundary_polylines)
-        return ax
-
-    elif plot_type == "mesh_only":
-        _plot_mesh_only(ax, nc, element_table)
-        return ax
-    elif plot_type == "patch":
+    if plot_type == "patch":
         fig_obj = _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax)
 
     else:
