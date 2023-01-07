@@ -196,27 +196,7 @@ def _plot_map(
         ax.add_collection(fig_obj)
 
     elif plot_type == "patch":
-        patches = _to_polygons(nc, element_table)
-        # do plot as patches (like MZ "box contour")
-        # with (constant) element values
-        if show_mesh:
-            edgecolor = MESH_COL
-            linewidth = 0.4
-        else:
-            edgecolor = "face"
-            linewidth = None
-        
-        fig_obj = PatchCollection(
-                patches,
-                cmap=cmap,
-                norm=cmap_norm,
-                edgecolor=edgecolor,
-                linewidths=linewidth,
-            )
-
-        fig_obj.set_array(z)
-        fig_obj.set_clim(vmin, vmax)
-        ax.add_collection(fig_obj)
+        fig_obj = _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax)
 
     else:
         # do node-based triangular plot
@@ -289,6 +269,36 @@ def _plot_map(
     ax.set_title(title)
 
     return ax
+
+def _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
+    """do plot as patches (like MZ "box contour")
+
+        with (constant) element values"""
+
+    from matplotlib.collections import PatchCollection
+
+    patches = _to_polygons(nc, element_table)
+        
+    if show_mesh:
+        edgecolor = MESH_COL
+        linewidth = 0.4
+    else:
+        edgecolor = "face"
+        linewidth = None
+        
+    fig_obj = PatchCollection(
+            patches,
+            cmap=cmap,
+            norm=cmap_norm,
+            edgecolor=edgecolor,
+            linewidths=linewidth,
+    )
+
+    fig_obj.set_array(z)
+    fig_obj.set_clim(vmin, vmax)
+    ax.add_collection(fig_obj)
+
+    return fig_obj
 
 def _get_tris(nc, element_table, ec, z,n_refinements):
     import matplotlib.tri as tri
