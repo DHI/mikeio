@@ -8,6 +8,7 @@ from .utils import _relative_cumulative_distance
 MESH_COL = "0.95" 
 MESH_COL_DARK = "0.6"
 
+
 def _plot_map(
     node_coordinates,
     element_table,
@@ -181,10 +182,6 @@ def _plot_map(
     _set_aspect_ratio(ax, nc, projection)
     _set_xy_label_by_projection(ax, projection)
 
-    # set plot limits
-    xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
-    ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
-
     if plot_type == "outline_only":
         fig_obj = None
 
@@ -256,19 +253,29 @@ def _plot_map(
             _add_non_tri_mesh(ax, nc, element_table,plot_type)
 
     if show_outline:
-        _add_outline(ax, boundary_polylines=boundary_polylines, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
+        _add_outline(ax, boundary_polylines)
         
     if add_colorbar and (plot_type != "outline_only"): # TODO extract outline_only plot to separate function
         _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
     
-    # set plot limits
+    _set_plot_limits(ax, nc)
+    
+    ax.set_title(title)
+
+    return ax
+
+def _set_plot_limits(ax, nc) -> None:
+    """Set default plot limits
+    
+    Override with matplotlib ax.set_xlim, ax.set_ylim
+    """
+    xmin, xmax =nc[:, 0].min(), nc[:, 0].max()
+    ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
+    
     xybuf = 6e-3 * (xmax - xmin)
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
-    ax.set_title(title)
-
-    return ax
 
 def _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
     """do plot as patches (like MZ "box contour")
@@ -359,15 +366,12 @@ def _add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
             )
     ax.add_collection(p)
 
-def _add_outline(ax,*, boundary_polylines, xmin, xmax, ymin, ymax) -> None:
+def _add_outline(ax,boundary_polylines) -> None:
     linwid = 1.2
     out_col = "0.4"
     for exterior in boundary_polylines.exteriors:
         ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-        xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
-        xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
-        ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
-
+        
     for interior in boundary_polylines.interiors:
         ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
 
