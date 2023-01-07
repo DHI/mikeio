@@ -5,6 +5,9 @@ import numpy as np
 from .utils import _relative_cumulative_distance
 
 
+MESH_COL = "0.95" 
+MESH_COL_DARK = "0.6"
+
 def _plot_map(
     node_coordinates,
     element_table,
@@ -92,9 +95,6 @@ def _plot_map(
     import matplotlib.pyplot as plt
     from matplotlib.collections import PatchCollection
     from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-    mesh_col = "0.95"
-    mesh_col_dark = "0.6"
 
     VALID_PLOT_TYPES = (None, 'mesh_only', 'outline_only', 'contour', 'contourf', 'patch', 'shaded')
     if plot_type not in VALID_PLOT_TYPES:
@@ -191,7 +191,7 @@ def _plot_map(
     elif plot_type == "mesh_only":
         patches = _to_polygons(nc, element_table)
         fig_obj = PatchCollection(
-            patches, edgecolor=mesh_col_dark, facecolor="none", linewidths=0.3
+            patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3
         )
         ax.add_collection(fig_obj)
 
@@ -200,7 +200,7 @@ def _plot_map(
         # do plot as patches (like MZ "box contour")
         # with (constant) element values
         if show_mesh:
-            edgecolor = mesh_col
+            edgecolor = MESH_COL
             linewidth = 0.4
         else:
             edgecolor = "face"
@@ -227,7 +227,7 @@ def _plot_map(
         triang, zn = _get_tris(nc, element_table, ec, z,n_refinements)
         
         if plot_type == "shaded":
-            ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
+            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
             if cmap_norm is None:
                 vmin = None
                 vmax = None
@@ -247,7 +247,7 @@ def _plot_map(
             )
 
         elif plot_type == "contour":
-            ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
+            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL_DARK)
             fig_obj = ax.tricontour(
                 triang,
                 zn,
@@ -257,11 +257,10 @@ def _plot_map(
                 norm=cmap_norm,
             )
             ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
-            if len(label) > 0:
-                ax.set_title(label)
+            ax.set_title(label)
 
         elif plot_type == "contourf":
-            ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
+            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
             fig_obj = ax.tricontourf(
                 triang,
                 zn,
@@ -274,7 +273,7 @@ def _plot_map(
             )
 
         if show_mesh and (not _is_tri_only(element_table)):
-            _add_non_tri_mesh(ax, nc, element_table,plot_type, mesh_col_dark)
+            _add_non_tri_mesh(ax, nc, element_table,plot_type)
 
     if show_outline:
         _add_outline(ax, boundary_polylines=boundary_polylines, xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax)
@@ -332,16 +331,16 @@ def _set_aspect_ratio(ax, nc, projection):
     else:
         ax.set_aspect("equal")
 
-def _add_non_tri_mesh(ax, nc, element_table,plot_type, mesh_col_dark) -> None:
+def _add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
     # if mesh is not tri only, we need to add it manually on top
     from matplotlib.collections import PatchCollection
     
     patches = _to_polygons(nc, element_table)
     mesh_linewidth = 0.4
     if plot_type == "contour":
-        mesh_col = mesh_col_dark
+        mesh_col = MESH_COL_DARK
     else:
-        mesh_col = "0.95" # TODO
+        mesh_col = MESH_COL
     p = PatchCollection(
             patches,
                 edgecolor=mesh_col,
