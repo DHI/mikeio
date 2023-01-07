@@ -14,16 +14,26 @@ from ..eum import EUMType, EUMUnit
 from ..exceptions import InvalidGeometry
 from ..interpolation import get_idw_interpolant, interp2d
 from .FM_utils import (
-    _get_node_centered_data,
+    __get_node_centered_data,
     _plot_map,
     _plot_vertical_profile,
-    _point_in_polygon,
-    _set_xy_label_by_projection,
-    _to_polygons,
+    __set_xy_label_by_projection,
+    __to_polygons,
 )
 from .geometry import BoundingBox, GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
+
+def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
+    """Check for each side in the polygon that the point is on the correct side"""
+
+    for j in range(len(xn) - 1):
+        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
+            return False
+    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+        return False
+    return True
+
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -139,12 +149,15 @@ class _GeometryFMPlotter:
 
     def mesh(self, title="Mesh", figsize=None, ax=None):
         """Plot mesh only"""
+
+        # TODO this must be a duplicate, delegate
+
         from matplotlib.collections import PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
-        patches = _to_polygons(
+        patches = __to_polygons(
             self.g._geometry2d.node_coordinates, self.g._geometry2d.element_table
         )
         fig_obj = PatchCollection(
@@ -154,11 +167,13 @@ class _GeometryFMPlotter:
         self.outline(ax=ax)
         ax.set_title(title)
         ax = self._set_plot_limits(ax)
-        _set_xy_label_by_projection(ax, self.g.projection)
+        __set_xy_label_by_projection(ax, self.g.projection)
         return ax
 
     def outline(self, title="Outline", figsize=None, ax=None):
         """Plot domain outline (using the boundary_polylines property)"""
+
+        # TODO this must be a duplicate, delegate
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
@@ -207,6 +222,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _set_plot_limits(self, ax):
+        # TODO this must be a duplicate, delegate
         bbox = xy_to_bbox(self.g.node_coordinates)
         xybuf = 6e-3 * (bbox.right - bbox.left)
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
@@ -214,6 +230,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _plot_aspect(self):
+        # TODO this must be a duplicate, delegate
         if self.g.is_geo:
             mean_lat = np.mean(self.g.node_coordinates[:, 1])
             return 1.0 / np.cos(np.pi * mean_lat / 180)
@@ -1344,7 +1361,7 @@ class GeometryFM(_Geometry):
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates
         elem_table = geometry.element_table
-        return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
+        return __get_node_centered_data(nc, elem_table, ec, data, extrapolate)
 
     @property
     def _geometry2d(self):

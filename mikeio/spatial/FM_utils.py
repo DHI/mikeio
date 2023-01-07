@@ -129,15 +129,15 @@ def _plot_map(
         _, ax = plt.subplots(figsize=figsize)
 
     # set aspect ratio
-    _set_aspect_ratio(ax, nc, projection)
-    _set_xy_label_by_projection(ax, projection)
+    __set_aspect_ratio(ax, nc, projection)
+    __set_xy_label_by_projection(ax, projection)
 
     if plot_type == "outline_only":
-        _plot_outline_only(ax, boundary_polylines)
+        __plot_outline_only(ax, boundary_polylines)
         return ax
 
     if plot_type == "mesh_only":
-        _plot_mesh_only(ax, nc, element_table)
+        __plot_mesh_only(ax, nc, element_table)
         return ax
 
     # At this point we are sure that we are plotting some data, at least bathymetry
@@ -152,20 +152,20 @@ def _plot_map(
     
     label = label or ""
 
-    vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels = _set_colormap_levels(cmap, vmin,vmax, levels, z)
-    cbar_extend = _cbar_extend(z, vmin, vmax)
+    vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels = __set_colormap_levels(cmap, vmin,vmax, levels, z)
+    cbar_extend = __cbar_extend(z, vmin, vmax)
 
 
     if plot_type == "patch":
-        fig_obj = _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax)
+        fig_obj = __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax)
 
     else:
         # do node-based triangular plot
         mesh_linewidth = 0.0
-        if show_mesh and _is_tri_only(element_table):
+        if show_mesh and __is_tri_only(element_table):
             mesh_linewidth = 0.4
             n_refinements = 0
-        triang, zn = _get_tris(nc, element_table, ec, z,n_refinements)
+        triang, zn = __get_tris(nc, element_table, ec, z,n_refinements)
         
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
@@ -213,22 +213,22 @@ def _plot_map(
                 vmax=vmax,
             )
 
-        if show_mesh and (not _is_tri_only(element_table)):
-            _add_non_tri_mesh(ax, nc, element_table,plot_type)
+        if show_mesh and (not __is_tri_only(element_table)):
+            __add_non_tri_mesh(ax, nc, element_table,plot_type)
 
     if show_outline:
-        _add_outline(ax, boundary_polylines)
+        __add_outline(ax, boundary_polylines)
         
     if add_colorbar:
-        _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
+        __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
     
-    _set_plot_limits(ax, nc)
+    __set_plot_limits(ax, nc)
     
     ax.set_title(title)
 
     return ax
 
-def _set_colormap_levels(cmap, vmin, vmax, levels, z):
+def __set_colormap_levels(cmap, vmin, vmax, levels, z):
     import matplotlib.cm as cm
     import matplotlib.colors as mplc
 
@@ -264,7 +264,7 @@ def _set_colormap_levels(cmap, vmin, vmax, levels, z):
     return vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels
 
 
-def _set_plot_limits(ax, nc) -> None:
+def __set_plot_limits(ax, nc) -> None:
     """Set default plot limits
     
     Override with matplotlib ax.set_xlim, ax.set_ylim
@@ -276,26 +276,26 @@ def _set_plot_limits(ax, nc) -> None:
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
-def _plot_mesh_only(ax,nc, element_table):
+def __plot_mesh_only(ax,nc, element_table):
     from matplotlib.collections import PatchCollection
 
-    patches = _to_polygons(nc, element_table)
+    patches = __to_polygons(nc, element_table)
     fig_obj = PatchCollection(
             patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3)
     ax.add_collection(fig_obj)
 
-def _plot_outline_only(ax, boundary_polylines):
-    _add_outline(ax, boundary_polylines)
+def __plot_outline_only(ax, boundary_polylines):
+    __add_outline(ax, boundary_polylines)
     return ax
 
-def _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
+def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
     """do plot as patches (like MZ "box contour")
 
         with (constant) element values"""
 
     from matplotlib.collections import PatchCollection
 
-    patches = _to_polygons(nc, element_table)
+    patches = __to_polygons(nc, element_table)
         
     if show_mesh:
         edgecolor = MESH_COL
@@ -318,14 +318,14 @@ def _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax
 
     return fig_obj
 
-def _get_tris(nc, element_table, ec, z,n_refinements):
+def __get_tris(nc, element_table, ec, z,n_refinements):
     import matplotlib.tri as tri
-    elem_table, ec, z = _create_tri_only_element_table(
+    elem_table, ec, z = __create_tri_only_element_table(
             nc, element_table, ec, data=z
         )
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
-    zn = _get_node_centered_data(nc, elem_table, ec, z)
+    zn = __get_node_centered_data(nc, elem_table, ec, z)
 
     if n_refinements > 0:
         # TODO: refinements doesn't seem to work for 3d files?
@@ -334,7 +334,7 @@ def _get_tris(nc, element_table, ec, z,n_refinements):
 
     return triang, zn
 
-def _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> None:
+def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> None:
 
     from mpl_toolkits.axes_grid1 import make_axes_locatable
     import matplotlib.pyplot as plt
@@ -351,7 +351,7 @@ def _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> N
                 extend=cbar_extend,
             )
 
-def _set_aspect_ratio(ax, nc, projection):
+def __set_aspect_ratio(ax, nc, projection):
     is_geo = projection == "LONG/LAT"
     if is_geo:
         mean_lat = np.mean(nc[:, 1])
@@ -359,11 +359,11 @@ def _set_aspect_ratio(ax, nc, projection):
     else:
         ax.set_aspect("equal")
 
-def _add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
+def __add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
     # if mesh is not tri only, we need to add it manually on top
     from matplotlib.collections import PatchCollection
     
-    patches = _to_polygons(nc, element_table)
+    patches = __to_polygons(nc, element_table)
     mesh_linewidth = 0.4
     if plot_type == "contour":
         mesh_col = MESH_COL_DARK
@@ -377,12 +377,12 @@ def _add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
             )
     ax.add_collection(p)
 
-def _add_outline(ax,boundary_polylines) -> None:
+def __add_outline(ax,boundary_polylines) -> None:
     lines = boundary_polylines.exteriors + boundary_polylines.interiors
     for line in lines:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
         
-def _set_xy_label_by_projection(ax, projection):
+def __set_xy_label_by_projection(ax, projection):
     if (not projection) or projection == "NON-UTM":
         ax.set_xlabel("x [m]")
         ax.set_ylabel("y [m]")
@@ -394,11 +394,11 @@ def _set_xy_label_by_projection(ax, projection):
         ax.set_ylabel("Northing [m]")
 
 
-def _is_tri_only(element_table):
+def __is_tri_only(element_table):
     return max([len(el) for el in element_table]) == 3
 
 
-def _to_polygons(node_coordinates, element_table):
+def __to_polygons(node_coordinates, element_table):
     """generate matplotlib polygons from element table for plotting
 
     Returns
@@ -422,7 +422,7 @@ def _to_polygons(node_coordinates, element_table):
     return polygons
 
 
-def _get_node_centered_data(
+def __get_node_centered_data(
     node_coordinates, element_table, element_coordinates, data, extrapolate=True
 ):
     """convert cell-centered data to node-centered by pseudo-laplacian method
@@ -443,7 +443,7 @@ def _get_node_centered_data(
         node-centered data
     """
     nc = node_coordinates
-    elem_table, ec, data = _create_tri_only_element_table(
+    elem_table, ec, data = __create_tri_only_element_table(
         nc, element_table, element_coordinates, data
     )
 
@@ -482,12 +482,12 @@ def _get_node_centered_data(
     return node_centered_data
 
 
-def _create_tri_only_element_table(
+def __create_tri_only_element_table(
     node_coordinates, element_table, element_coordinates, data=None
 ):
     """Convert quad/tri mesh to pure tri-mesh"""
 
-    if _is_tri_only(element_table):
+    if __is_tri_only(element_table):
         # already tri-only? just convert to 2d array
         return np.stack(element_table), element_coordinates, data
 
@@ -518,7 +518,7 @@ def _create_tri_only_element_table(
     return np.asarray(elem_table), ec, data
 
 
-def _cbar_extend(calc_data, vmin, vmax):
+def __cbar_extend(calc_data, vmin, vmax):
     if calc_data is None:
         return "neither"
     extend_min = calc_data.min() < vmin if vmin is not None else False
@@ -533,16 +533,6 @@ def _cbar_extend(calc_data, vmin, vmax):
         extend = "neither"
     return extend
 
-
-def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
-    """Check for each side in the polygon that the point is on the correct side"""
-
-    for j in range(len(xn) - 1):
-        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
-            return False
-    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-        return False
-    return True
 
 
 def _plot_vertical_profile(
