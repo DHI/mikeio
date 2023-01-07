@@ -374,14 +374,10 @@ def _add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
     ax.add_collection(p)
 
 def _add_outline(ax,boundary_polylines) -> None:
-    linwid = 1.2
-    out_col = "0.4"
-    for exterior in boundary_polylines.exteriors:
-        ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
+    lines = boundary_polylines.exteriors + boundary_polylines.interiors
+    for line in lines:
+        ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
         
-    for interior in boundary_polylines.interiors:
-        ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
-
 def _set_xy_label_by_projection(ax, projection):
     if (not projection) or projection == "NON-UTM":
         ax.set_xlabel("x [m]")
