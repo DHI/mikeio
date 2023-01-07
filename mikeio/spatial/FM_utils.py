@@ -140,15 +140,14 @@ def _plot_map(
         newz = np.full_like(z, fill_value=np.nan)
         newz[elements] = z[elements]
         z = newz
+    
+    if plot_data:
+        vmin = vmin or np.nanmin(z)
+        vmax = vmax or np.nanmax(z)
 
-    if plot_data and vmin is None:
-        vmin = np.nanmin(z)
-    if plot_data and vmax is None:
-        vmax = np.nanmax(z)
-
-    if plot_data and vmin == vmax:
-        vmin = vmin - 0.1
-        vmax = vmin + 0.2
+        if vmin == vmax:
+            vmin = vmin - 0.1
+            vmax = vmin + 0.2
 
     # set levels
     cmap_norm = None
@@ -183,15 +182,12 @@ def _plot_map(
     _set_xy_label_by_projection(ax, projection)
 
     if plot_type == "outline_only":
-        fig_obj = None
+        _plot_outline_only(ax, boundary_polylines)
+        return ax
 
     elif plot_type == "mesh_only":
-        patches = _to_polygons(nc, element_table)
-        fig_obj = PatchCollection(
-            patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3
-        )
-        ax.add_collection(fig_obj)
-
+        _plot_mesh_only(ax, nc, element_table)
+        return ax
     elif plot_type == "patch":
         fig_obj = _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax)
 
@@ -255,7 +251,7 @@ def _plot_map(
     if show_outline:
         _add_outline(ax, boundary_polylines)
         
-    if add_colorbar and (plot_type != "outline_only"): # TODO extract outline_only plot to separate function
+    if add_colorbar:
         _add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
     
     _set_plot_limits(ax, nc)
@@ -276,6 +272,17 @@ def _set_plot_limits(ax, nc) -> None:
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
+def _plot_mesh_only(ax,nc, element_table):
+    from matplotlib.collections import PatchCollection
+
+    patches = _to_polygons(nc, element_table)
+    fig_obj = PatchCollection(
+            patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3)
+    ax.add_collection(fig_obj)
+
+def _plot_outline_only(ax, boundary_polylines):
+    _add_outline(ax, boundary_polylines)
+    return ax
 
 def _plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
     """do plot as patches (like MZ "box contour")
