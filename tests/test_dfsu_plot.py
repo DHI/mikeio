@@ -225,7 +225,7 @@ def test_da_plot():
     da.plot()
     da.plot(show_mesh=True)
     da.plot.contour()
-    da.plot.contourf(show_mesh=True)
+    da.plot.contourf(show_mesh=True,cmap='terrain', levels=[-30,-20,-10,0])
     da.plot.outline()
 
     dam = da.max()

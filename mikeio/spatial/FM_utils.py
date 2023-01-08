@@ -160,12 +160,6 @@ def _plot_map(
         
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
-            if cmap_norm is None:
-                vmin = None
-                vmax = None
-            else:
-                cmap_norm = None
-            
             fig_obj = ax.tripcolor(
                 triang,
                 zn,
@@ -173,7 +167,6 @@ def _plot_map(
                 cmap=cmap,
                 vmin=vmin,
                 vmax=vmax,
-                norm=cmap_norm,
                 linewidths=0.3,
                 shading="gouraud",
             )
@@ -220,6 +213,7 @@ def _plot_map(
     return ax
 
 def __set_colormap_levels(cmap, vmin, vmax, levels, z):
+    import matplotlib
     import matplotlib.cm as cm
     import matplotlib.colors as mplc
 
@@ -245,7 +239,7 @@ def __set_colormap_levels(cmap, vmin, vmax, levels, z):
         levels = np.array(levels)
 
         if isinstance(cmap, str):
-            cmap = cm.get_cmap(cmap)
+            cmap = matplotlib.colormaps[cmap]
         cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
         cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
     
@@ -474,7 +468,7 @@ def _get_node_centered_data(
 
 
 def __create_tri_only_element_table(
-    node_coordinates, element_table, element_coordinates, data=None
+    node_coordinates, element_table, element_coordinates, data
 ):
     """Convert quad/tri mesh to pure tri-mesh"""
 
@@ -483,9 +477,6 @@ def __create_tri_only_element_table(
         return np.stack(element_table), element_coordinates, data
 
     ec = element_coordinates.copy()
-
-    if data is None:
-        data = []
 
     elem_table = [list(element_table[i]) for i in range(len(element_table))]
     tmp_elmnt_nodes = elem_table.copy()
