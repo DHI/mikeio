@@ -236,3 +236,9 @@ def test_da_plot():
     da.max("space").plot()
 
     plt.close("all")
+
+def test_plot_non_utm_file():
+    
+    ds = mikeio.read("tests/testdata/FakeLake_NONUTM.dfsu")
+    da = ds[0]
+    da.plot()
