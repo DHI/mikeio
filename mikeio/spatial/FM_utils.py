@@ -94,20 +94,14 @@ def _plot_map(
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
     
-    VALID_PLOT_TYPES = (None, 'mesh_only', 'outline_only', 'contour', 'contourf', 'patch', 'shaded')
+    VALID_PLOT_TYPES = ('mesh_only', 'outline_only', 'contour', 'contourf', 'patch', 'shaded')
     if plot_type not in VALID_PLOT_TYPES:
         raise Exception(f"plot_type {plot_type} unknown!")
-
-    plot_type = plot_type or "outline_only"
-
-    if plot_type == "mesh_only":
-        show_mesh = True
 
     cmap = cmap or cm.viridis 
 
     nc = node_coordinates
     ec = element_coordinates
-    ne = ec.shape[0]
 
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
@@ -115,14 +109,6 @@ def _plot_map(
         raise ValueError(
             "vmin/vmax cannot be provided together with non-integer levels"
         )
-
-    if elements is not None:
-        if plot_type.startswith("contour"):
-            raise ValueError("elements argument not possible with contour plots")
-        newz = np.full_like(z, fill_value=np.nan)
-        newz[elements] = z[elements]
-        z = newz
-    
     
     # plot in existing or new axes?
     if ax is None:
@@ -144,11 +130,16 @@ def _plot_map(
     if z is None:
         z = ec[:, 2]
         label = label or "Bathymetry (m)"
+
+    if elements is not None:
+        if plot_type.startswith("contour"):
+            raise ValueError("elements argument not possible with contour plots")
+        newz = np.full_like(z, fill_value=np.nan)
+        newz[elements] = z[elements]
+        z = newz
     
-    if len(z) != ne:
-        raise Exception(
-                f"Length of z ({len(z)}) does not match geometry ({ne})"
-            )
+    
+    assert len(z) == ec.shape[0]
     
     label = label or ""
 

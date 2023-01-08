@@ -106,6 +106,7 @@ class _GeometryFMPlotter:
     def __call__(self, ax=None, figsize=None, **kwargs):
         """Plot bathymetry as coloured patches"""
         ax = self._get_ax(ax, figsize)
+        kwargs['plot_type'] = kwargs.get('plot_type') or 'outline_only'
         return self._plot_FM_map(ax, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
@@ -132,6 +133,8 @@ class _GeometryFMPlotter:
 
         if "title" not in kwargs:
             kwargs["title"] = "Bathymetry"
+        
+        plot_type = kwargs.get("plot_type")
 
         g = self.g._geometry2d
 
@@ -140,10 +143,10 @@ class _GeometryFMPlotter:
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
             boundary_polylines=g.boundary_polylines,
+            plot_type=plot_type,
             projection=g.projection,
             z=None,
-            ax=ax,
-            **kwargs,
+            ax=ax
         )
 
     def mesh(self, title="Mesh", figsize=None, ax=None):
