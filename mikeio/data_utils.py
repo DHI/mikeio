@@ -1,8 +1,10 @@
 import re
+from datetime import datetime
 from typing import Iterable, Sequence, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from datetime import datetime
+
 from .base import TimeSeries
 
 
@@ -53,11 +55,18 @@ class DataUtilsMixin:
                 )
                 steps = list(range(s.start, s.stop))
             except TypeError:
-                steps = list(range(*steps.indices(len(time))))
+                pass
+                # steps = list(range(*steps.indices(len(time))))
         elif isinstance(steps, int):
             steps = [steps]
 
         return steps
+
+    @staticmethod
+    def _n_selected_timesteps(time, k):
+        if isinstance(k, slice):
+            k = list(range(*k.indices(len(time))))
+        return len(k)
 
     @staticmethod
     def _is_boolean_mask(x) -> bool:

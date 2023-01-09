@@ -224,3 +224,36 @@ def test_select_point_dfs1_to_dfs0_double(tmp_path):
     dsnew = mikeio.read(outfilename)
 
     assert dsnew.n_timesteps == ds.n_timesteps
+
+def test_interp_dfs1():
+
+    ds = mikeio.read("tests/testdata/waterlevel_north.dfs1")
+
+    da: mikeio.DataArray = ds.North_WL
+
+    assert da.geometry.x[-1] == 8800
+
+    dai = da.interp(x=0)
+    assert dai[0].values == pytest.approx(-0.33)
+
+    dai = da.interp(x=4000)
+    assert dai[0].values == pytest.approx(-0.3022272830659693)
+
+    dai = da.interp(x=8800)
+    assert dai[-1].values == pytest.approx(-0.0814)
+
+    dai = da.interp(x=8900) # outside the domain
+    assert np.isnan(dai[-1].values)
+
+    dai = da.interp(x=-10) # outside the domain
+    assert np.isnan(dai[-1].values)
+
+
+def test_interp_onepoint_dfs1():
+
+    ds = mikeio.read("tests/testdata/nx1.dfs1")    
+    assert ds.geometry.nx == 1
+
+    with pytest.raises(AssertionError, match="not possible for Grid1D with one point"):
+        ds[0].interp(x=0)
+

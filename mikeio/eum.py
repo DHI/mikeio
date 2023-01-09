@@ -3,26 +3,31 @@
 
 Examples
 --------
->>> from mikeio.eum import EUMType, EUMUnit
->>> EUMType.Temperature
-<EUMType.Temperature: 100006>
->>> EUMType.Temperature.units
+>>> mikeio.EUMType.Temperature
+Temperature
+>>> mikeio.EUMType.Temperature.value
+100006
+>>> mikeio.EUMType.Temperature.units
 [degree Celsius, degree Fahrenheit, degree Kelvin]
->>> EUMUnit.degree_Kelvin
-degree Kelvin
+>>> mikeio.EUMUnit.degree_Celsius
+degree Celsius
+>>> mikeio.EUMUnit.degree_Celsius.value
+2800
+>>>
 
 """
-from typing import List, Sequence
-from mikecore.DfsFile import DataValueType
-from mikecore.eum import eumWrapper
+import warnings
 from enum import IntEnum
-
-from mikeio.helpers import to_datatype
+from typing import Dict, List, Sequence, Union
 
 import pandas as pd
+from mikecore.DfsFile import DataValueType
+from mikecore.eum import eumUnit, eumWrapper
+
+from .exceptions import InvalidDataValueType
 
 
-def type_list(search=None):
+def _type_list(search=None):
     """Get a dictionary of the EUM items
 
     Notes
@@ -63,7 +68,12 @@ def type_list(search=None):
     return items
 
 
-def unit_list(type_enum):
+def type_list(search=None):
+    warnings.warn("type_list is deprecated use EUMType.search instead", FutureWarning)
+    return _type_list(search=search)
+
+
+def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
     """Get a dictionary of valid units
 
     Parameters
@@ -77,13 +87,17 @@ def unit_list(type_enum):
         names and codes for valid units
     """
     items = {}
-    # units = GetItemAllowedUnits(type_enum)
-    for i in range(eumWrapper.eumGetItemUnitCount(type_enum)):
-        d = eumWrapper.eumGetItemUnitSeq(type_enum, i + 1)
-        if d[0] is True:
-            items[d[2]] = d[1]
+    n_units_for_eum_type = eumWrapper.eumGetItemUnitCount(eum_type)
+    for i in range(n_units_for_eum_type):
+        _, value, key = eumWrapper.eumGetItemUnitSeq(eum_type, i + 1)
+        items[key] = value
 
     return items
+
+
+def unit_list(type_eum):
+    warnings.warn("unit_list is deprecated use EUMType.units instead", FutureWarning)
+    return _type_list(type_eum)
 
 
 class TimeAxisType(IntEnum):
@@ -113,9 +127,8 @@ class EUMType(IntEnum):
 
     Examples
     --------
-    >>> from mikeio.eum import EUMType
-    >>> EUMType.Temperature
-    <EUMType.Temperature: 100006>
+    >>> mikeio.EUMType.Temperature
+    Temperature
     >>> EUMType.Temperature.units
     [degree Celsius, degree Fahrenheit, degree Kelvin]
     """
@@ -726,12 +739,12 @@ class EUMType(IntEnum):
     @property
     def units(self):
         """List valid units for this EUM type"""
-        temp = unit_list(self.code).items()
+        temp = _unit_list(self.code).items()
         return [EUMUnit(value) for _, value in temp]
 
     @staticmethod
     def search(pattern) -> List["EUMType"]:
-        temp = type_list(pattern).items()
+        temp = _type_list(pattern).items()
         return [EUMType(key) for key, _ in temp]
 
 
@@ -1457,11 +1470,46 @@ class ItemInfo:
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
 
-class ItemInfoList(list):
 
+class ItemInfoList(list):
     def __init__(self, items: Sequence[ItemInfo]):
         super().__init__(items)
 
     def to_dataframe(self):
-        data = [{"name": item.name, "type": item.type.name, "unit": item.unit.name} for item in self]
+        data = [
+            {"name": item.name, "type": item.type.name, "unit": item.unit.name}
+            for item in self
+        ]
         return pd.DataFrame(data)
+
+
+def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
+    string_datatype_mapping = {
+        "Instantaneous": DataValueType.Instantaneous,
+        "Accumulated": DataValueType.Accumulated,
+        "StepAccumulated": DataValueType.StepAccumulated,
+        "MeanStepBackward": DataValueType.MeanStepBackward,
+        "MeanStepForward": DataValueType.MeanStepForward,
+        0: DataValueType.Instantaneous,
+        1: DataValueType.Accumulated,
+        2: DataValueType.StepAccumulated,
+        3: DataValueType.MeanStepBackward,
+        4: DataValueType.MeanStepForward,
+    }
+
+    if isinstance(datatype, str):
+        if datatype not in string_datatype_mapping.keys():
+            raise InvalidDataValueType
+
+        return string_datatype_mapping[datatype]
+
+    if isinstance(datatype, int):
+        if datatype not in string_datatype_mapping.keys():
+            raise InvalidDataValueType
+
+        return string_datatype_mapping[datatype]
+
+    if not isinstance(DataValueType):
+        raise ValueError("Data value type not supported")
+
+    return datatype

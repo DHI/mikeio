@@ -1,5 +1,7 @@
-import numpy as np
 import warnings
+
+import numpy as np
+
 from .utils import _relative_cumulative_distance
 
 
@@ -88,8 +90,8 @@ def _plot_map(
     import matplotlib.cm as cm
     import matplotlib.colors as mplc
     import matplotlib.pyplot as plt
-    from matplotlib.patches import Polygon
     from matplotlib.collections import PatchCollection
+    from matplotlib.patches import Polygon
     from mpl_toolkits.axes_grid1 import make_axes_locatable
 
     mesh_col = "0.95"

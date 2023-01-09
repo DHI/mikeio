@@ -1,6 +1,5 @@
-import os
 import pytest
-import mikeio
+from mikeio.spatial.FM_geometry import GeometryFM
 
 
 ##################################################
@@ -10,7 +9,16 @@ pytest.importorskip("shapely")
 
 
 def test_to_shapely():
-    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
-    dfs = mikeio.open(filename)
-    shp = dfs.to_shapely()
-    assert True
+     #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (0.5, 1.0, 0.0),  # 2
+    ]
+
+    el = [(0, 1, 2)]
+
+    g = GeometryFM(nc, el)
+    shp = g.to_shapely()
+    assert shp.geom_type == "MultiPolygon"
+    assert shp.area == 0.5

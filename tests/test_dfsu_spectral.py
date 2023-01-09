@@ -5,9 +5,9 @@ import mikeio
 from mikeio import eum
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio.dfsu_spectral import DfsuSpectral
+from mikeio.dfsu.spectral import DfsuSpectral
 from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
-import mikeio.spectral_utils as spectral_utils
+import mikeio.spectral as spectral
 
 
 @pytest.fixture
@@ -330,7 +330,7 @@ def test_read_spectrum_dir_line(dfsu_line_dir):
 def test_calc_frequency_bin_sizes(dfsu_line):
     dfs = dfsu_line
     f = dfs.frequencies
-    df = spectral_utils._f_to_df(f)
+    df = spectral._f_to_df(f)
     assert len(f) == len(df)
     assert df.max() < f.max()
 
