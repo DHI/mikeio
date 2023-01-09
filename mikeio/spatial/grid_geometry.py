@@ -1,14 +1,15 @@
+import warnings
 from dataclasses import dataclass
 from typing import Sequence, Tuple, Union
-import warnings
+
 import numpy as np
 
 from .geometry import (
-    _Geometry,
+    BoundingBox,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
-    BoundingBox,
+    _Geometry,
 )
 
 
@@ -54,6 +55,15 @@ def _print_axis_txt(name, x, dx) -> str:
 class Grid1D(_Geometry):
     """1D grid (node-based)
     axis is increasing and equidistant
+
+    Examples
+    --------
+    >>> mikeio.Grid1D(nx=3,dx=0.1)
+    <mikeio.Grid1D>
+    x: [0, 0.1, 0.2] (nx=3, dx=0.1)
+    >>> mikeio.Grid1D(x=[0.1, 0.5, 0.9])
+    <mikeio.Grid1D>
+    x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)
     """
 
     _dx: float
@@ -104,12 +114,18 @@ class Grid1D(_Geometry):
     def get_spatial_interpolant(self, coords, **kwargs):
 
         x = coords[0][0]  # TODO accept list of points
+
+        assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
-        weights = 1 - d[ids]
 
-        assert np.allclose(weights.sum(), 1.0)
+        if x > self.x.max() or x < self.x.min():
+            weights = np.array([np.nan, np.nan])
+        else:
+            weights = 1 - d[ids] / d[ids].sum()
+            assert np.allclose(weights.sum(), 1.0)
         assert len(ids) == 2
+        assert len(weights) == 2
         return ids, weights
 
     def interp(self, data, ids, weights):
@@ -573,6 +589,9 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
+    def __contains__(self, pt) -> bool:
+        return self.contains(pt)
+
     def find_index(self, x: float = None, y: float = None, coords=None, area=None):
         """Find nearest index (i,j) of point(s)
 
@@ -992,12 +1011,12 @@ class Grid3D(_Geometry):
     def __str__(self):
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"
 
-    def _geometry_for_layers(self, layers) -> Union[Grid2D, "Grid3D"]:
+    def _geometry_for_layers(self, layers, keepdims=False) -> Union[Grid2D, "Grid3D"]:
         if layers is None:
             return self
 
         g = self
-        if len(layers) == 1:
+        if len(layers) == 1 and not keepdims:
             geometry = Grid2D(
                 dx=g._dx,
                 dy=g._dy,
@@ -1009,18 +1028,20 @@ class Grid3D(_Geometry):
                 projection=g._projstr,
                 orientation=g.orientation,
             )
-        else:
-            d = np.diff(g.z[layers])
+            return geometry
+
+        d = np.diff(g.z[layers])
+        if len(d) > 0:
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 warnings.warn("Extracting non-equidistant layers! Cannot use Grid3D.")
-                geometry = GeometryUndefined()
-            else:
-                geometry = Grid3D(
-                    x=g.x,
-                    y=g.y,
-                    z=g.z[layers],
-                    origin=g._origin,
-                    projection=g.projection,
-                    orientation=g.orientation,
-                )
+                return GeometryUndefined()
+
+        geometry = Grid3D(
+            x=g.x,
+            y=g.y,
+            z=g.z[layers],
+            origin=g._origin,
+            projection=g.projection,
+            orientation=g.orientation,
+        )
         return geometry

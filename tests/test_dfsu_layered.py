@@ -225,6 +225,7 @@ def test_read_dfsu3d_xyz():
     ds = dfs.read()  # all data in file
     dspt1 = ds.sel(x=x, y=y, z=z)
     assert isinstance(dspt1.geometry, GeometryPoint3D)
+    assert dspt1.geometry.projection == ds.geometry.projection
 
     dspt2 = dfs.read(x=x, y=y, z=z)
     assert isinstance(dspt2.geometry, GeometryPoint3D)
@@ -236,6 +237,20 @@ def test_read_dfsu3d_xyz():
     assert dspt3.dims == ()
     assert dspt3[0].values == dspt1[0].values[-1]
     # 20.531237
+
+def test_read_dfsu3d_xyz_to_xarray():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    (x, y, z) = (333934.1, 6158101.5, -5)
+
+    ds = dfs.read()  # all data in file
+    dspt1 = ds.sel(x=x, y=y, z=z)
+    
+    xr_ds = dspt1.to_xarray()
+    assert float(xr_ds.x) == pytest.approx(x)
+    assert float(xr_ds.y) == pytest.approx(y)
+    assert float(xr_ds.z) == pytest.approx(z)
 
 
 def test_read_column_select_single_time_plot():

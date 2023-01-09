@@ -1,21 +1,24 @@
 import os
-import warnings
+
 import numpy as np
-from mikecore.eum import eumUnit, eumQuantity
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.DfsFactory import DfsFactory
-from mikecore.DfsFile import DfsSimpleType, DataValueType, DfsFile
-from mikecore.DfsBuilder import DfsBuilder
-from mikecore.Projections import Cartography
 import pandas as pd
+from mikecore.DfsBuilder import DfsBuilder
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsFile import DfsFile, DfsSimpleType
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity, eumUnit
 
 from . import __dfs_version__
-from .dfsutil import _valid_item_numbers, _valid_timesteps, _get_item_info
 from .dataset import Dataset
+from .dfs import (
+    _Dfs123,
+    _get_item_info,
+    _valid_item_numbers,
+    _valid_timesteps,
+    _write_dfs_data,
+)
 from .eum import TimeStepUnit
-from .dfs import _Dfs123, _write_dfs_data
-from .spatial.grid_geometry import Grid2D, Grid3D
-from .spatial.geometry import GeometryUndefined
+from .spatial.grid_geometry import Grid3D
 
 
 def write_dfs3(filename: str, ds: Dataset, title="") -> None:
@@ -92,7 +95,6 @@ def _write_dfs3_spatial_axis(builder, factory, geometry: Grid3D):
             geometry.dz,
         )
     )
-
 
 
 class Dfs3(_Dfs123):
@@ -189,9 +191,10 @@ class Dfs3(_Dfs123):
             Read only selected items, by number (0-based), or by name
         time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
             Read only selected time steps, by default None (=all)
-        area: array[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper) coordinates
+        keepdims: bool, optional
+            When reading a single time step or a single layer only,
+            should the singleton dimension be kept
+            in the returned Dataset? by default: False
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
 
@@ -227,20 +230,29 @@ class Dfs3(_Dfs123):
 
         if layers == "top":
             layers = -1
-        # if layers == "bottom":
-        #    return NotImplementedError()
         layers = None if layers is None else np.atleast_1d(layers)
-        geometry = self.geometry._geometry_for_layers(layers)
 
         nz = zNum if layers is None else len(layers)
-        shape = (nt, nz, yNum, xNum) if nz > 1 else (nt, yNum, xNum)
+        if nz == 1 and (not keepdims):
+            geometry = self.geometry._geometry_for_layers([0])
+            dims = ("time", "y", "x")
+            shape = (nt, yNum, xNum)
+        else:
+            geometry = self.geometry._geometry_for_layers(layers, keepdims)
+            dims = ("time", "z", "y", "x")
+            shape = (nt, nz, yNum, xNum)
+
         for item in range(n_items):
             data = np.ndarray(shape=shape, dtype=float)
             data_list.append(data)
 
+        if single_time_selected and not keepdims:
+            shape = shape[1:]
+            dims = tuple([d for d in dims if d != "time"])
+
         t_seconds = np.zeros(nt, dtype=float)
 
-        for it_number, it in enumerate(time_steps):
+        for i, it in enumerate(time_steps):
             for item in range(n_items):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data
@@ -249,24 +261,33 @@ class Dfs3(_Dfs123):
                 d[d == deleteValue] = np.nan
 
                 if layers is None:
-                    data_list[item][it_number, :, :, :] = d
+                    dd = d
                 elif len(layers) == 1:
                     if layers[0] == "bottom":
-                        data_list[item][it_number, :, :] = self._get_bottom_values(d)
+                        dd = self._get_bottom_values(d)
                     else:
-                        data_list[item][it_number, :, :] = d[layers[0], :, :]
+                        dd = d[layers[0], :, :]
                 else:
-                    for l in range(len(layers)):
-                        data_list[item][it_number, l, :, :] = d[layers[l], :, :]
+                    dd = d[layers, :, :]
 
-            t_seconds[it_number] = itemdata.Time
+                if single_time_selected and not keepdims:
+                    data_list[item] = dd
+                else:
+                    data_list[item][i, ...] = dd
+
+            t_seconds[i] = itemdata.Time
 
         dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
         return Dataset(
-            data_list, time=time, items=items, geometry=geometry, validate=False
+            data_list,
+            time=time,
+            items=items,
+            geometry=geometry,
+            dims=dims,
+            validate=False,
         )
 
     def write(

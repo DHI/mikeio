@@ -1,0 +1,103 @@
+// Created     : 2020-01-16 11:16:53
+// DLL         : C:\Program Files (x86)\DHI\2020\bin\x64\pfs2004.dll
+// Version     : 18.1.0.13341
+
+[GRID_EDITOR]
+   [GRID_DATA]
+      FILE_NAME = |.\Grid1.dfs2|
+   EndSect  // GRID_DATA
+
+   [IMAGE_FILES]
+   EndSect  // IMAGE_FILES
+
+   [GRID_EDIT_VIEW]
+      VIEW_TYPE = 'class CGridEditMapView'
+      View_Slice_Type = 0
+      View_Shading = true
+      View_Shading_Type = 0
+      View_Shading_Color_Type = 0
+      View_Box_Divider = 0
+      View_Coloring = 0
+      View_Box_Transparency_Val = 0.5
+      View_Isoline = false
+      View_Isoline_Labels = false
+      View_Isoline_Label_Type = 0
+      View_Aspect_Ratio_Type = 1
+      View_Aspect_Ratio = 1.0
+      View_Mouse_Pointer_Coords = 0
+      View_Overlay_Drawing_Order = 0, 1, 2, 3, 4
+      View_Overlay_Enabled = 1, 1, 1, 1, 1
+      [MIKEZero_Palette_Definition]
+         Palette_Title = 'Untitled [-]'
+         Palette_Type = 0
+         Locked = false
+         Topmost_Value = false
+         Nice_Value = true
+         RGB_Delete_Color = 255, 255, 255
+         RGB_Color_Value = 128, 0, 128
+         RGB_Color_Value = 85, 0, 171
+         RGB_Color_Value = 42, 0, 213
+         RGB_Color_Value = 0, 0, 255
+         RGB_Color_Value = 0, 56, 225
+         RGB_Color_Value = 0, 111, 195
+         RGB_Color_Value = 0, 166, 166
+         RGB_Color_Value = 0, 196, 110
+         RGB_Color_Value = 0, 226, 55
+         RGB_Color_Value = 0, 255, 0
+         RGB_Color_Value = 85, 255, 0
+         RGB_Color_Value = 170, 255, 0
+         RGB_Color_Value = 255, 255, 0
+         RGB_Color_Value = 255, 170, 0
+         RGB_Color_Value = 255, 85, 0
+         RGB_Color_Value = 255, 0, 0
+      EndSect  // MIKEZero_Palette_Definition
+
+      [Geographical_Grid_Definition]
+         Display_Lon_Lat = false
+         Display_Proj = false
+         Map_Projection = 'PROJCS["UTM-30",GEOGCS["Unused",DATUM["UTM Projections",SPHEROID["WGS 1984",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000],PARAMETER["False_Northing",0],PARAMETER["Central_Meridian",-3],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_Of_Origin",0],UNIT["Meter",1]]'
+         Northing_Always_Positive = false
+         Easting_Northing_In_Thousands = true
+         [Lon_Lat_Style]
+            [MIKEZero_Line_Object]
+               Base_Title = 'Lon/Lat Lines'
+               Base_Reg_Key = ''
+               Base_Col_Red = 0
+               Base_Col_Green = 0
+               Base_Col_Blue = 0
+               Base_Display_On = true
+               Line_Thickness = 0.15
+               Line_Style = 0
+               Line_Polygon_Style = 0
+            EndSect  // MIKEZero_Line_Object
+
+         EndSect  // Lon_Lat_Style
+
+         [Proj_Style]
+            [MIKEZero_Line_Object]
+               Base_Title = 'Projection Lines'
+               Base_Reg_Key = ''
+               Base_Col_Red = 0
+               Base_Col_Green = 0
+               Base_Col_Blue = 0
+               Base_Display_On = true
+               Line_Thickness = 0.15
+               Line_Style = 0
+               Line_Polygon_Style = 0
+            EndSect  // MIKEZero_Line_Object
+
+         EndSect  // Proj_Style
+
+         OverlayDrawingOrder = 1
+      EndSect  // Geographical_Grid_Definition
+
+      [North_Arrow_Definition]
+         North_Arrow_Type = 0
+         Display = false
+         Position = -1e-35, -1e-35
+         OverlayDrawingOrder = 2
+      EndSect  // North_Arrow_Definition
+
+   EndSect  // GRID_EDIT_VIEW
+
+EndSect  // GRID_EDITOR

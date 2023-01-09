@@ -307,6 +307,21 @@ def test_contains():
     assert inside[0] == True
     assert inside[1] == False
 
+def test_point_in_domain():
+    filename = "tests/testdata/wind_north_sea.dfsu"
+    dfs = mikeio.open(filename)
+
+    pt = [4, 54]
+    assert pt in dfs.geometry
+
+    pt2 = [0, 50]
+    assert pt2 not in dfs.geometry
+
+    pts = [pt, pt2]
+    inside = [pt in dfs.geometry for pt in pts]
+    assert inside[0] == True
+    assert inside[1] == False
+
 
 def test_get_overset_grid():
     filename = "tests/testdata/FakeLake.dfsu"
@@ -479,6 +494,8 @@ def test_write(tmpdir):
 
     assert dfs._source.ApplicationTitle == "mikeio"
 
+    dfs.write(outfilename, ds.isel(time=0))  # without time axis
+
 
 def test_write_from_dfsu(tmpdir):
 
@@ -575,14 +592,13 @@ def test_write_big_file(tmpdir):
 
     ds = Dataset(das)
 
-    with pytest.warns(match="dt"):  # TODO should dt be handled in a different way
-        with dfs.write(outfilename, data=ds, dt=3600, keep_open=True) as f:
-            for _ in range(1, nt):
-                data = []
-                for _ in range(n_items):
-                    d = np.random.random((1, n_elements))
-                    data.append(d)
-                f.append(data)
+    with dfs.write(outfilename, data=ds, dt=3600, keep_open=True) as f:
+        for _ in range(1, nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((1, n_elements))
+                data.append(d)
+            f.append(data)
 
     dfsu = mikeio.open(outfilename)
 
@@ -924,12 +940,29 @@ def test_dataset_interp():
     y = 6184000
 
     dai = da.interp(x=x, y=y)
-
     assert isinstance(dai, DataArray)
     assert dai.shape == (ds.n_timesteps,)
     assert dai.name == da.name
     assert dai.geometry.x == x
     assert dai.geometry.y == y
+    assert dai.geometry.projection == ds.geometry.projection
+
+def test_dataset_interp_to_xarray():
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+
+    assert not ds.geometry.is_geo
+
+    x = 360000
+    y = 6184000
+
+    dsi = ds.interp(x=x, y=y)
+
+    xr_dsi = dsi.to_xarray()
+    assert float(xr_dsi.x) == pytest.approx(x)
+    assert float(xr_dsi.y) == pytest.approx(y)
+
+
+
 
 
 def test_interp_like_grid():
@@ -1029,3 +1062,30 @@ def test_interp_like_fm_dataset():
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM)
+
+def test_write_header(tmpdir):
+    meshfilename = "tests/testdata/north_sea_2.mesh"
+    outfilename = os.path.join(tmpdir, "NS_write_header.dfsu")
+    dfs = mikeio.Dfsu(meshfilename)
+    n_elements = dfs.n_elements
+    nt = 3
+    n_items = 2
+    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+    time0 = datetime(2021,1,1)
+    with dfs.write_header(outfilename, items=items, start_time=time0, dt=3600) as f:
+        for _ in range(nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((1, n_elements))  # 2d
+                data.append(d)
+                f.append(data)
+
+    # append also works for data without time axis
+    outfilename = os.path.join(tmpdir, "NS_write_header2.dfsu")
+    with dfs.write_header(outfilename, items=items, start_time=time0, dt=3600) as f:
+        for _ in range(nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((n_elements))  # 1d
+                data.append(d)
+                f.append(data)

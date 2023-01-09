@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 from platform import architecture
 
 # PEP0440 compatible formatted version, see:
@@ -19,24 +19,23 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.2.2"
-__dfs_version__: int = 122
+__version__ = "1.4.dev0"
+__dfs_version__: int = 140
 
 
 if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
 
+from .dataset import DataArray, Dataset
 from .dfs0 import Dfs0
 from .dfs1 import Dfs1
 from .dfs2 import Dfs2
 from .dfs3 import Dfs3
-from .dfsu_factory import Dfsu
-from .dfsu import Mesh
-from .pfs import read_pfs, Pfs, PfsSection
-from .xyz import read_xyz
-from .dataset import Dataset, DataArray
+from .dfsu import Dfsu, Mesh
+from .eum import EUMType, EUMUnit, ItemInfo
+from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from .eum import ItemInfo, EUMType, EUMUnit
+from .xyz import read_xyz
 
 
 def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Dataset:
@@ -71,6 +70,11 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     layers: int, str or sequence, optional
         Dfs3/Dfsu-layered: read only data from specific layers,
         by default None (=all layers)
+    error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+    fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
 
     Returns
     -------
@@ -103,6 +107,8 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", elements=lst_of_elems)
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers="bottom")
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers=[-2,-1])
+    >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False) # replace corrupt data with np.nan
+    >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False, fill_bad_data_value=0.0) # replace corrupt data with 0.0
     """
 
     ext = os.path.splitext(filename)[1].lower()

@@ -1,26 +1,19 @@
 import os
 import warnings
 from datetime import datetime, timedelta
+
 import numpy as np
 import pandas as pd
-
-
-from mikecore.eum import eumQuantity
+from mikecore.DfsFactory import DfsBuilder, DfsFactory
+from mikecore.DfsFile import DataValueType, DfsSimpleType, StatType, TimeAxisType
 from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.DfsFactory import DfsFactory, DfsBuilder
-
-from mikecore.DfsFile import (
-    DfsSimpleType,
-    DataValueType,
-    StatType,
-    TimeAxisType,
-)
+from mikecore.eum import eumQuantity
 
 from . import __dfs_version__
-from .dfsutil import _valid_item_numbers, _get_item_info, _valid_timesteps
-from .dataset import Dataset
-from .eum import TimeStepUnit, EUMType, EUMUnit, ItemInfo
 from .base import TimeSeries
+from .dataset import Dataset
+from .dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
+from .eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit
 
 
 def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float):
