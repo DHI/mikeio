@@ -1204,3 +1204,20 @@ EndSect // ENGINE
     assert pfs.ENGINE.SUBSECTION.setting == 'advanced'
     assert pfs.ENGINE.SUBSECTION._parent == pfs.ENGINE
     assert pfs.ENGINE.SUBSECTION.SUBSUBSECTION._parent == pfs.ENGINE.SUBSECTION
+
+
+def test_pfs_family_tree_traversal():
+
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
+
+    node = pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.BOUNDARY_CONDITIONS.CODE_1
+
+    # How did I get here?
+    path = []
+    parent = node._parent
+    while parent is not None:
+        path.append(parent._name)
+        parent = parent._parent
+
+    bread_crumb = "/".join(reversed(path))
+    assert bread_crumb == "SPECTRAL_WAVE_MODULE/OUTPUTS/CODE_1"

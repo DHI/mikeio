@@ -63,6 +63,8 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
     def __init__(self, dictionary, **kwargs):
 
+        self._name = None
+
         if "parent" in kwargs:
             self._parent = kwargs.pop("parent")
         else:
@@ -71,6 +73,8 @@ class PfsSection(SimpleNamespace, MutableMapping):
         super().__init__(**kwargs)
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
+
+        self._ALIAS_LIST = ["_ALIAS_LIST","_parent","_name"]  # ignore these in key list
 
     def __repr__(self) -> str:
         return "\n".join(self._to_txt_lines())
@@ -105,7 +109,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
         if isinstance(value, dict):
             d = value.copy() if copy else value
-            self.__setattr__(key, PfsSection(d))
+            self._name = key
             self.__setattr__(key, PfsSection(d, parent=self))
         elif isinstance(value, PfsNonUniqueList):
             # multiple keywords/Sections with same name
@@ -167,16 +171,16 @@ class PfsSection(SimpleNamespace, MutableMapping):
         return self.__dict__.clear()
 
     def keys(self):
-        """Return a new view of the PfsSection's keys"""
-        return self.__dict__.keys()
+        """Return a list of the PfsDocument's keys (target names)"""
+        return [k for k, _ in self.items()]
 
     def values(self):
-        """Return a new view of the PfsSection's values."""
-        return self.__dict__.values()
+        """Return a list of the PfsDocument's values (targets)."""
+        return [v for _, v in self.items()]
 
     def items(self):
         """Return a new view of the PfsSection's items ((key, value) pairs)"""
-        return self.__dict__.items()
+        return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
     # TODO: better name
     def update_recursive(self, key, value):
@@ -394,7 +398,9 @@ class PfsSection(SimpleNamespace, MutableMapping):
     def to_dict(self) -> dict:
         """Convert to (nested) dict (as a copy)"""
         d = self.__dict__.copy()
-        for key, value in d.items():
+        for key in self._ALIAS_LIST:
+            d.pop(key)
+        for key, value in self.items():
             if isinstance(value, self.__class__):
                 d[key] = value.to_dict()
         return d
