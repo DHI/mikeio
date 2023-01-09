@@ -25,6 +25,16 @@ class PfsNonUniqueList(list):
 
 class PfsSection(SimpleNamespace, MutableMapping):
 
+
+    @property
+    def section_name(self) -> str:
+        return self._name
+    
+    @property
+    def parent(self) -> Optional["PfsSection"]:
+        return self._parent
+
+
     @staticmethod
     def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
         """Create a PfsSection from a DataFrame
@@ -63,7 +73,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
     def __init__(self, dictionary, **kwargs):
 
-        self._name = None
+        self._name = ""
 
         if "parent" in kwargs:
             self._parent = kwargs.pop("parent")
@@ -107,6 +117,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         if value is None:
             value = {}
 
+        self._name = key
         if isinstance(value, dict):
             d = value.copy() if copy else value
             self._name = key

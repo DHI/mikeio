@@ -1203,7 +1203,7 @@ EndSect // ENGINE
 
     assert pfs.ENGINE.SUBSECTION.setting == 'advanced'
     assert pfs.ENGINE.SUBSECTION._parent == pfs.ENGINE
-    assert pfs.ENGINE.SUBSECTION.SUBSUBSECTION._parent == pfs.ENGINE.SUBSECTION
+    assert pfs.ENGINE.SUBSECTION.SUBSUBSECTION.parent == pfs.ENGINE.SUBSECTION
 
 
 def test_pfs_family_tree_traversal():
@@ -1214,10 +1214,10 @@ def test_pfs_family_tree_traversal():
 
     # How did I get here?
     path = []
-    parent = node._parent
+    parent = node.parent
     while parent is not None:
-        path.append(parent._name)
-        parent = parent._parent
+        path.append(parent.section_name) # TODO is this a proper name?
+        parent = parent.parent
 
     bread_crumb = "/".join(reversed(path))
     assert bread_crumb == "SPECTRAL_WAVE_MODULE/OUTPUTS/CODE_1"
