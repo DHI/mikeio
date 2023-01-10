@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Iterable, Sequence, Tuple, Union
+from typing import Iterable, List, Sequence, Sized, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -8,8 +8,61 @@ import pandas as pd
 from .base import TimeSeries
 
 
+def _to_safe_name(name: str) -> str:
+    tmp = re.sub("[^0-9a-zA-Z]", "_", name)
+    return re.sub("_+", "_", tmp)  # Collapse multiple underscores
+
+def _n_selected_timesteps(x: Sized, k: Union[slice,Sized]) -> int:
+    if isinstance(k, slice):
+        k = list(range(*k.indices(len(x))))
+    return len(k)
+
+
+def _get_time_idx_list(time: pd.DatetimeIndex, steps):
+    """Find list of idx in DatetimeIndex"""
+
+    if isinstance(steps, str):
+        parts = steps.split(",")
+        if len(parts) == 1:
+            parts.append(parts[0])  # end=start
+
+        if parts[0] == "":
+            steps = slice(parts[1])  # stop only
+        elif parts[1] == "":
+            steps = slice(parts[0], None)  # start only
+        else:
+            steps = slice(parts[0], parts[1])
+
+    if (isinstance(steps, Union[List,Tuple]) and not isinstance(steps, str)) and isinstance(
+        steps[0], (str, datetime, np.datetime64, pd.Timestamp)
+    ):
+        steps = pd.DatetimeIndex(steps)
+    if isinstance(steps, pd.DatetimeIndex):
+        return time.get_indexer(steps)
+    if isinstance(steps, (str, datetime, np.datetime64, pd.Timestamp)):
+        steps = slice(steps, steps)
+    if isinstance(steps, slice):
+        try:
+            s = time.slice_indexer(
+                steps.start,
+                steps.stop,
+            )
+            steps = list(range(s.start, s.stop))
+        except TypeError:
+            pass # TODO this seems fishy!
+            # steps = list(range(*steps.indices(len(time))))
+    elif isinstance(steps, int):
+        steps = [steps]
+    # TODO what is the return type of this function
+    return steps
+
+
 class DataUtilsMixin:
-    """Common functionality for DataArray and Dataset"""
+    """DataArray Utils"""
+
+    @staticmethod
+    def _to_safe_name(name: str) -> str:
+        return _to_safe_name(name)
 
     @staticmethod
     def _time_by_agg_axis(
@@ -27,46 +80,11 @@ class DataUtilsMixin:
     def _get_time_idx_list(time: pd.DatetimeIndex, steps):
         """Find list of idx in DatetimeIndex"""
 
-        if isinstance(steps, str):
-            parts = steps.split(",")
-            if len(parts) == 1:
-                parts.append(parts[0])  # end=start
-
-            if parts[0] == "":
-                steps = slice(parts[1])  # stop only
-            elif parts[1] == "":
-                steps = slice(parts[0], None)  # start only
-            else:
-                steps = slice(parts[0], parts[1])
-
-        if (isinstance(steps, Iterable) and not isinstance(steps, str)) and isinstance(
-            steps[0], (str, datetime, np.datetime64, pd.Timestamp)
-        ):
-            steps = pd.DatetimeIndex(steps)
-        if isinstance(steps, pd.DatetimeIndex):
-            return time.get_indexer(steps)
-        if isinstance(steps, (str, datetime, np.datetime64, pd.Timestamp)):
-            steps = slice(steps, steps)
-        if isinstance(steps, slice):
-            try:
-                s = time.slice_indexer(
-                    steps.start,
-                    steps.stop,
-                )
-                steps = list(range(s.start, s.stop))
-            except TypeError:
-                pass
-                # steps = list(range(*steps.indices(len(time))))
-        elif isinstance(steps, int):
-            steps = [steps]
-
-        return steps
+        return _get_time_idx_list(time, steps)
 
     @staticmethod
     def _n_selected_timesteps(time, k):
-        if isinstance(k, slice):
-            k = list(range(*k.indices(len(time))))
-        return len(k)
+        return _n_selected_timesteps(time, k)
 
     @staticmethod
     def _is_boolean_mask(x) -> bool:
@@ -138,11 +156,6 @@ class DataUtilsMixin:
     def _axis_to_spatial_axis(dims, axis):
         # subtract 1 if has time axis; assumes axis is integer
         return axis - int(dims[0] == "time")
-
-    @staticmethod
-    def _to_safe_name(name: str) -> str:
-        tmp = re.sub("[^0-9a-zA-Z]", "_", name)
-        return re.sub("_+", "_", tmp)  # Collapse multiple underscores
 
     @staticmethod
     def _parse_interp_time(old_time, new_time):
