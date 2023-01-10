@@ -33,7 +33,7 @@ def _get_time_idx_list(time: pd.DatetimeIndex, steps):
         else:
             steps = slice(parts[0], parts[1])
 
-    if (isinstance(steps, Union[List,Tuple]) and not isinstance(steps, str)) and isinstance(
+    if (isinstance(steps, (List,Tuple)) and not isinstance(steps, str)) and isinstance(
         steps[0], (str, datetime, np.datetime64, pd.Timestamp)
     ):
         steps = pd.DatetimeIndex(steps)
