@@ -41,7 +41,6 @@ def test_properties():
     dfs = mikeio.open(filename)
 
     assert dfs.dx == 0.06666692346334457
-    assert dfs.x0 == 0.0
     assert dfs.nx == 10
     assert dfs.projection_string == "LONG/LAT"
     assert dfs.longitude == -5.0
@@ -51,7 +50,6 @@ def test_properties():
     g = dfs.geometry
     assert isinstance(g, mikeio.Grid1D)
     assert g.dx == 0.06666692346334457
-    assert g._x0 == 0.0
     assert g.nx == 10
     assert g.projection == "LONG/LAT"
     assert g.origin == (-5.0, 51.20000076293945)

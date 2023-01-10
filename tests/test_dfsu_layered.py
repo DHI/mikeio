@@ -57,7 +57,7 @@ def test_read_top_layer():
     assert dstop1.shape == dstop2.shape
     assert dstop1.dims == dstop2.dims
     assert isinstance(dstop1.geometry, GeometryFM)
-    assert dstop1.geometry._type == dstop2.geometry._type
+    assert dstop1.geometry.type_name == dstop2.geometry.type_name
     assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
     assert dstop1.geometry.max_nodes_per_element <= 4
 
@@ -73,7 +73,7 @@ def test_read_bottom_layer():
     assert dsbot1.shape == dsbot2.shape
     assert dsbot1.dims == dsbot2.dims
     assert isinstance(dsbot1.geometry, GeometryFM)
-    assert dsbot1.geometry._type == dsbot2.geometry._type
+    assert dsbot1.geometry.type_name == dsbot2.geometry.type_name
     assert np.all(dsbot1.to_numpy() == dsbot2.to_numpy())
     assert dsbot1.geometry.max_nodes_per_element <= 4
 
@@ -97,7 +97,7 @@ def test_read_multiple_layers():
     assert dstop1.shape == dstop2.shape
     assert dstop1.dims == dstop2.dims
     assert isinstance(dstop1.geometry, GeometryFM3D)
-    assert dstop1.geometry._type == dstop2.geometry._type
+    assert dstop1.geometry.type_name == dstop2.geometry.type_name
     assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
     assert dstop1.geometry.max_nodes_per_element >= 6
 
@@ -118,7 +118,7 @@ def test_read_dfsu3d_area():
     dsa2 = dfs.read(area=bbox)
     assert dsa1.shape == dsa2.shape
     assert dsa1.dims == dsa2.dims
-    assert dsa1.geometry._type == dsa2.geometry._type
+    assert dsa1.geometry.type_name == dsa2.geometry.type_name
     assert np.all(dsa1.to_numpy() == dsa2.to_numpy())
 
 
@@ -161,15 +161,15 @@ def test_read_dfsu3d_column():
     assert dscol1.geometry.n_layers == 4
     assert dscol1.geometry.n_elements == 4
     assert dscol1.geometry.n_nodes == 5 * 3
-    assert dscol1._zn.shape == (ds.n_timesteps, 5 * 3)
+    assert dscol1.zn.shape == (ds.n_timesteps, 5 * 3)
 
     dscol2 = dfs.read(x=x, y=y)
     assert isinstance(dscol2.geometry, GeometryFMVerticalColumn)
     assert dscol1.shape == dscol2.shape
     assert dscol1.dims == dscol2.dims
-    assert dscol1.geometry._type == dscol2.geometry._type
+    assert dscol1.geometry.type_name == dscol2.geometry.type_name
     assert np.all(dscol1.to_numpy() == dscol2.to_numpy())
-    assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
+    assert dscol2.zn.shape == (ds.n_timesteps, 5 * 3)
 
 
 def test_read_dfsu3d_column_save(tmpdir):
@@ -310,7 +310,7 @@ def test_calc_element_coordinates_3d():
     # extract dynamic z values for profile
     elem_ids = dfs.find_nearest_profile_elements(333934.1, 6158101.5)
     ds = dfs.read(items=0, elements=elem_ids, time=0)
-    zn_dyn = ds[0]._zn  # TODO
+    zn_dyn = ds[0].zn  # TODO
     ec = dfs.calc_element_coordinates(elements=elem_ids, zn=zn_dyn)
 
     assert ec[0, 2] == pytest.approx(-6.981768845)
@@ -642,9 +642,9 @@ def test_dataset_write_dfsu3d_max(tmp_path):
 
     outfilename = tmp_path / "oresund_sigma_z.dfsu"
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
-    assert ds._zn is not None
+    assert ds.zn is not None
     ds_max = ds.max("time")
-    assert ds_max._zn is not None
+    assert ds_max.zn is not None
     ds_max.to_dfs(outfilename)
 
     ds2 = mikeio.read(outfilename)

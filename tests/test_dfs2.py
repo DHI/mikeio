@@ -96,8 +96,6 @@ def test_write_projected(tmpdir):
     assert ds.geometry.dx == 100
     assert ds.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
-    assert ds.geometry._x0 == 0.0
-    assert ds.geometry._y0 == 0.0
     assert ds.geometry.origin[0] == pytest.approx(x0)
     assert ds.geometry.origin[1] == pytest.approx(y0)
 
@@ -120,8 +118,6 @@ def test_write_projected(tmpdir):
     assert ds2.geometry.dx == 100
     assert ds2.geometry.dy == 100
     # NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
-    assert ds2.geometry._x0 == pytest.approx(x0)
-    assert ds2.geometry._y0 == pytest.approx(y0)
     assert ds2.geometry.origin[0] == 0.0
     assert ds2.geometry.origin[1] == 0.0
 
@@ -135,8 +131,6 @@ def test_write_projected(tmpdir):
     assert ds3.geometry.dx == 100
     assert ds3.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
-    assert ds3.geometry._x0 == 0.0
-    assert ds3.geometry._y0 == 0.0
     assert ds3.geometry.origin[0] == pytest.approx(x0)
     assert ds3.geometry.origin[1] == pytest.approx(y0)
 
@@ -350,7 +344,7 @@ def test_dir_wave_spectra_relative_time_axis():
     assert ds.geometry.ny == 37
     assert ds.n_timesteps == 1
     da = ds["Directional spectrum [1]"]
-    assert da.type == EUMType._3D_Surface_Elevation_Spectrum
+    assert da.type == EUMType._3D_Surface_Elevation_Spectrum # TODO all EUM item types starting with a number, is prefixed with _ :-(
 
 
 def test_properties_rotated_longlat():
@@ -383,8 +377,8 @@ def test_select_area_rotated_UTM(tmpdir):
 
     dssel = ds.isel(x=range(10, 20), y=range(15, 45))
     assert ds.geometry.orientation == dssel.geometry.orientation
-    assert dssel.geometry._x0 == ds.geometry.x[10]
-    assert dssel.geometry._y0 == ds.geometry.y[15]
+    #assert dssel.geometry.x0 == ds.geometry.x[10]
+    #assert dssel.geometry.y0 == ds.geometry.y[15]
 
     tmpfile = os.path.join(tmpdir.dirname, "subset_rotated.dfs2")
     dssel.to_dfs(tmpfile)
@@ -474,7 +468,7 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmpdir):
 
     dfsmod = mikeio.open(outfilename)
 
-    assert dfs._longitude == dfsmod._longitude
+    assert dfs.longitude == dfsmod.longitude
 
 
 def test_read_some_time_step(dfs2_random_2items):

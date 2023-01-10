@@ -214,6 +214,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self.keys = None
 
     @property
+    def zn(self) -> Optional[np.ndarray]:
+        return self._zn
+
+    @property
     def values(self):
         raise AttributeError(
             "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"

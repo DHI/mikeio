@@ -1444,6 +1444,10 @@ class _GeometryFMLayered(GeometryFM):
         self.__dz = None
 
     @property
+    def zn(self):
+        return self._zn
+    
+    @property
     def layer_ids(self):
         """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
         if self.n_layers is None:

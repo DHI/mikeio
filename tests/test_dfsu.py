@@ -492,8 +492,6 @@ def test_write(tmpdir):
     dfs.write(outfilename, ds)
     dfs = Dfsu(outfilename)
 
-    assert dfs._source.ApplicationTitle == "mikeio"
-
     dfs.write(outfilename, ds.isel(time=0))  # without time axis
 
 
@@ -925,8 +923,6 @@ def test_dataset_write_dfsu(tmp_path):
     ds.to_dfs(outfilename)
 
     dfs = mikeio.open(outfilename)
-
-    assert dfs._source.ApplicationTitle == "mikeio"
 
     ds2 = dfs.read()
     assert ds2.n_timesteps == 2

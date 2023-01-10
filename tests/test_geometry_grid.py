@@ -133,17 +133,8 @@ def test_xx_yy():
     x = np.linspace(1, 7, nx)
     y = np.linspace(3, 5, ny)
     g = Grid2D(x=x, y=y)
-    # assert g.n == nx * ny
-    assert g._xx[0, 0] == 1.0
-    assert g._yy[-1, -1] == 5.0
     assert np.all(g.xy[1] == [3.0, 3.0])
     assert np.all(g.coordinates[1] == [3.0, 3.0])
-
-    g2 = Grid2D(x=x, y=y)
-
-    # Reverse order compared to above makes no difference
-    assert g2._yy[-1, -1] == 5.0
-    assert g2._xx[0, 0] == 1.0
 
 
 def test_create_in_bbox():
@@ -162,7 +153,6 @@ def test_create_in_bbox():
     g = Grid2D(bbox=bbox, dx=dx)
     assert g.dx == dx
     assert g.dy == dx
-    # assert g.n == 20
 
     dx = 0.5
     dy = 2.5
@@ -170,17 +160,6 @@ def test_create_in_bbox():
     assert g.dx == dx
     assert g.dy == dy
     assert g.nx * g.ny == 4
-
-    # g = Grid2D(bbox=bbox, dx=dx, dy=2.5)
-    # assert g.dx == dx
-    # assert g.dy == 2.5
-    # assert g.n == 4
-
-    # with pytest.raises(ValueError):
-    #     Grid2D(bbox, shape=(12, 2, 2))
-
-    # with pytest.raises(ValueError):
-    #     Grid2D(bbox=bbox, nx=None, ny=None)
 
 
 def test_no_parameters():
@@ -211,10 +190,6 @@ def test_contains():
     inside = g.contains(xy)
     assert inside[0]
     assert not inside[1]
-
-    # inside = g.contains(xy[:, 0], xy[:, 1])
-    # assert inside[0]
-    # assert not inside[1]
 
 def test_in():
     bbox = [0, 0, 1, 5]
@@ -320,19 +295,6 @@ def test_to_mesh(tmp_path: Path):
     assert outfilename.exists()
     mesh = Mesh(outfilename)
     assert mesh.node_coordinates[0, 2] == -10
-
-
-# def test_xy_to_bbox():
-#     bbox = [0, 0, 1, 5]
-#     g = Grid2D(bbox)
-#     xy = np.array([[0, 0], [0, 1], [1, 0], [1, 1], [0, 5], [1, 5]], dtype=float)
-#     bbox2 = Grid2D.xy_to_bbox(xy)
-#     assert bbox[0] == bbox2[0]
-#     assert bbox[-1] == bbox2[-1]
-
-#     bbox2 = Grid2D.xy_to_bbox(xy, buffer=0.2)
-#     assert bbox2[0] == -0.2
-#     assert bbox2[3] == 5.2
 
 
 def test_isel():

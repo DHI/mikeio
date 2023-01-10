@@ -1021,6 +1021,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         self._values = value
 
+    @property
+    def zn(self) -> Optional[np.ndarray]:
+        return self._zn
+
     def to_numpy(self) -> np.ndarray:
         """Values as a np.ndarray (equivalent to values)"""
         return self._values
