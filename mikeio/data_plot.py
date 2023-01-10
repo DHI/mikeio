@@ -1,39 +1,13 @@
-import warnings
-from copy import deepcopy
-from datetime import datetime
-from functools import cached_property
-from typing import Iterable, Optional, Sequence, Tuple, Union
-
 import numpy as np
-import pandas as pd
-from mikecore.DfsuFile import DfsuFileType
 
-from .base import TimeSeries
-from .data_utils import DataUtilsMixin
-from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.FM_geometry import (
-    GeometryFM,
-    GeometryFMAreaSpectrum,
-    GeometryFMLineSpectrum,
-    GeometryFMPointSpectrum,
-    GeometryFMVerticalColumn,
-    GeometryFMVerticalProfile,
-    _GeometryFMLayered,
-)
 from .spatial.FM_utils import _plot_map, _plot_vertical_profile
-from .spatial.geometry import (
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryUndefined,
-    _Geometry,
-)
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from .spectral import calc_m0_from_spectrum, plot_2dspectrum
+
+from .spectral import plot_2dspectrum
 
 class _DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)"""
 
-    def __init__(self, da: "DataArray") -> None:
+    def __init__(self, da) -> None:
         self.da = da
 
     def __call__(self, ax=None, figsize=None, **kwargs):
@@ -606,7 +580,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
 
 
 class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
-    def __init__(self, da: "DataArray") -> None:
+    def __init__(self, da) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
@@ -615,7 +589,7 @@ class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
 
 
 class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
-    def __init__(self, da: "DataArray") -> None:
+    def __init__(self, da) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
@@ -623,7 +597,7 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
         super().__init__(Hm0)
 
 class _DatasetPlotter:
-    def __init__(self, ds: "Dataset") -> None:
+    def __init__(self, ds) -> None:
         self.ds = ds
 
     def __call__(self, figsize=None, **kwargs):
