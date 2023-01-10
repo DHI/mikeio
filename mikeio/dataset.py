@@ -1411,7 +1411,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         it_unit = (
             items[0].unit
             if all([it.unit == items[0].unit for it in items])
-            else EUMUnit.Undefined
+            else EUMUnit.undefined
         )
         return ItemInfo(name, it_type, it_unit)
 
