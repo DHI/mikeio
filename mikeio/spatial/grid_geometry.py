@@ -1,6 +1,7 @@
 import warnings
-from dataclasses import dataclass
 from typing import Sequence, Tuple, Union
+
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -50,7 +51,6 @@ def _print_axis_txt(name, x, dx) -> str:
     txt = txt + f"] (n{name}={n}, d{name}={dx:0.4g})"
     return txt
 
-
 @dataclass
 class Grid1D(_Geometry):
     """1D grid (node-based)
@@ -87,7 +87,7 @@ class Grid1D(_Geometry):
         axis_name="x",
     ):
         """Create equidistant 1D spatial geometry"""
-        self._projstr = projection  # TODO handle other types than string
+        super().__init__(projection)
         self._origin = origin
         self._orientation = orientation
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
@@ -97,6 +97,11 @@ class Grid1D(_Geometry):
         self._nc = node_coordinates
 
         self._axis_name = axis_name
+
+
+    @property
+    def ndim(self) -> int:
+        return 1
 
     def __repr__(self):
         out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
@@ -272,8 +277,7 @@ class _Grid2DPlotter:
             ax.set_ylabel("Northing [m]")
             ax.set_aspect("equal")
 
-
-@dataclass  # would prefer this to be (frozen=True)
+@dataclass
 class Grid2D(_Geometry):
     """2D grid
     Origin in the center of cell in lower-left corner
@@ -310,7 +314,7 @@ class Grid2D(_Geometry):
         is_spectral=False,
     ):
         """Create equidistant 1D spatial geometry"""
-        self._projstr = projection  # TODO handle other types than string
+        super().__init__(projection)
         self._shift_origin_on_write = origin is None  # user-constructed
         self._origin = (0.0, 0.0) if origin is None else origin
         self._orientation = orientation
@@ -332,6 +336,10 @@ class Grid2D(_Geometry):
 
         self.plot = _Grid2DPlotter(self)
 
+    @property
+    def ndim(self) -> int:
+        return 2
+    
     @property
     def _is_rotated(self):
         return np.abs(self._orientation) > 1e-5
@@ -647,13 +655,14 @@ class Grid2D(_Geometry):
         return ii, jj
 
     def _bbox_to_index(
-        self, bbox: Sequence[float]
+        self, bbox: Union[Sequence[float], BoundingBox]
     ) -> Union[Tuple[None, None], Tuple[range, range]]:
         """Find subarea within this geometry"""
         if not (len(bbox) == 4):
             raise ValueError(
                 "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
             )
+        
         x0, y0, x1, y1 = bbox
         if x0 > self.x[-1] or y0 > self.y[-1] or x1 < self.x[0] or y1 < self.y[0]:
             warnings.warn("No elements in bbox")
@@ -885,6 +894,10 @@ class Grid3D(_Geometry):
         self._projstr = projection  # TODO handle other types than string
         self._origin = origin
         self._orientation = orientation
+
+    @property
+    def ndim(self) -> int:
+        return 3
 
     @property
     def x(self):

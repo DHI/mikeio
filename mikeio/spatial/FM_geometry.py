@@ -21,9 +21,44 @@ from .FM_utils import (
     _set_xy_label_by_projection,
     _to_polygons,
 )
-from .geometry import BoundingBox, GeometryPoint2D, GeometryPoint3D, _Geometry
+from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
+
+def _area_is_bbox(area) -> bool:
+    is_bbox = False
+    if area is not None:
+        if not np.isscalar(area):
+            area = np.array(area)
+            if (area.ndim == 1) & (len(area) == 4):
+                if np.all(np.isreal(area)):
+                    is_bbox = True
+    return is_bbox
+
+def _area_is_polygon(area) -> bool:
+    if area is None:
+        return False
+    if np.isscalar(area):
+        return False
+    if not np.all(np.isreal(area)):
+        return False
+    polygon = np.array(area)
+    if polygon.ndim > 2:
+        return False
+
+    if polygon.ndim == 1:
+        if len(polygon) <= 5:
+            return False
+        if len(polygon) % 2 != 0:
+            return False
+
+    if polygon.ndim == 2:
+        if polygon.shape[0] < 3:
+            return False
+        if polygon.shape[1] != 2:
+            return False
+
+    return True
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -437,6 +472,14 @@ class GeometryFM(_Geometry):
     def type_name(self):
         """Type name, e.g. Mesh, Dfsu2D"""
         return self._type.name if self._type else "Mesh"
+
+    @property
+    def ndim(self) -> int:
+        if self.is_layered:
+            return 3
+        else:
+            return 2
+        
 
     @property
     def is_2d(self) -> bool:
@@ -1111,12 +1154,12 @@ class GeometryFM(_Geometry):
 
     def _2d_elements_in_area(self, area):
         """Find 2d element ids of elements inside area"""
-        if self._area_is_bbox(area):
+        if _area_is_bbox(area):
             x0, y0, x1, y1 = area
             xc = self._geometry2d.element_coordinates[:, 0]
             yc = self._geometry2d.element_coordinates[:, 1]
             mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
-        elif self._area_is_polygon(area):
+        elif _area_is_polygon(area):
             polygon = np.array(area)
             xy = self._geometry2d.element_coordinates[:, :2]
             mask = self._inside_polygon(polygon, xy)

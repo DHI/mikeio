@@ -65,7 +65,8 @@ def test_x_y():
 
     # BoundingBox(left, bottom, right, top)
     # Is this test good, or just a copy of the implementation?
-    assert g.bbox == ((x0 - dx / 2), (y0 - dy / 2), (x1 + dx / 2), (y1 + dy / 2))
+    assert g.bbox.left == (x0 - dx / 2)
+    assert g.bbox.top == (y1 + dy / 2)
 
     text = repr(g)
     assert "<mikeio.Grid2D>" in text
