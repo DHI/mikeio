@@ -621,3 +621,70 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
         else:
             Hm0 = da.to_Hm0()
         super().__init__(Hm0)
+
+class _DatasetPlotter:
+    def __init__(self, ds: "Dataset") -> None:
+        self.ds = ds
+
+    def __call__(self, figsize=None, **kwargs):
+        """Plot multiple DataArrays as time series (only possible dfs0-type data)"""
+        if self.ds.dims == ("time",):
+            df = self.ds.to_dataframe()
+            return df.plot(figsize=figsize, **kwargs)
+        else:
+            raise ValueError(
+                "Could not plot Dataset. Try plotting one of its DataArrays instead..."
+            )
+
+    @staticmethod
+    def _get_fig_ax(ax=None, figsize=None):
+        import matplotlib.pyplot as plt
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=figsize)
+        else:
+            fig = plt.gcf()
+        return fig, ax
+
+    def scatter(self, x, y, ax=None, figsize=None, **kwargs):
+        """Plot data from two DataArrays against each other in a scatter plot
+
+        Parameters
+        ----------
+        x : str or int
+            Identifier for first DataArray
+        y : str or int
+            Identifier for second DataArray
+        ax: matplotlib.axes, optional
+            Adding to existing axis, instead of creating new fig
+        figsize: (float, float), optional
+            specify size of figure
+        title: str, optional
+            axes title
+        **kwargs: additional kwargs will be passed to ax.scatter()
+
+        Returns
+        -------
+        <matplotlib.axes>
+
+        Examples
+        --------
+        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
+        >>> ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
+        >>> ds.plot.scatter(x=0, y=1, figsize=(9,9), marker='*')
+        """
+        _, ax = self._get_fig_ax(ax, figsize)
+        if "title" in kwargs:
+            title = kwargs.pop("title")
+            ax.set_title(title)
+        xval = self.ds[x].values.ravel()
+        yval = self.ds[y].values.ravel()
+        ax.scatter(xval, yval, **kwargs)
+
+        ax.set_xlabel(self._label_txt(self.ds[x]))
+        ax.set_ylabel(self._label_txt(self.ds[y]))
+        return ax
+
+    @staticmethod
+    def _label_txt(da):
+        return f"{da.name} [{da.unit.name}]"

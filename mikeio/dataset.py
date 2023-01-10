@@ -22,74 +22,7 @@ from .spatial.geometry import (
 )
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
-
-class _DatasetPlotter:
-    def __init__(self, ds: "Dataset") -> None:
-        self.ds = ds
-
-    def __call__(self, figsize=None, **kwargs):
-        """Plot multiple DataArrays as time series (only possible dfs0-type data)"""
-        if self.ds.dims == ("time",):
-            df = self.ds.to_dataframe()
-            return df.plot(figsize=figsize, **kwargs)
-        else:
-            raise ValueError(
-                "Could not plot Dataset. Try plotting one of its DataArrays instead..."
-            )
-
-    @staticmethod
-    def _get_fig_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
-
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-        else:
-            fig = plt.gcf()
-        return fig, ax
-
-    def scatter(self, x, y, ax=None, figsize=None, **kwargs):
-        """Plot data from two DataArrays against each other in a scatter plot
-
-        Parameters
-        ----------
-        x : str or int
-            Identifier for first DataArray
-        y : str or int
-            Identifier for second DataArray
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-        figsize: (float, float), optional
-            specify size of figure
-        title: str, optional
-            axes title
-        **kwargs: additional kwargs will be passed to ax.scatter()
-
-        Returns
-        -------
-        <matplotlib.axes>
-
-        Examples
-        --------
-        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
-        >>> ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
-        >>> ds.plot.scatter(x=0, y=1, figsize=(9,9), marker='*')
-        """
-        _, ax = self._get_fig_ax(ax, figsize)
-        if "title" in kwargs:
-            title = kwargs.pop("title")
-            ax.set_title(title)
-        xval = self.ds[x].values.ravel()
-        yval = self.ds[y].values.ravel()
-        ax.scatter(xval, yval, **kwargs)
-
-        ax.set_xlabel(self._label_txt(self.ds[x]))
-        ax.set_ylabel(self._label_txt(self.ds[y]))
-        return ax
-
-    @staticmethod
-    def _label_txt(da):
-        return f"{da.name} [{da.unit.name}]"
-
+from .data_plot import _DatasetPlotter
 
 class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
     """Dataset containing one or more DataArrays with common geometry and time
@@ -192,9 +125,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self._data_vars = self._DataArrays_as_mapping(data)
 
         if (len(self) > 1) and validate:
-            first = self[0]
+            first: DataArray = self[0]
             for i in range(1, len(self)):
-                da = self[i]
+                da: DataArray = self[i]
                 first._is_compatible(da, raise_error=True)
 
         self._check_all_different_ids(self._data_vars.values())
