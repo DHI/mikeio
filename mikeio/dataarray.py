@@ -171,10 +171,6 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     >>> da.plot.pcolormesh()
     >>> da.plot.hist()
     """
-
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
     def __call__(self, ax=None, figsize=None, **kwargs):
         _, ax = self._get_fig_ax(ax, figsize)
         if self.da.n_timesteps == 1:
@@ -252,10 +248,6 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     >>> da.plot.pcolormesh()
     >>> da.plot.hist()
     """
-
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
     def __call__(self, ax=None, figsize=None, **kwargs):
         return self.pcolormesh(ax, figsize, **kwargs)
 
@@ -358,9 +350,6 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     >>> da.plot.hist()
     """
 
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
     def __call__(self, ax=None, figsize=None, **kwargs):
         """Plot data as coloured patches"""
         ax = self._get_ax(ax, figsize)
@@ -437,9 +426,6 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
     >>> dsp.plot.hist()
     """
 
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
     def __call__(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
         return self.line(ax, **kwargs)
@@ -488,7 +474,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
             shading="nearest",
             **kwargs,
         )
-        cbar = fig.colorbar(pos, label=self._label_txt())
+        fig.colorbar(pos, label=self._label_txt())
         ax.set_xlabel("time")
         fig.autofmt_xdate()
         ax.set_ylabel("z (static)")
@@ -510,8 +496,6 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
     >>> da.plot.hist()
     """
 
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
 
     def __call__(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
@@ -542,8 +526,6 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
 
 
 class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
 
     def __call__(self, ax=None, figsize=None, **kwargs):
         # ax = self._get_ax(ax, figsize)

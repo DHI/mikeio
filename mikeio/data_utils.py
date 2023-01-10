@@ -18,8 +18,6 @@ class DataUtilsMixin:
         """New DatetimeIndex after aggregating over time axis"""
         if axis == 0 or (isinstance(axis, Sequence) and 0 in axis):
             time = pd.DatetimeIndex([time[0]])
-        else:
-            time = time
 
         return time
 

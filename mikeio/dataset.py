@@ -146,7 +146,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )
-        return self._init_from_DataArrays(data, validate=validate)
+        self._init_from_DataArrays(data, validate=validate)
 
     @staticmethod
     def _is_DataArrays(data):
@@ -256,7 +256,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         if isinstance(data, Mapping):
             if isinstance(data, Dataset):
                 return data
-            data = Dataset._validate_item_names_and_keys(data)
+            data = Dataset._validate_item_names_and_keys(data) # TODO is this necessary?
             _ = Dataset._unique_item_names(data.values())
             return data
 
@@ -279,7 +279,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 warnings.warn(
                     f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. Item name will be replaced with key."
                 )
-                da.name == key
+                da.name = key
         return data_map
 
     @staticmethod
