@@ -140,7 +140,7 @@ def test_insert(ds1):
 def test_insert_wrong_type(ds1):
 
     with pytest.raises(ValueError):
-        ds1["Foo"] = np.zeros(ds1.shape)
+        ds1["Foo"] = "Bar"
 
 
 def test_insert_fail(ds1):
