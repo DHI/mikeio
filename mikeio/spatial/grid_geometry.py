@@ -188,10 +188,10 @@ class _Grid2DPlotter:
 
     Examples
     --------
-    >>> ds = mikeio.read("data.dfs2")
+    >>> ds = mikeio.read("tests/testdata/waves.dfs2")
     >>> g = ds.geometry
-    >>> g.plot()
-    >>> g.plot.outline()
+    >>> ax = g.plot()
+    >>> ax = g.plot.outline()
     """
 
     def __init__(self, geometry: "Grid2D") -> None:
@@ -313,7 +313,7 @@ class Grid2D(_Geometry):
         axis_names=("x", "y"),
         is_spectral=False,
     ):
-        """Create equidistant 1D spatial geometry"""
+        """Create equidistant 2D spatial geometry"""
         super().__init__(projection)
         self._shift_origin_on_write = origin is None  # user-constructed
         self._origin = (0.0, 0.0) if origin is None else origin
