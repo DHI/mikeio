@@ -4,6 +4,10 @@
         "--ignore=tests/performance"
     ],
     "python.testing.unittestEnabled": false,
+    "python.analysis.diagnosticSeverityOverrides":{
+        "reportPrivateUsage": "error",
+        "reportPrivateImportUsage": "error"
+    },
     "python.testing.nosetestsEnabled": false,
     "python.testing.pytestEnabled": true,
     "restructuredtext.confPath": "${workspaceFolder}\\docs",
