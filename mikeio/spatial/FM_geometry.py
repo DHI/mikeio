@@ -8,8 +8,6 @@ from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
 from scipy.spatial import cKDTree
 
-import mikeio.data_utils as du
-
 from ..eum import EUMType, EUMUnit
 from ..exceptions import InvalidGeometry
 from ..interpolation import get_idw_interpolant, interp2d
@@ -41,7 +39,7 @@ class GeometryFMPointSpectrum(_Geometry):
     @property
     def type_name(self):
         """Type name: DfsuSpectral0D"""
-        return self._type.name
+        return self._type.name # TODO there is no self._type??
 
     def __repr__(self):
         txt = f"Point Spectrum Geometry(frequency:{self.n_frequencies}, direction:{self.n_directions}"
@@ -308,23 +306,21 @@ class GeometryFM(_Geometry):
         # except ModuleNotFoundError:
         self._point_in_polygon = _point_in_polygon
 
-    def __repr__(self):
+    def _repr_txt(self, layer_txt= None):
         out = []
         out.append("Flexible Mesh Geometry: " + self.type_name)
         if self.n_nodes:
             out.append(f"number of nodes: {self.n_nodes}")
         if self.n_elements:
             out.append(f"number of elements: {self.n_elements}")
-        if self._n_layers:
-            details = (
-                "sigma only"
-                if self.n_z_layers is None
-                else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
-            )
-            out.append(f"number of layers: {self._n_layers} ({details})")
+            if layer_txt is not None:
+                out.append(layer_txt)
         if self._projstr:
             out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
+
+    def __repr__(self):
+        return self._repr_txt()
 
     def __str__(self) -> str:
         gtxt = f"{self.type_name}"
@@ -1486,6 +1482,18 @@ class _GeometryFMLayered(GeometryFM):
         self._2d_ids = None
         self._layer_ids = None
         self.__dz = None
+
+    def __repr__(self):
+        details = (
+                "sigma only"
+                if self.n_z_layers is None
+                else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
+            )
+        layer_txt = f"number of layers: {self._n_layers} ({details})"
+        return self._repr_txt(layer_txt=layer_txt)
+        
+            
+        
 
     @property
     def layer_ids(self):
