@@ -5,7 +5,7 @@ import numpy as np
 from .utils import _relative_cumulative_distance
 
 
-MESH_COL = "0.95" 
+MESH_COL = "0.95"
 MESH_COL_DARK = "0.6"
 
 
@@ -93,12 +93,20 @@ def _plot_map(
 
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
-    
-    VALID_PLOT_TYPES = ('mesh_only', 'outline_only', 'contour', 'contourf', 'patch', 'shaded')
-    if plot_type not in VALID_PLOT_TYPES:
-        raise Exception(f"plot_type {plot_type} unknown!")
 
-    cmap = cmap or cm.viridis 
+    VALID_PLOT_TYPES = (
+        "mesh_only",
+        "outline_only",
+        "contour",
+        "contourf",
+        "patch",
+        "shaded",
+    )
+    if plot_type not in VALID_PLOT_TYPES:
+        ok_list = ", ".join(VALID_PLOT_TYPES)
+        raise Exception(f"plot_type {plot_type} unknown! ({ok_list})")
+
+    cmap = cmap or cm.viridis
 
     nc = node_coordinates
     ec = element_coordinates
@@ -109,7 +117,7 @@ def _plot_map(
         raise ValueError(
             "vmin/vmax cannot be provided together with non-integer levels"
         )
-    
+
     # plot in existing or new axes?
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
@@ -137,18 +145,20 @@ def _plot_map(
         newz = np.full_like(z, fill_value=np.nan)
         newz[elements] = z[elements]
         z = newz
-    
-    
+
     assert len(z) == ec.shape[0]
-    
+
     label = label or ""
 
-    vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels = __set_colormap_levels(cmap, vmin,vmax, levels, z)
+    vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels = __set_colormap_levels(
+        cmap, vmin, vmax, levels, z
+    )
     cbar_extend = __cbar_extend(z, vmin, vmax)
 
-
     if plot_type == "patch":
-        fig_obj = __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax)
+        fig_obj = __plot_patch(
+            ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax
+        )
 
     else:
         # do node-based triangular plot
@@ -156,8 +166,8 @@ def _plot_map(
         if show_mesh and __is_tri_only(element_table):
             mesh_linewidth = 0.4
             n_refinements = 0
-        triang, zn = __get_tris(nc, element_table, ec, z,n_refinements)
-        
+        triang, zn = __get_tris(nc, element_table, ec, z, n_refinements)
+
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
             fig_obj = ax.tripcolor(
@@ -198,19 +208,20 @@ def _plot_map(
             )
 
         if show_mesh and (not __is_tri_only(element_table)):
-            __add_non_tri_mesh(ax, nc, element_table,plot_type)
+            __add_non_tri_mesh(ax, nc, element_table, plot_type)
 
     if show_outline:
         __add_outline(ax, boundary_polylines)
-        
+
     if add_colorbar:
         __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
-    
+
     __set_plot_limits(ax, nc)
-    
+
     ax.set_title(title)
 
     return ax
+
 
 def __set_colormap_levels(cmap, vmin, vmax, levels, z):
     import matplotlib
@@ -223,7 +234,6 @@ def __set_colormap_levels(cmap, vmin, vmax, levels, z):
     if vmin == vmax:
         vmin = vmin - 0.1
         vmax = vmin + 0.2
-
 
     cmap_norm = None
     cmap_ScMappable = None
@@ -242,59 +252,63 @@ def __set_colormap_levels(cmap, vmin, vmax, levels, z):
             cmap = matplotlib.colormaps[cmap]
         cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
         cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
-    
+
     if levels is None:
         levels = np.linspace(vmin, vmax, 10)
-    
+
     return vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels
 
 
 def __set_plot_limits(ax, nc) -> None:
     """Set default plot limits
-    
+
     Override with matplotlib ax.set_xlim, ax.set_ylim
     """
-    xmin, xmax =nc[:, 0].min(), nc[:, 0].max()
+    xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
     ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
-    
+
     xybuf = 6e-3 * (xmax - xmin)
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
-def __plot_mesh_only(ax,nc, element_table):
+
+def __plot_mesh_only(ax, nc, element_table):
     from matplotlib.collections import PatchCollection
 
     patches = _to_polygons(nc, element_table)
     fig_obj = PatchCollection(
-            patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3)
+        patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3
+    )
     ax.add_collection(fig_obj)
+
 
 def __plot_outline_only(ax, boundary_polylines):
     __add_outline(ax, boundary_polylines)
     return ax
 
+
 def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
     """do plot as patches (like MZ "box contour")
 
-        with (constant) element values"""
+    with (constant) element values"""
 
     from matplotlib.collections import PatchCollection
 
     patches = _to_polygons(nc, element_table)
-        
+
     if show_mesh:
         edgecolor = MESH_COL
         linewidth = 0.4
     else:
         edgecolor = "face"
         linewidth = None
-        
+
     fig_obj = PatchCollection(
-            patches,
-            cmap=cmap,
-            norm=cmap_norm,
-            edgecolor=edgecolor,
-            linewidths=linewidth,
+        patches,
+        cmap=cmap,
+        norm=cmap_norm,
+        edgecolor=edgecolor,
+        linewidths=linewidth,
     )
 
     fig_obj.set_array(z)
@@ -303,11 +317,11 @@ def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vma
 
     return fig_obj
 
-def __get_tris(nc, element_table, ec, z,n_refinements):
+
+def __get_tris(nc, element_table, ec, z, n_refinements):
     import matplotlib.tri as tri
-    elem_table, ec, z = __create_tri_only_element_table(
-            nc, element_table, ec, data=z
-        )
+
+    elem_table, ec, z = __create_tri_only_element_table(nc, element_table, ec, data=z)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
     zn = _get_node_centered_data(nc, elem_table, ec, z)
@@ -319,6 +333,7 @@ def __get_tris(nc, element_table, ec, z,n_refinements):
 
     return triang, zn
 
+
 def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> None:
 
     from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -328,13 +343,14 @@ def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> 
     cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
 
     plt.colorbar(
-                cmap_sm,
-                label=label,
-                cax=cax,
-                ticks=levels,
-                boundaries=levels,
-                extend=cbar_extend,
-            )
+        cmap_sm,
+        label=label,
+        cax=cax,
+        ticks=levels,
+        boundaries=levels,
+        extend=cbar_extend,
+    )
+
 
 def __set_aspect_ratio(ax, nc, projection):
     is_geo = projection == "LONG/LAT"
@@ -344,10 +360,11 @@ def __set_aspect_ratio(ax, nc, projection):
     else:
         ax.set_aspect("equal")
 
-def __add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
+
+def __add_non_tri_mesh(ax, nc, element_table, plot_type) -> None:
     # if mesh is not tri only, we need to add it manually on top
     from matplotlib.collections import PatchCollection
-    
+
     patches = _to_polygons(nc, element_table)
     mesh_linewidth = 0.4
     if plot_type == "contour":
@@ -355,18 +372,20 @@ def __add_non_tri_mesh(ax, nc, element_table,plot_type) -> None:
     else:
         mesh_col = MESH_COL
     p = PatchCollection(
-            patches,
-                edgecolor=mesh_col,
-                facecolor="none",
-                linewidths=mesh_linewidth,
-            )
+        patches,
+        edgecolor=mesh_col,
+        facecolor="none",
+        linewidths=mesh_linewidth,
+    )
     ax.add_collection(p)
 
-def __add_outline(ax,boundary_polylines) -> None:
+
+def __add_outline(ax, boundary_polylines) -> None:
     lines = boundary_polylines.exteriors + boundary_polylines.interiors
     for line in lines:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
-        
+
+
 def _set_xy_label_by_projection(ax, projection):
     if (not projection) or projection == "NON-UTM":
         ax.set_xlabel("x [m]")
@@ -514,7 +533,6 @@ def __cbar_extend(calc_data, vmin, vmax):
     else:
         extend = "neither"
     return extend
-
 
 
 def _plot_vertical_profile(
