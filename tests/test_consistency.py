@@ -209,7 +209,7 @@ def test_interp_x_y_dfsu3d_not_yet_implemented():
     x = 350000
     y = 6145000
     
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(NotImplementedError, match="3d"):
         ds.interp(x=x, y=y)
 
     
