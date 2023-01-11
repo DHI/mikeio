@@ -1885,14 +1885,14 @@ class GeometryFM3D(_GeometryFMLayered):
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers=None,
+        n_layers: int = 1,
         n_sigma=None,
         validate=True,
     ) -> None:
@@ -1917,6 +1917,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
     @property
     def boundary_polylines(self):
+        # Overides base class
         raise AttributeError(
             "GeometryFMVerticalProfile has no boundary_polylines property"
         )
