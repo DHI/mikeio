@@ -1,21 +1,8 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
-@dataclass(frozen=True)
-class BoundingBox:
-    left: float
-    bottom: float
-    right: float
-    top: float
+from collections import namedtuple
 
-    def __len__(self) -> int:
-        return 4
-
-    def __getitem__(self, key) -> float:
-        # Act as NamedTuple
-        items = (self.left, self.bottom, self.right, self.top)
-        return items[key]
-
+BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 class _Geometry(ABC):
     def __init__(self, projection:str = "NON-UTM") -> None:
