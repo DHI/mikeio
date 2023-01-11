@@ -203,6 +203,17 @@ def test_interp_x_y_dfsu2d():
     assert dss.geometry.x == x
     assert dss.geometry.y == y
 
+def test_interp_x_y_dfsu3d_not_yet_implemented():
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+
+    x = 350000
+    y = 6145000
+    
+    with pytest.raises(NotImplementedError):
+        ds.interp(x=x, y=y)
+
+    
+
 
 def test_read_dfsu2d():
     ds = mikeio.read(

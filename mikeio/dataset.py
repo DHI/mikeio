@@ -991,6 +991,10 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             if isinstance(
                 self.geometry, GeometryFM
             ):  # TODO remove this when all geometries implements the same method
+
+                if self.geometry.is_layered:
+                    raise NotImplementedError("Interpolation in 3d is not yet implemented")
+
                 interpolant = self.geometry.get_2d_interpolant(
                     xy, n_nearest=n_nearest, **kwargs
                 )
