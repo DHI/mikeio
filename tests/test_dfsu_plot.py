@@ -93,10 +93,22 @@ def test_plot_dfsu_shaded():
     dfs = mikeio.open(filename)
     da = dfs.read(items="Surface elevation", time=0)[0]
     elem40 = np.arange(40)
+
+    ax = da.plot(elements=elem40) # this is ok
+    assert ax is not None
+
     wl_40 = da.values[elem40]
     with pytest.warns(FutureWarning):
         dfs.plot(wl_40, elements=elem40, plot_type="shaded", levels=5)
-    assert True
+
+def test_plot_dfsu_contour_subset_not_allowed():
+    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
+    dfs = mikeio.open(filename)
+    da = dfs.read(items="Surface elevation", time=0)[0]
+    elem40 = np.arange(40)
+    with pytest.raises(Exception):
+        da.plot.contour(elements=elem40)
+
 
 
 def test_plot_dfsu():
@@ -211,8 +223,9 @@ def test_da_plot():
     ds = mikeio.read("tests/testdata/FakeLake.dfsu")
     da = ds[0]
     da.plot()
+    da.plot(show_mesh=True)
     da.plot.contour()
-    da.plot.contourf()
+    da.plot.contourf(show_mesh=True,cmap='terrain', levels=[-30,-20,-10,0])
     da.plot.outline()
 
     dam = da.max()
@@ -223,3 +236,9 @@ def test_da_plot():
     da.max("space").plot()
 
     plt.close("all")
+
+def test_plot_non_utm_file():
+    
+    ds = mikeio.read("tests/testdata/FakeLake_NONUTM.dfsu")
+    da = ds[0]
+    da.plot()
