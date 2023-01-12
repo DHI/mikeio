@@ -95,7 +95,6 @@
 <span class="kn">from</span> <span class="nn">mikecore.MeshBuilder</span> <span class="kn">import</span> <span class="n">MeshBuilder</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
 
-<span class="kn">import</span> <span class="nn">mikeio.data_utils</span> <span class="k">as</span> <span class="nn">du</span>
 
 <span class="kn">from</span> <span class="nn">..eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
 <span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="n">InvalidGeometry</span>
@@ -104,13 +103,23 @@
     <span class="n">_get_node_centered_data</span><span class="p">,</span>
     <span class="n">_plot_map</span><span class="p">,</span>
     <span class="n">_plot_vertical_profile</span><span class="p">,</span>
-    <span class="n">_point_in_polygon</span><span class="p">,</span>
-    <span class="n">_set_xy_label_by_projection</span><span class="p">,</span>
-    <span class="n">_to_polygons</span><span class="p">,</span>
+    <span class="n">_set_xy_label_by_projection</span><span class="p">,</span> <span class="c1"># TODO remove</span>
+    <span class="n">_to_polygons</span><span class="p">,</span> <span class="c1"># TODO remove</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="n">BoundingBox</span><span class="p">,</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">_Geometry</span>
+<span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">_Geometry</span>
 <span class="kn">from</span> <span class="nn">.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_relative_cumulative_distance</span><span class="p">,</span> <span class="n">xy_to_bbox</span>
+
+<span class="k">def</span> <span class="nf">_point_in_polygon</span><span class="p">(</span><span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">xp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for each side in the polygon that the point is on the correct side&quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xn</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">xp</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">xn</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">yp</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">xp</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">yp</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
 
 
 <div class="viewcode-block" id="GeometryFMPointSpectrum"><a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum">[docs]</a><span class="k">class</span> <span class="nc">GeometryFMPointSpectrum</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
@@ -184,6 +193,7 @@
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot bathymetry as coloured patches&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;plot_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plot_type&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;patch&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.contour"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.contour">[docs]</a>    <span class="k">def</span> <span class="nf">contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -210,6 +220,8 @@
 
         <span class="k">if</span> <span class="s2">&quot;title&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Bathymetry&quot;</span>
+        
+        <span class="n">plot_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;plot_type&quot;</span><span class="p">)</span>
 
         <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">_geometry2d</span>
 
@@ -218,14 +230,18 @@
             <span class="n">element_table</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">element_table</span><span class="p">,</span>
             <span class="n">element_coordinates</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">,</span>
             <span class="n">boundary_polylines</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">boundary_polylines</span><span class="p">,</span>
+            <span class="n">plot_type</span><span class="o">=</span><span class="n">plot_type</span><span class="p">,</span>
             <span class="n">projection</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
             <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.mesh">[docs]</a>    <span class="k">def</span> <span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Mesh&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot mesh only&quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO this must be a duplicate, delegate</span>
+
         <span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PatchCollection</span>
 
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
@@ -246,6 +262,8 @@
 
 <div class="viewcode-block" id="_GeometryFMPlotter.outline"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.outline">[docs]</a>    <span class="k">def</span> <span class="nf">outline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Outline&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot domain outline (using the boundary_polylines property)&quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO this must be a duplicate, delegate</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_plot_aspect</span><span class="p">())</span>
 
@@ -294,6 +312,7 @@
         <span class="k">return</span> <span class="n">ax</span></div>
 
     <span class="k">def</span> <span class="nf">_set_plot_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+        <span class="c1"># TODO this must be a duplicate, delegate</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="n">xy_to_bbox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">)</span>
         <span class="n">xybuf</span> <span class="o">=</span> <span class="mf">6e-3</span> <span class="o">*</span> <span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">right</span> <span class="o">-</span> <span class="n">bbox</span><span class="o">.</span><span class="n">left</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">bbox</span><span class="o">.</span><span class="n">left</span> <span class="o">-</span> <span class="n">xybuf</span><span class="p">,</span> <span class="n">bbox</span><span class="o">.</span><span class="n">right</span> <span class="o">+</span> <span class="n">xybuf</span><span class="p">)</span>
@@ -301,6 +320,7 @@
         <span class="k">return</span> <span class="n">ax</span>
 
     <span class="k">def</span> <span class="nf">_plot_aspect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO this must be a duplicate, delegate</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">is_geo</span><span class="p">:</span>
             <span class="n">mean_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
             <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">mean_lat</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span>
