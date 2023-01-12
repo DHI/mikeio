@@ -193,6 +193,7 @@ def _plot_map(
             )
             ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
             ax.set_title(label)
+            add_colorbar = False
 
         elif plot_type == "contourf":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
