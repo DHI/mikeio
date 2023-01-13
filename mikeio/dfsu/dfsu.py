@@ -1,40 +1,42 @@
 import os
-from typing import List, Union
-import numpy as np
-import pandas as pd
 import warnings
-
 from datetime import datetime, timedelta
 from functools import wraps
-from tqdm import trange
+from typing import List, Union
 
-from mikecore.eum import eumUnit, eumQuantity
+import numpy as np
+import pandas as pd
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from mikecore.MeshFile import MeshFile
+from mikecore.eum import eumQuantity, eumUnit
 from mikecore.MeshBuilder import MeshBuilder
+from mikecore.MeshFile import MeshFile
+from tqdm import trange
 
 from mikeio.spatial.utils import xy_to_bbox
 
-from . import __dfs_version__
-from .base import EquidistantTimeSeries
-from .track import _extract_track
-from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .dataset import Dataset, DataArray
-from .dfs0 import Dfs0
-from .eum import ItemInfo, EUMType, EUMUnit
-from .spatial.FM_geometry import (
+from .. import __dfs_version__
+from ..base import EquidistantTimeSeries
+from ..dataset import DataArray, Dataset
+from ..dfs import (
+    _get_item_info,
+    _read_item_time_step,
+    _valid_item_numbers,
+    _valid_timesteps,
+)
+from ..eum import EUMType, EUMUnit, ItemInfo
+from ..spatial.FM_geometry import (
     GeometryFM,
     GeometryFM3D,
-    GeometryFMVerticalProfile,
-    GeometryFMPointSpectrum,
-    GeometryFMPointSpectrum,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
+    GeometryFMPointSpectrum,
+    GeometryFMVerticalProfile,
 )
-from .spatial.FM_utils import _plot_map
-from .spatial.grid_geometry import Grid2D
+from ..spatial.FM_utils import _plot_map
+from ..spatial.grid_geometry import Grid2D
+from ..track import _extract_track
 
 
 def _write_dfsu(filename: str, data: Dataset):
@@ -56,7 +58,6 @@ def _write_dfsu(filename: str, data: Dataset):
     xn = geometry.node_coordinates[:, 0]
     yn = geometry.node_coordinates[:, 1]
     zn = geometry.node_coordinates[:, 2]
-    
 
     elem_table = [np.array(e) + 1 for e in geometry.element_table]
 
@@ -700,6 +701,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         y=None,
         keepdims=False,
         dtype=np.float32,
+        error_bad_data=True,
+        fill_bad_data_value=np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -722,6 +725,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             by default None
         elements: list[int], optional
             Read only selected element ids, by default None
+        error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+        fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
 
         Returns
         -------
@@ -776,15 +784,24 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
-        t_seconds = np.zeros(n_steps, dtype=float)
+        time = self.time
 
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
 
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                d = itemdata.Data
-                d[d == deletevalue] = np.nan
+                dfs, d = _read_item_time_step(
+                    dfs=dfs,
+                    filename=self._filename,
+                    time=time,
+                    item_numbers=item_numbers,
+                    deletevalue=deletevalue,
+                    shape=shape,
+                    item=item,
+                    it=it,
+                    error_bad_data=error_bad_data,
+                    fill_bad_data_value=fill_bad_data_value,
+                )
 
                 if elements is not None:
                     d = d[elements]
@@ -794,9 +811,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 else:
                     data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
-
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = self.time[time_steps]
 
         dfs.Close()
 
@@ -921,21 +936,20 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             title of the dfsu file. Default is blank.
         keep_open: bool, optional
             Keep file open for appending
-        """        
+        """
         if isinstance(data, list):
             raise TypeError(
                 "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
             )
 
         return self._write(
-            filename=filename, 
-            data=data, 
-            dt=dt, 
-            elements=elements, 
-            title=title, 
-            keep_open=keep_open
-            )
-
+            filename=filename,
+            data=data,
+            dt=dt,
+            elements=elements,
+            title=title,
+            keep_open=keep_open,
+        )
 
     def _write(
         self,
@@ -957,7 +971,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         data: list[np.array] or Dataset
             list of matrices, one for each item. Matrix dimension: time, x
         start_time: datetime, optional, deprecated
-            start date of type datetime.    
+            start date of type datetime.
         dt: float, optional, deprecated
             The time step (in seconds)
         items: list[ItemInfo], optional, deprecated
@@ -977,14 +991,11 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 FutureWarning,
             )
         if keep_open and not dt:
-            warnings.warn(
-                "argument dt missing, should be provided when keep_open=True"
-            )
+            warnings.warn("argument dt missing, should be provided when keep_open=True")
 
         filename = str(filename)
 
         if isinstance(data, Dataset):
-            
             items = data.items
             start_time = data.time[0]
             if dt is None and len(data.time) > 1:
@@ -994,7 +1005,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     )
                 dt = (data.time[1] - data.time[0]).total_seconds()
             if data.geometry.is_layered:
-                
                 zn_dynamic = data[0]._zn
 
             # data needs to be a list so we can fit zn later
@@ -1038,18 +1048,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         # spatial subset
         if elements is None:
             geometry = self.geometry
-            if (items[0].name == "Z coordinate") and (
-                    items[0].type == EUMType.ItemGeometry3D
-            ):
-                # get rid of z-item
-                items = items[1 : (n_items + 1)]
-                n_items = n_items - 1
-                new_data = []
-                for j in range(n_items):
-                    new_data.append(data[j + 1])
-                data = new_data
-                print(len(data),"_",data[0].shape)
-            
         else:
             geometry = self.geometry.elements_to_geometry(elements)
             if (not self.is_2d) and (geometry._type == DfsuFileType.Dfsu2D):
@@ -1070,15 +1068,13 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                     data = new_data
 
         if geometry.is_layered:
-            
             z_item = ItemInfo(
                 "Z coordinate", itemtype=EUMType.ItemGeometry3D, unit=EUMUnit.meter
             )
             items.insert(0, z_item)
             n_items = len(items)
-            zn_dynamic = geometry.element_coordinates[:, 2]
             data.insert(0, zn_dynamic)
-            
+
         # Default filetype;
         if geometry._type is None:  # == DfsuFileType.Mesh:
             # create dfs2d from mesh
@@ -1086,7 +1082,6 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         else:
             #    # TODO: if subset is slice...
             dfsu_filetype = geometry._type.value
-        
 
         if dfsu_filetype != DfsuFileType.Dfsu2D:
             if (items[0].name != "Z coordinate") and (
@@ -1099,7 +1094,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         # zn have to be Single precision??
         zn = geometry.node_coordinates[:, 2]
-        
+
         # TODO verify this
         # elem_table = geometry.element_table
         elem_table = []
@@ -1121,7 +1116,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         builder.SetProjection(proj)
         builder.SetTimeInfo(file_start_time, dt)
         builder.SetZUnit(eumUnit.eumUmeter)
-        
+
         if dfsu_filetype != DfsuFileType.Dfsu2D:
             builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
 
@@ -1130,18 +1125,19 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 builder.AddDynamicItem(
                     item.name, eumQuantity.Create(item.type, item.unit)
                 )
+
         builder.ApplicationTitle = "mikeio"
         builder.ApplicationVersion = __dfs_version__
 
         try:
             self._dfs = builder.CreateFile(filename)
-            
         except IOError:
             print("cannot create dfsu file: ", filename)
 
         deletevalue = self._dfs.DeleteValueFloat
 
         try:
+            # Add data for all item-timesteps, copying from source
             if items[0].name== "Z coordinate":
                 has_time_axis = len(np.shape(data[1])) == 2
                 n_timesteps = np.shape(data[1])[0] if has_time_axis else 1
@@ -1149,35 +1145,16 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 has_time_axis = len(np.shape(data[0])) == 2
                 n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
 
-            for i in trange(n_timesteps, disable=not self.show_progress):
+            for i in trange(n_time_steps, disable=not self.show_progress):
                 if geometry.is_layered:
                     self._dfs.WriteItemTimeStepNext(0, data[0].astype(np.float32))
 
                 for item in range(len(items)):
                     if items[item].name != "Z coordinate":
-                        di = data[item]
-                        d = di[i, :] if has_time_axis else di
-                        d[np.isnan(d)] = deletevalue   
+                        d = data[item][i, :]
+                        d[np.isnan(d)] = deletevalue
                         darray = d
                         self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
-            # # Add data for all item-timesteps, copying from source
-            # if items[0].name== "Z coordinate":
-            #     has_time_axis = len(np.shape(data[1])) == 2
-            #     n_timesteps = np.shape(data[1])[0] if has_time_axis else 1
-            # else:
-            #     has_time_axis = len(np.shape(data[0])) == 2
-            #     n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
-            
-
-            # for i in trange(n_timesteps, disable=not self.show_progress):
-            #     for item in range(len(items)):
-            #         if items[item].name != "Z coordinate":
-            #             di = data[item]
-            #             d = di[i, :] if has_time_axis else di
-            #             d[np.isnan(d)] = deletevalue   
-            #             darray = d
-            #             darray.insert(0,zn_dynamic)
-            #     self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))       
             if not keep_open:
                 self._dfs.Close()
             else:
@@ -1203,7 +1180,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
         for i in trange(n_timesteps, disable=not self.show_progress):
             if self.geometry.is_layered:
-                zn = self.geometry.element_coordinates[:,2]
+                zn = self.geometry.node_coordinates[:,2]
                 self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
             for item in range(n_items):
                 di = data[item]
@@ -1212,7 +1189,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 d = di[i, :] if has_time_axis else di
                 d[np.isnan(d)] = deletevalue
                 darray = d.astype(np.float32)
-                self._dfs.WriteItemTimeStepNext(0, darray)      
+                self._dfs.WriteItemTimeStepNext(0, darray)
 
     def close(self):
         "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"
