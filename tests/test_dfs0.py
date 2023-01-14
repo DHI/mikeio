@@ -112,12 +112,13 @@ def test_read_all_time_steps_without_reading_items():
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 1000
 
+
 def test_items_dataframe():
     dfs = mikeio.open("tests/testdata/random.dfs0")
     df = dfs.items.to_dataframe()
     assert "name" in df.columns
-    assert "type" in df.columns # or EUMType ?
-    assert df.type.iloc[1] == "Water_Level" # Is this the correct way to show it?
+    assert "type" in df.columns  # or EUMType ?
+    assert df.type.iloc[1] == "Water_Level"  # Is this the correct way to show it?
 
 
 def test_read_all_time_steps_without_reading_items_neq():
@@ -271,6 +272,35 @@ def test_write_from_data_frame(tmpdir):
     assert ds.items[0].type == EUMType.Concentration
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
     assert ds.items[0].data_value_type == 0
+
+
+def test_write_from_polars_data_frame(tmpdir):
+
+    import polars as pl
+
+    df = pl.read_csv("tests/testdata/co2-mm-mlo.csv", parse_dates=True)
+
+    # TODO handle missing data https://pola-rs.github.io/polars-book/user-guide/howcani/missing_data.html
+
+    # Polars does not have an index
+    # Pandas gives a label to each row with an index. Polars does not use an index and each row is indexed by its integer position in the table.
+    # Indexes are not needed! Not having them makes things easier - convince us otherwise!
+
+    # df = pd.read_csv(
+    #    "tests/testdata/co2-mm-mlo.csv",
+    #    parse_dates=True,
+    #    index_col="Date",
+    #    na_values=-99.99,
+    # )
+
+    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+    Dfs0.from_dataframe(df, filename)
+
+    assert os.path.exists(filename)
+
+    ds = mikeio.read(filename)
+
+    assert len(ds.items) == 5
 
 
 def test_write_from_data_frame_monkey_patched(tmpdir):

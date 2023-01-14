@@ -570,6 +570,17 @@ def dataframe_to_dfs0(
             default np.float32
     """
 
+    first_data_col = 0
+
+    if not hasattr(self, "index"):
+        try:
+            self.index = pd.DatetimeIndex(self[:, 0])
+            first_data_col = 1
+        except Exception:
+            raise ValueError(
+                "Dataframe must have an index or a first column that can be converted to an index"
+            )
+
     if not isinstance(self.index, pd.DatetimeIndex):
         raise ValueError(
             "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
@@ -577,19 +588,26 @@ def dataframe_to_dfs0(
 
     dfs = Dfs0()
 
+    X = self.to_numpy()
+
     data = []
-    for i in range(self.values.shape[1]):
-        data.append(self.values[:, i])
+    for i in range(first_data_col, X.shape[1]):
+        data.append(X[:, i])
 
     if items is None:
 
         if itemtype is None:
-            items = [ItemInfo(name) for name in self.columns]
+            items = [ItemInfo(name) for name in self.columns[first_data_col:]]
         else:
             if unit is None:
-                items = [ItemInfo(name, itemtype) for name in self.columns]
+                items = [
+                    ItemInfo(name, itemtype) for name in self.columns[first_data_col:]
+                ]
             else:
-                items = [ItemInfo(name, itemtype, unit) for name in self.columns]
+                items = [
+                    ItemInfo(name, itemtype, unit)
+                    for name in self.columns[first_data_col:]
+                ]
 
     if self.index.freq is None:  # non-equidistant
         dfs.write(
