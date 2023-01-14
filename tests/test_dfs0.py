@@ -278,20 +278,15 @@ def test_write_from_polars_data_frame(tmpdir):
 
     import polars as pl
 
-    df = pl.read_csv("tests/testdata/co2-mm-mlo.csv", parse_dates=True)
+    df = pl.read_csv(
+        "tests/testdata/co2-mm-mlo.csv", parse_dates=True, null_values="-99.99"
+    )
 
-    # TODO handle missing data https://pola-rs.github.io/polars-book/user-guide/howcani/missing_data.html
+    assert df.get_column("Average")[3] is None
 
     # Polars does not have an index
     # Pandas gives a label to each row with an index. Polars does not use an index and each row is indexed by its integer position in the table.
     # Indexes are not needed! Not having them makes things easier - convince us otherwise!
-
-    # df = pd.read_csv(
-    #    "tests/testdata/co2-mm-mlo.csv",
-    #    parse_dates=True,
-    #    index_col="Date",
-    #    na_values=-99.99,
-    # )
 
     filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
     Dfs0.from_dataframe(df, filename)
@@ -301,6 +296,7 @@ def test_write_from_polars_data_frame(tmpdir):
     ds = mikeio.read(filename)
 
     assert len(ds.items) == 5
+    assert np.isnan(ds["Average"].to_numpy()[3])
 
 
 def test_write_from_data_frame_monkey_patched(tmpdir):
