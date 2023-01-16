@@ -97,15 +97,14 @@
 <span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsSimpleType</span>
 
 <span class="kn">from</span> <span class="nn">.base</span> <span class="kn">import</span> <span class="n">TimeSeries</span>
-<span class="kn">from</span> <span class="nn">.data_utils</span> <span class="kn">import</span> <span class="n">DataUtilsMixin</span>
 <span class="kn">from</span> <span class="nn">.dataarray</span> <span class="kn">import</span> <span class="n">DataArray</span>
+<span class="kn">from</span> <span class="nn">.data_utils</span> <span class="kn">import</span> <span class="n">_to_safe_name</span><span class="p">,</span> <span class="n">_get_time_idx_list</span><span class="p">,</span> <span class="n">_n_selected_timesteps</span>
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">,</span> <span class="n">ItemInfo</span>
 <span class="kn">from</span> <span class="nn">.spatial.FM_geometry</span> <span class="kn">import</span> <span class="n">GeometryFM</span>
 <span class="kn">from</span> <span class="nn">.spatial.geometry</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeometryPoint2D</span><span class="p">,</span>
     <span class="n">GeometryPoint3D</span><span class="p">,</span>
     <span class="n">GeometryUndefined</span><span class="p">,</span>
-    <span class="n">_Geometry</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid1D</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">Grid3D</span>
 
@@ -178,7 +177,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">da</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span></div>
 
 
-<div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../dataset.html#mikeio.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">DataUtilsMixin</span><span class="p">,</span> <span class="n">TimeSeries</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableMapping</span><span class="p">):</span>
+<div class="viewcode-block" id="Dataset"><a class="viewcode-back" href="../../dataset.html#mikeio.Dataset">[docs]</a><span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">TimeSeries</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableMapping</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataset containing one or more DataArrays with common geometry and time</span>
 
 <span class="sd">    Most often obtained by reading a dfs file. But can also be</span>
@@ -224,7 +223,7 @@
         <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]],</span>
         <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">geometry</span><span class="p">:</span> <span class="n">_Geometry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geometry</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -258,7 +257,7 @@
         <span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">geometry</span><span class="p">:</span> <span class="n">_Geometry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geometry</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -440,9 +439,6 @@
 
     <span class="nd">@time</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_time</span><span class="p">):</span>
-        <span class="n">new_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_time</span><span class="p">(</span><span class="n">new_time</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_time</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length of new time is wrong&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="n">da</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">new_time</span>
 
@@ -764,13 +760,13 @@
         <span class="k">return</span> <span class="n">ds</span></div>
 
     <span class="k">def</span> <span class="nf">_set_name_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_to_safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># keep track of what we insert</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_del_name_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_to_safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -783,8 +779,8 @@
         <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_key_time</span><span class="p">(</span><span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
             <span class="n">key</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_key_time</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-            <span class="n">time_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_time_idx_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_selected_timesteps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">time_steps</span> <span class="o">=</span> <span class="n">_get_time_idx_list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_n_selected_timesteps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">time_steps</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;No timesteps found!&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time_steps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
@@ -1211,33 +1207,9 @@
             <span class="k">if</span> <span class="n">dt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You must specify either dt or freq&quot;</span><span class="p">)</span>
 
-        <span class="n">t_out_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_interp_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
-        <span class="n">t_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
-        <span class="n">t_out</span> <span class="o">=</span> <span class="n">t_out_index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">das</span> <span class="o">=</span> <span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">interp_time</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span> <span class="n">dt</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="n">extrapolate</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">)</span> <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 
-        <span class="c1"># TODO: it would be more efficient to interp all data at once!</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_time</span><span class="p">(</span>
-                <span class="n">t_in</span><span class="p">,</span> <span class="n">t_out</span><span class="p">,</span> <span class="n">da</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">method</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">,</span> <span class="n">fill_value</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="bp">self</span>
-        <span class="p">]</span>
-
-        <span class="n">zn</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="kc">None</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zn</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_time</span><span class="p">(</span>
-                <span class="n">t_in</span><span class="p">,</span> <span class="n">t_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">,</span> <span class="n">fill_value</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">t_out_index</span><span class="p">,</span>
-            <span class="n">items</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>
-            <span class="n">geometry</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span>
-            <span class="n">zn</span><span class="o">=</span><span class="n">zn</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">das</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">interp_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
         <span class="n">ds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
