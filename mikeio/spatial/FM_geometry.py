@@ -1430,15 +1430,15 @@ class GeometryFM(_Geometry):
 class _GeometryFMLayered(GeometryFM):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers=None,
-        n_sigma=None,
+        n_layers: int = 1 , # at least 1 layer
+        n_sigma = None,
         validate=True,
     ) -> None:
         super().__init__(
@@ -1466,8 +1466,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def layer_ids(self):
         """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1488,21 +1486,17 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def n_z_layers(self):
         """Maximum number of z-layers"""
-        if self.n_layers is None:
-            return None
         return self.n_layers - self.n_sigma_layers
 
     @property
     def top_elements(self):
         """List of 3d element ids of surface layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find top_elements")
-            return None
-        elif self._top_elems is None:
+        if self._top_elems is None:
             # note: if subset of elements is selected then this cannot be done!
 
             # TODO: check 0-based, 1-based...
             self._top_elems = self._findTopLayerElements(self.element_table)
+        
         return self._top_elems
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
@@ -1688,9 +1682,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def e2_e3_table(self):
         """The 2d-to-3d element connectivity table for a 3d object"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot return e2_e3_table")
-            return None
         if self._e2_e3_table is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1701,10 +1692,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-            # or return self._2d_ids ??
-
         if self._2d_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1918,14 +1905,14 @@ class GeometryFM3D(_GeometryFMLayered):
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers=None,
+        n_layers: int = 1,
         n_sigma=None,
         validate=True,
     ) -> None:
@@ -1950,6 +1937,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
     @property
     def boundary_polylines(self):
+        # Overides base class
         raise AttributeError(
             "GeometryFMVerticalProfile has no boundary_polylines property"
         )
