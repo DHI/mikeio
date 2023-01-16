@@ -1609,6 +1609,11 @@
                 <span class="n">dai</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">interp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="o">*</span><span class="n">interpolant</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
                 <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">()</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">is_layered</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                        <span class="s2">&quot;Interpolation in 3d is not yet implemented&quot;</span>
+                    <span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">interpolant</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">interpolant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span>
                         <span class="n">coords</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="n">n_nearest</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>

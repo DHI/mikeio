@@ -1078,6 +1078,7 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM</span>
             <span class="p">):</span>  <span class="c1"># TODO remove this when all geometries implements the same method</span>
+
                 <span class="n">interpolant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span>
                     <span class="n">xy</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="n">n_nearest</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">)</span>
