@@ -10,15 +10,14 @@ import pandas as pd
 from mikecore.DfsFile import DfsSimpleType
 
 from .base import TimeSeries
-from .data_utils import DataUtilsMixin
 from .dataarray import DataArray
+from .data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
 from .eum import EUMType, EUMUnit, ItemInfo
 from .spatial.FM_geometry import GeometryFM
 from .spatial.geometry import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
-    _Geometry,
 )
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
@@ -91,7 +90,7 @@ class _DatasetPlotter:
         return f"{da.name} [{da.unit.name}]"
 
 
-class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
+class Dataset(TimeSeries, collections.abc.MutableMapping):
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
@@ -137,7 +136,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         data: Union[Mapping[str, DataArray], Iterable[DataArray]],
         time=None,
         items=None,
-        geometry: _Geometry = None,
+        geometry= None,
         zn=None,
         dims=None,
         validate=True,
@@ -171,7 +170,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         data: Sequence[np.ndarray],
         time=None,
         items=None,
-        geometry: _Geometry = None,
+        geometry= None,
         zn=None,
         dims=None,
     ):
@@ -353,9 +352,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @time.setter
     def time(self, new_time):
-        new_time = self._parse_time(new_time)
-        if len(self.time) != len(new_time):
-            raise ValueError("Length of new time is wrong")
         for da in self:
             da.time = new_time
 
@@ -677,13 +673,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return ds
 
     def _set_name_attr(self, name: str, value: DataArray):
-        name = self._to_safe_name(name)
+        name = _to_safe_name(name)
         if name not in self.__itemattr:
             self.__itemattr.append(name)  # keep track of what we insert
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str):
-        name = self._to_safe_name(name)
+        name = _to_safe_name(name)
         if name in self.__itemattr:
             self.__itemattr.remove(name)
             delattr(self, name)
@@ -696,8 +692,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ) and self._is_key_time(key[0]):
             key = pd.DatetimeIndex(key)
         if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
-            time_steps = self._get_time_idx_list(self.time, key)
-            if self._n_selected_timesteps(self.time, time_steps) == 0:
+            time_steps = _get_time_idx_list(self.time, key)
+            if _n_selected_timesteps(self.time, time_steps) == 0:
                 raise IndexError("No timesteps found!")
             return self.isel(time_steps, axis=0)
         if isinstance(key, slice):
@@ -1124,33 +1120,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             if dt is None:
                 raise ValueError("You must specify either dt or freq")
 
-        t_out_index = self._parse_interp_time(self.time, dt)
-        t_in = self.time.values.astype(float)
-        t_out = t_out_index.values.astype(float)
+        das = [da.interp_time(dt= dt, method=method, extrapolate=extrapolate, fill_value=fill_value) for da in self]
 
-        # TODO: it would be more efficient to interp all data at once!
-        data = [
-            self._interpolate_time(
-                t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
-            )
-            for da in self
-        ]
-
-        zn = (
-            None
-            if self._zn is None
-            else self._interpolate_time(
-                t_in, t_out, self._zn, method, extrapolate, fill_value
-            )
-        )
-
-        return Dataset(
-            data,
-            t_out_index,
-            items=self.items.copy(),
-            geometry=self.geometry,
-            zn=zn,
-        )
+        return Dataset(das)
 
     def interp_na(self, axis="time", **kwargs) -> "Dataset":
         ds = self.copy()
