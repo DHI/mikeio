@@ -1,5 +1,3 @@
-import warnings
-
 import numpy as np
 
 from .utils import _relative_cumulative_distance

@@ -3,7 +3,7 @@ import warnings
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, TextIO, Tuple, Union
+from typing import Dict, List, Mapping, TextIO, Tuple, Union
 
 import yaml
 

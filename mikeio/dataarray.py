@@ -488,7 +488,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
             shading="nearest",
             **kwargs,
         )
-        cbar = fig.colorbar(pos, label=self._label_txt())
+        fig.colorbar(pos, label=self._label_txt())
         ax.set_xlabel("time")
         fig.autofmt_xdate()
         ax.set_ylabel("z (static)")
@@ -2179,7 +2179,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             data = func(self.values)
         except:
             # TODO: better except... TypeError etc
-            raise ValueError(f"Math operation could not be applied to DataArray")
+            raise ValueError("Math operation could not be applied to DataArray")
 
         new_da = self.copy()
         new_da.values = data
@@ -2192,7 +2192,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             data = func(self.values, other_values)
         except:
             # TODO: better except... TypeError etc
-            raise ValueError(f"Math operation could not be applied to DataArray")
+            raise ValueError("Math operation could not be applied to DataArray")
 
         # TODO: check if geometry etc match if other is DataArray?
 

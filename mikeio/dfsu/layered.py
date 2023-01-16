@@ -1,8 +1,6 @@
-import warnings
 from functools import wraps
 
 import numpy as np
-import pandas as pd
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from scipy.spatial import cKDTree
 from tqdm import trange

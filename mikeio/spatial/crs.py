@@ -108,7 +108,6 @@ class CRS:
             CRS instance.
 
         """
-        import pyproj
 
         return cls(projection_string=pyproj_crs.to_wkt(version="WKT1_ESRI"))
 
@@ -135,7 +134,6 @@ class CRS:
             Unexpected 'pyproj.to_epsg' return type.
 
         """
-        import pyproj
 
         epsg_code = self.to_pyproj().to_epsg(min_confidence=min_confidence)
         if epsg_code is None:

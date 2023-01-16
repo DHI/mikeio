@@ -840,7 +840,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 raise ValueError(f"Cannot select both {kw} and elements!")
 
         if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
-            raise ValueError(f"Cannot select both x,y and area!")
+            raise ValueError("Cannot select both x,y and area!")
 
     def _parse_geometry_sel(self, area, x, y):
         elements = None
