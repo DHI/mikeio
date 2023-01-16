@@ -1073,6 +1073,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             )
             items.insert(0, z_item)
             n_items = len(items)
+            zn_dynamic = geometry.node_coordinates[:,2]
             data.insert(0, zn_dynamic)
 
         # Default filetype;
