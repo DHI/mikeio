@@ -19,7 +19,7 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.4.dev1" # TODO use git hash instead for dev version?
+__version__ = "1.4.dev1"  # TODO use git hash instead for dev version?
 __dfs_version__: int = 140
 
 
@@ -150,25 +150,23 @@ def open(filename: str, **kwargs):
 
     >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
     """
-    ext = os.path.splitext(filename)[1].lower()
+    file_format = os.path.splitext(filename)[1].lower()[1:]
 
-    if ext == ".dfs0":
-        return Dfs0(filename, **kwargs)
+    READERS = {
+        "dfs0": Dfs0,
+        "dfs1": Dfs1,
+        "dfs2": Dfs2,
+        "dfs3": Dfs3,
+        "dfsu": Dfsu,
+        "mesh": Mesh,
+    }
 
-    elif ext == ".dfs1":
-        return Dfs1(filename, **kwargs)
+    if file_format not in READERS:
+        valid_formats = ", ".join(READERS.keys())
+        raise Exception(
+            f"{file_format} is not a supported format for mikeio.open. Valid formats are {valid_formats}"
+        )
 
-    elif ext == ".dfs2":
-        return Dfs2(filename, **kwargs)
+    reader_klass = READERS[file_format]
 
-    elif ext == ".dfs3":
-        return Dfs3(filename, **kwargs)
-
-    elif ext == ".dfsu":
-        return Dfsu(filename, **kwargs)
-
-    elif ext == ".mesh":
-        return Mesh(filename, **kwargs)
-
-    else:
-        raise Exception(f"{ext} is an unsupported extension")
+    return reader_klass(filename, **kwargs)
