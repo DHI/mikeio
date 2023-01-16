@@ -7,15 +7,9 @@ class DataDimensionMismatch(ValueError):
         super().__init__(self.message)
 
 
-class ItemNumbersError(ValueError):
-    def __init__(self, n_items_file):
-        super().__init__(
-            f"item numbers must be (a list of) integers between 0 and {n_items_file-1}."
-        )
-
-
 class ItemsError(ValueError):
     def __init__(self, n_items_file):
+        self.n_items_file = n_items_file
         super().__init__(
             f"'items' must be (a list of) integers between 0 and {n_items_file-1} or str."
         )
