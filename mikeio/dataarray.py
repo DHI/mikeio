@@ -1522,6 +1522,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM):
+                if self.geometry.is_layered:
+                    raise NotImplementedError(
+                        "Interpolation in 3d is not yet implemented"
+                    )
+
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
                         coords, n_nearest=n_nearest, **kwargs
