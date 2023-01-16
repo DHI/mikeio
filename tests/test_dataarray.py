@@ -1083,6 +1083,19 @@ def test_daarray_aggregation_dfs2():
     dasm = da.nanmean(axis="space")
     assert dasm.shape == (1,)
 
+def test_dataarray_weigthed_average():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds = mikeio.read(filename, items=["Surface elevation"])
+
+    da = ds["Surface elevation"]
+
+    area = da.geometry.get_element_area()
+    
+    da2 = da.average(weights=area, axis=1)
+
+    assert isinstance(da2.geometry, GeometryUndefined)
+    assert da2.dims == ("time",)
+
 
 def test_daarray_aggregation():
 

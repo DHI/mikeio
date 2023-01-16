@@ -390,3 +390,16 @@ def test_plot_spectrum_sector(dfsu_area_sector):
     dfs.plot_spectrum(spec, rmin=0, plot_type="patch")
     dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
     plt.close("all")
+
+
+def test_plot_da_spectrum(dfsu_pt):
+    dfs = dfsu_pt
+    ds = dfs.read(time=0)
+    da = ds[0]
+    da.plot()
+    #dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
+    #dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
+    #dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
+    #dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
+    plt.close("all")
+
