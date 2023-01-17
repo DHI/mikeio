@@ -344,14 +344,14 @@ class GeometryFM(_Geometry):
 
     @staticmethod
     def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
-    """Check for each side in the polygon that the point is on the correct side"""
+        """Check for each side in the polygon that the point is on the correct side"""
 
-    for j in range(len(xn) - 1):
-        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
-            return False
-    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-        return False
-    return True
+        for j in range(len(xn) - 1):
+            if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
+                return False
+            if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+                return False
+        return True
 
     @staticmethod
     def _area_is_bbox(area) -> bool:
