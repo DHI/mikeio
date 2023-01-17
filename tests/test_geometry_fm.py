@@ -21,7 +21,8 @@ def test_basic():
     assert g.is_tri_only
     assert g.projection == "LONG/LAT"
     assert not g.is_layered
-    assert g.find_index(0.5, 0.5) == 0
+    assert g.find_index(0.5, 0.5) == [0]
+    # assert g.find_index(50.0, -50.0) == ?? # TODO What to return if point is outside domain
 
 
 def test_too_many_elements():

@@ -315,7 +315,7 @@ class GeometryFM(_Geometry):
 
         #     self._point_in_polygon = numba.njit(_point_in_polygon)
         # except ModuleNotFoundError:
-        #self._point_in_polygon = _point_in_polygon
+        # self._point_in_polygon = _point_in_polygon
 
     def _repr_txt(self, layer_txt=None):
         out = []
@@ -347,7 +347,9 @@ class GeometryFM(_Geometry):
         """Check for each side in the polygon that the point is on the correct side"""
 
         for j in range(len(xn) - 1):
-            if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
+            if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (
+                yp - yn[j]
+            ) > 0:
                 return False
             if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
                 return False
@@ -759,8 +761,10 @@ class GeometryFM(_Geometry):
         coords = np.atleast_2d(coords)
         nc = self._geometry2d.node_coordinates
 
-        few_nearest, _ = self._find_n_nearest_2d_elements(coords, n=2)
-        ids = few_nearest[:, 0]  # first guess
+        few_nearest, _ = self._find_n_nearest_2d_elements(
+            coords, n=min(self.n_elements, 2)
+        )
+        ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
 
         for k in range(len(ids)):
             # step 1: is nearest element = element containing point?
