@@ -22,7 +22,7 @@ show_progress = True
 
 class _ChunkInfo:
     """Class for keeping track of an chunked processing
-    
+
     Parameters
     ----------
     n_data : int
@@ -38,7 +38,7 @@ class _ChunkInfo:
         number of chunks
     chunk_size : int
         number of data points per chunk
-    
+
     Methods
     -------
     stop(start)
@@ -865,7 +865,7 @@ def quantile(
 
 def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
     """Read item data from dfs file
-    
+
     Parameters
     ----------
     dfs : DfsFile
@@ -874,7 +874,7 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
         item number
     timestep : int
         timestep number
-        
+
     Returns
     -------
     np.ndarray
@@ -891,7 +891,7 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
 def _get_repeated_items(
     items_in: List[DfsDynamicItemInfo], prefixes: List[str]
 ) -> List[ItemInfo]:
-"""Create new items by repeating the items in items_in with the prefixes
+    """Create new items by repeating the items in items_in with the prefixes
 
     Parameters
     ----------
@@ -899,7 +899,7 @@ def _get_repeated_items(
         List of items to be repeated
     prefixes : List[str]
         List of prefixes to be added to the items
-    
+
     Returns
     -------
     List[ItemInfo]
