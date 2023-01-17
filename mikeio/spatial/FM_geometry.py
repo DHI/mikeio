@@ -16,15 +16,34 @@ from .FM_utils import (
     _get_node_centered_data,
     _plot_map,
     _plot_vertical_profile,
-    _set_xy_label_by_projection, # TODO remove
-    _to_polygons, # TODO remove
+    BoundaryPolylines,
+    _set_xy_label_by_projection,  # TODO remove
+    _to_polygons,  # TODO remove
 )
 from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
 
+
 def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
-    """Check for each side in the polygon that the point is on the correct side"""
+    """Check for each side in the polygon that the point is on the correct side
+
+    Parameters
+    ----------
+    xn : np.array
+        x-coordinates of the polygon
+    yn : np.array
+        y-coordinates of the polygon
+    xp : float
+        x-coordinate of the point
+    yp : float
+        y-coordinate of the point
+
+    Returns
+    -------
+    bool
+        True if point is inside polygon
+    """
 
     for j in range(len(xn) - 1):
         if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
@@ -32,7 +51,6 @@ def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
     if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
         return False
     return True
-
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -106,7 +124,7 @@ class _GeometryFMPlotter:
     def __call__(self, ax=None, figsize=None, **kwargs):
         """Plot bathymetry as coloured patches"""
         ax = self._get_ax(ax, figsize)
-        kwargs['plot_type'] = kwargs.get('plot_type') or 'patch'
+        kwargs["plot_type"] = kwargs.get("plot_type") or "patch"
         return self._plot_FM_map(ax, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
@@ -133,7 +151,7 @@ class _GeometryFMPlotter:
 
         if "title" not in kwargs:
             kwargs["title"] = "Bathymetry"
-        
+
         plot_type = kwargs.pop("plot_type")
 
         g = self.g._geometry2d
@@ -147,7 +165,7 @@ class _GeometryFMPlotter:
             projection=g.projection,
             z=None,
             ax=ax,
-            **kwargs
+            **kwargs,
         )
 
     def mesh(self, title="Mesh", figsize=None, ax=None):
@@ -880,7 +898,7 @@ class GeometryFM(_Geometry):
         self._codes = np.array(v, dtype=np.int32)
 
     @property
-    def boundary_polylines(self):
+    def boundary_polylines(self) -> BoundaryPolylines:
         """Lists of closed polylines defining domain outline"""
         if self._boundary_polylines is None:
             self._boundary_polylines = self._get_boundary_polylines()
@@ -948,7 +966,7 @@ class GeometryFM(_Geometry):
             polylines.append(polyline)
         return polylines
 
-    def _get_boundary_polylines(self):
+    def _get_boundary_polylines(self) -> BoundaryPolylines:
         """Get boundary polylines and categorize as inner or outer by
         assessing the signed area
         """
@@ -972,10 +990,6 @@ class GeometryFM(_Geometry):
             else:
                 poly_lines_int.append(poly)
 
-        BoundaryPolylines = namedtuple(
-            "BoundaryPolylines",
-            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-        )
         n_ext = len(poly_lines_ext)
         n_int = len(poly_lines_int)
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
@@ -1437,8 +1451,8 @@ class _GeometryFMLayered(GeometryFM):
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers: int = 1 , # at least 1 layer
-        n_sigma = None,
+        n_layers: int = 1,  # at least 1 layer
+        n_sigma=None,
         validate=True,
     ) -> None:
         super().__init__(
@@ -1496,7 +1510,7 @@ class _GeometryFMLayered(GeometryFM):
 
             # TODO: check 0-based, 1-based...
             self._top_elems = self._findTopLayerElements(self.element_table)
-        
+
         return self._top_elems
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
