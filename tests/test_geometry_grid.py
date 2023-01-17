@@ -217,6 +217,7 @@ def test_contains():
     # assert inside[0]
     # assert not inside[1]
 
+
 def test_in():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox)
@@ -251,6 +252,12 @@ def test_find_index():
     assert jj[0] == j1
     assert ii[2] == i2
     assert jj[2] == j2
+
+    with pytest.raises(ValueError):
+        g.find_index(x=-1, y=0)
+
+    with pytest.raises(ValueError):
+        g.find_index(coords=[(0.1, 0.1), (0.1, 0.1)])
 
 
 def test_to_geometryFM():

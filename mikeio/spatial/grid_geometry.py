@@ -51,6 +51,7 @@ def _print_axis_txt(name, x, dx) -> str:
     txt = txt + f"] (n{name}={n}, d{name}={dx:0.4g})"
     return txt
 
+
 @dataclass
 class Grid1D(_Geometry):
     """1D grid (node-based)
@@ -97,7 +98,6 @@ class Grid1D(_Geometry):
         self._nc = node_coordinates
 
         self._axis_name = axis_name
-
 
     @property
     def ndim(self) -> int:
@@ -277,6 +277,7 @@ class _Grid2DPlotter:
             ax.set_ylabel("Northing [m]")
             ax.set_aspect("equal")
 
+
 @dataclass
 class Grid2D(_Geometry):
     """2D grid
@@ -339,7 +340,7 @@ class Grid2D(_Geometry):
     @property
     def ndim(self) -> int:
         return 2
-    
+
     @property
     def _is_rotated(self):
         return np.abs(self._orientation) > 1e-5
@@ -643,8 +644,12 @@ class Grid2D(_Geometry):
         y = xy[:, 1]
         x = xy[:, 0]
 
-        ii = (-1) * np.ones_like(x, dtype=int)
-        jj = (-1) * np.ones_like(y, dtype=int)
+        ii = (-1) * np.ones_like(
+            x, dtype=int
+        )  # TODO -1 is not a good choice, since it is a valid index
+        jj = (-1) * np.ones_like(
+            y, dtype=int
+        )  # TODO -1 is not a good choice, since it is a valid index
 
         inside = self.contains(xy)
         for j, xyp in enumerate(xy):
@@ -662,7 +667,7 @@ class Grid2D(_Geometry):
             raise ValueError(
                 "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
             )
-        
+
         x0, y0, x1, y1 = bbox
         if x0 > self.x[-1] or y0 > self.y[-1] or x1 < self.x[0] or y1 < self.y[0]:
             warnings.warn("No elements in bbox")

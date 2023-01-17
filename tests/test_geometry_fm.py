@@ -22,7 +22,8 @@ def test_basic():
     assert g.projection == "LONG/LAT"
     assert not g.is_layered
     assert g.find_index(0.5, 0.5) == [0]
-    # assert g.find_index(50.0, -50.0) == ?? # TODO What to return if point is outside domain
+    with pytest.raises(ValueError):
+        g.find_index(50.0, -50.0)
 
 
 def test_too_many_elements():

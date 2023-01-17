@@ -795,7 +795,9 @@ class GeometryFM(_Geometry):
                     coords[k, 0],
                     coords[k, 1],
                 )
-                ids[k] = many_nearest[lid] if lid > 0 else -1
+                ids[k] = (
+                    many_nearest[lid] if lid > 0 else -1
+                )  # TODO -1 is not a good choice, since it is a valid index
 
         return ids
 
@@ -1111,6 +1113,11 @@ class GeometryFM(_Geometry):
         -------
         np.array
             indicies of containing elements
+
+        Raises
+        ------
+        ValueError
+            if any point is outside the domain
 
         Examples
         --------
