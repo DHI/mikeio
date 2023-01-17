@@ -2,6 +2,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
+# TODO this file tests private methods, Options: 1. declare methods as public, 2. Test at a higher level of abstraction
 
 from mikeio.data_utils import DataUtilsMixin as du
 

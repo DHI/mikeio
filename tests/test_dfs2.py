@@ -176,8 +176,10 @@ def test_read(dfs2_random):
 
 def test_read_bad_item(dfs2_random):
     dfs = dfs2_random
-    with pytest.raises(ItemsError):
+    with pytest.raises(ItemsError) as ex:
         dfs.read(items=100)
+
+    assert ex.value.n_items_file == 1
 
 
 def test_read_temporal_subset_slice():

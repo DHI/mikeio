@@ -15,13 +15,13 @@ from .FM_utils import (
     _get_node_centered_data,
     _plot_map,
     _plot_vertical_profile,
-    _point_in_polygon,
-    _set_xy_label_by_projection,
-    _to_polygons,
+    _set_xy_label_by_projection,  # TODO remove
+    _to_polygons,  # TODO remove
 )
 from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
+
 
 class GeometryFMPointSpectrum(_Geometry):
     def __init__(self, frequencies=None, directions=None, x=None, y=None) -> None:
@@ -39,7 +39,7 @@ class GeometryFMPointSpectrum(_Geometry):
     @property
     def type_name(self):
         """Type name: DfsuSpectral0D"""
-        return self._type.name # TODO there is no self._type??
+        return self._type.name  # TODO there is no self._type??
 
     def __repr__(self):
         txt = f"Point Spectrum Geometry(frequency:{self.n_frequencies}, direction:{self.n_directions}"
@@ -94,6 +94,7 @@ class _GeometryFMPlotter:
     def __call__(self, ax=None, figsize=None, **kwargs):
         """Plot bathymetry as coloured patches"""
         ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = kwargs.get("plot_type") or "patch"
         return self._plot_FM_map(ax, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
@@ -121,6 +122,8 @@ class _GeometryFMPlotter:
         if "title" not in kwargs:
             kwargs["title"] = "Bathymetry"
 
+        plot_type = kwargs.pop("plot_type")
+
         g = self.g._geometry2d
 
         return _plot_map(
@@ -128,6 +131,7 @@ class _GeometryFMPlotter:
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
             boundary_polylines=g.boundary_polylines,
+            plot_type=plot_type,
             projection=g.projection,
             z=None,
             ax=ax,
@@ -136,6 +140,9 @@ class _GeometryFMPlotter:
 
     def mesh(self, title="Mesh", figsize=None, ax=None):
         """Plot mesh only"""
+
+        # TODO this must be a duplicate, delegate
+
         from matplotlib.collections import PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
@@ -156,6 +163,8 @@ class _GeometryFMPlotter:
 
     def outline(self, title="Outline", figsize=None, ax=None):
         """Plot domain outline (using the boundary_polylines property)"""
+
+        # TODO this must be a duplicate, delegate
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
@@ -204,6 +213,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _set_plot_limits(self, ax):
+        # TODO this must be a duplicate, delegate
         bbox = xy_to_bbox(self.g.node_coordinates)
         xybuf = 6e-3 * (bbox.right - bbox.left)
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
@@ -211,6 +221,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _plot_aspect(self):
+        # TODO this must be a duplicate, delegate
         if self.g.is_geo:
             mean_lat = np.mean(self.g.node_coordinates[:, 1])
             return 1.0 / np.cos(np.pi * mean_lat / 180)
@@ -304,9 +315,9 @@ class GeometryFM(_Geometry):
 
         #     self._point_in_polygon = numba.njit(_point_in_polygon)
         # except ModuleNotFoundError:
-        self._point_in_polygon = _point_in_polygon
+        #self._point_in_polygon = _point_in_polygon
 
-    def _repr_txt(self, layer_txt= None):
+    def _repr_txt(self, layer_txt=None):
         out = []
         out.append("Flexible Mesh Geometry: " + self.type_name)
         if self.n_nodes:
@@ -330,6 +341,17 @@ class GeometryFM(_Geometry):
         else:
             gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
         return gtxt
+
+    @staticmethod
+    def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
+    """Check for each side in the polygon that the point is on the correct side"""
+
+    for j in range(len(xn) - 1):
+        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
+            return False
+    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+        return False
+    return True
 
     @staticmethod
     def _area_is_bbox(area) -> bool:
@@ -476,7 +498,6 @@ class GeometryFM(_Geometry):
             return 3
         else:
             return 2
-        
 
     @property
     def is_2d(self) -> bool:
@@ -1450,14 +1471,14 @@ class GeometryFM(_Geometry):
 class _GeometryFMLayered(GeometryFM):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers=None,
+        n_layers: int = 1,  # at least 1 layer
         n_sigma=None,
         validate=True,
     ) -> None:
@@ -1485,21 +1506,16 @@ class _GeometryFMLayered(GeometryFM):
 
     def __repr__(self):
         details = (
-                "sigma only"
-                if self.n_z_layers is None
-                else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
-            )
+            "sigma only"
+            if self.n_z_layers is None
+            else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
+        )
         layer_txt = f"number of layers: {self._n_layers} ({details})"
         return self._repr_txt(layer_txt=layer_txt)
-        
-            
-        
 
     @property
     def layer_ids(self):
         """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1520,21 +1536,17 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def n_z_layers(self):
         """Maximum number of z-layers"""
-        if self.n_layers is None:
-            return None
         return self.n_layers - self.n_sigma_layers
 
     @property
     def top_elements(self):
         """List of 3d element ids of surface layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find top_elements")
-            return None
-        elif self._top_elems is None:
+        if self._top_elems is None:
             # note: if subset of elements is selected then this cannot be done!
 
             # TODO: check 0-based, 1-based...
             self._top_elems = self._findTopLayerElements(self.element_table)
+
         return self._top_elems
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
@@ -1720,9 +1732,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def e2_e3_table(self):
         """The 2d-to-3d element connectivity table for a 3d object"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot return e2_e3_table")
-            return None
         if self._e2_e3_table is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1733,10 +1742,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-            # or return self._2d_ids ??
-
         if self._2d_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1950,14 +1955,14 @@ class GeometryFM3D(_GeometryFMLayered):
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers=None,
+        n_layers: int = 1,
         n_sigma=None,
         validate=True,
     ) -> None:
@@ -1982,6 +1987,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
     @property
     def boundary_polylines(self):
+        # Overides base class
         raise AttributeError(
             "GeometryFMVerticalProfile has no boundary_polylines property"
         )

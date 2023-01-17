@@ -20,7 +20,7 @@ from tqdm import tqdm, trange
 from .base import TimeSeries
 from .dataset import Dataset
 from .eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
-from .exceptions import DataDimensionMismatch, ItemNumbersError, ItemsError
+from .exceptions import DataDimensionMismatch, ItemsError
 from .spatial.geometry import GeometryUndefined
 
 
@@ -659,13 +659,6 @@ class _Dfs123(TimeSeries):
             item = ItemInfo(name, itemtype, unit, data_value_type)
             items.append(item)
         return items
-
-    def _validate_item_numbers(self, item_numbers):
-        if not all(
-            isinstance(item_number, int) and 0 <= item_number < self.n_items
-            for item_number in item_numbers
-        ):
-            raise ItemNumbersError()
 
     @property
     def deletevalue(self):
