@@ -16,6 +16,12 @@ def test_basic():
     g = GeometryFM(nc, el)
     assert g.n_elements == 1
     assert g.n_nodes == 3
+    assert g.is_2d
+    assert g.is_geo
+    assert g.is_tri_only
+    assert g.projection == "LONG/LAT"
+    assert not g.is_layered
+    assert g.find_index(0.5, 0.5) == 0
 
 
 def test_too_many_elements():
