@@ -15,12 +15,41 @@ from .FM_utils import (
     _get_node_centered_data,
     _plot_map,
     _plot_vertical_profile,
+    BoundaryPolylines,
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
 from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
+
+
+def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
+    """Check for each side in the polygon that the point is on the correct side
+
+    Parameters
+    ----------
+    xn : np.array
+        x-coordinates of the polygon
+    yn : np.array
+        y-coordinates of the polygon
+    xp : float
+        x-coordinate of the point
+    yp : float
+        y-coordinate of the point
+
+    Returns
+    -------
+    bool
+        True if point is inside polygon
+    """
+
+    for j in range(len(xn) - 1):
+        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
+            return False
+    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+        return False
+    return True
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -927,7 +956,7 @@ class GeometryFM(_Geometry):
         self._codes = np.array(v, dtype=np.int32)
 
     @property
-    def boundary_polylines(self):
+    def boundary_polylines(self) -> BoundaryPolylines:
         """Lists of closed polylines defining domain outline"""
         if self._boundary_polylines is None:
             self._boundary_polylines = self._get_boundary_polylines()
@@ -995,7 +1024,7 @@ class GeometryFM(_Geometry):
             polylines.append(polyline)
         return polylines
 
-    def _get_boundary_polylines(self):
+    def _get_boundary_polylines(self) -> BoundaryPolylines:
         """Get boundary polylines and categorize as inner or outer by
         assessing the signed area
         """
@@ -1019,10 +1048,6 @@ class GeometryFM(_Geometry):
             else:
                 poly_lines_int.append(poly)
 
-        BoundaryPolylines = namedtuple(
-            "BoundaryPolylines",
-            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-        )
         n_ext = len(poly_lines_ext)
         n_int = len(poly_lines_int)
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
