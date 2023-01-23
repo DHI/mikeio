@@ -1,33 +1,44 @@
-from datetime import datetime
 import warnings
-from typing import Optional, Sequence, Tuple, Union, Iterable
+from copy import deepcopy
+from datetime import datetime
+from functools import cached_property
+from typing import Iterable, Optional, Sequence, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from copy import deepcopy
+from mikecore.DfsuFile import DfsuFileType
 
 from .base import TimeSeries
+from .data_utils import DataUtilsMixin
 from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.geometry import (
-    _Geometry,
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryUndefined,
-)
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .spatial.FM_geometry import (
-    _GeometryFMLayered,
     GeometryFM,
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
-    GeometryFMLineSpectrum,
-    GeometryFMAreaSpectrum,
+    _GeometryFMLayered,
 )
-from mikecore.DfsuFile import DfsuFileType
-from .spatial.FM_utils import _plot_map, _plot_vertical_profile
-from mikecore.DfsuFile import DfsuFileType
-from .spectral_utils import plot_2dspectrum, calc_m0_from_spectrum
-from .data_utils import DataUtilsMixin
+from .spatial.geometry import (
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+    _Geometry,
+)
+from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
+from .spectral import calc_m0_from_spectrum
+from .data_plot import (
+    _DataArrayPlotter,
+    _DataArrayPlotterFM,
+    _DataArrayPlotterGrid1D,
+    _DataArrayPlotterGrid2D,
+    _DataArrayPlotterAreaSpectrum,
+    _DataArrayPlotterFMVerticalColumn,
+    _DataArrayPlotterFMVerticalProfile,
+    _DataArrayPlotterPointSpectrum,
+    _DataArrayPlotterLineSpectrum,
+)
 
 
 class _DataArrayPlotter:
@@ -808,7 +819,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
         ):
-            # raise ValueError("Geometry is required for ndim >=1")
+            if dims == ("time", "x"):
+                return Grid1D(nx=shape[1], dx=1.0 / (shape[1] - 1))
+
             warnings.warn("Geometry is required for ndim >=1")
 
         axis = 1 if "time" in dims else 0
@@ -962,7 +975,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
 
-    @property
+    @cached_property
     def is_equidistant(self) -> bool:
         """Is DataArray equidistant in time?"""
         if len(self.time) < 3:
@@ -1006,7 +1019,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @values.setter
     def values(self, value):
-        if value.shape != self._values.shape:
+        if np.isscalar(self._values):
+            if not np.isscalar(value):
+                raise ValueError("Shape of new data is wrong (should be scalar)")
+        elif value.shape != self._values.shape:
             raise ValueError("Shape of new data is wrong")
 
         self._values = value
@@ -1088,7 +1104,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 if dims[j] == "time":
                     # getitem accepts fancy indexing only for time
                     k = self._get_time_idx_list(self.time, k)
-                    if len(k) == 0:
+                    if self._n_selected_timesteps(self.time, k) == 0:
                         raise IndexError("No timesteps found!")
                 da = da.isel(k, axis=dims[j])
         return da
@@ -1129,6 +1145,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def isel(self, idx=None, axis=0, **kwargs) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
+
+        Note that the data will be a _view_ of the original data
+        if possible (single index or slice), otherwise a copy (fancy indexing)
+        following NumPy convention.
 
         The spatial parameters available depend on the dims
         (i.e. geometry) of the DataArray:
@@ -1231,7 +1251,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         axis = self._parse_axis(self.shape, self.dims, axis)
 
+        idx_slice = None
         if isinstance(idx, slice):
+            idx_slice = idx
             idx = list(range(*idx.indices(self.shape[axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             return None
@@ -1257,12 +1279,26 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 )
                 zn = self._zn[:, node_ids]
 
+        # reduce dims only if singleton idx
+        dims = (
+            tuple([d for i, d in enumerate(self.dims) if i != axis])
+            if single_index
+            else self.dims
+        )
         if single_index:
-            # reduce dims only if singleton idx
-            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
-            dat = np.take(self.values, int(idx), axis=axis)
+            idx = int(idx)
+        elif idx_slice is not None:
+            idx = idx_slice
+
+        if axis == 0:
+            dat = self.values[idx]
+        elif axis == 1:
+            dat = self.values[:, idx]
+        elif axis == 2:
+            dat = self.values[:, :, idx]
+        elif axis == 3:
+            dat = self.values[:, :, :, idx]
         else:
-            dims = self.dims
             dat = np.take(self.values, idx, axis=axis)
 
         return DataArray(
@@ -1483,22 +1519,33 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if isinstance(self.geometry, Grid2D):  # TODO DIY bilinear interpolation
                 xr_da = self.to_xarray()
                 dai = xr_da.interp(x=x, y=y).values
-                geometry = GeometryPoint2D(x=x, y=y)
+                geometry = GeometryPoint2D(
+                    x=x, y=y, projection=self.geometry.projection
+                )
             elif isinstance(self.geometry, Grid1D):
                 if interpolant is None:
                     interpolant = self.geometry.get_spatial_interpolant(coords)
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM):
+                if self.geometry.is_layered:
+                    raise NotImplementedError(
+                        "Interpolation in 3d is not yet implemented"
+                    )
+
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
                         coords, n_nearest=n_nearest, **kwargs
                     )
                 dai = self.geometry.interp2d(self, *interpolant).flatten()
                 if z is None:
-                    geometry = GeometryPoint2D(x=x, y=y)
+                    geometry = GeometryPoint2D(
+                        x=x, y=y, projection=self.geometry.projection
+                    )
                 else:
-                    geometry = GeometryPoint3D(x=x, y=y, z=z)
+                    geometry = GeometryPoint3D(
+                        x=x, y=y, z=z, projection=self.geometry.projection
+                    )
 
             da = DataArray(
                 data=dai, time=self.time, geometry=geometry, item=deepcopy(self.item)
@@ -1511,6 +1558,57 @@ class DataArray(DataUtilsMixin, TimeSeries):
             da = da.interp_time(time)
 
         return da
+
+    def __dataarray_read_item_time_func(
+        self, item: int, step: int
+    ) -> Tuple[np.ndarray, float]:
+        "Used by _extract_track"
+        # Ignore item argument
+        data = self.isel(time=step).to_numpy()
+        time = (self.time[step] - self.time[0]).total_seconds()
+
+        return data, time
+
+    def extract_track(self, track, method="nearest", dtype=np.float32):
+        """
+        Extract data along a moving track
+
+        Parameters
+        ---------
+        track: pandas.DataFrame
+            with DatetimeIndex and (x, y) of track points as first two columns
+            x,y coordinates must be in same coordinate system as dfsu
+        track: str
+            filename of csv or dfs0 file containing t,x,y
+        method: str, optional
+            Spatial interpolation method ('nearest' or 'inverse_distance')
+            default='nearest'
+
+        Returns
+        -------
+        Dataset
+            A dataset with data dimension t
+            The first two items will be x- and y- coordinates of track
+        """
+        from .track import _extract_track
+
+        return _extract_track(
+            deletevalue=self.deletevalue,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            timestep=self.timestep,
+            geometry=self.geometry,
+            n_elements=self.shape[1],  # TODO is there a better way to find out this?
+            track=track,
+            items=[self.item],
+            time_steps=list(range(self.n_timesteps)),
+            item_numbers=[0],
+            method=method,
+            dtype=dtype,
+            data_read_func=lambda item, step: self.__dataarray_read_item_time_func(
+                item, step
+            ),
+        )
 
     def interp_time(
         self,
@@ -1562,6 +1660,34 @@ class DataArray(DataUtilsMixin, TimeSeries):
             geometry=self.geometry,
             zn=zn,
         )
+
+    def interp_na(self, axis="time", **kwargs) -> "DataArray":
+        """Fill in NaNs by interpolating according to different methods.
+
+        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`
+
+        Examples
+        --------
+
+        >>> time = pd.date_range("2000", periods=3, freq="D")
+        >>> da = mikeio.DataArray(data=np.array([0.0, np.nan, 2.0]), time=time)
+        >>> da
+        <mikeio.DataArray>
+        name: NoName
+        dims: (time:3)
+        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
+        values: [0, nan, 2]
+        >>> da.interp_na()
+        <mikeio.DataArray>
+        name: NoName
+        dims: (time:3)
+        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
+        values: [0, 1, 2]
+        """
+
+        xr_da = self.to_xarray().interpolate_na(dim=axis, **kwargs)
+        self.values = xr_da.values
+        return self
 
     def interp_like(
         self,
@@ -1674,13 +1800,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     # ============= Aggregation methods ===========
 
-    def max(self, axis="time", **kwargs) -> "DataArray":
+    def max(self, axis=0, **kwargs) -> "DataArray":
         """Max value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1693,13 +1819,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis="time", **kwargs) -> "DataArray":
+    def min(self, axis=0, **kwargs) -> "DataArray":
         """Min value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1712,13 +1838,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis="time", **kwargs) -> "DataArray":
+    def mean(self, axis=0, **kwargs) -> "DataArray":
         """Mean value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1731,13 +1857,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis="time", **kwargs) -> "DataArray":
+    def std(self, axis=0, **kwargs) -> "DataArray":
         """Standard deviation values along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1750,13 +1876,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis="time", **kwargs) -> "DataArray":
+    def ptp(self, axis=0, **kwargs) -> "DataArray":
         """Range (max - min) a.k.a Peak to Peak along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1765,13 +1891,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis="time", **kwargs) -> "DataArray":
+    def average(self, weights, axis=0, **kwargs) -> "DataArray":
         """Compute the weighted average along the specified axis.
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1798,13 +1924,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis="time", **kwargs) -> "DataArray":
+    def nanmax(self, axis=0, **kwargs) -> "DataArray":
         """Max value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1817,13 +1943,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis="time", **kwargs) -> "DataArray":
+    def nanmin(self, axis=0, **kwargs) -> "DataArray":
         """Min value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1836,13 +1962,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis="time", **kwargs) -> "DataArray":
+    def nanmean(self, axis=0, **kwargs) -> "DataArray":
         """Mean value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1855,13 +1981,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis="time", **kwargs) -> "DataArray":
+    def nanstd(self, axis=0, **kwargs) -> "DataArray":
         """Standard deviation value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1874,13 +2000,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
-    def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "DataArray":
+    def aggregate(self, axis=0, func=np.nanmean, **kwargs) -> "DataArray":
         """Aggregate along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
         func: function, optional
             default np.nanmean
 
@@ -1911,7 +2037,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             warnings.simplefilter("ignore", category=RuntimeWarning)
             data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
-        if axis == 0:  # time
+        if axis == 0 and "time" in self.dims:  # time
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[0]
 
@@ -1928,7 +2054,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             zn=zn,
         )
 
-    def quantile(self, q, *, axis="time", **kwargs):
+    def quantile(self, q, *, axis=0, **kwargs):
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1939,7 +2065,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -1958,7 +2084,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis="time", **kwargs):
+    def nanquantile(self, q, *, axis=0, **kwargs):
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1969,7 +2095,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time" or "space", by default 0
 
         Returns
         -------
@@ -2189,6 +2315,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
             coords["element"] = xr.DataArray(
                 data=self.geometry.element_ids, dims="element"
             )
+        elif isinstance(self.geometry, GeometryPoint2D):
+            coords["x"] = self.geometry.x
+            coords["y"] = self.geometry.y
+        elif isinstance(self.geometry, GeometryPoint3D):
+            coords["x"] = self.geometry.x
+            coords["y"] = self.geometry.y
+            coords["z"] = self.geometry.z
 
         xr_da = xr.DataArray(
             data=self.values,

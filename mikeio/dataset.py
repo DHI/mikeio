@@ -1,99 +1,29 @@
+import collections.abc
 import os
-from datetime import datetime
-from typing import Iterable, Sequence, Union, Mapping, Optional
 import warnings
+from copy import deepcopy
+from datetime import datetime
+from typing import Iterable, Mapping, Optional, Sequence, Tuple, Union
+
 import numpy as np
 import pandas as pd
-from copy import deepcopy
-
-import collections.abc
-
 from mikecore.DfsFile import DfsSimpleType
 
-from .eum import EUMType, EUMUnit, ItemInfo
-from .data_utils import DataUtilsMixin
-from .spatial.FM_geometry import GeometryFM
 from .base import TimeSeries
 from .dataarray import DataArray
+from .data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
+from .eum import EUMType, EUMUnit, ItemInfo
+from .spatial.FM_geometry import GeometryFM
 from .spatial.geometry import (
-    _Geometry,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
 )
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
+from .data_plot import _DatasetPlotter
 
-class _DatasetPlotter:
-    def __init__(self, ds: "Dataset") -> None:
-        self.ds = ds
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        """Plot multiple DataArrays as time series (only possible dfs0-type data)"""
-        if self.ds.dims == ("time",):
-            df = self.ds.to_dataframe()
-            df.plot(figsize=figsize, **kwargs)  # TODO ax
-        else:
-            raise ValueError(
-                "Could not plot Dataset. Try plotting one of its DataArrays instead..."
-            )
-        # fig, ax = self._get_fig_ax(ax, figsize)
-
-    @staticmethod
-    def _get_fig_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
-
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-        else:
-            fig = plt.gcf()
-        return fig, ax
-
-    def scatter(self, x, y, ax=None, figsize=None, **kwargs):
-        """Plot data from two DataArrays against each other in a scatter plot
-
-        Parameters
-        ----------
-        x : str or int
-            Identifier for first DataArray
-        y : str or int
-            Identifier for second DataArray
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-        figsize: (float, float), optional
-            specify size of figure
-        title: str, optional
-            axes title
-        **kwargs: additional kwargs will be passed to ax.scatter()
-
-        Returns
-        -------
-        <matplotlib.axes>
-
-        Examples
-        --------
-        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
-        >>> ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
-        >>> ds.plot.scatter(x=0, y=1, figsize=(9,9), marker='*')
-        """
-        _, ax = self._get_fig_ax(ax, figsize)
-        if "title" in kwargs:
-            title = kwargs.pop("title")
-            ax.set_title(title)
-        xval = self.ds[x].values.ravel()
-        yval = self.ds[y].values.ravel()
-        ax.scatter(xval, yval, **kwargs)
-
-        ax.set_xlabel(self._label_txt(self.ds[x]))
-        ax.set_ylabel(self._label_txt(self.ds[y]))
-        return ax
-
-    @staticmethod
-    def _label_txt(da):
-        return f"{da.name} [{da.unit.name}]"
-
-
-class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
+class Dataset(TimeSeries, collections.abc.MutableMapping):
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
@@ -139,7 +69,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         data: Union[Mapping[str, DataArray], Iterable[DataArray]],
         time=None,
         items=None,
-        geometry: _Geometry = None,
+        geometry= None,
         zn=None,
         dims=None,
         validate=True,
@@ -148,7 +78,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )
-        return self._init_from_DataArrays(data, validate=validate)
+        self._init_from_DataArrays(data, validate=validate)
 
     @staticmethod
     def _is_DataArrays(data):
@@ -173,7 +103,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         data: Sequence[np.ndarray],
         time=None,
         items=None,
-        geometry: _Geometry = None,
+        geometry= None,
         zn=None,
         dims=None,
     ):
@@ -194,9 +124,9 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         self._data_vars = self._DataArrays_as_mapping(data)
 
         if (len(self) > 1) and validate:
-            first = self[0]
+            first: DataArray = self[0]
             for i in range(1, len(self)):
-                da = self[i]
+                da: DataArray = self[i]
                 first._is_compatible(da, raise_error=True)
 
         self._check_all_different_ids(self._data_vars.values())
@@ -258,7 +188,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         if isinstance(data, Mapping):
             if isinstance(data, Dataset):
                 return data
-            data = Dataset._validate_item_names_and_keys(data)
+            data = Dataset._validate_item_names_and_keys(data) # TODO is this necessary?
             _ = Dataset._unique_item_names(data.values())
             return data
 
@@ -281,7 +211,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
                 warnings.warn(
                     f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. Item name will be replaced with key."
                 )
-                da.name == key
+                da.name = key
         return data_map
 
     @staticmethod
@@ -355,9 +285,6 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @time.setter
     def time(self, new_time):
-        new_time = self._parse_time(new_time)
-        if len(self.time) != len(new_time):
-            raise ValueError("Length of new time is wrong")
         for da in self:
             da.time = new_time
 
@@ -679,13 +606,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         return ds
 
     def _set_name_attr(self, name: str, value: DataArray):
-        name = self._to_safe_name(name)
+        name = _to_safe_name(name)
         if name not in self.__itemattr:
             self.__itemattr.append(name)  # keep track of what we insert
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str):
-        name = self._to_safe_name(name)
+        name = _to_safe_name(name)
         if name in self.__itemattr:
             self.__itemattr.remove(name)
             delattr(self, name)
@@ -698,8 +625,8 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         ) and self._is_key_time(key[0]):
             key = pd.DatetimeIndex(key)
         if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
-            time_steps = self._get_time_idx_list(self.time, key)
-            if len(time_steps) == 0:
+            time_steps = _get_time_idx_list(self.time, key)
+            if _n_selected_timesteps(self.time, time_steps) == 0:
                 raise IndexError("No timesteps found!")
             return self.isel(time_steps, axis=0)
         if isinstance(key, slice):
@@ -993,6 +920,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             if isinstance(
                 self.geometry, GeometryFM
             ):  # TODO remove this when all geometries implements the same method
+
                 interpolant = self.geometry.get_2d_interpolant(
                     xy, n_nearest=n_nearest, **kwargs
                 )
@@ -1008,6 +936,60 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             ds = ds.interp_time(time)
 
         return ds
+
+    def __dataset_read_item_time_func(
+        self, item: int, step: int
+    ) -> Tuple[np.ndarray, float]:
+        "Used by _extract_track"
+
+        data = self[item].isel(time=step).to_numpy()
+        time = (self.time[step] - self.time[0]).total_seconds()
+
+        return data, time
+
+    def extract_track(self, track, method="nearest", dtype=np.float32):
+        """
+        Extract data along a moving track
+
+        Parameters
+        ---------
+        track: pandas.DataFrame
+            with DatetimeIndex and (x, y) of track points as first two columns
+            x,y coordinates must be in same coordinate system as dfsu
+        track: str
+            filename of csv or dfs0 file containing t,x,y
+        method: str, optional
+            Spatial interpolation method ('nearest' or 'inverse_distance')
+            default='nearest'
+
+        Returns
+        -------
+        Dataset
+            A dataset with data dimension t
+            The first two items will be x- and y- coordinates of track
+        """
+        from .track import _extract_track
+
+        item_numbers = list(range(self.n_items))
+        time_steps = list(range(self.n_timesteps))
+
+        return _extract_track(
+            deletevalue=self.deletevalue,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            timestep=self.timestep,
+            geometry=self.geometry,
+            n_elements=self.shape[1],  # TODO is there a better way to find out this?
+            track=track,
+            items=self.items,
+            time_steps=time_steps,
+            item_numbers=item_numbers,
+            method=method,
+            dtype=dtype,
+            data_read_func=lambda item, step: self.__dataset_read_item_time_func(
+                item, step
+            ),
+        )
 
     def interp_time(
         self,
@@ -1071,33 +1053,16 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             if dt is None:
                 raise ValueError("You must specify either dt or freq")
 
-        t_out_index = self._parse_interp_time(self.time, dt)
-        t_in = self.time.values.astype(float)
-        t_out = t_out_index.values.astype(float)
+        das = [da.interp_time(dt= dt, method=method, extrapolate=extrapolate, fill_value=fill_value) for da in self]
 
-        # TODO: it would be more efficient to interp all data at once!
-        data = [
-            self._interpolate_time(
-                t_in, t_out, da.to_numpy(), method, extrapolate, fill_value
-            )
-            for da in self
-        ]
+        return Dataset(das)
 
-        zn = (
-            None
-            if self._zn is None
-            else self._interpolate_time(
-                t_in, t_out, self._zn, method, extrapolate, fill_value
-            )
-        )
+    def interp_na(self, axis="time", **kwargs) -> "Dataset":
+        ds = self.copy()
+        for da in ds:
+            da.values = da.interp_na(axis=axis, **kwargs).values
 
-        return Dataset(
-            data,
-            t_out_index,
-            items=self.items.copy(),
-            geometry=self.geometry,
-            zn=zn,
-        )
+        return ds
 
     def interp_like(
         self,
@@ -1243,13 +1208,19 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     def _concat_time(self, other, copy=True) -> "Dataset":
         self._check_all_items_match(other)
-        if not np.all(self.shape[1:] == other.shape[1:]):
+        # assuming time is always first dimension we can skip / keep it by bool
+        start_dim = int("time" in self.dims)
+        if not np.all(
+            self.shape[start_dim:] == other.shape[int("time" in other.dims) :]
+        ):
+            # if not np.all(self.shape[1:] == other.shape[1:]):
             raise ValueError("Shape of the datasets must match (except time dimension)")
-        if "time" not in self.dims:
+        if hasattr(self, "time"):  # using attribute instead of dim checking. Works
+            ds = self.copy() if copy else self
+        else:
             raise ValueError(
-                "Datasets cannot be concatenated as they have no time axis!"
+                "Datasets cannot be concatenated as they have no time attribute!"
             )
-        ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
         s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
@@ -1257,18 +1228,18 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         newtime = df12.index
         newdata = self.create_empty_data(
-            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[1:]
+            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[start_dim:]
         )
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            # if there is an overlap "other" data will be used!
+            #    # if there is an overlap "other" data will be used!
             newdata[j][idx1] = ds[j].to_numpy()
             newdata[j][idx2] = other[j].to_numpy()
 
         zn = None
         if self._zn is not None:
-            zshape = (len(newtime), self._zn.shape[1])
+            zshape = (len(newtime), self._zn.shape[start_dim])
             zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
             zn[idx1, :] = self._zn
             zn[idx2, :] = other._zn
@@ -1298,13 +1269,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     # ============ aggregate =============
 
-    def aggregate(self, axis="time", func=np.nanmean, **kwargs) -> "Dataset":
+    def aggregate(self, axis=0, func=np.nanmean, **kwargs) -> "Dataset":
         """Aggregate along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
         func: function, optional
             default np.nanmean
 
@@ -1346,11 +1317,11 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         it_unit = (
             items[0].unit
             if all([it.unit == items[0].unit for it in items])
-            else EUMUnit.Undefined
+            else EUMUnit.undefined
         )
         return ItemInfo(name, it_type, it_unit)
 
-    def quantile(self, q, *, axis="time", **kwargs) -> "Dataset":
+    def quantile(self, q, *, axis=0, **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1361,7 +1332,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1380,7 +1351,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis="time", **kwargs) -> "Dataset":
+    def nanquantile(self, q, *, axis=0, **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1391,7 +1362,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Examples
         --------
@@ -1447,13 +1418,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
             return Dataset(data=res, validate=False)
 
-    def max(self, axis="time", **kwargs) -> "Dataset":
+    def max(self, axis=0, **kwargs) -> "Dataset":
         """Max value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1466,13 +1437,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis="time", **kwargs) -> "Dataset":
+    def min(self, axis=0, **kwargs) -> "Dataset":
         """Min value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1485,13 +1456,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis="time", **kwargs) -> "Dataset":
+    def mean(self, axis=0, **kwargs) -> "Dataset":
         """Mean value along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1505,13 +1476,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis="time", **kwargs) -> "Dataset":
+    def std(self, axis=0, **kwargs) -> "Dataset":
         """Standard deviation along an axis
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1524,12 +1495,12 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis="time", **kwargs) -> "Dataset":
+    def ptp(self, axis=0, **kwargs) -> "Dataset":
         """Range (max - min) a.k.a Peak to Peak along an axis
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1538,13 +1509,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis="time", **kwargs) -> "Dataset":
+    def average(self, weights, axis=0, **kwargs) -> "Dataset":
         """Compute the weighted average along the specified axis.
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1572,13 +1543,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis="time", **kwargs) -> "Dataset":
+    def nanmax(self, axis=0, **kwargs) -> "Dataset":
         """Max value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         See Also
         --------
@@ -1591,13 +1562,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis="time", **kwargs) -> "Dataset":
+    def nanmin(self, axis=0, **kwargs) -> "Dataset":
         """Min value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1606,13 +1577,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis="time", **kwargs) -> "Dataset":
+    def nanmean(self, axis=0, **kwargs) -> "Dataset":
         """Mean value along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1621,13 +1592,13 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis="time", **kwargs) -> "Dataset":
+    def nanstd(self, axis=0, **kwargs) -> "Dataset":
         """Standard deviation along an axis (NaN removed)
 
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default "time"=0
+            axis number or "time", "space" or "items", by default 0
 
         Returns
         -------
@@ -1821,7 +1792,7 @@ class Dataset(DataUtilsMixin, TimeSeries, collections.abc.MutableMapping):
 
     @staticmethod
     def _validate_extension(filename, valid_extension):
-        _, ext = os.path.splitext(filename)
+        ext = os.path.splitext(filename)[1].lower()
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 

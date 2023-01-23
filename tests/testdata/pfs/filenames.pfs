@@ -1,0 +1,11 @@
+// Created     : 2022-10-07 13:41:29
+// By          : MIKE IO
+// Version     : 1.2.0
+
+[FILE_NAMES]
+   file_1 = './file_1.dfs0'
+   file_2 = '..\..\file_2.dfs0'
+   file_3 = |./file_3.dfs0|
+   file_4 = |..\..\file_4.dfs0|
+EndSect  // FILE_NAMES
+

@@ -1,9 +1,10 @@
 import os
+
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 
 from .dfsu import Dfsu2DH
-from .dfsu_layered import Dfsu3D, Dfsu2DV
-from .dfsu_spectral import DfsuSpectral
+from .layered import Dfsu2DV, Dfsu3D
+from .spectral import DfsuSpectral
 
 
 class Dfsu:
@@ -24,7 +25,7 @@ class Dfsu:
 
     @staticmethod
     def _get_DfsuFileType_n_Obj(filename: str):
-        ext = os.path.splitext(filename)[-1]
+        ext = os.path.splitext(filename)[-1].lower()
         if "dfs" in ext:
             dfs = DfsuFile.Open(filename)
             type = DfsuFileType(dfs.DfsuFileType)

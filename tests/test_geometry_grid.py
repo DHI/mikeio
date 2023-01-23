@@ -216,6 +216,14 @@ def test_contains():
     # assert inside[0]
     # assert not inside[1]
 
+def test_in():
+    bbox = [0, 0, 1, 5]
+    g = Grid2D(bbox=bbox)
+    xy1 = [0.5, 4.5]
+    xy2 = [1.5, 0.5]
+    assert xy1 in g
+    assert xy2 not in g
+
 
 def test_find_index():
     bbox = [0, 0, 1, 5]

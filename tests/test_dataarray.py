@@ -172,6 +172,16 @@ def test_data_0d(da0):
     assert "geometry" not in repr(da0)
 
 
+def test_create_data_1d_default_grid():
+
+    da = mikeio.DataArray(
+        data=np.zeros((10, 5)),
+        time=pd.date_range(start="2000-01-01", freq="H", periods=10),
+        item=ItemInfo("Foo"),
+    )
+    assert isinstance(da.geometry, mikeio.Grid1D)
+
+
 def test_data_2d_no_geometry_not_allowed():
 
     nt = 10
@@ -829,6 +839,98 @@ def test_modify_values(da1):
     da1.values = np.zeros_like(da1.values) + 2.0
 
 
+def test_modify_values_1d(da1):
+    assert da1.values[4] == 14.0
+
+    # selecting a slice will return a view. The original is changed.
+    da1.isel(slice(4,6)).values[0] = 13.0 
+    assert da1.values[4] == 13.0
+
+    # __getitem__ uses isel()
+    da1[4:6].values[0] = 12.0 
+    assert da1.values[4] == 12.0
+
+    # values is scalar, therefore copy by definition. Original is not changed.
+    da1.isel(4).values = 11.0    
+    assert da1.values[4] != 11.0  
+
+    # fancy indexing will return copy! Original is *not* changed.
+    da1.isel([0,4,7]).values[1] = 10.0  
+    assert da1.values[4] != 10.0  
+
+
+def test_modify_values_2d_all(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    da2 += 0.1
+    assert da2.values[2,5] == 0.2
+
+    vals = 0.3*np.ones(da2.shape)
+    da2.values = vals
+    assert da2.values[2,5] == 0.3
+
+
+def test_modify_values_2d_idx(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    # selecting a single index will return a view. The original is changed.
+    da2.isel(time=2).values[5] = 0.2
+    assert da2.values[2,5] == 0.2
+
+    da2.isel(x=5).values[2] = 0.3
+    assert da2.values[2,5] == 0.3
+
+    da2.values[2,5] = 0.4
+    assert da2.values[2,5] == 0.4
+
+    # __getitem__ uses isel()
+    da2[2].values[5] = 0.5
+    assert da2.values[2,5] == 0.5
+
+    da2[:,5].values[2] = 0.6
+    assert da2.values[2,5] == 0.6
+
+
+def test_modify_values_2d_slice(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    # selecting a slice will return a view. The original is changed.
+    da2.isel(time=slice(2,6)).values[0,5] = 0.4
+    assert da2.values[2,5] == 0.4
+
+    da2.isel(x=slice(5,7)).values[2,0] = 0.5
+    assert da2.values[2,5] == 0.5
+
+    # __getitem__ uses isel()
+    da2[2:5].values[0,5] = 0.6
+    assert da2.values[2,5] == 0.6
+
+    da2[:,5:7].values[2,0] = 0.7
+    assert da2.values[2,5] == 0.7
+
+
+def test_modify_values_2d_fancy(da2):
+    assert da2.shape == (10,7)
+    assert da2.values[2,5] == 0.1
+
+    # fancy indexing will return a *copy*. The original is NOT changed.
+    da2.isel(time=[2,3,4,5]).values[0,5] = 0.4
+    assert da2.values[2,5] != 0.4
+
+    da2.isel(x=[5,6]).values[2,0] = 0.5
+    assert da2.values[2,5] != 0.5
+
+    # __getitem__ uses isel()
+    da2[[2,3,4,5]].values[0,5] = 0.6
+    assert da2.values[2,5] != 0.6
+
+    da2[:,[5,6]].values[2,0] = 0.7
+    assert da2.values[2,5] != 0.7
+
+
 def test_add_scalar(da1):
     da2 = da1 + 10.0
     assert isinstance(da2, mikeio.DataArray)
@@ -981,6 +1083,19 @@ def test_daarray_aggregation_dfs2():
     dasm = da.nanmean(axis="space")
     assert dasm.shape == (1,)
 
+def test_dataarray_weigthed_average():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds = mikeio.read(filename, items=["Surface elevation"])
+
+    da = ds["Surface elevation"]
+
+    area = da.geometry.get_element_area()
+    
+    da2 = da.average(weights=area, axis=1)
+
+    assert isinstance(da2.geometry, GeometryUndefined)
+    assert da2.dims == ("time",)
+
 
 def test_daarray_aggregation():
 
@@ -1030,6 +1145,14 @@ def test_daarray_aggregation():
     assert len(da_ptp.time) == 1
     assert pytest.approx(da_ptp.values[0]) == 0.0529321208596229
 
+
+def test_daarray_aggregation_no_time():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds = mikeio.read(filename, items=[3], time=-1)
+    da = ds["Current speed"]
+    assert da.dims == ("element",) 
+
+    assert da.max().values == pytest.approx(1.6463733)
 
 def test_daarray_aggregation_nan_versions():
 
@@ -1188,3 +1311,20 @@ def test_time_selection():
     with pytest.raises(IndexError):
         # not in time
         ds.sel(time="1997-09-15 00:00")
+
+
+def test_interp_na():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.array([np.nan, 1.0, np.nan, np.nan, 4.0]),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+
+    dai = da.interp_na()
+    assert np.isnan(dai.to_numpy()[0])
+    assert dai.to_numpy()[2] == pytest.approx(2.0)
+
+    dai = da.interp_na(fill_value="extrapolate")
+    assert dai.to_numpy()[0] == pytest.approx(0.0)
+    assert dai.to_numpy()[2] == pytest.approx(2.0)

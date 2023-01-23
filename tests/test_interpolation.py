@@ -3,6 +3,10 @@ from mikeio.interpolation import get_idw_interpolant, interp2d, _interp_itemstep
 import mikeio
 import numpy as np
 
+from mikeio.spatial.geometry import GeometryUndefined
+
+import pytest
+
 
 def test_get_idw_interpolant():
     d = np.linspace(1, 2, 2)
@@ -25,8 +29,10 @@ def test_interp2d():
 
     elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
+    # with pytest.warns(match="Geometry"):
     dati = interp2d(ds, elem_ids, weights)
     assert isinstance(dati, Dataset)
+    assert isinstance(dati.geometry, GeometryUndefined)  # There is no suitable file format for this, thus no suitable geometry :-(
     assert np.all(dati.shape == (ds.n_timesteps, npts))
     assert dati[0].values[0, 0] == 8.262675285339355
 

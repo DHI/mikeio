@@ -12,7 +12,7 @@ import mikeio
 from mikeio.dataset import Dataset
 from mikeio.dfs2 import Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
-from mikeio.custom_exceptions import ItemsError
+from mikeio.exceptions import ItemsError
 from mikeio.spatial.geometry import GeometryPoint2D
 from mikeio.spatial.grid_geometry import Grid2D
 
@@ -176,8 +176,10 @@ def test_read(dfs2_random):
 
 def test_read_bad_item(dfs2_random):
     dfs = dfs2_random
-    with pytest.raises(ItemsError):
+    with pytest.raises(ItemsError) as ex:
         dfs.read(items=100)
+
+    assert ex.value.n_items_file == 1
 
 
 def test_read_temporal_subset_slice():

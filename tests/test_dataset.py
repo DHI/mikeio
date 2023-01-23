@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 import numpy as np
 import pandas as pd
-import py
 import pytest
 
 import mikeio
@@ -20,7 +19,9 @@ def ds1():
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    return mikeio.Dataset(data, time, items)
+    return mikeio.Dataset(
+        data=data, time=time, items=items, geometry=mikeio.Grid1D(nx=7, dx=1)
+    )
 
 
 @pytest.fixture
@@ -94,7 +95,7 @@ def test_properties(ds1):
 
     assert ds1.shape == (nt, ne)
     assert ds1.dims == ("time", "x")
-    assert ds1.geometry is None
+    assert ds1.geometry.nx == 7
     assert ds1._zn is None
 
     # assert not hasattr(ds1, "keys")   # TODO: remove this
@@ -135,6 +136,11 @@ def test_insert(ds1):
     assert len(ds1) == 3
     assert ds1.names == ["Foo", "Bar", "Baz"]
     assert ds1[-1] == da
+
+def test_insert_wrong_type(ds1):
+
+    with pytest.raises(ValueError):
+        ds1["Foo"] = "Bar"
 
 
 def test_insert_fail(ds1):
@@ -274,7 +280,7 @@ def test_select_subset_isel_axis_out_of_range_error(ds2):
     # After subsetting there is only one dimension
     assert len(dss.shape) == 1
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         dss.isel(idx=0, axis=1)
 
 
@@ -769,6 +775,15 @@ def test_aggregation_workflows(tmpdir):
     outfilename = os.path.join(tmpdir.dirname, "min.dfs0")
     ds3.to_dfs(outfilename)
     assert os.path.isfile(outfilename)
+
+
+def test_aggregation_dataset_no_time():
+    filename = "tests/testdata/HD2D.dfsu"
+    dfs = mikeio.open(filename)
+    ds = dfs.read(time=-1, items=["Surface elevation", "Current speed"])
+    
+    ds2 = ds.max()
+    assert ds2["Current speed"].values == pytest.approx(1.6463733)
 
 
 def test_aggregations():
@@ -1299,8 +1314,9 @@ def test_concat_by_time_inconsistent_shape_not_possible():
 def test_concat_by_time_no_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=0)
     ds2 = mikeio.read("tests/testdata/tide2.dfs1", time=1)
-    with pytest.raises(ValueError, match="no time axis"):
-        mikeio.Dataset.concat([ds1, ds2])
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds3.n_timesteps == 2
 
 
 def test_concat_by_time_2():
@@ -1406,6 +1422,31 @@ def test_concat_dfsu3d():
     assert ds3.geometry.n_elements == ds1.geometry.n_elements
     assert ds3._zn.shape == ds._zn.shape
     assert np.all(ds3._zn == ds._zn)
+
+
+def test_concat_dfsu3d_single_timesteps():
+    filename = "tests/testdata/basin_3d.dfsu"
+    ds = mikeio.read(filename)
+    ds1 = mikeio.read(filename, time=0)
+    ds2 = mikeio.read(filename, time=2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+
+
+def test_concat_dfs2_single_timesteps():
+    filename = "tests/testdata/single_row.dfs2"
+    ds = mikeio.read(filename)
+    ds1 = mikeio.read(filename, time=0)
+    ds2 = mikeio.read(filename, time=2)
+    ds3 = mikeio.Dataset.concat([ds1, ds2])
+
+    assert ds1.n_items == ds2.n_items == ds3.n_items
+    assert ds3.start_time == ds1.start_time
+    assert ds3.end_time == ds2.end_time
+    assert ds3.n_timesteps == 2
 
 
 def test_merge_same_name_error():
@@ -1532,3 +1573,41 @@ def test_create_array_with_defaults_from_dataset():
     assert isinstance(da_eum, mikeio.DataArray)
     assert da_eum.geometry == ds.geometry
     assert da_eum.item.type == mikeio.EUMType.Temperature
+
+
+def test_dataset_plot(ds1):
+    ax = ds1.isel(x=0).plot()
+    assert len(ax.lines) == 2
+    ds2 = ds1 + 0.01
+    ax = ds2.isel(x=-1).plot(ax=ax)
+    assert len(ax.lines) == 4
+
+
+def test_interp_na():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.array([np.nan, 1.0, np.nan, np.nan, 4.0]),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+    da2 = mikeio.DataArray(
+        data=np.array([np.nan, np.nan, np.nan, 4.0, 4.0]),
+        time=time,
+        item=ItemInfo(name="Bar"),
+    )
+
+    ds = mikeio.Dataset([da, da2])
+
+    dsi = ds.interp_na()
+    assert np.isnan(dsi[0].to_numpy()[0])
+    assert dsi.Foo.to_numpy()[2] == pytest.approx(2.0)
+    assert np.isnan(dsi.Foo.to_numpy()[0])
+
+    dsi = ds.interp_na(fill_value="extrapolate")
+    assert dsi.Foo.to_numpy()[0] == pytest.approx(0.0)
+    assert dsi.Bar.to_numpy()[2] == pytest.approx(4.0)
+
+def test_plot_scatter():
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=0)
+    ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
+

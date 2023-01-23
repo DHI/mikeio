@@ -1,38 +1,42 @@
 import os
-import numpy as np
-import pandas as pd
 import warnings
-
 from datetime import datetime, timedelta
 from functools import wraps
-from tqdm import trange
+from typing import List, Union
 
-from mikecore.eum import eumUnit, eumQuantity
+import numpy as np
+import pandas as pd
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from mikecore.MeshFile import MeshFile
+from mikecore.eum import eumQuantity, eumUnit
 from mikecore.MeshBuilder import MeshBuilder
+from mikecore.MeshFile import MeshFile
+from tqdm import trange
 
 from mikeio.spatial.utils import xy_to_bbox
 
-from . import __dfs_version__
-from .base import EquidistantTimeSeries
-from .dfsutil import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .dataset import Dataset, DataArray
-from .dfs0 import Dfs0
-from .eum import ItemInfo, EUMType, EUMUnit
-from .spatial.FM_geometry import (
+from .. import __dfs_version__
+from ..base import EquidistantTimeSeries
+from ..dataset import DataArray, Dataset
+from ..dfs import (
+    _get_item_info,
+    _read_item_time_step,
+    _valid_item_numbers,
+    _valid_timesteps,
+)
+from ..eum import EUMType, EUMUnit, ItemInfo
+from ..spatial.FM_geometry import (
     GeometryFM,
     GeometryFM3D,
-    GeometryFMVerticalProfile,
-    GeometryFMPointSpectrum,
-    GeometryFMPointSpectrum,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
+    GeometryFMPointSpectrum,
+    GeometryFMVerticalProfile,
 )
-from .spatial.FM_utils import _plot_map
-from .spatial.grid_geometry import Grid2D
+from ..spatial.FM_utils import _plot_map
+from ..spatial.grid_geometry import Grid2D
+from ..track import _extract_track
 
 
 def _write_dfsu(filename: str, data: Dataset):
@@ -171,7 +175,7 @@ class _UnstructuredFile:
         if not os.path.isfile(filename):
             raise Exception(f"file {filename} does not exist!")
 
-        _, ext = os.path.splitext(filename)
+        ext = os.path.splitext(filename)[1].lower()
 
         if ext == ".mesh":
             self._read_mesh_header(filename)
@@ -390,7 +394,7 @@ class _UnstructuredFile:
     @property
     def valid_codes(self):
         """Unique list of node codes"""
-        return list(set(self.codes))
+        return list(set(self.geometry.codes))
 
     @property
     def boundary_codes(self):
@@ -476,12 +480,12 @@ class _UnstructuredFile:
         """
         nc = self.node_coordinates
         if code is not None:
-            if code not in self.valid_codes:
+            if code not in self.geometry.valid_codes:
                 print(
                     f"Selected code: {code} is not valid. Valid codes: {self.valid_codes}"
                 )
                 raise Exception
-            return nc[self.codes == code]
+            return nc[self.geometry.codes == code]
         return nc
 
     @wraps(GeometryFM.elements_to_geometry)
@@ -697,6 +701,8 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         y=None,
         keepdims=False,
         dtype=np.float32,
+        error_bad_data=True,
+        fill_bad_data_value=np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -719,32 +725,16 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             by default None
         elements: list[int], optional
             Read only selected element ids, by default None
+        error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+        fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
 
         Returns
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
-
-        Examples
-        --------
-        >>> dfsu.read()
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
-        >>> dfsu.read(time="1985-08-06 12:00,1985-08-07 00:00")
-        <mikeio.Dataset>
-        Dimensions: (5, 884)
-        Time: 1985-08-06 12:00:00 - 1985-08-06 22:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -794,15 +784,24 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             data = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
-        t_seconds = np.zeros(n_steps, dtype=float)
+        time = self.time
 
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
 
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                d = itemdata.Data
-                d[d == deletevalue] = np.nan
+                dfs, d = _read_item_time_step(
+                    dfs=dfs,
+                    filename=self._filename,
+                    time=time,
+                    item_numbers=item_numbers,
+                    deletevalue=deletevalue,
+                    shape=shape,
+                    item=item,
+                    it=it,
+                    error_bad_data=error_bad_data,
+                    fill_bad_data_value=fill_bad_data_value,
+                )
 
                 if elements is not None:
                     d = d[elements]
@@ -812,9 +811,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 else:
                     data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
-
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = self.time[time_steps]
 
         dfs.Close()
 
@@ -888,22 +885,22 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         Examples
         --------
-        >>> msh = Mesh("foo.mesh")
-        >>> n_elements = msh.n_elements
-        >>> dfs = Dfsu(meshfilename)
+        >>> from datetime import datetime
+        >>> meshfilename = "tests/testdata/north_sea_2.mesh"
+        >>> outfilename = "bigfile.dfsu"
+        >>> dfs = mikeio.Dfsu(meshfilename)
+        >>> n_elements = dfs.n_elements
         >>> nt = 1000
         >>> n_items = 10
-        >>> items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-        >>> with dfs.write_header(outfilename, items=items) as f:
-        >>>     for i in range(1, nt):
-        >>>         data = []
-        >>>         for i in range(n_items):
-        >>>             d = np.random.random((1, n_elements))
-        >>>             data.append(d)
-        >>>             f.append(data)
+        >>> items = [mikeio.ItemInfo(f"Item {i+1}") for i in range(n_items)]
+        >>> with dfs.write_header(outfilename, items=items, start_time=datetime(2000,1,1), dt=3600) as f:
+        ...     for _ in range(nt):
+        ...         # get a list of data
+        ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]
+        ...         f.append(data)
         """
 
-        return self.write(
+        return self._write(
             filename=filename,
             data=[],
             start_time=start_time,
@@ -931,8 +928,53 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             full path to the new dfsu file
         data: Dataset
             list of matrices, one for each item. Matrix dimension: time, x
+        dt: float, optional
+            The time step (in seconds)
+        elements: list[int], optional
+            write only these element ids to file
+        title: str
+            title of the dfsu file. Default is blank.
+        keep_open: bool, optional
+            Keep file open for appending
+        """
+        if isinstance(data, list):
+            raise TypeError(
+                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
+            )
+
+        return self._write(
+            filename=filename,
+            data=data,
+            dt=dt,
+            elements=elements,
+            title=title,
+            keep_open=keep_open,
+        )
+
+    def _write(
+        self,
+        filename,
+        data,
+        start_time=None,
+        dt=None,
+        items=None,
+        elements=None,
+        title=None,
+        keep_open=False,
+    ):
+        """Write a new dfsu file
+
+        Parameters
+        -----------
+        filename: str
+            full path to the new dfsu file
+        data: list[np.array] or Dataset
+            list of matrices, one for each item. Matrix dimension: time, x
+        start_time: datetime, optional, deprecated
+            start date of type datetime.
         dt: float, optional, deprecated
             The time step (in seconds)
+        items: list[ItemInfo], optional, deprecated
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -943,16 +985,13 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         if self.is_spectral:
             raise ValueError("write() is not supported for spectral dfsu!")
 
-        if dt:
+        if dt and not keep_open:
             warnings.warn(
-                "setting dt is deprecated, please supply data in the form of a Dataset",
+                "argument dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
             )
-
-        if isinstance(data, list):
-            raise TypeError(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
-            )
+        if keep_open and not dt:
+            warnings.warn("argument dt missing, should be provided when keep_open=True")
 
         filename = str(filename)
 
@@ -969,7 +1008,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
                 zn_dynamic = data[0]._zn
 
             # data needs to be a list so we can fit zn later
-            data = [x.to_numpy() for x in data]
+            data = [np.atleast_2d(x.to_numpy()) for x in data]
 
         n_items = len(data)
         n_time_steps = 0
@@ -1115,23 +1154,25 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             self._dfs.Close()
             os.remove(filename)
 
-    def append(self, data: Dataset) -> None:
+    def append(self, data: Union[Dataset, List[np.ndarray]]) -> None:
         """Append to a dfsu file opened with `write(...,keep_open=True)`
 
         Parameters
         -----------
-        data: Dataset
+        data: list[np.array] or Dataset
+            list of matrices, one for each item. Matrix dimension: time, x
         """
 
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
-        n_time_steps = np.shape(data[0])[0]
-        for i in trange(n_time_steps, disable=not self.show_progress):
+        has_time_axis = len(np.shape(data[0])) == 2
+        n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
+        for i in trange(n_timesteps, disable=not self.show_progress):
             for item in range(n_items):
                 di = data[item]
                 if isinstance(data, Dataset):
                     di = di.to_numpy()
-                d = di[i, :]
+                d = di[i, :] if has_time_axis else di
                 d[np.isnan(d)] = deletevalue
                 darray = d.astype(np.float32)
                 self._dfs.WriteItemTimeStepNext(0, darray)
@@ -1165,6 +1206,12 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
 
 class Dfsu2DH(_Dfsu):
+    def _dfs_read_item_time_func(self, item: int, step: int):
+        dfs = DfsuFile.Open(self._filename)
+        itemdata = dfs.ReadItemTimeStep(item + 1, step)
+
+        return itemdata.Data, itemdata.Time
+
     def extract_track(self, track, items=None, method="nearest", dtype=np.float32):
         """
         Extract track data from a dfsu file
@@ -1190,11 +1237,17 @@ class Dfsu2DH(_Dfsu):
 
         Examples
         --------
-        >>> ds = dfsu.extract_track(times, xy, items=['u','v'])
-
-        >>> ds = dfsu.extract_track('track_file.dfs0')
-
-        >>> ds = dfsu.extract_track('track_file.csv', items=0)
+        >>> dfsu = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
+        >>> ds = dfsu.extract_track("tests/testdata/altimetry_NorthSea_20171027.csv")
+        >>> ds
+        <mikeio.Dataset>
+        dims: (time:1115)
+        time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
+        items:
+          0:  Longitude <Undefined> (undefined)
+          1:  Latitude <Undefined> (undefined)
+          2:  Surface elevation <Surface Elevation> (meter)
+          3:  Wind speed <Wind speed> (meter per sec)
         """
         if self.is_spectral:
             raise ValueError("Method not supported for spectral dfsu!")
@@ -1203,157 +1256,25 @@ class Dfsu2DH(_Dfsu):
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
-        n_items = len(item_numbers)
-
         self._n_timesteps = dfs.NumberOfTimeSteps
         _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
-        deletevalue = self.deletevalue
-
-        if isinstance(track, str):
-            filename = track
-            if os.path.exists(filename):
-                _, ext = os.path.splitext(filename)
-                if ext == ".dfs0":
-                    df = Dfs0(filename).to_dataframe()
-                elif ext == ".csv":
-                    df = pd.read_csv(filename, index_col=0, parse_dates=True)
-                else:
-                    raise ValueError(f"{ext} files not supported (dfs0, csv)")
-
-                times = df.index
-                coords = df.iloc[:, 0:2].to_numpy(copy=True)
-            else:
-                raise ValueError(f"{filename} does not exist")
-        elif isinstance(track, Dataset):
-            times = track.time
-            coords = np.zeros(shape=(len(times), 2))
-            coords[:, 0] = track[0].to_numpy().copy()
-            coords[:, 1] = track[1].to_numpy().copy()
-        else:
-            assert isinstance(track, pd.DataFrame)
-            times = track.index
-            coords = track.iloc[:, 0:2].to_numpy(copy=True)
-
-        assert isinstance(
-            times, pd.DatetimeIndex
-        ), "The index must be a pandas.DatetimeIndex"
-        assert (
-            times.is_monotonic_increasing
-        ), "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
-
-        data_list = []
-        data_list.append(coords[:, 0])  # longitude
-        data_list.append(coords[:, 1])  # latitude
-        for item in range(n_items):
-            # Initialize an empty data block
-            data = np.empty(shape=(len(times)), dtype=dtype)
-            data[:] = np.nan
-            data_list.append(data)
-
-        if self.is_geo:
-            lon = coords[:, 0]
-            lon[lon < -180] = lon[lon < -180] + 360
-            lon[lon >= 180] = lon[lon >= 180] - 360
-            coords[:, 0] = lon
-
-        # track end (relative to dfsu)
-        t_rel = (times - self.end_time).total_seconds()
-        # largest idx for which (times - self.end_time)<=0
-        tmp = np.where(t_rel <= 0)[0]
-        if len(tmp) == 0:
-            raise ValueError("No time overlap! Track ends before dfsu starts!")
-        i_end = tmp[-1]
-
-        # track time relative to dfsu start
-        t_rel = (times - self.start_time).total_seconds()
-        tmp = np.where(t_rel >= 0)[0]
-        if len(tmp) == 0:
-            raise ValueError("No time overlap! Track starts after dfsu ends!")
-        i_start = tmp[0]  # smallest idx for which t_rel>=0
-
-        dfsu_step = int(np.floor(t_rel[i_start] / self.timestep))  # first step
-
-        # spatial interpolation
-        n_pts = 1 if method == "nearest" else 5
-        elem_ids, weights = self.geometry.get_2d_interpolant(
-            coords[i_start : (i_end + 1)], n_nearest=n_pts
+        return _extract_track(
+            deletevalue=self.deletevalue,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            timestep=self.timestep,
+            geometry=self.geometry,
+            n_elements=self.n_elements,
+            track=track,
+            items=items,
+            time_steps=time_steps,
+            item_numbers=item_numbers,
+            method=method,
+            dtype=dtype,
+            data_read_func=lambda item, step: self._dfs_read_item_time_func(item, step),
         )
-
-        # initialize dfsu data arrays
-        d1 = np.ndarray(shape=(n_items, self.n_elements), dtype=dtype)
-        d2 = np.ndarray(shape=(n_items, self.n_elements), dtype=dtype)
-        t1 = 0.0
-        t2 = 0.0
-
-        # very first dfsu time step
-        step = time_steps[dfsu_step]
-        for item in range(n_items):
-            itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
-            t2 = itemdata.Time - 1e-10
-            # d = to_numpy(itemdata.Data)
-            d = itemdata.Data
-            d[d == deletevalue] = np.nan
-            d2[item, :] = d
-
-        def is_EOF(step):
-            return step >= self.n_timesteps
-
-        # loop over track points
-        for i_interp, i in enumerate(
-            trange(i_start, i_end + 1, disable=not self.show_progress)
-        ):
-            t_rel[i]  # time of point relative to dfsu start
-
-            read_next = t_rel[i] > t2
-
-            while (read_next == True) and (not is_EOF(dfsu_step + 1)):
-                dfsu_step = dfsu_step + 1
-
-                # swap new to old
-                d1, d2 = d2, d1
-                t1, t2 = t2, t1
-
-                step = time_steps[dfsu_step]
-                for item in range(n_items):
-                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, step)
-                    t2 = itemdata.Time
-                    # d = to_numpy(itemdata.Data)
-                    d = itemdata.Data
-                    d[d == deletevalue] = np.nan
-                    d2[item, :] = d
-
-                read_next = t_rel[i] > t2
-
-            if (read_next == True) and (is_EOF(dfsu_step)):
-                # cannot read next - no more timesteps in dfsu file
-                continue
-
-            w = (t_rel[i] - t1) / self.timestep  # time-weight
-            eid = elem_ids[i_interp]
-            if np.any(eid > 0):
-                dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
-                dati = dati + w * np.dot(d2[:, eid], weights[i_interp])
-            else:
-                dati = np.empty(shape=n_items, dtype=dtype)
-                dati[:] = np.nan
-
-            for item in range(n_items):
-                data_list[item + 2][i] = dati[item]
-
         dfs.Close()
-
-        items_out = []
-        if self.is_geo:
-            items_out.append(ItemInfo("Longitude"))
-            items_out.append(ItemInfo("Latitude"))
-        else:
-            items_out.append(ItemInfo("x"))
-            items_out.append(ItemInfo("y"))
-        for item in items:
-            items_out.append(item)
-
-        return Dataset(data_list, times, items_out)
 
 
 class Mesh(_UnstructuredFile):
@@ -1368,12 +1289,13 @@ class Mesh(_UnstructuredFile):
     Examples
     --------
 
-    >>> msh = Mesh("../tests/testdata/odense_rough.mesh")
+    >>> import mikeio
+    >>> msh = mikeio.Mesh("tests/testdata/odense_rough.mesh")
     >>> msh
-    Number of elements: 654
-    Number of nodes: 399
-    Projection: UTM-33
-
+    Flexible Mesh
+    number of elements: 654
+    number of nodes: 399
+    projection: UTM-33
     """
 
     def __init__(self, filename):

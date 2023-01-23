@@ -307,6 +307,21 @@ def test_contains():
     assert inside[0] == True
     assert inside[1] == False
 
+def test_point_in_domain():
+    filename = "tests/testdata/wind_north_sea.dfsu"
+    dfs = mikeio.open(filename)
+
+    pt = [4, 54]
+    assert pt in dfs.geometry
+
+    pt2 = [0, 50]
+    assert pt2 not in dfs.geometry
+
+    pts = [pt, pt2]
+    inside = [pt in dfs.geometry for pt in pts]
+    assert inside[0] == True
+    assert inside[1] == False
+
 
 def test_get_overset_grid():
     filename = "tests/testdata/FakeLake.dfsu"
@@ -478,6 +493,8 @@ def test_write(tmpdir):
     dfs = Dfsu(outfilename)
 
     assert dfs._source.ApplicationTitle == "mikeio"
+
+    dfs.write(outfilename, ds.isel(time=0))  # without time axis
 
 
 def test_write_from_dfsu(tmpdir):
@@ -837,9 +854,49 @@ def test_extract_track():
     items = ["Sign. Wave Height", "Wind speed"]
     track2 = dfs.extract_track(csv_file, items=items)
     assert track2[2].values[23] == approx(3.6284972794399653)
+    assert track["Wind speed"].values[23] == approx(12.4430027008056)
 
     track3 = dfs.extract_track(csv_file, method="inverse_distance")
     assert track3[2].values[23] == approx(3.6469911492412463)
+
+
+# TODO consider move to test_dataset.py
+def test_extract_track_from_dataset():
+    ds = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")
+    csv_file = "tests/testdata/track_extraction_case02_track.csv"
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
+    track = ds.extract_track(df)
+
+    assert track[2].values[23] == approx(3.6284972794399653)
+    assert sum(np.isnan(track[2].to_numpy())) == 26
+    assert np.all(track[1].to_numpy() == df.latitude.values)
+
+    ds2 = ds[["Sign. Wave Height", "Wind speed"]]
+    track2 = ds2.extract_track(csv_file)
+    assert track2[2].values[23] == approx(3.6284972794399653)
+
+    track3 = ds2.extract_track(csv_file, method="inverse_distance")
+    assert track3[2].values[23] == approx(3.6469911492412463)
+
+
+# TODO consider move to test_datarray.py
+def test_extract_track_from_dataarray():
+    da = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")[0]
+    csv_file = "tests/testdata/track_extraction_case02_track.csv"
+    df = pd.read_csv(
+        csv_file,
+        index_col=0,
+        parse_dates=True,
+    )
+    track = da.extract_track(df)
+
+    assert track[2].values[23] == approx(3.6284972794399653)
+    assert sum(np.isnan(track[2].to_numpy())) == 26
+    assert np.all(track[1].to_numpy() == df.latitude.values)
 
 
 def test_extract_bad_track():
@@ -883,12 +940,29 @@ def test_dataset_interp():
     y = 6184000
 
     dai = da.interp(x=x, y=y)
-
     assert isinstance(dai, DataArray)
     assert dai.shape == (ds.n_timesteps,)
     assert dai.name == da.name
     assert dai.geometry.x == x
     assert dai.geometry.y == y
+    assert dai.geometry.projection == ds.geometry.projection
+
+def test_dataset_interp_to_xarray():
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+
+    assert not ds.geometry.is_geo
+
+    x = 360000
+    y = 6184000
+
+    dsi = ds.interp(x=x, y=y)
+
+    xr_dsi = dsi.to_xarray()
+    assert float(xr_dsi.x) == pytest.approx(x)
+    assert float(xr_dsi.y) == pytest.approx(y)
+
+
+
 
 
 def test_interp_like_grid():
@@ -988,3 +1062,30 @@ def test_interp_like_fm_dataset():
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM)
+
+def test_write_header(tmpdir):
+    meshfilename = "tests/testdata/north_sea_2.mesh"
+    outfilename = os.path.join(tmpdir, "NS_write_header.dfsu")
+    dfs = mikeio.Dfsu(meshfilename)
+    n_elements = dfs.n_elements
+    nt = 3
+    n_items = 2
+    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
+    time0 = datetime(2021,1,1)
+    with dfs.write_header(outfilename, items=items, start_time=time0, dt=3600) as f:
+        for _ in range(nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((1, n_elements))  # 2d
+                data.append(d)
+                f.append(data)
+
+    # append also works for data without time axis
+    outfilename = os.path.join(tmpdir, "NS_write_header2.dfsu")
+    with dfs.write_header(outfilename, items=items, start_time=time0, dt=3600) as f:
+        for _ in range(nt):
+            data = []
+            for _ in range(n_items):
+                d = np.random.random((n_elements))  # 1d
+                data.append(d)
+                f.append(data)

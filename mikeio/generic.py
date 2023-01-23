@@ -1,25 +1,23 @@
-import os
-from typing import Iterable, List, Union
 import math
+import os
+from copy import deepcopy
+from datetime import datetime, timedelta
+from shutil import copyfile
+from typing import Iterable, List, Optional, Union
+
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
-import warnings
-from shutil import copyfile
-from copy import deepcopy
-
-from tqdm import trange, tqdm
-
-from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
+from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
+from tqdm import tqdm, trange
+
 from . import __dfs_version__
-from .dfsutil import _valid_item_numbers, _get_item_info
-from .eum import EUMType, ItemInfo
+from .dfs import _get_item_info, _valid_item_numbers
+from .eum import ItemInfo
 
-
-show_progress = False
+show_progress = True
 
 
 class _ChunkInfo:
@@ -163,7 +161,7 @@ def scale(
     outfilename: str,
     offset: float = 0.0,
     factor: float = 1.0,
-    items: Union[List[str], List[int]] = None,
+    items: Optional[Union[List[str], List[int]]] = None,
 ) -> None:
     """Apply scaling to any dfs file
 
@@ -206,6 +204,68 @@ def scale(
 
             dfs.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
 
+    dfs.Close()
+
+
+def fill_corrupt(
+    infilename: str,
+    outfilename: str,
+    fill_value: float = np.nan,
+    items: Optional[Union[List[str], List[int]]] = None,
+) -> None:
+    """
+    Replace corrupt (unreadable) data with fill_value, default delete value.
+
+    Parameters
+    ----------
+
+    infilename: str
+        full path to the input file
+    outfilename: str
+        full path to the output file
+    fill_value: float, optional
+        value to use where data is corrupt, default delete value
+    items: List[str] or List[int], optional
+        Process only selected items, by number (0-based) or name, by default: all
+    """
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+    n_items = len(item_numbers)
+
+    dfs = _clone(
+        str(infilename),
+        str(outfilename),
+        items=item_numbers,
+    )
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    deletevalue = dfs.FileInfo.DeleteValueFloat
+
+    for timestep in trange(n_time_steps, disable=not show_progress):
+        for item in range(n_items):
+
+            itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+            if itemdata is not None:
+                time = itemdata.Time
+                d = itemdata.Data
+            else:
+                iteminfo: DfsDynamicItemInfo = dfs_i.ItemInfo[item]
+                d = np.zeros(iteminfo.ElementCount)
+                d[:] = fill_value
+                d[d == deletevalue] = np.nan
+
+                # close and re-open file to solve problem with reading
+                dfs_i.Close()
+                dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+
+            d[np.isnan(d)] = deletevalue
+            darray = d.astype(np.float32)
+
+            dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
+
+    dfs_i.Close()
     dfs.Close()
 
 
@@ -308,7 +368,7 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
 def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     """Concatenates files along the time axis
 
-    If files are overlapping, the last one will be used.
+    Overlap handling is defined by the `keep` argument,  by default the last one will be used.
 
     Parameters
     ----------
@@ -326,9 +386,9 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     The list of input files have to be sorted, i.e. in chronological order
     """
 
-    dfs_i_a = DfsFileFactory.DfsGenericOpen(infilenames[0])
+    dfs_i_a = DfsFileFactory.DfsGenericOpen(str(infilenames[0]))
 
-    dfs_o = _clone(infilenames[0], outfilename)
+    dfs_o = _clone(str(infilenames[0]), str(outfilename))
 
     n_items = len(dfs_i_a.ItemInfo)
     dfs_i_a.Close()
@@ -337,7 +397,7 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
 
     for i, infilename in enumerate(tqdm(infilenames, disable=not show_progress)):
 
-        dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+        dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
         t_axis = dfs_i.FileInfo.TimeAxis
         n_time_steps = t_axis.NumberOfTimeSteps
         dt = t_axis.TimeStep
@@ -353,7 +413,7 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
         if keep == "last":
 
             if i < (len(infilenames) - 1):
-                dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
+                dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
                 nf = dfs_n.FileInfo.TimeAxis.StartDateTime
                 next_start_time = datetime(
                     nf.year, nf.month, nf.day, nf.hour, nf.minute, nf.second
@@ -455,7 +515,7 @@ def extract(
     >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity")
     >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
     """
-    dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
+    dfs_i = DfsFileFactory.DfsGenericOpenEdit(str(infilename))
 
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
@@ -472,8 +532,8 @@ def extract(
         item_numbers.insert(0, 0)
 
     dfs_o = _clone(
-        infilename,
-        outfilename,
+        str(infilename),
+        str(outfilename),
         start_time=file_start_new,
         timestep=timestep,
         items=item_numbers,
