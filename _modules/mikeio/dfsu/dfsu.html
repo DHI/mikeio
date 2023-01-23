@@ -917,6 +917,32 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_validate_elements_and_geometry_sel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that only one of elements, area, x, y is selected</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elements : list[int], optional</span>
+<span class="sd">            Read only selected element ids, by default None</span>
+<span class="sd">        area : list[float], optional</span>
+<span class="sd">            Read only data inside (horizontal) area given as a</span>
+<span class="sd">            bounding box (tuple with left, lower, right, upper)</span>
+<span class="sd">            or as list of coordinates for a polygon, by default None</span>
+<span class="sd">        x : float, optional</span>
+<span class="sd">            Read only data for elements containing the (x,y) points(s),</span>
+<span class="sd">            by default None</span>
+<span class="sd">        y : float, optional</span>
+<span class="sd">            Read only data for elements containing the (x,y) points(s),</span>
+<span class="sd">            by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        None</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If more than one of elements, area, x, y is selected</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">used_kwargs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">kw</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -930,6 +956,31 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot select both x,y and area!&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parse_geometry_sel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse geometry selection</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        area : list[float], optional</span>
+<span class="sd">            Read only data inside (horizontal) area given as a</span>
+<span class="sd">            bounding box (tuple with left, lower, right, upper)</span>
+<span class="sd">            or as list of coordinates for a polygon, by default None</span>
+<span class="sd">        x : float, optional</span>
+<span class="sd">            Read only data for elements containing the (x,y) points(s),</span>
+<span class="sd">            by default None</span>
+<span class="sd">        y : float, optional</span>
+<span class="sd">            Read only data for elements containing the (x,y) points(s),</span>
+<span class="sd">            by default None</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[int]</span>
+<span class="sd">            List of element ids</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If no elements are found in selection</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">elements</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

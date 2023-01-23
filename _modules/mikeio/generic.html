@@ -108,7 +108,33 @@
 
 
 <span class="k">class</span> <span class="nc">_ChunkInfo</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for keeping track of an chunked processing&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Class for keeping track of an chunked processing</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_data : int</span>
+<span class="sd">        number of data points</span>
+<span class="sd">    n_chunks : int</span>
+<span class="sd">        number of chunks</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n_data : int</span>
+<span class="sd">        number of data points</span>
+<span class="sd">    n_chunks : int</span>
+<span class="sd">        number of chunks</span>
+<span class="sd">    chunk_size : int</span>
+<span class="sd">        number of data points per chunk</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    stop(start)</span>
+<span class="sd">        Return the stop index for a chunk</span>
+<span class="sd">    chunk_end(start)</span>
+<span class="sd">        Return the end index for a chunk</span>
+<span class="sd">    from_dfs(dfs, item_numbers, buffer_size)</span>
+<span class="sd">        Calculate chunk info based on # of elements in dfs file and selected buffer size</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_data</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_chunks</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">):</span>
 
@@ -120,12 +146,15 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">chunk_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;number of data points per chunk&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_data</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_chunks</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the stop index for a chunk&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">chunk_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the end index for a chunk&quot;&quot;&quot;</span>
         <span class="n">e2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span> <span class="o">-</span> <span class="p">((</span><span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">e2</span><span class="p">)</span>
 
@@ -922,6 +951,22 @@
 
 
 <span class="k">def</span> <span class="nf">_read_item</span><span class="p">(</span><span class="n">dfs</span><span class="p">:</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">timestep</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read item data from dfs file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dfs : DfsFile</span>
+<span class="sd">        dfs file</span>
+<span class="sd">    item : int</span>
+<span class="sd">        item number</span>
+<span class="sd">    timestep : int</span>
+<span class="sd">        timestep number</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    np.ndarray</span>
+<span class="sd">        item data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">indatatime</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestepIndex</span><span class="o">=</span><span class="n">timestep</span><span class="p">)</span>
     <span class="n">indata</span> <span class="o">=</span> <span class="n">indatatime</span><span class="o">.</span><span class="n">Data</span>
     <span class="n">has_value</span> <span class="o">=</span> <span class="n">indata</span> <span class="o">!=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">DeleteValueFloat</span>
@@ -933,6 +978,20 @@
 <span class="k">def</span> <span class="nf">_get_repeated_items</span><span class="p">(</span>
     <span class="n">items_in</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">DfsDynamicItemInfo</span><span class="p">],</span> <span class="n">prefixes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create new items by repeating the items in items_in with the prefixes</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    items_in : List[DfsDynamicItemInfo]</span>
+<span class="sd">        List of items to be repeated</span>
+<span class="sd">    prefixes : List[str]</span>
+<span class="sd">        List of prefixes to be added to the items</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    List[ItemInfo]</span>
+<span class="sd">        List of new items</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">item_numbers</span> <span class="o">=</span> <span class="n">_valid_item_numbers</span><span class="p">(</span><span class="n">items_in</span><span class="p">)</span>
     <span class="n">items_in</span> <span class="o">=</span> <span class="n">_get_item_info</span><span class="p">(</span><span class="n">items_in</span><span class="p">)</span>
 

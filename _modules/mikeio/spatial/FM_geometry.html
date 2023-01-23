@@ -103,15 +103,34 @@
     <span class="n">_get_node_centered_data</span><span class="p">,</span>
     <span class="n">_plot_map</span><span class="p">,</span>
     <span class="n">_plot_vertical_profile</span><span class="p">,</span>
-    <span class="n">_set_xy_label_by_projection</span><span class="p">,</span> <span class="c1"># TODO remove</span>
-    <span class="n">_to_polygons</span><span class="p">,</span> <span class="c1"># TODO remove</span>
+    <span class="n">BoundaryPolylines</span><span class="p">,</span>
+    <span class="n">_set_xy_label_by_projection</span><span class="p">,</span>  <span class="c1"># TODO remove</span>
+    <span class="n">_to_polygons</span><span class="p">,</span>  <span class="c1"># TODO remove</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">_Geometry</span>
 <span class="kn">from</span> <span class="nn">.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_relative_cumulative_distance</span><span class="p">,</span> <span class="n">xy_to_bbox</span>
 
+
 <span class="k">def</span> <span class="nf">_point_in_polygon</span><span class="p">(</span><span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">xp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for each side in the polygon that the point is on the correct side&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for each side in the polygon that the point is on the correct side</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    xn : np.array</span>
+<span class="sd">        x-coordinates of the polygon</span>
+<span class="sd">    yn : np.array</span>
+<span class="sd">        y-coordinates of the polygon</span>
+<span class="sd">    xp : float</span>
+<span class="sd">        x-coordinate of the point</span>
+<span class="sd">    yp : float</span>
+<span class="sd">        y-coordinate of the point</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if point is inside polygon</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xn</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">xp</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">xn</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">yp</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -119,7 +138,6 @@
     <span class="k">if</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">xp</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">yp</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="kc">True</span>
-
 
 
 <div class="viewcode-block" id="GeometryFMPointSpectrum"><a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum">[docs]</a><span class="k">class</span> <span class="nc">GeometryFMPointSpectrum</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
@@ -193,7 +211,7 @@
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot bathymetry as coloured patches&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;plot_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;plot_type&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;patch&#39;</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;plot_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plot_type&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;patch&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.contour"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.contour">[docs]</a>    <span class="k">def</span> <span class="nf">contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -220,7 +238,7 @@
 
         <span class="k">if</span> <span class="s2">&quot;title&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;title&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Bathymetry&quot;</span>
-        
+
         <span class="n">plot_type</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;plot_type&quot;</span><span class="p">)</span>
 
         <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">_geometry2d</span>
@@ -234,7 +252,7 @@
             <span class="n">projection</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
             <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span>
-            <span class="o">**</span><span class="n">kwargs</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="_GeometryFMPlotter.mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter.mesh">[docs]</a>    <span class="k">def</span> <span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Mesh&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -967,7 +985,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_codes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryPolylines</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lists of closed polylines defining domain outline&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_polylines</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_boundary_polylines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_boundary_polylines</span><span class="p">()</span>
@@ -1035,7 +1053,7 @@
             <span class="n">polylines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polyline</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">polylines</span>
 
-    <span class="k">def</span> <span class="nf">_get_boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryPolylines</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get boundary polylines and categorize as inner or outer by</span>
 <span class="sd">        assessing the signed area</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1059,10 +1077,6 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">poly_lines_int</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
 
-        <span class="n">BoundaryPolylines</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
-            <span class="s2">&quot;BoundaryPolylines&quot;</span><span class="p">,</span>
-            <span class="p">[</span><span class="s2">&quot;n_exteriors&quot;</span><span class="p">,</span> <span class="s2">&quot;exteriors&quot;</span><span class="p">,</span> <span class="s2">&quot;n_interiors&quot;</span><span class="p">,</span> <span class="s2">&quot;interiors&quot;</span><span class="p">],</span>
-        <span class="p">)</span>
         <span class="n">n_ext</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly_lines_ext</span><span class="p">)</span>
         <span class="n">n_int</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">poly_lines_int</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">BoundaryPolylines</span><span class="p">(</span><span class="n">n_ext</span><span class="p">,</span> <span class="n">poly_lines_ext</span><span class="p">,</span> <span class="n">n_int</span><span class="p">,</span> <span class="n">poly_lines_int</span><span class="p">)</span>
@@ -1524,8 +1538,8 @@
         <span class="n">dfsu_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">element_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">node_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">n_layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">,</span> <span class="c1"># at least 1 layer</span>
-        <span class="n">n_sigma</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># at least 1 layer</span>
+        <span class="n">n_sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
@@ -1583,7 +1597,7 @@
 
             <span class="c1"># TODO: check 0-based, 1-based...</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_top_elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findTopLayerElements</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">)</span>
-        
+
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_elems</span>
 
     <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
