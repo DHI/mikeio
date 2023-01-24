@@ -825,7 +825,7 @@ class GeometryFM(_Geometry):
                     coords[k, 1],
                 )
                 ids[k] = (
-                    many_nearest[lid] if lid > 0 else -1
+                    many_nearest[lid] if lid > 0 else -999999999
                 )  # TODO -1 is not a good choice, since it is a valid index
 
         return ids

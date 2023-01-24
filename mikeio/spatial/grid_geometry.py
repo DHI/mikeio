@@ -644,12 +644,8 @@ class Grid2D(_Geometry):
         y = xy[:, 1]
         x = xy[:, 0]
 
-        ii = (-1) * np.ones_like(
-            x, dtype=int
-        )  # TODO -1 is not a good choice, since it is a valid index
-        jj = (-1) * np.ones_like(
-            y, dtype=int
-        )  # TODO -1 is not a good choice, since it is a valid index
+        ii = (-999999999) * np.ones_like(x, dtype=int)  # TODO -999999999 ?
+        jj = (-999999999) * np.ones_like(y, dtype=int)  # TODO -999999999 ?
 
         inside = self.contains(xy)
         for j, xyp in enumerate(xy):
