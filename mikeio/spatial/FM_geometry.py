@@ -784,67 +784,22 @@ class GeometryFM(_Geometry):
         d, elem_id = self._tree2d.query(p, k=n)
         return elem_id, d
 
-    def _find_element_2d(self, coords: np.array):
-        xn = np.zeros(4, dtype=np.float64)
-        yn = np.zeros(4, dtype=np.float64)
-        coords = np.atleast_2d(coords)
+    def _find_element_2d(self, x: float, y: float) -> int:
+
         nc = self._geometry2d.node_coordinates
 
         few_nearest, _ = self._find_n_nearest_2d_elements(
-            coords, n=min(self.n_elements, 2)
+            x=x, y=y, n=min(self.n_elements, 10)
         )
-        ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
 
-        for k in range(len(ids)):
-            # step 1: is nearest element = element containing point?
-            nodes = self._geometry2d.element_table[ids[k]]
-            element_found = self._point_in_polygon(
-                nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
-            )
+        for idx in few_nearest:
+            nodes = self._geometry2d.element_table[idx]
+            element_found = self._point_in_polygon(nc[nodes, 0], nc[nodes, 1], x, y)
 
-            # step 2: if not, then try second nearest point
-            if not element_found:
-                nodes = self._geometry2d.element_table[few_nearest[k, 1]]
-                element_found = self._point_in_polygon(
-                    nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
-                )
-                ids[k] = few_nearest[k, 1]
+            if element_found:
+                return idx
 
-            # step 3: if not, then try with *many* more points
-            if not element_found:
-                # many_nearest, _ = self._find_n_nearest_2d_elements(coords[k:k, :], n=10)
-                many_nearest, _ = self._find_n_nearest_2d_elements(
-                    coords[k, :], n=10
-                )  # JAN fix
-                element_table = self._geometry2d.element_table[many_nearest]
-                lid = self._find_element_containing_point_2d(
-                    element_table,
-                    xn,
-                    yn,
-                    coords[k, 0],
-                    coords[k, 1],
-                )
-                ids[k] = (
-                    many_nearest[lid] if lid > 0 else -999999999
-                )  # TODO -1 is not a good choice, since it is a valid index
-
-        return ids
-
-    def _find_element_containing_point_2d(
-        self,
-        element_table,
-        xn: np.array,
-        yn: np.array,
-        xp: float,
-        yp: float,
-    ):
-        for j, el in enumerate(element_table):
-            n_nodes = len(el)
-            xn[0:n_nodes] = self.node_coordinates[el, 0]
-            yn[0:n_nodes] = self.node_coordinates[el, 1]
-            if self._point_in_polygon(xn[0:n_nodes], yn[0:n_nodes], xp, yp):
-                return j
-        return -1
+        return None
 
     def get_overset_grid(
         self, dx=None, dy=None, nx=None, ny=None, buffer=None
@@ -1164,7 +1119,8 @@ class GeometryFM(_Geometry):
                 xy = coords[:, :2]
             else:
                 xy = np.vstack((x, y)).T
-            return self._find_element_2d(coords=xy)
+            idx = [self._find_element_2d(x=x, y=y) for (x, y) in xy]
+            return idx
         elif area is not None:
             return self._elements_in_area(area)
         else:
@@ -1608,7 +1564,7 @@ class _GeometryFMLayered(GeometryFM):
                 z = coords[:, 2] if coords.shape[1] == 3 else None
             else:
                 xy = np.vstack((x, y)).T
-            idx_2d = self._find_element_2d(coords=xy)
+            idx_2d = [self._find_element_2d(x=x, y=y) for (x, y) in xy]
 
             if z is None:
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])

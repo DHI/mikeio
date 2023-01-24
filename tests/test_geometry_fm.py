@@ -96,6 +96,30 @@ def test_area():
     assert area > 0.0
 
 
+def test_find_index_simple_domain():
+    #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.0, 1.0, 0.0),  # 3
+        (0.5, 1.5, 0.0),  # 4
+    ]
+
+    el = [(0, 1, 2), (0, 2, 3), (3, 2, 4)]
+
+    g = GeometryFM(node_coordinates=nc, element_table=el, projection="LONG/LAT")
+    idx = g.find_index(0.5, 0.1)
+    assert idx[0] == 0
+
+    idx = g.find_index(coords=[(0.5, 0.1), (0.1, 0.5)])
+    assert idx[0] == 0
+    assert idx[1] == 1
+
+    idx = g.find_index(-0.5, -0.1)
+    assert idx[0] is None
+
+
 def test_plot_mesh():
     #     x     y    z
     nc = [
