@@ -91,6 +91,7 @@
 
 <span class="kn">from</span> <span class="nn">.spectral</span> <span class="kn">import</span> <span class="n">plot_2dspectrum</span>
 
+
 <div class="viewcode-block" id="_DataArrayPlotter"><a class="viewcode-back" href="../../dataarray.html#mikeio.dataarray._DataArrayPlotter">[docs]</a><span class="k">class</span> <span class="nc">_DataArrayPlotter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Context aware plotter (sensible plotting according to geometry)&quot;&quot;&quot;</span>
 
@@ -209,7 +210,7 @@
         <span class="k">return</span> <span class="n">ax</span>
 
     <span class="k">def</span> <span class="nf">_label_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">]&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">short_name</span><span class="si">}</span><span class="s2">]&quot;</span>
 
     <span class="k">def</span> <span class="nf">_get_first_step_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">n_timesteps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -231,6 +232,7 @@
 <span class="sd">    &gt;&gt;&gt; da.plot.pcolormesh()</span>
 <span class="sd">    &gt;&gt;&gt; da.plot.hist()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fig_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">n_timesteps</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -308,6 +310,7 @@
 <span class="sd">    &gt;&gt;&gt; da.plot.pcolormesh()</span>
 <span class="sd">    &gt;&gt;&gt; da.plot.hist()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -556,7 +559,6 @@
 <span class="sd">    &gt;&gt;&gt; da.plot.hist()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_transect</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -586,7 +588,6 @@
 
 
 <span class="k">class</span> <span class="nc">_DataArrayPlotterPointSpectrum</span><span class="p">(</span><span class="n">_DataArrayPlotter</span><span class="p">):</span>
-
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="c1"># ax = self._get_ax(ax, figsize)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">n_frequencies</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">n_directions</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -682,6 +683,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">Hm0</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">to_Hm0</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">Hm0</span><span class="p">)</span>
+
 
 <div class="viewcode-block" id="_DatasetPlotter"><a class="viewcode-back" href="../../dataset.html#mikeio.dataarray._DatasetPlotter">[docs]</a><span class="k">class</span> <span class="nc">_DatasetPlotter</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ds</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
