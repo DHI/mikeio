@@ -111,7 +111,6 @@
     <span class="n">GeometryPoint2D</span><span class="p">,</span>
     <span class="n">GeometryPoint3D</span><span class="p">,</span>
     <span class="n">GeometryUndefined</span><span class="p">,</span>
-    <span class="n">_Geometry</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid1D</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">Grid3D</span>
 <span class="kn">from</span> <span class="nn">.spectral</span> <span class="kn">import</span> <span class="n">calc_m0_from_spectrum</span>
@@ -189,7 +188,7 @@
         <span class="c1"># *,</span>
         <span class="n">time</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">item</span><span class="p">:</span> <span class="n">ItemInfo</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">geometry</span><span class="p">:</span> <span class="n">_Geometry</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">(),</span>
+        <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">(),</span>
         <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dims</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
