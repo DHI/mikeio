@@ -29,9 +29,16 @@ from .spatial.geometry import (
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .spectral import calc_m0_from_spectrum
 from .data_plot import (
-    _DataArrayPlotter, _DataArrayPlotterFM, _DataArrayPlotterGrid1D, _DataArrayPlotterGrid2D, _DataArrayPlotterAreaSpectrum, _DataArrayPlotterFMVerticalColumn, _DataArrayPlotterFMVerticalProfile, _DataArrayPlotterPointSpectrum, _DataArrayPlotterLineSpectrum
+    _DataArrayPlotter,
+    _DataArrayPlotterFM,
+    _DataArrayPlotterGrid1D,
+    _DataArrayPlotterGrid2D,
+    _DataArrayPlotterAreaSpectrum,
+    _DataArrayPlotterFMVerticalColumn,
+    _DataArrayPlotterFMVerticalProfile,
+    _DataArrayPlotterPointSpectrum,
+    _DataArrayPlotterLineSpectrum,
 )
-
 
 
 class _DataArraySpectrumToHm0:

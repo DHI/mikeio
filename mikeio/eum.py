@@ -1373,6 +1373,32 @@ class EUMUnit(IntEnum):
         name = name.replace("_", " ")
         return name
 
+    @property
+    def short_name(self):
+
+        unit_short_names = {
+            "kilometer": "km",
+            "centimeter": "cm",
+            "millimeter": "mm",
+            "meter": "m",
+            "liter": "l",
+            "kilogram": "kg",
+            "milligram": "mg",
+            "gram": "g",
+            "second": "s",
+            "sec": "s",
+            "hertz": "Hz",
+            "_pow_2": "^2",
+            "_pow_3": "^3",
+            "_per_": "/",
+            "_": "*",
+        }
+
+        name = self.name
+        for key, value in unit_short_names.items():
+            name = name.replace(key, value)
+        return name
+
     def __repr__(self):
 
         return self.display_name

@@ -4,6 +4,7 @@ from .spatial.FM_utils import _plot_map, _plot_vertical_profile
 
 from .spectral import plot_2dspectrum
 
+
 class _DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)"""
 
@@ -122,7 +123,7 @@ class _DataArrayPlotter:
         return ax
 
     def _label_txt(self):
-        return f"{self.da.name} [{self.da.unit.name}]"
+        return f"{self.da.name} [{self.da.unit.short_name}]"
 
     def _get_first_step_values(self):
         if self.da.n_timesteps > 1:
@@ -144,6 +145,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     >>> da.plot.pcolormesh()
     >>> da.plot.hist()
     """
+
     def __call__(self, ax=None, figsize=None, **kwargs):
         _, ax = self._get_fig_ax(ax, figsize)
         if self.da.n_timesteps == 1:
@@ -221,6 +223,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     >>> da.plot.pcolormesh()
     >>> da.plot.hist()
     """
+
     def __call__(self, ax=None, figsize=None, **kwargs):
         return self.pcolormesh(ax, figsize, **kwargs)
 
@@ -469,7 +472,6 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
     >>> da.plot.hist()
     """
 
-
     def __call__(self, ax=None, figsize=None, **kwargs):
         ax = self._get_ax(ax, figsize)
         return self._plot_transect(ax=ax, **kwargs)
@@ -499,7 +501,6 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
 
 
 class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
-
     def __call__(self, ax=None, figsize=None, **kwargs):
         # ax = self._get_ax(ax, figsize)
         if self.da.n_frequencies > 0 and self.da.n_directions > 0:
@@ -595,6 +596,7 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
         else:
             Hm0 = da.to_Hm0()
         super().__init__(Hm0)
+
 
 class _DatasetPlotter:
     def __init__(self, ds) -> None:
