@@ -207,14 +207,14 @@ def test_read_area_subset_geo():
     dssel = dsall.sel(area=bbox)  # selects all pixels with element center in the bbox
     ds = mikeio.read(filename, area=bbox)
     assert ds.geometry == dssel.geometry
-    assert ds.geometry.bbox[0] < bbox[0]  #
+    assert ds.geometry.bbox.left < bbox[0]  #
     assert ds.geometry.x[0] == pytest.approx(bbox[0])
     assert ds.geometry.x[-1] == pytest.approx(bbox[2])
     assert ds.geometry.y[0] == pytest.approx(bbox[1])
     assert ds.geometry.y[-1] == pytest.approx(bbox[3])
 
 
-def test_subset_bbox_named_tuple():
+def test_subset_bbox():
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     ds = mikeio.read(filename)
     dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area

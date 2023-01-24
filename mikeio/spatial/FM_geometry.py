@@ -8,7 +8,6 @@ from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
 from scipy.spatial import cKDTree
 
-
 from ..eum import EUMType, EUMUnit
 from ..exceptions import InvalidGeometry
 from ..interpolation import get_idw_interpolant, interp2d
@@ -69,7 +68,7 @@ class GeometryFMPointSpectrum(_Geometry):
     @property
     def type_name(self):
         """Type name: DfsuSpectral0D"""
-        return self._type.name
+        return self._type.name  # TODO there is no self._type??
 
     def __repr__(self):
         txt = f"Point Spectrum Geometry(frequency:{self.n_frequencies}, direction:{self.n_directions}"
@@ -345,25 +344,23 @@ class GeometryFM(_Geometry):
 
         #     self._point_in_polygon = numba.njit(_point_in_polygon)
         # except ModuleNotFoundError:
-        self._point_in_polygon = _point_in_polygon
+        # self._point_in_polygon = _point_in_polygon
 
-    def __repr__(self):
+    def _repr_txt(self, layer_txt=None):
         out = []
         out.append("Flexible Mesh Geometry: " + self.type_name)
         if self.n_nodes:
             out.append(f"number of nodes: {self.n_nodes}")
         if self.n_elements:
             out.append(f"number of elements: {self.n_elements}")
-        if self._n_layers:
-            details = (
-                "sigma only"
-                if self.n_z_layers is None
-                else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
-            )
-            out.append(f"number of layers: {self._n_layers} ({details})")
+            if layer_txt is not None:
+                out.append(layer_txt)
         if self._projstr:
             out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
+
+    def __repr__(self):
+        return self._repr_txt()
 
     def __str__(self) -> str:
         gtxt = f"{self.type_name}"
@@ -373,6 +370,56 @@ class GeometryFM(_Geometry):
         else:
             gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
         return gtxt
+
+    @staticmethod
+    def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
+        """Check for each side in the polygon that the point is on the correct side"""
+
+        for j in range(len(xn) - 1):
+            if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (
+                yp - yn[j]
+            ) > 0:
+                return False
+            if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+                return False
+        return True
+
+    @staticmethod
+    def _area_is_bbox(area) -> bool:
+        is_bbox = False
+        if area is not None:
+            if not np.isscalar(area):
+                area = np.array(area)
+                if (area.ndim == 1) & (len(area) == 4):
+                    if np.all(np.isreal(area)):
+                        is_bbox = True
+        return is_bbox
+
+    @staticmethod
+    def _area_is_polygon(area) -> bool:
+        if area is None:
+            return False
+        if np.isscalar(area):
+            return False
+        if not np.all(np.isreal(area)):
+            return False
+        polygon = np.array(area)
+        if polygon.ndim > 2:
+            return False
+
+        if polygon.ndim == 1:
+            if len(polygon) <= 5:
+                return False
+            if len(polygon) % 2 != 0:
+                return False
+
+        if polygon.ndim == 2:
+            if polygon.shape[0] < 3:
+                return False
+            if polygon.shape[1] != 2:
+                return False
+
+        return True
 
     # should projection string still be here?
     def _set_nodes(
@@ -475,6 +522,13 @@ class GeometryFM(_Geometry):
     def type_name(self):
         """Type name, e.g. Mesh, Dfsu2D"""
         return self._type.name if self._type else "Mesh"
+
+    @property
+    def ndim(self) -> int:
+        if self.is_layered:
+            return 3
+        else:
+            return 2
 
     @property
     def is_2d(self) -> bool:
@@ -736,8 +790,10 @@ class GeometryFM(_Geometry):
         coords = np.atleast_2d(coords)
         nc = self._geometry2d.node_coordinates
 
-        few_nearest, _ = self._find_n_nearest_2d_elements(coords, n=2)
-        ids = few_nearest[:, 0]  # first guess
+        few_nearest, _ = self._find_n_nearest_2d_elements(
+            coords, n=min(self.n_elements, 2)
+        )
+        ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
 
         for k in range(len(ids)):
             # step 1: is nearest element = element containing point?
@@ -768,7 +824,9 @@ class GeometryFM(_Geometry):
                     coords[k, 0],
                     coords[k, 1],
                 )
-                ids[k] = many_nearest[lid] if lid > 0 else -1
+                ids[k] = (
+                    many_nearest[lid] if lid > 0 else -1
+                )  # TODO -1 is not a good choice, since it is a valid index
 
         return ids
 
@@ -1080,6 +1138,11 @@ class GeometryFM(_Geometry):
         -------
         np.array
             indicies of containing elements
+
+        Raises
+        ------
+        ValueError
+            if any point is outside the domain
 
         Examples
         --------
@@ -1476,6 +1539,15 @@ class _GeometryFMLayered(GeometryFM):
         self._2d_ids = None
         self._layer_ids = None
         self.__dz = None
+
+    def __repr__(self):
+        details = (
+            "sigma only"
+            if self.n_z_layers is None
+            else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
+        )
+        layer_txt = f"number of layers: {self._n_layers} ({details})"
+        return self._repr_txt(layer_txt=layer_txt)
 
     @property
     def layer_ids(self):

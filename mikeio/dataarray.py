@@ -24,7 +24,6 @@ from .spatial.geometry import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
-    _Geometry,
 )
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 from .spectral import calc_m0_from_spectrum
@@ -102,7 +101,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         # *,
         time: Union[pd.DatetimeIndex, str] = None,
         item: ItemInfo = None,
-        geometry: _Geometry = GeometryUndefined(),
+        geometry = GeometryUndefined(),
         zn=None,
         dims: Optional[Sequence[str]] = None,
     ):
