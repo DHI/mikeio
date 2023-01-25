@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class DataDimensionMismatch(ValueError):
     def __init__(self):
         self.message = (
@@ -26,3 +29,17 @@ class InvalidDataValueType(ValueError):
             "Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
             "'MeanStepBackward', or 'MeanStepForward'"
         )
+
+
+class OutsideModelDomainError(ValueError):
+    def __init__(
+        self,
+        x: float,
+        y: float,
+        z: Optional[float] = None,
+        message="Point is outside model domain",
+    ):
+        self.x = x
+        self.y = y
+        self.z = z
+        super().__init__(message)

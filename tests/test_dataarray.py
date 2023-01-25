@@ -5,6 +5,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
+from mikeio.exceptions import OutsideModelDomainError
 from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D, GeometryUndefined
 
 
@@ -1280,12 +1281,20 @@ def test_xzy_selection():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    das_xzy = ds.Temperature.sel(
-        x=340000, y=15.75, z=0
-    )  # TODO this is way outside the domain
+    das_xzy = ds.Temperature.sel(x=348946, y=6173673, z=0)
 
     # check for point geometry after selection
     assert type(das_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
+    assert das_xzy.values[0] == pytest.approx(17.381)
+
+
+def test_xzy_selection_outside_domain():
+    # select in space via x,y,z coordinates test
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds = mikeio.read(filename)
+
+    with pytest.raises(OutsideModelDomainError):
+        ds.Temperature.sel(x=340000, y=15.75, z=0)  # this is way outside the domain
 
 
 def test_layer_selection():
