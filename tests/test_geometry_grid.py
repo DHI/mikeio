@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import numpy as np
@@ -6,6 +5,7 @@ import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D
 from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.exceptions import OutsideModelDomainError
 
 
 def test_create_nx_ny():
@@ -231,14 +231,16 @@ def test_find_index():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, dx=0.2)
     xy1 = [0.52, 1.52]
-    xy2 = [1.5, 0.5]
+    xy2 = [0.4, 1.2]
+    xy99 = [1.5, 0.5]
     i1, j1 = g.find_index(coords=xy1)
     assert i1 == 2
     assert j1 == 7
-    i2, j2 = g.find_index(coords=xy2)
-    assert i2 == -1
-    assert j2 == -1
 
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(coords=xy99)
+
+    i2, j2 = g.find_index(coords=xy2)
     xy = np.vstack([xy1, xy2])
     ii, jj = g.find_index(coords=xy)
     assert ii[0] == i1
@@ -253,12 +255,11 @@ def test_find_index():
     assert ii[2] == i2
     assert jj[2] == j2
 
-    # TODO: Fix this
-    # with pytest.raises(ValueError):
-    #    g.find_index(x=-1, y=0)
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(x=-1, y=0)
 
-    # with pytest.raises(ValueError):
-    #    g.find_index(coords=[(0.1, 0.1), (0.1, 0.1)])
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(coords=[(-0.1, 0.1), (-0.1, 0.1)])
 
 
 def test_to_geometryFM():

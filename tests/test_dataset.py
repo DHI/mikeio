@@ -6,6 +6,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio.exceptions import OutsideModelDomainError
 
 
 @pytest.fixture
@@ -136,6 +137,7 @@ def test_insert(ds1):
     assert len(ds1) == 3
     assert ds1.names == ["Foo", "Bar", "Baz"]
     assert ds1[-1] == da
+
 
 def test_insert_wrong_type(ds1):
 
@@ -781,7 +783,7 @@ def test_aggregation_dataset_no_time():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
     ds = dfs.read(time=-1, items=["Surface elevation", "Current speed"])
-    
+
     ds2 = ds.max()
     assert ds2["Current speed"].values == pytest.approx(1.6463733)
 
@@ -1493,10 +1495,8 @@ def test_xzy_selection():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    dss_xzy = ds.sel(x=340000, y=15.75, z=0)
-
-    # check for point geometry after selection
-    assert isinstance(dss_xzy.geometry, mikeio.spatial.geometry.GeometryPoint3D)
+    with pytest.raises(OutsideModelDomainError):
+        ds.sel(x=340000, y=15.75, z=0)
 
 
 def test_layer_selection():
@@ -1607,7 +1607,7 @@ def test_interp_na():
     assert dsi.Foo.to_numpy()[0] == pytest.approx(0.0)
     assert dsi.Bar.to_numpy()[2] == pytest.approx(4.0)
 
+
 def test_plot_scatter():
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=0)
     ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
-

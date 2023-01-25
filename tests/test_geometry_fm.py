@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 from mikeio.spatial.FM_geometry import GeometryFM, GeometryFM3D
+from mikeio.exceptions import OutsideModelDomainError
 
 
 def test_basic():
@@ -112,12 +113,18 @@ def test_find_index_simple_domain():
     idx = g.find_index(0.5, 0.1)
     assert idx[0] == 0
 
+    # look for multiple points in the same call
     idx = g.find_index(coords=[(0.5, 0.1), (0.1, 0.5)])
     assert idx[0] == 0
     assert idx[1] == 1
 
-    idx = g.find_index(-0.5, -0.1)
-    assert idx[0] is None
+    # look for the same points multiple times
+    idx = g.find_index(coords=[(0.5, 0.1), (0.5, 0.1)])
+    assert idx[0] == 0
+    assert idx[1] == 0
+
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(-0.5, -0.1)
 
 
 def test_plot_mesh():

@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+from ..exceptions import OutsideModelDomainError
+
 from .geometry import (
     BoundingBox,
     GeometryPoint2D,
@@ -652,6 +654,8 @@ class Grid2D(_Geometry):
             if inside[j]:
                 ii[j] = (np.abs(self.x - xyp[0])).argmin()
                 jj[j] = (np.abs(self.y - xyp[1])).argmin()
+            else:
+                raise OutsideModelDomainError(x=x[j], y=y[j])
 
         return ii, jj
 

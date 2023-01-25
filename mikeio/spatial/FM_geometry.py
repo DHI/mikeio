@@ -9,7 +9,7 @@ from mikecore.MeshBuilder import MeshBuilder
 from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
-from ..exceptions import InvalidGeometry
+from ..exceptions import InvalidGeometry, OutsideModelDomainError
 from ..interpolation import get_idw_interpolant, interp2d
 from .FM_utils import (
     _get_node_centered_data,
@@ -799,7 +799,7 @@ class GeometryFM(_Geometry):
             if element_found:
                 return idx
 
-        return None
+        raise OutsideModelDomainError(x=x, y=y)
 
     def get_overset_grid(
         self, dx=None, dy=None, nx=None, ny=None, buffer=None
