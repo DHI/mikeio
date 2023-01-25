@@ -1287,6 +1287,19 @@ def test_xzy_selection():
     assert type(das_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
     assert das_xzy.values[0] == pytest.approx(17.381)
 
+    # do the same but go one level deeper, but finding the index first
+    idx = ds.geometry.find_index(x=348946, y=6173673, z=0)
+    das_idx = ds.Temperature.isel(element=idx)
+    assert das_idx.values[0] == pytest.approx(17.381)
+
+    # let's try find the same point multiple times
+    das_idxs = ds.geometry.find_index(
+        x=[348946, 348946], y=[6173673, 6173673], z=[0, 0]
+    )
+    assert len(das_idxs) == 2
+    for idx in das_idxs:
+        assert idx == das_idx
+
 
 def test_xzy_selection_outside_domain():
     # select in space via x,y,z coordinates test

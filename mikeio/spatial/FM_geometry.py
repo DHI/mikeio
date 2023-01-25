@@ -1565,12 +1565,16 @@ class _GeometryFMLayered(GeometryFM):
             else:
                 xy = np.vstack((x, y)).T
             idx_2d = [self._find_element_2d(x=x, y=y) for (x, y) in xy]
-
+            assert len(idx_2d) == len(xy)
             if z is None:
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
             else:
                 idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
-            idx = np.intersect1d(idx, idx_3d).astype(int)
+            assert len(idx_3d) == len(xy)
+            idx = np.intersect1d(idx, idx_3d).astype(
+                int
+            )  # TODO intersection is probably not what we want
+            assert len(idx) == len(xy)
         elif area is not None:
             idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)
