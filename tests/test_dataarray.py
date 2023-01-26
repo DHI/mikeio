@@ -1296,9 +1296,7 @@ def test_xzy_selection():
     das_idxs = ds.geometry.find_index(
         x=[348946, 348946], y=[6173673, 6173673], z=[0, 0]
     )
-    assert len(das_idxs) == 2
-    for idx in das_idxs:
-        assert idx == das_idx
+    assert len(das_idxs) == 1  # only one point
 
 
 def test_xzy_selection_outside_domain():

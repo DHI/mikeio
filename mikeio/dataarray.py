@@ -101,7 +101,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         # *,
         time: Union[pd.DatetimeIndex, str] = None,
         item: ItemInfo = None,
-        geometry = GeometryUndefined(),
+        geometry=GeometryUndefined(),
         zn=None,
         dims: Optional[Sequence[str]] = None,
     ):
@@ -828,6 +828,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
                     sp_axis = 0 if (jj is not None and len(jj) == 1) else 1
                     da = da.isel(idx=ii, axis=(sp_axis + t_ax_offset))
             else:
+                idx = list(idx)
                 da = da.isel(idx, axis="space")
 
         # select in time

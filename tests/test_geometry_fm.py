@@ -111,17 +111,16 @@ def test_find_index_simple_domain():
 
     g = GeometryFM(node_coordinates=nc, element_table=el, projection="LONG/LAT")
     idx = g.find_index(0.5, 0.1)
-    assert idx[0] == 0
+    assert 0 in idx
 
     # look for multiple points in the same call
     idx = g.find_index(coords=[(0.5, 0.1), (0.1, 0.5)])
-    assert idx[0] == 0
-    assert idx[1] == 1
+    assert {0, 1} <= idx
 
     # look for the same points multiple times
     idx = g.find_index(coords=[(0.5, 0.1), (0.5, 0.1)])
-    assert idx[0] == 0
-    assert idx[1] == 0
+    assert len(idx) == 1
+    assert 0 in idx
 
     with pytest.raises(OutsideModelDomainError):
         g.find_index(-0.5, -0.1)

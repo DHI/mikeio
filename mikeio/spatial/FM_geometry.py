@@ -1,6 +1,6 @@
 import warnings
 from collections import namedtuple
-from typing import Sequence, Union
+from typing import Sequence, Union, Set
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -1063,10 +1063,10 @@ class GeometryFM(_Geometry):
             if self._type == DfsuFileType.DfsuSpectral1D:
                 return self._nodes_to_geometry(nodes=idx)
             else:
-                return self.elements_to_geometry(elements=idx, node_layers=None)
+                return self.elements_to_geometry(elements=list(idx), node_layers=None)
 
-    def find_index(self, x=None, y=None, coords=None, area=None):
-        """Find element indicies for a number of points or within an area
+    def find_index(self, x=None, y=None, coords=None, area=None) -> Set[int]:
+        """Find a *set* of element indicies for a number of points or within an area
 
         This method will return elements *containing* the argument
         points/area, which is not necessarily the same as the nearest.
@@ -1091,7 +1091,7 @@ class GeometryFM(_Geometry):
 
         Returns
         -------
-        np.array
+        set(int)
             indicies of containing elements
 
         Raises
@@ -1120,9 +1120,9 @@ class GeometryFM(_Geometry):
             else:
                 xy = np.vstack((x, y)).T
             idx = [self._find_element_2d(x=x, y=y) for (x, y) in xy]
-            return idx
+            return set(idx)
         elif area is not None:
-            return self._elements_in_area(area)
+            return set(self._elements_in_area(area))
         else:
             raise ValueError("Provide either coordinates or area")
 
@@ -1570,11 +1570,7 @@ class _GeometryFMLayered(GeometryFM):
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
             else:
                 idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
-            assert len(idx_3d) >= len(xy)
-            idx = np.intersect1d(idx, idx_3d).astype(
-                int
-            )  # TODO intersection is probably not what we want
-            assert len(idx) >= len(xy)
+            idx = np.intersect1d(idx, idx_3d).astype(int)
         elif area is not None:
             idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)
