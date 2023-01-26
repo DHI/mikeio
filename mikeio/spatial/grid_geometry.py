@@ -1,5 +1,5 @@
 import warnings
-from typing import Sequence, Tuple, Union
+from typing import Sequence, Tuple, Union, Set
 
 from dataclasses import dataclass
 
@@ -112,11 +112,11 @@ class Grid1D(_Geometry):
     def __str__(self):
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
 
-    def find_index(self, x: float, **kwargs) -> int:
+    def find_index(self, x: float, **kwargs) -> Set[int]:
         """Find nearest point"""
 
         d = (self.x - x) ** 2
-        return np.argmin(d)
+        return set([np.argmin(d)])
 
     def get_spatial_interpolant(self, coords, **kwargs):
 
@@ -962,7 +962,7 @@ class Grid3D(_Geometry):
         """Grid orientation"""
         return self._orientation
 
-    def find_index(self, coords=None, layers=None, area=None):
+    def find_index(self, coords=None, layers=None, area=None) -> Set[int]:
         if layers is not None:
             raise NotImplementedError(
                 f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"
