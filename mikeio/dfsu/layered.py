@@ -1,3 +1,4 @@
+from typing import Collection
 import warnings
 from functools import wraps
 
@@ -97,7 +98,7 @@ class DfsuLayered(_Dfsu):
         *,
         items=None,
         time=None,
-        elements=None,
+        elements: Collection[int] = None,
         area=None,
         x=None,
         y=None,

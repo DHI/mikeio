@@ -2,7 +2,7 @@ import os
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import List, Union
+from typing import Collection, List, Union
 
 import numpy as np
 import pandas as pd
@@ -695,7 +695,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         *,
         items=None,
         time=None,
-        elements=None,
+        elements: Collection[int] = None,
         area=None,
         x=None,
         y=None,
