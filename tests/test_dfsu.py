@@ -9,6 +9,7 @@ import mikeio
 from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh
 from mikeio.eum import ItemInfo
 from pytest import approx
+from mikeio.exceptions import OutsideModelDomainError
 
 from mikeio.spatial.FM_geometry import GeometryFM
 from mikeio.spatial.geometry import GeometryPoint2D
@@ -231,6 +232,17 @@ def test_read_area():
     assert ds.geometry.n_elements == 18
 
 
+def test_find_index_on_island():
+    filename = "tests/testdata/FakeLake.dfsu"
+    dfs = mikeio.open(filename)
+
+    idx = dfs.geometry.find_index(x=-0.36, y=0.14)
+    assert 230 in idx
+
+    with pytest.raises(OutsideModelDomainError):
+        dfs.geometry.find_index(x=-0.36, y=0.15)
+
+
 def test_read_area_single_element():
 
     filename = "tests/testdata/FakeLake.dfsu"
@@ -306,6 +318,7 @@ def test_contains():
     inside = dfs.contains(pts)
     assert inside[0] == True
     assert inside[1] == False
+
 
 def test_point_in_domain():
     filename = "tests/testdata/wind_north_sea.dfsu"
@@ -947,6 +960,7 @@ def test_dataset_interp():
     assert dai.geometry.y == y
     assert dai.geometry.projection == ds.geometry.projection
 
+
 def test_dataset_interp_to_xarray():
     ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
 
@@ -960,9 +974,6 @@ def test_dataset_interp_to_xarray():
     xr_dsi = dsi.to_xarray()
     assert float(xr_dsi.x) == pytest.approx(x)
     assert float(xr_dsi.y) == pytest.approx(y)
-
-
-
 
 
 def test_interp_like_grid():
@@ -1063,6 +1074,7 @@ def test_interp_like_fm_dataset():
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM)
 
+
 def test_write_header(tmpdir):
     meshfilename = "tests/testdata/north_sea_2.mesh"
     outfilename = os.path.join(tmpdir, "NS_write_header.dfsu")
@@ -1071,7 +1083,7 @@ def test_write_header(tmpdir):
     nt = 3
     n_items = 2
     items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-    time0 = datetime(2021,1,1)
+    time0 = datetime(2021, 1, 1)
     with dfs.write_header(outfilename, items=items, start_time=time0, dt=3600) as f:
         for _ in range(nt):
             data = []
