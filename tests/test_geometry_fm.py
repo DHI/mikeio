@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 from mikeio.spatial.FM_geometry import GeometryFM, GeometryFM3D
 from mikeio.exceptions import OutsideModelDomainError
+from mikeio.spatial.geometry import GeometryPoint2D
 
 
 def test_basic():
@@ -124,6 +125,24 @@ def test_find_index_simple_domain():
 
     with pytest.raises(OutsideModelDomainError):
         g.find_index(-0.5, -0.1)
+
+
+def test_isel_simple_domain():
+    #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.0, 1.0, 0.0),  # 3
+        (0.5, 1.5, 0.0),  # 4
+    ]
+
+    el = [(0, 1, 2), (0, 2, 3), (3, 2, 4)]
+
+    g = GeometryFM(node_coordinates=nc, element_table=el, projection="LONG/LAT")
+    gp = g.isel(0)
+    assert isinstance(gp, GeometryPoint2D)
+    assert gp.projection == g.projection
 
 
 def test_plot_mesh():

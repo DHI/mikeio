@@ -1115,7 +1115,7 @@ class GeometryFM(_Geometry):
             return self._nodes_to_geometry(nodes=idx)
         else:
             return self.elements_to_geometry(
-                elements=list(idx), node_layers=None, keepdims=keepdims
+                elements=idx, node_layers=None, keepdims=keepdims
             )
 
     def find_index(self, x=None, y=None, coords=None, area=None) -> Set[int]:
@@ -1278,13 +1278,13 @@ class GeometryFM(_Geometry):
         return geom
 
     def elements_to_geometry(
-        self, elements: Collection[int], node_layers="all", keepdims=False
+        self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
     ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint3D, GeometryPoint2D]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
         ----------
-        elements : Collection[int]
+        elements : int or Collection[int]
             collection of element ids
         node_layers : str, optional
             for 3d files either 'top', 'bottom' layer nodes
@@ -1297,7 +1297,10 @@ class GeometryFM(_Geometry):
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        elements = list(elements)
+        if np.isscalar(elements):
+            elements = [elements]
+        else:
+            elements = list(elements)
         if len(elements) == 1 and not keepdims:
             coords = self.element_coordinates[elements.pop(), :]
             if self.is_layered:
