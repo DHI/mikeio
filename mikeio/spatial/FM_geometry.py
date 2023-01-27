@@ -784,7 +784,55 @@ class GeometryFM(_Geometry):
         d, elem_id = self._tree2d.query(p, k=n)
         return elem_id, d
 
-    def _find_element_2d(self, x: float, y: float) -> int:
+    def _find_element_2d(self, coords: np.array):
+        xn = np.zeros(4, dtype=np.float64)
+        yn = np.zeros(4, dtype=np.float64)
+        coords = np.atleast_2d(coords)
+        nc = self._geometry2d.node_coordinates
+
+        few_nearest, _ = self._find_n_nearest_2d_elements(
+            coords, n=min(self.n_elements, 2)
+        )
+        ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
+
+        for k in range(len(ids)):
+            # step 1: is nearest element = element containing point?
+            nodes = self._geometry2d.element_table[ids[k]]
+            element_found = self._point_in_polygon(
+                nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
+            )
+
+            # step 2: if not, then try second nearest point
+            if not element_found:
+                candidate = few_nearest[k, 1]
+                assert np.isscalar(candidate)
+                nodes = self._geometry2d.element_table[candidate]
+                element_found = self._point_in_polygon(
+                    nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
+                )
+                ids[k] = few_nearest[k, 1]
+
+            # step 3: if not, then try with *many* more points
+            if not element_found:
+                many_nearest, _ = self._find_n_nearest_2d_elements(
+                    coords[k, :], n=min(10, self.n_elements)
+                )
+                for p in many_nearest:
+                    element_found = self._point_in_polygon(
+                        nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
+                    )
+                if element_found:
+                    ids[k] = p  # TODO create a test that actually takes this path!!
+                    break
+                else:
+                    raise OutsideModelDomainError(x=coords[k, 0], y=coords[k, 1])
+                # ids[k] = (
+                #    many_nearest[lid] if lid > 0 else -1
+                # )  # TODO -1 is not a good choice, since it is a valid index
+
+        return ids
+
+    def _find_single_element_2d(self, x: float, y: float) -> int:
 
         nc = self._geometry2d.node_coordinates
 
@@ -1119,7 +1167,7 @@ class GeometryFM(_Geometry):
                 xy = coords[:, :2]
             else:
                 xy = np.vstack((x, y)).T
-            idx = [self._find_element_2d(x=x, y=y) for (x, y) in xy]
+            idx = self._find_element_2d(coords=xy)
             return set(idx)
         elif area is not None:
             return set(self._elements_in_area(area))
@@ -1564,7 +1612,7 @@ class _GeometryFMLayered(GeometryFM):
                 z = coords[:, 2] if coords.shape[1] == 3 else None
             else:
                 xy = np.vstack((x, y)).T
-            idx_2d = [self._find_element_2d(x=x, y=y) for (x, y) in xy]
+            idx_2d = self._find_element_2d(coords=xy)
             assert len(idx_2d) == len(xy)
             if z is None:
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
