@@ -170,3 +170,7 @@ def test_layered():
     assert not g.is_2d
 
     assert len(g.top_elements) == 1
+
+    # find vertical column
+    idx = g.find_index(x=0.9, y=0.1)
+    assert len(idx) == 2
