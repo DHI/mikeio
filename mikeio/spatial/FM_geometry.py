@@ -1,6 +1,6 @@
 import warnings
 from collections import namedtuple
-from typing import Sequence, Union, Set
+from typing import Collection, Sequence, Union, Set
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -1281,14 +1281,14 @@ class GeometryFM(_Geometry):
         return geom
 
     def elements_to_geometry(
-        self, elements, node_layers="all"
+        self, elements: Collection[int], node_layers="all"
     ) -> Union["GeometryFM", "GeometryFM3D"]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
         ----------
-        elements : list(int)
-            list of element ids
+        elements : Collection[int]
+            collection of element ids
         node_layers : str, optional
             for 3d files either 'top', 'bottom' layer nodes
             or 'all' can be selected, by default 'all'
@@ -1300,7 +1300,7 @@ class GeometryFM(_Geometry):
         """
         elements = np.atleast_1d(elements)
         if len(elements) == 1:
-            coords = self.element_coordinates[elements[0], :]
+            coords = self.element_coordinates[elements.pop(), :]
             if self.is_layered:
                 return GeometryPoint3D(*coords)
             else:
