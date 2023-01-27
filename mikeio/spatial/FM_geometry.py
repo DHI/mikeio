@@ -1084,7 +1084,9 @@ class GeometryFM(_Geometry):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
-    def isel(self, idx=None, axis="elements", keepdims=False):
+    def isel(
+        self, idx: Union[int, Collection[int]], keepdims=False, **kwargs
+    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint2D, GeometryPoint3D]:
         """export a selection of elements to a new geometry
 
         Typically not called directly, but by Dataset/DataArray's
@@ -1092,8 +1094,8 @@ class GeometryFM(_Geometry):
 
         Parameters
         ----------
-        idx : list(int)
-            list of element indicies
+        idx : int or collection(int)
+            collection of element indicies
         keepdims : bool, optional
             Should the original Geometry type be kept (keepdims=True)
             or should it be reduced e.g. to a GeometryPoint2D if possible

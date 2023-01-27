@@ -793,8 +793,15 @@ def test_to_mesh_2d(tmpdir):
 def test_elements_to_geometry():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = mikeio.open(filename)
+
+    tiny_geom = dfs.geometry.elements_to_geometry(elements=set([1, 0]))
+    assert tiny_geom.n_elements == 2
+
+    other_tiny_geom = dfs.geometry.isel(set([1, 0]))
+    assert other_tiny_geom.n_elements == 2
+
     prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
-    geom = dfs.elements_to_geometry(prof_ids)
+    geom = dfs.geometry.elements_to_geometry(prof_ids)
 
     text = repr(geom)
 
