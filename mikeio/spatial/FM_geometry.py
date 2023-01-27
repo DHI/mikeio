@@ -1085,7 +1085,7 @@ class GeometryFM(_Geometry):
         return all_faces[uf_id[bnd_face_id]]
 
     def isel(
-        self, idx: Union[int, Collection[int]], keepdims=False, **kwargs
+        self, idx: Collection[int], keepdims=False, **kwargs
     ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint2D, GeometryPoint3D]:
         """export a selection of elements to a new geometry
 
@@ -1094,7 +1094,7 @@ class GeometryFM(_Geometry):
 
         Parameters
         ----------
-        idx : int or collection(int)
+        idx : collection(int)
             collection of element indicies
         keepdims : bool, optional
             Should the original Geometry type be kept (keepdims=True)
@@ -1110,18 +1110,13 @@ class GeometryFM(_Geometry):
         --------
         find_index : find element indicies for points or an area
         """
-        if (np.isscalar(idx) or len(idx)) == 1 and (not keepdims):
-            coords = self.element_coordinates[idx].flatten()
 
-            if self.is_layered:
-                return GeometryPoint3D(*coords, projection=self.projection)
-            else:
-                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
+        if self._type == DfsuFileType.DfsuSpectral1D:
+            return self._nodes_to_geometry(nodes=idx)
         else:
-            if self._type == DfsuFileType.DfsuSpectral1D:
-                return self._nodes_to_geometry(nodes=idx)
-            else:
-                return self.elements_to_geometry(elements=list(idx), node_layers=None)
+            return self.elements_to_geometry(
+                elements=list(idx), node_layers=None, keepdims=keepdims
+            )
 
     def find_index(self, x=None, y=None, coords=None, area=None) -> Set[int]:
         """Find a *set* of element indicies for a number of points or within an area
@@ -1283,8 +1278,8 @@ class GeometryFM(_Geometry):
         return geom
 
     def elements_to_geometry(
-        self, elements: Collection[int], node_layers="all"
-    ) -> Union["GeometryFM", "GeometryFM3D"]:
+        self, elements: Collection[int], node_layers="all", keepdims=False
+    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint3D, GeometryPoint2D]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
@@ -1294,6 +1289,8 @@ class GeometryFM(_Geometry):
         node_layers : str, optional
             for 3d files either 'top', 'bottom' layer nodes
             or 'all' can be selected, by default 'all'
+        keepdims: bool, optional
+            keep original geometry type for single points
 
         Returns
         -------
@@ -1301,14 +1298,16 @@ class GeometryFM(_Geometry):
             which can be used for further extraction or saved to file
         """
         elements = list(elements)
-        if len(elements) == 1:
+        if len(elements) == 1 and not keepdims:
             coords = self.element_coordinates[elements.pop(), :]
             if self.is_layered:
-                return GeometryPoint3D(*coords)
+                return GeometryPoint3D(*coords, projection=self.projection)
             else:
-                return GeometryPoint2D(coords[0], coords[1])
+                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
 
-        elements = np.sort(elements)  # make sure elements are sorted!
+        elements = np.sort(
+            elements
+        )  # make sure elements are sorted! # TODO is this necessary?
 
         # create new geometry
         new_type = self._type

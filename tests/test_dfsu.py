@@ -794,6 +794,10 @@ def test_elements_to_geometry():
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = mikeio.open(filename)
 
+    single_elem_geom = dfs.geometry.isel([0], keepdims=True)
+    assert single_elem_geom.n_elements == 1
+    assert len(single_elem_geom.element_table) == 1
+
     tiny_geom = dfs.geometry.elements_to_geometry(elements=set([1, 0]))
     assert tiny_geom.n_elements == 2
 
