@@ -817,14 +817,16 @@ class GeometryFM(_Geometry):
                 many_nearest, _ = self._find_n_nearest_2d_elements(
                     coords[k, :], n=min(10, self.n_elements)
                 )
-                for p in many_nearest:
+                for p in many_nearest[2:]:  # we have already tried the two first above
+                    nodes = self._geometry2d.element_table[p]
                     element_found = self._point_in_polygon(
                         nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
                     )
-                if element_found:
-                    ids[k] = p  # TODO create a test that actually takes this path!!
-                    break
-                else:
+                    if element_found:
+                        ids[k] = p
+                        break
+
+                if not element_found:
                     raise OutsideModelDomainError(x=coords[k, 0], y=coords[k, 1])
                 # ids[k] = (
                 #    many_nearest[lid] if lid > 0 else -1
