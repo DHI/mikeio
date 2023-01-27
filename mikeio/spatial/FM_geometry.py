@@ -1298,7 +1298,7 @@ class GeometryFM(_Geometry):
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        elements = np.atleast_1d(elements)
+        elements = list(elements)
         if len(elements) == 1:
             coords = self.element_coordinates[elements.pop(), :]
             if self.is_layered:

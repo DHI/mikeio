@@ -759,7 +759,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             geometry = self.geometry
             n_elems = geometry.n_elements
         else:
-            elements = [elements] if np.isscalar(elements) else elements
+            elements = [elements] if np.isscalar(elements) else list(elements)
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
 
