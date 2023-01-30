@@ -110,9 +110,9 @@ class Dfs3(_Dfs123):
         self._nx = None
         self._ny = None
         self._nz = None
-        self._x0 = 0
-        self._y0 = 0
-        self._z0 = 0
+        self._x0 = 0.0
+        self._y0 = 0.0
+        self._z0 = 0.0
         self.geometry = None
 
         if filename:
@@ -154,7 +154,7 @@ class Dfs3(_Dfs123):
 
         return str.join("\n", out)
 
-    def _read_dfs3_header(self):
+    def _read_dfs3_header(self, read_x0y0z0: bool = False):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
 
@@ -162,9 +162,11 @@ class Dfs3(_Dfs123):
 
         self.source = self._dfs
 
-        self._x0 = self._dfs.SpatialAxis.X0
-        self._y0 = self._dfs.SpatialAxis.Y0
-        self._z0 = self._dfs.SpatialAxis.Z0
+        if read_x0y0z0:
+            self._x0 = self._dfs.SpatialAxis.X0
+            self._y0 = self._dfs.SpatialAxis.Y0
+            self._z0 = self._dfs.SpatialAxis.Z0
+
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._dz = self._dfs.SpatialAxis.Dz
