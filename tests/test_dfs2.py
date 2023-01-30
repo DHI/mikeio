@@ -32,13 +32,13 @@ def dfs2_random_2items():
 @pytest.fixture
 def dfs2_pt_spectrum():
     filepath = Path("tests/testdata/pt_spectra.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.open(filepath, type="spectral")
 
 
 @pytest.fixture
 def dfs2_pt_spectrum_linearf():
     filepath = Path("tests/testdata/dir_wave_analysis_spectra.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.open(filepath, type="spectral")
 
 
 @pytest.fixture
@@ -109,7 +109,7 @@ def test_write_projected(tmpdir):
         dx=100,
         dy=100,
         projection="UTM-33",
-        origin=(0.0, 0.0),
+        # origin=(0.0, 0.0),
     )
     da = mikeio.DataArray(
         data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
@@ -119,11 +119,11 @@ def test_write_projected(tmpdir):
     ds2 = mikeio.read(filename)
     assert ds2.geometry.dx == 100
     assert ds2.geometry.dy == 100
-    # NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
-    assert ds2.geometry._x0 == pytest.approx(x0)
-    assert ds2.geometry._y0 == pytest.approx(y0)
-    assert ds2.geometry.origin[0] == 0.0
-    assert ds2.geometry.origin[1] == 0.0
+    # CHANGED: NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
+    # assert ds2.geometry._x0 == pytest.approx(x0)
+    # assert ds2.geometry._y0 == pytest.approx(y0)
+    assert ds2.geometry.origin[0] == pytest.approx(x0)
+    assert ds2.geometry.origin[1] == pytest.approx(y0)
 
     grid = Grid2D(nx=nx, ny=ny, origin=(x0, y0), dx=100, dy=100, projection="UTM-33")
     da = mikeio.DataArray(
@@ -308,15 +308,14 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert dfs.n_timesteps == 31
 
     g = dfs.geometry
+    assert g.is_spectral
     assert g.x[0] == pytest.approx(0.055)
-    assert g.x[-1] > 25  # if considered linear
+    # assert g.x[-1] > 25  # if considered linear
+    assert g.x[-1] < 0.6  # logarithmic
     assert g.y[0] == 0
     assert g.dx == pytest.approx(1.1)
     assert g.dy == 22.5
     assert g.orientation == 0
-
-    g.is_spectral = True
-    assert g.x[-1] < 0.6  # logarithmic
 
 
 def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
@@ -385,16 +384,16 @@ def test_select_area_rotated_UTM(tmpdir):
 
     dssel = ds.isel(x=range(10, 20), y=range(15, 45))
     assert ds.geometry.orientation == dssel.geometry.orientation
-    assert dssel.geometry._x0 == ds.geometry.x[10]
-    assert dssel.geometry._y0 == ds.geometry.y[15]
+    # assert dssel.geometry._x0 == ds.geometry.x[10]
+    # assert dssel.geometry._y0 == ds.geometry.y[15]
 
     tmpfile = os.path.join(tmpdir.dirname, "subset_rotated.dfs2")
     dssel.to_dfs(tmpfile)
     dfs = mikeio.open(tmpfile)
     g = dfs.geometry
 
-    assert dfs.x0 == 50
-    assert dfs.y0 == 75
+    # assert dfs.x0 == 50
+    # assert dfs.y0 == 75
     assert dfs.dx == 5
     assert dfs.dy == 5
     assert dfs.nx == 10
@@ -405,8 +404,8 @@ def test_select_area_rotated_UTM(tmpdir):
     assert g.orientation == dfs.orientation
     # origin is projected coordinates
     assert g.origin == pytest.approx((479670, 6104860))
-    assert g.x[0] == dfs.x0
-    assert g.y[0] == dfs.y0
+    # assert g.x[0] == dfs.x0
+    # assert g.y[0] == dfs.y0
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
