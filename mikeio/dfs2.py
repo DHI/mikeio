@@ -105,20 +105,20 @@ class Dfs2(_Dfs123):
 
     _ndim = 2
 
-    def __init__(self, filename=None, type="horizontal"):
+    def __init__(self, filename=None, type:str="horizontal"):
         super().__init__(filename)
 
         self._dx = None
         self._dy = None
         self._nx = None
         self._ny = None
-        self._x0 = 0
-        self._y0 = 0
+        self._x0 = 0.0
+        self._y0 = 0.0
         self.geometry = None
 
         if filename:
-            self._read_dfs2_header()
-            is_spectral = type == "spectral"
+            is_spectral = type.lower() in ["spectral", "spectra", "spectrum"]
+            self._read_dfs2_header(read_x0y0=is_spectral)
 
             if self._projstr == "LONG/LAT":
                 if np.abs(self._orientation) < 1e-6:
@@ -185,14 +185,15 @@ class Dfs2(_Dfs123):
 
         return str.join("\n", out)
 
-    def _read_dfs2_header(self):
+    def _read_dfs2_header(self, read_x0y0: bool = False):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
 
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
-        self._x0 = self._dfs.SpatialAxis.X0
-        self._y0 = self._dfs.SpatialAxis.Y0
+        if read_x0y0:
+            self._x0 = self._dfs.SpatialAxis.X0
+            self._y0 = self._dfs.SpatialAxis.Y0
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._nx = self._dfs.SpatialAxis.XCount
