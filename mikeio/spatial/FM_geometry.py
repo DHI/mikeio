@@ -813,7 +813,8 @@ class GeometryFM(_Geometry):
             # step 3: if not, then try with *many* more points
             if not element_found:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
-                    coords[k, :], n=min(self._geometry2d.n_elements, 10) # TODO is 10 enough?
+                    coords[k, :],
+                    n=min(self._geometry2d.n_elements, 10),  # TODO is 10 enough?
                 )
                 for p in many_nearest[2:]:  # we have already tried the two first above
                     nodes = self._geometry2d.element_table[p]
@@ -826,9 +827,6 @@ class GeometryFM(_Geometry):
 
                 if not element_found:
                     raise OutsideModelDomainError(x=coords[k, 0], y=coords[k, 1])
-                # ids[k] = (
-                #    many_nearest[lid] if lid > 0 else -1
-                # )  # TODO -1 is not a good choice, since it is a valid index
 
         return ids
 
