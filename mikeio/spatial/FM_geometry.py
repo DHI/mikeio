@@ -1111,7 +1111,9 @@ class GeometryFM(_Geometry):
             )
 
     def find_index(self, x=None, y=None, coords=None, area=None) -> Set[int]:
-        """Find a *set* of element indicies for a number of points or within an area
+        """Find a *set* of element indicies for a number of points or within an area.
+
+        The returned indices returned are the unique, unordered set of element indices that contain the points or area.
 
         This method will return elements *containing* the argument
         points/area, which is not necessarily the same as the nearest.
