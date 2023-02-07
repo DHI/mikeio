@@ -239,8 +239,11 @@ def test_find_index_on_island():
     idx = dfs.geometry.find_index(x=-0.36, y=0.14)
     assert 230 in idx
 
-    with pytest.raises(OutsideModelDomainError):
+    with pytest.raises(OutsideModelDomainError) as ex:
         dfs.geometry.find_index(x=-0.36, y=0.15)
+
+    assert ex.value.x == -0.36
+    assert ex.value.y == 0.15
 
 
 def test_read_area_single_element():

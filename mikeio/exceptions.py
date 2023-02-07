@@ -37,9 +37,12 @@ class OutsideModelDomainError(ValueError):
         x: float,
         y: float,
         z: Optional[float] = None,
-        message="Point is outside model domain",
+        message: Optional[str] = None,
     ):
         self.x = x
         self.y = y
         self.z = z
+        message = (
+            f"Point ({x},{y}) is outside model domain" if message is None else message
+        )
         super().__init__(message)

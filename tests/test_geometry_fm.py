@@ -123,8 +123,11 @@ def test_find_index_simple_domain():
     assert len(idx) == 1
     assert 0 in idx
 
-    with pytest.raises(OutsideModelDomainError):
+    with pytest.raises(OutsideModelDomainError) as ex:
         g.find_index(-0.5, -0.1)
+
+    assert ex.value.x == -0.5
+    assert ex.value.y == -0.1
 
 
 def test_isel_simple_domain():

@@ -784,20 +784,12 @@ class GeometryFM(_Geometry):
         d, elem_id = self._tree2d.query(p, k=n)
         return elem_id, d
 
-    def _max_n_elements(self, n: int) -> int:
-        if self.is_layered:
-            return min(self._geometry2d.n_elements, n)
-        else:
-            return min(self.n_elements, n)
-
     def _find_element_2d(self, coords: np.array):
-        xn = np.zeros(4, dtype=np.float64)
-        yn = np.zeros(4, dtype=np.float64)
         coords = np.atleast_2d(coords)
         nc = self._geometry2d.node_coordinates
 
         few_nearest, _ = self._find_n_nearest_2d_elements(
-            coords, n=self._max_n_elements(2)
+            coords, n=min(self._geometry2d.n_elements, 2)
         )
         ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
 
@@ -821,7 +813,7 @@ class GeometryFM(_Geometry):
             # step 3: if not, then try with *many* more points
             if not element_found:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
-                    coords[k, :], n=self._max_n_elements(10)
+                    coords[k, :], n=min(self._geometry2d.n_elements, 10) # TODO is 10 enough?
                 )
                 for p in many_nearest[2:]:  # we have already tried the two first above
                     nodes = self._geometry2d.element_table[p]
