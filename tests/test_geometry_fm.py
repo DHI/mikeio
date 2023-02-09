@@ -128,6 +128,7 @@ def test_find_index_simple_domain():
 
     assert ex.value.x == -0.5
     assert ex.value.y == -0.1
+    assert 0 in ex.value.indices
 
 
 def test_isel_simple_domain():

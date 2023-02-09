@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Set
 
 
 class DataDimensionMismatch(ValueError):
@@ -32,17 +32,14 @@ class InvalidDataValueType(ValueError):
 
 
 class OutsideModelDomainError(ValueError):
-    def __init__(
-        self,
-        x: float,
-        y: float,
-        z: Optional[float] = None,
-        message: Optional[str] = None,
-    ):
+    def __init__(self, *, x, y, z=None, indices=None, message=None):
         self.x = x
         self.y = y
         self.z = z
+        self.indices = indices
         message = (
-            f"Point ({x},{y}) is outside model domain" if message is None else message
+            f"Point(s) ({x},{y}) with indices: {self.indices} outside model domain"
+            if message is None
+            else message
         )
         super().__init__(message)

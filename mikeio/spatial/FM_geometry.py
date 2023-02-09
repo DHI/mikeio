@@ -785,6 +785,9 @@ class GeometryFM(_Geometry):
         return elem_id, d
 
     def _find_element_2d(self, coords: np.array):
+
+        points_outside = []
+
         coords = np.atleast_2d(coords)
         nc = self._geometry2d.node_coordinates
 
@@ -826,7 +829,14 @@ class GeometryFM(_Geometry):
                         break
 
                 if not element_found:
-                    raise OutsideModelDomainError(x=coords[k, 0], y=coords[k, 1])
+                    points_outside.append(k)
+
+        if len(points_outside) > 0:
+            raise OutsideModelDomainError(
+                x=coords[points_outside, 0],
+                y=coords[points_outside, 1],
+                indices=points_outside,
+            )
 
         return ids
 
