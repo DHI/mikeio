@@ -429,8 +429,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def _has_time_axis(self):
         return self.dims[0][0] == "t"
 
-    def dropna(self) -> Optional["DataArray"]:
-        # TODO consider if isel should be allowed to return None, it ripples through the code
+    def dropna(self) -> "DataArray":
         """Remove time steps where values are NaN"""
         if not self._has_time_axis:
             raise ValueError("Not available if no time axis!")
