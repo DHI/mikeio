@@ -1159,8 +1159,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if interpolant is None:
             elem_ids, weights = self.geometry.get_2d_interpolant(xy, **kwargs)
         else:
-            elem_ids = None
-            weights = None
+            elem_ids, weights = interpolant
 
         if isinstance(geom, Grid2D):
             dai = self.geometry.interp2d(
