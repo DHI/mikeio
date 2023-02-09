@@ -1160,15 +1160,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             elem_ids, weights = interpolant
 
-        if isinstance(geom, Grid2D):
+        if isinstance(geom, (Grid2D, GeometryFM)):
+            shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
+
             dai = self.geometry.interp2d(
-                data=self.to_numpy(),
-                elem_ids=elem_ids,
-                weights=weights,
-                shape=(geom.ny, geom.nx),
+                data=self.to_numpy(), elem_ids=elem_ids, weights=weights, shape=shape
             )
-        else:
-            dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
 
         dai = DataArray(
             data=dai, time=self.time, geometry=geom, item=deepcopy(self.item)
