@@ -6,7 +6,7 @@ from typing import Iterable, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsuFile import DfsuFileType
+from mikecore.DfsuFile import DfsuFileType  # type: ignore
 
 from .base import TimeSeries
 from .data_utils import DataUtilsMixin
@@ -98,16 +98,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def __init__(
         self,
         data,
-        # *,
-        time: Union[pd.DatetimeIndex, str] = None,
-        item: ItemInfo = None,
-        geometry = GeometryUndefined(),
+        *,
+        time: Optional[Union[pd.DatetimeIndex, str]] = None,
+        item: Optional[ItemInfo] = None,
+        geometry=GeometryUndefined(),
         zn=None,
         dims: Optional[Sequence[str]] = None,
     ):
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
-        self.time = self._parse_time(time)
+        self.time: pd.DatetimeIndex = self._parse_time(time)
         self.dims = self._parse_dims(dims, geometry)
 
         self._check_time_data_length(self.time)
@@ -381,7 +381,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         dt = None
         if len(self.time) > 1 and self.is_equidistant:
-            dt = (self.time[1] - self.time[0]).total_seconds()
+            first: pd.Timestamp = self.time[0]  # type: ignore
+            second: pd.Timestamp = self.time[1]  # type: ignore
+            dt = (second - first).total_seconds()
         return dt
 
     @property
@@ -427,7 +429,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def _has_time_axis(self):
         return self.dims[0][0] == "t"
 
-    def dropna(self) -> "DataArray":
+    def dropna(self) -> Optional["DataArray"]:
+        # TODO consider if isel should be allowed to return None, it ripples through the code
         """Remove time steps where values are NaN"""
         if not self._has_time_axis:
             raise ValueError("Not available if no time axis!")
@@ -436,8 +439,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         # this seems overly complicated...
         axes = tuple(range(1, x.ndim))
-        idx = np.where(~np.isnan(x).all(axis=axes))
-        idx = list(idx[0])
+        idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
         return self.isel(idx, axis=0)
 
     def flipud(self) -> "DataArray":
@@ -483,10 +485,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     # ============= Select/interp ===========
 
-    def __getitem__(self, key) -> "DataArray":
+    def get_masked(self, key) -> np.ndarray:
         if self._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
             return self._get_by_boolean_mask(self.values, mask)
+        else:
+            raise ValueError("Invalid mask")
+
+    def __getitem__(self, key) -> "DataArray":
 
         da = self
         dims = self.dims
@@ -648,7 +654,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
             idx_slice = idx
             idx = list(range(*idx.indices(self.shape[axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
-            return None
+            raise ValueError(
+                "Empty index is not allowed"
+            )  # TODO other option would be to have a NullDataArray
 
         idx = np.atleast_1d(idx)
         single_index = len(idx) == 1
@@ -665,6 +673,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if hasattr(self.geometry, "isel"):
                 spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
+
+            # TOOD this is ugly
             if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
@@ -705,7 +715,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def sel(
         self,
         *,
-        time: Union[str, pd.DatetimeIndex, "DataArray"] = None,
+        time: Optional[Union[str, pd.DatetimeIndex, "DataArray"]] = None,
         **kwargs,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
@@ -845,12 +855,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def interp(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
-        *,
-        time: Union[pd.DatetimeIndex, "DataArray"] = None,
-        x: float = None,
-        y: float = None,
-        z: float = None,
-        n_nearest=3,
+        # *, # TODO: make this a keyword-only argument in the future
+        time: Optional[Union[pd.DatetimeIndex, "DataArray"]] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+        z: Optional[float] = None,
+        n_nearest: int = 3,
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -904,11 +914,18 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if z is not None:
             raise NotImplementedError()
 
+        geometry: Union[
+            GeometryPoint2D, GeometryPoint3D, GeometryUndefined
+        ] = GeometryUndefined()
+
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
             coords = [(x, y)]
 
             if isinstance(self.geometry, Grid2D):  # TODO DIY bilinear interpolation
+                if x is None or y is None:
+                    raise ValueError("both x and y must be specified")
+
                 xr_da = self.to_xarray()
                 dai = xr_da.interp(x=x, y=y).values
                 geometry = GeometryPoint2D(
@@ -920,6 +937,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM):
+                if x is None or y is None:
+                    raise ValueError("both x and y must be specified")
                 if self.geometry.is_layered:
                     raise NotImplementedError(
                         "Interpolation in 3d is not yet implemented"
@@ -957,7 +976,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         "Used by _extract_track"
         # Ignore item argument
         data = self.isel(time=step).to_numpy()
-        time = (self.time[step] - self.time[0]).total_seconds()
+        time = (self.time[step] - self.time[0]).total_seconds()  # type: ignore
 
         return data, time
 
@@ -1046,8 +1065,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
         )
 
         return DataArray(
-            data,
-            t_out_index,
+            data=data,
+            time=t_out_index,
             item=deepcopy(self.item),
             geometry=self.geometry,
             zn=zn,
@@ -1138,11 +1157,17 @@ class DataArray(DataUtilsMixin, TimeSeries):
             raise NotImplementedError()
 
         if interpolant is None:
-            interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+            elem_ids, weights = self.geometry.get_2d_interpolant(xy, **kwargs)
+        else:
+            elem_ids = None
+            weights = None
 
         if isinstance(geom, Grid2D):
             dai = self.geometry.interp2d(
-                self.to_numpy(), *interpolant, shape=(geom.ny, geom.nx)
+                data=self.to_numpy(),
+                elem_ids=elem_ids,
+                weights=weights,
+                shape=(geom.ny, geom.nx),
             )
         else:
             dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
@@ -1187,8 +1212,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         datasets = [Dataset([da]) for da in dataarrays]
 
         ds = Dataset.concat(datasets, keep=keep)
-
-        return ds[0]
+        da = ds[0]
+        assert isinstance(da, DataArray)
+        return da
 
     # ============= Aggregation methods ===========
 
@@ -1520,7 +1546,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
             item = deepcopy(self.item)
-            return DataArray(qdat, time, item=item, geometry=geometry, dims=dims, zn=zn)
+            return DataArray(
+                data=qdat, time=time, item=item, geometry=geometry, dims=dims, zn=zn
+            )
         else:
             res = []
             for quantile in q:
@@ -1641,11 +1669,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         bmask = self.values >= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __eq__(self, other) -> "DataArray":
+    def __eq__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values == self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __ne__(self, other) -> "DataArray":
+    def __ne__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values != self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
@@ -1755,15 +1783,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def _time_txt(self) -> str:
         noneq_txt = "" if self.is_equidistant else " non-equidistant"
         timetxt = (
-            f"time: {self.time[0]} (time-invariant)"
+            f"time: {str(self.time[0])} (time-invariant)"
             if self.n_timesteps == 1
-            else f"time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps}{noneq_txt} records)"
+            else f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps}{noneq_txt} records)"
         )
         return timetxt
 
     def _geometry_txt(self) -> str:
-        if not isinstance(self.geometry, (GeometryUndefined, type(None))):
-            return f"geometry: {self.geometry}"
+        return f"geometry: {self.geometry}"
 
     def _values_txt(self) -> str:
 
@@ -1774,3 +1801,5 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return f"values: [{valtxt}]"
         elif self.ndim == 1:
             return f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
+        else:
+            return ""  # raise NotImplementedError()

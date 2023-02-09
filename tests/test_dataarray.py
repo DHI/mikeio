@@ -163,13 +163,11 @@ def test_data_0d(da0):
     assert da0.ndim == 1
     assert da0.dims == ("time",)
     assert "values" in repr(da0)
-    assert "geometry" not in repr(da0)
     assert "values" in repr(da0[:4])
 
     da0 = da0.squeeze()
     assert da0.ndim == 0
     assert "values" in repr(da0)
-    assert "geometry" not in repr(da0)
 
 
 def test_create_data_1d_default_grid():
@@ -618,8 +616,8 @@ def test_da_isel_space(da_grid2d):
 
 
 def test_da_isel_empty(da_grid2d):
-    da_sel = da_grid2d.isel(slice(100, 200), axis="y")
-    assert da_sel is None
+    with pytest.raises(ValueError):
+        da_grid2d.isel(slice(100, 200), axis="y")
 
 
 def test_da_isel_space_multiple_elements(da_grid2d):
@@ -843,92 +841,92 @@ def test_modify_values_1d(da1):
     assert da1.values[4] == 14.0
 
     # selecting a slice will return a view. The original is changed.
-    da1.isel(slice(4,6)).values[0] = 13.0 
+    da1.isel(slice(4, 6)).values[0] = 13.0
     assert da1.values[4] == 13.0
 
     # __getitem__ uses isel()
-    da1[4:6].values[0] = 12.0 
+    da1[4:6].values[0] = 12.0
     assert da1.values[4] == 12.0
 
     # values is scalar, therefore copy by definition. Original is not changed.
-    da1.isel(4).values = 11.0    
-    assert da1.values[4] != 11.0  
+    da1.isel(4).values = 11.0
+    assert da1.values[4] != 11.0
 
     # fancy indexing will return copy! Original is *not* changed.
-    da1.isel([0,4,7]).values[1] = 10.0  
-    assert da1.values[4] != 10.0  
+    da1.isel([0, 4, 7]).values[1] = 10.0
+    assert da1.values[4] != 10.0
 
 
 def test_modify_values_2d_all(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     da2 += 0.1
-    assert da2.values[2,5] == 0.2
+    assert da2.values[2, 5] == 0.2
 
-    vals = 0.3*np.ones(da2.shape)
+    vals = 0.3 * np.ones(da2.shape)
     da2.values = vals
-    assert da2.values[2,5] == 0.3
+    assert da2.values[2, 5] == 0.3
 
 
 def test_modify_values_2d_idx(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     # selecting a single index will return a view. The original is changed.
     da2.isel(time=2).values[5] = 0.2
-    assert da2.values[2,5] == 0.2
+    assert da2.values[2, 5] == 0.2
 
     da2.isel(x=5).values[2] = 0.3
-    assert da2.values[2,5] == 0.3
+    assert da2.values[2, 5] == 0.3
 
-    da2.values[2,5] = 0.4
-    assert da2.values[2,5] == 0.4
+    da2.values[2, 5] = 0.4
+    assert da2.values[2, 5] == 0.4
 
     # __getitem__ uses isel()
     da2[2].values[5] = 0.5
-    assert da2.values[2,5] == 0.5
+    assert da2.values[2, 5] == 0.5
 
-    da2[:,5].values[2] = 0.6
-    assert da2.values[2,5] == 0.6
+    da2[:, 5].values[2] = 0.6
+    assert da2.values[2, 5] == 0.6
 
 
 def test_modify_values_2d_slice(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     # selecting a slice will return a view. The original is changed.
-    da2.isel(time=slice(2,6)).values[0,5] = 0.4
-    assert da2.values[2,5] == 0.4
+    da2.isel(time=slice(2, 6)).values[0, 5] = 0.4
+    assert da2.values[2, 5] == 0.4
 
-    da2.isel(x=slice(5,7)).values[2,0] = 0.5
-    assert da2.values[2,5] == 0.5
+    da2.isel(x=slice(5, 7)).values[2, 0] = 0.5
+    assert da2.values[2, 5] == 0.5
 
     # __getitem__ uses isel()
-    da2[2:5].values[0,5] = 0.6
-    assert da2.values[2,5] == 0.6
+    da2[2:5].values[0, 5] = 0.6
+    assert da2.values[2, 5] == 0.6
 
-    da2[:,5:7].values[2,0] = 0.7
-    assert da2.values[2,5] == 0.7
+    da2[:, 5:7].values[2, 0] = 0.7
+    assert da2.values[2, 5] == 0.7
 
 
 def test_modify_values_2d_fancy(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     # fancy indexing will return a *copy*. The original is NOT changed.
-    da2.isel(time=[2,3,4,5]).values[0,5] = 0.4
-    assert da2.values[2,5] != 0.4
+    da2.isel(time=[2, 3, 4, 5]).values[0, 5] = 0.4
+    assert da2.values[2, 5] != 0.4
 
-    da2.isel(x=[5,6]).values[2,0] = 0.5
-    assert da2.values[2,5] != 0.5
+    da2.isel(x=[5, 6]).values[2, 0] = 0.5
+    assert da2.values[2, 5] != 0.5
 
     # __getitem__ uses isel()
-    da2[[2,3,4,5]].values[0,5] = 0.6
-    assert da2.values[2,5] != 0.6
+    da2[[2, 3, 4, 5]].values[0, 5] = 0.6
+    assert da2.values[2, 5] != 0.6
 
-    da2[:,[5,6]].values[2,0] = 0.7
-    assert da2.values[2,5] != 0.7
+    da2[:, [5, 6]].values[2, 0] = 0.7
+    assert da2.values[2, 5] != 0.7
 
 
 def test_add_scalar(da1):
@@ -1044,7 +1042,7 @@ def test_dataarray_masking():
     assert mask.shape == (3, 1740)
 
     # get values using mask (other values will be np.nan)
-    da_mask = da[mask]
+    da_mask = da.get_masked(mask)  # TODO name?
     assert isinstance(da_mask, np.ndarray)
     assert da_mask.shape == (2486,)
 
@@ -1083,6 +1081,7 @@ def test_daarray_aggregation_dfs2():
     dasm = da.nanmean(axis="space")
     assert dasm.shape == (1,)
 
+
 def test_dataarray_weigthed_average():
     filename = "tests/testdata/HD2D.dfsu"
     ds = mikeio.read(filename, items=["Surface elevation"])
@@ -1090,7 +1089,7 @@ def test_dataarray_weigthed_average():
     da = ds["Surface elevation"]
 
     area = da.geometry.get_element_area()
-    
+
     da2 = da.average(weights=area, axis=1)
 
     assert isinstance(da2.geometry, GeometryUndefined)
@@ -1150,9 +1149,10 @@ def test_daarray_aggregation_no_time():
     filename = "tests/testdata/HD2D.dfsu"
     ds = mikeio.read(filename, items=[3], time=-1)
     da = ds["Current speed"]
-    assert da.dims == ("element",) 
+    assert da.dims == ("element",)
 
     assert da.max().values == pytest.approx(1.6463733)
+
 
 def test_daarray_aggregation_nan_versions():
 
