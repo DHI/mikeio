@@ -428,10 +428,12 @@ def test_read_dfs0_single_item_read_by_name():
 
     dfs0file = r"tests/testdata/random.dfs0"
 
+    items = ["NotFun", "VarFun01"]
     dfs = Dfs0(dfs0file)
-    res = dfs.read(["NotFun", "VarFun01"])  # reversed order compare to original file
+    res = dfs.read(items=items)  # reversed order compare to original file
     data = res.to_numpy()
 
+    assert items == ["NotFun", "VarFun01"]
     assert len(data) == 2
     assert res.items[0].name == "NotFun"
     assert res.items[0].type == EUMType.Water_Level
