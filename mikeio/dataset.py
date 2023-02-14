@@ -1295,6 +1295,13 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if axis == "items":
             if self.n_items <= 1:
                 return self
+
+            if "keepdims" in kwargs:
+                warnings.warn(
+                    "The keepdims arguments is deprecated. The result will always be a Dataset.",
+                    FutureWarning,
+                )
+
             keepdims = kwargs.pop("keepdims", False)
             name = kwargs.pop("name", func.__name__)
             data = func(self.to_numpy(), axis=0, keepdims=False, **kwargs)
@@ -1307,6 +1314,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 dims=self.dims,
                 zn=self._zn,
             )
+            if not keepdims:
+                warnings.warn(
+                    "The keepdims arguments is deprecated. The result will always be a Dataset.",
+                    FutureWarning,
+                )
             return Dataset([da], validate=False) if keepdims else da
         else:
             res = {
