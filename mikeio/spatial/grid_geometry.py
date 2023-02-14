@@ -1,10 +1,10 @@
 import warnings
 from typing import Sequence, Tuple, Union
-
 from dataclasses import dataclass
-
 import numpy as np
 
+from mikecore.Projections import Cartography
+        
 from .geometry import (
     BoundingBox,
     GeometryPoint2D,
@@ -73,6 +73,18 @@ class Grid1D(_Geometry):
     _orientation: float
     _origin: Tuple[float, float]
     _projstr: str
+
+    def __eq__(self, other):
+        if not isinstance(other, Grid1D):
+            return False
+        return (
+            self._dx == other._dx
+            and self._nx == other._nx
+            and self._x0 == other._x0
+            # and self._projstr == other._projstr
+            # and np.allclose(self._origin, other._origin)
+            # and np.allclose(self._orientation, other._orientation)
+        )
 
     def __init__(
         self,
@@ -295,6 +307,22 @@ class Grid2D(_Geometry):
     _origin: Tuple[float, float]
     _orientation: float
     is_spectral: bool
+
+    def __eq__(self, other):
+        if not isinstance(other, Grid2D):
+            return False
+        return (
+            self._dx == other._dx
+            and self._nx == other._nx
+            and self._x0 == other._x0
+            and self._dy == other._dy
+            and self._ny == other._ny
+            and self._y0 == other._y0
+            and self._projstr == other._projstr
+            and self.is_spectral == other.is_spectral
+            and np.allclose(self._origin, other._origin)
+            and np.allclose(self._orientation, other._orientation)
+        )
 
     def __init__(
         self,
@@ -568,8 +596,6 @@ class Grid2D(_Geometry):
     @property
     def _cart(self):
         """MIKE Core Cartography object"""
-        from mikecore.Projections import Cartography
-
         factory = (
             Cartography.CreateGeoOrigin if self.is_geo else Cartography.CreateProjOrigin
         )
@@ -907,6 +933,24 @@ class Grid3D(_Geometry):
     _origin: Tuple[float, float]
     _orientation: float
 
+    def __eq__(self, other):
+        if not isinstance(other, Grid3D):
+            return False
+        return (
+            self._dx == other._dx
+            and self._nx == other._nx
+            and self._x0 == other._x0
+            and self._dy == other._dy
+            and self._ny == other._ny
+            and self._y0 == other._y0
+            and self._dz == other._dz
+            and self._nz == other._nz
+            and self._z0 == other._z0
+            and self._projstr == other._projstr
+            and np.allclose(self._origin, other._origin)
+            and np.allclose(self._orientation, other._orientation)
+        )
+
     def __init__(
         self,
         *,
@@ -928,6 +972,7 @@ class Grid3D(_Geometry):
     ) -> None:
 
         super().__init__()
+        self._origin = (0.0, 0.0) if origin is None else origin
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
         self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
         self._z0, self._dz, self._nz = _parse_grid_axis("z", z, z0, dz, nz)
@@ -941,10 +986,15 @@ class Grid3D(_Geometry):
         return 3
 
     @property
+    def _is_rotated(self):
+        return np.abs(self._orientation) > 1e-5
+
+    @property
     def x(self):
-        """array of x-axis node coordinates"""
+        """array of x-axis coordinates (element center)"""
         x1 = self._x0 + self.dx * (self.nx - 1)
-        return np.linspace(self._x0, x1, self.nx)
+        x_local = np.linspace(self._x0, x1, self.nx)
+        return x_local if self._is_rotated else x_local + self.origin[0]
 
     @property
     def dx(self) -> float:
@@ -953,14 +1003,15 @@ class Grid3D(_Geometry):
 
     @property
     def nx(self) -> int:
-        """number of x-axis nodes"""
+        """number of x grid points"""
         return self._nx
 
     @property
     def y(self):
-        """array of y-axis node coordinates"""
+        """array of y-axis coordinates (element center)"""
         y1 = self._y0 + self.dy * (self.ny - 1)
-        return np.linspace(self._y0, y1, self.ny)
+        y_local = np.linspace(self._y0, y1, self.ny)
+        return y_local if self._is_rotated else y_local + self.origin[1]
 
     @property
     def dy(self) -> float:
@@ -969,7 +1020,7 @@ class Grid3D(_Geometry):
 
     @property
     def ny(self) -> int:
-        """number of y-axis nodes"""
+        """number of y grid points"""
         return self._ny
 
     @property
@@ -985,7 +1036,7 @@ class Grid3D(_Geometry):
 
     @property
     def nz(self) -> int:
-        """number of z-axis nodes"""
+        """number of z grid points"""
         return self._nz
 
     @property
@@ -1009,15 +1060,27 @@ class Grid3D(_Geometry):
 
     def isel(self, idx, axis):
         """Get a subset geometry from this geometry"""
+        if isinstance(axis, str):
+            if axis == "z":
+                axis = 0
+            elif axis == "y":
+                axis = 1
+            elif axis == "x":
+                axis = 2
+            else:
+                raise ValueError(f"axis must be 'x', 'y' or 'z', not {axis}")
+        assert isinstance(axis, int), "axis must be an integer (or 'x', 'y' or 'z')"
+        axis = axis + 3 if axis < 0 else axis
+
         if not np.isscalar(idx):
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 return GeometryUndefined()
             else:
-                x = self.x[idx] if axis == 2 else self.x
-                y = self.y[idx] if axis == 1 else self.y
-                z = self.z[idx] if axis == 0 else self.z
-                return Grid3D(x=x, y=y, z=z, projection=self.projection)
+                ii = idx if axis == 2 else None
+                jj = idx if axis == 1 else None
+                kk = idx if axis == 0 else None
+                return self._index_to_Grid3D(ii, jj, kk)
 
         if axis == 0:
             # z is the first axis! return x-y Grid2D
@@ -1041,13 +1104,66 @@ class Grid3D(_Geometry):
                 y=self.z,
                 # projection=self._projection,
             )
-        else:
+        elif axis == 2:
             # x is the last axis! return y-z Grid2D
             # TODO: origin, how to pass self.x[idx]?
             return Grid2D(
                 x=self.y,
                 y=self.z,
                 # projection=self._projection,
+            )
+        else:
+            raise ValueError(f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis}")
+
+    def _index_to_Grid3D(self, ii=None, jj=None, kk=None):
+        ii = range(self.nx) if ii is None else ii
+        jj = range(self.ny) if jj is None else jj
+        kk = range(self.nz) if kk is None else kk
+        assert (
+            len(ii) > 1 and len(jj) > 1 and len(kk) > 1
+        ), "Index must be at least len 2"
+        assert (
+            ii[-1] < self.nx and jj[-1] < self.ny and kk[-1] < self.nz
+        ), "Index out of bounds"
+        di = np.diff(ii)
+        dj = np.diff(jj)
+        dk = np.diff(kk)
+        if (
+            (np.any(di < 1) or not np.allclose(di, di[0]))
+            or (np.any(dj < 1) or not np.allclose(dj, dj[0]))
+            or (np.any(dk < 1) or not np.allclose(dk, dk[0]))
+        ):
+            warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
+            return GeometryUndefined()
+        else:
+            dx = self.dx * di[0]
+            dy = self.dy * dj[0]
+            dz = self.dz * dk[0]
+            x0 = self._x0 + (self.x[ii[0]] - self.x[0])
+            y0 = self._y0 + (self.y[jj[0]] - self.y[0])
+            z0 = self._z0 + (self.z[kk[0]] - self.z[0])
+            origin = self.origin
+            if self._is_rotated:
+                # rotated => most be projected 
+                cart = Cartography.CreateProjOrigin(self.projection_string, *self.origin, self.orientation)
+                origin = self._cart.Xy2Proj(ii[0], jj[0])
+                # what about the orientation if is_geo??
+                # orientationGeo = proj.Proj2GeoRotation(east, north, orientationProj)
+                x0, y0 = (0.0, 0.0)
+
+            return Grid3D(
+                x0=x0,
+                y0=y0,
+                z0=z0,
+                dx=dx,
+                dy=dy,
+                dz=dz,
+                nx=len(ii),
+                ny=len(jj),
+                nz=len(kk),
+                projection=self.projection,
+                orientation=self._orientation,
+                origin=origin,
             )
 
     def __repr__(self):
