@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
 
+from copy import deepcopy
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -77,6 +78,8 @@ def _valid_item_numbers(
     n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
         return list(range(n_items_file))
+
+    items = deepcopy(items)
 
     if np.isscalar(items):
         if isinstance(items, str) and "*" in items:
