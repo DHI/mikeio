@@ -2,11 +2,13 @@ import os
 
 import numpy as np
 import pandas as pd
+
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import DfsFile, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
+from mikecore.Projections import Cartography
 
 from . import __dfs_version__
 from .dataset import Dataset
@@ -34,23 +36,23 @@ def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
 
     factory = DfsFactory()
     _write_dfs3_spatial_axis(builder, factory, geometry)
-    origin = geometry._origin  # Origin in geographical coordinates
-    orient = geometry._orientation
+    origin = geometry.origin  # Origin in geographical coordinates
+    orient = geometry.orientation
 
-    # if geometry.is_geo:
-    proj = factory.CreateProjectionGeoOrigin(
-        geometry.projection_string, *origin, orient
-    )
-    # else:
-    #    cart: Cartography = Cartography.CreateProjOrigin(
-    #        geometry.projection_string, *origin, orient
-    #    )
-    #    proj = factory.CreateProjectionGeoOrigin(
-    #        wktProjectionString=geometry.projection,
-    #        lon0=cart.LonOrigin,
-    #        lat0=cart.LatOrigin,
-    #        orientation=cart.Orientation,
-    #    )
+    if geometry.is_geo:
+        proj = factory.CreateProjectionGeoOrigin(
+            geometry.projection_string, *origin, orient
+        )
+    else:
+        cart: Cartography = Cartography.CreateProjOrigin(
+            geometry.projection_string, *origin, orient
+        )
+        proj = factory.CreateProjectionGeoOrigin(
+            wktProjectionString=geometry.projection,
+            lon0=cart.LonOrigin,
+            lat0=cart.LatOrigin,
+            orientation=cart.Orientation,
+        )
 
     builder.SetGeographicalProjection(proj)
 
@@ -117,6 +119,9 @@ class Dfs3(_Dfs123):
 
         if filename:
             self._read_dfs3_header()
+            self._validate_no_orientation_in_geo()
+            origin, orientation = self._origin_and_orientation_in_CRS()
+
             self.geometry = Grid3D(
                 x0=self._x0,
                 dx=self._dx,
@@ -127,9 +132,9 @@ class Dfs3(_Dfs123):
                 z0=self._z0,
                 dz=self._dz,
                 nz=self._nz,
-                origin=(self._longitude, self._latitude),
+                origin=origin,
                 projection=self._projstr,
-                orientation=self._orientation,
+                orientation=orientation,
             )
 
     def __repr__(self):
@@ -408,3 +413,8 @@ class Dfs3(_Dfs123):
     @property
     def shape(self):
         return (self._n_timesteps, self._nz, self._ny, self._nx)
+
+    @property
+    def is_geo(self):
+        """Are coordinates geographical (LONG/LAT)?"""
+        return self._projstr == "LONG/LAT"
