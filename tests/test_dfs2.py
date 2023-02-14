@@ -357,7 +357,7 @@ def test_dir_wave_spectra_relative_time_axis():
 
 def test_properties_rotated_longlat():
     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
-    with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"):
+    with pytest.raises(ValueError, match="Orientation is not supported for LONG/LAT"):
         mikeio.open(filepath)
 
 

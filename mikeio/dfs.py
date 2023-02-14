@@ -2,9 +2,10 @@ import warnings
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from typing import Iterable, List, Optional, Tuple, Union
-
 import numpy as np
 import pandas as pd
+from tqdm import tqdm, trange
+
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -15,7 +16,7 @@ from mikecore.DfsFile import (
 )
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
-from tqdm import tqdm, trange
+from mikecore.Projections import Cartography
 
 from .base import TimeSeries
 from .dataset import Dataset
@@ -748,3 +749,25 @@ class _Dfs123(TimeSeries):
     def dx(self):
         """Step size in x direction"""
         pass
+
+    def _validate_no_orientation_in_geo(self):
+        if self.is_geo and abs(self._orientation) > 1e-6:
+            raise ValueError("Orientation is not supported for LONG/LAT coordinates")
+
+    def _origin_and_orientation_in_CRS(self):
+        """Project origin and orientation to projected CRS (if not LONG/LAT)"""
+        if self.is_geo:
+            origin = self._longitude, self._latitude
+            orientation = 0.0
+        else:
+            lon, lat = self._longitude, self._latitude
+            cart = Cartography.CreateGeoOrigin(
+                projectionString=self._projstr,
+                lonOrigin=lon,
+                latOrigin=lat,
+                orientation=self._orientation,
+            )
+            # convert origin and orientation to projected CRS
+            origin = np.round(cart.Geo2Proj(lon, lat), 7)
+            orientation = cart.OrientationProj
+        return origin, orientation

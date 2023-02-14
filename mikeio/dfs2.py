@@ -1,14 +1,14 @@
 import os
 from copy import deepcopy
-
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
+
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.DfsFile import DfsFile, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from mikecore.Projections import Cartography
-from tqdm import tqdm
 
 from . import __dfs_version__
 from .dataset import Dataset
@@ -44,14 +44,14 @@ def _write_dfs2_header(filename, ds: Dataset, title="") -> DfsFile:
 
     factory = DfsFactory()
     _write_dfs2_spatial_axis(builder, factory, geometry)
-    proj = geometry.projection_string
+    proj_str = geometry.projection_string
     origin = geometry.origin
     orient = geometry.orientation
 
     if geometry.is_geo:
-        proj = factory.CreateProjectionGeoOrigin(proj, *origin, orient)
+        proj = factory.CreateProjectionGeoOrigin(proj_str, *origin, orient)
     else:
-        cart: Cartography = Cartography.CreateProjOrigin(proj, *origin, orient)
+        cart: Cartography = Cartography.CreateProjOrigin(proj_str, *origin, orient)
         proj = factory.CreateProjectionGeoOrigin(
             wktProjectionString=geometry.projection,
             lon0=cart.LonOrigin,
@@ -105,7 +105,7 @@ class Dfs2(_Dfs123):
 
     _ndim = 2
 
-    def __init__(self, filename=None, type:str="horizontal"):
+    def __init__(self, filename=None, type: str = "horizontal"):
         super().__init__(filename)
 
         self._dx = None
@@ -119,26 +119,8 @@ class Dfs2(_Dfs123):
         if filename:
             is_spectral = type.lower() in ["spectral", "spectra", "spectrum"]
             self._read_dfs2_header(read_x0y0=is_spectral)
-
-            if self._projstr == "LONG/LAT":
-                if np.abs(self._orientation) < 1e-6:
-                    origin = self._longitude, self._latitude
-                    orientation = 0.0
-                else:
-                    raise ValueError(
-                        "LONG/LAT with non-zero orientation is not supported"
-                    )
-            else:
-                lon, lat = self._longitude, self._latitude
-                cart = Cartography.CreateGeoOrigin(
-                    projectionString=self._projstr,
-                    lonOrigin=lon,
-                    latOrigin=lat,
-                    orientation=self._orientation,
-                )
-                # convert origin and orientation to projected CRS
-                origin = np.round(cart.Geo2Proj(lon, lat), 7)
-                orientation = cart.OrientationProj
+            self._validate_no_orientation_in_geo()
+            origin, orientation = self._origin_and_orientation_in_CRS()
 
             self.geometry = Grid2D(
                 dx=self._dx,
@@ -152,7 +134,6 @@ class Dfs2(_Dfs123):
                 projection=self._projstr,
                 is_spectral=is_spectral,
             )
-            
 
     def __repr__(self):
         out = ["<mikeio.Dfs2>"]
