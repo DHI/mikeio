@@ -123,17 +123,7 @@ class Dfs2(_Dfs123):
             if self._projstr == "LONG/LAT":
                 if np.abs(self._orientation) < 1e-6:
                     origin = self._longitude, self._latitude
-                    self.geometry = Grid2D(
-                        dx=self._dx,
-                        dy=self._dy,
-                        nx=self._nx,
-                        ny=self._ny,
-                        x0=self._x0,
-                        y0=self._y0,
-                        origin=origin,
-                        projection=self._projstr,
-                        is_spectral=is_spectral,
-                    )
+                    orientation = 0.0
                 else:
                     raise ValueError(
                         "LONG/LAT with non-zero orientation is not supported"
@@ -142,25 +132,27 @@ class Dfs2(_Dfs123):
                 lon, lat = self._longitude, self._latitude
                 cart = Cartography.CreateGeoOrigin(
                     projectionString=self._projstr,
-                    lonOrigin=self._longitude,
-                    latOrigin=self._latitude,
+                    lonOrigin=lon,
+                    latOrigin=lat,
                     orientation=self._orientation,
                 )
-                origin_projected = np.round(cart.Geo2Proj(lon, lat), 7)
-                orientation_projected = cart.OrientationProj
+                # convert origin and orientation to projected CRS
+                origin = np.round(cart.Geo2Proj(lon, lat), 7)
+                orientation = cart.OrientationProj
 
-                self.geometry = Grid2D(
-                    dx=self._dx,
-                    dy=self._dy,
-                    nx=self._nx,
-                    ny=self._ny,
-                    x0=self._x0,
-                    y0=self._y0,
-                    orientation=orientation_projected,
-                    origin=origin_projected,
-                    projection=self._projstr,
-                    is_spectral=is_spectral,
-                )
+            self.geometry = Grid2D(
+                dx=self._dx,
+                dy=self._dy,
+                nx=self._nx,
+                ny=self._ny,
+                x0=self._x0,
+                y0=self._y0,
+                orientation=orientation,
+                origin=origin,
+                projection=self._projstr,
+                is_spectral=is_spectral,
+            )
+            
 
     def __repr__(self):
         out = ["<mikeio.Dfs2>"]
