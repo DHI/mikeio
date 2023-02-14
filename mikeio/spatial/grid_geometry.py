@@ -748,9 +748,13 @@ class Grid2D(_Geometry):
             y0 = self._y0 + (self.y[jj[0]] - self.y[0])
             origin = None if self._shift_origin_on_write else self.origin
             # if not self._is_rotated and not self._shift_origin_on_write:
-            if not self.is_spectral:
+            if self._is_rotated:
                 origin = self._cart.Xy2Proj(ii[0], jj[0])
-                # what about the orientation?
+                # what about the orientation if is_geo??
+                # orientationGeo = proj.Proj2GeoRotation(east, north, orientationProj)
+                x0, y0 = (0.0, 0.0)
+            elif not self.is_spectral:
+                origin = (self.origin[0] + x0, self.origin[1] + y0)
                 x0, y0 = (0.0, 0.0)
 
             return Grid2D(
