@@ -381,31 +381,48 @@ def test_properties_rotated_UTM():
 def test_select_area_rotated_UTM(tmpdir):
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
     ds = mikeio.read(filepath)
+    assert ds.geometry.origin == pytest.approx((479670, 6104860))
+    assert ds.geometry.orientation == pytest.approx(-22.2387902)
 
     dssel = ds.isel(x=range(10, 20), y=range(15, 45))
-    assert ds.geometry.orientation == dssel.geometry.orientation
-    # assert dssel.geometry._x0 == ds.geometry.x[10]
-    # assert dssel.geometry._y0 == ds.geometry.y[15]
+    assert dssel.geometry.orientation == ds.geometry.orientation
+    assert dssel.geometry.origin == pytest.approx((479673.579, 6104877.669))
 
     tmpfile = os.path.join(tmpdir.dirname, "subset_rotated.dfs2")
     dssel.to_dfs(tmpfile)
     dfs = mikeio.open(tmpfile)
     g = dfs.geometry
 
-    # assert dfs.x0 == 50
-    # assert dfs.y0 == 75
+    assert dfs.x0 == 0
+    assert dfs.y0 == 0
     assert dfs.dx == 5
     assert dfs.dy == 5
     assert dfs.nx == 10
     assert dfs.ny == 30
-    assert dfs.longitude == pytest.approx(14.6814730403)
-    assert dfs.latitude == pytest.approx(55.090063)
-    assert dfs.orientation == pytest.approx(-22.2387902)
+    assert dfs.orientation == pytest.approx(ds.geometry.orientation)
     assert g.orientation == dfs.orientation
-    # origin is projected coordinates
-    assert g.origin == pytest.approx((479670, 6104860))
-    # assert g.x[0] == dfs.x0
-    # assert g.y[0] == dfs.y0
+    # origin is in projected coordinates
+    assert g.origin == pytest.approx(dssel.geometry.origin)
+
+
+def test_select_area_rotated_UTM_2():
+    fn = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    ds = mikeio.read(fn)
+    dssel = ds.isel(x=range(50, 61), y=range(75, 106))
+    g1 = dssel.geometry
+
+    # compare to file that has been cropped in MIKE Zero
+    fn = Path("tests/testdata/BW_Ronne_Layout1998_rotated_crop.dfs2")
+    ds2 = mikeio.read(fn)
+    g2 = ds2.geometry
+
+    assert g1.origin == pytest.approx(g2.origin)
+    assert g1.dx == g2.dx
+    assert g1.dy == g2.dy
+    assert g1.nx == g2.nx
+    assert g1.ny == g2.ny
+    assert g1.orientation == g2.orientation  # orientation in projected coordinates
+    assert g1.projection_string == g2.projection_string
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
