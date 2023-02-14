@@ -565,6 +565,16 @@ class Grid2D(_Geometry):
         """n-by-2 array of x- and y-coordinates"""
         return self.xy
 
+    @property
+    def _cart(self):
+        """MIKE Core Cartography object"""
+        from mikecore.Projections import Cartography
+
+        factory = (
+            Cartography.CreateGeoOrigin if self.is_geo else Cartography.CreateProjOrigin
+        )
+        return factory(self.projection_string, *self.origin, self.orientation)
+
     def _shift_x0y0_to_origin(self):
         """Shift spatial axis to start at (0,0) adding the start to origin instead
         Note: this will not change the x or y properties.
@@ -683,7 +693,19 @@ class Grid2D(_Geometry):
 
         return i, j
 
-    def isel(self, idx, axis):
+    def isel(
+        self, idx, axis: Union[int, str]
+    ) -> Union["Grid2D", "Grid1D", "GeometryUndefined"]:
+        """Return a new geometry as a subset of Grid2D along the given axis."""
+        if isinstance(axis, str):
+            if axis == "y":
+                axis = 0
+            elif axis == "x":
+                axis = 1
+            else:
+                raise ValueError(f"axis must be 'x' or 'y', not {axis}")
+        assert isinstance(axis, int), "axis must be an integer (or 'x' or 'y')"
+        axis = axis + 2 if axis < 0 else axis
 
         if not np.isscalar(idx):
             d = np.diff(idx)
@@ -699,16 +721,19 @@ class Grid2D(_Geometry):
             # we return a "copy" of the x-axis
             nc = np.column_stack([self.x, self.y[idx] * np.ones_like(self.x)])
             return Grid1D(x=self.x, projection=self.projection, node_coordinates=nc)
-        else:
+        elif axis == 1:
             nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])
             return Grid1D(
                 x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
             )
+        else:
+            raise ValueError(f"axis must be 0 or 1 (or 'x' or 'y'), not {axis}")
 
     def _index_to_Grid2D(self, ii=None, jj=None):
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
         assert len(ii) > 1 and len(jj) > 1, "Index must be at least len 2"
+        assert ii[-1] < self.nx and jj[-1] < self.ny, "Index out of bounds"
         di = np.diff(ii)
         dj = np.diff(jj)
         if (np.any(di < 1) or not np.allclose(di, di[0])) or (
@@ -722,8 +747,10 @@ class Grid2D(_Geometry):
             x0 = self._x0 + (self.x[ii[0]] - self.x[0])
             y0 = self._y0 + (self.y[jj[0]] - self.y[0])
             origin = None if self._shift_origin_on_write else self.origin
-            if not self._is_rotated and not self._shift_origin_on_write:
-                origin = (self.origin[0] + x0, self.origin[1] + y0)
+            # if not self._is_rotated and not self._shift_origin_on_write:
+            if not self.is_spectral:
+                origin = self._cart.Xy2Proj(ii[0], jj[0])
+                # what about the orientation?
                 x0, y0 = (0.0, 0.0)
 
             return Grid2D(
