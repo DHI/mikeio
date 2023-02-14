@@ -200,7 +200,8 @@ def test_read_area_subset_bad_bbox():
 
 
 def test_read_area_subset_geo():
-
+    # x: [-15, -14.75, ..., 40] (nx=221, dx=0.25)
+    # y: [30, 30.25, ..., 55] (ny=101, dy=0.25)
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     bbox = (10, 40, 20, 50)
     dsall = mikeio.read(filename)
