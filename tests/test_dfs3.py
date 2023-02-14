@@ -94,10 +94,13 @@ def test_dfs3_read_write(tmpdir):
 
 
 def test_read_rotated_grid():
-    ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
-    assert pytest.approx(ds.geometry.orientation) == 18.1246891
+    dfs = mikeio.open("tests/testdata/dissolved_oxygen.dfs3")
+    # North to Y orientation: 18.124689102173
+    # Grid rotation: 17.0003657182497
 
-    # North to Y rotation != Grid rotation
+    # assert dfs._orientation == pytest.approx(18.1246891)
+    assert dfs.orientation == pytest.approx(17.0003657)
+    assert dfs.geometry.orientation == pytest.approx(17.0003657)  # in own CRS
 
 
 def test_dfs3_to_dfs(tmpdir):
@@ -171,6 +174,7 @@ def test_read_single_timestep_dfs3():
     assert ds.dims == ("z", "y", "x")
     assert ds.shape == (5, 17, 21)
 
+
 def test_read_write_single_layer_as_dfs3(tmpdir):
     fn = "tests/testdata/single_layer.dfs3"
     ds1 = mikeio.read(fn, keepdims=True)
@@ -179,7 +183,23 @@ def test_read_write_single_layer_as_dfs3(tmpdir):
     ds2 = mikeio.read(fn, layers=0, keepdims=True)
     assert ds2.dims == ("time", "z", "y", "x")
     assert isinstance(ds2.geometry, Grid3D)
-    
+
     outfile = os.path.join(tmpdir, "single_layer.dfs3")
 
     ds2.to_dfs(outfile)
+
+
+def test_MIKE_SHE_dfs3_output():
+    ds = mikeio.read("tests/testdata/Karup_MIKE_SHE_head_output.dfs3")
+    assert ds.n_timesteps == 6
+    assert ds.n_items == 1
+    g = ds.geometry
+    assert g.x[0] == 494329.0
+    assert g.y[0] == pytest.approx(6220250.0)
+    assert g.origin == pytest.approx((494329.0, 6220250.0))
+
+    # ds2 = ds.isel(x=range(30, 45))
+    # g2 = ds2.geometry
+    # assert g2.x[0] == g.x[0] + 30 * g.dx
+    # assert g2.y[0] == g.y[0]  # + 35 * g.dy
+    # assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
