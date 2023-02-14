@@ -160,7 +160,7 @@ class Dfs3(_Dfs123):
 
         self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
 
-        self.source = self._dfs
+        self._source = self._dfs
 
         if read_x0y0z0:
             self._x0 = self._dfs.SpatialAxis.X0
