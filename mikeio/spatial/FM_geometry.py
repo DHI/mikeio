@@ -804,7 +804,7 @@ class GeometryFM(_Geometry):
             )
 
             # step 2: if not, then try second nearest point
-            if not element_found:
+            if not element_found and self._geometry2d.n_elements > 1:
                 candidate = few_nearest[k, 1]
                 assert np.isscalar(candidate)
                 nodes = self._geometry2d.element_table[candidate]
@@ -814,7 +814,7 @@ class GeometryFM(_Geometry):
                 ids[k] = few_nearest[k, 1]
 
             # step 3: if not, then try with *many* more points
-            if not element_found:
+            if not element_found and self._geometry2d.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
                     coords[k, :],
                     n=min(self._geometry2d.n_elements, 10),  # TODO is 10 enough?
@@ -828,8 +828,8 @@ class GeometryFM(_Geometry):
                         ids[k] = p
                         break
 
-                if not element_found:
-                    points_outside.append(k)
+            if not element_found:
+                points_outside.append(k)
 
         if len(points_outside) > 0:
             raise OutsideModelDomainError(
