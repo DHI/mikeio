@@ -857,3 +857,23 @@ def test_read_write_header_unchanged_vertical(tmpdir):
 
 def test_read_write_header_unchanged_spectral_2(tmpdir):
     is_header_unchanged_on_read_write(tmpdir, "pt_spectra.dfs2")
+
+
+def test_read_write_header_unchanged_MIKE_SHE_output(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "Karup_MIKE_SHE_output.dfs2")
+
+
+def test_MIKE_SHE_output():
+    ds = mikeio.read("tests/testdata/Karup_MIKE_SHE_output.dfs2")
+    assert ds.n_timesteps == 6
+    assert ds.n_items == 2
+    g = ds.geometry
+    assert g.x[0] == 494329.0
+    assert g.y[0] == pytest.approx(6220250.0)
+    assert g.origin == pytest.approx((494329.0, 6220250.0))
+
+    ds2 = ds.isel(x=range(30, 45), y=range(35, 42))
+    g2 = ds2.geometry
+    assert g2.x[0] == g.x[0] + 30 * g.dx
+    assert g2.y[0] == g.y[0] + 35 * g.dy
+    assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
