@@ -581,11 +581,16 @@ class Grid2D(_Geometry):
         """
         if self._is_rotated:
             raise ValueError("Only possible if orientation = 0")
-        if self.is_spectral:
+            # TODO: needs testing
+            # i0, j0 = self._x0/self.dx, self._y0/self.dy
+            # self._x0, self._y0 = 0.0, 0.0
+            # self._origin = self._cart.Xy2Proj(i0, j0)
+        elif self.is_spectral:
             raise ValueError("Not possible for spectral Grid2D")
-        x0, y0 = self._x0, self._y0
-        self._x0, self._y0 = 0.0, 0.0
-        self._origin = (self._origin[0] + x0, self._origin[1] + y0)
+        else:
+            x0, y0 = self._x0, self._y0
+            self._x0, self._y0 = 0.0, 0.0
+            self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
     def contains(self, coords):
         """test if a list of points are inside grid
