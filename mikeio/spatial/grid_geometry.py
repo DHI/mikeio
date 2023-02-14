@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from mikecore.Projections import Cartography
-        
+
 from .geometry import (
     BoundingBox,
     GeometryPoint2D,
@@ -1142,14 +1142,16 @@ class Grid3D(_Geometry):
             x0 = self._x0 + (self.x[ii[0]] - self.x[0])
             y0 = self._y0 + (self.y[jj[0]] - self.y[0])
             z0 = self._z0 + (self.z[kk[0]] - self.z[0])
-            origin = self.origin
             if self._is_rotated:
-                # rotated => most be projected 
-                cart = Cartography.CreateProjOrigin(self.projection_string, *self.origin, self.orientation)
-                origin = self._cart.Xy2Proj(ii[0], jj[0])
-                # what about the orientation if is_geo??
-                # orientationGeo = proj.Proj2GeoRotation(east, north, orientationProj)
-                x0, y0 = (0.0, 0.0)
+                # rotated => most be projected
+                cart = Cartography.CreateProjOrigin(
+                    self.projection, *self.origin, self.orientation
+                )
+                origin = cart.Xy2Proj(ii[0], jj[0])
+            else:
+                origin = (self.origin[0] + x0, self.origin[1] + y0)
+
+            x0, y0 = (0.0, 0.0)
 
             return Grid3D(
                 x0=x0,
@@ -1162,7 +1164,7 @@ class Grid3D(_Geometry):
                 ny=len(jj),
                 nz=len(kk),
                 projection=self.projection,
-                orientation=self._orientation,
+                orientation=self.orientation,
                 origin=origin,
             )
 

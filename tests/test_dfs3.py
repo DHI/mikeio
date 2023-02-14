@@ -198,8 +198,8 @@ def test_MIKE_SHE_dfs3_output():
     assert g.y[0] == pytest.approx(6220250.0)
     assert g.origin == pytest.approx((494329.0, 6220250.0))
 
-    # ds2 = ds.isel(x=range(30, 45))
-    # g2 = ds2.geometry
-    # assert g2.x[0] == g.x[0] + 30 * g.dx
-    # assert g2.y[0] == g.y[0]  # + 35 * g.dy
-    # assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
+    ds2 = ds.isel(x=range(30, 45))
+    g2 = ds2.geometry
+    assert g2.x[0] == g.x[0] + 30 * g.dx
+    assert g2.y[0] == g.y[0]  # + 35 * g.dy
+    assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
