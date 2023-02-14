@@ -1,9 +1,9 @@
 import warnings
-from typing import Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple, Union
 from dataclasses import dataclass
 import numpy as np
 
-from mikecore.Projections import Cartography
+from mikecore.Projections import Cartography  # type: ignore
 
 from .geometry import (
     BoundingBox,
@@ -56,6 +56,23 @@ def _print_axis_txt(name, x, dx) -> str:
 class Grid1D(_Geometry):
     """1D grid (node-based)
     axis is increasing and equidistant
+
+    Parameters
+    ----------
+    x : array_like
+        node coordinates
+    x0 : float
+        first node coordinate
+    dx : float
+        grid spacing
+    nx : int
+        number of nodes
+    projection : str
+        projection string
+    origin : tuple
+        not commonly used
+    orientation : float
+        not commonly used
 
     Examples
     --------
@@ -126,7 +143,7 @@ class Grid1D(_Geometry):
         """Find nearest point"""
 
         d = (self.x - x) ** 2
-        return np.argmin(d)
+        return int(np.argmin(d))
 
     def get_spatial_interpolant(self, coords, **kwargs):
 
@@ -172,8 +189,35 @@ class Grid1D(_Geometry):
     def orientation(self) -> float:
         return self._orientation
 
-    def isel(self, idx, axis=0):
-        """Get a subset geometry from this geometry"""
+    def isel(
+        self, idx, axis=None
+    ) -> Union[GeometryPoint2D, GeometryPoint3D, GeometryUndefined]:
+        """Get a subset geometry from this geometry
+
+        Parameters
+        ----------
+        idx : int or slice
+            index or slice
+        axis : int, optional
+            Not used for Grid1D, by default None
+
+        Returns
+        -------
+        GeometryPoint2D or GeometryPoint3D or GeometryUndefined
+            The geometry of the selected point
+
+        Examples
+        --------
+        >>> g = mikeio.Grid1D(nx=3,dx=0.1)
+        >>> g
+        <mikeio.Grid1D>
+        x: [0, 0.1, 0.2] (nx=3, dx=0.1)
+        >>> g.isel([1,2])
+        <mikeio.Grid1D>
+        x: [0.1, 0.2] (nx=2, dx=0.1)
+        >>> g.isel(1)
+        GeometryUndefined()
+        """
 
         if not np.isscalar(idx):
             nc = None if self._nc is None else self._nc[idx, :]
@@ -216,7 +260,7 @@ class _Grid2DPlotter:
 
     @staticmethod
     def _get_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # type: ignore
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
@@ -327,22 +371,62 @@ class Grid2D(_Geometry):
     def __init__(
         self,
         *,
-        x=None,
-        x0=0.0,
-        dx=None,
-        nx=None,
-        y=None,
-        y0=0.0,
-        dy=None,
-        ny=None,
+        x: Optional[Sequence[float]] = None,
+        x0: float = 0.0,
+        dx: Optional[float] = None,
+        nx: Optional[int] = None,
+        y: Optional[Sequence[float]] = None,
+        y0: float = 0.0,
+        dy: Optional[float] = None,
+        ny: Optional[int] = None,
         bbox=None,
         projection="NON-UTM",
-        origin: Tuple[float, float] = None,
+        origin: Optional[Tuple[float, float]] = None,
         orientation=0.0,
         axis_names=("x", "y"),
         is_spectral=False,
     ):
-        """Create equidistant 2D spatial geometry"""
+        """Create equidistant 2D spatial geometry
+
+        Parameters
+        ----------
+        x : array_like, optional
+            x coordinates of cell centers
+        x0 : float, optional
+            x coordinate of lower-left corner of first cell
+        dx : float, optional
+            x cell size
+        nx : int, optional
+            number of cells in x direction
+        y : array_like, optional
+            y coordinates of cell centers
+        y0 : float, optional
+            y coordinate of lower-left corner of first cell
+        dy : float, optional
+            y cell size
+        ny : int, optional
+            number of cells in y direction
+        bbox : tuple, optional
+            (x0, y0, x1, y1) of bounding box
+        projection : str, optional
+            projection string, by default "NON-UTM"
+        origin : tuple, optional
+            user-defined origin, by default None
+        orientation : float, optional
+            rotation angle in degrees, by default 0.0
+        axis_names : tuple, optional
+            names of x and y axes, by default ("x", "y")
+        is_spectral : bool, optional
+            if True, the grid is spectral, by default False
+
+        Examples
+        --------
+        >>> mikeio.Grid2D(x0=12.0, nx=2, dx=0.25, y0=55.0, ny=3, dy=0.25, projection="LONG/LAT")
+        <mikeio.Grid2D>
+        x: [12, 12.25] (nx=2, dx=0.25)
+        y: [55, 55.25, 55.5] (ny=3, dy=0.25)
+        projection: LONG/LAT
+        """
         super().__init__(projection)
         self._shift_origin_on_write = origin is None  # user-constructed
         self._origin = (0.0, 0.0) if origin is None else origin
@@ -642,7 +726,13 @@ class Grid2D(_Geometry):
     def __contains__(self, pt) -> bool:
         return self.contains(pt)
 
-    def find_index(self, x: float = None, y: float = None, coords=None, area=None):
+    def find_index(
+        self,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+        coords=None,
+        area=None,
+    ):
         """Find nearest index (i,j) of point(s)
 
         -1 is returned if point is outside grid
@@ -1183,13 +1273,15 @@ class Grid3D(_Geometry):
     def __str__(self):
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"
 
-    def _geometry_for_layers(self, layers, keepdims=False) -> Union[Grid2D, "Grid3D"]:
+    def _geometry_for_layers(
+        self, layers, keepdims=False
+    ) -> Union[Grid2D, "Grid3D", "GeometryUndefined"]:
         if layers is None:
             return self
 
         g = self
         if len(layers) == 1 and not keepdims:
-            geometry = Grid2D(
+            geometry_2d = Grid2D(
                 dx=g._dx,
                 dy=g._dy,
                 nx=g._nx,
@@ -1200,7 +1292,7 @@ class Grid3D(_Geometry):
                 projection=g._projstr,
                 orientation=g.orientation,
             )
-            return geometry
+            return geometry_2d
 
         d = np.diff(g.z[layers])
         if len(d) > 0:
