@@ -920,10 +920,11 @@ def test_aggregate_selected_items_dfsu_save_to_new_file(tmpdir):
         dsm = ds.max(
             axis="items", keepdims=True, name="Max Water Level"
         )  # add a nice name
-    assert dsm.name == "Max Water Level"
+    assert len(dsm) == 1
+    assert dsm[0].name == "Max Water Level"
     assert dsm.geometry == ds.geometry
     assert dsm.dims == ds.dims
-    assert dsm.type == ds[-1].type
+    assert dsm[0].type == ds[-1].type
 
     outfilename = os.path.join(tmpdir, "maxwl.dfsu")
     dsm.to_dfs(outfilename)
