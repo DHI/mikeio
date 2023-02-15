@@ -6,6 +6,7 @@ import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D
 from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.spatial.geometry import GeometryUndefined
 
 
 def test_create_nx_ny():
@@ -30,6 +31,21 @@ def test_grid1d_x():
     g = Grid1D(x=x)
     assert g.x[0] == x0
     assert g.x[-1] == x1
+
+
+def test_grid1d_isel():
+    g = Grid1D(nx=10, dx=0.1)
+
+    g2 = g.isel([0, 1, 2])
+    assert g2.nx == 3
+
+    with pytest.raises(NotImplementedError, match="equidistant"):
+        g.isel([0, 1, 9])
+
+    p1 = g.isel(3)
+    assert isinstance(
+        p1, GeometryUndefined
+    )  # the only info we have is how far along a 1d axis we are, not enough to create a 2d point
 
 
 def test_grid1d_equality():
