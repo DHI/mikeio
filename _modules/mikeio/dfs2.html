@@ -91,15 +91,15 @@
   <h1>Source code for mikeio.dfs2</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
 <span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsBuilder</span><span class="p">,</span> <span class="n">DfsFactory</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">DfsSimpleType</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>
 <span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span><span class="p">,</span> <span class="n">eumUnit</span>
 <span class="kn">from</span> <span class="nn">mikecore.Projections</span> <span class="kn">import</span> <span class="n">Cartography</span>
-<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
 <span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
@@ -135,14 +135,14 @@
 
     <span class="n">factory</span> <span class="o">=</span> <span class="n">DfsFactory</span><span class="p">()</span>
     <span class="n">_write_dfs2_spatial_axis</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
-    <span class="n">proj</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">projection_string</span>
+    <span class="n">proj_str</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">projection_string</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">origin</span>
     <span class="n">orient</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">orientation</span>
 
     <span class="k">if</span> <span class="n">geometry</span><span class="o">.</span><span class="n">is_geo</span><span class="p">:</span>
-        <span class="n">proj</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionGeoOrigin</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span> <span class="o">*</span><span class="n">origin</span><span class="p">,</span> <span class="n">orient</span><span class="p">)</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionGeoOrigin</span><span class="p">(</span><span class="n">proj_str</span><span class="p">,</span> <span class="o">*</span><span class="n">origin</span><span class="p">,</span> <span class="n">orient</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cart</span><span class="p">:</span> <span class="n">Cartography</span> <span class="o">=</span> <span class="n">Cartography</span><span class="o">.</span><span class="n">CreateProjOrigin</span><span class="p">(</span><span class="n">proj</span><span class="p">,</span> <span class="o">*</span><span class="n">origin</span><span class="p">,</span> <span class="n">orient</span><span class="p">)</span>
+        <span class="n">cart</span><span class="p">:</span> <span class="n">Cartography</span> <span class="o">=</span> <span class="n">Cartography</span><span class="o">.</span><span class="n">CreateProjOrigin</span><span class="p">(</span><span class="n">proj_str</span><span class="p">,</span> <span class="o">*</span><span class="n">origin</span><span class="p">,</span> <span class="n">orient</span><span class="p">)</span>
         <span class="n">proj</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionGeoOrigin</span><span class="p">(</span>
             <span class="n">wktProjectionString</span><span class="o">=</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
             <span class="n">lon0</span><span class="o">=</span><span class="n">cart</span><span class="o">.</span><span class="n">LonOrigin</span><span class="p">,</span>
@@ -196,62 +196,35 @@
 
     <span class="n">_ndim</span> <span class="o">=</span> <span class="mi">2</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_read_dfs2_header</span><span class="p">()</span>
-            <span class="n">is_spectral</span> <span class="o">=</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;spectral&quot;</span>
+            <span class="n">is_spectral</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;spectral&quot;</span><span class="p">,</span> <span class="s2">&quot;spectra&quot;</span><span class="p">,</span> <span class="s2">&quot;spectrum&quot;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_dfs2_header</span><span class="p">(</span><span class="n">read_x0y0</span><span class="o">=</span><span class="n">is_spectral</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_no_orientation_in_geo</span><span class="p">()</span>
+            <span class="n">origin</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin_and_orientation_in_CRS</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span> <span class="o">==</span> <span class="s2">&quot;LONG/LAT&quot;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">1e-6</span><span class="p">:</span>
-                    <span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_longitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latitude</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span>
-                        <span class="n">dx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dx</span><span class="p">,</span>
-                        <span class="n">dy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dy</span><span class="p">,</span>
-                        <span class="n">nx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nx</span><span class="p">,</span>
-                        <span class="n">ny</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ny</span><span class="p">,</span>
-                        <span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_x0</span><span class="p">,</span>
-                        <span class="n">y0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_y0</span><span class="p">,</span>
-                        <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
-                        <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span><span class="p">,</span>
-                        <span class="n">is_spectral</span><span class="o">=</span><span class="n">is_spectral</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                        <span class="s2">&quot;LONG/LAT with non-zero orientation is not supported&quot;</span>
-                    <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">lon</span><span class="p">,</span> <span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_longitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latitude</span>
-                <span class="n">cart</span> <span class="o">=</span> <span class="n">Cartography</span><span class="o">.</span><span class="n">CreateGeoOrigin</span><span class="p">(</span>
-                    <span class="n">projectionString</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span><span class="p">,</span>
-                    <span class="n">lonOrigin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_longitude</span><span class="p">,</span>
-                    <span class="n">latOrigin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_latitude</span><span class="p">,</span>
-                    <span class="n">orientation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">origin_projected</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">cart</span><span class="o">.</span><span class="n">Geo2Proj</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">),</span> <span class="mi">7</span><span class="p">)</span>
-                <span class="n">orientation_projected</span> <span class="o">=</span> <span class="n">cart</span><span class="o">.</span><span class="n">OrientationProj</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span>
-                    <span class="n">dx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dx</span><span class="p">,</span>
-                    <span class="n">dy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dy</span><span class="p">,</span>
-                    <span class="n">nx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nx</span><span class="p">,</span>
-                    <span class="n">ny</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ny</span><span class="p">,</span>
-                    <span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_x0</span><span class="p">,</span>
-                    <span class="n">y0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_y0</span><span class="p">,</span>
-                    <span class="n">orientation</span><span class="o">=</span><span class="n">orientation_projected</span><span class="p">,</span>
-                    <span class="n">origin</span><span class="o">=</span><span class="n">origin_projected</span><span class="p">,</span>
-                    <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span><span class="p">,</span>
-                    <span class="n">is_spectral</span><span class="o">=</span><span class="n">is_spectral</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span>
+                <span class="n">dx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dx</span><span class="p">,</span>
+                <span class="n">dy</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dy</span><span class="p">,</span>
+                <span class="n">nx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nx</span><span class="p">,</span>
+                <span class="n">ny</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ny</span><span class="p">,</span>
+                <span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_x0</span><span class="p">,</span>
+                <span class="n">y0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_y0</span><span class="p">,</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
+                <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
+                <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span><span class="p">,</span>
+                <span class="n">is_spectral</span><span class="o">=</span><span class="n">is_spectral</span><span class="p">,</span>
+            <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;mikeio.Dfs2&gt;&quot;</span><span class="p">]</span>
@@ -276,14 +249,15 @@
 
         <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_read_dfs2_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_read_dfs2_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read_x0y0</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="si">}</span><span class="s2"> does not exist!&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">Dfs2FileOpen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">X0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Y0</span>
+        <span class="k">if</span> <span class="n">read_x0y0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">X0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Y0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Dx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Dy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">XCount</span>

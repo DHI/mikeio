@@ -93,11 +93,13 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
 <span class="kn">from</span> <span class="nn">mikecore.DfsBuilder</span> <span class="kn">import</span> <span class="n">DfsBuilder</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">DfsSimpleType</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>
 <span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span><span class="p">,</span> <span class="n">eumUnit</span>
+<span class="kn">from</span> <span class="nn">mikecore.Projections</span> <span class="kn">import</span> <span class="n">Cartography</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
 <span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
@@ -125,23 +127,23 @@
 
     <span class="n">factory</span> <span class="o">=</span> <span class="n">DfsFactory</span><span class="p">()</span>
     <span class="n">_write_dfs3_spatial_axis</span><span class="p">(</span><span class="n">builder</span><span class="p">,</span> <span class="n">factory</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
-    <span class="n">origin</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">_origin</span>  <span class="c1"># Origin in geographical coordinates</span>
-    <span class="n">orient</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">_orientation</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">origin</span>  <span class="c1"># Origin in geographical coordinates</span>
+    <span class="n">orient</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">orientation</span>
 
-    <span class="c1"># if geometry.is_geo:</span>
-    <span class="n">proj</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionGeoOrigin</span><span class="p">(</span>
-        <span class="n">geometry</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span> <span class="o">*</span><span class="n">origin</span><span class="p">,</span> <span class="n">orient</span>
-    <span class="p">)</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#    cart: Cartography = Cartography.CreateProjOrigin(</span>
-    <span class="c1">#        geometry.projection_string, *origin, orient</span>
-    <span class="c1">#    )</span>
-    <span class="c1">#    proj = factory.CreateProjectionGeoOrigin(</span>
-    <span class="c1">#        wktProjectionString=geometry.projection,</span>
-    <span class="c1">#        lon0=cart.LonOrigin,</span>
-    <span class="c1">#        lat0=cart.LatOrigin,</span>
-    <span class="c1">#        orientation=cart.Orientation,</span>
-    <span class="c1">#    )</span>
+    <span class="k">if</span> <span class="n">geometry</span><span class="o">.</span><span class="n">is_geo</span><span class="p">:</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionGeoOrigin</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span> <span class="o">*</span><span class="n">origin</span><span class="p">,</span> <span class="n">orient</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cart</span><span class="p">:</span> <span class="n">Cartography</span> <span class="o">=</span> <span class="n">Cartography</span><span class="o">.</span><span class="n">CreateProjOrigin</span><span class="p">(</span>
+            <span class="n">geometry</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span> <span class="o">*</span><span class="n">origin</span><span class="p">,</span> <span class="n">orient</span>
+        <span class="p">)</span>
+        <span class="n">proj</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="n">CreateProjectionGeoOrigin</span><span class="p">(</span>
+            <span class="n">wktProjectionString</span><span class="o">=</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
+            <span class="n">lon0</span><span class="o">=</span><span class="n">cart</span><span class="o">.</span><span class="n">LonOrigin</span><span class="p">,</span>
+            <span class="n">lat0</span><span class="o">=</span><span class="n">cart</span><span class="o">.</span><span class="n">LatOrigin</span><span class="p">,</span>
+            <span class="n">orientation</span><span class="o">=</span><span class="n">cart</span><span class="o">.</span><span class="n">Orientation</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="n">builder</span><span class="o">.</span><span class="n">SetGeographicalProjection</span><span class="p">(</span><span class="n">proj</span><span class="p">)</span>
 
@@ -201,13 +203,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_nz</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_z0</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_z0</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_dfs3_header</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_no_orientation_in_geo</span><span class="p">()</span>
+            <span class="n">origin</span><span class="p">,</span> <span class="n">orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin_and_orientation_in_CRS</span><span class="p">()</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid3D</span><span class="p">(</span>
                 <span class="n">x0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_x0</span><span class="p">,</span>
                 <span class="n">dx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dx</span><span class="p">,</span>
@@ -218,9 +223,9 @@
                 <span class="n">z0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_z0</span><span class="p">,</span>
                 <span class="n">dz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dz</span><span class="p">,</span>
                 <span class="n">nz</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nz</span><span class="p">,</span>
-                <span class="n">origin</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_longitude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latitude</span><span class="p">),</span>
+                <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
                 <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span><span class="p">,</span>
-                <span class="n">orientation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span><span class="p">,</span>
+                <span class="n">orientation</span><span class="o">=</span><span class="n">orientation</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -245,17 +250,19 @@
 
         <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_read_dfs3_header</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_read_dfs3_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">read_x0y0z0</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;file </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="si">}</span><span class="s2"> does not exist!&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">Dfs3FileOpen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">X0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Y0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_z0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Z0</span>
+        <span class="k">if</span> <span class="n">read_x0y0z0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">X0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Y0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_z0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Z0</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Dx</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Dy</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">SpatialAxis</span><span class="o">.</span><span class="n">Dz</span>
@@ -496,7 +503,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_n_timesteps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Are coordinates geographical (LONG/LAT)?&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span> <span class="o">==</span> <span class="s2">&quot;LONG/LAT&quot;</span></div>
 </pre></div>
 
            </div>

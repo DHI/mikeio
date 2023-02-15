@@ -66,6 +66,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs3.dy"><code class="docutils literal notranslate"><span class="pre">Dfs3.dy</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs3.dz"><code class="docutils literal notranslate"><span class="pre">Dfs3.dz</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs3.end_time"><code class="docutils literal notranslate"><span class="pre">Dfs3.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs3.is_geo"><code class="docutils literal notranslate"><span class="pre">Dfs3.is_geo</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs3.items"><code class="docutils literal notranslate"><span class="pre">Dfs3.items</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs3.latitude"><code class="docutils literal notranslate"><span class="pre">Dfs3.latitude</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs3.longitude"><code class="docutils literal notranslate"><span class="pre">Dfs3.longitude</span></code></a></li>
@@ -256,6 +257,12 @@
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="mikeio.Dfs3.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Dfs3.is_geo" title="Permalink to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs3.items">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs3.items" title="Permalink to this definition"></a></dt>
 <dd><p>List of items</p>
@@ -408,19 +415,19 @@ x, y and z axes are increasing and equidistant</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid3D.nx">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.Grid3D.nx" title="Permalink to this definition"></a></dt>
-<dd><p>number of x-axis nodes</p>
+<dd><p>number of x grid points</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid3D.ny">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.Grid3D.ny" title="Permalink to this definition"></a></dt>
-<dd><p>number of y-axis nodes</p>
+<dd><p>number of y grid points</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid3D.nz">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nz</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#mikeio.Grid3D.nz" title="Permalink to this definition"></a></dt>
-<dd><p>number of z-axis nodes</p>
+<dd><p>number of z grid points</p>
 </dd></dl>
 
 <dl class="py property">
@@ -450,13 +457,13 @@ x, y and z axes are increasing and equidistant</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid3D.x">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#mikeio.Grid3D.x" title="Permalink to this definition"></a></dt>
-<dd><p>array of x-axis node coordinates</p>
+<dd><p>array of x-axis coordinates (element center)</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Grid3D.y">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#mikeio.Grid3D.y" title="Permalink to this definition"></a></dt>
-<dd><p>array of y-axis node coordinates</p>
+<dd><p>array of y-axis coordinates (element center)</p>
 </dd></dl>
 
 <dl class="py property">
