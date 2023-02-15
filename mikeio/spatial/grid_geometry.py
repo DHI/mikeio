@@ -91,18 +91,6 @@ class Grid1D(_Geometry):
     _origin: Tuple[float, float]
     _projstr: str
 
-    def __eq__(self, other):
-        if not isinstance(other, Grid1D):
-            return False
-        return (
-            self._dx == other._dx
-            and self._nx == other._nx
-            and self._x0 == other._x0
-            # and self._projstr == other._projstr
-            # and np.allclose(self._origin, other._origin)
-            # and np.allclose(self._orientation, other._orientation)
-        )
-
     def __init__(
         self,
         x=None,
@@ -118,7 +106,8 @@ class Grid1D(_Geometry):
     ):
         """Create equidistant 1D spatial geometry"""
         super().__init__(projection)
-        self._origin = origin
+        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
 
@@ -352,22 +341,6 @@ class Grid2D(_Geometry):
     _orientation: float
     is_spectral: bool
 
-    def __eq__(self, other):
-        if not isinstance(other, Grid2D):
-            return False
-        return (
-            self._dx == other._dx
-            and self._nx == other._nx
-            and self._x0 == other._x0
-            and self._dy == other._dy
-            and self._ny == other._ny
-            and self._y0 == other._y0
-            and self._projstr == other._projstr
-            and self.is_spectral == other.is_spectral
-            and np.allclose(self._origin, other._origin)
-            and np.allclose(self._orientation, other._orientation)
-        )
-
     def __init__(
         self,
         *,
@@ -429,7 +402,8 @@ class Grid2D(_Geometry):
         """
         super().__init__(projection)
         self._shift_origin_on_write = origin is None  # user-constructed
-        self._origin = (0.0, 0.0) if origin is None else origin
+        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self.__xx = None
         self.__yy = None
@@ -1023,24 +997,6 @@ class Grid3D(_Geometry):
     _origin: Tuple[float, float]
     _orientation: float
 
-    def __eq__(self, other):
-        if not isinstance(other, Grid3D):
-            return False
-        return (
-            self._dx == other._dx
-            and self._nx == other._nx
-            and self._x0 == other._x0
-            and self._dy == other._dy
-            and self._ny == other._ny
-            and self._y0 == other._y0
-            and self._dz == other._dz
-            and self._nz == other._nz
-            and self._z0 == other._z0
-            and self._projstr == other._projstr
-            and np.allclose(self._origin, other._origin)
-            and np.allclose(self._orientation, other._orientation)
-        )
-
     def __init__(
         self,
         *,
@@ -1062,7 +1018,8 @@ class Grid3D(_Geometry):
     ) -> None:
 
         super().__init__()
-        self._origin = (0.0, 0.0) if origin is None else origin
+        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
         self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
         self._z0, self._dz, self._nz = _parse_grid_axis("z", z, z0, dz, nz)
