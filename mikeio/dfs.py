@@ -771,6 +771,6 @@ class _Dfs123(TimeSeries):
                 orientation=self._orientation,
             )
             # convert origin and orientation to projected CRS
-            origin = np.round(cart.Geo2Proj(lon, lat), 7)
+            origin = tuple(np.round(cart.Geo2Proj(lon, lat), 6))
             orientation = cart.OrientationProj
         return origin, orientation
