@@ -135,7 +135,7 @@ class Grid1D(_Geometry):
 
         d = (self.x - x) ** 2
 
-        return set(int([np.argmin(d)]))
+        return set([int(np.argmin(d))])
 
     def get_spatial_interpolant(self, coords, **kwargs):
 
