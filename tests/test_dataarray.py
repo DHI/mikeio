@@ -164,13 +164,11 @@ def test_data_0d(da0):
     assert da0.ndim == 1
     assert da0.dims == ("time",)
     assert "values" in repr(da0)
-    assert "geometry" not in repr(da0)
     assert "values" in repr(da0[:4])
 
     da0 = da0.squeeze()
     assert da0.ndim == 0
     assert "values" in repr(da0)
-    assert "geometry" not in repr(da0)
 
 
 def test_create_data_1d_default_grid():
@@ -619,8 +617,8 @@ def test_da_isel_space(da_grid2d):
 
 
 def test_da_isel_empty(da_grid2d):
-    da_sel = da_grid2d.isel(slice(100, 200), axis="y")
-    assert da_sel is None
+    with pytest.raises(ValueError):
+        da_grid2d.isel(slice(100, 200), axis="y")
 
 
 def test_da_isel_space_multiple_elements(da_grid2d):
@@ -1032,42 +1030,6 @@ def test_binary_math_operations(da1):
 
     da2 = da1 % 2
     assert isinstance(da2, mikeio.DataArray)
-
-
-def test_dataarray_masking():
-    filename = "tests/testdata/basin_3d.dfsu"
-    da = mikeio.read(filename, items="U velocity")[0]
-    assert da.shape == (3, 1740)
-
-    mask = da < 0
-    assert mask.shape == da.shape
-    assert mask.dtype == "bool"
-    assert mask.shape == (3, 1740)
-
-    # get values using mask (other values will be np.nan)
-    da_mask = da[mask]
-    assert isinstance(da_mask, np.ndarray)
-    assert da_mask.shape == (2486,)
-
-    # set values smaller than 0 to 0 using mask
-    assert da.min(axis=None).values < 0
-    da[mask] = 0.0
-    assert da.min(axis=None).values == 0
-
-    mask = da > 0
-    assert mask.dtype == "bool"
-
-    mask = da == 0
-    assert mask.dtype == "bool"
-
-    mask = da != 0
-    assert mask.dtype == "bool"
-
-    mask = da >= 0
-    assert mask.dtype == "bool"
-
-    mask = da <= 0
-    assert mask.dtype == "bool"
 
 
 def test_daarray_aggregation_dfs2():

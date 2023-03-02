@@ -3,11 +3,11 @@ import os
 import warnings
 from copy import deepcopy
 from datetime import datetime
-from typing import Iterable, Mapping, Optional, Sequence, Tuple, Union
+from typing import Iterable, List, Mapping, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsFile import DfsSimpleType
+from mikecore.DfsFile import DfsSimpleType  # type: ignore
 
 from .base import TimeSeries
 from .dataarray import DataArray
@@ -22,6 +22,7 @@ from .spatial.geometry import (
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
 from .data_plot import _DatasetPlotter
+
 
 class Dataset(TimeSeries, collections.abc.MutableMapping):
     """Dataset containing one or more DataArrays with common geometry and time
@@ -66,10 +67,10 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def __init__(
         self,
-        data: Union[Mapping[str, DataArray], Iterable[DataArray]],
+        data: Union[Mapping[str, DataArray], Iterable[DataArray], Sequence[np.ndarray]],
         time=None,
         items=None,
-        geometry= None,
+        geometry=None,
         zn=None,
         dims=None,
         validate=True,
@@ -77,7 +78,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
-            )
+            )  # type: ignore
         self._init_from_DataArrays(data, validate=validate)
 
     @staticmethod
@@ -100,10 +101,10 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     @staticmethod
     def _create_dataarrays(
-        data: Sequence[np.ndarray],
+        data,
         time=None,
         items=None,
-        geometry= None,
+        geometry=None,
         zn=None,
         dims=None,
     ):
@@ -124,9 +125,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         self._data_vars = self._DataArrays_as_mapping(data)
 
         if (len(self) > 1) and validate:
-            first: DataArray = self[0]
+            first = self[0]
             for i in range(1, len(self)):
-                da: DataArray = self[i]
+                da = self[i]
                 first._is_compatible(da, raise_error=True)
 
         self._check_all_different_ids(self._data_vars.values())
@@ -188,7 +189,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if isinstance(data, Mapping):
             if isinstance(data, Dataset):
                 return data
-            data = Dataset._validate_item_names_and_keys(data) # TODO is this necessary?
+            data = Dataset._validate_item_names_and_keys(
+                data
+            )  # TODO is this necessary?
             _ = Dataset._unique_item_names(data.values())
             return data
 
@@ -307,7 +310,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         dt = None
         if len(self.time) > 1 and self.is_equidistant:
-            dt = (self.time[1] - self.time[0]).total_seconds()
+            dt = (self.time[1] - self.time[0]).total_seconds()  # type: ignore
         return dt
 
     @property
@@ -401,17 +404,16 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def dropna(self) -> "Dataset":
         """Remove time steps where all items are NaN"""
-        if not self[0]._has_time_axis:
+        if not self[0]._has_time_axis:  # type: ignore
             raise ValueError("Not available if no time axis!")
 
-        all_index = []
+        all_index: List[int] = []
         for i in range(self.n_items):
             x = self[i].to_numpy()
 
             # this seems overly complicated...
             axes = tuple(range(1, x.ndim))
-            idx = np.where(~np.isnan(x).all(axis=axes))
-            idx = list(idx[0])
+            idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
             if i == 0:
                 all_index = idx
             else:
@@ -621,9 +623,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         # select time steps
         if (
-            isinstance(key, Iterable) and not isinstance(key, str)
+            isinstance(key, Sequence) and not isinstance(key, str)
         ) and self._is_key_time(key[0]):
-            key = pd.DatetimeIndex(key)
+            key = pd.DatetimeIndex(key)  # type: ignore
         if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
             time_steps = _get_time_idx_list(self.time, key)
             if _n_selected_timesteps(self.time, time_steps) == 0:
@@ -711,9 +713,8 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         )
         return False
 
-    def _key_to_str(
-        self, key: Union[str, int, slice, Iterable[str], Iterable[int]]
-    ) -> Union[str, Iterable[str]]:
+    # TODO change this to return a single type
+    def _key_to_str(self, key: Union[str, int, slice, Iterable[str], Iterable[int]]):
         """Translate item selection key to str (or List[str])"""
         if isinstance(key, str):
             return key
@@ -856,11 +857,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
     def interp(
         self,
         *,
-        time: Union[pd.DatetimeIndex, "DataArray"] = None,
-        x: float = None,
-        y: float = None,
-        z: float = None,
-        n_nearest=3,
+        time: Optional[Union[pd.DatetimeIndex, "DataArray"]] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+        z: Optional[float] = None,
+        n_nearest: int = 3,
         **kwargs,
     ) -> "Dataset":
         """Interpolate data in time and space
@@ -932,7 +933,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             ds = Dataset([da for da in self], validate=False)
 
         # interp in time
-        if time is not None:
+        if isinstance(time, (pd.DatetimeIndex, DataArray)):
             ds = ds.interp_time(time)
 
         return ds
@@ -943,7 +944,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         "Used by _extract_track"
 
         data = self[item].isel(time=step).to_numpy()
-        time = (self.time[step] - self.time[0]).total_seconds()
+        time = (self.time[step] - self.time[0]).total_seconds()  # type: ignore
 
         return data, time
 
@@ -993,7 +994,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def interp_time(
         self,
-        dt: Optional[Union[float, pd.DatetimeIndex, "Dataset"]] = None,
+        dt: Optional[Union[float, pd.DatetimeIndex, "Dataset", DataArray]] = None,
         *,
         freq: Optional[str] = None,
         method="linear",
@@ -1053,7 +1054,12 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             if dt is None:
                 raise ValueError("You must specify either dt or freq")
 
-        das = [da.interp_time(dt= dt, method=method, extrapolate=extrapolate, fill_value=fill_value) for da in self]
+        das = [
+            da.interp_time(
+                dt=dt, method=method, extrapolate=extrapolate, fill_value=fill_value
+            )
+            for da in self
+        ]
 
         return Dataset(das)
 
@@ -1269,7 +1275,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     # ============ aggregate =============
 
-    def aggregate(self, axis=0, func=np.nanmean, **kwargs) -> "Dataset":
+    def aggregate(
+        self, axis=0, func=np.nanmean, **kwargs
+    ) -> Union["Dataset", "DataArray"]:
         """Aggregate along an axis
 
         Parameters
@@ -1287,6 +1295,13 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if axis == "items":
             if self.n_items <= 1:
                 return self
+
+            if "keepdims" in kwargs:
+                warnings.warn(
+                    "The keepdims arguments is deprecated. The result will always be a Dataset.",
+                    FutureWarning,
+                )
+
             keepdims = kwargs.pop("keepdims", False)
             name = kwargs.pop("name", func.__name__)
             data = func(self.to_numpy(), axis=0, keepdims=False, **kwargs)
@@ -1299,6 +1314,11 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 dims=self.dims,
                 zn=self._zn,
             )
+            if not keepdims:
+                warnings.warn(
+                    "The keepdims arguments is deprecated. The result will always be a Dataset.",
+                    FutureWarning,
+                )
             return Dataset([da], validate=False) if keepdims else da
         else:
             res = {
@@ -1321,7 +1341,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         )
         return ItemInfo(name, it_type, it_unit)
 
-    def quantile(self, q, *, axis=0, **kwargs) -> "Dataset":
+    def quantile(self, q, *, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1351,7 +1371,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis=0, **kwargs) -> "Dataset":
+    def nanquantile(self, q, *, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1377,7 +1397,9 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
-    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> "Dataset":
+    def _quantile(
+        self, q, *, axis=0, func=np.quantile, **kwargs
+    ) -> Union["Dataset", "DataArray"]:
 
         if axis == "items":
             keepdims = kwargs.pop("keepdims", False)
@@ -1385,7 +1407,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 return self  # or raise ValueError?
             if np.isscalar(q):
                 data = func(self.to_numpy(), q=q, axis=0, keepdims=False, **kwargs)
-                item = self._agg_item_from_items(self.items, f"Quantile {q}")
+                item = self._agg_item_from_items(self.items, f"Quantile {str(q)}")
                 da = DataArray(
                     data=data,
                     time=self.time,
@@ -1401,6 +1423,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 res = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)
+                    assert isinstance(qd, DataArray)
                     res.append(qd)
                 return Dataset(data=res, validate=False)
         else:
@@ -1412,13 +1435,14 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 for name, da in self._data_vars.items():
                     for quantile in q:
                         qd = da._quantile(q=quantile, axis=axis, func=func)
+                        assert isinstance(qd, DataArray)
                         newname = f"Quantile {quantile}, {name}"
                         qd.name = newname
                         res.append(qd)
 
             return Dataset(data=res, validate=False)
 
-    def max(self, axis=0, **kwargs) -> "Dataset":
+    def max(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Max value along an axis
 
         Parameters
@@ -1437,7 +1461,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis=0, **kwargs) -> "Dataset":
+    def min(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Min value along an axis
 
         Parameters
@@ -1456,7 +1480,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis=0, **kwargs) -> "Dataset":
+    def mean(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Mean value along an axis
 
         Parameters
@@ -1476,7 +1500,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis=0, **kwargs) -> "Dataset":
+    def std(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Standard deviation along an axis
 
         Parameters
@@ -1495,7 +1519,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis=0, **kwargs) -> "Dataset":
+    def ptp(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Range (max - min) a.k.a Peak to Peak along an axis
         Parameters
         ----------
@@ -1509,7 +1533,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis=0, **kwargs) -> "Dataset":
+    def average(self, weights, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Compute the weighted average along the specified axis.
 
         Parameters
@@ -1543,7 +1567,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis=0, **kwargs) -> "Dataset":
+    def nanmax(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Max value along an axis (NaN removed)
 
         Parameters
@@ -1562,7 +1586,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis=0, **kwargs) -> "Dataset":
+    def nanmin(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Min value along an axis (NaN removed)
 
         Parameters
@@ -1577,7 +1601,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis=0, **kwargs) -> "Dataset":
+    def nanmean(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Mean value along an axis (NaN removed)
 
         Parameters
@@ -1592,7 +1616,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis=0, **kwargs) -> "Dataset":
+    def nanstd(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
         """Standard deviation along an axis (NaN removed)
 
         Parameters
@@ -1652,7 +1676,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             raise ValueError("Could not add data in Dataset")
         newds = self.copy()
         for j in range(len(self)):
-            newds[j].values = data[j]
+            newds[j].values = data[j]  # type: ignore
         return newds
 
     def _check_datasets_match(self, other):
@@ -1739,7 +1763,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         df = pd.DataFrame(data, index=self.time)
 
         if round_time:
-            rounded_idx = pd.DatetimeIndex(self.time).round(round_time)
+            rounded_idx = pd.DatetimeIndex(self.time).round(round_time)  # type: ignore
             df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
         else:
             df.index = pd.DatetimeIndex(self.time, freq="infer")
@@ -1839,7 +1863,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if len(self) == 0:
             return "Empty <mikeio.Dataset>"
         da = self[0]
-        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]
+        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]  # type: ignore
         out = [x for x in out if x is not None]
 
         if self.n_items > 10:
