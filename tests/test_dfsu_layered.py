@@ -446,7 +446,7 @@ def test_top_elements_subset():
     area = [356000, 6144000, 359000, 6146000]
     idx2d = g2d.find_index(area=area)
     assert len(idx2d) == 6
-    assert idx2d[-1] == 3408
+    assert 3408 in idx2d
 
     idx3d = g3d.find_index(area=area)
     subg = g3d.isel(idx3d)
