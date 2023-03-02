@@ -417,17 +417,21 @@ def test_top_elements():
     filename = os.path.join("tests", "testdata", "basin_3d.dfsu")
     dfs = mikeio.open(filename)
     assert len(dfs.top_elements) == 174
-    assert dfs.top_elements[3] == 39
+    assert 39 in dfs.top_elements
+    assert 0 not in dfs.top_elements
+    assert (dfs.n_elements - 1) in dfs.top_elements
 
     filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
     dfs = mikeio.open(filename)
     assert len(dfs.top_elements) == 3700
-    assert dfs.top_elements[3] == 16
+    assert 16 in dfs.top_elements
+    assert (dfs.n_elements - 1) in dfs.top_elements
 
     filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
     dfs = mikeio.open(filename)
     assert len(dfs.top_elements) == 99
-    assert dfs.top_elements[3] == 19
+    assert 19 in dfs.top_elements
+    assert (dfs.n_elements - 1) in dfs.top_elements
 
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
