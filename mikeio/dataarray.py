@@ -484,12 +484,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     # ============= Select/interp ===========
 
-    def get_masked(self, key) -> np.ndarray:
-        if self._is_boolean_mask(key):
-            mask = key if isinstance(key, np.ndarray) else key.values
-            return self._get_by_boolean_mask(self.values, mask)
-        else:
-            raise ValueError("Invalid mask")
+    # TODO implement def where() modelled after xarray
+    # def get_masked(self, key) -> np.ndarray:
+    #    if self._is_boolean_mask(key):
+    #        mask = key if isinstance(key, np.ndarray) else key.values
+    #        return self._get_by_boolean_mask(self.values, mask)
+    #    else:
+    #        raise ValueError("Invalid mask")
 
     def __getitem__(self, key) -> "DataArray":
 

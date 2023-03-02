@@ -1032,42 +1032,6 @@ def test_binary_math_operations(da1):
     assert isinstance(da2, mikeio.DataArray)
 
 
-def test_dataarray_masking():
-    filename = "tests/testdata/basin_3d.dfsu"
-    da = mikeio.read(filename, items="U velocity")[0]
-    assert da.shape == (3, 1740)
-
-    mask = da < 0
-    assert mask.shape == da.shape
-    assert mask.dtype == "bool"
-    assert mask.shape == (3, 1740)
-
-    # get values using mask (other values will be np.nan)
-    da_mask = da.get_masked(mask)  # TODO name?
-    assert isinstance(da_mask, np.ndarray)
-    assert da_mask.shape == (2486,)
-
-    # set values smaller than 0 to 0 using mask
-    assert da.min(axis=None).values < 0
-    da[mask] = 0.0
-    assert da.min(axis=None).values == 0
-
-    mask = da > 0
-    assert mask.dtype == "bool"
-
-    mask = da == 0
-    assert mask.dtype == "bool"
-
-    mask = da != 0
-    assert mask.dtype == "bool"
-
-    mask = da >= 0
-    assert mask.dtype == "bool"
-
-    mask = da <= 0
-    assert mask.dtype == "bool"
-
-
 def test_daarray_aggregation_dfs2():
 
     filename = "tests/testdata/gebco_sound.dfs2"
