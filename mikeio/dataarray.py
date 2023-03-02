@@ -6,7 +6,7 @@ from typing import Iterable, Optional, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsuFile import DfsuFileType
+from mikecore.DfsuFile import DfsuFileType  # type: ignore
 
 from .base import TimeSeries
 from .data_utils import DataUtilsMixin
@@ -20,626 +20,24 @@ from .spatial.FM_geometry import (
     GeometryFMVerticalProfile,
     _GeometryFMLayered,
 )
-from .spatial.FM_utils import _plot_map, _plot_vertical_profile
 from .spatial.geometry import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
-    _Geometry,
 )
 from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from .spectral import calc_m0_from_spectrum, plot_2dspectrum
-
-
-class _DataArrayPlotter:
-    """Context aware plotter (sensible plotting according to geometry)"""
-
-    def __init__(self, da: "DataArray") -> None:
-        self.da = da
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        """Plot DataArray according to geometry
-
-        Parameters
-        ----------
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-        figsize: (float, float), optional
-            specify size of figure
-        title: str, optional
-            axes title
-
-        Returns
-        -------
-        <matplotlib.axes>
-        """
-        fig, ax = self._get_fig_ax(ax, figsize)
-
-        if self.da.ndim == 1:
-            if self.da._has_time_axis:
-                return self._timeseries(self.da.values, fig, ax, **kwargs)
-            else:
-                return self._line_not_timeseries(self.da.values, ax, **kwargs)
-
-        if self.da.ndim == 2:
-            return ax.imshow(self.da.values, **kwargs)
-
-        # if everything else fails, plot histogram
-        return self._hist(ax, **kwargs)
-
-    @staticmethod
-    def _get_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
-
-        if ax is None:
-            _, ax = plt.subplots(figsize=figsize)
-        return ax
-
-    @staticmethod
-    def _get_fig_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
-
-        if ax is None:
-            fig, ax = plt.subplots(figsize=figsize)
-        else:
-            fig = plt.gcf()
-        return fig, ax
-
-    def hist(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot DataArray as histogram (using ax.hist)
-
-        Parameters
-        ----------
-        bins : int or sequence or str,
-            If bins is an integer, it defines the number
-            of equal-width bins in the range.
-            If bins is a sequence, it defines the bin edges,
-            including the left edge of the first bin and the
-            right edge of the last bin.
-            by default: rcParams["hist.bins"] (default: 10)
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-        figsize: (float, float), optional
-            specify size of figure
-        title: str, optional
-            axes title
-
-        See Also
-        --------
-        matplotlib.pyplot.hist
-
-        Returns
-        -------
-        <matplotlib.axes>
-        """
-        ax = self._get_ax(ax, figsize)
-        if title is not None:
-            ax.set_title(title)
-        return self._hist(ax, **kwargs)
-
-    def _hist(self, ax, **kwargs):
-        result = ax.hist(self.da.values.ravel(), **kwargs)
-        ax.set_xlabel(self._label_txt())
-        return result
-
-    def line(self, ax=None, figsize=None, **kwargs):
-        """Plot data as lines (timeseries if time is present)"""
-        fig, ax = self._get_fig_ax(ax, figsize)
-        if self.da._has_time_axis:
-            return self._timeseries(self.da.values, fig, ax, **kwargs)
-        else:
-            return self._line_not_timeseries(self.da.values, ax, **kwargs)
-
-    def _timeseries(self, values, fig, ax, **kwargs):
-        if "title" in kwargs:
-            title = kwargs.pop("title")
-            ax.set_title(title)
-        ax.plot(self.da.time, values, **kwargs)
-        ax.set_xlabel("time")
-        fig.autofmt_xdate()
-        ax.set_ylabel(self._label_txt())
-        return ax
-
-    def _line_not_timeseries(self, values, ax, **kwargs):
-        title = kwargs.pop("title") if "title" in kwargs else f"{self.da.time[0]}"
-        ax.set_title(title)
-        ax.plot(values, **kwargs)
-        ax.set_xlabel(self.da.dims[0])
-        ax.set_ylabel(self._label_txt())
-        return ax
-
-    def _label_txt(self):
-        return f"{self.da.name} [{self.da.unit.name}]"
-
-    def _get_first_step_values(self):
-        if self.da.n_timesteps > 1:
-            return self.da.values[0]
-        else:
-            return np.squeeze(self.da.values)
-
-
-class _DataArrayPlotterGrid1D(_DataArrayPlotter):
-    """Plot a DataArray with a Grid1D geometry
-
-    Examples
-    --------
-    >>> da = mikeio.read("tide1.dfs1")["Level"]
-    >>> da.plot()
-    >>> da.plot.line()
-    >>> da.plot.timeseries()
-    >>> da.plot.imshow()
-    >>> da.plot.pcolormesh()
-    >>> da.plot.hist()
-    """
-
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        _, ax = self._get_fig_ax(ax, figsize)
-        if self.da.n_timesteps == 1:
-            return self.line(ax, **kwargs)
-        else:
-            return self.pcolormesh(ax, **kwargs)
-
-    def line(self, ax=None, figsize=None, **kwargs):
-        """Plot as spatial lines"""
-        _, ax = self._get_fig_ax(ax, figsize)
-        return self._lines(ax, **kwargs)
-
-    def timeseries(self, ax=None, figsize=None, **kwargs):
-        """Plot as timeseries"""
-        if self.da.n_timesteps == 1:
-            raise ValueError("Not possible with single timestep DataArray")
-        fig, ax = self._get_fig_ax(ax, figsize)
-        return super()._timeseries(self.da.values, fig, ax, **kwargs)
-
-    def imshow(self, ax=None, figsize=None, **kwargs):
-        """Plot as 2d"""
-        if not self.da._has_time_axis:
-            raise ValueError(
-                "Not possible without time axis. DataArray only has 1 dimension."
-            )
-        fig, ax = self._get_fig_ax(ax, figsize)
-        pos = ax.imshow(self.da.values, **kwargs)
-        fig.colorbar(pos, ax=ax, label=self._label_txt())
-        return ax
-
-    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot multiple lines as 2d color plot"""
-        if not self.da._has_time_axis:
-            raise ValueError(
-                "Not possible without time axis. DataArray only has 1 dimension."
-            )
-        if title is not None:
-            ax.set_title(title)
-        fig, ax = self._get_fig_ax(ax, figsize)
-        pos = ax.pcolormesh(
-            self.da.geometry.x,
-            self.da.time,
-            self.da.values,
-            shading="nearest",
-            **kwargs,
-        )
-        _ = fig.colorbar(pos, label=self._label_txt())
-        ax.set_xlabel(self.da.geometry._axis_name)
-        ax.set_ylabel("time")
-        return ax
-
-    def _lines(self, ax=None, title=None, **kwargs):
-        """x-lines - one per timestep"""
-        if title is not None:
-            ax.set_title(title)
-        elif self.da.n_timesteps == 1:
-            ax.set_title(f"{self.da.time[0]}")
-        ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
-        ax.set_xlabel(self.da.geometry._axis_name)
-        ax.set_ylabel(self._label_txt())
-        return ax
-
-
-class _DataArrayPlotterGrid2D(_DataArrayPlotter):
-    """Plot a DataArray with a Grid2D geometry
-
-    If DataArray has multiple time steps, the first step will be plotted.
-
-    Examples
-    --------
-    >>> da = mikeio.read("gebco_sound.dfs2")["Elevation"]
-    >>> da.plot()
-    >>> da.plot.contour()
-    >>> da.plot.contourf()
-    >>> da.plot.pcolormesh()
-    >>> da.plot.hist()
-    """
-
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        return self.pcolormesh(ax, figsize, **kwargs)
-
-    def contour(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot data as contour lines"""
-        _, ax = self._get_fig_ax(ax, figsize)
-
-        x, y = self._get_x_y()
-        values = self._get_first_step_values()
-
-        pos = ax.contour(x, y, values, **kwargs)
-        # fig.colorbar(pos, label=self._label_txt())
-        ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
-        if title is not None:
-            ax.set_title(title)
-        return ax
-
-    def contourf(self, ax=None, figsize=None, label=None, title=None, **kwargs):
-        """Plot data as filled contours"""
-        fig, ax = self._get_fig_ax(ax, figsize)
-
-        x, y = self._get_x_y()
-        values = self._get_first_step_values()
-
-        label = label if label is not None else self._label_txt()
-
-        pos = ax.contourf(x, y, values, **kwargs)
-        fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
-        if title is not None:
-            ax.set_title(title)
-        return ax
-
-    def pcolormesh(self, ax=None, figsize=None, label=None, title=None, **kwargs):
-        """Plot data as coloured patches"""
-        fig, ax = self._get_fig_ax(ax, figsize)
-
-        xn, yn = self._get_xn_yn()
-        values = self._get_first_step_values()
-
-        label = label if label is not None else self._label_txt()
-
-        pos = ax.pcolormesh(xn, yn, values, **kwargs)
-        fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, yn)
-        if title is not None:
-            ax.set_title(title)
-        return ax
-
-    def _get_x_y(self):
-        x = self.da.geometry.x
-        y = self.da.geometry.y
-        return x, y
-
-    def _get_xn_yn(self):
-        xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
-        yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
-        return xn, yn
-
-    @staticmethod
-    def _set_aspect_and_labels(ax, geometry, y):
-        if geometry.is_spectral:
-            ax.set_xlabel("Frequency [Hz]")
-            ax.set_ylabel("Directions [degree]")
-        elif geometry._is_rotated:
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif geometry.projection == "NON-UTM":
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif geometry.is_geo:
-            ax.set_xlabel("Longitude [degrees]")
-            ax.set_ylabel("Latitude [degrees]")
-            mean_lat = np.mean(y)
-            aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
-            ax.set_aspect(aspect_ratio)
-        else:
-            ax.set_xlabel("Easting [m]")
-            ax.set_ylabel("Northing [m]")
-            ax.set_aspect("equal")
-
-
-class _DataArrayPlotterFM(_DataArrayPlotter):
-    """Plot a DataArray with a GeometryFM geometry
-
-    If DataArray has multiple time steps, the first step will be plotted.
-
-    If DataArray is 3D the surface layer will be plotted.
-
-    Examples
-    --------
-    >>> da = mikeio.read("HD2D.dfsu")["Surface elevation"]
-    >>> da.plot()
-    >>> da.plot.contour()
-    >>> da.plot.contourf()
-
-    >>> da.plot.mesh()
-    >>> da.plot.outline()
-    >>> da.plot.hist()
-    """
-
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        """Plot data as coloured patches"""
-        ax = self._get_ax(ax, figsize)
-        return self._plot_FM_map(ax, **kwargs)
-
-    def patch(self, ax=None, figsize=None, **kwargs):
-        """Plot data as coloured patches"""
-        ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "patch"
-        return self._plot_FM_map(ax, **kwargs)
-
-    def contour(self, ax=None, figsize=None, **kwargs):
-        """Plot data as contour lines"""
-        ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contour"
-        return self._plot_FM_map(ax, **kwargs)
-
-    def contourf(self, ax=None, figsize=None, **kwargs):
-        """Plot data as filled contours"""
-        ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contourf"
-        return self._plot_FM_map(ax, **kwargs)
-
-    def mesh(self, ax=None, figsize=None, **kwargs):
-        """Plot mesh only"""
-        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
-
-    def outline(self, ax=None, figsize=None, **kwargs):
-        """Plot domain outline (using the boundary_polylines property)"""
-        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
-
-    def _plot_FM_map(self, ax, **kwargs):
-        values = self._get_first_step_values()
-
-        title = f"{self.da.time[0]}"
-        if self.da.geometry.is_layered:
-            # select surface as default plotting for 3d files
-            values = values[self.da.geometry.top_elements]
-            geometry = self.da.geometry.geometry2d
-            title = "Surface, " + title
-        else:
-            geometry = self.da.geometry
-
-        if "label" not in kwargs:
-            kwargs["label"] = self._label_txt()
-        if "title" not in kwargs:
-            kwargs["title"] = title
-
-        return _plot_map(
-            node_coordinates=geometry.node_coordinates,
-            element_table=geometry.element_table,
-            element_coordinates=geometry.element_coordinates,
-            boundary_polylines=geometry.boundary_polylines,
-            projection=geometry.projection,
-            z=values,
-            ax=ax,
-            **kwargs,
-        )
-
-
-class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
-    """Plot a DataArray with a GeometryFMVerticalColumn geometry
-
-    If DataArray has multiple time steps, the first step will be plotted.
-
-    Examples
-    --------
-    >>> ds = mikeio.read("oresund_sigma_z.dfsu")
-    >>> dsp = ds.sel(x=333934.1, y=6158101.5)
-    >>> da = dsp["Temperature"]
-    >>> dsp.plot()
-    >>> dsp.plot(extrapolate=False, marker='o')
-    >>> dsp.plot.pcolormesh()
-    >>> dsp.plot.hist()
-    """
-
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        ax = self._get_ax(ax, figsize)
-        return self.line(ax, **kwargs)
-
-    def line(self, ax=None, figsize=None, extrapolate=True, **kwargs):
-        """Plot data as vertical lines"""
-        ax = self._get_ax(ax, figsize)
-        return self._line(ax, extrapolate=extrapolate, **kwargs)
-
-    def _line(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
-        import matplotlib.pyplot as plt
-
-        if "title" in kwargs:
-            title = kwargs.pop("title")
-            ax.set_title(title)
-
-        if show_legend is None:
-            show_legend = len(self.da.time) < 10
-
-        values = self.da.to_numpy()
-        zn = self.da._zn
-        if extrapolate:
-            ze = self.da.geometry._calc_zee(zn)
-            values = self.da.geometry._interp_values(zn, values, ze)
-        else:
-            ze = self.da.geometry.calc_ze(zn)
-
-        ax.plot(values.T, ze.T, label=self.da.time, **kwargs)
-
-        ax.set_xlabel(self._label_txt())
-        ax.set_ylabel("z")
-
-        if show_legend:
-            plt.legend()
-
-        return ax
-
-    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot data as coloured patches"""
-        fig, ax = self._get_fig_ax(ax, figsize)
-        ze = self.da.geometry.calc_ze()
-        pos = ax.pcolormesh(
-            self.da.time,
-            ze,
-            self.da.values.T,
-            shading="nearest",
-            **kwargs,
-        )
-        cbar = fig.colorbar(pos, label=self._label_txt())
-        ax.set_xlabel("time")
-        fig.autofmt_xdate()
-        ax.set_ylabel("z (static)")
-        if title is not None:
-            ax.set_title(title)
-        return ax
-
-
-class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
-    """Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry
-
-    If DataArray has multiple time steps, the first step will be plotted.
-
-    Examples
-    --------
-    >>> da = mikeio.read("oresund_vertical_slice.dfsu")["Temperature"]
-    >>> da.plot()
-    >>> da.plot.mesh()
-    >>> da.plot.hist()
-    """
-
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        ax = self._get_ax(ax, figsize)
-        return self._plot_transect(ax=ax, **kwargs)
-
-    def _plot_transect(self, **kwargs):
-        if "label" not in kwargs:
-            kwargs["label"] = self._label_txt()
-        if "title" not in kwargs:
-            kwargs["title"] = self.da.time[0]
-
-        values, zn = self._get_first_step_values()
-        g = self.da.geometry
-        return _plot_vertical_profile(
-            node_coordinates=g.node_coordinates,
-            element_table=g.element_table,
-            values=values,
-            zn=zn,
-            is_geo=g.is_geo,
-            **kwargs,
-        )
-
-    def _get_first_step_values(self):
-        if self.da.n_timesteps > 1:
-            return self.da.values[0], self.da._zn[0]
-        else:
-            return np.squeeze(self.da.values), np.squeeze(self.da._zn)
-
-
-class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
-    def __init__(self, da: "DataArray") -> None:
-        super().__init__(da)
-
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        # ax = self._get_ax(ax, figsize)
-        if self.da.n_frequencies > 0 and self.da.n_directions > 0:
-            return self._plot_2dspectrum(figsize=figsize, **kwargs)
-        elif self.da.n_frequencies == 0:
-            return self._plot_dirspectrum(ax=ax, figsize=figsize, **kwargs)
-        elif self.da.n_directions == 0:
-            return self._plot_freqspectrum(ax=ax, figsize=figsize, **kwargs)
-        else:
-            raise ValueError("Spectrum could not be plotted")
-
-    def patch(self, **kwargs):
-        kwargs["plot_type"] = "patch"
-        return self._plot_2dspectrum(**kwargs)
-
-    def contour(self, **kwargs):
-        kwargs["plot_type"] = "contour"
-        return self._plot_2dspectrum(**kwargs)
-
-    def contourf(self, **kwargs):
-        kwargs["plot_type"] = "contourf"
-        return self._plot_2dspectrum(**kwargs)
-
-    def _plot_freqspectrum(self, ax=None, figsize=None, **kwargs):
-        ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)
-        ax.set_xlabel("frequency [Hz]")
-        ax.set_ylabel("directionally integrated energy [m*m*s]")
-        return ax
-
-    def _plot_dirspectrum(self, ax=None, figsize=None, **kwargs):
-        ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)
-        ax.set_xlabel("directions [degrees]")
-        ax.set_ylabel("directional spectral energy [m*m*s]")
-        ax.set_xticks(self.da.directions[::2])
-        return ax
-
-    def _plot_1dspectrum(self, x_values, ax=None, figsize=None, **kwargs):
-        ax = self._get_ax(ax, figsize)
-        y_values = self._get_first_step_values()
-
-        if "linestyle" not in kwargs:
-            kwargs["linestyle"] = "-"
-        if "marker" not in kwargs:
-            kwargs["marker"] = "."
-
-        title = kwargs.pop("title") if "title" in kwargs else self._get_title()
-        ax.set_title(title)
-
-        ax.plot(x_values, y_values, **kwargs)
-        return ax
-
-    def _plot_2dspectrum(self, **kwargs):
-        values = self._get_first_step_values()
-
-        if "figsize" not in kwargs or kwargs["figsize"] is None:
-            kwargs["figsize"] = (7, 7)
-        if "label" not in kwargs:
-            kwargs["label"] = self._label_txt()
-        if "title" not in kwargs:
-            kwargs["title"] = self._get_title()
-
-        return plot_2dspectrum(
-            values,
-            frequencies=self.da.geometry.frequencies,
-            directions=self.da.geometry.directions,
-            **kwargs,
-        )
-
-    def _get_title(self):
-        txt = f"{self.da.time[0]}"
-        x, y = self.da.geometry.x, self.da.geometry.y
-        if x is not None and y is not None:
-            if np.abs(x) < 400 and np.abs(y) < 90:
-                txt = txt + f", (x, y) = ({x:.5f}, {y:.5f})"
-            else:
-                txt = txt + f", (x, y) = ({x:.1f}, {y:.1f})"
-        return txt
-
-
-class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
-    def __init__(self, da: "DataArray") -> None:
-        if da.n_timesteps > 1:
-            Hm0 = da[0].to_Hm0()
-        else:
-            Hm0 = da.to_Hm0()
-        super().__init__(Hm0)
-
-
-class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
-    def __init__(self, da: "DataArray") -> None:
-        if da.n_timesteps > 1:
-            Hm0 = da[0].to_Hm0()
-        else:
-            Hm0 = da.to_Hm0()
-        super().__init__(Hm0)
+from .spectral import calc_m0_from_spectrum
+from .data_plot import (
+    _DataArrayPlotter,
+    _DataArrayPlotterFM,
+    _DataArrayPlotterGrid1D,
+    _DataArrayPlotterGrid2D,
+    _DataArrayPlotterAreaSpectrum,
+    _DataArrayPlotterFMVerticalColumn,
+    _DataArrayPlotterFMVerticalProfile,
+    _DataArrayPlotterPointSpectrum,
+    _DataArrayPlotterLineSpectrum,
+)
 
 
 class _DataArraySpectrumToHm0:
@@ -700,16 +98,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def __init__(
         self,
         data,
-        # *,
-        time: Union[pd.DatetimeIndex, str] = None,
-        item: ItemInfo = None,
-        geometry: _Geometry = GeometryUndefined(),
+        *,
+        time: Optional[Union[pd.DatetimeIndex, str]] = None,
+        item: Optional[ItemInfo] = None,
+        geometry=GeometryUndefined(),
         zn=None,
         dims: Optional[Sequence[str]] = None,
     ):
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
-        self.time = self._parse_time(time)
+        self.time: pd.DatetimeIndex = self._parse_time(time)
         self.dims = self._parse_dims(dims, geometry)
 
         self._check_time_data_length(self.time)
@@ -983,7 +381,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         dt = None
         if len(self.time) > 1 and self.is_equidistant:
-            dt = (self.time[1] - self.time[0]).total_seconds()
+            first: pd.Timestamp = self.time[0]  # type: ignore
+            second: pd.Timestamp = self.time[1]  # type: ignore
+            dt = (second - first).total_seconds()
         return dt
 
     @property
@@ -1038,8 +438,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         # this seems overly complicated...
         axes = tuple(range(1, x.ndim))
-        idx = np.where(~np.isnan(x).all(axis=axes))
-        idx = list(idx[0])
+        idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
         return self.isel(idx, axis=0)
 
     def flipud(self) -> "DataArray":
@@ -1085,10 +484,15 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     # ============= Select/interp ===========
 
+    # TODO implement def where() modelled after xarray
+    # def get_masked(self, key) -> np.ndarray:
+    #    if self._is_boolean_mask(key):
+    #        mask = key if isinstance(key, np.ndarray) else key.values
+    #        return self._get_by_boolean_mask(self.values, mask)
+    #    else:
+    #        raise ValueError("Invalid mask")
+
     def __getitem__(self, key) -> "DataArray":
-        if self._is_boolean_mask(key):
-            mask = key if isinstance(key, np.ndarray) else key.values
-            return self._get_by_boolean_mask(self.values, mask)
 
         da = self
         dims = self.dims
@@ -1250,7 +654,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
             idx_slice = idx
             idx = list(range(*idx.indices(self.shape[axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
-            return None
+            raise ValueError(
+                "Empty index is not allowed"
+            )  # TODO other option would be to have a NullDataArray
 
         idx = np.atleast_1d(idx)
         single_index = len(idx) == 1
@@ -1267,6 +673,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if hasattr(self.geometry, "isel"):
                 spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
+
+            # TOOD this is ugly
             if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
@@ -1307,7 +715,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def sel(
         self,
         *,
-        time: Union[str, pd.DatetimeIndex, "DataArray"] = None,
+        time: Optional[Union[str, pd.DatetimeIndex, "DataArray"]] = None,
         **kwargs,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
@@ -1447,12 +855,12 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def interp(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
-        *,
-        time: Union[pd.DatetimeIndex, "DataArray"] = None,
-        x: float = None,
-        y: float = None,
-        z: float = None,
-        n_nearest=3,
+        # *, # TODO: make this a keyword-only argument in the future
+        time: Optional[Union[pd.DatetimeIndex, "DataArray"]] = None,
+        x: Optional[float] = None,
+        y: Optional[float] = None,
+        z: Optional[float] = None,
+        n_nearest: int = 3,
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1506,11 +914,18 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if z is not None:
             raise NotImplementedError()
 
+        geometry: Union[
+            GeometryPoint2D, GeometryPoint3D, GeometryUndefined
+        ] = GeometryUndefined()
+
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
             coords = [(x, y)]
 
             if isinstance(self.geometry, Grid2D):  # TODO DIY bilinear interpolation
+                if x is None or y is None:
+                    raise ValueError("both x and y must be specified")
+
                 xr_da = self.to_xarray()
                 dai = xr_da.interp(x=x, y=y).values
                 geometry = GeometryPoint2D(
@@ -1522,6 +937,13 @@ class DataArray(DataUtilsMixin, TimeSeries):
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM):
+                if x is None or y is None:
+                    raise ValueError("both x and y must be specified")
+                if self.geometry.is_layered:
+                    raise NotImplementedError(
+                        "Interpolation in 3d is not yet implemented"
+                    )
+
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
                         coords, n_nearest=n_nearest, **kwargs
@@ -1554,7 +976,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         "Used by _extract_track"
         # Ignore item argument
         data = self.isel(time=step).to_numpy()
-        time = (self.time[step] - self.time[0]).total_seconds()
+        time = (self.time[step] - self.time[0]).total_seconds()  # type: ignore
 
         return data, time
 
@@ -1643,8 +1065,8 @@ class DataArray(DataUtilsMixin, TimeSeries):
         )
 
         return DataArray(
-            data,
-            t_out_index,
+            data=data,
+            time=t_out_index,
             item=deepcopy(self.item),
             geometry=self.geometry,
             zn=zn,
@@ -1735,14 +1157,16 @@ class DataArray(DataUtilsMixin, TimeSeries):
             raise NotImplementedError()
 
         if interpolant is None:
-            interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
-
-        if isinstance(geom, Grid2D):
-            dai = self.geometry.interp2d(
-                self.to_numpy(), *interpolant, shape=(geom.ny, geom.nx)
-            )
+            elem_ids, weights = self.geometry.get_2d_interpolant(xy, **kwargs)
         else:
-            dai = self.geometry.interp2d(self.to_numpy(), *interpolant)
+            elem_ids, weights = interpolant
+
+        if isinstance(geom, (Grid2D, GeometryFM)):
+            shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
+
+            dai = self.geometry.interp2d(
+                data=self.to_numpy(), elem_ids=elem_ids, weights=weights, shape=shape
+            )
 
         dai = DataArray(
             data=dai, time=self.time, geometry=geom, item=deepcopy(self.item)
@@ -1784,8 +1208,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
         datasets = [Dataset([da]) for da in dataarrays]
 
         ds = Dataset.concat(datasets, keep=keep)
-
-        return ds[0]
+        da = ds[0]
+        assert isinstance(da, DataArray)
+        return da
 
     # ============= Aggregation methods ===========
 
@@ -2117,7 +1542,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
             item = deepcopy(self.item)
-            return DataArray(qdat, time, item=item, geometry=geometry, dims=dims, zn=zn)
+            return DataArray(
+                data=qdat, time=time, item=item, geometry=geometry, dims=dims, zn=zn
+            )
         else:
             res = []
             for quantile in q:
@@ -2238,11 +1665,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
         bmask = self.values >= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __eq__(self, other) -> "DataArray":
+    def __eq__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values == self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __ne__(self, other) -> "DataArray":
+    def __ne__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values != self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
@@ -2352,15 +1779,14 @@ class DataArray(DataUtilsMixin, TimeSeries):
     def _time_txt(self) -> str:
         noneq_txt = "" if self.is_equidistant else " non-equidistant"
         timetxt = (
-            f"time: {self.time[0]} (time-invariant)"
+            f"time: {str(self.time[0])} (time-invariant)"
             if self.n_timesteps == 1
-            else f"time: {self.time[0]} - {self.time[-1]} ({self.n_timesteps}{noneq_txt} records)"
+            else f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps}{noneq_txt} records)"
         )
         return timetxt
 
     def _geometry_txt(self) -> str:
-        if not isinstance(self.geometry, (GeometryUndefined, type(None))):
-            return f"geometry: {self.geometry}"
+        return f"geometry: {self.geometry}"
 
     def _values_txt(self) -> str:
 
@@ -2371,3 +1797,5 @@ class DataArray(DataUtilsMixin, TimeSeries):
             return f"values: [{valtxt}]"
         elif self.ndim == 1:
             return f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
+        else:
+            return ""  # raise NotImplementedError()
