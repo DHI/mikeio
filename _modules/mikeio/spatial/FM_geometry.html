@@ -89,6 +89,7 @@
   <h1>Source code for mikeio.spatial.FM_geometry</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1607,7 +1608,6 @@
             <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
             <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_top_elems</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers_column</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bot_elems</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span> <span class="o">=</span> <span class="n">n_layers</span>
@@ -1653,16 +1653,21 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum number of z-layers&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span>
 
-    <span class="nd">@property</span>
+    <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">top_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;List of 3d element ids of surface layer&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_elems</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># note: if subset of elements is selected then this cannot be done!</span>
+        <span class="c1"># note: if subset of elements is selected then this cannot be done!</span>
 
-            <span class="c1"># TODO: check 0-based, 1-based...</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_top_elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findTopLayerElements</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_elems</span>
+        <span class="c1"># fast path if no z-layers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_z_layers</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">stop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span>
+                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># slow path</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findTopLayerElements</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 
