@@ -2,11 +2,13 @@ import os
 
 import numpy as np
 import pandas as pd
+
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import DfsFile, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
+from mikecore.Projections import Cartography
 
 from . import __dfs_version__
 from .dataset import Dataset
@@ -34,23 +36,23 @@ def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
 
     factory = DfsFactory()
     _write_dfs3_spatial_axis(builder, factory, geometry)
-    origin = geometry._origin  # Origin in geographical coordinates
-    orient = geometry._orientation
+    origin = geometry.origin  # Origin in geographical coordinates
+    orient = geometry.orientation
 
-    # if geometry.is_geo:
-    proj = factory.CreateProjectionGeoOrigin(
-        geometry.projection_string, *origin, orient
-    )
-    # else:
-    #    cart: Cartography = Cartography.CreateProjOrigin(
-    #        geometry.projection_string, *origin, orient
-    #    )
-    #    proj = factory.CreateProjectionGeoOrigin(
-    #        wktProjectionString=geometry.projection,
-    #        lon0=cart.LonOrigin,
-    #        lat0=cart.LatOrigin,
-    #        orientation=cart.Orientation,
-    #    )
+    if geometry.is_geo:
+        proj = factory.CreateProjectionGeoOrigin(
+            geometry.projection_string, *origin, orient
+        )
+    else:
+        cart: Cartography = Cartography.CreateProjOrigin(
+            geometry.projection_string, *origin, orient
+        )
+        proj = factory.CreateProjectionGeoOrigin(
+            wktProjectionString=geometry.projection,
+            lon0=cart.LonOrigin,
+            lat0=cart.LatOrigin,
+            orientation=cart.Orientation,
+        )
 
     builder.SetGeographicalProjection(proj)
 
@@ -102,7 +104,7 @@ class Dfs3(_Dfs123):
     _ndim = 3
 
     def __init__(self, filename=None):
-        super(Dfs3, self).__init__(filename)
+        super().__init__(filename)
 
         self._dx = None
         self._dy = None
@@ -110,13 +112,16 @@ class Dfs3(_Dfs123):
         self._nx = None
         self._ny = None
         self._nz = None
-        self._x0 = 0
-        self._y0 = 0
-        self._z0 = 0
+        self._x0 = 0.0
+        self._y0 = 0.0
+        self._z0 = 0.0
         self.geometry = None
 
         if filename:
             self._read_dfs3_header()
+            self._validate_no_orientation_in_geo()
+            origin, orientation = self._origin_and_orientation_in_CRS()
+
             self.geometry = Grid3D(
                 x0=self._x0,
                 dx=self._dx,
@@ -127,9 +132,9 @@ class Dfs3(_Dfs123):
                 z0=self._z0,
                 dz=self._dz,
                 nz=self._nz,
-                origin=(self._longitude, self._latitude),
+                origin=origin,
                 projection=self._projstr,
-                orientation=self._orientation,
+                orientation=orientation,
             )
 
     def __repr__(self):
@@ -154,17 +159,19 @@ class Dfs3(_Dfs123):
 
         return str.join("\n", out)
 
-    def _read_dfs3_header(self):
+    def _read_dfs3_header(self, read_x0y0z0: bool = False):
         if not os.path.isfile(self._filename):
             raise Exception(f"file {self._filename} does not exist!")
 
         self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
 
-        self.source = self._dfs
+        self._source = self._dfs
 
-        self._x0 = self._dfs.SpatialAxis.X0
-        self._y0 = self._dfs.SpatialAxis.Y0
-        self._z0 = self._dfs.SpatialAxis.Z0
+        if read_x0y0z0:
+            self._x0 = self._dfs.SpatialAxis.X0
+            self._y0 = self._dfs.SpatialAxis.Y0
+            self._z0 = self._dfs.SpatialAxis.Z0
+
         self._dx = self._dfs.SpatialAxis.Dx
         self._dy = self._dfs.SpatialAxis.Dy
         self._dz = self._dfs.SpatialAxis.Dz
@@ -406,3 +413,8 @@ class Dfs3(_Dfs123):
     @property
     def shape(self):
         return (self._n_timesteps, self._nz, self._ny, self._nx)
+
+    @property
+    def is_geo(self):
+        """Are coordinates geographical (LONG/LAT)?"""
+        return self._projstr == "LONG/LAT"

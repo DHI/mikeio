@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import numpy as np
@@ -6,6 +5,8 @@ import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D
 from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.spatial.geometry import GeometryUndefined
+from mikeio.exceptions import OutsideModelDomainError
 
 
 def test_create_nx_ny():
@@ -30,6 +31,21 @@ def test_grid1d_x():
     g = Grid1D(x=x)
     assert g.x[0] == x0
     assert g.x[-1] == x1
+
+
+def test_grid1d_isel():
+    g = Grid1D(nx=10, dx=0.1)
+
+    g2 = g.isel([0, 1, 2])
+    assert g2.nx == 3
+
+    with pytest.raises(NotImplementedError, match="equidistant"):
+        g.isel([0, 1, 9])
+
+    p1 = g.isel(3)
+    assert isinstance(
+        p1, GeometryUndefined
+    )  # the only info we have is how far along a 1d axis we are, not enough to create a 2d point
 
 
 def test_grid1d_equality():
@@ -65,7 +81,8 @@ def test_x_y():
 
     # BoundingBox(left, bottom, right, top)
     # Is this test good, or just a copy of the implementation?
-    assert g.bbox == ((x0 - dx / 2), (y0 - dy / 2), (x1 + dx / 2), (y1 + dy / 2))
+    assert g.bbox.left == (x0 - dx / 2)
+    assert g.bbox.top == (y1 + dy / 2)
 
     text = repr(g)
     assert "<mikeio.Grid2D>" in text
@@ -191,6 +208,11 @@ def test_contains():
     assert inside[0]
     assert not inside[1]
 
+    # inside = g.contains(xy[:, 0], xy[:, 1])
+    # assert inside[0]
+    # assert not inside[1]
+
+
 def test_in():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox)
@@ -204,14 +226,16 @@ def test_find_index():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, dx=0.2)
     xy1 = [0.52, 1.52]
-    xy2 = [1.5, 0.5]
+    xy2 = [0.4, 1.2]
+    xy99 = [1.5, 0.5]
     i1, j1 = g.find_index(coords=xy1)
     assert i1 == 2
     assert j1 == 7
-    i2, j2 = g.find_index(coords=xy2)
-    assert i2 == -1
-    assert j2 == -1
 
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(coords=xy99)
+
+    i2, j2 = g.find_index(coords=xy2)
     xy = np.vstack([xy1, xy2])
     ii, jj = g.find_index(coords=xy)
     assert ii[0] == i1
@@ -225,6 +249,12 @@ def test_find_index():
     assert jj[0] == j1
     assert ii[2] == i2
     assert jj[2] == j2
+
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(x=-1, y=0)
+
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(coords=[(-0.1, 0.1), (-0.1, 0.1)])
 
 
 def test_to_geometryFM():

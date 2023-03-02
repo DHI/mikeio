@@ -1,15 +1,25 @@
 import warnings
 
 import numpy as np
+from collections import namedtuple
 
 from .utils import _relative_cumulative_distance
+
+
+MESH_COL = "0.95"
+MESH_COL_DARK = "0.6"
+
+BoundaryPolylines = namedtuple(
+    "BoundaryPolylines",
+    ["n_exteriors", "exteriors", "n_interiors", "interiors"],
+)
 
 
 def _plot_map(
     node_coordinates,
     element_table,
     element_coordinates,
-    boundary_polylines,
+    boundary_polylines: BoundaryPolylines,
     projection="",
     z=None,
     elements=None,
@@ -35,7 +45,7 @@ def _plot_map(
     node_coordinates,
     element_table,
     element_coordinates,
-    boundary_polylines,
+    boundary_polylines: BoundaryPolylines,
     projection,
     z: np.array or a Dataset with a single item, optional
         value for each element to plot, default bathymetry
@@ -87,55 +97,25 @@ def _plot_map(
     >>> dfs.plot(z=ds) # plot surface elevation
     """
 
-    import matplotlib.cm as cm
-    import matplotlib.colors as mplc
     import matplotlib.pyplot as plt
-    from matplotlib.collections import PatchCollection
-    from matplotlib.patches import Polygon
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    import matplotlib.cm as cm
 
-    mesh_col = "0.95"
-    mesh_col_dark = "0.6"
+    VALID_PLOT_TYPES = (
+        "mesh_only",
+        "outline_only",
+        "contour",
+        "contourf",
+        "patch",
+        "shaded",
+    )
+    if plot_type not in VALID_PLOT_TYPES:
+        ok_list = ", ".join(VALID_PLOT_TYPES)
+        raise Exception(f"plot_type {plot_type} unknown! ({ok_list})")
 
-    if plot_type is None:
-        plot_type = "outline_only"
-
-    plot_data = True
-    if plot_type == "mesh_only" or plot_type == "outline_only":
-        plot_data = False
-
-    if plot_type == "mesh_only":
-        show_mesh = True
-
-    if cmap is None:
-        cmap = cm.viridis
+    cmap = cmap or cm.viridis
 
     nc = node_coordinates
     ec = element_coordinates
-    ne = ec.shape[0]
-
-    is_bathy = False
-    if z is None:
-        is_bathy = True
-        if plot_data:
-            z = ec[:, 2]
-            if label is None:
-                label = "Bathymetry (m)"
-    else:
-        # if isinstance(z, DataArray):
-        #     z = z.to_numpy().copy()
-        # if isinstance(z, Dataset) and len(z) == 1:  # if single-item Dataset
-        #     z = z[0].to_numpy().copy()
-        if len(z) != ne:
-            z = np.squeeze(z).copy()  # handles single time step
-            if len(z) != ne:
-                raise Exception(
-                    f"Length of z ({len(z)}) does not match geometry ({ne})"
-                )
-        if label is None:
-            label = ""
-        if not plot_data:
-            print(f"Cannot plot data in {plot_type} plot!")
 
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
@@ -144,6 +124,27 @@ def _plot_map(
             "vmin/vmax cannot be provided together with non-integer levels"
         )
 
+    # plot in existing or new axes?
+    if ax is None:
+        _, ax = plt.subplots(figsize=figsize)
+
+    # set aspect ratio
+    __set_aspect_ratio(ax, nc, projection)
+    _set_xy_label_by_projection(ax, projection)
+
+    if plot_type == "outline_only":
+        __plot_outline_only(ax, boundary_polylines)
+        return ax
+
+    if plot_type == "mesh_only":
+        __plot_mesh_only(ax, nc, element_table)
+        return ax
+
+    # At this point we are sure that we are plotting some data, at least bathymetry
+    if z is None:
+        z = ec[:, 2]
+        label = label or "Bathymetry (m)"
+
     if elements is not None:
         if plot_type.startswith("contour"):
             raise ValueError("elements argument not possible with contour plots")
@@ -151,164 +152,43 @@ def _plot_map(
         newz[elements] = z[elements]
         z = newz
 
-    if plot_data and vmin is None:
-        vmin = np.nanmin(z)
-    if plot_data and vmax is None:
-        vmax = np.nanmax(z)
+    assert len(z) == ec.shape[0]
 
-    if plot_data and vmin == vmax:
-        vmin = vmin - 0.1
-        vmax = vmin + 0.2
+    label = label or ""
 
-    # set levels
-    cmap_norm = None
-    cmap_ScMappable = None
-    if ("only" not in plot_type) and (levels is not None):
-        if np.isscalar(levels):
-            n_levels = levels
-            levels = np.linspace(vmin, vmax, n_levels)
-        else:
-            n_levels = len(levels)
-            vmin = min(levels)
-            vmax = max(levels)
+    vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels = __set_colormap_levels(
+        cmap, vmin, vmax, levels, z
+    )
+    cbar_extend = __cbar_extend(z, vmin, vmax)
 
-        levels = np.array(levels)
-
-        if isinstance(cmap, str):
-            cmap = cm.get_cmap(cmap)
-        cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
-        cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
-    if ("contour" in plot_type) and (levels is None):
-        n_levels = 10
-        levels = np.linspace(vmin, vmax, n_levels)
-
-    cbar_extend = _cbar_extend(z, vmin, vmax)
-
-    # plot in existing or new axes?
-    if ax is None:
-        fig, ax = plt.subplots(figsize=figsize)
-
-    # set aspect ratio
-    is_geo = projection == "LONG/LAT"
-    if is_geo:
-        mean_lat = np.mean(nc[:, 1])
-        ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
-    else:
-        ax.set_aspect("equal")
-
-    _set_xy_label_by_projection(ax, projection)
-
-    # set plot limits
-    xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
-    ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
-
-    # scale height of colorbar
-    cbar_frac = 0.046 * nc[:, 1].ptp() / nc[:, 0].ptp()
-
-    if plot_type == "outline_only":
-        fig_obj = None
-
-    elif plot_type == "mesh_only":
-        if show_mesh == False:
-            print("Not possible to use show_mesh=False on a mesh_only plot!")
-        patches = _to_polygons(nc, element_table)
-        fig_obj = PatchCollection(
-            patches, edgecolor=mesh_col_dark, facecolor="none", linewidths=0.3
+    if plot_type == "patch":
+        fig_obj = __plot_patch(
+            ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax
         )
-        ax.add_collection(fig_obj)
-
-    elif plot_type == "patch" or plot_type == "box":
-        patches = _to_polygons(nc, element_table)
-        # do plot as patches (like MZ "box contour")
-        # with (constant) element center values
-        if show_mesh:
-            fig_obj = PatchCollection(
-                patches,
-                cmap=cmap,
-                norm=cmap_norm,
-                edgecolor=mesh_col,
-                linewidths=0.4,
-            )
-        else:
-            fig_obj = PatchCollection(
-                patches,
-                cmap=cmap,
-                norm=cmap_norm,
-                edgecolor="face",
-                alpha=None,
-                linewidths=None,
-            )
-
-        fig_obj.set_array(z)
-        fig_obj.set_clim(vmin, vmax)
-        ax.add_collection(fig_obj)
-
-        if add_colorbar:
-            cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-            cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-            plt.colorbar(cmap_sm, label=label, cax=cax, extend=cbar_extend)
 
     else:
         # do node-based triangular plot
-        import matplotlib.tri as tri
-
         mesh_linewidth = 0.0
-        if show_mesh and _is_tri_only(element_table):
+        if show_mesh and __is_tri_only(element_table):
             mesh_linewidth = 0.4
-            if n_refinements > 0:
-                n_refinements = 0
-                print("Warning: mesh refinement is not possible if plot_mesh=True")
+            n_refinements = 0
+        triang, zn = __get_tris(nc, element_table, ec, z, n_refinements)
 
-        elem_table, ec, z = _create_tri_only_element_table(
-            nc, element_table, ec, data=z
-        )
-        triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
+        if plot_type == "shaded":
+            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
+            fig_obj = ax.tripcolor(
+                triang,
+                zn,
+                edgecolors="face",
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                linewidths=0.3,
+                shading="gouraud",
+            )
 
-        zn = _get_node_centered_data(nc, elem_table, ec, z)
-
-        if n_refinements > 0:
-            # TODO: refinements doesn't seem to work for 3d files?
-            refiner = tri.UniformTriRefiner(triang)
-            triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
-
-        if plot_type == "shaded" or plot_type == "smooth":
-            ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-            if cmap_norm is None:
-                fig_obj = ax.tripcolor(
-                    triang,
-                    zn,
-                    edgecolors="face",
-                    vmin=vmin,
-                    vmax=vmax,
-                    cmap=cmap,
-                    linewidths=0.3,
-                    shading="gouraud",
-                )
-            else:
-                fig_obj = ax.tripcolor(
-                    triang,
-                    zn,
-                    edgecolors="face",
-                    cmap=cmap,
-                    norm=cmap_norm,
-                    linewidths=0.3,
-                    shading="gouraud",
-                )
-
-            if add_colorbar:
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
-
-                plt.colorbar(
-                    cmap_sm,
-                    label=label,
-                    cax=cax,
-                    boundaries=levels,
-                    extend=cbar_extend,
-                )
-
-        elif plot_type == "contour" or plot_type == "contour_lines":
-            ax.triplot(triang, lw=mesh_linewidth, color=mesh_col_dark)
+        elif plot_type == "contour":
+            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL_DARK)
             fig_obj = ax.tricontour(
                 triang,
                 zn,
@@ -318,14 +198,11 @@ def _plot_map(
                 norm=cmap_norm,
             )
             ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
-            if len(label) > 0:
-                ax.set_title(label)
+            ax.set_title(label)
+            add_colorbar = False
 
-        elif plot_type == "contourf" or plot_type == "contour_filled":
-            ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
-            # vbuf = 0.01 * (vmax - vmin) / n_levels
-            # avoid white outside limits
-            # zn = np.clip(zn, vmin + vbuf, vmax - vbuf) # # THIS LINE SEEMS TO CAUSE TROUBLE
+        elif plot_type == "contourf":
+            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
             fig_obj = ax.tricontourf(
                 triang,
                 zn,
@@ -337,62 +214,355 @@ def _plot_map(
                 vmax=vmax,
             )
 
-            # colorbar
-            if add_colorbar:
-                cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
-                if cmap_ScMappable is None:
-                    plt.colorbar(fig_obj, label=label, cax=cax)
-                else:
-                    try:
-                        plt.colorbar(
-                            cmap_ScMappable,
-                            label=label,
-                            cax=cax,
-                            ticks=levels,
-                            extend=cbar_extend,
-                        )
-                    except:
-                        warnings.warn("Cannot add colorbar")
-
-        else:
-            if (plot_type is not None) and plot_type != "outline_only":
-                raise Exception(f"plot_type {plot_type} unknown!")
-
-        if show_mesh and (not _is_tri_only(element_table)):
-            # if mesh is not tri only, we need to add it manually on top
-            patches = _to_polygons(nc, element_table)
-            mesh_linewidth = 0.4
-            if plot_type == "contour":
-                mesh_col = mesh_col_dark
-            p = PatchCollection(
-                patches,
-                edgecolor=mesh_col,
-                facecolor="none",
-                linewidths=mesh_linewidth,
-            )
-            ax.add_collection(p)
+        if show_mesh and (not __is_tri_only(element_table)):
+            __add_non_tri_mesh(ax, nc, element_table, plot_type)
 
     if show_outline:
-        linwid = 1.2
-        out_col = "0.4"
-        for exterior in boundary_polylines.exteriors:
-            ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-            xd, yd = exterior.xy[:, 0], exterior.xy[:, 1]
-            xmin, xmax = min(xmin, np.min(xd)), max(xmax, np.max(xd))
-            ymin, ymax = min(ymin, np.min(yd)), max(ymax, np.max(yd))
+        __add_outline(ax, boundary_polylines)
 
-        for interior in boundary_polylines.interiors:
-            ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
+    if add_colorbar:
+        __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
 
-    # set plot limits
+    __set_plot_limits(ax, nc)
+
+    ax.set_title(title)
+
+    return ax
+
+
+def __set_colormap_levels(cmap, vmin, vmax, levels, z):
+    """Set colormap, levels, vmin, vmax, and cmap_norm
+
+    Parameters
+    ----------
+    cmap : str or matplotlib.colors.Colormap
+        colormap name or colormap object
+    vmin : float
+        minimum value for colorbar
+    vmax : float
+        maximum value for colorbar
+    levels : int or list of float
+        number of levels or list of levels
+    z : array of float
+        data to be plotted
+
+    Returns
+    -------
+    vmin : float
+        minimum value for colorbar
+    vmax : float
+        maximum value for colorbar
+    cmap : matplotlib.colors.Colormap
+        colormap object
+    cmap_norm : matplotlib.colors.Normalize
+        colormap normalization object
+    cmap_ScMappable : matplotlib.cm.ScalarMappable
+        colormap object
+    levels : list of float
+        list of levels
+    """
+
+    import matplotlib
+    import matplotlib.cm as cm
+    import matplotlib.colors as mplc
+
+    vmin = vmin or np.nanmin(z)
+    vmax = vmax or np.nanmax(z)
+
+    if vmin == vmax:
+        vmin = vmin - 0.1
+        vmax = vmin + 0.2
+
+    cmap_norm = None
+    cmap_ScMappable = None
+    if levels is not None:
+        if np.isscalar(levels):
+            n_levels = levels
+            levels = np.linspace(vmin, vmax, n_levels)
+        else:
+            n_levels = len(levels)
+            vmin = min(levels)
+            vmax = max(levels)
+
+        levels = np.array(levels)
+
+        if isinstance(cmap, str):
+            cmap = matplotlib.colormaps[cmap]
+        cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
+        cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
+
+    if levels is None:
+        levels = np.linspace(vmin, vmax, 10)
+
+    return vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels
+
+
+def __set_plot_limits(ax, nc) -> None:
+    """Set default plot limits
+
+    Override with matplotlib ax.set_xlim, ax.set_ylim
+    """
+    xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
+    ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
+
     xybuf = 6e-3 * (xmax - xmin)
     ax.set_xlim(xmin - xybuf, xmax + xybuf)
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
-    if title is not None:
-        ax.set_title(title)
 
+def __plot_mesh_only(ax, nc, element_table):
+    """plot mesh only (no data)
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        axes object
+    nc : array of float
+        node coordinates
+    element_table : array of int
+        element table
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        axes object
+    """
+    from matplotlib.collections import PatchCollection
+
+    patches = _to_polygons(nc, element_table)
+    fig_obj = PatchCollection(
+        patches, edgecolor=MESH_COL_DARK, facecolor="none", linewidths=0.3
+    )
+    ax.add_collection(fig_obj)
+
+
+def __plot_outline_only(ax, boundary_polylines: BoundaryPolylines):
+    """plot outline only (no data)
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        axes object
+    boundary_polylines : BoundaryPolylines
+        boundary polylines
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        axes object
+    """
+    __add_outline(ax, boundary_polylines)
     return ax
+
+
+def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
+    """plot patch with data from z
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        axes object
+    nc : array of float
+        node coordinates
+    element_table : array of int
+        element table
+    show_mesh : bool
+        include mesh polygons
+    cmap : str or matplotlib.colors.Colormap
+        colormap name or colormap object
+    cmap_norm : matplotlib.colors.Normalize
+        colormap normalization object
+    z : array of float
+        data to be plotted
+    vmin : float
+        minimum value for colorbar
+    vmax : float
+        maximum value for colorbar
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        axes object
+    """
+
+    from matplotlib.collections import PatchCollection
+
+    patches = _to_polygons(nc, element_table)
+
+    if show_mesh:
+        edgecolor = MESH_COL
+        linewidth = 0.4
+    else:
+        edgecolor = "face"
+        linewidth = None
+
+    fig_obj = PatchCollection(
+        patches,
+        cmap=cmap,
+        norm=cmap_norm,
+        edgecolor=edgecolor,
+        linewidths=linewidth,
+    )
+
+    fig_obj.set_array(z)
+    fig_obj.set_clim(vmin, vmax)
+    ax.add_collection(fig_obj)
+
+    return fig_obj
+
+
+def __get_tris(nc, element_table, ec, z, n_refinements):
+    """get triangulation object and node-centered data
+
+    Parameters
+    ----------
+    nc : array of float
+        node coordinates
+    element_table : array of int
+        element table
+    ec : array of int
+        element coordinates
+    z : array of float
+        data to be plotted
+    n_refinements : int
+        number of refinements
+
+    Returns
+    -------
+    matplotlib.tri.Triangulation and node-centered data
+    """
+
+    import matplotlib.tri as tri
+
+    elem_table, ec, z = __create_tri_only_element_table(nc, element_table, ec, data=z)
+    triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
+
+    zn = _get_node_centered_data(nc, elem_table, ec, z)
+
+    if n_refinements > 0:
+        # TODO: refinements doesn't seem to work for 3d files?
+        refiner = tri.UniformTriRefiner(triang)
+        triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
+
+    return triang, zn
+
+
+def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> None:
+    """add colorbar to axes
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        axes object
+    cmap_ScMappable : matplotlib.cm.ScalarMappable
+        colormap object
+    fig_obj : matplotlib.figure.Figure
+        figure object
+    label : str
+        colorbar label
+    levels : array of float
+        colorbar levels
+    cbar_extend : str
+        extend colorbar beyond min/max values
+
+    Returns
+    -------
+    None
+    """
+
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    import matplotlib.pyplot as plt
+
+    cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
+    cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
+
+    plt.colorbar(
+        cmap_sm,
+        label=label,
+        cax=cax,
+        ticks=levels,
+        boundaries=levels,
+        extend=cbar_extend,
+    )
+
+
+def __set_aspect_ratio(ax, nc, projection):
+    """set aspect ratio
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        axes object
+    nc : array of float
+        node coordinates
+    projection : str
+        projection type
+
+    Returns
+    -------
+    None
+    """
+    is_geo = projection == "LONG/LAT"
+    if is_geo:
+        mean_lat = np.mean(nc[:, 1])
+        ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
+    else:
+        ax.set_aspect("equal")
+
+
+def __add_non_tri_mesh(ax, nc, element_table, plot_type) -> None:
+    """add non-triangular mesh to axes
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        axes object
+    nc : array of float
+        node coordinates
+    element_table : array of int
+        element table
+    plot_type : str
+
+    Returns
+    -------
+    None
+    """
+    # if mesh is not tri only, we need to add it manually on top
+    from matplotlib.collections import PatchCollection
+
+    patches = _to_polygons(nc, element_table)
+    mesh_linewidth = 0.4
+    if plot_type == "contour":
+        mesh_col = MESH_COL_DARK
+    else:
+        mesh_col = MESH_COL
+    p = PatchCollection(
+        patches,
+        edgecolor=mesh_col,
+        facecolor="none",
+        linewidths=mesh_linewidth,
+    )
+    ax.add_collection(p)
+
+
+def __add_outline(ax, boundary_polylines: BoundaryPolylines) -> None:
+    """add outline to axes
+
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        axes object
+    boundary_polylines: BoundaryPolylines
+        boundary polylines
+
+    Returns
+    -------
+    None
+    """
+
+    lines = boundary_polylines.exteriors + boundary_polylines.interiors
+    for line in lines:
+        ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
 
 
 def _set_xy_label_by_projection(ax, projection):
@@ -407,7 +577,7 @@ def _set_xy_label_by_projection(ax, projection):
         ax.set_ylabel("Northing [m]")
 
 
-def _is_tri_only(element_table):
+def __is_tri_only(element_table):
     return max([len(el) for el in element_table]) == 3
 
 
@@ -456,7 +626,7 @@ def _get_node_centered_data(
         node-centered data
     """
     nc = node_coordinates
-    elem_table, ec, data = _create_tri_only_element_table(
+    elem_table, ec, data = __create_tri_only_element_table(
         nc, element_table, element_coordinates, data
     )
 
@@ -495,19 +665,16 @@ def _get_node_centered_data(
     return node_centered_data
 
 
-def _create_tri_only_element_table(
-    node_coordinates, element_table, element_coordinates, data=None
+def __create_tri_only_element_table(
+    node_coordinates, element_table, element_coordinates, data
 ):
     """Convert quad/tri mesh to pure tri-mesh"""
 
-    if _is_tri_only(element_table):
+    if __is_tri_only(element_table):
         # already tri-only? just convert to 2d array
         return np.stack(element_table), element_coordinates, data
 
     ec = element_coordinates.copy()
-
-    if data is None:
-        data = []
 
     elem_table = [list(element_table[i]) for i in range(len(element_table))]
     tmp_elmnt_nodes = elem_table.copy()
@@ -531,7 +698,7 @@ def _create_tri_only_element_table(
     return np.asarray(elem_table), ec, data
 
 
-def _cbar_extend(calc_data, vmin, vmax):
+def __cbar_extend(calc_data, vmin, vmax) -> str:
     if calc_data is None:
         return "neither"
     extend_min = calc_data.min() < vmin if vmin is not None else False
@@ -545,17 +712,6 @@ def _cbar_extend(calc_data, vmin, vmax):
     else:
         extend = "neither"
     return extend
-
-
-def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
-    """Check for each side in the polygon that the point is on the correct side"""
-
-    for j in range(len(xn) - 1):
-        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
-            return False
-    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-        return False
-    return True
 
 
 def _plot_vertical_profile(

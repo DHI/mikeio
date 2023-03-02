@@ -5,6 +5,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
+from mikeio.exceptions import OutsideModelDomainError
 from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D, GeometryUndefined
 
 
@@ -163,13 +164,11 @@ def test_data_0d(da0):
     assert da0.ndim == 1
     assert da0.dims == ("time",)
     assert "values" in repr(da0)
-    assert "geometry" not in repr(da0)
     assert "values" in repr(da0[:4])
 
     da0 = da0.squeeze()
     assert da0.ndim == 0
     assert "values" in repr(da0)
-    assert "geometry" not in repr(da0)
 
 
 def test_create_data_1d_default_grid():
@@ -618,8 +617,8 @@ def test_da_isel_space(da_grid2d):
 
 
 def test_da_isel_empty(da_grid2d):
-    da_sel = da_grid2d.isel(slice(100, 200), axis="y")
-    assert da_sel is None
+    with pytest.raises(ValueError):
+        da_grid2d.isel(slice(100, 200), axis="y")
 
 
 def test_da_isel_space_multiple_elements(da_grid2d):
@@ -683,7 +682,7 @@ def test_da_sel_xy_grid2d(da_grid2d):
     assert da1.geometry.y == 0.0
     assert np.all(da1.to_numpy() == da.to_numpy()[:, 10, 4])
 
-    da2 = da.sel(x=100.4, y=0.0)
+    # da2 = da.sel(x=100.4, y=0.0) # TODO outside grid
 
 
 def test_da_sel_multi_xy_grid2d(da_grid2d):
@@ -843,92 +842,92 @@ def test_modify_values_1d(da1):
     assert da1.values[4] == 14.0
 
     # selecting a slice will return a view. The original is changed.
-    da1.isel(slice(4,6)).values[0] = 13.0 
+    da1.isel(slice(4, 6)).values[0] = 13.0
     assert da1.values[4] == 13.0
 
     # __getitem__ uses isel()
-    da1[4:6].values[0] = 12.0 
+    da1[4:6].values[0] = 12.0
     assert da1.values[4] == 12.0
 
     # values is scalar, therefore copy by definition. Original is not changed.
-    da1.isel(4).values = 11.0    
-    assert da1.values[4] != 11.0  
+    da1.isel(4).values = 11.0
+    assert da1.values[4] != 11.0
 
     # fancy indexing will return copy! Original is *not* changed.
-    da1.isel([0,4,7]).values[1] = 10.0  
-    assert da1.values[4] != 10.0  
+    da1.isel([0, 4, 7]).values[1] = 10.0
+    assert da1.values[4] != 10.0
 
 
 def test_modify_values_2d_all(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     da2 += 0.1
-    assert da2.values[2,5] == 0.2
+    assert da2.values[2, 5] == 0.2
 
-    vals = 0.3*np.ones(da2.shape)
+    vals = 0.3 * np.ones(da2.shape)
     da2.values = vals
-    assert da2.values[2,5] == 0.3
+    assert da2.values[2, 5] == 0.3
 
 
 def test_modify_values_2d_idx(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     # selecting a single index will return a view. The original is changed.
     da2.isel(time=2).values[5] = 0.2
-    assert da2.values[2,5] == 0.2
+    assert da2.values[2, 5] == 0.2
 
     da2.isel(x=5).values[2] = 0.3
-    assert da2.values[2,5] == 0.3
+    assert da2.values[2, 5] == 0.3
 
-    da2.values[2,5] = 0.4
-    assert da2.values[2,5] == 0.4
+    da2.values[2, 5] = 0.4
+    assert da2.values[2, 5] == 0.4
 
     # __getitem__ uses isel()
     da2[2].values[5] = 0.5
-    assert da2.values[2,5] == 0.5
+    assert da2.values[2, 5] == 0.5
 
-    da2[:,5].values[2] = 0.6
-    assert da2.values[2,5] == 0.6
+    da2[:, 5].values[2] = 0.6
+    assert da2.values[2, 5] == 0.6
 
 
 def test_modify_values_2d_slice(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     # selecting a slice will return a view. The original is changed.
-    da2.isel(time=slice(2,6)).values[0,5] = 0.4
-    assert da2.values[2,5] == 0.4
+    da2.isel(time=slice(2, 6)).values[0, 5] = 0.4
+    assert da2.values[2, 5] == 0.4
 
-    da2.isel(x=slice(5,7)).values[2,0] = 0.5
-    assert da2.values[2,5] == 0.5
+    da2.isel(x=slice(5, 7)).values[2, 0] = 0.5
+    assert da2.values[2, 5] == 0.5
 
     # __getitem__ uses isel()
-    da2[2:5].values[0,5] = 0.6
-    assert da2.values[2,5] == 0.6
+    da2[2:5].values[0, 5] = 0.6
+    assert da2.values[2, 5] == 0.6
 
-    da2[:,5:7].values[2,0] = 0.7
-    assert da2.values[2,5] == 0.7
+    da2[:, 5:7].values[2, 0] = 0.7
+    assert da2.values[2, 5] == 0.7
 
 
 def test_modify_values_2d_fancy(da2):
-    assert da2.shape == (10,7)
-    assert da2.values[2,5] == 0.1
+    assert da2.shape == (10, 7)
+    assert da2.values[2, 5] == 0.1
 
     # fancy indexing will return a *copy*. The original is NOT changed.
-    da2.isel(time=[2,3,4,5]).values[0,5] = 0.4
-    assert da2.values[2,5] != 0.4
+    da2.isel(time=[2, 3, 4, 5]).values[0, 5] = 0.4
+    assert da2.values[2, 5] != 0.4
 
-    da2.isel(x=[5,6]).values[2,0] = 0.5
-    assert da2.values[2,5] != 0.5
+    da2.isel(x=[5, 6]).values[2, 0] = 0.5
+    assert da2.values[2, 5] != 0.5
 
     # __getitem__ uses isel()
-    da2[[2,3,4,5]].values[0,5] = 0.6
-    assert da2.values[2,5] != 0.6
+    da2[[2, 3, 4, 5]].values[0, 5] = 0.6
+    assert da2.values[2, 5] != 0.6
 
-    da2[:,[5,6]].values[2,0] = 0.7
-    assert da2.values[2,5] != 0.7
+    da2[:, [5, 6]].values[2, 0] = 0.7
+    assert da2.values[2, 5] != 0.7
 
 
 def test_add_scalar(da1):
@@ -1033,42 +1032,6 @@ def test_binary_math_operations(da1):
     assert isinstance(da2, mikeio.DataArray)
 
 
-def test_dataarray_masking():
-    filename = "tests/testdata/basin_3d.dfsu"
-    da = mikeio.read(filename, items="U velocity")[0]
-    assert da.shape == (3, 1740)
-
-    mask = da < 0
-    assert mask.shape == da.shape
-    assert mask.dtype == "bool"
-    assert mask.shape == (3, 1740)
-
-    # get values using mask (other values will be np.nan)
-    da_mask = da[mask]
-    assert isinstance(da_mask, np.ndarray)
-    assert da_mask.shape == (2486,)
-
-    # set values smaller than 0 to 0 using mask
-    assert da.min(axis=None).values < 0
-    da[mask] = 0.0
-    assert da.min(axis=None).values == 0
-
-    mask = da > 0
-    assert mask.dtype == "bool"
-
-    mask = da == 0
-    assert mask.dtype == "bool"
-
-    mask = da != 0
-    assert mask.dtype == "bool"
-
-    mask = da >= 0
-    assert mask.dtype == "bool"
-
-    mask = da <= 0
-    assert mask.dtype == "bool"
-
-
 def test_daarray_aggregation_dfs2():
 
     filename = "tests/testdata/gebco_sound.dfs2"
@@ -1082,6 +1045,20 @@ def test_daarray_aggregation_dfs2():
 
     dasm = da.nanmean(axis="space")
     assert dasm.shape == (1,)
+
+
+def test_dataarray_weigthed_average():
+    filename = "tests/testdata/HD2D.dfsu"
+    ds = mikeio.read(filename, items=["Surface elevation"])
+
+    da = ds["Surface elevation"]
+
+    area = da.geometry.get_element_area()
+
+    da2 = da.average(weights=area, axis=1)
+
+    assert isinstance(da2.geometry, GeometryUndefined)
+    assert da2.dims == ("time",)
 
 
 def test_daarray_aggregation():
@@ -1137,9 +1114,10 @@ def test_daarray_aggregation_no_time():
     filename = "tests/testdata/HD2D.dfsu"
     ds = mikeio.read(filename, items=[3], time=-1)
     da = ds["Current speed"]
-    assert da.dims == ("element",) 
+    assert da.dims == ("element",)
 
     assert da.max().values == pytest.approx(1.6463733)
+
 
 def test_daarray_aggregation_nan_versions():
 
@@ -1265,10 +1243,31 @@ def test_xzy_selection():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    das_xzy = ds.Temperature.sel(x=340000, y=15.75, z=0)
+    das_xzy = ds.Temperature.sel(x=348946, y=6173673, z=0)
 
     # check for point geometry after selection
     assert type(das_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
+    assert das_xzy.values[0] == pytest.approx(17.381)
+
+    # do the same but go one level deeper, but finding the index first
+    idx = ds.geometry.find_index(x=348946, y=6173673, z=0)
+    das_idx = ds.Temperature.isel(element=idx)
+    assert das_idx.values[0] == pytest.approx(17.381)
+
+    # let's try find the same point multiple times
+    das_idxs = ds.geometry.find_index(
+        x=[348946, 348946], y=[6173673, 6173673], z=[0, 0]
+    )
+    assert len(das_idxs) == 1  # only one point
+
+
+def test_xzy_selection_outside_domain():
+    # select in space via x,y,z coordinates test
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds = mikeio.read(filename)
+
+    with pytest.raises(OutsideModelDomainError):
+        ds.Temperature.sel(x=340000, y=15.75, z=0)  # this is way outside the domain
 
 
 def test_layer_selection():

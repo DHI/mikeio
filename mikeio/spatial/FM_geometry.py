@@ -1,6 +1,7 @@
 import warnings
 from collections import namedtuple
-from typing import Sequence, Union
+from functools import cached_property
+from typing import Collection, Sequence, Union
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -8,20 +9,18 @@ from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
 from scipy.spatial import cKDTree
 
-import mikeio.data_utils as du
-
 from ..eum import EUMType, EUMUnit
-from ..exceptions import InvalidGeometry
+from ..exceptions import InvalidGeometry, OutsideModelDomainError
 from ..interpolation import get_idw_interpolant, interp2d
 from .FM_utils import (
     _get_node_centered_data,
     _plot_map,
     _plot_vertical_profile,
-    _point_in_polygon,
-    _set_xy_label_by_projection,
-    _to_polygons,
+    BoundaryPolylines,
+    _set_xy_label_by_projection,  # TODO remove
+    _to_polygons,  # TODO remove
 )
-from .geometry import BoundingBox, GeometryPoint2D, GeometryPoint3D, _Geometry
+from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
 
@@ -42,7 +41,7 @@ class GeometryFMPointSpectrum(_Geometry):
     @property
     def type_name(self):
         """Type name: DfsuSpectral0D"""
-        return self._type.name
+        return self._type.name  # TODO there is no self._type??
 
     def __repr__(self):
         txt = f"Point Spectrum Geometry(frequency:{self.n_frequencies}, direction:{self.n_directions}"
@@ -97,6 +96,7 @@ class _GeometryFMPlotter:
     def __call__(self, ax=None, figsize=None, **kwargs):
         """Plot bathymetry as coloured patches"""
         ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = kwargs.get("plot_type") or "patch"
         return self._plot_FM_map(ax, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
@@ -124,6 +124,8 @@ class _GeometryFMPlotter:
         if "title" not in kwargs:
             kwargs["title"] = "Bathymetry"
 
+        plot_type = kwargs.pop("plot_type")
+
         g = self.g._geometry2d
 
         return _plot_map(
@@ -131,6 +133,7 @@ class _GeometryFMPlotter:
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
             boundary_polylines=g.boundary_polylines,
+            plot_type=plot_type,
             projection=g.projection,
             z=None,
             ax=ax,
@@ -139,6 +142,9 @@ class _GeometryFMPlotter:
 
     def mesh(self, title="Mesh", figsize=None, ax=None):
         """Plot mesh only"""
+
+        # TODO this must be a duplicate, delegate
+
         from matplotlib.collections import PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
@@ -159,6 +165,8 @@ class _GeometryFMPlotter:
 
     def outline(self, title="Outline", figsize=None, ax=None):
         """Plot domain outline (using the boundary_polylines property)"""
+
+        # TODO this must be a duplicate, delegate
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
@@ -207,6 +215,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _set_plot_limits(self, ax):
+        # TODO this must be a duplicate, delegate
         bbox = xy_to_bbox(self.g.node_coordinates)
         xybuf = 6e-3 * (bbox.right - bbox.left)
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
@@ -214,6 +223,7 @@ class _GeometryFMPlotter:
         return ax
 
     def _plot_aspect(self):
+        # TODO this must be a duplicate, delegate
         if self.g.is_geo:
             mean_lat = np.mean(self.g.node_coordinates[:, 1])
             return 1.0 / np.cos(np.pi * mean_lat / 180)
@@ -307,25 +317,23 @@ class GeometryFM(_Geometry):
 
         #     self._point_in_polygon = numba.njit(_point_in_polygon)
         # except ModuleNotFoundError:
-        self._point_in_polygon = _point_in_polygon
+        # self._point_in_polygon = _point_in_polygon
 
-    def __repr__(self):
+    def _repr_txt(self, layer_txt=None):
         out = []
         out.append("Flexible Mesh Geometry: " + self.type_name)
         if self.n_nodes:
             out.append(f"number of nodes: {self.n_nodes}")
         if self.n_elements:
             out.append(f"number of elements: {self.n_elements}")
-        if self._n_layers:
-            details = (
-                "sigma only"
-                if self.n_z_layers is None
-                else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
-            )
-            out.append(f"number of layers: {self._n_layers} ({details})")
+            if layer_txt is not None:
+                out.append(layer_txt)
         if self._projstr:
             out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
+
+    def __repr__(self):
+        return self._repr_txt()
 
     def __str__(self) -> str:
         gtxt = f"{self.type_name}"
@@ -335,6 +343,56 @@ class GeometryFM(_Geometry):
         else:
             gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
         return gtxt
+
+    @staticmethod
+    def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
+        """Check for each side in the polygon that the point is on the correct side"""
+
+        for j in range(len(xn) - 1):
+            if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (
+                yp - yn[j]
+            ) > 0:
+                return False
+            if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+                return False
+        return True
+
+    @staticmethod
+    def _area_is_bbox(area) -> bool:
+        is_bbox = False
+        if area is not None:
+            if not np.isscalar(area):
+                area = np.array(area)
+                if (area.ndim == 1) & (len(area) == 4):
+                    if np.all(np.isreal(area)):
+                        is_bbox = True
+        return is_bbox
+
+    @staticmethod
+    def _area_is_polygon(area) -> bool:
+        if area is None:
+            return False
+        if np.isscalar(area):
+            return False
+        if not np.all(np.isreal(area)):
+            return False
+        polygon = np.array(area)
+        if polygon.ndim > 2:
+            return False
+
+        if polygon.ndim == 1:
+            if len(polygon) <= 5:
+                return False
+            if len(polygon) % 2 != 0:
+                return False
+
+        if polygon.ndim == 2:
+            if polygon.shape[0] < 3:
+                return False
+            if polygon.shape[1] != 2:
+                return False
+
+        return True
 
     # should projection string still be here?
     def _set_nodes(
@@ -437,6 +495,13 @@ class GeometryFM(_Geometry):
     def type_name(self):
         """Type name, e.g. Mesh, Dfsu2D"""
         return self._type.name if self._type else "Mesh"
+
+    @property
+    def ndim(self) -> int:
+        if self.is_layered:
+            return 3
+        else:
+            return 2
 
     @property
     def is_2d(self) -> bool:
@@ -693,13 +758,16 @@ class GeometryFM(_Geometry):
         return elem_id, d
 
     def _find_element_2d(self, coords: np.array):
-        xn = np.zeros(4, dtype=np.float64)
-        yn = np.zeros(4, dtype=np.float64)
+
+        points_outside = []
+
         coords = np.atleast_2d(coords)
         nc = self._geometry2d.node_coordinates
 
-        few_nearest, _ = self._find_n_nearest_2d_elements(coords, n=2)
-        ids = few_nearest[:, 0]  # first guess
+        few_nearest, _ = self._find_n_nearest_2d_elements(
+            coords, n=min(self._geometry2d.n_elements, 2)
+        )
+        ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
 
         for k in range(len(ids)):
             # step 1: is nearest element = element containing point?
@@ -709,46 +777,58 @@ class GeometryFM(_Geometry):
             )
 
             # step 2: if not, then try second nearest point
-            if not element_found:
-                nodes = self._geometry2d.element_table[few_nearest[k, 1]]
+            if not element_found and self._geometry2d.n_elements > 1:
+                candidate = few_nearest[k, 1]
+                assert np.isscalar(candidate)
+                nodes = self._geometry2d.element_table[candidate]
                 element_found = self._point_in_polygon(
                     nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
                 )
                 ids[k] = few_nearest[k, 1]
 
             # step 3: if not, then try with *many* more points
-            if not element_found:
-                # many_nearest, _ = self._find_n_nearest_2d_elements(coords[k:k, :], n=10)
+            if not element_found and self._geometry2d.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
-                    coords[k, :], n=10
-                )  # JAN fix
-                element_table = self._geometry2d.element_table[many_nearest]
-                lid = self._find_element_containing_point_2d(
-                    element_table,
-                    xn,
-                    yn,
-                    coords[k, 0],
-                    coords[k, 1],
+                    coords[k, :],
+                    n=min(self._geometry2d.n_elements, 10),  # TODO is 10 enough?
                 )
-                ids[k] = many_nearest[lid] if lid > 0 else -1
+                for p in many_nearest[2:]:  # we have already tried the two first above
+                    nodes = self._geometry2d.element_table[p]
+                    element_found = self._point_in_polygon(
+                        nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
+                    )
+                    if element_found:
+                        ids[k] = p
+                        break
+
+            if not element_found:
+                points_outside.append(k)
+
+        if len(points_outside) > 0:
+            raise OutsideModelDomainError(
+                x=coords[points_outside, 0],
+                y=coords[points_outside, 1],
+                indices=points_outside,
+            )
 
         return ids
 
-    def _find_element_containing_point_2d(
-        self,
-        element_table,
-        xn: np.array,
-        yn: np.array,
-        xp: float,
-        yp: float,
-    ):
-        for j, el in enumerate(element_table):
-            n_nodes = len(el)
-            xn[0:n_nodes] = self.node_coordinates[el, 0]
-            yn[0:n_nodes] = self.node_coordinates[el, 1]
-            if self._point_in_polygon(xn[0:n_nodes], yn[0:n_nodes], xp, yp):
-                return j
-        return -1
+    def _find_single_element_2d(self, x: float, y: float) -> int:
+
+        nc = self._geometry2d.node_coordinates
+
+        few_nearest, _ = self._find_n_nearest_2d_elements(
+            x=x, y=y, n=min(self.n_elements, 10)
+        )
+
+        for idx in few_nearest:
+            nodes = self._geometry2d.element_table[idx]
+            element_found = self._point_in_polygon(nc[nodes, 0], nc[nodes, 1], x, y)
+
+            if element_found:
+                return idx
+
+        raise OutsideModelDomainError(x=x, y=y)
 
     def get_overset_grid(
         self, dx=None, dy=None, nx=None, ny=None, buffer=None
@@ -860,7 +940,7 @@ class GeometryFM(_Geometry):
         self._codes = np.array(v, dtype=np.int32)
 
     @property
-    def boundary_polylines(self):
+    def boundary_polylines(self) -> BoundaryPolylines:
         """Lists of closed polylines defining domain outline"""
         if self._boundary_polylines is None:
             self._boundary_polylines = self._get_boundary_polylines()
@@ -928,7 +1008,7 @@ class GeometryFM(_Geometry):
             polylines.append(polyline)
         return polylines
 
-    def _get_boundary_polylines(self):
+    def _get_boundary_polylines(self) -> BoundaryPolylines:
         """Get boundary polylines and categorize as inner or outer by
         assessing the signed area
         """
@@ -952,10 +1032,6 @@ class GeometryFM(_Geometry):
             else:
                 poly_lines_int.append(poly)
 
-        BoundaryPolylines = namedtuple(
-            "BoundaryPolylines",
-            ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-        )
         n_ext = len(poly_lines_ext)
         n_int = len(poly_lines_int)
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
@@ -981,7 +1057,9 @@ class GeometryFM(_Geometry):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
-    def isel(self, idx=None, axis="elements", keepdims=False):
+    def isel(
+        self, idx: Collection[int], keepdims=False, **kwargs
+    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint2D, GeometryPoint3D]:
         """export a selection of elements to a new geometry
 
         Typically not called directly, but by Dataset/DataArray's
@@ -989,8 +1067,8 @@ class GeometryFM(_Geometry):
 
         Parameters
         ----------
-        idx : list(int)
-            list of element indicies
+        idx : collection(int)
+            collection of element indicies
         keepdims : bool, optional
             Should the original Geometry type be kept (keepdims=True)
             or should it be reduced e.g. to a GeometryPoint2D if possible
@@ -1005,21 +1083,18 @@ class GeometryFM(_Geometry):
         --------
         find_index : find element indicies for points or an area
         """
-        if (np.isscalar(idx) or len(idx)) == 1 and (not keepdims):
-            coords = self.element_coordinates[idx].flatten()
 
-            if self.is_layered:
-                return GeometryPoint3D(*coords, projection=self.projection)
-            else:
-                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
+        if self._type == DfsuFileType.DfsuSpectral1D:
+            return self._nodes_to_geometry(nodes=idx)
         else:
-            if self._type == DfsuFileType.DfsuSpectral1D:
-                return self._nodes_to_geometry(nodes=idx)
-            else:
-                return self.elements_to_geometry(elements=idx, node_layers=None)
+            return self.elements_to_geometry(
+                elements=idx, node_layers=None, keepdims=keepdims
+            )
 
-    def find_index(self, x=None, y=None, coords=None, area=None):
-        """Find element indicies for a number of points or within an area
+    def find_index(self, x=None, y=None, coords=None, area=None) -> np.ndarray:
+        """Find a *set* of element indicies for a number of points or within an area.
+
+        The returned indices returned are the unique, unordered set of element indices that contain the points or area.
 
         This method will return elements *containing* the argument
         points/area, which is not necessarily the same as the nearest.
@@ -1047,6 +1122,11 @@ class GeometryFM(_Geometry):
         np.array
             indicies of containing elements
 
+        Raises
+        ------
+        ValueError
+            if any point is outside the domain
+
         Examples
         --------
         >>> g = dfs.geometry
@@ -1067,7 +1147,8 @@ class GeometryFM(_Geometry):
                 xy = coords[:, :2]
             else:
                 xy = np.vstack((x, y)).T
-            return self._find_element_2d(coords=xy)
+            idx = self._find_element_2d(coords=xy)
+            return idx
         elif area is not None:
             return self._elements_in_area(area)
         else:
@@ -1172,32 +1253,39 @@ class GeometryFM(_Geometry):
         return geom
 
     def elements_to_geometry(
-        self, elements, node_layers="all"
-    ) -> Union["GeometryFM", "GeometryFM3D"]:
+        self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
+    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint3D, GeometryPoint2D]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
         ----------
-        elements : list(int)
-            list of element ids
+        elements : int or Collection[int]
+            collection of element ids
         node_layers : str, optional
             for 3d files either 'top', 'bottom' layer nodes
             or 'all' can be selected, by default 'all'
+        keepdims: bool, optional
+            keep original geometry type for single points
 
         Returns
         -------
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        elements = np.atleast_1d(elements)
-        if len(elements) == 1:
-            coords = self.element_coordinates[elements[0], :]
+        if np.isscalar(elements):
+            elements = [elements]
+        else:
+            elements = list(elements)
+        if len(elements) == 1 and not keepdims:
+            coords = self.element_coordinates[elements.pop(), :]
             if self.is_layered:
-                return GeometryPoint3D(*coords)
+                return GeometryPoint3D(*coords, projection=self.projection)
             else:
-                return GeometryPoint2D(coords[0], coords[1])
+                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
 
-        elements = np.sort(elements)  # make sure elements are sorted!
+        elements = np.sort(
+            elements
+        )  # make sure elements are sorted! # TODO is this necessary?
 
         # create new geometry
         new_type = self._type
@@ -1410,14 +1498,14 @@ class GeometryFM(_Geometry):
 class _GeometryFMLayered(GeometryFM):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers=None,
+        n_layers: int = 1,  # at least 1 layer
         n_sigma=None,
         validate=True,
     ) -> None:
@@ -1431,7 +1519,6 @@ class _GeometryFMLayered(GeometryFM):
             node_ids=node_ids,
             validate=validate,
         )
-        self._top_elems = None
         self._n_layers_column = None
         self._bot_elems = None
         self._n_layers = n_layers
@@ -1443,6 +1530,15 @@ class _GeometryFMLayered(GeometryFM):
         self._layer_ids = None
         self.__dz = None
 
+    def __repr__(self):
+        details = (
+            "sigma only"
+            if self.n_z_layers is None
+            else f"{self.n_sigma_layers} sigma-layers, max {self.n_z_layers} z-layers"
+        )
+        layer_txt = f"number of layers: {self._n_layers} ({details})"
+        return self._repr_txt(layer_txt=layer_txt)
+
     @property
     def zn(self):
         return self._zn
@@ -1450,8 +1546,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def layer_ids(self):
         """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1472,22 +1566,23 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def n_z_layers(self):
         """Maximum number of z-layers"""
-        if self.n_layers is None:
-            return None
         return self.n_layers - self.n_sigma_layers
 
-    @property
+    @cached_property
     def top_elements(self):
         """List of 3d element ids of surface layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find top_elements")
-            return None
-        elif self._top_elems is None:
-            # note: if subset of elements is selected then this cannot be done!
+        # note: if subset of elements is selected then this cannot be done!
 
-            # TODO: check 0-based, 1-based...
-            self._top_elems = self._findTopLayerElements(self.element_table)
-        return self._top_elems
+        # fast path if no z-layers
+        if self.n_z_layers == 0:
+            return np.arange(
+                start=self.n_sigma_layers - 1,
+                stop=self.n_elements,
+                step=self.n_sigma_layers,
+            )
+        else:
+            # slow path
+            return self._findTopLayerElements(self.element_table)
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
 
@@ -1513,7 +1608,7 @@ class _GeometryFMLayered(GeometryFM):
             else:
                 xy = np.vstack((x, y)).T
             idx_2d = self._find_element_2d(coords=xy)
-
+            assert len(idx_2d) == len(xy)
             if z is None:
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
             else:
@@ -1672,9 +1767,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def e2_e3_table(self):
         """The 2d-to-3d element connectivity table for a 3d object"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot return e2_e3_table")
-            return None
         if self._e2_e3_table is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1685,10 +1777,6 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def elem2d_ids(self):
         """The associated 2d element id for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-            # or return self._2d_ids ??
-
         if self._2d_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1902,14 +1990,14 @@ class GeometryFM3D(_GeometryFMLayered):
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
         self,
-        node_coordinates=None,
-        element_table=None,
+        node_coordinates,
+        element_table,
         codes=None,
         projection=None,
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
-        n_layers=None,
+        n_layers: int = 1,
         n_sigma=None,
         validate=True,
     ) -> None:
@@ -1934,6 +2022,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
     @property
     def boundary_polylines(self):
+        # Overides base class
         raise AttributeError(
             "GeometryFMVerticalProfile has no boundary_polylines property"
         )

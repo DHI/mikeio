@@ -21,7 +21,33 @@ show_progress = True
 
 
 class _ChunkInfo:
-    """Class for keeping track of an chunked processing"""
+    """Class for keeping track of an chunked processing
+
+    Parameters
+    ----------
+    n_data : int
+        number of data points
+    n_chunks : int
+        number of chunks
+
+    Attributes
+    ----------
+    n_data : int
+        number of data points
+    n_chunks : int
+        number of chunks
+    chunk_size : int
+        number of data points per chunk
+
+    Methods
+    -------
+    stop(start)
+        Return the stop index for a chunk
+    chunk_end(start)
+        Return the end index for a chunk
+    from_dfs(dfs, item_numbers, buffer_size)
+        Calculate chunk info based on # of elements in dfs file and selected buffer size
+    """
 
     def __init__(self, n_data: int, n_chunks: np.int32):
 
@@ -33,12 +59,15 @@ class _ChunkInfo:
 
     @property
     def chunk_size(self):
+        """number of data points per chunk"""
         return math.ceil(self.n_data / self.n_chunks)
 
     def stop(self, start: int) -> int:
+        """Return the stop index for a chunk"""
         return min(start + self.chunk_size, self.n_data)
 
     def chunk_end(self, start):
+        """Return the end index for a chunk"""
         e2 = self.stop(start)
         return self.chunk_size - ((start + self.chunk_size) - e2)
 
@@ -835,6 +864,22 @@ def quantile(
 
 
 def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
+    """Read item data from dfs file
+
+    Parameters
+    ----------
+    dfs : DfsFile
+        dfs file
+    item : int
+        item number
+    timestep : int
+        timestep number
+
+    Returns
+    -------
+    np.ndarray
+        item data
+    """
     indatatime = dfs.ReadItemTimeStep(item + 1, timestepIndex=timestep)
     indata = indatatime.Data
     has_value = indata != dfs.FileInfo.DeleteValueFloat
@@ -846,6 +891,20 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
 def _get_repeated_items(
     items_in: List[DfsDynamicItemInfo], prefixes: List[str]
 ) -> List[ItemInfo]:
+    """Create new items by repeating the items in items_in with the prefixes
+
+    Parameters
+    ----------
+    items_in : List[DfsDynamicItemInfo]
+        List of items to be repeated
+    prefixes : List[str]
+        List of prefixes to be added to the items
+
+    Returns
+    -------
+    List[ItemInfo]
+        List of new items
+    """
     item_numbers = _valid_item_numbers(items_in)
     items_in = _get_item_info(items_in)
 
