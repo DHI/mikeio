@@ -1,3 +1,4 @@
+from typing import Collection
 import warnings
 from functools import wraps
 
@@ -97,7 +98,7 @@ class DfsuLayered(_Dfsu):
         *,
         items=None,
         time=None,
-        elements=None,
+        elements: Collection[int] = None,
         area=None,
         x=None,
         y=None,
@@ -263,20 +264,14 @@ class DfsuLayered(_Dfsu):
 
     def _parse_geometry_sel(self, area, layers, x, y, z):
         elements = None
-        if layers is not None:
-            elements = self.geometry.get_layer_elements(layers)
 
-        if area is not None:
-            elements_a = self.geometry._elements_in_area(area)
-            elements = (
-                elements_a if layers is None else np.intersect1d(elements, elements_a)
-            )
-
-        if (x is not None) or (y is not None):
-            elements_xy = self.geometry.find_index(x=x, y=y, z=z)
-            elements = (
-                elements_xy if layers is None else np.intersect1d(elements, elements_xy)
-            )
+        if (
+            (x is not None)
+            or (y is not None)
+            or (area is not None)
+            or (layers is not None)
+        ):
+            elements = self.geometry.find_index(x=x, y=y, z=z, area=area, layers=layers)
 
         if (
             (x is not None)

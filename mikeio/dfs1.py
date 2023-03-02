@@ -13,7 +13,7 @@ class Dfs1(_Dfs123):
     _ndim = 1
 
     def __init__(self, filename=None):
-        super(Dfs1, self).__init__(filename)
+        super().__init__(filename)
 
         self._dx = None
         self._nx = None

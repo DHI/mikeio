@@ -7,23 +7,12 @@ class DataDimensionMismatch(ValueError):
         super().__init__(self.message)
 
 
-class ItemNumbersError(ValueError):
-    def __init__(self, n_items_file):
-        super().__init__(
-            f"item numbers must be (a list of) integers between 0 and {n_items_file-1}."
-        )
-
-
 class ItemsError(ValueError):
     def __init__(self, n_items_file):
+        self.n_items_file = n_items_file
         super().__init__(
             f"'items' must be (a list of) integers between 0 and {n_items_file-1} or str."
         )
-
-
-class InvalidDataType(ValueError):
-    def __init__(self):
-        super().__init__("Invalid data type. Choose np.float32 or np.float64")
 
 
 class InvalidGeometry(ValueError):
@@ -39,11 +28,15 @@ class InvalidDataValueType(ValueError):
         )
 
 
-class NoDataForQuery(ValueError):
-    def __init__(self, query_string):
-        super().__init__(f"Invalid query {query_string}")
-
-
-class InvalidQuantity(ValueError):
-    def __init__(self, message="Invalid quantity."):
+class OutsideModelDomainError(ValueError):
+    def __init__(self, *, x, y, z=None, indices=None, message=None):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.indices = indices
+        message = (
+            f"Point(s) ({x},{y}) with indices: {self.indices} outside model domain"
+            if message is None
+            else message
+        )
         super().__init__(message)
