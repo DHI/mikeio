@@ -2,7 +2,7 @@ import os
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import List, Union
+from typing import Collection, List, Union
 
 import numpy as np
 import pandas as pd
@@ -695,7 +695,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         *,
         items=None,
         time=None,
-        elements=None,
+        elements: Collection[int] = None,
         area=None,
         x=None,
         y=None,
@@ -759,7 +759,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             geometry = self.geometry
             n_elems = geometry.n_elements
         else:
-            elements = [elements] if np.isscalar(elements) else elements
+            elements = [elements] if np.isscalar(elements) else list(elements)
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
 

@@ -6,6 +6,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio.exceptions import OutsideModelDomainError
 
 
 @pytest.fixture
@@ -1498,10 +1499,8 @@ def test_xzy_selection():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    dss_xzy = ds.sel(x=340000, y=15.75, z=0)
-
-    # check for point geometry after selection
-    assert isinstance(dss_xzy.geometry, mikeio.spatial.geometry.GeometryPoint3D)
+    with pytest.raises(OutsideModelDomainError):
+        ds.sel(x=340000, y=15.75, z=0)
 
 
 def test_layer_selection():

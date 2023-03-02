@@ -26,3 +26,17 @@ class InvalidDataValueType(ValueError):
             "Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
             "'MeanStepBackward', or 'MeanStepForward'"
         )
+
+
+class OutsideModelDomainError(ValueError):
+    def __init__(self, *, x, y, z=None, indices=None, message=None):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.indices = indices
+        message = (
+            f"Point(s) ({x},{y}) with indices: {self.indices} outside model domain"
+            if message is None
+            else message
+        )
+        super().__init__(message)

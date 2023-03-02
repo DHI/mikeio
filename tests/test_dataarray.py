@@ -5,6 +5,7 @@ import pytest
 
 import mikeio
 from mikeio.eum import EUMType, ItemInfo
+from mikeio.exceptions import OutsideModelDomainError
 from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D, GeometryUndefined
 
 
@@ -681,7 +682,7 @@ def test_da_sel_xy_grid2d(da_grid2d):
     assert da1.geometry.y == 0.0
     assert np.all(da1.to_numpy() == da.to_numpy()[:, 10, 4])
 
-    da2 = da.sel(x=100.4, y=0.0)
+    # da2 = da.sel(x=100.4, y=0.0) # TODO outside grid
 
 
 def test_da_sel_multi_xy_grid2d(da_grid2d):
@@ -1278,10 +1279,31 @@ def test_xzy_selection():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    das_xzy = ds.Temperature.sel(x=340000, y=15.75, z=0)
+    das_xzy = ds.Temperature.sel(x=348946, y=6173673, z=0)
 
     # check for point geometry after selection
     assert type(das_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
+    assert das_xzy.values[0] == pytest.approx(17.381)
+
+    # do the same but go one level deeper, but finding the index first
+    idx = ds.geometry.find_index(x=348946, y=6173673, z=0)
+    das_idx = ds.Temperature.isel(element=idx)
+    assert das_idx.values[0] == pytest.approx(17.381)
+
+    # let's try find the same point multiple times
+    das_idxs = ds.geometry.find_index(
+        x=[348946, 348946], y=[6173673, 6173673], z=[0, 0]
+    )
+    assert len(das_idxs) == 1  # only one point
+
+
+def test_xzy_selection_outside_domain():
+    # select in space via x,y,z coordinates test
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    ds = mikeio.read(filename)
+
+    with pytest.raises(OutsideModelDomainError):
+        ds.Temperature.sel(x=340000, y=15.75, z=0)  # this is way outside the domain
 
 
 def test_layer_selection():
