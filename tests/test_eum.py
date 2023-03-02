@@ -76,3 +76,13 @@ def test_eum_conversion():
 
     assert True
 
+
+def test_short_name():
+    assert EUMType.Water_Level.units[0].name == "meter"
+    assert EUMType.Water_Level.units[0].short_name == "m"
+
+    assert EUMType.Acceleration.units[0].name == "meter_per_sec_pow_2"
+    assert EUMType.Acceleration.units[0].short_name == "m/s^2"
+
+    assert EUMUnit.gallonUK.name == "gallonUK"
+    assert EUMUnit.gallonUK.short_name == "gallonUK"

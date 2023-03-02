@@ -32,13 +32,13 @@ def dfs2_random_2items():
 @pytest.fixture
 def dfs2_pt_spectrum():
     filepath = Path("tests/testdata/pt_spectra.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.open(filepath, type="spectral")
 
 
 @pytest.fixture
 def dfs2_pt_spectrum_linearf():
     filepath = Path("tests/testdata/dir_wave_analysis_spectra.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.open(filepath, type="spectral")
 
 
 @pytest.fixture
@@ -109,7 +109,7 @@ def test_write_projected(tmpdir):
         dx=100,
         dy=100,
         projection="UTM-33",
-        origin=(0.0, 0.0),
+        # origin=(0.0, 0.0),
     )
     da = mikeio.DataArray(
         data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
@@ -119,11 +119,11 @@ def test_write_projected(tmpdir):
     ds2 = mikeio.read(filename)
     assert ds2.geometry.dx == 100
     assert ds2.geometry.dy == 100
-    # NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
-    assert ds2.geometry._x0 == pytest.approx(x0)
-    assert ds2.geometry._y0 == pytest.approx(y0)
-    assert ds2.geometry.origin[0] == 0.0
-    assert ds2.geometry.origin[1] == 0.0
+    # CHANGED: NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
+    # assert ds2.geometry._x0 == pytest.approx(x0)
+    # assert ds2.geometry._y0 == pytest.approx(y0)
+    assert ds2.geometry.origin[0] == pytest.approx(x0)
+    assert ds2.geometry.origin[1] == pytest.approx(y0)
 
     grid = Grid2D(nx=nx, ny=ny, origin=(x0, y0), dx=100, dy=100, projection="UTM-33")
     da = mikeio.DataArray(
@@ -176,8 +176,10 @@ def test_read(dfs2_random):
 
 def test_read_bad_item(dfs2_random):
     dfs = dfs2_random
-    with pytest.raises(ItemsError):
+    with pytest.raises(ItemsError) as ex:
         dfs.read(items=100)
+
+    assert ex.value.n_items_file == 1
 
 
 def test_read_temporal_subset_slice():
@@ -198,21 +200,22 @@ def test_read_area_subset_bad_bbox():
 
 
 def test_read_area_subset_geo():
-
+    # x: [-15, -14.75, ..., 40] (nx=221, dx=0.25)
+    # y: [30, 30.25, ..., 55] (ny=101, dy=0.25)
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     bbox = (10, 40, 20, 50)
     dsall = mikeio.read(filename)
     dssel = dsall.sel(area=bbox)  # selects all pixels with element center in the bbox
     ds = mikeio.read(filename, area=bbox)
     assert ds.geometry == dssel.geometry
-    assert ds.geometry.bbox[0] < bbox[0]  #
+    assert ds.geometry.bbox.left < bbox[0]  #
     assert ds.geometry.x[0] == pytest.approx(bbox[0])
     assert ds.geometry.x[-1] == pytest.approx(bbox[2])
     assert ds.geometry.y[0] == pytest.approx(bbox[1])
     assert ds.geometry.y[-1] == pytest.approx(bbox[3])
 
 
-def test_subset_bbox_named_tuple():
+def test_subset_bbox():
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     ds = mikeio.read(filename)
     dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area
@@ -306,15 +309,14 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert dfs.n_timesteps == 31
 
     g = dfs.geometry
+    assert g.is_spectral
     assert g.x[0] == pytest.approx(0.055)
-    assert g.x[-1] > 25  # if considered linear
+    # assert g.x[-1] > 25  # if considered linear
+    assert g.x[-1] < 0.6  # logarithmic
     assert g.y[0] == 0
     assert g.dx == pytest.approx(1.1)
     assert g.dy == 22.5
     assert g.orientation == 0
-
-    g.is_spectral = True
-    assert g.x[-1] < 0.6  # logarithmic
 
 
 def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
@@ -355,7 +357,7 @@ def test_dir_wave_spectra_relative_time_axis():
 
 def test_properties_rotated_longlat():
     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
-    with pytest.raises(ValueError, match="LONG/LAT with non-zero orientation"):
+    with pytest.raises(ValueError, match="Orientation is not supported for LONG/LAT"):
         mikeio.open(filepath)
 
 
@@ -380,31 +382,48 @@ def test_properties_rotated_UTM():
 def test_select_area_rotated_UTM(tmpdir):
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
     ds = mikeio.read(filepath)
+    assert ds.geometry.origin == pytest.approx((479670, 6104860))
+    assert ds.geometry.orientation == pytest.approx(-22.2387902)
 
     dssel = ds.isel(x=range(10, 20), y=range(15, 45))
-    assert ds.geometry.orientation == dssel.geometry.orientation
-    assert dssel.geometry._x0 == ds.geometry.x[10]
-    assert dssel.geometry._y0 == ds.geometry.y[15]
+    assert dssel.geometry.orientation == ds.geometry.orientation
+    assert dssel.geometry.origin == pytest.approx((479673.579, 6104877.669))
 
     tmpfile = os.path.join(tmpdir.dirname, "subset_rotated.dfs2")
     dssel.to_dfs(tmpfile)
     dfs = mikeio.open(tmpfile)
     g = dfs.geometry
 
-    assert dfs.x0 == 50
-    assert dfs.y0 == 75
+    assert dfs.x0 == 0
+    assert dfs.y0 == 0
     assert dfs.dx == 5
     assert dfs.dy == 5
     assert dfs.nx == 10
     assert dfs.ny == 30
-    assert dfs.longitude == pytest.approx(14.6814730403)
-    assert dfs.latitude == pytest.approx(55.090063)
-    assert dfs.orientation == pytest.approx(-22.2387902)
+    assert dfs.orientation == pytest.approx(ds.geometry.orientation)
     assert g.orientation == dfs.orientation
-    # origin is projected coordinates
-    assert g.origin == pytest.approx((479670, 6104860))
-    assert g.x[0] == dfs.x0
-    assert g.y[0] == dfs.y0
+    # origin is in projected coordinates
+    assert g.origin == pytest.approx(dssel.geometry.origin)
+
+
+def test_select_area_rotated_UTM_2():
+    fn = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    ds = mikeio.read(fn)
+    dssel = ds.isel(x=range(50, 61), y=range(75, 106))
+    g1 = dssel.geometry
+
+    # compare to file that has been cropped in MIKE Zero
+    fn = Path("tests/testdata/BW_Ronne_Layout1998_rotated_crop.dfs2")
+    ds2 = mikeio.read(fn)
+    g2 = ds2.geometry
+
+    assert g1.origin == pytest.approx(g2.origin)
+    assert g1.dx == g2.dx
+    assert g1.dy == g2.dy
+    assert g1.nx == g2.nx
+    assert g1.ny == g2.ny
+    assert g1.orientation == g2.orientation  # orientation in projected coordinates
+    assert g1.projection_string == g2.projection_string
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
@@ -838,3 +857,23 @@ def test_read_write_header_unchanged_vertical(tmpdir):
 
 def test_read_write_header_unchanged_spectral_2(tmpdir):
     is_header_unchanged_on_read_write(tmpdir, "pt_spectra.dfs2")
+
+
+def test_read_write_header_unchanged_MIKE_SHE_output(tmpdir):
+    is_header_unchanged_on_read_write(tmpdir, "Karup_MIKE_SHE_output.dfs2")
+
+
+def test_MIKE_SHE_output():
+    ds = mikeio.read("tests/testdata/Karup_MIKE_SHE_output.dfs2")
+    assert ds.n_timesteps == 6
+    assert ds.n_items == 2
+    g = ds.geometry
+    assert g.x[0] == 494329.0
+    assert g.y[0] == pytest.approx(6220250.0)
+    assert g.origin == pytest.approx((494329.0, 6220250.0))
+
+    ds2 = ds.isel(x=range(30, 45), y=range(35, 42))
+    g2 = ds2.geometry
+    assert g2.x[0] == g.x[0] + 30 * g.dx
+    assert g2.y[0] == g.y[0] + 35 * g.dy
+    assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))

@@ -2,7 +2,7 @@ import os
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import List, Union
+from typing import Collection, List, Union
 
 import numpy as np
 import pandas as pd
@@ -695,7 +695,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         *,
         items=None,
         time=None,
-        elements=None,
+        elements: Collection[int] = None,
         area=None,
         x=None,
         y=None,
@@ -759,7 +759,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             geometry = self.geometry
             n_elems = geometry.n_elements
         else:
-            elements = [elements] if np.isscalar(elements) else elements
+            elements = [elements] if np.isscalar(elements) else list(elements)
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
 
@@ -830,6 +830,32 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         )
 
     def _validate_elements_and_geometry_sel(self, elements, **kwargs):
+        """Check that only one of elements, area, x, y is selected
+
+        Parameters
+        ----------
+        elements : list[int], optional
+            Read only selected element ids, by default None
+        area : list[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+        y : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If more than one of elements, area, x, y is selected
+        """
         used_kwargs = []
         for kw, val in kwargs.items():
             if val is not None:
@@ -843,6 +869,31 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             raise ValueError(f"Cannot select both x,y and area!")
 
     def _parse_geometry_sel(self, area, x, y):
+        """Parse geometry selection
+
+        Parameters
+        ----------
+        area : list[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+        y : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+
+        Returns
+        -------
+        list[int]
+            List of element ids
+
+        Raises
+        ------
+        ValueError
+            If no elements are found in selection
+        """
         elements = None
 
         if area is not None:
