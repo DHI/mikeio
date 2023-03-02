@@ -116,11 +116,18 @@ def test_find_index_simple_domain():
 
     # look for multiple points in the same call
     idx = g.find_index(coords=[(0.5, 0.1), (0.1, 0.5)])
-    assert {0, 1} <= idx
+
+    # TODO checking for subsets can only be done if this is a set
+    # assert {0, 1} <= idx
+    assert 0 in idx
+    assert 1 in idx
 
     # look for the same points multiple times
     idx = g.find_index(coords=[(0.5, 0.1), (0.5, 0.1)])
-    assert len(idx) == 1
+
+    # the current behavior is to return the same index twice
+    # but this could be changed to return only unique indices
+    assert len(idx) == 2
     assert 0 in idx
 
     with pytest.raises(OutsideModelDomainError) as ex:

@@ -1118,7 +1118,7 @@ class GeometryFM(_Geometry):
                 elements=idx, node_layers=None, keepdims=keepdims
             )
 
-    def find_index(self, x=None, y=None, coords=None, area=None) -> Set[int]:
+    def find_index(self, x=None, y=None, coords=None, area=None) -> np.ndarray[int]:
         """Find a *set* of element indicies for a number of points or within an area.
 
         The returned indices returned are the unique, unordered set of element indices that contain the points or area.
@@ -1146,7 +1146,7 @@ class GeometryFM(_Geometry):
 
         Returns
         -------
-        set(int)
+        np.array
             indicies of containing elements
 
         Raises
@@ -1175,9 +1175,9 @@ class GeometryFM(_Geometry):
             else:
                 xy = np.vstack((x, y)).T
             idx = self._find_element_2d(coords=xy)
-            return set(idx)
+            return idx
         elif area is not None:
-            return set(self._elements_in_area(area))
+            return self._elements_in_area(area)
         else:
             raise ValueError("Provide either coordinates or area")
 
