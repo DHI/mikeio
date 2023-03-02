@@ -10,10 +10,8 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/js/theme.js"></script>
@@ -91,7 +89,7 @@
   <h1>Source code for mikeio.spatial.FM_geometry</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFileType</span>
@@ -100,7 +98,7 @@
 <span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="kn">import</span> <span class="n">cKDTree</span>
 
 <span class="kn">from</span> <span class="nn">..eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span>
-<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="n">InvalidGeometry</span>
+<span class="kn">from</span> <span class="nn">..exceptions</span> <span class="kn">import</span> <span class="n">InvalidGeometry</span><span class="p">,</span> <span class="n">OutsideModelDomainError</span>
 <span class="kn">from</span> <span class="nn">..interpolation</span> <span class="kn">import</span> <span class="n">get_idw_interpolant</span><span class="p">,</span> <span class="n">interp2d</span>
 <span class="kn">from</span> <span class="nn">.FM_utils</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_get_node_centered_data</span><span class="p">,</span>
@@ -113,34 +111,6 @@
 <span class="kn">from</span> <span class="nn">.geometry</span> <span class="kn">import</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">_Geometry</span>
 <span class="kn">from</span> <span class="nn">.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span>
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_relative_cumulative_distance</span><span class="p">,</span> <span class="n">xy_to_bbox</span>
-
-
-<span class="k">def</span> <span class="nf">_point_in_polygon</span><span class="p">(</span><span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">xp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">yp</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check for each side in the polygon that the point is on the correct side</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    xn : np.array</span>
-<span class="sd">        x-coordinates of the polygon</span>
-<span class="sd">    yn : np.array</span>
-<span class="sd">        y-coordinates of the polygon</span>
-<span class="sd">    xp : float</span>
-<span class="sd">        x-coordinate of the point</span>
-<span class="sd">    yp : float</span>
-<span class="sd">        y-coordinate of the point</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    bool</span>
-<span class="sd">        True if point is inside polygon</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xn</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">xp</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">xn</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">yp</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">yn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">xp</span> <span class="o">-</span> <span class="n">xn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">yp</span> <span class="o">-</span> <span class="n">yn</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="GeometryFMPointSpectrum"><a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.spatial.FM_geometry.GeometryFMPointSpectrum">[docs]</a><span class="k">class</span> <span class="nc">GeometryFMPointSpectrum</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
@@ -876,13 +846,14 @@
         <span class="k">return</span> <span class="n">elem_id</span><span class="p">,</span> <span class="n">d</span>
 
     <span class="k">def</span> <span class="nf">_find_element_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
-        <span class="n">xn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-        <span class="n">yn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="n">points_outside</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">nc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">node_coordinates</span>
 
         <span class="n">few_nearest</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_n_nearest_2d_elements</span><span class="p">(</span>
-            <span class="n">coords</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">few_nearest</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># first guess</span>
 
@@ -894,48 +865,58 @@
             <span class="p">)</span>
 
             <span class="c1"># step 2: if not, then try second nearest point</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">element_found</span><span class="p">:</span>
-                <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">few_nearest</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">element_found</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">n_elements</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">candidate</span> <span class="o">=</span> <span class="n">few_nearest</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">candidate</span><span class="p">]</span>
                 <span class="n">element_found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point_in_polygon</span><span class="p">(</span>
                     <span class="n">nc</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">nc</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
                 <span class="p">)</span>
                 <span class="n">ids</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">few_nearest</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
 
             <span class="c1"># step 3: if not, then try with *many* more points</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">element_found</span><span class="p">:</span>
-                <span class="c1"># many_nearest, _ = self._find_n_nearest_2d_elements(coords[k:k, :], n=10)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">element_found</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">n_elements</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">many_nearest</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_n_nearest_2d_elements</span><span class="p">(</span>
-                    <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:],</span> <span class="n">n</span><span class="o">=</span><span class="mi">10</span>
-                <span class="p">)</span>  <span class="c1"># JAN fix</span>
-                <span class="n">element_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">many_nearest</span><span class="p">]</span>
-                <span class="n">lid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_element_containing_point_2d</span><span class="p">(</span>
-                    <span class="n">element_table</span><span class="p">,</span>
-                    <span class="n">xn</span><span class="p">,</span>
-                    <span class="n">yn</span><span class="p">,</span>
-                    <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-                    <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                    <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="p">:],</span>
+                    <span class="n">n</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>  <span class="c1"># TODO is 10 enough?</span>
                 <span class="p">)</span>
-                <span class="n">ids</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">many_nearest</span><span class="p">[</span><span class="n">lid</span><span class="p">]</span> <span class="k">if</span> <span class="n">lid</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
-                <span class="p">)</span>  <span class="c1"># TODO -1 is not a good choice, since it is a valid index</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">many_nearest</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>  <span class="c1"># we have already tried the two first above</span>
+                    <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+                    <span class="n">element_found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point_in_polygon</span><span class="p">(</span>
+                        <span class="n">nc</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">nc</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">element_found</span><span class="p">:</span>
+                        <span class="n">ids</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+                        <span class="k">break</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">element_found</span><span class="p">:</span>
+                <span class="n">points_outside</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">points_outside</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">OutsideModelDomainError</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">coords</span><span class="p">[</span><span class="n">points_outside</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">coords</span><span class="p">[</span><span class="n">points_outside</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">indices</span><span class="o">=</span><span class="n">points_outside</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ids</span>
 
-    <span class="k">def</span> <span class="nf">_find_element_containing_point_2d</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">element_table</span><span class="p">,</span>
-        <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
-        <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
-        <span class="n">xp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">yp</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">el</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">element_table</span><span class="p">):</span>
-            <span class="n">n_nodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
-            <span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n_nodes</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">el</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
-            <span class="n">yn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n_nodes</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">el</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point_in_polygon</span><span class="p">(</span><span class="n">xn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n_nodes</span><span class="p">],</span> <span class="n">yn</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n_nodes</span><span class="p">],</span> <span class="n">xp</span><span class="p">,</span> <span class="n">yp</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">j</span>
-        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">def</span> <span class="nf">_find_single_element_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+
+        <span class="n">nc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">node_coordinates</span>
+
+        <span class="n">few_nearest</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_n_nearest_2d_elements</span><span class="p">(</span>
+            <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">few_nearest</span><span class="p">:</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_geometry2d</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            <span class="n">element_found</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_point_in_polygon</span><span class="p">(</span><span class="n">nc</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">nc</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">element_found</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">idx</span>
+
+        <span class="k">raise</span> <span class="n">OutsideModelDomainError</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 
 <div class="viewcode-block" id="GeometryFM.get_overset_grid"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.get_overset_grid">[docs]</a>    <span class="k">def</span> <span class="nf">get_overset_grid</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="kc">None</span>
@@ -1164,7 +1145,9 @@
         <span class="n">bnd_face_id</span> <span class="o">=</span> <span class="n">face_counts</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">all_faces</span><span class="p">[</span><span class="n">uf_id</span><span class="p">[</span><span class="n">bnd_face_id</span><span class="p">]]</span>
 
-<div class="viewcode-block" id="GeometryFM.isel"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.isel">[docs]</a>    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;elements&quot;</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryFM.isel"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.isel">[docs]</a>    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeometryFM&quot;</span><span class="p">,</span> <span class="s2">&quot;GeometryFM3D&quot;</span><span class="p">,</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of elements to a new geometry</span>
 
 <span class="sd">        Typically not called directly, but by Dataset/DataArray&#39;s</span>
@@ -1172,8 +1155,8 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        idx : list(int)</span>
-<span class="sd">            list of element indicies</span>
+<span class="sd">        idx : collection(int)</span>
+<span class="sd">            collection of element indicies</span>
 <span class="sd">        keepdims : bool, optional</span>
 <span class="sd">            Should the original Geometry type be kept (keepdims=True)</span>
 <span class="sd">            or should it be reduced e.g. to a GeometryPoint2D if possible</span>
@@ -1188,21 +1171,18 @@
 <span class="sd">        --------</span>
 <span class="sd">        find_index : find element indicies for points or an area</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">keepdims</span><span class="p">):</span>
-            <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_layered</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">GeometryPoint3D</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral1D</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_geometry</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral1D</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_geometry</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span>
+                <span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span>
+            <span class="p">)</span></div>
 
-<div class="viewcode-block" id="GeometryFM.find_index"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.find_index">[docs]</a>    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find element indicies for a number of points or within an area</span>
+<div class="viewcode-block" id="GeometryFM.find_index"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.find_index">[docs]</a>    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find a *set* of element indicies for a number of points or within an area.</span>
+
+<span class="sd">        The returned indices returned are the unique, unordered set of element indices that contain the points or area.</span>
 
 <span class="sd">        This method will return elements *containing* the argument</span>
 <span class="sd">        points/area, which is not necessarily the same as the nearest.</span>
@@ -1255,7 +1235,8 @@
                 <span class="n">xy</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_element_2d</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">xy</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_element_2d</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">xy</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">idx</span>
         <span class="k">elif</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements_in_area</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1360,32 +1341,39 @@
         <span class="k">return</span> <span class="n">geom</span>
 
 <div class="viewcode-block" id="GeometryFM.elements_to_geometry"><a class="viewcode-back" href="../../../mesh.html#mikeio.spatial.FM_geometry.GeometryFM.elements_to_geometry">[docs]</a>    <span class="k">def</span> <span class="nf">elements_to_geometry</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeometryFM&quot;</span><span class="p">,</span> <span class="s2">&quot;GeometryFM3D&quot;</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeometryFM&quot;</span><span class="p">,</span> <span class="s2">&quot;GeometryFM3D&quot;</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">GeometryPoint2D</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of elements to new flexible file geometry</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        elements : list(int)</span>
-<span class="sd">            list of element ids</span>
+<span class="sd">        elements : int or Collection[int]</span>
+<span class="sd">            collection of element ids</span>
 <span class="sd">        node_layers : str, optional</span>
 <span class="sd">            for 3d files either &#39;top&#39;, &#39;bottom&#39; layer nodes</span>
 <span class="sd">            or &#39;all&#39; can be selected, by default &#39;all&#39;</span>
+<span class="sd">        keepdims: bool, optional</span>
+<span class="sd">            keep original geometry type for single points</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        UnstructuredGeometry</span>
 <span class="sd">            which can be used for further extraction or saved to file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">elements</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">elements</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="p">:]</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_layered</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">GeometryPoint3D</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">GeometryPoint3D</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
 
-        <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>  <span class="c1"># make sure elements are sorted!</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+            <span class="n">elements</span>
+        <span class="p">)</span>  <span class="c1"># make sure elements are sorted! # TODO is this necessary?</span>
 
         <span class="c1"># create new geometry</span>
         <span class="n">new_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
@@ -1700,7 +1688,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
             <span class="n">idx_2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_element_2d</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">xy</span><span class="p">)</span>
-
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_2d</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">idx_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">idx_2d</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
