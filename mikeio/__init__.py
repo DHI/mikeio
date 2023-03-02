@@ -19,7 +19,7 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.4.0"
+__version__ = "1.5.dev0"  # TODO use git hash instead for dev version?
 __dfs_version__: int = 140
 
 
