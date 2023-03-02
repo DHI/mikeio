@@ -1118,7 +1118,7 @@ class GeometryFM(_Geometry):
                 elements=idx, node_layers=None, keepdims=keepdims
             )
 
-    def find_index(self, x=None, y=None, coords=None, area=None) -> np.ndarray[int]:
+    def find_index(self, x=None, y=None, coords=None, area=None) -> np.ndarray:
         """Find a *set* of element indicies for a number of points or within an area.
 
         The returned indices returned are the unique, unordered set of element indices that contain the points or area.
