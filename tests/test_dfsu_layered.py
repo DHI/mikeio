@@ -238,6 +238,7 @@ def test_read_dfsu3d_xyz():
     assert dspt3[0].values == dspt1[0].values[-1]
     # 20.531237
 
+
 def test_read_dfsu3d_xyz_to_xarray():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
@@ -246,7 +247,7 @@ def test_read_dfsu3d_xyz_to_xarray():
 
     ds = dfs.read()  # all data in file
     dspt1 = ds.sel(x=x, y=y, z=z)
-    
+
     xr_ds = dspt1.to_xarray()
     assert float(xr_ds.x) == pytest.approx(x)
     assert float(xr_ds.y) == pytest.approx(y)
@@ -441,7 +442,7 @@ def test_top_elements_subset():
     area = [356000, 6144000, 359000, 6146000]
     idx2d = g2d.find_index(area=area)
     assert len(idx2d) == 6
-    assert idx2d[-1] == 3408
+    assert 3408 in idx2d
 
     idx3d = g3d.find_index(area=area)
     subg = g3d.isel(idx3d)
@@ -651,10 +652,11 @@ def test_dataset_write_dfsu3d_max(tmp_path):
     assert ds2.n_timesteps == 1
     assert ds2.geometry.is_layered
 
+
 def test_read_wildcard_items():
     dfs = mikeio.open("tests/testdata/oresund_sigma_z.dfsu")
     assert dfs.items[1].name == "Salinity"
-    
+
     ds = dfs.read(items="Sal*")
     assert ds.items[0].name == "Salinity"
     assert ds.n_items == 1

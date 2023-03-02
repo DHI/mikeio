@@ -1,6 +1,8 @@
 import numpy as np
 import pytest
 from mikeio.spatial.FM_geometry import GeometryFM, GeometryFM3D
+from mikeio.exceptions import OutsideModelDomainError
+from mikeio.spatial.geometry import GeometryPoint2D
 
 
 def test_basic():
@@ -21,9 +23,9 @@ def test_basic():
     assert g.is_tri_only
     assert g.projection == "LONG/LAT"
     assert not g.is_layered
-    # assert g.find_index(0.5, 0.5) == [0] # TODO: fix this
-    # with pytest.raises(ValueError):
-    #    g.find_index(50.0, -50.0)
+    assert 0 in g.find_index(0.5, 0.5)
+    with pytest.raises(ValueError):
+        g.find_index(50.0, -50.0)
 
 
 def test_too_many_elements():
@@ -96,6 +98,64 @@ def test_area():
     assert area > 0.0
 
 
+def test_find_index_simple_domain():
+    #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.0, 1.0, 0.0),  # 3
+        (0.5, 1.5, 0.0),  # 4
+    ]
+
+    el = [(0, 1, 2), (0, 2, 3), (3, 2, 4)]
+
+    g = GeometryFM(node_coordinates=nc, element_table=el, projection="LONG/LAT")
+    idx = g.find_index(0.5, 0.1)
+    assert 0 in idx
+
+    # look for multiple points in the same call
+    idx = g.find_index(coords=[(0.5, 0.1), (0.1, 0.5)])
+
+    # TODO checking for subsets can only be done if this is a set
+    # assert {0, 1} <= idx
+    assert 0 in idx
+    assert 1 in idx
+
+    # look for the same points multiple times
+    idx = g.find_index(coords=[(0.5, 0.1), (0.5, 0.1)])
+
+    # the current behavior is to return the same index twice
+    # but this could be changed to return only unique indices
+    assert len(idx) == 2
+    assert 0 in idx
+
+    with pytest.raises(OutsideModelDomainError) as ex:
+        g.find_index(-0.5, -0.1)
+
+    assert ex.value.x == -0.5
+    assert ex.value.y == -0.1
+    assert 0 in ex.value.indices
+
+
+def test_isel_simple_domain():
+    #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.0, 1.0, 0.0),  # 3
+        (0.5, 1.5, 0.0),  # 4
+    ]
+
+    el = [(0, 1, 2), (0, 2, 3), (3, 2, 4)]
+
+    g = GeometryFM(node_coordinates=nc, element_table=el, projection="LONG/LAT")
+    gp = g.isel(0)
+    assert isinstance(gp, GeometryPoint2D)
+    assert gp.projection == g.projection
+
+
 def test_plot_mesh():
     #     x     y    z
     nc = [
@@ -140,3 +200,7 @@ def test_layered():
     assert not g.is_2d
 
     assert len(g.top_elements) == 1
+
+    # find vertical column
+    idx = g.find_index(x=0.9, y=0.1)
+    assert len(idx) == 2

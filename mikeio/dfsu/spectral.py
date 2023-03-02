@@ -232,7 +232,9 @@ class DfsuSpectral(_Dfsu):
             if elements is None:
                 geometry = self.geometry
             else:
-                elements = [elements] if np.isscalar(elements) else elements
+                elements = (
+                    [elements] if np.isscalar(elements) else list(elements)
+                )  # TODO check this
                 geometry = self.geometry.elements_to_geometry(elements)
             return geometry, elements
 

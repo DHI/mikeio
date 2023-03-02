@@ -1,6 +1,6 @@
 import warnings
 from collections import namedtuple
-from typing import Sequence, Union
+from typing import Collection, Sequence, Union
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -9,7 +9,7 @@ from mikecore.MeshBuilder import MeshBuilder
 from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
-from ..exceptions import InvalidGeometry
+from ..exceptions import InvalidGeometry, OutsideModelDomainError
 from ..interpolation import get_idw_interpolant, interp2d
 from .FM_utils import (
     _get_node_centered_data,
@@ -22,34 +22,6 @@ from .FM_utils import (
 from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
-
-
-def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
-    """Check for each side in the polygon that the point is on the correct side
-
-    Parameters
-    ----------
-    xn : np.array
-        x-coordinates of the polygon
-    yn : np.array
-        y-coordinates of the polygon
-    xp : float
-        x-coordinate of the point
-    yp : float
-        y-coordinate of the point
-
-    Returns
-    -------
-    bool
-        True if point is inside polygon
-    """
-
-    for j in range(len(xn) - 1):
-        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
-            return False
-    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-        return False
-    return True
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -785,13 +757,14 @@ class GeometryFM(_Geometry):
         return elem_id, d
 
     def _find_element_2d(self, coords: np.array):
-        xn = np.zeros(4, dtype=np.float64)
-        yn = np.zeros(4, dtype=np.float64)
+
+        points_outside = []
+
         coords = np.atleast_2d(coords)
         nc = self._geometry2d.node_coordinates
 
         few_nearest, _ = self._find_n_nearest_2d_elements(
-            coords, n=min(self.n_elements, 2)
+            coords, n=min(self._geometry2d.n_elements, 2)
         )
         ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
 
@@ -803,48 +776,58 @@ class GeometryFM(_Geometry):
             )
 
             # step 2: if not, then try second nearest point
-            if not element_found:
-                nodes = self._geometry2d.element_table[few_nearest[k, 1]]
+            if not element_found and self._geometry2d.n_elements > 1:
+                candidate = few_nearest[k, 1]
+                assert np.isscalar(candidate)
+                nodes = self._geometry2d.element_table[candidate]
                 element_found = self._point_in_polygon(
                     nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
                 )
                 ids[k] = few_nearest[k, 1]
 
             # step 3: if not, then try with *many* more points
-            if not element_found:
-                # many_nearest, _ = self._find_n_nearest_2d_elements(coords[k:k, :], n=10)
+            if not element_found and self._geometry2d.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
-                    coords[k, :], n=10
-                )  # JAN fix
-                element_table = self._geometry2d.element_table[many_nearest]
-                lid = self._find_element_containing_point_2d(
-                    element_table,
-                    xn,
-                    yn,
-                    coords[k, 0],
-                    coords[k, 1],
+                    coords[k, :],
+                    n=min(self._geometry2d.n_elements, 10),  # TODO is 10 enough?
                 )
-                ids[k] = (
-                    many_nearest[lid] if lid > 0 else -1
-                )  # TODO -1 is not a good choice, since it is a valid index
+                for p in many_nearest[2:]:  # we have already tried the two first above
+                    nodes = self._geometry2d.element_table[p]
+                    element_found = self._point_in_polygon(
+                        nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
+                    )
+                    if element_found:
+                        ids[k] = p
+                        break
+
+            if not element_found:
+                points_outside.append(k)
+
+        if len(points_outside) > 0:
+            raise OutsideModelDomainError(
+                x=coords[points_outside, 0],
+                y=coords[points_outside, 1],
+                indices=points_outside,
+            )
 
         return ids
 
-    def _find_element_containing_point_2d(
-        self,
-        element_table,
-        xn: np.array,
-        yn: np.array,
-        xp: float,
-        yp: float,
-    ):
-        for j, el in enumerate(element_table):
-            n_nodes = len(el)
-            xn[0:n_nodes] = self.node_coordinates[el, 0]
-            yn[0:n_nodes] = self.node_coordinates[el, 1]
-            if self._point_in_polygon(xn[0:n_nodes], yn[0:n_nodes], xp, yp):
-                return j
-        return -1
+    def _find_single_element_2d(self, x: float, y: float) -> int:
+
+        nc = self._geometry2d.node_coordinates
+
+        few_nearest, _ = self._find_n_nearest_2d_elements(
+            x=x, y=y, n=min(self.n_elements, 10)
+        )
+
+        for idx in few_nearest:
+            nodes = self._geometry2d.element_table[idx]
+            element_found = self._point_in_polygon(nc[nodes, 0], nc[nodes, 1], x, y)
+
+            if element_found:
+                return idx
+
+        raise OutsideModelDomainError(x=x, y=y)
 
     def get_overset_grid(
         self, dx=None, dy=None, nx=None, ny=None, buffer=None
@@ -1073,7 +1056,9 @@ class GeometryFM(_Geometry):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
-    def isel(self, idx=None, axis="elements", keepdims=False):
+    def isel(
+        self, idx: Collection[int], keepdims=False, **kwargs
+    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint2D, GeometryPoint3D]:
         """export a selection of elements to a new geometry
 
         Typically not called directly, but by Dataset/DataArray's
@@ -1081,8 +1066,8 @@ class GeometryFM(_Geometry):
 
         Parameters
         ----------
-        idx : list(int)
-            list of element indicies
+        idx : collection(int)
+            collection of element indicies
         keepdims : bool, optional
             Should the original Geometry type be kept (keepdims=True)
             or should it be reduced e.g. to a GeometryPoint2D if possible
@@ -1097,21 +1082,18 @@ class GeometryFM(_Geometry):
         --------
         find_index : find element indicies for points or an area
         """
-        if (np.isscalar(idx) or len(idx)) == 1 and (not keepdims):
-            coords = self.element_coordinates[idx].flatten()
 
-            if self.is_layered:
-                return GeometryPoint3D(*coords, projection=self.projection)
-            else:
-                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
+        if self._type == DfsuFileType.DfsuSpectral1D:
+            return self._nodes_to_geometry(nodes=idx)
         else:
-            if self._type == DfsuFileType.DfsuSpectral1D:
-                return self._nodes_to_geometry(nodes=idx)
-            else:
-                return self.elements_to_geometry(elements=idx, node_layers=None)
+            return self.elements_to_geometry(
+                elements=idx, node_layers=None, keepdims=keepdims
+            )
 
-    def find_index(self, x=None, y=None, coords=None, area=None):
-        """Find element indicies for a number of points or within an area
+    def find_index(self, x=None, y=None, coords=None, area=None) -> np.ndarray:
+        """Find a *set* of element indicies for a number of points or within an area.
+
+        The returned indices returned are the unique, unordered set of element indices that contain the points or area.
 
         This method will return elements *containing* the argument
         points/area, which is not necessarily the same as the nearest.
@@ -1164,7 +1146,8 @@ class GeometryFM(_Geometry):
                 xy = coords[:, :2]
             else:
                 xy = np.vstack((x, y)).T
-            return self._find_element_2d(coords=xy)
+            idx = self._find_element_2d(coords=xy)
+            return idx
         elif area is not None:
             return self._elements_in_area(area)
         else:
@@ -1269,32 +1252,39 @@ class GeometryFM(_Geometry):
         return geom
 
     def elements_to_geometry(
-        self, elements, node_layers="all"
-    ) -> Union["GeometryFM", "GeometryFM3D"]:
+        self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
+    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint3D, GeometryPoint2D]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
         ----------
-        elements : list(int)
-            list of element ids
+        elements : int or Collection[int]
+            collection of element ids
         node_layers : str, optional
             for 3d files either 'top', 'bottom' layer nodes
             or 'all' can be selected, by default 'all'
+        keepdims: bool, optional
+            keep original geometry type for single points
 
         Returns
         -------
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        elements = np.atleast_1d(elements)
-        if len(elements) == 1:
-            coords = self.element_coordinates[elements[0], :]
+        if np.isscalar(elements):
+            elements = [elements]
+        else:
+            elements = list(elements)
+        if len(elements) == 1 and not keepdims:
+            coords = self.element_coordinates[elements.pop(), :]
             if self.is_layered:
-                return GeometryPoint3D(*coords)
+                return GeometryPoint3D(*coords, projection=self.projection)
             else:
-                return GeometryPoint2D(coords[0], coords[1])
+                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
 
-        elements = np.sort(elements)  # make sure elements are sorted!
+        elements = np.sort(
+            elements
+        )  # make sure elements are sorted! # TODO is this necessary?
 
         # create new geometry
         new_type = self._type
@@ -1609,7 +1599,7 @@ class _GeometryFMLayered(GeometryFM):
             else:
                 xy = np.vstack((x, y)).T
             idx_2d = self._find_element_2d(coords=xy)
-
+            assert len(idx_2d) == len(xy)
             if z is None:
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
             else:

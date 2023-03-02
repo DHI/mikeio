@@ -5,6 +5,8 @@ import numpy as np
 
 from mikecore.Projections import Cartography  # type: ignore
 
+from ..exceptions import OutsideModelDomainError
+
 from .geometry import (
     BoundingBox,
     GeometryPoint2D,
@@ -132,6 +134,7 @@ class Grid1D(_Geometry):
         """Find nearest point"""
 
         d = (self.x - x) ** 2
+
         return int(np.argmin(d))
 
     def get_spatial_interpolant(self, coords, **kwargs):
@@ -749,18 +752,16 @@ class Grid2D(_Geometry):
         y = xy[:, 1]
         x = xy[:, 0]
 
-        ii = (-1) * np.ones_like(
-            x, dtype=int
-        )  # TODO -1 is not a good choice, since it is a valid index
-        jj = (-1) * np.ones_like(
-            y, dtype=int
-        )  # TODO -1 is not a good choice, since it is a valid index
+        ii = (-999999999) * np.ones_like(x, dtype=int)
+        jj = (-999999999) * np.ones_like(y, dtype=int)
 
         inside = self.contains(xy)
         for j, xyp in enumerate(xy):
             if inside[j]:
                 ii[j] = (np.abs(self.x - xyp[0])).argmin()
                 jj[j] = (np.abs(self.y - xyp[1])).argmin()
+            else:
+                raise OutsideModelDomainError(x=x[j], y=y[j])
 
         return ii, jj
 

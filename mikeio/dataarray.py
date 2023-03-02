@@ -101,7 +101,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         # *,
         time: Union[pd.DatetimeIndex, str] = None,
         item: ItemInfo = None,
-        geometry = GeometryUndefined(),
+        geometry=GeometryUndefined(),
         zn=None,
         dims: Optional[Sequence[str]] = None,
     ):
