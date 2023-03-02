@@ -1,6 +1,6 @@
 import warnings
 from collections import namedtuple
-from typing import Collection, Sequence, Union, Set
+from typing import Collection, Sequence, Union
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -22,34 +22,6 @@ from .FM_utils import (
 from .geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 from .grid_geometry import Grid2D
 from .utils import _relative_cumulative_distance, xy_to_bbox
-
-
-def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
-    """Check for each side in the polygon that the point is on the correct side
-
-    Parameters
-    ----------
-    xn : np.array
-        x-coordinates of the polygon
-    yn : np.array
-        y-coordinates of the polygon
-    xp : float
-        x-coordinate of the point
-    yp : float
-        y-coordinate of the point
-
-    Returns
-    -------
-    bool
-        True if point is inside polygon
-    """
-
-    for j in range(len(xn) - 1):
-        if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (yp - yn[j]) > 0:
-            return False
-    if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-        return False
-    return True
 
 
 class GeometryFMPointSpectrum(_Geometry):
