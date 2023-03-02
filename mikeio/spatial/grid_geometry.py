@@ -1,5 +1,5 @@
 import warnings
-from typing import Optional, Sequence, Tuple, Union, Set
+from typing import Optional, Sequence, Tuple, Union
 from dataclasses import dataclass
 import numpy as np
 
