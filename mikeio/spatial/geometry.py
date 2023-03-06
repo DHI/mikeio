@@ -49,8 +49,9 @@ class GeometryPoint2D(_Geometry):
     def __repr__(self) -> str:
         return f"GeometryPoint2D(x={self.x}, y={self.y})"
 
-    def __str__(self) -> str:
-        return self.wkt
+    # TODO should we use wkt here
+    # def __str__(self) -> str:
+    #    return self.wkt
 
     @property
     def wkt(self) -> str:
@@ -77,9 +78,6 @@ class GeometryPoint3D(_Geometry):
 
     def __repr__(self):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
-
-    def __str__(self) -> str:
-        return self.wkt
 
     @property
     def wkt(self) -> str:

@@ -6,7 +6,6 @@ from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D
 def test_point2d_wkt():
     p = GeometryPoint2D(10, 20)
     assert p.wkt == "POINT (10 20)"
-    assert str(p) == "POINT (10 20)"
 
     p = GeometryPoint2D(x=-5642.5, y=120.1)
     assert p.wkt == "POINT (-5642.5 120.1)"
@@ -15,8 +14,6 @@ def test_point2d_wkt():
 def test_point3d_wkt():
     p = GeometryPoint3D(10, 20, 30)
     assert p.wkt == "POINT Z (10 20 30)"
-
-    assert str(p) == "POINT Z (10 20 30)"
 
 
 def test_point2d_to_shapely():
