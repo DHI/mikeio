@@ -5,8 +5,6 @@ from typing import Iterable, List, Sequence, Sized, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from .base import TimeSeries
-
 
 def _to_safe_name(name: str) -> str:
     tmp = re.sub("[^0-9a-zA-Z]", "_", name)

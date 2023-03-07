@@ -1,8 +1,8 @@
 import numpy as np
 
-from .spatial.FM_utils import _plot_map, _plot_vertical_profile
+from ..spatial.FM_utils import _plot_map, _plot_vertical_profile
 
-from .spectral import plot_2dspectrum
+from ..spectral import plot_2dspectrum
 
 
 class _DataArrayPlotter:

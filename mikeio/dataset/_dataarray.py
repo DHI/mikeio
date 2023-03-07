@@ -8,10 +8,9 @@ import numpy as np
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
 
-from .base import TimeSeries
-from .data_utils import DataUtilsMixin
-from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.FM_geometry import (
+from ._data_utils import DataUtilsMixin
+from ..eum import EUMType, EUMUnit, ItemInfo
+from ..spatial.FM_geometry import (
     GeometryFM,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
@@ -20,14 +19,14 @@ from .spatial.FM_geometry import (
     GeometryFMVerticalProfile,
     _GeometryFMLayered,
 )
-from .spatial.geometry import (
+from ..spatial.geometry import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
 )
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from .spectral import calc_m0_from_spectrum
-from .data_plot import (
+from ..spatial.grid_geometry import Grid1D, Grid2D, Grid3D
+from ..spectral import calc_m0_from_spectrum
+from ._data_plot import (
     _DataArrayPlotter,
     _DataArrayPlotterFM,
     _DataArrayPlotterGrid1D,
@@ -82,7 +81,7 @@ class _DataArraySpectrumToHm0:
         )
 
 
-class DataArray(DataUtilsMixin, TimeSeries):
+class DataArray(DataUtilsMixin):
     """DataArray with data and metadata for a single item in a dfs file
 
     The DataArray has these main properties:

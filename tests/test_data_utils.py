@@ -4,7 +4,7 @@ import pytest
 
 # TODO this file tests private methods, Options: 1. declare methods as public, 2. Test at a higher level of abstraction
 
-from mikeio.data_utils import DataUtilsMixin as du
+from mikeio.dataset._data_utils import DataUtilsMixin as du
 
 
 def test_parse_time_None():

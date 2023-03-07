@@ -1,30 +1,37 @@
-import collections.abc
 import os
 import warnings
 from copy import deepcopy
 from datetime import datetime
-from typing import Iterable, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import (
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    MutableMapping,
+)
 
 import numpy as np
 import pandas as pd
 from mikecore.DfsFile import DfsSimpleType  # type: ignore
 
-from .base import TimeSeries
-from .dataarray import DataArray
-from .data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
-from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.FM_geometry import GeometryFM
-from .spatial.geometry import (
+from ._dataarray import DataArray
+from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
+from ..eum import EUMType, EUMUnit, ItemInfo
+from ..spatial.FM_geometry import GeometryFM
+from ..spatial.geometry import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
 )
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
+from ..spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
-from .data_plot import _DatasetPlotter
+from ._data_plot import _DatasetPlotter
 
 
-class Dataset(TimeSeries, collections.abc.MutableMapping):
+class Dataset(MutableMapping):
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
