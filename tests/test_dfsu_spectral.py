@@ -5,7 +5,6 @@ import mikeio
 from mikeio import eum
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio.dfsu.spectral import DfsuSpectral
 from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
 import mikeio.spectral as spectral
 
@@ -336,7 +335,7 @@ def test_calc_frequency_bin_sizes(dfsu_line):
 
 
 def test_calc_Hm0_from_spectrum_line(dfsu_line):
-    dfs: DfsuSpectral = dfsu_line
+    dfs = dfsu_line
     assert dfs.n_elements == 9
     assert dfs.n_nodes == 10
     ds = dfs.read()
@@ -397,9 +396,8 @@ def test_plot_da_spectrum(dfsu_pt):
     ds = dfs.read(time=0)
     da = ds[0]
     da.plot()
-    #dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
-    #dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
-    #dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
-    #dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
+    # dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
+    # dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
+    # dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
+    # dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
     plt.close("all")
-

@@ -9,7 +9,7 @@ from tqdm import trange
 from ..dataset import DataArray, Dataset
 from ..dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from ..spectral import calc_m0_from_spectrum, plot_2dspectrum
-from .dfsu import _Dfsu
+from ._dfsu import _Dfsu
 
 
 class DfsuSpectral(_Dfsu):

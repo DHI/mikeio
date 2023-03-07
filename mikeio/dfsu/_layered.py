@@ -20,7 +20,7 @@ from ..exceptions import InvalidGeometry
 from ..interpolation import get_idw_interpolant, interp2d
 from ..spatial.FM_geometry import GeometryFM3D
 from ..spatial.FM_utils import _plot_vertical_profile
-from .dfsu import _Dfsu
+from ._dfsu import _Dfsu
 
 
 class DfsuLayered(_Dfsu):
