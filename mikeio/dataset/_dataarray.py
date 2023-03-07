@@ -841,7 +841,7 @@ class DataArray(DataUtilsMixin):
 
         # select in time
         if time is not None:
-            time = time.time if isinstance(time, TimeSeries) else time
+            time = time.time if hasattr(time, "time") else time
             if isinstance(time, int) or (
                 isinstance(time, Sequence) and isinstance(time[0], int)
             ):
