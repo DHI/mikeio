@@ -1017,9 +1017,7 @@ class DataArray(DataUtilsMixin):
             item_numbers=[0],
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__dataarray_read_item_time_func(
-                item, step
-            ),
+            data_read_func=self.__dataarray_read_item_time_func,
         )
 
     def interp_time(

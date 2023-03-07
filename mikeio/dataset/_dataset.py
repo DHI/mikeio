@@ -994,9 +994,7 @@ class Dataset(MutableMapping):
             item_numbers=item_numbers,
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__dataset_read_item_time_func(
-                item, step
-            ),
+            data_read_func=self.__dataset_read_item_time_func,
         )
 
     def interp_time(
