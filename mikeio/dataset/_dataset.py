@@ -976,7 +976,7 @@ class Dataset(MutableMapping):
             A dataset with data dimension t
             The first two items will be x- and y- coordinates of track
         """
-        from .track import _extract_track
+        from ..track import _extract_track
 
         item_numbers = list(range(self.n_items))
         time_steps = list(range(self.n_timesteps))
