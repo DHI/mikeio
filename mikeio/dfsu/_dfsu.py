@@ -18,7 +18,7 @@ from mikeio.spatial.utils import xy_to_bbox
 
 from .. import __dfs_version__
 from ..dataset import DataArray, Dataset
-from ..dfs import (
+from ..dfs._dfs import (
     _get_item_info,
     _read_item_time_step,
     _valid_item_numbers,
@@ -35,7 +35,7 @@ from ..spatial.FM_geometry import (
 )
 from ..spatial.FM_utils import _plot_map
 from ..spatial.grid_geometry import Grid2D
-from ..track import _extract_track
+from .._track import _extract_track
 
 
 def _write_dfsu(filename: str, data: Dataset):

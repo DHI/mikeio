@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Mapping, TextIO, Tuple, Union
 
 import yaml
 
-from .pfssection import PfsNonUniqueList, PfsSection
+from ._pfssection import PfsNonUniqueList, PfsSection
 
 
 def parse_yaml_preserving_duplicates(src, unique_keywords=False):

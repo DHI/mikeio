@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from .dataset import Dataset
-from .dfs0 import Dfs0
+from .dfs import Dfs0
 from .eum import ItemInfo
 from .spatial.FM_geometry import GeometryFM
 

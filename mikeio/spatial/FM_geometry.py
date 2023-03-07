@@ -11,7 +11,7 @@ from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import InvalidGeometry, OutsideModelDomainError
-from ..interpolation import get_idw_interpolant, interp2d
+from .._interpolation import get_idw_interpolant, interp2d
 from .FM_utils import (
     _get_node_centered_data,
     _plot_map,

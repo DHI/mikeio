@@ -1,5 +1,5 @@
 from mikeio.dataset import Dataset
-from mikeio.interpolation import get_idw_interpolant, interp2d, _interp_itemstep
+from mikeio._interpolation import get_idw_interpolant, interp2d, _interp_itemstep
 import mikeio
 import numpy as np
 
@@ -32,7 +32,9 @@ def test_interp2d():
     # with pytest.warns(match="Geometry"):
     dati = interp2d(ds, elem_ids, weights)
     assert isinstance(dati, Dataset)
-    assert isinstance(dati.geometry, GeometryUndefined)  # There is no suitable file format for this, thus no suitable geometry :-(
+    assert isinstance(
+        dati.geometry, GeometryUndefined
+    )  # There is no suitable file format for this, thus no suitable geometry :-(
     assert np.all(dati.shape == (ds.n_timesteps, npts))
     assert dati[0].values[0, 0] == 8.262675285339355
 

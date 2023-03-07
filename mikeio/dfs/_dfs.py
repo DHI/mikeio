@@ -19,10 +19,10 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 from mikecore.Projections import Cartography
 
-from .dataset import Dataset
-from .eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
-from .exceptions import DataDimensionMismatch, ItemsError
-from .spatial.geometry import GeometryUndefined
+from ..dataset import Dataset
+from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
+from ..exceptions import DataDimensionMismatch, ItemsError
+from ..spatial.geometry import GeometryUndefined
 
 
 def _read_item_time_step(

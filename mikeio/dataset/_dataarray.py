@@ -25,7 +25,7 @@ from ..spatial.geometry import (
     GeometryUndefined,
 )
 from ..spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from ..spectral import calc_m0_from_spectrum
+from .._spectral import calc_m0_from_spectrum
 from ._data_plot import (
     _DataArrayPlotter,
     _DataArrayPlotterFM,
@@ -1002,7 +1002,7 @@ class DataArray(DataUtilsMixin):
             A dataset with data dimension t
             The first two items will be x- and y- coordinates of track
         """
-        from ..track import _extract_track
+        from .._track import _extract_track
 
         return _extract_track(
             deletevalue=self.deletevalue,

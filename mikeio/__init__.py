@@ -27,10 +27,7 @@ if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
 
 from .dataset import DataArray, Dataset
-from .dfs0 import Dfs0
-from .dfs1 import Dfs1
-from .dfs2 import Dfs2
-from .dfs3 import Dfs3
+from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
