@@ -841,7 +841,9 @@ class DataArray(DataUtilsMixin):
 
         # select in time
         if time is not None:
-            time = time.time if hasattr(time, "time") else time
+            if hasattr(time, "time"):
+                if isinstance(time.time, pd.DatetimeIndex):
+                    time = time.time
             if isinstance(time, int) or (
                 isinstance(time, Sequence) and isinstance(time[0], int)
             ):

@@ -158,8 +158,8 @@ class DataUtilsMixin:
     def _parse_interp_time(old_time, new_time):
         if isinstance(new_time, pd.DatetimeIndex):
             t_out_index = new_time
-        elif isinstance(new_time, TimeSeries):
-            t_out_index = new_time.time
+        elif hasattr(new_time, "time"):
+            t_out_index = pd.DatetimeIndex(new_time.time)
         else:
             # offset = pd.tseries.offsets.DateOffset(seconds=new_time) # This seems identical, but doesn't work with slicing
             offset = pd.Timedelta(seconds=new_time)
