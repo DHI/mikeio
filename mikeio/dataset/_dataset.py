@@ -1826,7 +1826,7 @@ class Dataset(MutableMapping):
             raise ValueError(f"File extension must be {valid_extension}")
 
     def _to_dfs0(self, filename, **kwargs):
-        from ..dfs0 import _write_dfs0
+        from ..dfs._dfs0 import _write_dfs0
 
         dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
