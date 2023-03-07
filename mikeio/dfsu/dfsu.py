@@ -17,7 +17,6 @@ from tqdm import trange
 from mikeio.spatial.utils import xy_to_bbox
 
 from .. import __dfs_version__
-from ..base import EquidistantTimeSeries
 from ..dataset import DataArray, Dataset
 from ..dfs import (
     _get_item_info,
@@ -619,7 +618,7 @@ class _UnstructuredFile:
         )
 
 
-class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
+class _Dfsu(_UnstructuredFile):
     def __init__(self, filename, dfs=None):
         """
         Create a Dfsu object
