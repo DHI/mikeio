@@ -18,8 +18,8 @@ from ..dfs._dfs import (
 from ..eum import EUMType, ItemInfo
 from ..exceptions import InvalidGeometry
 from .._interpolation import get_idw_interpolant, interp2d
-from ..spatial.FM_geometry import GeometryFM3D
-from ..spatial.FM_utils import _plot_vertical_profile
+from ..spatial._FM_geometry import GeometryFM3D
+from ..spatial._FM_utils import _plot_vertical_profile
 from ._dfsu import _Dfsu
 
 

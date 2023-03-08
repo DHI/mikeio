@@ -31,7 +31,13 @@ from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
+from .spatial._grid_geometry import (
+    Grid1D,
+    Grid2D,
+    Grid3D,
+)  # Grid geometries are imported into the main module, since they are used to create dfs files
+
+# Other geometries are available in the spatial module
 from .xyz import read_xyz
 
 

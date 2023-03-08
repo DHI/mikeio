@@ -3,12 +3,12 @@ import numpy as np
 import pytest
 import mikeio
 from mikeio import Dfsu, Mesh
-from mikeio.spatial.FM_geometry import (
+from mikeio.spatial._FM_geometry import (
     GeometryFM,
     GeometryFM3D,
     GeometryFMVerticalColumn,
 )
-from mikeio.spatial.geometry import GeometryPoint3D
+from mikeio.spatial._geometry import GeometryPoint3D
 
 
 def test_read_simple_3d():

@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-from mikeio.spatial.FM_geometry import GeometryFM, GeometryFM3D
+from mikeio.spatial._FM_geometry import GeometryFM, GeometryFM3D
 from mikeio.exceptions import OutsideModelDomainError
-from mikeio.spatial.geometry import GeometryPoint2D
+from mikeio.spatial._geometry import GeometryPoint2D
 
 
 def test_basic():

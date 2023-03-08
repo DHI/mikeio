@@ -11,9 +11,9 @@ from mikeio.eum import ItemInfo
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 
-from mikeio.spatial.FM_geometry import GeometryFM
-from mikeio.spatial.geometry import GeometryPoint2D
-from mikeio.spatial.grid_geometry import Grid2D
+from mikeio.spatial._FM_geometry import GeometryFM
+from mikeio.spatial._geometry import GeometryPoint2D
+from mikeio.spatial._grid_geometry import Grid2D
 
 
 def test_repr():

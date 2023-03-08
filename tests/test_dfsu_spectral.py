@@ -5,7 +5,7 @@ import mikeio
 from mikeio import eum
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
+from mikeio.spatial._FM_geometry import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
 import mikeio._spectral as _spectral
 
 

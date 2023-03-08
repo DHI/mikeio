@@ -4,11 +4,9 @@ import numpy as np
 import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D
-from mikeio.spatial.FM_geometry import GeometryFM
-from mikeio.spatial.geometry import GeometryUndefined
+from mikeio.spatial._FM_geometry import GeometryFM
+from mikeio.spatial._geometry import GeometryUndefined
 from mikeio.exceptions import OutsideModelDomainError
-
-
 
 
 def test_create_nx_ny():

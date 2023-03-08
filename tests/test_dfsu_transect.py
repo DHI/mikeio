@@ -3,11 +3,11 @@ import pytest
 import matplotlib.pyplot as plt
 
 import mikeio
-from mikeio.spatial.FM_geometry import (
+from mikeio.spatial._FM_geometry import (
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
 )
-from mikeio.spatial.geometry import GeometryPoint3D
+from mikeio.spatial._geometry import GeometryPoint3D
 from mikecore.DfsuFile import DfsuFileType
 
 

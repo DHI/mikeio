@@ -12,8 +12,8 @@ import mikeio
 from mikeio import Dataset, Dfs2
 from mikeio.eum import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import ItemsError
-from mikeio.spatial.geometry import GeometryPoint2D
-from mikeio.spatial.grid_geometry import Grid2D
+from mikeio.spatial._geometry import GeometryPoint2D
+from mikeio.spatial._grid_geometry import Grid2D
 
 
 @pytest.fixture

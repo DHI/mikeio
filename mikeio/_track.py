@@ -8,7 +8,7 @@ import pandas as pd
 from .dataset import Dataset
 from .dfs import Dfs0
 from .eum import ItemInfo
-from .spatial.FM_geometry import GeometryFM
+from .spatial._FM_geometry import GeometryFM
 
 
 def _extract_track(

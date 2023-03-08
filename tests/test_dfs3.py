@@ -2,8 +2,8 @@ import os
 import pytest
 
 import mikeio
-from mikeio.spatial.geometry import GeometryUndefined
-from mikeio.spatial.grid_geometry import Grid2D, Grid3D
+from mikeio.spatial._geometry import GeometryUndefined
+from mikeio.spatial._grid_geometry import Grid2D, Grid3D
 
 
 def test_dfs3_repr():

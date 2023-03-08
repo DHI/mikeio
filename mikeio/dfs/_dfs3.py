@@ -20,7 +20,7 @@ from ._dfs import (
     _write_dfs_data,
 )
 from ..eum import TimeStepUnit
-from ..spatial.grid_geometry import Grid3D
+from ..spatial._grid_geometry import Grid3D
 
 
 def write_dfs3(filename: str, ds: Dataset, title="") -> None:

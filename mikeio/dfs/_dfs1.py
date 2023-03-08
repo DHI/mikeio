@@ -6,7 +6,7 @@ from mikecore.eum import eumUnit
 
 from .. import __dfs_version__
 from ._dfs import _Dfs123
-from ..spatial.grid_geometry import Grid1D
+from ..spatial._grid_geometry import Grid1D
 
 
 class Dfs1(_Dfs123):
