@@ -3,7 +3,7 @@ from mikeio._interpolation import get_idw_interpolant, interp2d, _interp_itemste
 import mikeio
 import numpy as np
 
-from mikeio.spatial._geometry import GeometryUndefined
+from mikeio.spatial import GeometryUndefined
 
 import pytest
 

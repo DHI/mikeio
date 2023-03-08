@@ -8,7 +8,7 @@ from mikeio.spatial._FM_geometry import (
     GeometryFM3D,
     GeometryFMVerticalColumn,
 )
-from mikeio.spatial._geometry import GeometryPoint3D
+from mikeio.spatial import GeometryPoint3D
 
 
 def test_read_simple_3d():

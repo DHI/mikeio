@@ -1,6 +1,6 @@
 import numpy as np
 
-from .spatial._geometry import GeometryUndefined
+from .spatial import GeometryUndefined
 
 
 # class Interpolation2D:

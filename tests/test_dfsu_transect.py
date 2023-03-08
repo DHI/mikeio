@@ -7,7 +7,7 @@ from mikeio.spatial._FM_geometry import (
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
 )
-from mikeio.spatial._geometry import GeometryPoint3D
+from mikeio.spatial import GeometryPoint3D
 from mikecore.DfsuFile import DfsuFileType
 
 

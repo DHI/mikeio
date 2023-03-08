@@ -10,21 +10,25 @@ from mikecore.DfsuFile import DfsuFileType  # type: ignore
 
 from ._data_utils import DataUtilsMixin
 from ..eum import EUMType, EUMUnit, ItemInfo
-from ..spatial._FM_geometry import (
+
+
+from ..spatial import (
+    Grid1D,
+    Grid2D,
+    Grid3D,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
     GeometryFM,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
-    _GeometryFMLayered,
 )
-from ..spatial._geometry import (
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryUndefined,
-)
-from ..spatial._grid_geometry import Grid1D, Grid2D, Grid3D
+
+from ..spatial._FM_geometry import _GeometryFMLayered
+
 from .._spectral import calc_m0_from_spectrum
 from ._data_plot import (
     _DataArrayPlotter,

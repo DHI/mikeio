@@ -4,7 +4,7 @@ import pytest
 
 import mikeio
 from mikeio import DataArray
-from mikeio.spatial._geometry import GeometryUndefined
+from mikeio.spatial import GeometryUndefined
 import mikeio.generic
 
 

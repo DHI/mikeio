@@ -34,7 +34,7 @@ from ..spatial import (
     GeometryFMVerticalProfile,
 )
 from ..spatial._FM_utils import _plot_map
-from ..spatial._grid_geometry import Grid2D
+from ..spatial import Grid2D
 from .._track import _extract_track
 
 

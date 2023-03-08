@@ -19,7 +19,7 @@ from ._dfs import (
     _valid_timesteps,
     _write_dfs_data,
 )
-from ..eum._eum import TimeStepUnit
+from ..eum import TimeStepUnit
 from ..spatial import Grid3D
 
 
