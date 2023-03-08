@@ -1828,7 +1828,7 @@ class Dataset(MutableMapping):
             raise ValueError(f"File extension must be {valid_extension}")
 
     def _to_dfs0(self, filename, **kwargs):
-        from ..dfs0 import _write_dfs0
+        from ..dfs._dfs0 import _write_dfs0
 
         dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
@@ -1836,24 +1836,24 @@ class Dataset(MutableMapping):
 
     def _to_dfs2(self, filename):
         # assumes Grid2D geometry
-        from ..dfs2 import write_dfs2
+        from ..dfs._dfs2 import write_dfs2
 
         write_dfs2(filename, self)
 
     def _to_dfs3(self, filename):
         # assumes Grid3D geometry
-        from ..dfs3 import write_dfs3
+        from ..dfs._dfs3 import write_dfs3
 
         write_dfs3(filename, self)
 
     def _to_dfs1(self, filename):
-        from ..dfs1 import Dfs1
+        from ..dfs._dfs1 import Dfs1
 
         dfs = Dfs1()
         dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry._x0)
 
     def _to_dfsu(self, filename):
-        from ..dfsu import _write_dfsu
+        from ..dfsu._dfsu import _write_dfsu
 
         _write_dfsu(filename, self)
 
