@@ -43,7 +43,7 @@ class _DataArrayPlotter:
 
     @staticmethod
     def _get_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # type: ignore
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
@@ -51,7 +51,7 @@ class _DataArrayPlotter:
 
     @staticmethod
     def _get_fig_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # type: ignore
 
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)

@@ -34,7 +34,7 @@ def _get_time_idx_list(time: pd.DatetimeIndex, steps):
 
     if (isinstance(steps, (List, Tuple)) and not isinstance(steps, str)) and isinstance(
         steps[0], (str, datetime, np.datetime64, pd.Timestamp)
-    ):
+    ):  # TODO mypy complains about types, look into this
         steps = pd.DatetimeIndex(steps)
     if isinstance(steps, pd.DatetimeIndex):
         return time.get_indexer(steps)
@@ -173,12 +173,12 @@ class DataUtilsMixin:
     def _interpolate_time(
         intime,
         outtime,
-        data: np.array,
+        data: np.ndarray,
         method: Union[str, int],
         extrapolate: bool,
         fill_value: float,
     ):
-        from scipy.interpolate import interp1d
+        from scipy.interpolate import interp1d  # type: ignore
 
         interpolator = interp1d(
             intime,

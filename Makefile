@@ -11,7 +11,7 @@ doctest:
 	rm -f *.dfs* # remove temporary files, created from doctests
 
 typecheck:
-	mypy mikeio/dataarray.py mikeio/dataset.py
+	mypy mikeio/dataset/*.py
 
 coverage: 
 	pytest --cov-report html --cov=mikeio tests/
