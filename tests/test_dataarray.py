@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 import mikeio
-from mikeio.eum import EUMType, ItemInfo
+from mikeio import EUMType, ItemInfo
 from mikeio.exceptions import OutsideModelDomainError
 
 

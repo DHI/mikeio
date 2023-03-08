@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import datetime
 import mikeio
-from mikeio import Dfs0
-from mikeio.eum import EUMType, EUMUnit, ItemInfo
+from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
+
 
 import pytest
 

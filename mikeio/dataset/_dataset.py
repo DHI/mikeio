@@ -20,13 +20,15 @@ from mikecore.DfsFile import DfsSimpleType  # type: ignore
 from ._dataarray import DataArray
 from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
 from ..eum import EUMType, EUMUnit, ItemInfo
-from ..spatial._FM_geometry import GeometryFM
-from ..spatial._geometry import (
+from ..spatial import (
+    GeometryFM,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
+    Grid1D,
+    Grid2D,
+    Grid3D,
 )
-from ..spatial._grid_geometry import Grid1D, Grid2D, Grid3D
 
 from ._data_plot import _DatasetPlotter
 

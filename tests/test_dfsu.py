@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import mikeio
-from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh
-from mikeio.eum import ItemInfo
+from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh, ItemInfo
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 

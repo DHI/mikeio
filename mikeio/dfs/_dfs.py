@@ -22,7 +22,7 @@ from mikecore.Projections import Cartography
 from ..dataset import Dataset
 from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
 from ..exceptions import DataDimensionMismatch, ItemsError
-from ..spatial._geometry import GeometryUndefined
+from ..spatial import GeometryUndefined
 
 
 def _read_item_time_step(

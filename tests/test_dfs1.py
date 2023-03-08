@@ -7,7 +7,7 @@ import pandas as pd
 import mikeio
 
 from mikeio import Dfs1
-from mikeio.eum import EUMType, EUMUnit
+from mikeio import EUMType, EUMUnit
 
 
 def test_filenotexist():

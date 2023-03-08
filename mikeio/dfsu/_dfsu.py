@@ -25,7 +25,7 @@ from ..dfs._dfs import (
     _valid_timesteps,
 )
 from ..eum import EUMType, EUMUnit, ItemInfo
-from ..spatial._FM_geometry import (
+from ..spatial import (
     GeometryFM,
     GeometryFM3D,
     GeometryFMAreaSpectrum,

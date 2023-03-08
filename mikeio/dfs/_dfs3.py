@@ -19,8 +19,8 @@ from ._dfs import (
     _valid_timesteps,
     _write_dfs_data,
 )
-from ..eum import TimeStepUnit
-from ..spatial._grid_geometry import Grid3D
+from ..eum._eum import TimeStepUnit
+from ..spatial import Grid3D
 
 
 def write_dfs3(filename: str, ds: Dataset, title="") -> None:

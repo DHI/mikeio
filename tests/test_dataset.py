@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import OutsideModelDomainError
 
 
