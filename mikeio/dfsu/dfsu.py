@@ -1124,7 +1124,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
             )
             items.insert(0, z_item)
             n_items = len(items)
-            zn_dynamic = geometry.node_coordinates[:,2]
+            zn_dynamic = geometry.node_coordinates[:, 2]
             data.insert(0, zn_dynamic)
 
         # Default filetype;
@@ -1190,15 +1190,15 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
 
         try:
             # Add data for all item-timesteps, copying from source
-            if items[0].name== "Z coordinate":
-                has_time_axis = len(np.shape(data[1])) == 2
-                n_timesteps = np.shape(data[1])[0] if has_time_axis else 1
-            else:
-                has_time_axis = len(np.shape(data[0])) == 2
-                n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
+            # if items[0].name == "Z coordinate":
+            #    has_time_axis = len(np.shape(data[1])) == 2
+            #    n_timesteps = np.shape(data[1])[0] if has_time_axis else 1
+            # else:
+            #    has_time_axis = len(np.shape(data[0])) == 2
+            #    n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
 
             for i in trange(n_time_steps, disable=not self.show_progress):
-                if geometry.is_layered:
+                if geometry.is_layered and len(data) > 0:
                     self._dfs.WriteItemTimeStepNext(0, data[0].astype(np.float32))
 
                 for item in range(len(items)):
@@ -1232,7 +1232,7 @@ class _Dfsu(_UnstructuredFile, EquidistantTimeSeries):
         n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
         for i in trange(n_timesteps, disable=not self.show_progress):
             if self.geometry.is_layered:
-                zn = self.geometry.node_coordinates[:,2]
+                zn = self.geometry.node_coordinates[:, 2]
                 self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
             for item in range(n_items):
                 di = data[item]

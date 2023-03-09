@@ -581,6 +581,29 @@ def test_incremental_write_from_dfsu_context_manager(tmpdir):
     assert dfs.end_time == newdfs.end_time
 
 
+def test_incremental_write_from_dfsu_context_manager_3d(tmpdir):
+
+    sourcefilename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = os.path.join(tmpdir.dirname, "simple3d.dfsu")
+    dfs = mikeio.open(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read(time=[0], keepdims=True)
+
+    with dfs.write(outfilename, ds, keep_open=True) as f:
+        for i in range(1, nt):
+            ds = dfs.read(time=[i], keepdims=True)
+            f.append(ds)
+
+        # dfs.close() # should be called automagically by context manager
+
+    newdfs = mikeio.open(outfilename)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time
+
+
 def test_write_big_file(tmpdir):
 
     outfilename = os.path.join(tmpdir.dirname, "big.dfsu")

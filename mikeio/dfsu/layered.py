@@ -240,7 +240,11 @@ class DfsuLayered(_Dfsu):
 
         dfs.Close()
 
-        dims = ("time", "element") if not single_time_selected else ("element",)
+        dims = (
+            ("time", "element")
+            if not (single_time_selected and not keepdims)  # TODO extract variable
+            else ("element",)
+        )
 
         if elements is not None and len(elements) == 1:
             # squeeze point data
