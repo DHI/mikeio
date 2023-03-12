@@ -9,8 +9,6 @@ from mikeio.spatial.geometry import GeometryUndefined
 from mikeio.exceptions import OutsideModelDomainError
 
 
-
-
 def test_create_nx_ny():
 
     g = Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=1440, ny=721)
@@ -278,6 +276,32 @@ def test_find_index():
 
     with pytest.raises(OutsideModelDomainError):
         g.find_index(coords=[(-0.1, 0.1), (-0.1, 0.1)])
+
+
+def test_find_index_grid_with_negative_origin():
+    # create a grid with negative origin
+    bbox = [-1, -1, 1, 5]
+    g = Grid2D(bbox=bbox, dx=0.5)
+
+    xy1 = [0.52, 1.52]
+    ii, jj = g.find_index(x=xy1[0], y=xy1[1])
+    assert ii == 3
+    assert jj == 5
+
+    xy2 = [
+        -0.9,
+        4.95,
+    ]  # to the left of the first element center, and above the last element center
+    ii, jj = g.find_index(x=xy2[0], y=xy2[1])
+    assert ii == 0
+    assert jj == 11
+
+    # test three points, two inside and one outside
+    xy3 = [-1.5, 0.5]
+
+    xy = np.vstack([xy1, xy2, xy3])
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(coords=xy)
 
 
 def test_to_geometryFM():
