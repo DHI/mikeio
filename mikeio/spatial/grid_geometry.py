@@ -771,8 +771,8 @@ class Grid2D(_Geometry):
             raise OutsideModelDomainError(x=x[~inside], y=y[~inside])
 
         # get index in x, and y for points inside based on the grid spacing and origin
-        ii = np.round((x - self._x0) / self.dx).astype(int)
-        jj = np.round((y - self._y0) / self.dy).astype(int)
+        ii = np.floor((x - self.x[0]) / self.dx).astype(int)
+        jj = np.floor((y - self.y[0]) / self.dy).astype(int)
 
         return ii, jj
 
