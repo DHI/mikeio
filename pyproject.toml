@@ -46,7 +46,8 @@ dev = ["pytest",
        "pyproj",
        "xarray",
        "netcdf4",
-       "matplotlib"]
+       "matplotlib",
+       "pre-commit",]
 
 test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy"]
 
