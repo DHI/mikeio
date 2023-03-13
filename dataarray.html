@@ -91,8 +91,10 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.start_time"><code class="docutils literal notranslate"><span class="pre">DataArray.start_time</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.std"><code class="docutils literal notranslate"><span class="pre">DataArray.std()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.timestep"><code class="docutils literal notranslate"><span class="pre">DataArray.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_dataframe"><code class="docutils literal notranslate"><span class="pre">DataArray.to_dataframe()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_dfs"><code class="docutils literal notranslate"><span class="pre">DataArray.to_dfs()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_numpy"><code class="docutils literal notranslate"><span class="pre">DataArray.to_numpy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_pandas"><code class="docutils literal notranslate"><span class="pre">DataArray.to_pandas()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.to_xarray"><code class="docutils literal notranslate"><span class="pre">DataArray.to_xarray()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.type"><code class="docutils literal notranslate"><span class="pre">DataArray.type</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.DataArray.unit"><code class="docutils literal notranslate"><span class="pre">DataArray.unit</span></code></a></li>
@@ -1133,6 +1135,23 @@ least two time instances); otherwise None</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.to_dataframe">
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_time</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ms'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.to_dataframe" title="Permalink to this definition"></a></dt>
+<dd><p>Convert to DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>unit_in_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – include unit in column name, default False,</p></li>
+<li><p><strong>round_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – round time to, by default “ms”, use False to avoid rounding</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.DataArray.to_dfs">
 <span class="sig-name descname"><span class="pre">to_dfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.to_dfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.to_dfs" title="Permalink to this definition"></a></dt>
 <dd><p>Write data to a new dfs file</p>
@@ -1151,6 +1170,17 @@ to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)</p></li>
 <dt class="sig sig-object py" id="mikeio.DataArray.to_numpy">
 <span class="sig-name descname"><span class="pre">to_numpy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.24)"><span class="pre">ndarray</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.to_numpy"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.to_numpy" title="Permalink to this definition"></a></dt>
 <dd><p>Values as a np.ndarray (equivalent to values)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.DataArray.to_pandas">
+<span class="sig-name descname"><span class="pre">to_pandas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v1.5.3)"><span class="pre">Series</span></a></span></span><a class="reference internal" href="_modules/mikeio/dataarray.html#DataArray.to_pandas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.to_pandas" title="Permalink to this definition"></a></dt>
+<dd><p>Convert to Pandas Series</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.Series</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
