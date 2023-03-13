@@ -1709,6 +1709,37 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         self._to_dataset().to_dfs(filename, **kwargs)
 
+    def to_dataframe(
+        self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
+    ) -> pd.DataFrame:
+        """Convert to DataFrame
+
+        Parameters
+        ----------
+        unit_in_name: bool, optional
+            include unit in column name, default False,
+        round_time: str, bool, optional
+            round time to, by default "ms", use False to avoid rounding
+
+        Returns
+        -------
+        pd.DataFrame
+        """
+
+        return self._to_dataset().to_dataframe(
+            unit_in_name=unit_in_name, round_time=round_time
+        )
+
+    def to_pandas(self) -> pd.Series:
+        """Convert to Pandas Series
+
+        Returns
+        -------
+        pd.Series
+        """
+
+        return pd.Series(data=self.to_numpy(), index=self.time, name=self.name)
+
     def to_xarray(self):
         """Export to xarray.DataArray"""
 

@@ -1732,6 +1732,14 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     # ===============================================
 
+    def to_pandas(self, **kwargs) -> Union[pd.Series, pd.DataFrame]:
+        """Convert Dataset to a Pandas DataFrame"""
+
+        if self.n_items != 1:
+            return self.to_dataframe(**kwargs)
+        else:
+            return self[0].to_pandas(**kwargs)
+
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
     ) -> pd.DataFrame:
