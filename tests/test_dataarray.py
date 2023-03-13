@@ -1313,3 +1313,32 @@ def test_interp_na():
     dai = da.interp_na(fill_value="extrapolate")
     assert dai.to_numpy()[0] == pytest.approx(0.0)
     assert dai.to_numpy()[2] == pytest.approx(2.0)
+
+
+def test_to_dataframe():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.ones(5),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+
+    df = da.to_dataframe()
+    assert df.shape == (5, 1)
+    assert df["Foo"].values[0] == 1.0
+    assert df.index[-1].day == 5
+
+
+def test_to_pandas():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.ones(5),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+
+    series = da.to_pandas()
+    assert series.shape == (5,)
+    assert series.index[-1].day == 5
+    assert series.values[0] == 1.0
+    assert series.name == "Foo"
