@@ -541,6 +541,9 @@ def test_to_dataframe_single_timestep():
     assert "Bar" in df.columns
     # assert isinstance(df.index, pd.DatetimeIndex)
 
+    df2 = ds.to_pandas()
+    assert df2.shape == (1, 2)
+
 
 def test_to_dataframe():
 
@@ -557,6 +560,19 @@ def test_to_dataframe():
 
     assert list(df.columns) == ["Foo", "Bar"]
     assert isinstance(df.index, pd.DatetimeIndex)
+
+
+def test_to_pandas_single_item_dataset():
+
+    da = mikeio.DataArray(
+        data=np.zeros(5), time=pd.date_range("2000", freq="D", periods=5), item="Foo"
+    )
+    ds = mikeio.Dataset([da])
+
+    series = ds.to_pandas()
+
+    assert series.shape == (5,)
+    assert series.name == "Foo"
 
 
 def test_multidimensional_to_dataframe_no_supported():
