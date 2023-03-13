@@ -21,3 +21,7 @@ def read_xyz(filename: Union[str, Path]) -> pd.DataFrame:
 def dataframe_to_xyz(self, filename: Union[str, Path]) -> None:
     # TODO validation
     self.to_csv(filename, sep="\t", header=False, index=False)
+
+
+# TODO should we keep this?
+pd.DataFrame.to_xyz = dataframe_to_xyz
