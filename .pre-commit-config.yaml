@@ -1,5 +1,6 @@
 exclude:
     tests/testdata
+    docs/
 
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
