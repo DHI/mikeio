@@ -735,12 +735,12 @@ class Grid2D(_Geometry):
         """
         if x is None and y is not None and not np.isscalar(y):
             raise ValueError(
-                f"{y} is not a scalar value, use the coords argument instead"
+                f"y={y} is not a scalar value, use the coords argument instead"
             )
 
         if y is None and x is not None and not np.isscalar(x):
             raise ValueError(
-                f"{x} is not a a scalar value, use the coords argument instead"
+                f"x={x} is not a scalar value, use the coords argument instead"
             )
 
         if x is not None and y is not None:

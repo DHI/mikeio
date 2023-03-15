@@ -288,10 +288,8 @@ def test_find_index_grid_with_negative_origin():
     assert ii == 3
     assert jj == 5
 
-    xy2 = [
-        -0.9,
-        4.95,
-    ]  # to the left of the first element center, and above the last element center
+    # to the left of the first element center, and above the last element center
+    xy2 = [-0.9, 4.95]  
     ii, jj = g.find_index(x=xy2[0], y=xy2[1])
     assert ii == 0
     assert jj == 11
