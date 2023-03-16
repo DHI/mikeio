@@ -53,23 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#from-dfs0-to-pandas-dataframe">From Dfs0 to pandas DataFrame</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#from-pandas-dataframe-to-dfs0">From pandas DataFrame to Dfs0</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dfs0-example-notebooks">Dfs0 example notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfs0-api">Dfs0 API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mikeio.Dfs0"><code class="docutils literal notranslate"><span class="pre">Dfs0</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dfs0.deletevalue</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.from_dataframe"><code class="docutils literal notranslate"><span class="pre">Dfs0.from_dataframe()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.items"><code class="docutils literal notranslate"><span class="pre">Dfs0.items</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.n_items"><code class="docutils literal notranslate"><span class="pre">Dfs0.n_items</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.n_timesteps"><code class="docutils literal notranslate"><span class="pre">Dfs0.n_timesteps</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.read"><code class="docutils literal notranslate"><span class="pre">Dfs0.read()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.start_time"><code class="docutils literal notranslate"><span class="pre">Dfs0.start_time</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.time"><code class="docutils literal notranslate"><span class="pre">Dfs0.time</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.timestep"><code class="docutils literal notranslate"><span class="pre">Dfs0.timestep</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.to_dataframe"><code class="docutils literal notranslate"><span class="pre">Dfs0.to_dataframe()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs0.write"><code class="docutils literal notranslate"><span class="pre">Dfs0.write()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#dfs0-api">Dfs0 API</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
@@ -115,7 +99,7 @@
 <p>A dfs0 file is also called a time series file.</p>
 <p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">mikeio.Dataset</span></code></span></a> - keeps EUM information (convenient if you save data to new dfs0 file)</p></li>
+<li><p><a class="reference external" href="https://docs.xarray.dev/en/stable/user-guide/terminology.html#term-Dataset" title="xarray 2023.2.1.dev0"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">mikeio.Dataset</span></code></span></a> - keeps EUM information (convenient if you save data to new dfs0 file)</p></li>
 <li><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"><code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> - utilize all the powerful methods of pandas</p></li>
 </ul>
 <section id="read-dfs0-to-dataset">
@@ -166,128 +150,6 @@
 </section>
 <section id="dfs0-api">
 <h2>Dfs0 API<a class="headerlink" href="#dfs0-api" title="Permalink to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="mikeio.Dfs0">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs0.html#Dfs0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0" title="Permalink to this definition"></a></dt>
-<dd><dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs0.deletevalue">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs0.deletevalue" title="Permalink to this definition"></a></dt>
-<dd><p>File delete value</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs0.from_dataframe">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itemtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs0.html#Dfs0.from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.from_dataframe" title="Permalink to this definition"></a></dt>
-<dd><p>Create a dfs0 from a pandas Dataframe</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe with data</p></li>
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – filename to write output</p></li>
-<li><p><strong>itemtype</strong> (<a class="reference internal" href="eum.html#mikeio.eum.EUMType" title="mikeio.eum.EUMType"><em>EUMType</em></a><em>, </em><em>optional</em>) – Same type for all items</p></li>
-<li><p><strong>unit</strong> (<a class="reference internal" href="eum.html#mikeio.eum.EUMUnit" title="mikeio.eum.EUMUnit"><em>EUMUnit</em></a><em>, </em><em>optional</em>) – Same unit for all items</p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em>) – Different types, units for each items, similar to <cite>create</cite></p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs0.items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs0.items" title="Permalink to this definition"></a></dt>
-<dd><p>List of items</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs0.n_items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfs0.n_items" title="Permalink to this definition"></a></dt>
-<dd><p>Number of items</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs0.n_timesteps">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfs0.n_timesteps" title="Permalink to this definition"></a></dt>
-<dd><p>Number of time steps</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs0.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="reference internal" href="_modules/mikeio/dfs0.html#Dfs0.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.read" title="Permalink to this definition"></a></dt>
-<dd><p>Read data from a dfs0 file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>] or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>datetime</em><em>, </em><em>pd.TimeStamp</em><em>, </em><em>sequence</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><em>slice</em></a><em> or </em><em>pd.DatetimeIndex</em><em>, </em><em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A Dataset with data dimensions [t]</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset">Dataset</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs0.start_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfs0.start_time" title="Permalink to this definition"></a></dt>
-<dd><p>File start time</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs0.time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#mikeio.Dfs0.time" title="Permalink to this definition"></a></dt>
-<dd><p>File all datetimes</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs0.timestep">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfs0.timestep" title="Permalink to this definition"></a></dt>
-<dd><p>Time step size in seconds</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs0.to_dataframe">
-<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/mikeio/dfs0.html#Dfs0.to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.to_dataframe" title="Permalink to this definition"></a></dt>
-<dd><p>Read data from the dfs0 file and return a Pandas DataFrame.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>unit_in_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – include unit in column name, default False</p></li>
-<li><p><strong>round_time</strong> (<em>string</em><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – round time to avoid problem with floating point inaccurcy, set to False to avoid rounding</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pd.DataFrame</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs0.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs0.html#Dfs0.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition"></a></dt>
-<dd><p>Create a dfs0 file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Full path and filename to dfs0 to be created.</p></li>
-<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><em>np.array</em><em>]</em>) – values</p></li>
-<li><p><strong>start_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.11)"><em>datetime.datetime</em></a><em>, </em><em>, </em><em>optional</em>) – start date of type datetime.</p></li>
-<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>, </em><em>optional</em>) – the time step. Therefore dt of 5.5 with timeseries_unit of minutes
-means 5 mins and 30 seconds. default to 1.0</p></li>
-<li><p><strong>datetimes</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><em>datetime</em><em>]</em>) – </p></li>
-<li><p><strong>items</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><em>list</em></a><em>[</em><a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><em>ItemInfo</em></a><em>]</em><em>, </em><em>optional</em>) – List of ItemInfo corresponding to a variable types (ie. Water Level).</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – title, default blank</p></li>
-<li><p><strong>dtype</strong> (<em>np.dtype</em><em>, </em><em>optional</em>) – default np.float32</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 </section>
 

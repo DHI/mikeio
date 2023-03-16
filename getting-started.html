@@ -109,11 +109,11 @@
 </section>
 <section id="dataset">
 <h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this heading"></a></h2>
-<p>The <a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class">Dataset</span></a> is the common MIKE IO data structure for data read from dfs files.
+<p>The <a class="reference external" href="https://docs.xarray.dev/en/stable/user-guide/terminology.html#term-Dataset" title="xarray 2023.2.1.dev0"><span class="xref myst">Dataset</span></a> is the common MIKE IO data structure for data read from dfs files.
 The  <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code> method returns a Dataset with a <a class="reference internal" href="dataarray.html"><span class="doc std std-doc">DataArray</span></a> for each item.</p>
 <p>The DataArray have all the relevant information, e.g:</p>
 <ul class="simple">
-<li><p>item - an <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="xref myst py py-class">ItemInfo</span></a> with name, type and unit</p></li>
+<li><p>item - an <a class="reference internal" href="#eum.ItemInfo"><span class="xref myst">ItemInfo</span></a> with name, type and unit</p></li>
 <li><p>time - a pandas.DateTimeIndex with the time instances of the data</p></li>
 <li><p>values - a NumPy array</p></li>
 </ul>
@@ -121,12 +121,12 @@ The  <code class="docutils literal notranslate"><span class="pre">mikeio.read()<
 </section>
 <section id="items-iteminfo-and-eum">
 <h2>Items, ItemInfo and EUM<a class="headerlink" href="#items-iteminfo-and-eum" title="Permalink to this heading"></a></h2>
-<p>The dfs items in MIKE IO are represented by the <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="xref myst py py-class">ItemInfo class</span></a>.
+<p>The dfs items in MIKE IO are represented by the <a class="reference internal" href="#eum.ItemInfo"><span class="xref myst">ItemInfo class</span></a>.
 An ItemInfo consists of:</p>
 <ul class="simple">
 <li><p>name - a user-defined string</p></li>
-<li><p>type - an <a class="reference internal" href="eum.html#mikeio.eum.EUMType" title="mikeio.eum.EUMType"><span class="xref myst py py-class">EUMType</span></a></p></li>
-<li><p>unit - an <a class="reference internal" href="eum.html#mikeio.eum.EUMUnit" title="mikeio.eum.EUMUnit"><span class="xref myst py py-class">EUMUnit</span></a></p></li>
+<li><p>type - an <a class="reference internal" href="#eum.EUMType"><span class="xref myst">EUMType</span></a></p></li>
+<li><p>unit - an <a class="reference internal" href="#eum.EUMUnit"><span class="xref myst">EUMUnit</span></a></p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio.eum</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Viken&quot;</span><span class="p">,</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Water_Level</span><span class="p">)</span>
@@ -170,13 +170,13 @@ An ItemInfo consists of:</p>
 <h2>Generic dfs<a class="headerlink" href="#generic-dfs" title="Permalink to this heading"></a></h2>
 <p>MIKE IO has <a class="reference internal" href="generic.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">generic</span></code></span></a> functionality that works for all dfs files:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="generic.html#mikeio.generic.concat" title="mikeio.generic.concat"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">concat()</span></code></span></a> - Concatenates files along the time axis</p></li>
-<li><p><a class="reference internal" href="generic.html#mikeio.generic.extract" title="mikeio.generic.extract"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">extract()</span></code></span></a> - Extract timesteps and/or items to a new dfs file</p></li>
-<li><p><a class="reference internal" href="generic.html#mikeio.generic.diff" title="mikeio.generic.diff"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">diff()</span></code></span></a> - Calculate difference between two dfs files with identical geometry</p></li>
-<li><p><a class="reference internal" href="generic.html#mikeio.generic.sum" title="mikeio.generic.sum"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">sum()</span></code></span></a> - Calculate the sum of two dfs files</p></li>
-<li><p><a class="reference internal" href="generic.html#mikeio.generic.scale" title="mikeio.generic.scale"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">scale()</span></code></span></a> - Apply scaling to any dfs file</p></li>
-<li><p><a class="reference internal" href="generic.html#mikeio.generic.avg_time" title="mikeio.generic.avg_time"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">avg_time()</span></code></span></a> - Create a temporally averaged dfs file</p></li>
-<li><p><a class="reference internal" href="generic.html#mikeio.generic.quantile" title="mikeio.generic.quantile"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">quantile()</span></code></span></a> - Create a dfs file with temporal quantiles</p></li>
+<li><p><a class="reference internal" href="#generic.concat"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">concat()</span></code></span></a> - Concatenates files along the time axis</p></li>
+<li><p><a class="reference internal" href="#generic.extract"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">extract()</span></code></span></a> - Extract timesteps and/or items to a new dfs file</p></li>
+<li><p><a class="reference internal" href="#generic.diff"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">diff()</span></code></span></a> - Calculate difference between two dfs files with identical geometry</p></li>
+<li><p><a class="reference internal" href="#generic.sum"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">sum()</span></code></span></a> - Calculate the sum of two dfs files</p></li>
+<li><p><a class="reference internal" href="#generic.scale"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">scale()</span></code></span></a> - Apply scaling to any dfs file</p></li>
+<li><p><a class="reference internal" href="#generic.avg_time"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">avg_time()</span></code></span></a> - Create a temporally averaged dfs file</p></li>
+<li><p><a class="reference internal" href="#generic.quantile"><span class="xref myst"><code class="docutils literal notranslate"><span class="pre">quantile()</span></code></span></a> - Create a dfs file with temporal quantiles</p></li>
 </ul>
 <p>All generic methods creates a new dfs file.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">generic</span>
