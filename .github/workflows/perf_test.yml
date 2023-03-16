@@ -32,4 +32,4 @@ jobs:
         pip install .[test]
     - name: Test with pytest
       run: |
-        pytest tests/performance/ --durations=0
+        make perftest
