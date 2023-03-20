@@ -12,7 +12,8 @@ def _to_safe_name(name: str) -> str:
     tmp = re.sub("[^0-9a-zA-Z]", "_", name)
     return re.sub("_+", "_", tmp)  # Collapse multiple underscores
 
-def _n_selected_timesteps(x: Sized, k: Union[slice,Sized]) -> int:
+
+def _n_selected_timesteps(x: Sized, k: Union[slice, Sized]) -> int:
     if isinstance(k, slice):
         k = list(range(*k.indices(len(x))))
     return len(k)
@@ -33,7 +34,7 @@ def _get_time_idx_list(time: pd.DatetimeIndex, steps):
         else:
             steps = slice(parts[0], parts[1])
 
-    if (isinstance(steps, (List,Tuple)) and not isinstance(steps, str)) and isinstance(
+    if (isinstance(steps, (List, Tuple)) and not isinstance(steps, str)) and isinstance(
         steps[0], (str, datetime, np.datetime64, pd.Timestamp)
     ):
         steps = pd.DatetimeIndex(steps)
@@ -49,7 +50,7 @@ def _get_time_idx_list(time: pd.DatetimeIndex, steps):
             )
             steps = list(range(s.start, s.stop))
         except TypeError:
-            pass # TODO this seems fishy!
+            pass  # TODO this seems fishy!
             # steps = list(range(*steps.indices(len(time))))
     elif isinstance(steps, int):
         steps = [steps]
@@ -120,7 +121,7 @@ class DataUtilsMixin:
             raise ValueError(
                 "Time must be monotonic increasing (only equal or increasing) instances."
             )
-
+        assert isinstance(index, pd.DatetimeIndex)
         return index
 
     @staticmethod

@@ -1,5 +1,6 @@
 import warnings
 from collections import namedtuple
+from functools import cached_property
 from typing import Collection, Sequence, Union
 
 import numpy as np
@@ -1518,7 +1519,6 @@ class _GeometryFMLayered(GeometryFM):
             node_ids=node_ids,
             validate=validate,
         )
-        self._top_elems = None
         self._n_layers_column = None
         self._bot_elems = None
         self._n_layers = n_layers
@@ -1564,16 +1564,21 @@ class _GeometryFMLayered(GeometryFM):
         """Maximum number of z-layers"""
         return self.n_layers - self.n_sigma_layers
 
-    @property
+    @cached_property
     def top_elements(self):
         """List of 3d element ids of surface layer"""
-        if self._top_elems is None:
-            # note: if subset of elements is selected then this cannot be done!
+        # note: if subset of elements is selected then this cannot be done!
 
-            # TODO: check 0-based, 1-based...
-            self._top_elems = self._findTopLayerElements(self.element_table)
-
-        return self._top_elems
+        # fast path if no z-layers
+        if self.n_z_layers == 0:
+            return np.arange(
+                start=self.n_sigma_layers - 1,
+                stop=self.n_elements,
+                step=self.n_sigma_layers,
+            )
+        else:
+            # slow path
+            return self._findTopLayerElements(self.element_table)
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
 

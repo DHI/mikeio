@@ -495,9 +495,9 @@ def test_create_undefined():
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
     data = {
         "Item 1": mikeio.DataArray(
-            d1, time, item=ItemInfo("Item 1")
+            data=d1, time=time, item=ItemInfo("Item 1")
         ),  # TODO redundant name
-        "Item 2": mikeio.DataArray(d2, time, item=ItemInfo("Item 2")),
+        "Item 2": mikeio.DataArray(data=d2, time=time, item=ItemInfo("Item 2")),
     }
 
     ds = mikeio.Dataset(data)
@@ -541,6 +541,9 @@ def test_to_dataframe_single_timestep():
     assert "Bar" in df.columns
     # assert isinstance(df.index, pd.DatetimeIndex)
 
+    df2 = ds.to_pandas()
+    assert df2.shape == (1, 2)
+
 
 def test_to_dataframe():
 
@@ -557,6 +560,19 @@ def test_to_dataframe():
 
     assert list(df.columns) == ["Foo", "Bar"]
     assert isinstance(df.index, pd.DatetimeIndex)
+
+
+def test_to_pandas_single_item_dataset():
+
+    da = mikeio.DataArray(
+        data=np.zeros(5), time=pd.date_range("2000", freq="D", periods=5), item="Foo"
+    )
+    ds = mikeio.Dataset([da])
+
+    series = ds.to_pandas()
+
+    assert series.shape == (5,)
+    assert series.name == "Foo"
 
 
 def test_multidimensional_to_dataframe_no_supported():
@@ -896,7 +912,8 @@ def test_aggregate_across_items():
 
     ds = mikeio.read("tests/testdata/State_wlbc_north_err.dfs1")
 
-    dam = ds.max(axis="items")
+    with pytest.warns(FutureWarning):  # TODO: remove in 1.5.0
+        dam = ds.max(axis="items")
 
     assert isinstance(dam, mikeio.DataArray)
     assert dam.geometry == ds.geometry
@@ -916,15 +933,18 @@ def test_aggregate_selected_items_dfsu_save_to_new_file(tmpdir):
 
     assert ds.n_items == 5
 
-    dam = ds.max(axis="items", name="Max Water Level")  # add a nice name
-    assert dam.name == "Max Water Level"
-    assert isinstance(dam, mikeio.DataArray)
-    assert dam.geometry == ds.geometry
-    assert dam.dims == ds.dims
-    assert dam.type == ds[-1].type
+    with pytest.warns(FutureWarning):  # TODO: remove keepdims in 1.5.0
+        dsm = ds.max(
+            axis="items", keepdims=True, name="Max Water Level"
+        )  # add a nice name
+    assert len(dsm) == 1
+    assert dsm[0].name == "Max Water Level"
+    assert dsm.geometry == ds.geometry
+    assert dsm.dims == ds.dims
+    assert dsm[0].type == ds[-1].type
 
     outfilename = os.path.join(tmpdir, "maxwl.dfsu")
-    dam.to_dfs(outfilename)
+    dsm.to_dfs(outfilename)
 
 
 def test_copy():

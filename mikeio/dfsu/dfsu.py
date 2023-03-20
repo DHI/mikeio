@@ -1309,6 +1309,7 @@ class Dfsu2DH(_Dfsu):
         <mikeio.Dataset>
         dims: (time:1115)
         time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
+        geometry: GeometryUndefined()
         items:
           0:  Longitude <Undefined> (undefined)
           1:  Latitude <Undefined> (undefined)
