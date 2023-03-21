@@ -97,6 +97,7 @@ class Dfs1(_Dfs123):
         """
 
         self._x0 = x0
+        filename = str(filename)
 
         if isinstance(data, list):
             raise TypeError(
