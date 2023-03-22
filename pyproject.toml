@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name="mikeio"
-version="1.5.dev0"
+version="1.5.dev1"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.15.0",  # first version with numpy.quantile
