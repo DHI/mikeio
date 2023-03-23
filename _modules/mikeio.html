@@ -115,14 +115,19 @@
     <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;This library has not been tested for a 32 bit system.&quot;</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.dataset</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">.dfs0</span> <span class="kn">import</span> <span class="n">Dfs0</span>
-<span class="kn">from</span> <span class="nn">.dfs1</span> <span class="kn">import</span> <span class="n">Dfs1</span>
-<span class="kn">from</span> <span class="nn">.dfs2</span> <span class="kn">import</span> <span class="n">Dfs2</span>
-<span class="kn">from</span> <span class="nn">.dfs3</span> <span class="kn">import</span> <span class="n">Dfs3</span>
+<span class="kn">from</span> <span class="nn">.dfs</span> <span class="kn">import</span> <span class="n">Dfs0</span><span class="p">,</span> <span class="n">Dfs1</span><span class="p">,</span> <span class="n">Dfs2</span><span class="p">,</span> <span class="n">Dfs3</span>
 <span class="kn">from</span> <span class="nn">.dfsu</span> <span class="kn">import</span> <span class="n">Dfsu</span><span class="p">,</span> <span class="n">Mesh</span>
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">,</span> <span class="n">ItemInfo</span>
 <span class="kn">from</span> <span class="nn">.pfs</span> <span class="kn">import</span> <span class="n">Pfs</span><span class="p">,</span> <span class="n">PfsDocument</span><span class="p">,</span> <span class="n">PfsSection</span><span class="p">,</span> <span class="n">read_pfs</span>
-<span class="kn">from</span> <span class="nn">.spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid1D</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">Grid3D</span>
+
+<span class="c1"># Grid geometries are imported into the main module, since they are used to create dfs files</span>
+<span class="c1"># Other geometries are available in the spatial module</span>
+<span class="kn">from</span> <span class="nn">.spatial</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Grid1D</span><span class="p">,</span>
+    <span class="n">Grid2D</span><span class="p">,</span>
+    <span class="n">Grid3D</span><span class="p">,</span>
+<span class="p">)</span>  
+
 <span class="kn">from</span> <span class="nn">.xyz</span> <span class="kn">import</span> <span class="n">read_xyz</span>
 
 

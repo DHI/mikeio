@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mikeio.dfsu.dfsu &mdash; MIKE IO  documentation</title>
+  <title>mikeio.dfsu._dfsu &mdash; MIKE IO  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -76,7 +76,7 @@
       <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
           <li class="breadcrumb-item"><a href="../../mikeio.html">mikeio</a></li>
-      <li class="breadcrumb-item active">mikeio.dfsu.dfsu</li>
+      <li class="breadcrumb-item active">mikeio.dfsu._dfsu</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -85,7 +85,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mikeio.dfsu.dfsu</h1><div class="highlight"><pre>
+  <h1>Source code for mikeio.dfsu._dfsu</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
@@ -102,19 +102,18 @@
 <span class="kn">from</span> <span class="nn">mikecore.MeshFile</span> <span class="kn">import</span> <span class="n">MeshFile</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">trange</span>
 
-<span class="kn">from</span> <span class="nn">mikeio.spatial.utils</span> <span class="kn">import</span> <span class="n">xy_to_bbox</span>
+<span class="kn">from</span> <span class="nn">mikeio.spatial._utils</span> <span class="kn">import</span> <span class="n">xy_to_bbox</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
-<span class="kn">from</span> <span class="nn">..base</span> <span class="kn">import</span> <span class="n">EquidistantTimeSeries</span>
 <span class="kn">from</span> <span class="nn">..dataset</span> <span class="kn">import</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span>
-<span class="kn">from</span> <span class="nn">..dfs</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">..dfs._dfs</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_get_item_info</span><span class="p">,</span>
     <span class="n">_read_item_time_step</span><span class="p">,</span>
     <span class="n">_valid_item_numbers</span><span class="p">,</span>
     <span class="n">_valid_timesteps</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">..eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">,</span> <span class="n">ItemInfo</span>
-<span class="kn">from</span> <span class="nn">..spatial.FM_geometry</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">..spatial</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">GeometryFM</span><span class="p">,</span>
     <span class="n">GeometryFM3D</span><span class="p">,</span>
     <span class="n">GeometryFMAreaSpectrum</span><span class="p">,</span>
@@ -122,9 +121,9 @@
     <span class="n">GeometryFMPointSpectrum</span><span class="p">,</span>
     <span class="n">GeometryFMVerticalProfile</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">..spatial.FM_utils</span> <span class="kn">import</span> <span class="n">_plot_map</span>
-<span class="kn">from</span> <span class="nn">..spatial.grid_geometry</span> <span class="kn">import</span> <span class="n">Grid2D</span>
-<span class="kn">from</span> <span class="nn">..track</span> <span class="kn">import</span> <span class="n">_extract_track</span>
+<span class="kn">from</span> <span class="nn">..spatial._FM_utils</span> <span class="kn">import</span> <span class="n">_plot_map</span>
+<span class="kn">from</span> <span class="nn">..spatial</span> <span class="kn">import</span> <span class="n">Grid2D</span>
+<span class="kn">from</span> <span class="nn">.._track</span> <span class="kn">import</span> <span class="n">_extract_track</span>
 
 
 <span class="k">def</span> <span class="nf">_write_dfsu</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">):</span>
@@ -707,7 +706,7 @@
         <span class="p">)</span>
 
 
-<span class="k">class</span> <span class="nc">_Dfsu</span><span class="p">(</span><span class="n">_UnstructuredFile</span><span class="p">,</span> <span class="n">EquidistantTimeSeries</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">_Dfsu</span><span class="p">(</span><span class="n">_UnstructuredFile</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">dfs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a Dfsu object</span>

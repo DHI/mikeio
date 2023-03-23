@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>mikeio.pfs.pfsdocument &mdash; MIKE IO  documentation</title>
+  <title>mikeio.pfs._pfsdocument &mdash; MIKE IO  documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -77,7 +77,7 @@
           <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
           <li class="breadcrumb-item"><a href="../../mikeio.html">mikeio</a></li>
           <li class="breadcrumb-item"><a href="../pfs.html">mikeio.pfs</a></li>
-      <li class="breadcrumb-item active">mikeio.pfs.pfsdocument</li>
+      <li class="breadcrumb-item active">mikeio.pfs._pfsdocument</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -86,7 +86,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for mikeio.pfs.pfsdocument</h1><div class="highlight"><pre>
+  <h1>Source code for mikeio.pfs._pfsdocument</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
@@ -96,7 +96,7 @@
 
 <span class="kn">import</span> <span class="nn">yaml</span>
 
-<span class="kn">from</span> <span class="nn">.pfssection</span> <span class="kn">import</span> <span class="n">PfsNonUniqueList</span><span class="p">,</span> <span class="n">PfsSection</span>
+<span class="kn">from</span> <span class="nn">._pfssection</span> <span class="kn">import</span> <span class="n">PfsNonUniqueList</span><span class="p">,</span> <span class="n">PfsSection</span>
 
 
 <span class="k">def</span> <span class="nf">parse_yaml_preserving_duplicates</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">unique_keywords</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
