@@ -8,26 +8,29 @@ import numpy as np
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
 
-from .base import TimeSeries
-from .data_utils import DataUtilsMixin
-from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.FM_geometry import (
+from ._data_utils import DataUtilsMixin
+from ..eum import EUMType, EUMUnit, ItemInfo
+
+
+from ..spatial import (
+    Grid1D,
+    Grid2D,
+    Grid3D,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
     GeometryFM,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
-    _GeometryFMLayered,
 )
-from .spatial.geometry import (
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryUndefined,
-)
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from .spectral import calc_m0_from_spectrum
-from .data_plot import (
+
+from ..spatial._FM_geometry import _GeometryFMLayered
+
+from .._spectral import calc_m0_from_spectrum
+from ._data_plot import (
     _DataArrayPlotter,
     _DataArrayPlotterFM,
     _DataArrayPlotterGrid1D,
@@ -82,7 +85,7 @@ class _DataArraySpectrumToHm0:
         )
 
 
-class DataArray(DataUtilsMixin, TimeSeries):
+class DataArray(DataUtilsMixin):
     """DataArray with data and metadata for a single item in a dfs file
 
     The DataArray has these main properties:
@@ -842,7 +845,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         # select in time
         if time is not None:
-            time = time.time if isinstance(time, TimeSeries) else time
+            if hasattr(time, "time"):
+                if isinstance(time.time, pd.DatetimeIndex):
+                    time = time.time
             if isinstance(time, int) or (
                 isinstance(time, Sequence) and isinstance(time[0], int)
             ):
@@ -1001,7 +1006,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             A dataset with data dimension t
             The first two items will be x- and y- coordinates of track
         """
-        from .track import _extract_track
+        from .._track import _extract_track
 
         return _extract_track(
             deletevalue=self.deletevalue,
@@ -1016,9 +1021,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             item_numbers=[0],
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__dataarray_read_item_time_func(
-                item, step
-            ),
+            data_read_func=self.__dataarray_read_item_time_func,
         )
 
     def interp_time(

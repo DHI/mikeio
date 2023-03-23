@@ -1,6 +1,6 @@
 import numpy as np
 
-from .geometry import BoundingBox
+from ._geometry import BoundingBox
 
 
 def xy_to_bbox(xy, buffer=None):

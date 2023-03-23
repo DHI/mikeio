@@ -1,5 +1,5 @@
 import pytest
-from mikeio.spatial.FM_geometry import GeometryFM
+from mikeio.spatial._FM_geometry import GeometryFM
 
 
 ##################################################
@@ -9,7 +9,7 @@ pytest.importorskip("shapely")
 
 
 def test_to_shapely():
-     #     x     y    z
+    #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
         (1.0, 0.0, 0.0),  # 1
