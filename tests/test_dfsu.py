@@ -6,14 +6,13 @@ import numpy as np
 import pandas as pd
 import pytest
 import mikeio
-from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh
-from mikeio.eum import ItemInfo
+from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh, ItemInfo
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 
-from mikeio.spatial.FM_geometry import GeometryFM
-from mikeio.spatial.geometry import GeometryPoint2D
-from mikeio.spatial.grid_geometry import Grid2D
+from mikeio.spatial._FM_geometry import GeometryFM
+from mikeio.spatial import GeometryPoint2D
+from mikeio.spatial import Grid2D
 
 
 def test_repr():

@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -1528,7 +1528,7 @@ def test_layer_selection():
 
     dss_layer = ds.sel(layers=0)
     # should not be layered after selection
-    assert type(dss_layer.geometry) == mikeio.spatial.FM_geometry.GeometryFM
+    assert type(dss_layer.geometry) == mikeio.spatial.GeometryFM
 
 
 def test_time_selection():

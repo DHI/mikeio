@@ -15,7 +15,7 @@ from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
 
 from . import __dfs_version__
-from .dfs import _get_item_info, _valid_item_numbers
+from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import ItemInfo
 
 show_progress = True

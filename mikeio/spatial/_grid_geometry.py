@@ -7,7 +7,7 @@ from mikecore.Projections import Cartography  # type: ignore
 
 from ..exceptions import OutsideModelDomainError
 
-from .geometry import (
+from ._geometry import (
     BoundingBox,
     GeometryPoint2D,
     GeometryPoint3D,
@@ -934,7 +934,7 @@ class Grid2D(_Geometry):
         south: int, optional
             code value for south boundary
         """
-        from mikeio.spatial.FM_geometry import GeometryFM
+        from mikeio.spatial._FM_geometry import GeometryFM
 
         # get node based grid
         xn = self._centers_to_nodes(self.x)

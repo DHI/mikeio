@@ -1,4 +1,4 @@
-from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D
+from mikeio.spatial import GeometryPoint2D, GeometryPoint3D
 
 # https://www.ogc.org/standard/sfa/
 
