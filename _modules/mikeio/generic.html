@@ -88,10 +88,11 @@
   <h1>Source code for mikeio.generic</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copyfile</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -175,15 +176,19 @@
 
 
 <span class="k">def</span> <span class="nf">_clone</span><span class="p">(</span>
-    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timestep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">timestep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DfsFile</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clone a dfs file</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    infilename : str</span>
+<span class="sd">    infilename : Union[str,pathlib.Path]</span>
 <span class="sd">        input filename</span>
-<span class="sd">    outfilename : str</span>
+<span class="sd">    outfilename : Union[str,pathlib.Path]</span>
 <span class="sd">        output filename</span>
 <span class="sd">    start_time : datetime, optional</span>
 <span class="sd">        new start time for the new file, by default None</span>
@@ -199,7 +204,7 @@
 <span class="sd">    DfsFile</span>
 <span class="sd">        MIKE generic dfs file object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">source</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilename</span><span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">))</span>
     <span class="n">fi</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">FileInfo</span>
 
     <span class="n">builder</span> <span class="o">=</span> <span class="n">DfsBuilder</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">fi</span><span class="o">.</span><span class="n">FileTitle</span><span class="p">,</span> <span class="s2">&quot;mikeio&quot;</span><span class="p">,</span> <span class="n">__dfs_version__</span><span class="p">)</span>
@@ -256,7 +261,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Items of type: {type(items)} is not supported&quot;</span><span class="p">)</span>
 
     <span class="c1"># Create file</span>
-    <span class="n">builder</span><span class="o">.</span><span class="n">CreateFile</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
+    <span class="n">builder</span><span class="o">.</span><span class="n">CreateFile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">outfilename</span><span class="p">))</span>
 
     <span class="c1"># Copy static items</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -274,8 +279,8 @@
 
 
 <div class="viewcode-block" id="scale"><a class="viewcode-back" href="../../generic.html#mikeio.generic.scale">[docs]</a><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span>
-    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
     <span class="n">items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -285,9 +290,9 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 
-<span class="sd">    infilename: str</span>
+<span class="sd">    infilename: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the input file</span>
-<span class="sd">    outfilename: str</span>
+<span class="sd">    outfilename: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the output file</span>
 <span class="sd">    offset: float, optional</span>
 <span class="sd">        value to add to all items, default 0.0</span>
@@ -296,6 +301,8 @@
 <span class="sd">    items: List[str] or List[int], optional</span>
 <span class="sd">        Process only selected items, by number (0-based) or name, by default: all</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">infilename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">)</span>
+    <span class="n">outfilename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
     <span class="n">copyfile</span><span class="p">(</span><span class="n">infilename</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">)</span>
     <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpenEdit</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
 
@@ -325,8 +332,8 @@
 
 
 <div class="viewcode-block" id="fill_corrupt"><a class="viewcode-back" href="../../generic.html#mikeio.generic.fill_corrupt">[docs]</a><span class="k">def</span> <span class="nf">fill_corrupt</span><span class="p">(</span>
-    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
     <span class="n">items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -336,9 +343,9 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 
-<span class="sd">    infilename: str</span>
+<span class="sd">    infilename: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the input file</span>
-<span class="sd">    outfilename: str</span>
+<span class="sd">    outfilename: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the output file</span>
 <span class="sd">    fill_value: float, optional</span>
 <span class="sd">        value to use where data is corrupt, default delete value</span>
@@ -386,18 +393,25 @@
     <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="sum"><a class="viewcode-back" href="../../generic.html#mikeio.generic.sum">[docs]</a><span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="n">infilename_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">infilename_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="sum"><a class="viewcode-back" href="../../generic.html#mikeio.generic.sum">[docs]</a><span class="k">def</span> <span class="nf">sum</span><span class="p">(</span>
+    <span class="n">infilename_a</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">infilename_b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum two dfs files (a+b)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    infilename_a: str</span>
+<span class="sd">    infilename_a: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the first input file</span>
-<span class="sd">    infilename_b: str</span>
+<span class="sd">    infilename_b: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the second input file</span>
-<span class="sd">    outfilename: str</span>
+<span class="sd">    outfilename: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the output file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">infilename_a</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">infilename_a</span><span class="p">)</span>
+    <span class="n">infilename_b</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">infilename_b</span><span class="p">)</span>
+    <span class="n">outfilename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
     <span class="n">copyfile</span><span class="p">(</span><span class="n">infilename_a</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">)</span>
 
     <span class="n">dfs_i_a</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilename_a</span><span class="p">)</span>
@@ -433,18 +447,25 @@
     <span class="n">dfs_o</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="diff"><a class="viewcode-back" href="../../generic.html#mikeio.generic.diff">[docs]</a><span class="k">def</span> <span class="nf">diff</span><span class="p">(</span><span class="n">infilename_a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">infilename_b</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="diff"><a class="viewcode-back" href="../../generic.html#mikeio.generic.diff">[docs]</a><span class="k">def</span> <span class="nf">diff</span><span class="p">(</span>
+    <span class="n">infilename_a</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">infilename_b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate difference between two dfs files (a-b)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    infilename_a: str</span>
+<span class="sd">    infilename_a: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the first input file</span>
-<span class="sd">    infilename_b: str</span>
+<span class="sd">    infilename_b: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the second input file</span>
-<span class="sd">    outfilename: str</span>
+<span class="sd">    outfilename: Union[str,pathlib.Path]</span>
 <span class="sd">        full path to the output file</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">infilename_a</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">infilename_a</span><span class="p">)</span>
+    <span class="n">infilename_b</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">infilename_b</span><span class="p">)</span>
+    <span class="n">outfilename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
 
     <span class="n">copyfile</span><span class="p">(</span><span class="n">infilename_a</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">)</span>
 
@@ -482,7 +503,11 @@
     <span class="n">dfs_o</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="concat"><a class="viewcode-back" href="../../generic.html#mikeio.generic.concat">[docs]</a><span class="k">def</span> <span class="nf">concat</span><span class="p">(</span><span class="n">infilenames</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="concat"><a class="viewcode-back" href="../../generic.html#mikeio.generic.concat">[docs]</a><span class="k">def</span> <span class="nf">concat</span><span class="p">(</span>
+    <span class="n">infilenames</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenates files along the time axis</span>
 
 <span class="sd">    Overlap handling is defined by the `keep` argument,  by default the last one will be used.</span>
@@ -491,9 +516,9 @@
 <span class="sd">    ----------</span>
 <span class="sd">    infilenames: List[str]</span>
 <span class="sd">        filenames to concatenate</span>
-<span class="sd">    outfilename: str</span>
+<span class="sd">    outfilename: Union[str,pathlib.Path]</span>
 <span class="sd">        filename of output</span>
-<span class="sd">    keep: str</span>
+<span class="sd">    keep: Union[str,pathlib.Path]</span>
 <span class="sd">        either &#39;first&#39; (keep older), &#39;last&#39; (keep newer)</span>
 <span class="sd">        or &#39;average&#39; can be selected. By default &#39;last&#39;</span>
 
@@ -601,15 +626,20 @@
 
 
 <div class="viewcode-block" id="extract"><a class="viewcode-back" href="../../generic.html#mikeio.generic.extract">[docs]</a><span class="k">def</span> <span class="nf">extract</span><span class="p">(</span>
-    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">end</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">end</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract timesteps and/or items to a new dfs file</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    infilename : str</span>
+<span class="sd">    infilename : Union[str,pathlib.Path]</span>
 <span class="sd">        path to input dfs file</span>
-<span class="sd">    outfilename : str</span>
+<span class="sd">    outfilename : Union[str,pathlib.Path]</span>
 <span class="sd">        path to output dfs file</span>
 <span class="sd">    start : int, float, str or datetime, optional</span>
 <span class="sd">        start of extraction as either step, relative seconds</span>
@@ -778,20 +808,24 @@
     <span class="k">return</span> <span class="n">timestep</span>
 
 
-<div class="viewcode-block" id="avg_time"><a class="viewcode-back" href="../../generic.html#mikeio.generic.avg_time">[docs]</a><span class="k">def</span> <span class="nf">avg_time</span><span class="p">(</span><span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="avg_time"><a class="viewcode-back" href="../../generic.html#mikeio.generic.avg_time">[docs]</a><span class="k">def</span> <span class="nf">avg_time</span><span class="p">(</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a temporally averaged dfs file</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    infilename : str</span>
+<span class="sd">    infilename : Union[str,pathlib.Path]</span>
 <span class="sd">        input filename</span>
-<span class="sd">    outfilename : str</span>
+<span class="sd">    outfilename : Union[str,pathlib.Path]</span>
 <span class="sd">        output filename</span>
 <span class="sd">    skipna : bool, optional</span>
 <span class="sd">        exclude NaN/delete values when computing the result, default True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="n">infilename</span><span class="p">)</span>
+    <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">))</span>
 
     <span class="n">dfs_o</span> <span class="o">=</span> <span class="n">_clone</span><span class="p">(</span><span class="n">infilename</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">)</span>
 
@@ -841,15 +875,21 @@
 
 
 <div class="viewcode-block" id="quantile"><a class="viewcode-back" href="../../generic.html#mikeio.generic.quantile">[docs]</a><span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span>
-    <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mf">1.0e9</span>
+    <span class="n">infilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">outfilename</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
+    <span class="n">q</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">buffer_size</span><span class="o">=</span><span class="mf">1.0e9</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create temporal quantiles of all items in dfs file</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    infilename : str</span>
+<span class="sd">    infilename : Union[str,pathlib.Path]</span>
 <span class="sd">        input filename</span>
-<span class="sd">    outfilename : str</span>
+<span class="sd">    outfilename : Union[str,pathlib.Path]</span>
 <span class="sd">        output filename</span>
 <span class="sd">    q: array_like of float</span>
 <span class="sd">        Quantile or sequence of quantiles to compute,</span>
