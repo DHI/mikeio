@@ -19,7 +19,8 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.5.dev0"  # TODO use git hash instead for dev version?
+__version__ = "1.5.dev1"  # TODO use git hash instead for dev version?
+# __version__ = "1.4.1"
 __dfs_version__: int = 140
 
 
@@ -27,14 +28,19 @@ if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
 
 from .dataset import DataArray, Dataset
-from .dfs0 import Dfs0
-from .dfs1 import Dfs1
-from .dfs2 import Dfs2
-from .dfs3 import Dfs3
+from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
+
+# Grid geometries are imported into the main module, since they are used to create dfs files
+# Other geometries are available in the spatial module
+from .spatial import (
+    Grid1D,
+    Grid2D,
+    Grid3D,
+)  
+
 from .xyz import read_xyz
 
 

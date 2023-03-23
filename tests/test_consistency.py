@@ -3,8 +3,8 @@ from datetime import datetime
 import pytest
 
 import mikeio
-from mikeio.dataarray import DataArray
-from mikeio.spatial.geometry import GeometryUndefined
+from mikeio import DataArray
+from mikeio.spatial import GeometryUndefined
 import mikeio.generic
 
 
@@ -203,16 +203,15 @@ def test_interp_x_y_dfsu2d():
     assert dss.geometry.x == x
     assert dss.geometry.y == y
 
+
 def test_interp_x_y_dfsu3d_not_yet_implemented():
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
 
     x = 350000
     y = 6145000
-    
+
     with pytest.raises(NotImplementedError, match="3d"):
         ds.interp(x=x, y=y)
-
-    
 
 
 def test_read_dfsu2d():
@@ -482,25 +481,26 @@ def test_read_dfs_time_list_int():
         assert all(dsr[0].time == dsgetitem.time)
         assert dsr[0].shape == dsgetitem.shape
 
+
 def test_read_dfs_time_slice_int():
 
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
-        
-        time = slice(1,3) # 1,2 (not 3)
+
+        time = slice(1, 3)  # 1,2 (not 3)
         dssel = mikeio.read(filename=filename).isel(time=time)
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
         assert dssel.n_timesteps == 2
 
-        time = slice(None,-1) # Skip last step
+        time = slice(None, -1)  # Skip last step
         dssel = mikeio.read(filename=filename).isel(time=time)
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
         assert dssel.n_timesteps == 4
-        
-        time = slice(1,None) # Skip first step
+
+        time = slice(1, None)  # Skip first step
         dssel = mikeio.read(filename=filename).isel(time=time)
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)

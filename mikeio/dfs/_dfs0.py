@@ -9,11 +9,10 @@ from mikecore.DfsFile import DataValueType, DfsSimpleType, StatType, TimeAxisTyp
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
-from . import __dfs_version__
-from .base import TimeSeries
-from .dataset import Dataset
-from .dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit
+from .. import __dfs_version__
+from ..dataset import Dataset
+from ._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
+from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit
 
 
 def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float):
@@ -81,7 +80,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
     dfs.Close()
 
 
-class Dfs0(TimeSeries):
+class Dfs0:
     def __init__(self, filename=None):
         """Create a Dfs0 object for reading, writing
 
