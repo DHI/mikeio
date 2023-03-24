@@ -1,5 +1,5 @@
-from .pfsdocument import Pfs, PfsDocument
-from .pfssection import PfsNonUniqueList, PfsSection
+from ._pfsdocument import Pfs, PfsDocument
+from ._pfssection import PfsNonUniqueList, PfsSection
 
 
 def read_pfs(filename, encoding="cp1252", unique_keywords=False):

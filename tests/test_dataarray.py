@@ -4,9 +4,8 @@ import matplotlib.pyplot as plt
 import pytest
 
 import mikeio
-from mikeio.eum import EUMType, ItemInfo
+from mikeio import EUMType, ItemInfo
 from mikeio.exceptions import OutsideModelDomainError
-from mikeio.spatial.geometry import GeometryPoint2D, GeometryPoint3D, GeometryUndefined
 
 
 @pytest.fixture
@@ -442,27 +441,27 @@ def test_dataarray_dfsu3d_indexing():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds = mikeio.read(filename)
 
-    assert isinstance(ds.Salinity.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
+    assert isinstance(ds.Salinity.geometry, mikeio.spatial.GeometryFM3D)
 
     # indexing in time selecting a single record
     da = ds.Salinity[0, :]
-    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
+    assert isinstance(da.geometry, mikeio.spatial.GeometryFM3D)
 
     # indexing in space selecting a single element
     da = ds.Salinity[:, 0]
-    assert isinstance(da.geometry, GeometryPoint3D)
+    assert isinstance(da.geometry, mikeio.spatial.GeometryPoint3D)
 
     # indexing in space selecting a multiple elements with slice
     da = ds.Salinity[:, 0:45]
-    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
+    assert isinstance(da.geometry, mikeio.spatial.GeometryFM3D)
 
     # indexing in space selecting a multiple elements with tuple
     da = ds.Salinity[:, (3, 6, 12)]
-    assert isinstance(da.geometry, mikeio.spatial.FM_geometry.GeometryFM3D)
+    assert isinstance(da.geometry, mikeio.spatial.GeometryFM3D)
 
     # indexing in both time and space
     da = ds.Salinity[0, 0]
-    assert isinstance(da.geometry, GeometryPoint3D)
+    assert isinstance(da.geometry, mikeio.spatial.GeometryPoint3D)
     assert da.shape == ()
 
 
@@ -481,7 +480,7 @@ def test_dataarray_grid1d_indexing(da2):
     assert da[0, 0].shape == ()
 
     assert isinstance(da[:, :].geometry, mikeio.Grid1D)
-    assert isinstance(da[:, -1].geometry, GeometryUndefined)
+    assert isinstance(da[:, -1].geometry, mikeio.spatial.GeometryUndefined)
 
 
 def test_dataarray_grid2d_repr(da_grid2d):
@@ -517,7 +516,7 @@ def test_dataarray_grid2d_indexing(da_grid2d):
     assert isinstance(da[0, :, :].geometry, mikeio.Grid2D)
     assert isinstance(da[0, 0, :].geometry, mikeio.Grid1D)
     assert isinstance(da[:, :, 0].geometry, mikeio.Grid1D)
-    assert isinstance(da[:, -1, 0].geometry, GeometryPoint2D)
+    assert isinstance(da[:, -1, 0].geometry, mikeio.spatial.GeometryPoint2D)
 
     # TODO: slices in other than the time direction will give GeometryUndefined
     assert isinstance(da[:, 2:5, 0].geometry, mikeio.Grid1D)
@@ -627,7 +626,7 @@ def test_da_isel_space_multiple_elements(da_grid2d):
     da_sel = da_grid2d.isel((0, 1, 2, 10), axis="y")
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 4, 7)
-    assert isinstance(da_sel.geometry, GeometryUndefined)
+    assert isinstance(da_sel.geometry, mikeio.spatial.GeometryUndefined)
 
     da_sel = da_grid2d.isel(slice(None, 3), axis="x")
     assert da_sel.dims == ("time", "y", "x")
@@ -677,7 +676,7 @@ def test_da_sel_xy_grid2d(da_grid2d):
     # Grid2D(x0=10.0, dx=0.1, nx=7, ny=14, dy=1.0, y0=-10.0),
     da = da_grid2d
     da1 = da.sel(x=10.4, y=0.0)
-    assert isinstance(da1.geometry, GeometryPoint2D)
+    assert isinstance(da1.geometry, mikeio.spatial.GeometryPoint2D)
     assert da1.geometry.x == 10.4
     assert da1.geometry.y == 0.0
     assert np.all(da1.to_numpy() == da.to_numpy()[:, 10, 4])
@@ -1057,7 +1056,7 @@ def test_dataarray_weigthed_average():
 
     da2 = da.average(weights=area, axis=1)
 
-    assert isinstance(da2.geometry, GeometryUndefined)
+    assert isinstance(da2.geometry, mikeio.spatial.GeometryUndefined)
     assert da2.dims == ("time",)
 
 
@@ -1173,7 +1172,7 @@ def test_da_quantile_axis0(da2):
 
     daqs = da2.quantile(q=0.345, axis="space")
     assert isinstance(
-        daqs.geometry, GeometryUndefined
+        daqs.geometry, mikeio.spatial.GeometryUndefined
     )  # Aggregating over space doesn't create a well defined geometry
     assert isinstance(da2.geometry, mikeio.Grid1D)  # But this one is intact
     assert len(daqs.time) == 10
@@ -1246,7 +1245,7 @@ def test_xzy_selection():
     das_xzy = ds.Temperature.sel(x=348946, y=6173673, z=0)
 
     # check for point geometry after selection
-    assert type(das_xzy.geometry) == mikeio.spatial.geometry.GeometryPoint3D
+    assert type(das_xzy.geometry) == mikeio.spatial.GeometryPoint3D
     assert das_xzy.values[0] == pytest.approx(17.381)
 
     # do the same but go one level deeper, but finding the index first
@@ -1277,7 +1276,7 @@ def test_layer_selection():
 
     das_layer = ds.Temperature.sel(layers=0)
     # should not be layered after selection
-    assert type(das_layer.geometry) == mikeio.spatial.FM_geometry.GeometryFM
+    assert type(das_layer.geometry) == mikeio.spatial.GeometryFM
 
 
 def test_time_selection():
@@ -1314,3 +1313,32 @@ def test_interp_na():
     dai = da.interp_na(fill_value="extrapolate")
     assert dai.to_numpy()[0] == pytest.approx(0.0)
     assert dai.to_numpy()[2] == pytest.approx(2.0)
+
+
+def test_to_dataframe():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.ones(5),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+
+    df = da.to_dataframe()
+    assert df.shape == (5, 1)
+    assert df["Foo"].values[0] == 1.0
+    assert df.index[-1].day == 5
+
+
+def test_to_pandas():
+    time = pd.date_range("2000", periods=5, freq="D")
+    da = mikeio.DataArray(
+        data=np.ones(5),
+        time=time,
+        item=ItemInfo(name="Foo"),
+    )
+
+    series = da.to_pandas()
+    assert series.shape == (5,)
+    assert series.index[-1].day == 5
+    assert series.values[0] == 1.0
+    assert series.name == "Foo"

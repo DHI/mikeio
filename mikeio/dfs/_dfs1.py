@@ -4,9 +4,9 @@ from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumUnit
 
-from . import __dfs_version__
-from .dfs import _Dfs123
-from .spatial.grid_geometry import Grid1D
+from .. import __dfs_version__
+from ._dfs import _Dfs123
+from ..spatial import Grid1D
 
 
 class Dfs1(_Dfs123):
@@ -97,6 +97,7 @@ class Dfs1(_Dfs123):
         """
 
         self._x0 = x0
+        filename = str(filename)
 
         if isinstance(data, list):
             raise TypeError(

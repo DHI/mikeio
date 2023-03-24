@@ -4,8 +4,9 @@ from collections import namedtuple
 
 BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
+
 class _Geometry(ABC):
-    def __init__(self, projection:str = "NON-UTM") -> None:
+    def __init__(self, projection: str = "NON-UTM") -> None:
         self._projstr = projection
 
     @property
@@ -34,7 +35,6 @@ class _Geometry(ABC):
         pass
 
 
-
 class GeometryUndefined:
     def __repr__(self):
         return "GeometryUndefined()"
@@ -46,12 +46,26 @@ class GeometryPoint2D(_Geometry):
         self.x = x
         self.y = y
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"GeometryPoint2D(x={self.x}, y={self.y})"
 
+    # TODO should we use wkt here
+    # def __str__(self) -> str:
+    #    return self.wkt
+
     @property
-    def ndim(self):
+    def wkt(self) -> str:
+        return f"POINT ({self.x} {self.y})"
+
+    @property
+    def ndim(self) -> int:
+        """Geometry dimension"""
         return 0
+
+    def to_shapely(self):
+        from shapely.geometry import Point
+
+        return Point(self.x, self.y)
 
 
 class GeometryPoint3D(_Geometry):
@@ -66,5 +80,14 @@ class GeometryPoint3D(_Geometry):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
 
     @property
-    def ndim(self):
+    def wkt(self) -> str:
+        return f"POINT Z ({self.x} {self.y} {self.z})"
+
+    @property
+    def ndim(self) -> int:
         return 0
+
+    def to_shapely(self):
+        from shapely.geometry import Point
+
+        return Point(self.x, self.y, self.z)

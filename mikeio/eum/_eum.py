@@ -24,7 +24,7 @@ import pandas as pd
 from mikecore.DfsFile import DataValueType
 from mikecore.eum import eumUnit, eumWrapper
 
-from .exceptions import InvalidDataValueType
+from ..exceptions import InvalidDataValueType
 
 
 def _type_list(search=None):

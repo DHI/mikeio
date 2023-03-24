@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 from collections import namedtuple
 
-from .utils import _relative_cumulative_distance
+from ._utils import _relative_cumulative_distance
 
 
 MESH_COL = "0.95"

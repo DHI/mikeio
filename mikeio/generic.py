@@ -1,9 +1,10 @@
 import math
 import os
+import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -14,7 +15,7 @@ from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
 
 from . import __dfs_version__
-from .dfs import _get_item_info, _valid_item_numbers
+from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import ItemInfo
 
 show_progress = True
@@ -87,15 +88,19 @@ class _ChunkInfo:
 
 
 def _clone(
-    infilename: str, outfilename: str, start_time=None, timestep=None, items=None
+    infilename: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
+    start_time=None,
+    timestep=None,
+    items=None,
 ) -> DfsFile:
     """Clone a dfs file
 
     Parameters
     ----------
-    infilename : str
+    infilename : Union[str,pathlib.Path]
         input filename
-    outfilename : str
+    outfilename : Union[str,pathlib.Path]
         output filename
     start_time : datetime, optional
         new start time for the new file, by default None
@@ -111,7 +116,7 @@ def _clone(
     DfsFile
         MIKE generic dfs file object
     """
-    source = DfsFileFactory.DfsGenericOpen(infilename)
+    source = DfsFileFactory.DfsGenericOpen(str(infilename))
     fi = source.FileInfo
 
     builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
@@ -168,7 +173,7 @@ def _clone(
         raise ValueError("Items of type: {type(items)} is not supported")
 
     # Create file
-    builder.CreateFile(outfilename)
+    builder.CreateFile(str(outfilename))
 
     # Copy static items
     while True:
@@ -186,8 +191,8 @@ def _clone(
 
 
 def scale(
-    infilename: str,
-    outfilename: str,
+    infilename: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
     offset: float = 0.0,
     factor: float = 1.0,
     items: Optional[Union[List[str], List[int]]] = None,
@@ -197,9 +202,9 @@ def scale(
     Parameters
     ----------
 
-    infilename: str
+    infilename: Union[str,pathlib.Path]
         full path to the input file
-    outfilename: str
+    outfilename: Union[str,pathlib.Path]
         full path to the output file
     offset: float, optional
         value to add to all items, default 0.0
@@ -208,6 +213,8 @@ def scale(
     items: List[str] or List[int], optional
         Process only selected items, by number (0-based) or name, by default: all
     """
+    infilename = str(infilename)
+    outfilename = str(outfilename)
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
@@ -237,8 +244,8 @@ def scale(
 
 
 def fill_corrupt(
-    infilename: str,
-    outfilename: str,
+    infilename: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
     fill_value: float = np.nan,
     items: Optional[Union[List[str], List[int]]] = None,
 ) -> None:
@@ -248,9 +255,9 @@ def fill_corrupt(
     Parameters
     ----------
 
-    infilename: str
+    infilename: Union[str,pathlib.Path]
         full path to the input file
-    outfilename: str
+    outfilename: Union[str,pathlib.Path]
         full path to the output file
     fill_value: float, optional
         value to use where data is corrupt, default delete value
@@ -298,18 +305,25 @@ def fill_corrupt(
     dfs.Close()
 
 
-def sum(infilename_a: str, infilename_b: str, outfilename: str) -> None:
+def sum(
+    infilename_a: Union[str, pathlib.Path],
+    infilename_b: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
+) -> None:
     """Sum two dfs files (a+b)
 
     Parameters
     ----------
-    infilename_a: str
+    infilename_a: Union[str,pathlib.Path]
         full path to the first input file
-    infilename_b: str
+    infilename_b: Union[str,pathlib.Path]
         full path to the second input file
-    outfilename: str
+    outfilename: Union[str,pathlib.Path]
         full path to the output file
     """
+    infilename_a = str(infilename_a)
+    infilename_b = str(infilename_b)
+    outfilename = str(outfilename)
     copyfile(infilename_a, outfilename)
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
@@ -345,18 +359,25 @@ def sum(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     dfs_o.Close()
 
 
-def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
+def diff(
+    infilename_a: Union[str, pathlib.Path],
+    infilename_b: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
+) -> None:
     """Calculate difference between two dfs files (a-b)
 
     Parameters
     ----------
-    infilename_a: str
+    infilename_a: Union[str,pathlib.Path]
         full path to the first input file
-    infilename_b: str
+    infilename_b: Union[str,pathlib.Path]
         full path to the second input file
-    outfilename: str
+    outfilename: Union[str,pathlib.Path]
         full path to the output file
     """
+    infilename_a = str(infilename_a)
+    infilename_b = str(infilename_b)
+    outfilename = str(outfilename)
 
     copyfile(infilename_a, outfilename)
 
@@ -394,7 +415,11 @@ def diff(infilename_a: str, infilename_b: str, outfilename: str) -> None:
     dfs_o.Close()
 
 
-def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
+def concat(
+    infilenames: Sequence[Union[str, pathlib.Path]],
+    outfilename: Union[str, pathlib.Path],
+    keep="last",
+) -> None:
     """Concatenates files along the time axis
 
     Overlap handling is defined by the `keep` argument,  by default the last one will be used.
@@ -403,9 +428,9 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
     ----------
     infilenames: List[str]
         filenames to concatenate
-    outfilename: str
+    outfilename: Union[str,pathlib.Path]
         filename of output
-    keep: str
+    keep: Union[str,pathlib.Path]
         either 'first' (keep older), 'last' (keep newer)
         or 'average' can be selected. By default 'last'
 
@@ -513,15 +538,20 @@ def concat(infilenames: List[str], outfilename: str, keep="last") -> None:
 
 
 def extract(
-    infilename: str, outfilename: str, start=0, end=-1, step=1, items=None
+    infilename: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
+    start=0,
+    end=-1,
+    step=1,
+    items=None,
 ) -> None:
     """Extract timesteps and/or items to a new dfs file
 
     Parameters
     ----------
-    infilename : str
+    infilename : Union[str,pathlib.Path]
         path to input dfs file
-    outfilename : str
+    outfilename : Union[str,pathlib.Path]
         path to output dfs file
     start : int, float, str or datetime, optional
         start of extraction as either step, relative seconds
@@ -690,20 +720,24 @@ def _parse_step(dfs_i, step):
     return timestep
 
 
-def avg_time(infilename: str, outfilename: str, skipna=True):
+def avg_time(
+    infilename: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
+    skipna=True,
+):
     """Create a temporally averaged dfs file
 
     Parameters
     ----------
-    infilename : str
+    infilename : Union[str,pathlib.Path]
         input filename
-    outfilename : str
+    outfilename : Union[str,pathlib.Path]
         output filename
     skipna : bool, optional
         exclude NaN/delete values when computing the result, default True
     """
 
-    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+    dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
 
     dfs_o = _clone(infilename, outfilename)
 
@@ -753,15 +787,21 @@ def avg_time(infilename: str, outfilename: str, skipna=True):
 
 
 def quantile(
-    infilename: str, outfilename: str, q, *, items=None, skipna=True, buffer_size=1.0e9
+    infilename: Union[str, pathlib.Path],
+    outfilename: Union[str, pathlib.Path],
+    q,
+    *,
+    items=None,
+    skipna=True,
+    buffer_size=1.0e9,
 ):
     """Create temporal quantiles of all items in dfs file
 
     Parameters
     ----------
-    infilename : str
+    infilename : Union[str,pathlib.Path]
         input filename
-    outfilename : str
+    outfilename : Union[str,pathlib.Path]
         output filename
     q: array_like of float
         Quantile or sequence of quantiles to compute,
