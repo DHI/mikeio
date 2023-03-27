@@ -331,7 +331,7 @@ class PfsDocument(PfsSection):
         if "," in value:
             tokens = self._split_line_by_comma(value)
             for j in range(len(tokens)):
-                tokens[j] = self._parse_token(tokens[j])
+                tokens[j] = self._parse_token(tokens[j], context=value)
             value = f"[{','.join(tokens)}]" if len(tokens) > 1 else tokens[0]
         else:
             value = self._parse_token(value)
@@ -348,10 +348,12 @@ class PfsDocument(PfsSection):
         # lexer.wordchars += ",.-"
         # return list(lexer)
 
-    def _parse_token(self, token: str) -> str:
+    def _parse_token(self, token: str, context="") -> str:
         s = token.strip()
 
-        if s.count("|") == 2:
+        # Example of complicated string:
+        # '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+        if s.count("|") == 2 and "CLOB" not in context:
             parts = s.split("|")
             if len(parts[1]) > 1 and parts[1].count("'") > 0:
                 # string containing single quotes that needs escaping

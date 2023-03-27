@@ -17,6 +17,7 @@ def d1():
         empty=dict(),
     )
 
+
 def test_pfssection(d1):
     sct = mikeio.PfsSection(d1)
     assert sct.key1 == 1
@@ -65,8 +66,8 @@ def test_pfssection_keys_values_items(d1):
 
 def test_pfssection_from_dataframe():
     stations = dict(
-        name=["Viken", "Drogden"],
-        position=[[12.5817, 56.128], [12.7113, 55.5364]]) 
+        name=["Viken", "Drogden"], position=[[12.5817, 56.128], [12.7113, 55.5364]]
+    )
     df = pd.DataFrame(stations, index=range(1, 3))
     sct = mikeio.PfsSection.from_dataframe(df, prefix="MEASUREMENT_")
     assert sct.MEASUREMENT_1.name == "Viken"
@@ -74,6 +75,7 @@ def test_pfssection_from_dataframe():
 
     with pytest.raises(AttributeError):
         sct.MEASUREMENT_0
+
 
 def test_pfssection_output_to_and_from_dataframe():
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
@@ -100,10 +102,8 @@ def test_pfssection_output_to_and_from_dataframe():
     n_new_lines = len(new_lines)
     n_orig_lines = len(orig_lines)
     n_missing_lines = n_orig_lines - n_new_lines
-    
+
     assert orig_lines[n_missing_lines:] == new_lines
-
-
 
 
 def test_pfssection_to_dict(d1):
@@ -252,7 +252,7 @@ def test_pfssection_find_replace(d1):
 
 def test_pfssection_write(d1, tmpdir):
     sct = mikeio.PfsSection(d1)
-    pfs = mikeio.PfsDocument({"root":sct})
+    pfs = mikeio.PfsDocument({"root": sct})
     fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
     pfs.write(fn)
 
@@ -279,7 +279,7 @@ def test_basic():
 
     data = pfs.targets[0]
     assert pfs.targets[0] == pfs.BoundaryExtractor
-    
+
     assert data.z_min == -3000
     assert data.POINT_1.y == 50
 
@@ -1184,3 +1184,37 @@ def test_search_and_modify(pfs_ABC_text):
     r1.ROOT.A1.B.float_1 = 99.9
     assert r1.ROOT.A1.B.float_1 == 99.9
     assert pfs.ROOT.A1.B.float_1 == 4.5
+
+
+def test_clob():
+    clob_text = """
+       [WQRiverGroupPfs]
+      Touched = false
+      [WQRiverListPfs]
+         Touched = false
+         DhiSEPfsListItemCount = 1
+         SolutionMethod = 1
+         UpdateFrequency = 1
+         DisableProcesses = false
+         [WQRiverPfs_0]
+            Touched = false
+            ObjectID = '7669105c-471a-4b76-be8b-4978926ffe10'
+            ModelIndex = 0
+            Model = 'From file ...'
+            TemplateFile = ||
+            Description = ''
+            Clob = '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+         EndSect  // WQRiverPfs_0
+
+      EndSect  // WQRiverListPfs
+
+   EndSect  // WQRiverGroupPfs
+   """
+    pfs = mikeio.PfsDocument(StringIO(clob_text))
+    sct = pfs.WQRiverGroupPfs.WQRiverListPfs.WQRiverPfs_0
+    assert sct.Description == ""
+    assert sct.TemplateFile == "||"
+    assert (
+        sct.Clob
+        == r'<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+    )
