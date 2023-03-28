@@ -1186,28 +1186,20 @@ def test_search_and_modify(pfs_ABC_text):
     assert pfs.ROOT.A1.B.float_1 == 4.5
 
 
-def test_clob():
+def test_clob_can_contain_pipe_characters():
     clob_text = """
-       [WQRiverGroupPfs]
+    [WQRiverGroupPfs]
       Touched = false
       [WQRiverListPfs]
          Touched = false
-         DhiSEPfsListItemCount = 1
-         SolutionMethod = 1
-         UpdateFrequency = 1
          DisableProcesses = false
          [WQRiverPfs_0]
             Touched = false
-            ObjectID = '7669105c-471a-4b76-be8b-4978926ffe10'
-            ModelIndex = 0
-            Model = 'From file ...'
             TemplateFile = ||
             Description = ''
             Clob = '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
          EndSect  // WQRiverPfs_0
-
       EndSect  // WQRiverListPfs
-
    EndSect  // WQRiverGroupPfs
    """
     pfs = mikeio.PfsDocument(StringIO(clob_text))
