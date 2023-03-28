@@ -10,9 +10,9 @@ Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
 MIKE IO facilitates common data processing workflows for [MIKE files in Python](https://www.mikepoweredbydhi.com/products/mike-for-developers#io).
 
-[![YouTube](images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
+[![YouTube](https://raw.githubusercontent.com/DHI/mikeio/main/images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
 
-[![YouTube](images/youtube2.png)](http://www.youtube.com/watch?v=0oVedpx9zAQ)
+[![YouTube](https://raw.githubusercontent.com/DHI/mikeio/main/images/youtube2.png)](http://www.youtube.com/watch?v=0oVedpx9zAQ)
 
 ## Requirements
 * Windows or Linux operating system
@@ -90,8 +90,8 @@ TOTAL                              8696    756    91%
 
 It is possible to run MIKE IO in your favorite cloud notebook environment e.g. [Deepnote](https://deepnote.com/), [Google Colab](https://colab.research.google.com/), etc...
 
-![DeepNote](images/deepnote.png)
+![DeepNote](https://raw.githubusercontent.com/DHI/mikeio/main/images/deepnote.png)
 
-![Colab](images/colab.png)
+![Colab](https://raw.githubusercontent.com/DHI/mikeio/main/images/colab.png)
 
 
