@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data Structures &mdash; MIKE IO  documentation</title>
+  <title>Python Module Index &mdash; MIKE IO  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -17,8 +16,9 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Dataset" href="dataset.html" />
-    <link rel="prev" title="Design philosophy" href="design.html" /> 
+ 
+
+
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -41,10 +41,10 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
@@ -77,9 +77,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Data Structures</li>
+      <li class="breadcrumb-item active">Python Module Index</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/data-structures.md.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -87,24 +86,39 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="data-structures">
-<h1>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading"></a></h1>
-<p>MIKE IO has these primary data structures:</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class">Dataset</span></a> - a collection of DataArrays corresponding to the contents of a dfs file; typically obtained from <a class="reference internal" href="dfs-overview.html#mikeio.read" title="mikeio.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">mikeio.read()</span></code></a></p></li>
-<li><p><a class="reference internal" href="dataarray.html#mikeio.DataArray" title="mikeio.DataArray"><span class="xref myst py py-class">DataArray</span></a> - data and metadata corresponding to one “item” in a dfs file.</p></li>
-<li><p><strong>Geometry</strong> - spatial description of the data in a dfs file; comes in different flavours: <a class="reference internal" href="dfs1.html#mikeio.Grid1D" title="mikeio.Grid1D"><span class="xref myst py py-class">Grid1D</span></a>, <a class="reference internal" href="dfs2.html#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class">Grid2D</span></a>, <a class="reference internal" href="dfs3.html#mikeio.Grid3D" title="mikeio.Grid3D"><span class="xref myst py py-class">Grid3D</span></a>, <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="xref myst py py-class">GeometryFM</span></a>, <a class="reference internal" href="dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D" title="mikeio.spatial.FM_geometry.GeometryFM3D"><span class="xref myst py py-class">GeometryFM3D</span></a>, etc. corresponding to different types of dfs files.</p></li>
-<li><p><strong>Dfs</strong> - an object returned by <code class="docutils literal notranslate"><span class="pre">dfs</span> <span class="pre">=</span> <span class="pre">mikeio.open()</span></code> containing the metadata (=header) of a dfs file ready for reading the data (which can be done with <code class="docutils literal notranslate"><span class="pre">dfs.read()</span></code>); exists in different specialized versions: <a class="reference internal" href="dfs0.html#mikeio.Dfs0" title="mikeio.Dfs0"><span class="xref myst py py-class">Dfs0</span></a>, <a class="reference internal" href="dfs1.html#mikeio.Dfs1" title="mikeio.Dfs1"><span class="xref myst py py-class">Dfs1</span></a>, <a class="reference internal" href="dfs2.html#mikeio.Dfs2" title="mikeio.Dfs2"><span class="xref myst py py-class">Dfs2</span></a>, <a class="reference internal" href="dfs3.html#mikeio.Dfs3" title="mikeio.Dfs3"><span class="xref myst py py-class">Dfs3</span></a>, <a class="reference internal" href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH" title="mikeio.dfsu.Dfsu2DH"><span class="xref myst py py-class">Dfsu2DH</span></a>, <a class="reference internal" href="#Dfsu3D"><span class="xref myst">Dfsu3D</span></a>, <a class="reference internal" href="#Dfsu2DV"><span class="xref myst">Dfsu2DV</span></a>, <a class="reference internal" href="#DfsuSpectral"><span class="xref myst">DfsuSpectral</span></a>,</p></li>
-</ul>
-</section>
+
+   <h1>Python Module Index</h1>
+
+   <div class="modindex-jumpbox">
+   <a href="#cap-m"><strong>m</strong></a>
+   </div>
+
+   <table class="indextable modindextable">
+     <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
+     <tr class="cap" id="cap-m"><td></td><td>
+       <strong>m</strong></td><td></td></tr>
+     <tr>
+       <td><img src="_static/minus.png" class="toggler"
+              id="toggle-1" style="display: none" alt="-" /></td>
+       <td>
+       <a href="dfs-overview.html#module-mikeio"><code class="xref">mikeio</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="eum.html#module-mikeio.eum"><code class="xref">mikeio.eum</code></a></td><td>
+       <em></em></td></tr>
+     <tr class="cg-1">
+       <td></td>
+       <td>&#160;&#160;&#160;
+       <a href="generic.html#module-mikeio.generic"><code class="xref">mikeio.generic</code></a></td><td>
+       <em></em></td></tr>
+   </table>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="design.html" class="btn btn-neutral float-left" title="Design philosophy" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dataset.html" class="btn btn-neutral float-right" title="Dataset" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 
