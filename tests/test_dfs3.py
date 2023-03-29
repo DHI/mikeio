@@ -1,5 +1,6 @@
 import os
 import pytest
+import numpy as np
 
 import mikeio
 from mikeio.spatial import GeometryUndefined
@@ -46,6 +47,12 @@ def test_dfs3_read():
     assert da.shape == (30, 10, 10, 10)  # t  # z  # y  # x
     assert da.dims == ("time", "z", "y", "x")
     assert da.name == "Item 1"
+    assert da.to_numpy().dtype == np.float32
+
+
+def test_dfs3_read_double_precision():
+    ds = mikeio.read("tests/testdata/Grid1.dfs3", dtype=np.float64)
+    assert ds[0].to_numpy().dtype == np.float64
 
 
 def test_dfs3_read_time():
