@@ -282,25 +282,20 @@ class GeometryFM(_Geometry):
             raise ValueError("element_table must be provided")
 
         self._type = None  # None: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
+        self._ec = None  # element_coordinates is a lazy property
+        self._n_layers = None  # TODO only relevant for layered
+        self._tree2d = None  # lazy property
+        self._boundary_polylines = None  # lazy property
+        self._geom2d = None  # lazy property
 
-        self._nc = None
-        self._ec = None
-        self._codes = None
-        self._element_ids = None
-        self._node_ids = None
-        self._element_table = None
-        self._n_axis = 1
-        self._n_layers = None
+        self._nc = np.asarray(node_coordinates)
 
-        self._tree2d = None
-        self._boundary_polylines = None
-        self._geom2d = None
-
-        self._set_nodes(
-            node_coordinates=node_coordinates,
-            codes=codes,
-            node_ids=node_ids,
-            projection_string=projection,
+        n_nodes = len(node_coordinates)
+        self._codes = (
+            np.zeros((n_nodes,), dtype=int) if codes is None else np.asarray(codes)
+        )
+        self._node_ids = (
+            np.arange(len(self._codes)) if node_ids is None else np.asarray(node_ids)
         )
 
         self._set_elements(
@@ -311,13 +306,6 @@ class GeometryFM(_Geometry):
         )
 
         self.plot = _GeometryFMPlotter(self)
-
-        # try:
-        #     import numba
-
-        #     self._point_in_polygon = numba.njit(_point_in_polygon)
-        # except ModuleNotFoundError:
-        # self._point_in_polygon = _point_in_polygon
 
     def _repr_txt(self, layer_txt=None):
         out = []
@@ -394,18 +382,6 @@ class GeometryFM(_Geometry):
 
         return True
 
-    # should projection string still be here?
-    def _set_nodes(
-        self, node_coordinates, codes=None, node_ids=None, projection_string=None
-    ):
-        self._nc = np.asarray(node_coordinates)
-        if codes is None:
-            codes = np.zeros(len(node_coordinates), dtype=int)
-        self._codes = np.asarray(codes)
-        if node_ids is None:
-            node_ids = np.arange(len(codes))
-        self._node_ids = np.asarray(node_ids)
-
     def _set_elements(
         self, element_table, element_ids=None, dfsu_type=None, validate=True
     ):
@@ -429,12 +405,12 @@ class GeometryFM(_Geometry):
             element_ids = np.arange(len(element_table))
         self._element_ids = np.asarray(element_ids)
 
-        if dfsu_type is None:
-            # guess type
-            if self.max_nodes_per_element < 5:
-                dfsu_type = DfsuFileType.Dfsu2D
-            else:
-                dfsu_type = DfsuFileType.Dfsu3DSigma
+        # if dfsu_type is None:
+        #    # guess type
+        #    if self.max_nodes_per_element < 5:
+        #        dfsu_type = DfsuFileType.Dfsu2D
+        #    else:
+        #        dfsu_type = DfsuFileType.Dfsu3DSigma
         self._type = dfsu_type
 
     def _reindex(self):
@@ -1339,6 +1315,7 @@ class GeometryFM(_Geometry):
             projection=self.projection_string,
             element_table=elem_tbl,
             element_ids=elem_ids,
+            dfsu_type=self._type,
         )
         geom._reindex()
 
@@ -1497,11 +1474,12 @@ class GeometryFM(_Geometry):
 class _GeometryFMLayered(GeometryFM):
     def __init__(
         self,
+        *,
         node_coordinates,
         element_table,
         codes=None,
         projection=None,
-        dfsu_type=None,
+        dfsu_type=DfsuFileType.Dfsu3DSigma,
         element_ids=None,
         node_ids=None,
         n_layers: int = 1,  # at least 1 layer
@@ -1964,6 +1942,7 @@ class GeometryFM3D(_GeometryFMLayered):
             element_table=elem_tbl,
             element_ids=self.element_ids[elem_ids],
             validate=False,
+            dfsu_type=DfsuFileType.Dfsu2D,
         )
 
         geom._type = None  # DfsuFileType.Mesh
