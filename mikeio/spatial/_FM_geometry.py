@@ -1,12 +1,12 @@
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import Collection, Sequence, Union
+from typing import Collection, Sequence, Union, Optional
 
 import numpy as np
-from mikecore.DfsuFile import DfsuFileType
-from mikecore.eum import eumQuantity
-from mikecore.MeshBuilder import MeshBuilder
+from mikecore.DfsuFile import DfsuFileType  # type: ignore
+from mikecore.eum import eumQuantity  # type: ignore
+from mikecore.MeshBuilder import MeshBuilder  # type: ignore
 from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
@@ -113,7 +113,7 @@ class _GeometryFMPlotter:
 
     @staticmethod
     def _get_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt
+        import matplotlib.pyplot as plt  # type: ignore
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
@@ -145,7 +145,7 @@ class _GeometryFMPlotter:
 
         # TODO this must be a duplicate, delegate
 
-        from matplotlib.collections import PatchCollection
+        from matplotlib.collections import PatchCollection  # type: ignore
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
@@ -313,15 +313,6 @@ class GeometryFM(_Geometry):
 
     def __repr__(self):
         return self._repr_txt()
-
-    def __str__(self) -> str:
-        gtxt = f"{self.type_name}"
-        if self.is_layered:
-            n_z_layers = "no" if self.n_z_layers is None else self.n_z_layers
-            gtxt += f" ({self.n_elements} elements, {self.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
-        else:
-            gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
-        return gtxt
 
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
@@ -623,7 +614,7 @@ class GeometryFM(_Geometry):
         n_nearest: int = 5,
         extrapolate: bool = False,
         p: int = 2,
-        radius: float = None,
+        radius: Optional[float] = None,
     ):
         """IDW interpolant for list of coordinates
 
@@ -662,8 +653,7 @@ class GeometryFM(_Geometry):
             ValueError("n_nearest must be at least 1")
 
         if radius is not None:
-            idx = np.where(dists > radius)[0]
-            weights[idx] = np.nan
+            weights[dists > radius] = np.nan
 
         return ids, weights
 
@@ -710,7 +700,7 @@ class GeometryFM(_Geometry):
         d, elem_id = self._tree2d.query(p, k=n)
         return elem_id, d
 
-    def _find_element_2d(self, coords: np.array):
+    def _find_element_2d(self, coords: np.ndarray):
 
         points_outside = []
 
@@ -910,7 +900,7 @@ class GeometryFM(_Geometry):
         bool array
             True for points inside, False otherwise
         """
-        import matplotlib.path as mp
+        import matplotlib.path as mp  # type: ignore
 
         points = np.atleast_2d(points)
 
@@ -931,7 +921,7 @@ class GeometryFM(_Geometry):
         return cnts
 
     def __contains__(self, pt) -> bool:
-        return self.contains(pt)
+        return self.contains(pt)[0]
 
     def _get_boundary_polylines_uncategorized(self):
         """Construct closed polylines for all boundary faces"""
@@ -1157,7 +1147,7 @@ class GeometryFM(_Geometry):
 
         return np.where(mask)[0]
 
-    def _nodes_to_geometry(self, nodes) -> "GeometryFM":
+    def _nodes_to_geometry(self, nodes) -> Union["GeometryFM", GeometryPoint2D]:
         """export a selection of nodes to new flexible file geometry
 
         Note: takes only the elements for which all nodes are selected
@@ -1228,11 +1218,11 @@ class GeometryFM(_Geometry):
         else:
             elements = list(elements)
         if len(elements) == 1 and not keepdims:
-            coords = self.element_coordinates[elements.pop(), :]
+            x, y, z = self.element_coordinates[elements.pop(), :]
             if self.is_layered:
-                return GeometryPoint3D(*coords, projection=self.projection)
+                return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
             else:
-                return GeometryPoint2D(coords[0], coords[1], projection=self.projection)
+                return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
         elements = np.sort(
             elements
@@ -1403,7 +1393,7 @@ class GeometryFM(_Geometry):
         shapely.geometry.MultiPolygon
             polygons with mesh elements
         """
-        from shapely.geometry import MultiPolygon, Polygon
+        from shapely.geometry import MultiPolygon, Polygon  # type: ignore
 
         polygons = []
         for j in range(self.n_elements):
@@ -1480,7 +1470,7 @@ class _GeometryFMLayered(GeometryFM):
         self._e2_e3_table = None  # lazy
         self._2d_ids = None  # lazy
         self._layer_ids = None  # lazy
-        self.__dz = None  # lazy
+        # self.__dz = None  # lazy
 
     def __repr__(self):
         details = (
@@ -1491,7 +1481,7 @@ class _GeometryFMLayered(GeometryFM):
         layer_txt = f"number of layers: {self._n_layers} ({details})"
         return self._repr_txt(layer_txt=layer_txt)
 
-    @property
+    @cached_property
     def layer_ids(self):
         """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
         if self._layer_ids is None:
@@ -1715,6 +1705,9 @@ class _GeometryFMLayered(GeometryFM):
     @property
     def e2_e3_table(self):
         """The 2d-to-3d element connectivity table for a 3d object"""
+
+        # e2_e3, 2d_ids and layer_ids are all set at the same time
+
         if self._e2_e3_table is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -1831,12 +1824,10 @@ class _GeometryFMLayered(GeometryFM):
         """
         return self._calc_element_coordinates(elements, zn)
 
-    @property
+    @cached_property
     def _dz(self):
         """Height of each 3d element (using static zn information)"""
-        if self.__dz is None:
-            self.__dz = self._calc_dz()
-        return self.__dz
+        return self._calc_dz()
 
     def _calc_dz(self, elements=None, zn=None):
         """Height of 3d elements using static or dynamic zn information"""
@@ -1967,7 +1958,12 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         self._rel_elem_dist = None
 
         # remove inherited but unsupported methods
-        self.interp2d = None
+        def __dir__(self):
+            natdir = set(self.__dict__.keys() + dir(self.__class__))
+            natdir.remove("interp2d")
+            return list(natdir)
+
+        # self.interp2d = None
 
     @property
     def boundary_polylines(self):
@@ -2085,7 +2081,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
     def _interp_values(self, zn, data, z):
         """Interpolate to other z values, allow linear extrapolation"""
-        from scipy.interpolate import interp1d
+        from scipy.interpolate import interp1d  # type: ignore
 
         opt = {"kind": "linear", "bounds_error": False, "fill_value": "extrapolate"}
 
@@ -2232,7 +2228,9 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     def isel(self, idx=None, axis="node"):
         return self._nodes_to_geometry(nodes=idx)
 
-    def _nodes_to_geometry(self, nodes) -> "GeometryFM":
+    def _nodes_to_geometry(
+        self, nodes
+    ) -> Union["GeometryFM", GeometryFMPointSpectrum, "GeometryFMLineSpectrum"]:
         """export a selection of nodes to new flexible file geometry
         Note: takes only the elements for which all nodes are selected
         Parameters
