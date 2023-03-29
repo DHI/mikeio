@@ -205,7 +205,7 @@ class Dfs3(_Dfs123):
             in the returned Dataset? by default: False
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
-        dtype: class, optional
+        dtype: data-type, optional
             Define the dtype of the returned dataset (default = np.float32)
 
         Returns
