@@ -200,7 +200,8 @@ class Dfs2(_Dfs123):
         area: array[float], optional
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper) coordinates
-
+        dtype: class, optional
+            Define the dtype of the returned dataset (default = np.float32)
         Returns
         -------
         Dataset
