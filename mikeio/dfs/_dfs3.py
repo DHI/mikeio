@@ -188,6 +188,7 @@ class Dfs3(_Dfs123):
         area=None,
         layers=None,
         keepdims=False,
+        dtype=np.float32,
     ) -> Dataset:
         """
         Read data from a dfs3 file
@@ -204,6 +205,8 @@ class Dfs3(_Dfs123):
             in the returned Dataset? by default: False
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
+        dtype: class, optional
+            Define the dtype of the returned dataset (default = np.float32)
 
         Returns
         -------
@@ -250,7 +253,7 @@ class Dfs3(_Dfs123):
             shape = (nt, nz, yNum, xNum)
 
         for item in range(n_items):
-            data = np.ndarray(shape=shape, dtype=float)
+            data = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
         if single_time_selected and not keepdims:
