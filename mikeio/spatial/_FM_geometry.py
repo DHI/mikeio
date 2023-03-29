@@ -281,10 +281,8 @@ class GeometryFM(_Geometry):
         if element_table is None:
             raise ValueError("element_table must be provided")
 
-        self._type = None  # None: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-        self._ec = None  # element_coordinates is a lazy property
         self._n_layers = None  # TODO only relevant for layered
-        self._tree2d = None  # lazy property
+        # self._tree2d = None  # lazy property
         self._boundary_polylines = None  # lazy property
         self._geom2d = None  # lazy property
 
@@ -298,10 +296,11 @@ class GeometryFM(_Geometry):
             np.arange(len(self._codes)) if node_ids is None else np.asarray(node_ids)
         )
 
-        self._set_elements(
+        self._type = dfsu_type
+
+        self._element_table, self._element_ids = self._set_elements(
             element_table=element_table,
             element_ids=element_ids,
-            dfsu_type=dfsu_type,
             validate=validate,
         )
 
@@ -382,9 +381,7 @@ class GeometryFM(_Geometry):
 
         return True
 
-    def _set_elements(
-        self, element_table, element_ids=None, dfsu_type=None, validate=True
-    ):
+    def _set_elements(self, element_table, element_ids=None, validate=True):
 
         if validate:
             max_node_id = self.node_ids.max()
@@ -400,18 +397,11 @@ class GeometryFM(_Geometry):
                         f"Element table has node # {e.max()}. Max node id: {max_node_id}"
                     )
 
-        self._element_table = element_table
         if element_ids is None:
             element_ids = np.arange(len(element_table))
-        self._element_ids = np.asarray(element_ids)
+        element_ids = np.asarray(element_ids)
 
-        # if dfsu_type is None:
-        #    # guess type
-        #    if self.max_nodes_per_element < 5:
-        #        dfsu_type = DfsuFileType.Dfsu2D
-        #    else:
-        #        dfsu_type = DfsuFileType.Dfsu3DSigma
-        self._type = dfsu_type
+        return element_table, element_ids
 
     def _reindex(self):
         new_node_ids = np.arange(self.n_nodes)
@@ -512,12 +502,15 @@ class GeometryFM(_Geometry):
         """Does the mesh consist of triangles only?"""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
-    @property
+    @cached_property
     def element_coordinates(self):
         """Center coordinates of each element"""
-        if self._ec is None:
-            self._ec = self._calc_element_coordinates()
-        return self._ec
+        return self._calc_element_coordinates()
+
+    @cached_property
+    def _tree2d(self):
+        xy = self._geometry2d.element_coordinates[:, :2]
+        return cKDTree(xy)
 
     def _calc_element_coordinates(self, elements=None, zn=None):
         node_coordinates = self._nc
@@ -710,18 +703,11 @@ class GeometryFM(_Geometry):
         """
         return interp2d(data, elem_ids, weights, shape)
 
-    def _create_tree2d(self):
-        xy = self._geometry2d.element_coordinates[:, :2]
-        self._tree2d = cKDTree(xy)
-
     def _find_n_nearest_2d_elements(self, x, y=None, n=1):
         if n > self._geometry2d.n_elements:
             raise ValueError(
                 f"Cannot find {n} nearest! Number of 2D elements: {self._geometry2d.n_elements}"
             )
-
-        if self._tree2d is None:
-            self._create_tree2d()
 
         if y is None:
             p = x
