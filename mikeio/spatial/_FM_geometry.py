@@ -311,6 +311,17 @@ class GeometryFM(_Geometry):
             out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
 
+    def __str__(self) -> str:
+
+        # TODO refactor layered and non-layered
+        gtxt = f"{self.type_name}"
+        if self.is_layered:
+            n_z_layers = "no" if self.n_z_layers is None else self.n_z_layers
+            gtxt += f" ({self.n_elements} elements, {self.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
+        else:
+            gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
+        return gtxt
+
     def __repr__(self):
         return self._repr_txt()
 
