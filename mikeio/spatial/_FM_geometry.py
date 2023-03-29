@@ -276,15 +276,7 @@ class GeometryFM(_Geometry):
     ) -> None:
         super().__init__(projection=projection)
 
-        if node_coordinates is None:
-            raise ValueError("node_coordinates must be provided")
-        if element_table is None:
-            raise ValueError("element_table must be provided")
-
         self._n_layers = None  # TODO only relevant for layered
-        # self._tree2d = None  # lazy property
-        self._boundary_polylines = None  # lazy property
-        self._geom2d = None  # lazy property
 
         self._nc = np.asarray(node_coordinates)
 
@@ -900,12 +892,10 @@ class GeometryFM(_Geometry):
             raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
         self._codes = np.array(v, dtype=np.int32)
 
-    @property
+    @cached_property
     def boundary_polylines(self) -> BoundaryPolylines:
         """Lists of closed polylines defining domain outline"""
-        if self._boundary_polylines is None:
-            self._boundary_polylines = self._get_boundary_polylines()
-        return self._boundary_polylines
+        return self._get_boundary_polylines()
 
     def contains(self, points) -> Sequence[bool]:
         """test if a list of points are contained by mesh
@@ -1396,14 +1386,14 @@ class GeometryFM(_Geometry):
         elem_table = geometry.element_table
         return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
 
-    @property
+    # TODO potential subject to change
+    @cached_property
     def _geometry2d(self):
         """The 2d geometry for a 3d object"""
         if self._n_layers is None:
             return self
-        if self._geom2d is None:
-            self._geom2d = self.to_2d_geometry()
-        return self._geom2d
+        else:
+            return self.to_2d_geometry()
 
     def to_shapely(self):
         """Export mesh as shapely MultiPolygon
@@ -1482,16 +1472,15 @@ class _GeometryFMLayered(GeometryFM):
             node_ids=node_ids,
             validate=validate,
         )
-        self._n_layers_column = None
-        self._bot_elems = None
+        self._n_layers_column = None  # lazy
+        self._bot_elems = None  # lazy
         self._n_layers = n_layers
         self._n_sigma = n_sigma
 
-        self._geom2d = None
-        self._e2_e3_table = None
-        self._2d_ids = None
-        self._layer_ids = None
-        self.__dz = None
+        self._e2_e3_table = None  # lazy
+        self._2d_ids = None  # lazy
+        self._layer_ids = None  # lazy
+        self.__dz = None  # lazy
 
     def __repr__(self):
         details = (
@@ -1962,16 +1951,16 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         validate=True,
     ) -> None:
         super().__init__(
-            node_coordinates,
-            element_table,
-            codes,
-            projection,
-            dfsu_type,
-            element_ids,
-            node_ids,
-            n_layers,
-            n_sigma,
-            validate,
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            n_layers=n_layers,
+            n_sigma=n_sigma,
+            validate=validate,
         )
         self.plot = _GeometryFMVerticalProfilePlotter(self)
         # self._rel_node_dist = None
