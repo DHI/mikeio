@@ -274,7 +274,7 @@ class GeometryFM(_Geometry):
         node_ids=None,
         validate=True,
     ) -> None:
-        super().__init__()
+        super().__init__(projection=projection)
 
         if node_coordinates is None:
             raise ValueError("node_coordinates must be provided")
@@ -345,7 +345,7 @@ class GeometryFM(_Geometry):
         return gtxt
 
     @staticmethod
-    def _point_in_polygon(xn: np.array, yn: np.array, xp: float, yp: float) -> bool:
+    def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
         """Check for each side in the polygon that the point is on the correct side"""
 
         for j in range(len(xn) - 1):
@@ -405,7 +405,6 @@ class GeometryFM(_Geometry):
         if node_ids is None:
             node_ids = np.arange(len(codes))
         self._node_ids = np.asarray(node_ids)
-        self._projstr = "LONG/LAT" if projection_string is None else projection_string
 
     def _set_elements(
         self, element_table, element_ids=None, dfsu_type=None, validate=True
@@ -460,7 +459,7 @@ class GeometryFM(_Geometry):
     @property
     def n_nodes(self) -> int:
         """Number of nodes"""
-        return None if self._node_ids is None else len(self._node_ids)
+        return len(self._node_ids)
 
     @property
     def node_ids(self):
@@ -469,7 +468,7 @@ class GeometryFM(_Geometry):
     @property
     def n_elements(self) -> int:
         """Number of elements"""
-        return None if self._element_ids is None else len(self._element_ids)
+        return len(self._element_ids)
 
     @property
     def element_ids(self):
