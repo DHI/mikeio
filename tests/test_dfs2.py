@@ -9,12 +9,10 @@ import xarray
 
 import mikeio
 
-from mikeio.dataset import Dataset
-from mikeio.dfs2 import Dfs2
-from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio import Dataset, Dfs2
+from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import ItemsError
-from mikeio.spatial.geometry import GeometryPoint2D
-from mikeio.spatial.grid_geometry import Grid2D
+from mikeio.spatial import GeometryPoint2D, Grid2D
 
 
 @pytest.fixture
@@ -61,9 +59,9 @@ def test_get_time_without_reading_data():
     assert dfs.time[-1].hour == 12
 
 
-def test_write_projected(tmpdir):
+def test_write_projected(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "utm.dfs2")
+    fp = tmp_path / "utm.dfs2"
 
     nt = 100
     ny = 2
@@ -90,9 +88,9 @@ def test_write_projected(tmpdir):
     da = mikeio.DataArray(
         data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
     )
-    da.to_dfs(filename)
+    da.to_dfs(fp)
 
-    ds = mikeio.read(filename)
+    ds = mikeio.read(fp)
     assert ds.geometry.dx == 100
     assert ds.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
@@ -114,9 +112,9 @@ def test_write_projected(tmpdir):
     da = mikeio.DataArray(
         data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
     )
-    da.to_dfs(filename)
+    da.to_dfs(fp)
 
-    ds2 = mikeio.read(filename)
+    ds2 = mikeio.read(fp)
     assert ds2.geometry.dx == 100
     assert ds2.geometry.dy == 100
     # CHANGED: NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
@@ -129,9 +127,9 @@ def test_write_projected(tmpdir):
     da = mikeio.DataArray(
         data=d, time=pd.date_range("2012-1-1", freq="s", periods=100), geometry=grid
     )
-    da.to_dfs(filename)
+    da.to_dfs(fp)
 
-    ds3 = mikeio.read(filename)
+    ds3 = mikeio.read(fp)
     assert ds3.geometry.dx == 100
     assert ds3.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
@@ -141,8 +139,8 @@ def test_write_projected(tmpdir):
     assert ds3.geometry.origin[1] == pytest.approx(y0)
 
 
-def test_write_without_time(tmpdir):
-    filename = os.path.join(tmpdir.dirname, "utm.dfs2")
+def test_write_without_time(tmp_path):
+    fp = tmp_path / "utm.dfs2"
 
     ny = 2
     nx = 3
@@ -151,14 +149,14 @@ def test_write_without_time(tmpdir):
     d = np.random.random((ny, nx))
     time = pd.date_range("2012-1-1", freq="s", periods=1)
     da = mikeio.DataArray(data=d, time=time, geometry=grid)
-    da.to_dfs(filename)
+    da.to_dfs(fp)
 
-    ds = mikeio.read(filename)
+    ds = mikeio.read(fp)
     assert ds.geometry.ny == ny
     assert ds.geometry.nx == nx
     assert ds.shape == (1, ny, nx)
 
-    ds = mikeio.read(filename, time=0)
+    ds = mikeio.read(fp, time=0)
     assert ds.geometry.ny == ny
     assert ds.geometry.nx == nx
     assert ds.shape == (ny, nx)
@@ -379,7 +377,7 @@ def test_properties_rotated_UTM():
     assert g.origin == pytest.approx((479670, 6104860))
 
 
-def test_select_area_rotated_UTM(tmpdir):
+def test_select_area_rotated_UTM(tmp_path):
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
     ds = mikeio.read(filepath)
     assert ds.geometry.origin == pytest.approx((479670, 6104860))
@@ -389,7 +387,7 @@ def test_select_area_rotated_UTM(tmpdir):
     assert dssel.geometry.orientation == ds.geometry.orientation
     assert dssel.geometry.origin == pytest.approx((479673.579, 6104877.669))
 
-    tmpfile = os.path.join(tmpdir.dirname, "subset_rotated.dfs2")
+    tmpfile = tmp_path / "subset_rotated.dfs2"
     dssel.to_dfs(tmpfile)
     dfs = mikeio.open(tmpfile)
     g = dfs.geometry
@@ -426,17 +424,17 @@ def test_select_area_rotated_UTM_2():
     assert g1.projection_string == g2.projection_string
 
 
-def test_write_selected_item_to_new_file(dfs2_random_2items, tmpdir):
+def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
 
     dfs = dfs2_random_2items
 
-    outfilename = os.path.join(tmpdir.dirname, "simple.dfs2")
+    fp = tmp_path / "simple.dfs2"
 
     ds = dfs.read(items=["Untitled"])
 
-    dfs.write(outfilename, ds)
+    dfs.write(fp, ds)
 
-    dfs2 = mikeio.open(outfilename)
+    dfs2 = mikeio.open(fp)
 
     ds2 = dfs2.read()
 
@@ -479,19 +477,19 @@ def test_repr_time(dfs2_random):
     assert "steps" in text
 
 
-def test_write_modified_data_to_new_file(dfs2_gebco, tmpdir):
+def test_write_modified_data_to_new_file(dfs2_gebco, tmp_path):
 
     dfs = dfs2_gebco
 
-    outfilename = os.path.join(tmpdir.dirname, "mod.dfs2")
+    fp = tmp_path / "mod.dfs2"
 
     ds = dfs.read()
 
     ds[0] = ds[0] + 10.0
 
-    dfs.write(outfilename, ds)
+    dfs.write(fp, ds)
 
-    dfsmod = mikeio.open(outfilename)
+    dfsmod = mikeio.open(fp)
 
     assert dfs._longitude == dfsmod._longitude
 
@@ -505,12 +503,11 @@ def test_read_some_time_step(dfs2_random_2items):
     assert len(res.time) == 2
 
 
-def test_interpolate_non_equidistant_data(tmpdir):
+def test_interpolate_non_equidistant_data(tmp_path):
 
-    filename = r"tests/testdata/eq.dfs2"
-    dfs = mikeio.open(filename)
-
-    ds = dfs.read(time=[0, 2, 3, 6])  # non-equidistant dataset
+    ds = mikeio.read(
+        "tests/testdata/eq.dfs2", time=[0, 2, 3, 6]
+    )  # non-equidistant dataset
 
     assert not ds.is_equidistant
 
@@ -518,11 +515,11 @@ def test_interpolate_non_equidistant_data(tmpdir):
 
     assert ds2.is_equidistant
 
-    outfilename = os.path.join(tmpdir.dirname, "interpolated_time.dfs2")
+    fp = tmp_path / "interpolated_time.dfs2"
 
-    dfs.write(outfilename, ds2)
+    ds2.to_dfs(fp)
 
-    dfs2 = mikeio.open(outfilename)
+    dfs2 = mikeio.open(fp)
     assert dfs2.timestep == 3600.0
 
     ds3 = dfs2.read()
@@ -530,24 +527,18 @@ def test_interpolate_non_equidistant_data(tmpdir):
     assert ds3.is_equidistant
 
 
-def test_write_some_time_step(tmpdir):
+def test_write_some_time_step(tmp_path):
 
-    filename = r"tests/testdata/waves.dfs2"
-    dfs = mikeio.open(filename)
-
-    ds = dfs.read(time=[1, 2])
+    ds = mikeio.read("tests/testdata/waves.dfs2", time=[1, 2])
 
     assert ds[0].to_numpy().shape[0] == 2
     assert len(ds.time) == 2
 
-    assert dfs.timestep == 86400.0
-    assert dfs.start_time.day == 1
+    fp = tmp_path / "waves_subset.dfs2"
 
-    outfilename = os.path.join(tmpdir.dirname, "waves_subset.dfs2")
+    ds.to_dfs(fp)
 
-    dfs.write(outfilename, ds)
-
-    dfs2 = mikeio.open(outfilename)
+    dfs2 = mikeio.open(fp)
     assert dfs2.timestep == 86400.0
     assert dfs2.start_time.day == 2
 
@@ -583,8 +574,8 @@ def test_interp_to_x_y():
     assert dai.geometry.y == y
 
 
-def test_write_accumulated_datatype(tmpdir):
-    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+def test_write_accumulated_datatype(tmp_path):
+    fp = tmp_path / "simple.dfs2"
 
     d = np.random.random([100, 2, 3])
 
@@ -600,15 +591,15 @@ def test_write_accumulated_datatype(tmpdir):
         ),
     )
 
-    da.to_dfs(filename)
+    da.to_dfs(fp)
 
-    newdfs = mikeio.open(filename)
+    newdfs = mikeio.open(fp)
     assert newdfs.items[0].data_value_type == 3
 
 
-def test_write_NonEqCalendarAxis(tmpdir):
+def test_write_NonEqCalendarAxis(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "simple.dfs2")
+    fp = tmp_path / "simple.dfs2"
 
     d = np.random.random([6, 5, 10])
     d[1, :, :] = np.nan
@@ -628,46 +619,43 @@ def test_write_NonEqCalendarAxis(tmpdir):
         ],
     )
 
-    da.to_dfs(filename)
+    da.to_dfs(fp)
 
-    newds = mikeio.read(filename)
+    newds = mikeio.read(fp)
     assert newds.is_equidistant == False
     assert newds.start_time.year == 2012
     assert newds.end_time.day == 28
 
 
-def test_write_non_equidistant_data(tmpdir):
+def test_write_non_equidistant_data(tmp_path):
 
-    filename = r"tests/testdata/eq.dfs2"
-    dfs = mikeio.open(filename)
-
-    ds = dfs.read(time=[0, 2, 3, 6])  # non-equidistant dataset
+    ds = mikeio.read(
+        "tests/testdata/eq.dfs2", time=[0, 2, 3, 6]
+    )  # non-equidistant dataset
 
     assert not ds.is_equidistant
 
-    outfilename = os.path.join(tmpdir.dirname, "neq_from_dataset.dfs2")
+    fp = tmp_path / "neq_from_dataset.dfs2"
 
-    dfs.write(outfilename, ds)
+    ds.to_dfs(fp)
 
-    dfs2 = mikeio.open(outfilename)
-    ds3 = dfs2.read()
+    ds3 = mikeio.read(fp)
 
     assert not ds3.is_equidistant
 
 
-def test_incremental_write_from_dfs2(tmpdir):
+def test_incremental_write_from_dfs2(tmp_path):
     "Useful for writing datasets with many timesteps to avoid problems with out of memory"
 
-    sourcefilename = "tests/testdata/eq.dfs2"
-    outfilename = os.path.join(tmpdir.dirname, "appended.dfs2")
-    dfs = mikeio.open(sourcefilename)
+    fp = tmp_path / "appended.dfs2"
+    dfs = mikeio.open("tests/testdata/eq.dfs2")
 
     nt = dfs.n_timesteps
 
     ds = dfs.read(time=[0], keepdims=True)
     # assert ds.timestep == dfs.timestep, # ds.timestep is undefined
     dfs_to_write = Dfs2()
-    dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True)
+    dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True)
 
     for i in range(1, nt):
         ds = dfs.read(time=[i], keepdims=True)
@@ -675,25 +663,24 @@ def test_incremental_write_from_dfs2(tmpdir):
 
     dfs_to_write.close()
 
-    newdfs = mikeio.open(outfilename)
+    newdfs = mikeio.open(fp)
     assert dfs.start_time == newdfs.start_time
     assert dfs.timestep == newdfs.timestep
     assert dfs.end_time == newdfs.end_time
 
 
-def test_incremental_write_from_dfs2_context_manager(tmpdir):
+def test_incremental_write_from_dfs2_context_manager(tmp_path):
     "Useful for writing datasets with many timesteps to avoid problems with out of memory"
 
-    sourcefilename = "tests/testdata/eq.dfs2"
-    outfilename = os.path.join(tmpdir.dirname, "appended.dfs2")
-    dfs = mikeio.open(sourcefilename)
+    fp = tmp_path / "appended.dfs2"
+    dfs = mikeio.open("tests/testdata/eq.dfs2")
 
     nt = dfs.n_timesteps
 
     ds = dfs.read(time=[0], keepdims=True)
 
     dfs_to_write = Dfs2()
-    with dfs_to_write.write(outfilename, ds, dt=dfs.timestep, keep_open=True) as f:
+    with dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True) as f:
 
         for i in range(1, nt):
             ds = dfs.read(time=[i], keepdims=True)
@@ -701,7 +688,7 @@ def test_incremental_write_from_dfs2_context_manager(tmpdir):
 
         # dfs_to_write.close() # called automagically by context manager
 
-    newdfs = mikeio.open(outfilename)
+    newdfs = mikeio.open(fp)
     assert dfs.start_time == newdfs.start_time
     assert dfs.timestep == newdfs.timestep
     assert dfs.end_time == newdfs.end_time
@@ -811,12 +798,12 @@ def dfs2_props_to_list(d):
     return res
 
 
-def is_header_unchanged_on_read_write(tmpdir, filename):
+def is_header_unchanged_on_read_write(tmp_path, filename):
     dfsA = mikeio.open("tests/testdata/" + filename)
     props_A = dfs2_props_to_list(dfsA)
 
     ds = dfsA.read()
-    filename_out = os.path.join(tmpdir.dirname, filename)
+    filename_out = tmp_path / filename
     ds.to_dfs(filename_out)
     dfsB = mikeio.open(filename_out)
     props_B = dfs2_props_to_list(dfsB)
@@ -824,43 +811,43 @@ def is_header_unchanged_on_read_write(tmpdir, filename):
         assert pytest.approx(pA) == pB
 
 
-def test_read_write_header_unchanged_utm_not_rotated(tmpdir):
-    is_header_unchanged_on_read_write(tmpdir, "utm_not_rotated_neurope_temp.dfs2")
+def test_read_write_header_unchanged_utm_not_rotated(tmp_path):
+    is_header_unchanged_on_read_write(tmp_path, "utm_not_rotated_neurope_temp.dfs2")
 
 
-def test_read_write_header_unchanged_longlat(tmpdir):
-    is_header_unchanged_on_read_write(tmpdir, "europe_wind_long_lat.dfs2")
+def test_read_write_header_unchanged_longlat(tmp_path):
+    is_header_unchanged_on_read_write(tmp_path, "europe_wind_long_lat.dfs2")
 
 
-def test_read_write_header_unchanged_global_longlat(tmpdir):
+def test_read_write_header_unchanged_global_longlat(tmp_path):
     is_header_unchanged_on_read_write(
-        tmpdir, "global_long_lat_pacific_view_temperature_delta.dfs2"
+        tmp_path, "global_long_lat_pacific_view_temperature_delta.dfs2"
     )
 
 
-def test_read_write_header_unchanged_local_coordinates(tmpdir):
-    is_header_unchanged_on_read_write(tmpdir, "M3WFM_sponge_local_coordinates.dfs2")
+def test_read_write_header_unchanged_local_coordinates(tmp_path):
+    is_header_unchanged_on_read_write(tmp_path, "M3WFM_sponge_local_coordinates.dfs2")
 
 
-def test_read_write_header_unchanged_utm_rotated(tmpdir):
-    is_header_unchanged_on_read_write(tmpdir, "BW_Ronne_Layout1998_rotated.dfs2")
+def test_read_write_header_unchanged_utm_rotated(tmp_path):
+    is_header_unchanged_on_read_write(tmp_path, "BW_Ronne_Layout1998_rotated.dfs2")
 
 
-def test_read_write_header_unchanged_vertical(tmpdir):
-    is_header_unchanged_on_read_write(tmpdir, "hd_vertical_slice.dfs2")
+def test_read_write_header_unchanged_vertical(tmp_path):
+    is_header_unchanged_on_read_write(tmp_path, "hd_vertical_slice.dfs2")
 
 
-# def test_read_write_header_unchanged_spectral(tmpdir):
+# def test_read_write_header_unchanged_spectral(tmp_path):
 #     # fails: <TimeAxisType.TimeEquidistant: 1> != <TimeAxisType.CalendarEquidistant: 3>
-#     is_header_unchanged_on_read_write(tmpdir, "dir_wave_analysis_spectra.dfs2")
+#     is_header_unchanged_on_read_write(tmp_path, "dir_wave_analysis_spectra.dfs2")
 
 
-def test_read_write_header_unchanged_spectral_2(tmpdir):
-    is_header_unchanged_on_read_write(tmpdir, "pt_spectra.dfs2")
+def test_read_write_header_unchanged_spectral_2(tmp_path):
+    is_header_unchanged_on_read_write(tmp_path, "pt_spectra.dfs2")
 
 
-def test_read_write_header_unchanged_MIKE_SHE_output(tmpdir):
-    is_header_unchanged_on_read_write(tmpdir, "Karup_MIKE_SHE_output.dfs2")
+def test_read_write_header_unchanged_MIKE_SHE_output(tmp_path):
+    is_header_unchanged_on_read_write(tmp_path, "Karup_MIKE_SHE_output.dfs2")
 
 
 def test_MIKE_SHE_output():

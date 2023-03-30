@@ -1,30 +1,39 @@
-import collections.abc
 import os
 import warnings
 from copy import deepcopy
 from datetime import datetime
-from typing import Iterable, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import (
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    MutableMapping,
+)
 
 import numpy as np
 import pandas as pd
 from mikecore.DfsFile import DfsSimpleType  # type: ignore
 
-from .base import TimeSeries
-from .dataarray import DataArray
-from .data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
-from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.FM_geometry import GeometryFM
-from .spatial.geometry import (
+from ._dataarray import DataArray
+from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
+from ..eum import EUMType, EUMUnit, ItemInfo
+from ..spatial import (
+    GeometryFM,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
+    Grid1D,
+    Grid2D,
+    Grid3D,
 )
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
-from .data_plot import _DatasetPlotter
+from ._data_plot import _DatasetPlotter
 
 
-class Dataset(TimeSeries, collections.abc.MutableMapping):
+class Dataset(MutableMapping):
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
@@ -969,7 +978,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             A dataset with data dimension t
             The first two items will be x- and y- coordinates of track
         """
-        from .track import _extract_track
+        from .._track import _extract_track
 
         item_numbers = list(range(self.n_items))
         time_steps = list(range(self.n_timesteps))
@@ -987,9 +996,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             item_numbers=item_numbers,
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__dataset_read_item_time_func(
-                item, step
-            ),
+            data_read_func=self.__dataset_read_item_time_func,
         )
 
     def interp_time(
@@ -1829,7 +1836,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             raise ValueError(f"File extension must be {valid_extension}")
 
     def _to_dfs0(self, filename, **kwargs):
-        from .dfs0 import _write_dfs0
+        from ..dfs._dfs0 import _write_dfs0
 
         dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
@@ -1837,24 +1844,24 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def _to_dfs2(self, filename):
         # assumes Grid2D geometry
-        from .dfs2 import write_dfs2
+        from ..dfs._dfs2 import write_dfs2
 
         write_dfs2(filename, self)
 
     def _to_dfs3(self, filename):
         # assumes Grid3D geometry
-        from .dfs3 import write_dfs3
+        from ..dfs._dfs3 import write_dfs3
 
         write_dfs3(filename, self)
 
     def _to_dfs1(self, filename):
-        from .dfs1 import Dfs1
+        from ..dfs._dfs1 import Dfs1
 
         dfs = Dfs1()
         dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry._x0)
 
     def _to_dfsu(self, filename):
-        from .dfsu import _write_dfsu
+        from ..dfsu._dfsu import _write_dfsu
 
         _write_dfsu(filename, self)
 

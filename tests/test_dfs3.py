@@ -2,8 +2,8 @@ import os
 import pytest
 
 import mikeio
-from mikeio.spatial.geometry import GeometryUndefined
-from mikeio.spatial.grid_geometry import Grid2D, Grid3D
+from mikeio.spatial import GeometryUndefined
+from mikeio.spatial import Grid2D, Grid3D
 
 
 def test_dfs3_repr():
@@ -86,13 +86,6 @@ def test_dfs3_read_multiple_layers():
     assert ds.shape == (2, 3, 17, 21)
 
 
-def test_dfs3_read_write(tmpdir):
-    ds = mikeio.read("tests/testdata/Grid1.dfs3")
-    outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
-
-    ds.to_dfs(outfilename)
-
-
 def test_read_rotated_grid():
     dfs = mikeio.open("tests/testdata/dissolved_oxygen.dfs3")
     # North to Y orientation: 18.124689102173
@@ -103,13 +96,12 @@ def test_read_rotated_grid():
     assert dfs.geometry.orientation == pytest.approx(17.0003657)  # in own CRS
 
 
-def test_dfs3_to_dfs(tmpdir):
+def test_dfs3_to_dfs(tmp_path):
     ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
-    # ds = mikeio.read("tests/testdata/Grid1.dfs3")
-    outfilename = os.path.join(tmpdir.dirname, "rw.dfs3")
-    ds.to_dfs(outfilename)
+    fp = tmp_path / "test.dfs3"
+    ds.to_dfs(fp)
 
-    dsnew = mikeio.read(outfilename)
+    dsnew = mikeio.read(fp)
 
     assert ds.n_items == dsnew.n_items
     assert ds.geometry == dsnew.geometry
@@ -175,7 +167,7 @@ def test_read_single_timestep_dfs3():
     assert ds.shape == (5, 17, 21)
 
 
-def test_read_write_single_layer_as_dfs3(tmpdir):
+def test_read_write_single_layer_as_dfs3(tmp_path):
     fn = "tests/testdata/single_layer.dfs3"
     ds1 = mikeio.read(fn, keepdims=True)
     assert isinstance(ds1.geometry, Grid3D)
@@ -184,9 +176,9 @@ def test_read_write_single_layer_as_dfs3(tmpdir):
     assert ds2.dims == ("time", "z", "y", "x")
     assert isinstance(ds2.geometry, Grid3D)
 
-    outfile = os.path.join(tmpdir, "single_layer.dfs3")
+    fp = tmp_path / "single_layer.dfs3"
 
-    ds2.to_dfs(outfile)
+    ds2.to_dfs(fp)
 
 
 def test_MIKE_SHE_dfs3_output():

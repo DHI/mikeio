@@ -9,7 +9,7 @@ from scipy.spatial import cKDTree
 from tqdm import trange
 
 from ..dataset import DataArray, Dataset
-from ..dfs import (
+from ..dfs._dfs import (
     _get_item_info,
     _read_item_time_step,
     _valid_item_numbers,
@@ -17,10 +17,10 @@ from ..dfs import (
 )
 from ..eum import EUMType, ItemInfo
 from ..exceptions import InvalidGeometry
-from ..interpolation import get_idw_interpolant, interp2d
-from ..spatial.FM_geometry import GeometryFM3D
-from ..spatial.FM_utils import _plot_vertical_profile
-from .dfsu import _Dfsu
+from .._interpolation import get_idw_interpolant, interp2d
+from ..spatial import GeometryFM3D
+from ..spatial._FM_utils import _plot_vertical_profile
+from ._dfsu import _Dfsu
 
 
 class DfsuLayered(_Dfsu):

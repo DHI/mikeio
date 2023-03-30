@@ -2,12 +2,10 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 import mikeio
-from mikeio import eum
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio.dfsu.spectral import DfsuSpectral
-from mikeio.spatial.FM_geometry import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
-import mikeio.spectral as spectral
+from mikeio.spatial import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
+import mikeio._spectral as _spectral
 
 
 @pytest.fixture
@@ -108,7 +106,7 @@ def test_read_spectrum_pt(dfsu_pt):
     dfs = dfsu_pt
     ds1 = dfs.read(time=0)
     assert ds1.shape == (16, 25)
-    assert ds1[0].type == eum.EUMType.Wave_energy_density
+    assert ds1[0].type == mikeio.EUMType.Wave_energy_density
     assert ds1[0].to_numpy().max() == pytest.approx(0.03205060)
 
     ds2 = dfs.read()
@@ -126,7 +124,7 @@ def test_read_spectrum_area_sector(dfsu_area_sector):
 
     ds = dfs.read()
     assert ds.shape == (3, 40, 19, 25)
-    assert ds[0].type == eum.EUMType.Wave_energy_density
+    assert ds[0].type == mikeio.EUMType.Wave_energy_density
     assert np.min(ds[0].to_numpy()) >= 0
     assert np.mean(ds[0].to_numpy()) == pytest.approx(0.001861494)
 
@@ -138,7 +136,7 @@ def test_read_pt_freq_spectrum(dfsu_pt_freq):
 
     ds = dfs.read()
     assert ds.shape == (31, 25)
-    assert ds[0].type == eum.EUMType.Directional_integrated_spectral_density
+    assert ds[0].type == mikeio.EUMType.Directional_integrated_spectral_density
     assert np.min(ds[0].to_numpy()) >= 0
     assert np.mean(ds[0].to_numpy()) == pytest.approx(0.4229705970)
 
@@ -150,7 +148,7 @@ def test_read_area_freq_spectrum(dfsu_area_freq):
 
     ds = dfs.read()
     assert ds.shape == (3, 40, 25)
-    assert ds.items[0].type == eum.EUMType.Directional_integrated_spectral_density
+    assert ds.items[0].type == mikeio.EUMType.Directional_integrated_spectral_density
     assert np.min(ds[0].to_numpy()) >= 0
     assert np.mean(ds[0].to_numpy()) == pytest.approx(0.253988722)
 
@@ -316,7 +314,7 @@ def test_read_spectrum_dir_line(dfsu_line_dir):
 
     ds1 = dfs.read(time=[0, 1])
     assert ds1.shape == (2, 10, 16)
-    assert ds1.items[0].type == eum.EUMType.Frequency_integrated_spectral_density
+    assert ds1.items[0].type == mikeio.EUMType.Frequency_integrated_spectral_density
     values = ds1[0].to_numpy()
     assert np.nanmin(values) >= 0
     assert np.nanmax(values) == pytest.approx(0.22447659)
@@ -330,13 +328,13 @@ def test_read_spectrum_dir_line(dfsu_line_dir):
 def test_calc_frequency_bin_sizes(dfsu_line):
     dfs = dfsu_line
     f = dfs.frequencies
-    df = spectral._f_to_df(f)
+    df = _spectral._f_to_df(f)
     assert len(f) == len(df)
     assert df.max() < f.max()
 
 
 def test_calc_Hm0_from_spectrum_line(dfsu_line):
-    dfs: DfsuSpectral = dfsu_line
+    dfs = dfsu_line
     assert dfs.n_elements == 9
     assert dfs.n_nodes == 10
     ds = dfs.read()
@@ -397,9 +395,8 @@ def test_plot_da_spectrum(dfsu_pt):
     ds = dfs.read(time=0)
     da = ds[0]
     da.plot()
-    #dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
-    #dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
-    #dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
-    #dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
+    # dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
+    # dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
+    # dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
+    # dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
     plt.close("all")
-

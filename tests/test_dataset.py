@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio.eum import EUMType, ItemInfo, EUMUnit
+from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -777,22 +777,23 @@ def test_flipud():
     assert dsud["Foo"].to_numpy()[0, 0, 0] == ds["Foo"].to_numpy()[0, -1, 0]
 
 
-def test_aggregation_workflows(tmpdir):
+def test_aggregation_workflows(tmp_path):
+    # TODO move to integration tests
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
     ds = dfs.read(items=["Surface elevation", "Current speed"])
     ds2 = ds.max(axis=1)
 
-    outfilename = os.path.join(tmpdir.dirname, "max.dfs0")
+    outfilename = tmp_path / "max.dfs0"
     ds2.to_dfs(outfilename)
-    assert os.path.isfile(outfilename)
+    assert outfilename.exists()
 
     ds3 = ds.min(axis=1)
 
-    outfilename = os.path.join(tmpdir.dirname, "min.dfs0")
+    outfilename = tmp_path / "min.dfs0"
     ds3.to_dfs(outfilename)
-    assert os.path.isfile(outfilename)
+    assert outfilename.exists()
 
 
 def test_aggregation_dataset_no_time():
@@ -826,9 +827,9 @@ def test_aggregations():
     assert dsm.geometry is not None
 
 
-def test_to_dfs_extension_validation(tmpdir):
+def test_to_dfs_extension_validation(tmp_path):
 
-    outfilename = os.path.join(tmpdir, "not_gonna_happen.dfs2")
+    outfilename = tmp_path / "not_gonna_happen.dfs2"
 
     ds = mikeio.read(
         "tests/testdata/HD2D.dfsu", items=["Surface elevation", "Current speed"]
@@ -839,7 +840,8 @@ def test_to_dfs_extension_validation(tmpdir):
     assert "dfsu" in str(excinfo.value)
 
 
-def test_weighted_average(tmpdir):
+def test_weighted_average(tmp_path):
+    # TODO move to integration tests
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -848,7 +850,7 @@ def test_weighted_average(tmpdir):
     area = dfs.get_element_area()
     ds2 = ds.average(weights=area, axis=1)
 
-    outfilename = os.path.join(tmpdir.dirname, "average.dfs0")
+    outfilename = tmp_path / "average.dfs0"
     ds2.to_dfs(outfilename)
     assert os.path.isfile(outfilename)
 
@@ -927,7 +929,7 @@ def test_aggregate_across_items():
     assert dsm.dims == ds.dims
 
 
-def test_aggregate_selected_items_dfsu_save_to_new_file(tmpdir):
+def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
 
     ds = mikeio.read("tests/testdata/State_Area.dfsu", items="*Level*")
 
@@ -943,7 +945,7 @@ def test_aggregate_selected_items_dfsu_save_to_new_file(tmpdir):
     assert dsm.dims == ds.dims
     assert dsm[0].type == ds[-1].type
 
-    outfilename = os.path.join(tmpdir, "maxwl.dfsu")
+    outfilename = tmp_path / "maxwl.dfsu"
     dsm.to_dfs(outfilename)
 
 
@@ -1526,7 +1528,7 @@ def test_layer_selection():
 
     dss_layer = ds.sel(layers=0)
     # should not be layered after selection
-    assert type(dss_layer.geometry) == mikeio.spatial.FM_geometry.GeometryFM
+    assert type(dss_layer.geometry) == mikeio.spatial.GeometryFM
 
 
 def test_time_selection():
