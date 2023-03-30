@@ -23,5 +23,5 @@ def dataframe_to_xyz(self, filename: Union[str, Path]) -> None:
     self.to_csv(filename, sep="\t", header=False, index=False)
 
 
-# TODO should we keep this?
+# Monkey patch method on DataFrame for convenience
 pd.DataFrame.to_xyz = dataframe_to_xyz
