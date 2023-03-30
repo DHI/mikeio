@@ -1189,12 +1189,6 @@ class _Dfsu(_UnstructuredFile):
 
         try:
             # Add data for all item-timesteps, copying from source
-            # if items[0].name == "Z coordinate":
-            #    has_time_axis = len(np.shape(data[1])) == 2
-            #    n_timesteps = np.shape(data[1])[0] if has_time_axis else 1
-            # else:
-            #    has_time_axis = len(np.shape(data[0])) == 2
-            #    n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
 
             for i in trange(n_time_steps, disable=not self.show_progress):
                 if geometry.is_layered and len(data) > 0:
