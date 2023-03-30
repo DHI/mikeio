@@ -1123,6 +1123,7 @@ class _Dfsu(_UnstructuredFile):
             )
             items.insert(0, z_item)
             n_items = len(items)
+            zn_dynamic = geometry.node_coordinates[:, 2]
             data.insert(0, zn_dynamic)
 
         # Default filetype;
@@ -1188,12 +1189,17 @@ class _Dfsu(_UnstructuredFile):
 
         try:
             # Add data for all item-timesteps, copying from source
+
             for i in trange(n_time_steps, disable=not self.show_progress):
+                if geometry.is_layered and len(data) > 0:
+                    self._dfs.WriteItemTimeStepNext(0, data[0].astype(np.float32))
+
                 for item in range(len(items)):
-                    d = data[item][i, :]
-                    d[np.isnan(d)] = deletevalue
-                    darray = d
-                    self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                    if items[item].name != "Z coordinate":
+                        d = data[item][i, :]
+                        d[np.isnan(d)] = deletevalue
+                        darray = d
+                        self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
             if not keep_open:
                 self._dfs.Close()
             else:
@@ -1218,6 +1224,9 @@ class _Dfsu(_UnstructuredFile):
         has_time_axis = len(np.shape(data[0])) == 2
         n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
         for i in trange(n_timesteps, disable=not self.show_progress):
+            if self.geometry.is_layered:
+                zn = self.geometry.node_coordinates[:, 2]
+                self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
             for item in range(n_items):
                 di = data[item]
                 if isinstance(data, Dataset):
