@@ -108,7 +108,7 @@ class Grid1D(_Geometry):
     ):
         """Create equidistant 1D spatial geometry"""
         super().__init__(projection)
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
@@ -183,7 +183,7 @@ class Grid1D(_Geometry):
 
     def isel(
         self, idx, axis=None
-    ) -> Union[GeometryPoint2D, GeometryPoint3D, GeometryUndefined]:
+    ) -> Union["Grid1D", GeometryPoint2D, GeometryPoint3D, GeometryUndefined]:
         """Get a subset geometry from this geometry
 
         Parameters
@@ -405,7 +405,7 @@ class Grid2D(_Geometry):
         """
         super().__init__(projection)
         self._shift_origin_on_write = origin is None  # user-constructed
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self.__xx = None
@@ -1030,7 +1030,7 @@ class Grid3D(_Geometry):
     ) -> None:
 
         super().__init__()
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
         self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)

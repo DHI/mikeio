@@ -6,8 +6,8 @@ BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 
 class _Geometry(ABC):
-    def __init__(self, projection: str = "NON-UTM") -> None:
-        self._projstr = projection
+    def __init__(self, projection=None) -> None:
+        self._projstr = projection if projection else "LONG/LAT"
 
     @property
     def projection_string(self) -> str:

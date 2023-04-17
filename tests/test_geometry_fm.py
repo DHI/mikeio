@@ -44,24 +44,6 @@ def test_too_many_elements():
     assert "element" in str(excinfo.value).lower()
 
 
-def test_no_nodes():
-    el = [(0, 1, 2)]
-
-    with pytest.raises(ValueError):
-        GeometryFM(node_coordinates=None, element_table=el)
-
-
-def test_no_element_table():
-    nc = [
-        (0.0, 0.0, 0.0),
-        (1.0, 0.0, 0.0),
-        (0.5, 1.0, 0.0),
-    ]
-
-    with pytest.raises(ValueError):
-        GeometryFM(node_coordinates=nc, element_table=None)
-
-
 def test_overset_grid():
     #     x     y    z
     nc = [
