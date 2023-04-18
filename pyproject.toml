@@ -64,3 +64,13 @@ notebooks= [
 [project.urls]
 "Homepage" = "https://github.com/DHI/mikeio"
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
+
+# mypy global options:
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = false
+
+# mypy per-module options:
+
+ignore_missing_imports = true

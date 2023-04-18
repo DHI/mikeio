@@ -24,18 +24,17 @@ class PfsNonUniqueList(list):
 
 
 class PfsSection(SimpleNamespace, MutableMapping):
-
     @staticmethod
     def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
         """Create a PfsSection from a DataFrame
-        
+
         Parameters
         ----------
         df: dataframe
             data
         prefix: str
             section header prefix
-        
+
         Examples
         --------
         >>> df = pd.DataFrame(dict(station=["Foo", "Bar"],include=[0,1]), index=[1,2])
@@ -54,11 +53,8 @@ class PfsSection(SimpleNamespace, MutableMapping):
             include = 1
         EndSect  // STATION_2
         """
-        d = {}
-        for idx in df.index:
-            key = prefix + str(idx)
-            value = df.loc[idx].to_dict()
-            d[key] = value
+        d = {f"{prefix}{idx}": row.to_dict() for idx, row in df.iterrows()}
+
         return PfsSection(d)
 
     def __init__(self, dictionary, **kwargs):
