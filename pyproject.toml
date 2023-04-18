@@ -68,9 +68,8 @@ notebooks= [
 # mypy global options:
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.9"
 warn_return_any = false
+allow_redefinition = true
+warn_unreachable = true
 
-# mypy per-module options:
-
-ignore_missing_imports = true
