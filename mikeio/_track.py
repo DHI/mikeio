@@ -41,6 +41,7 @@ def _extract_track(
                 df = Dfs0(filename).to_dataframe()
             elif ext == ".csv":
                 df = pd.read_csv(filename, index_col=0, parse_dates=True)
+                df.index = pd.DatetimeIndex(df.index)
             else:
                 raise ValueError(f"{ext} files not supported (dfs0, csv)")
 

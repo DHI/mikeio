@@ -884,6 +884,13 @@ def test_extract_track():
         index_col=0,
         parse_dates=True,
     )
+
+    # the csv datetime has inconsistent formatting, which is not supported by pandas 2.0
+    # 2008-07-04 12:20:00
+    # 2008-07-04 12:20:00.001
+
+    df.index = pd.DatetimeIndex(df.index)
+
     track = dfs.extract_track(df)
 
     assert track[2].values[23] == approx(3.6284972794399653)
@@ -908,6 +915,7 @@ def test_extract_track_from_dataset():
         index_col=0,
         parse_dates=True,
     )
+    df.index = pd.DatetimeIndex(df.index)
     track = ds.extract_track(df)
 
     assert track[2].values[23] == approx(3.6284972794399653)
@@ -931,6 +939,7 @@ def test_extract_track_from_dataarray():
         index_col=0,
         parse_dates=True,
     )
+    df.index = pd.DatetimeIndex(df.index)
     track = da.extract_track(df)
 
     assert track[2].values[23] == approx(3.6284972794399653)
