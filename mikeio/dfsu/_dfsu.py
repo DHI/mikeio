@@ -2,16 +2,16 @@ import os
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Collection, List, Union
+from typing import Collection, List, Union, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsFactory import DfsFactory
-from mikecore.DfsuBuilder import DfsuBuilder
-from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from mikecore.eum import eumQuantity, eumUnit
-from mikecore.MeshBuilder import MeshBuilder
-from mikecore.MeshFile import MeshFile
+from mikecore.DfsFactory import DfsFactory  # type: ignore
+from mikecore.DfsuBuilder import DfsuBuilder  # type: ignore
+from mikecore.DfsuFile import DfsuFile, DfsuFileType  # type: ignore
+from mikecore.eum import eumQuantity, eumUnit  # type: ignore
+from mikecore.MeshBuilder import MeshBuilder  # type: ignore
+from mikecore.MeshFile import MeshFile  # type: ignore
 from tqdm import trange
 
 from mikeio.spatial._utils import xy_to_bbox
@@ -45,7 +45,7 @@ def _write_dfsu(filename: str, data: Dataset):
     if len(data.time) == 1:
         dt = 1  # TODO is there any sensible default?
     else:
-        dt = (data.time[1] - data.time[0]).total_seconds()
+        dt = (data.time[1] - data.time[0]).total_seconds()  # type: ignore
     n_time_steps = len(data.time)
 
     geometry = data.geometry
@@ -694,7 +694,7 @@ class _Dfsu(_UnstructuredFile):
         *,
         items=None,
         time=None,
-        elements: Collection[int] = None,
+        elements: Optional[Collection[int]] = None,
         area=None,
         x=None,
         y=None,
@@ -758,7 +758,7 @@ class _Dfsu(_UnstructuredFile):
             geometry = self.geometry
             n_elems = geometry.n_elements
         else:
-            elements = [elements] if np.isscalar(elements) else list(elements)
+            elements = [elements] if np.isscalar(elements) else list(elements)  # type: ignore
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
 
@@ -772,6 +772,8 @@ class _Dfsu(_UnstructuredFile):
 
         data_list = []
 
+        shape: Tuple[int, ...]
+
         n_steps = len(time_steps)
         shape = (
             (n_elems,)
@@ -780,7 +782,7 @@ class _Dfsu(_UnstructuredFile):
         )
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=shape, dtype=dtype)
+            data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
         time = self.time
@@ -813,6 +815,8 @@ class _Dfsu(_UnstructuredFile):
         time = self.time[time_steps]
 
         dfs.Close()
+
+        dims: Tuple[str, ...]
 
         dims = ("time", "element")
 
@@ -1206,11 +1210,12 @@ class _Dfsu(_UnstructuredFile):
                 return self
 
         except Exception as e:
+
             print(e)
             self._dfs.Close()
             os.remove(filename)
 
-    def append(self, data: Union[Dataset, List[np.ndarray]]) -> None:
+    def append(self, data: Union[List[np.ndarray], Dataset]) -> None:
         """Append to a dfsu file opened with `write(...,keep_open=True)`
 
         Parameters
@@ -1221,17 +1226,19 @@ class _Dfsu(_UnstructuredFile):
 
         deletevalue = self._dfs.DeleteValueFloat
         n_items = len(data)
-        has_time_axis = len(np.shape(data[0])) == 2
-        n_timesteps = np.shape(data[0])[0] if has_time_axis else 1
+        has_time_axis = len(np.shape(data[0])) == 2  # type: ignore
+        n_timesteps = np.shape(data[0])[0] if has_time_axis else 1  # type: ignore
         for i in trange(n_timesteps, disable=not self.show_progress):
             if self.geometry.is_layered:
                 zn = self.geometry.node_coordinates[:, 2]
                 self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
             for item in range(n_items):
-                di = data[item]
-                if isinstance(data, Dataset):
-                    di = di.to_numpy()
-                d = di[i, :] if has_time_axis else di
+                dai: Union[np.ndarray, DataArray, Dataset] = data[item]
+                if isinstance(dai, DataArray):
+                    di: np.ndarray = dai.to_numpy()
+                elif isinstance(dai, np.ndarray):  # TODO is this too restrictive?
+                    di = dai
+                d: np.ndarray = di[i, :] if has_time_axis else di
                 d[np.isnan(d)] = deletevalue
                 darray = d.astype(np.float32)
                 self._dfs.WriteItemTimeStepNext(0, darray)
@@ -1319,7 +1326,7 @@ class Dfsu2DH(_Dfsu):
         self._n_timesteps = dfs.NumberOfTimeSteps
         _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
-        return _extract_track(
+        res = _extract_track(
             deletevalue=self.deletevalue,
             start_time=self.start_time,
             end_time=self.end_time,
@@ -1332,9 +1339,10 @@ class Dfsu2DH(_Dfsu):
             item_numbers=item_numbers,
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self._dfs_read_item_time_func(item, step),
+            data_read_func=self._dfs_read_item_time_func,
         )
         dfs.Close()
+        return res
 
 
 class Mesh(_UnstructuredFile):
