@@ -273,7 +273,7 @@ def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 
 
 class _Dfs123:
-    _ndim = None
+    _ndim: int
 
     show_progress = False
 
@@ -329,6 +329,8 @@ class _Dfs123:
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
 
+        shape: Tuple[int, ...]
+
         if self._ndim == 1:
             shape = (nt, self._nx)
         elif self._ndim == 2:
@@ -339,7 +341,9 @@ class _Dfs123:
         if single_time_selected and not keepdims:
             shape = shape[1:]
 
-        data_list = [np.ndarray(shape=shape, dtype=dtype) for item in range(n_items)]
+        data_list: List[np.ndarray] = [
+            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
+        ]
 
         t_seconds = np.zeros(len(time_steps))
 
@@ -363,7 +367,7 @@ class _Dfs123:
 
             t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)  # type: ignore
 
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 

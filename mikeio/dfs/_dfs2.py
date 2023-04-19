@@ -1,14 +1,16 @@
 import os
+from typing import List, Tuple
+
 from copy import deepcopy
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from mikecore.DfsFactory import DfsBuilder, DfsFactory
-from mikecore.DfsFile import DfsFile, DfsSimpleType
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.eum import eumQuantity, eumUnit
-from mikecore.Projections import Cartography
+from mikecore.DfsFactory import DfsBuilder, DfsFactory  # type: ignore
+from mikecore.DfsFile import DfsFile, DfsSimpleType  # type: ignore
+from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
+from mikecore.eum import eumQuantity, eumUnit  # type: ignore
+from mikecore.Projections import Cartography  # type: ignore
 
 from .. import __dfs_version__
 from ..dataset import Dataset
@@ -216,6 +218,8 @@ class Dfs2(_Dfs123):
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
 
+        shape: Tuple[int, ...]
+
         if area is not None:
             take_subset = True
             ii, jj = self.geometry.find_index(area=area)
@@ -229,7 +233,9 @@ class Dfs2(_Dfs123):
         if single_time_selected and not keepdims:
             shape = shape[1:]
 
-        data_list = [np.ndarray(shape=shape, dtype=dtype) for item in range(n_items)]
+        data_list: List[np.ndarray] = [
+            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
+        ]
 
         t_seconds = np.zeros(len(time_steps))
 
@@ -254,7 +260,9 @@ class Dfs2(_Dfs123):
 
         self._dfs.Close()
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)  # type: ignore
+
+        dims: Tuple[str, ...]
 
         if single_time_selected and not keepdims:
             dims = ("y", "x")
