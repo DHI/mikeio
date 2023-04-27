@@ -2,11 +2,17 @@ from abc import ABC, abstractmethod
 
 from collections import namedtuple
 
+from mikecore.Projections import MapProjection
+
 BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 
 class _Geometry(ABC):
     def __init__(self, projection=None) -> None:
+
+        if not MapProjection.IsValid(projection):
+            raise ValueError(f"{projection=} is not a valid projection string")
+
         self._projstr = projection if projection else "LONG/LAT"
 
     @property

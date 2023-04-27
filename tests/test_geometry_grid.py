@@ -426,3 +426,9 @@ def test_grid2d_equality():
     g6 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, y0=5)
 
     assert g5 != g6
+
+
+def test_bad_projection_raises_error():
+
+    with pytest.raises(ValueError, match="proj"):
+        Grid2D(nx=2, ny=2, dx=0.1, projection="Not a WKT projection string")
