@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import mikeio
 from mikeio import Dfsu, Mesh
-from mikeio.spatial._FM_geometry import (
+from mikeio.spatial import (
     GeometryFM,
     GeometryFM3D,
     GeometryFMVerticalColumn,

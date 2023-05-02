@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from mikeio.spatial._FM_geometry import GeometryFM, GeometryFM3D
+from mikeio.spatial import GeometryFM, GeometryFM3D
 from mikeio.exceptions import OutsideModelDomainError
 from mikeio.spatial import GeometryPoint2D
 

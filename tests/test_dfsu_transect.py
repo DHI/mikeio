@@ -3,7 +3,7 @@ import pytest
 import matplotlib.pyplot as plt
 
 import mikeio
-from mikeio.spatial._FM_geometry import (
+from mikeio.spatial import (
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
 )
