@@ -9,6 +9,8 @@ from mikecore.eum import eumQuantity  # type: ignore
 from mikecore.MeshBuilder import MeshBuilder  # type: ignore
 from scipy.spatial import cKDTree
 
+from mikeio.exceptions import InvalidGeometry
+
 from ._FM_geometry import GeometryFM2D
 from ._geometry import _Geometry, GeometryPoint3D
 

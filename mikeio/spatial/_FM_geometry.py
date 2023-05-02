@@ -980,7 +980,7 @@ class GeometryFM2D(_Geometry):
 
     def isel(
         self, idx: Collection[int], keepdims=False, **kwargs
-    ) -> Union["GeometryFM2D", "GeometryFM3D", GeometryPoint2D, GeometryPoint3D]:
+    ) -> Union["GeometryFM2D", GeometryPoint2D]:
         """export a selection of elements to a new geometry
 
         Typically not called directly, but by Dataset/DataArray's
@@ -1143,7 +1143,7 @@ class GeometryFM2D(_Geometry):
 
     def elements_to_geometry(
         self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
-    ) -> Union["GeometryFM2D", "GeometryFM3D", GeometryPoint3D, GeometryPoint2D]:
+    ) -> Union["GeometryFM2D", GeometryPoint2D]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
