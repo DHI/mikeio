@@ -20,6 +20,7 @@ from ..spatial import (
     GeometryPoint3D,
     GeometryUndefined,
     GeometryFM2D,
+    GeometryFM3D,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
@@ -942,13 +943,11 @@ class DataArray(DataUtilsMixin):
                     interpolant = self.geometry.get_spatial_interpolant(coords)
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
+            elif isinstance(self.geometry, GeometryFM3D):
+                raise NotImplementedError("Interpolation in 3d is not yet implemented")
             elif isinstance(self.geometry, GeometryFM2D):
                 if x is None or y is None:
                     raise ValueError("both x and y must be specified")
-                if self.geometry.is_layered:
-                    raise NotImplementedError(
-                        "Interpolation in 3d is not yet implemented"
-                    )
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
