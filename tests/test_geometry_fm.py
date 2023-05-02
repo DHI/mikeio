@@ -5,6 +5,34 @@ from mikeio.exceptions import OutsideModelDomainError
 from mikeio.spatial import GeometryPoint2D
 
 
+@pytest.fixture
+def simple_3d_geom():
+    #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),
+        (1.0, 0.0, 0.0),
+        (1.0, 1.0, 0.0),
+        (0.0, 0.0, -1.0),
+        (1.0, 0.0, -1.0),
+        (1.0, 1.0, -1.0),
+        (0.0, 0.0, -2.0),
+        (1.0, 0.0, -2.0),
+        (1.0, 1.0, -2.0),
+    ]
+
+    el = [(0, 1, 2, 3, 4, 5), (3, 4, 5, 6, 7, 8)]
+
+    g = GeometryFM3D(
+        node_coordinates=nc,
+        element_table=el,
+        projection="LONG/LAT",
+        n_layers=2,
+        n_sigma=2,
+    )
+
+    return g
+
+
 def test_basic():
     #     x     y    z
     nc = [
@@ -154,29 +182,10 @@ def test_plot_mesh():
     g.plot.mesh()
 
 
-def test_layered():
-    #     x     y    z
-    nc = [
-        (0.0, 0.0, 0.0),
-        (1.0, 0.0, 0.0),
-        (1.0, 1.0, 0.0),
-        (0.0, 0.0, -1.0),
-        (1.0, 0.0, -1.0),
-        (1.0, 1.0, -1.0),
-        (0.0, 0.0, -2.0),
-        (1.0, 0.0, -2.0),
-        (1.0, 1.0, -2.0),
-    ]
+def test_layered(simple_3d_geom: GeometryFM3D):
 
-    el = [(0, 1, 2, 3, 4, 5), (3, 4, 5, 6, 7, 8)]
+    g = simple_3d_geom
 
-    g = GeometryFM3D(
-        node_coordinates=nc,
-        element_table=el,
-        projection="LONG/LAT",
-        n_layers=2,
-        n_sigma=2,
-    )
     assert g.n_elements == 2
     assert g.n_layers == 2
     assert not g.is_2d

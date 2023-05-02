@@ -632,6 +632,18 @@ class _GeometryFMLayered(_Geometry):
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
 
+    def _z_idx_in_column(self, e3_col, z):
+        dz = self._dz[e3_col]
+        z_col = self.element_coordinates[e3_col, 2]
+        z_face = np.append(z_col - dz / 2, z_col[-1] + dz[-1] / 2)
+        if z < z_face[0] or z > z_face[-1]:
+            xy = tuple(self.element_coordinates[e3_col[0], :2])
+            raise ValueError(
+                f"z value '{z}' is outside water column [{z_face[0]},{z_face[-1]}] in point x,y={xy}"
+            )
+        idx = np.searchsorted(z_face, z) - 1
+        return idx
+
     def _find_elem3d_from_elem2d(self, elem2d, z):
         """Find 3d element ids from 2d element ids and z-values"""
 

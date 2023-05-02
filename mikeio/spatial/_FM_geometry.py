@@ -1076,17 +1076,6 @@ class GeometryFM2D(_Geometry):
         else:
             raise ValueError("Provide either coordinates or area")
 
-    def _z_idx_in_column(self, e3_col, z):
-        dz = self._dz[e3_col]
-        z_col = self.element_coordinates[e3_col, 2]
-        z_face = np.append(z_col - dz / 2, z_col[-1] + dz[-1] / 2)
-        if z < z_face[0] or z > z_face[-1]:
-            xy = tuple(self.element_coordinates[e3_col[0], :2])
-            raise ValueError(
-                f"z value '{z}' is outside water column [{z_face[0]},{z_face[-1]}] in point x,y={xy}"
-            )
-        idx = np.searchsorted(z_face, z) - 1
-        return idx
 
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
