@@ -91,7 +91,7 @@ class _GeometryFMPlotter:
     >>> g.plot.boundary_nodes()
     """
 
-    def __init__(self, geometry: "GeometryFM") -> None:
+    def __init__(self, geometry: "GeometryFM2D") -> None:
         self.g = geometry
 
     def __call__(self, ax=None, figsize=None, **kwargs):
@@ -127,7 +127,7 @@ class _GeometryFMPlotter:
 
         plot_type = kwargs.pop("plot_type")
 
-        g = self.g._geometry2d
+        g = self.g
 
         return _plot_map(
             node_coordinates=g.node_coordinates,
@@ -151,9 +151,7 @@ class _GeometryFMPlotter:
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
-        patches = _to_polygons(
-            self.g._geometry2d.node_coordinates, self.g._geometry2d.element_table
-        )
+        patches = _to_polygons(self.g.node_coordinates, self.g.element_table)
         fig_obj = PatchCollection(
             patches, edgecolor="0.6", facecolor="none", linewidths=0.3
         )
@@ -232,7 +230,7 @@ class _GeometryFMPlotter:
             return "equal"
 
 
-class GeometryFM(_Geometry):
+class GeometryFM2D(_Geometry):
     def __init__(
         self,
         node_coordinates,
@@ -245,8 +243,6 @@ class GeometryFM(_Geometry):
         validate=True,
     ) -> None:
         super().__init__(projection=projection)
-
-        self._n_layers = None  # TODO only relevant for layered
 
         self._nc = np.asarray(node_coordinates)
 
@@ -473,7 +469,7 @@ class GeometryFM(_Geometry):
 
     @cached_property
     def _tree2d(self):
-        xy = self._geometry2d.element_coordinates[:, :2]
+        xy = self.element_coordinates[:, :2]
         return cKDTree(xy)
 
     def _calc_element_coordinates(self, elements=None, zn=None):
@@ -667,9 +663,12 @@ class GeometryFM(_Geometry):
         return interp2d(data, elem_ids, weights, shape)
 
     def _find_n_nearest_2d_elements(self, x, y=None, n=1):
-        if n > self._geometry2d.n_elements:
+
+        # TODO
+
+        if n > self.n_elements:
             raise ValueError(
-                f"Cannot find {n} nearest! Number of 2D elements: {self._geometry2d.n_elements}"
+                f"Cannot find {n} nearest! Number of elements: {self.n_elements}"
             )
 
         if y is None:
@@ -686,38 +685,38 @@ class GeometryFM(_Geometry):
         points_outside = []
 
         coords = np.atleast_2d(coords)
-        nc = self._geometry2d.node_coordinates
+        nc = self.node_coordinates
 
         few_nearest, _ = self._find_n_nearest_2d_elements(
-            coords, n=min(self._geometry2d.n_elements, 2)
+            coords, n=min(self.n_elements, 2)
         )
         ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
 
         for k in range(len(ids)):
             # step 1: is nearest element = element containing point?
-            nodes = self._geometry2d.element_table[ids[k]]
+            nodes = self.element_table[ids[k]]
             element_found = self._point_in_polygon(
                 nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
             )
 
             # step 2: if not, then try second nearest point
-            if not element_found and self._geometry2d.n_elements > 1:
+            if not element_found and self.n_elements > 1:
                 candidate = few_nearest[k, 1]
                 assert np.isscalar(candidate)
-                nodes = self._geometry2d.element_table[candidate]
+                nodes = self.element_table[candidate]
                 element_found = self._point_in_polygon(
                     nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
                 )
                 ids[k] = few_nearest[k, 1]
 
             # step 3: if not, then try with *many* more points
-            if not element_found and self._geometry2d.n_elements > 1:
+            if not element_found and self.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
                     coords[k, :],
-                    n=min(self._geometry2d.n_elements, 10),  # TODO is 10 enough?
+                    n=min(self.n_elements, 10),  # TODO is 10 enough?
                 )
                 for p in many_nearest[2:]:  # we have already tried the two first above
-                    nodes = self._geometry2d.element_table[p]
+                    nodes = self.element_table[p]
                     element_found = self._point_in_polygon(
                         nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
                     )
@@ -739,14 +738,14 @@ class GeometryFM(_Geometry):
 
     def _find_single_element_2d(self, x: float, y: float) -> int:
 
-        nc = self._geometry2d.node_coordinates
+        nc = self.node_coordinates
 
         few_nearest, _ = self._find_n_nearest_2d_elements(
             x=x, y=y, n=min(self.n_elements, 10)
         )
 
         for idx in few_nearest:
-            nodes = self._geometry2d.element_table[idx]
+            nodes = self.element_table[idx]
             element_found = self._point_in_polygon(nc[nodes, 0], nc[nodes, 1], x, y)
 
             if element_found:
@@ -781,7 +780,7 @@ class GeometryFM(_Geometry):
         <mikeio.Grid2D>
             2d grid
         """
-        nc = self._geometry2d.node_coordinates
+        nc = self.node_coordinates
         bbox = xy_to_bbox(nc, buffer=buffer)
         return Grid2D(bbox=bbox, dx=dx, dy=dy, nx=nx, ny=ny, projection=self.projection)
 
@@ -941,13 +940,13 @@ class GeometryFM(_Geometry):
         Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
 
         for polyline in polylines:
-            xy = self._geometry2d.node_coordinates[polyline, :2]
+            xy = self.node_coordinates[polyline, :2]
             area = (
                 np.dot(xy[:, 1], np.roll(xy[:, 0], 1))
                 - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
             ) * 0.5
             poly_line = np.asarray(polyline)
-            xy = self._geometry2d.node_coordinates[poly_line, 0:2]
+            xy = self.node_coordinates[poly_line, 0:2]
             poly = Polyline(len(polyline), poly_line, xy, area)
             if area > 0:
                 poly_lines_ext.append(poly)
@@ -960,7 +959,7 @@ class GeometryFM(_Geometry):
 
     def _get_boundary_faces(self):
         """Construct list of faces"""
-        element_table = self._geometry2d.element_table
+        element_table = self.element_table
 
         all_faces = []
         for el in element_table:
@@ -981,7 +980,7 @@ class GeometryFM(_Geometry):
 
     def isel(
         self, idx: Collection[int], keepdims=False, **kwargs
-    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint2D, GeometryPoint3D]:
+    ) -> Union["GeometryFM2D", "GeometryFM3D", GeometryPoint2D, GeometryPoint3D]:
         """export a selection of elements to a new geometry
 
         Typically not called directly, but by Dataset/DataArray's
@@ -1076,23 +1075,6 @@ class GeometryFM(_Geometry):
         else:
             raise ValueError("Provide either coordinates or area")
 
-    def _find_elem3d_from_elem2d(self, elem2d, z):
-        """Find 3d element ids from 2d element ids and z-values"""
-
-        # TODO: coordinate with _find_3d_from_2d_points()
-
-        elem2d = [elem2d] if np.isscalar(elem2d) else elem2d
-        elem2d = np.asarray(elem2d)
-        z_vec = np.full(elem2d.shape, fill_value=z) if np.isscalar(z) else z
-        elem3d = np.full_like(elem2d, fill_value=-1)
-        for j, e2 in enumerate(elem2d):
-            idx_3d = np.hstack(self.e2_e3_table[e2])
-            elem3d[j] = idx_3d[self._z_idx_in_column(idx_3d, z_vec[j])]
-
-            # z_col = self.element_coordinates[idx_3d, 2]
-            # elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest
-        return elem3d
-
     def _z_idx_in_column(self, e3_col, z):
         dz = self._dz[e3_col]
         z_col = self.element_coordinates[e3_col, 2]
@@ -1116,19 +1098,19 @@ class GeometryFM(_Geometry):
         """Find 2d element ids of elements inside area"""
         if self._area_is_bbox(area):
             x0, y0, x1, y1 = area
-            xc = self._geometry2d.element_coordinates[:, 0]
-            yc = self._geometry2d.element_coordinates[:, 1]
+            xc = self.element_coordinates[:, 0]
+            yc = self.element_coordinates[:, 1]
             mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
         elif self._area_is_polygon(area):
             polygon = np.array(area)
-            xy = self._geometry2d.element_coordinates[:, :2]
+            xy = self.element_coordinates[:, :2]
             mask = self._inside_polygon(polygon, xy)
         else:
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
 
         return np.where(mask)[0]
 
-    def _nodes_to_geometry(self, nodes) -> Union["GeometryFM", GeometryPoint2D]:
+    def _nodes_to_geometry(self, nodes) -> Union["GeometryFM2D", GeometryPoint2D]:
         """export a selection of nodes to new flexible file geometry
 
         Note: takes only the elements for which all nodes are selected
@@ -1162,7 +1144,7 @@ class GeometryFM(_Geometry):
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
 
-        geom = GeometryFM(
+        geom = GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
@@ -1176,7 +1158,7 @@ class GeometryFM(_Geometry):
 
     def elements_to_geometry(
         self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
-    ) -> Union["GeometryFM", "GeometryFM3D", GeometryPoint3D, GeometryPoint2D]:
+    ) -> Union["GeometryFM2D", "GeometryFM3D", GeometryPoint3D, GeometryPoint2D]:
         """export a selection of elements to new flexible file geometry
 
         Parameters
@@ -1233,7 +1215,7 @@ class GeometryFM(_Geometry):
 
         # extract information for selected elements
         if self.is_layered and n_layers == 1:
-            geom2d = self._geometry2d
+            geom2d = self
             elem2d = self.elem2d_ids[elements]
             node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
             node_coords = geom2d.node_coordinates[node_ids]
@@ -1255,7 +1237,7 @@ class GeometryFM(_Geometry):
             else:
                 GeometryClass = self.__class__
         else:
-            GeometryClass = GeometryFM
+            GeometryClass = GeometryFM2D
 
         geom = GeometryClass(
             node_coordinates=node_coords,
@@ -1298,6 +1280,7 @@ class GeometryFM(_Geometry):
 
         return geom
 
+    # TODO remove 3d specific code from here
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
         """list of nodes and element table for a list of elements
 
@@ -1353,20 +1336,20 @@ class GeometryFM(_Geometry):
         np.array(float)
             node-centered data
         """
-        geometry = self._geometry2d
+        geometry = self
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates
         elem_table = geometry.element_table
         return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
 
     # TODO potential subject to change
-    @cached_property
-    def _geometry2d(self):
-        """The 2d geometry for a 3d object"""
-        if self._n_layers is None:
-            return self
-        else:
-            return self.to_2d_geometry()
+    # @cached_property
+    # def _geometry2d(self):
+    #    """The 2d geometry for a 3d object"""
+    #    if self._n_layers is None:
+    #        return self
+    #    else:
+    #        return self.to_2d_geometry()
 
     def to_shapely(self):
         """Export mesh as shapely MultiPolygon
@@ -1401,7 +1384,7 @@ class GeometryFM(_Geometry):
         """
         builder = MeshBuilder()
 
-        geom2d = self._geometry2d
+        geom2d = self
 
         nc = geom2d.node_coordinates
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geom2d.codes)
@@ -1420,7 +1403,7 @@ class GeometryFM(_Geometry):
 #     pass
 
 
-class _GeometryFMSpectrum(GeometryFM):
+class _GeometryFMSpectrum(GeometryFM2D):
     def __init__(
         self,
         node_coordinates,
@@ -1522,7 +1505,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
 
     def _nodes_to_geometry(
         self, nodes
-    ) -> Union["GeometryFM", GeometryFMPointSpectrum, "GeometryFMLineSpectrum"]:
+    ) -> Union["GeometryFM2D", GeometryFMPointSpectrum, "GeometryFMLineSpectrum"]:
         """export a selection of nodes to new flexible file geometry
         Note: takes only the elements for which all nodes are selected
         Parameters

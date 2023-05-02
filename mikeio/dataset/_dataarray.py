@@ -19,7 +19,7 @@ from ..spatial import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
-    GeometryFM,
+    GeometryFM2D,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
@@ -70,7 +70,7 @@ class _DataArraySpectrumToHm0:
                 axis_name="node",
             )
         elif isinstance(g, GeometryFMAreaSpectrum):
-            geometry = GeometryFM(
+            geometry = GeometryFM2D(
                 node_coordinates=g.node_coordinates,
                 codes=g.codes,
                 node_ids=g.node_ids,
@@ -162,7 +162,7 @@ class DataArray(DataUtilsMixin):
             if ndim_no_time == 2:
                 dims.append("direction")
                 dims.append("frequency")
-        elif isinstance(geometry, GeometryFM):
+        elif isinstance(geometry, GeometryFM2D):
             if geometry._type == DfsuFileType.DfsuSpectral1D:
                 if ndim_no_time > 0:
                     dims.append("node")
@@ -233,7 +233,7 @@ class DataArray(DataUtilsMixin):
 
         if isinstance(geometry, GeometryFMPointSpectrum):
             pass
-        elif isinstance(geometry, GeometryFM):
+        elif isinstance(geometry, GeometryFM2D):
             if geometry.is_spectral:
                 if geometry._type == DfsuFileType.DfsuSpectral1D:
                     assert (
@@ -321,7 +321,7 @@ class DataArray(DataUtilsMixin):
             return _DataArrayPlotterLineSpectrum(self)
         elif isinstance(self.geometry, GeometryFMAreaSpectrum):
             return _DataArrayPlotterAreaSpectrum(self)
-        elif isinstance(self.geometry, GeometryFM):
+        elif isinstance(self.geometry, GeometryFM2D):
             return _DataArrayPlotterFM(self)
         elif isinstance(self.geometry, Grid1D):
             return _DataArrayPlotterGrid1D(self)
@@ -942,7 +942,7 @@ class DataArray(DataUtilsMixin):
                     interpolant = self.geometry.get_spatial_interpolant(coords)
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
-            elif isinstance(self.geometry, GeometryFM):
+            elif isinstance(self.geometry, GeometryFM2D):
                 if x is None or y is None:
                     raise ValueError("both x and y must be specified")
                 if self.geometry.is_layered:
@@ -1106,7 +1106,7 @@ class DataArray(DataUtilsMixin):
 
     def interp_like(
         self,
-        other: Union["DataArray", Grid2D, GeometryFM, pd.DatetimeIndex],
+        other: Union["DataArray", Grid2D, GeometryFM2D, pd.DatetimeIndex],
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1133,7 +1133,7 @@ class DataArray(DataUtilsMixin):
         DataArray
             Interpolated DataArray
         """
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
@@ -1141,7 +1141,7 @@ class DataArray(DataUtilsMixin):
         if isinstance(other, pd.DatetimeIndex):
             return self.interp_time(other, **kwargs)
 
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError("Currently only supports 2d flexible mesh data!")
 
         if hasattr(other, "geometry"):
@@ -1151,7 +1151,7 @@ class DataArray(DataUtilsMixin):
 
         if isinstance(geom, Grid2D):
             xy = geom.xy
-        elif isinstance(geom, GeometryFM):
+        elif isinstance(geom, GeometryFM2D):
             xy = geom.element_coordinates[:, :2]
             if geom.is_layered:
                 raise NotImplementedError(
@@ -1165,7 +1165,7 @@ class DataArray(DataUtilsMixin):
         else:
             elem_ids, weights = interpolant
 
-        if isinstance(geom, (Grid2D, GeometryFM)):
+        if isinstance(geom, (Grid2D, GeometryFM2D)):
             shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
 
             dai = self.geometry.interp2d(
@@ -1762,7 +1762,7 @@ class DataArray(DataUtilsMixin):
             coords["z"] = xr.DataArray(data=self.geometry.z, dims="z")
             coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
             coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, GeometryFM):
+        elif isinstance(self.geometry, GeometryFM2D):
             coords["element"] = xr.DataArray(
                 data=self.geometry.element_ids, dims="element"
             )

@@ -934,7 +934,7 @@ class Grid2D(_Geometry):
         south: int, optional
             code value for south boundary
         """
-        from mikeio.spatial._FM_geometry import GeometryFM
+        from mikeio.spatial._FM_geometry import GeometryFM2D
 
         # get node based grid
         xn = self._centers_to_nodes(self.x)
@@ -959,7 +959,7 @@ class Grid2D(_Geometry):
 
         nc = np.column_stack([x, y, zn])
         elem_table = gn._to_element_table(index_base=0)
-        return GeometryFM(
+        return GeometryFM2D(
             node_coordinates=nc,
             element_table=elem_table,
             codes=codes,

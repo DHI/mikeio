@@ -4,7 +4,7 @@ import pytest
 import mikeio
 from mikeio import Dfsu, Mesh
 from mikeio.spatial import (
-    GeometryFM,
+    GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalColumn,
 )
@@ -56,7 +56,7 @@ def test_read_top_layer():
     dstop2 = dfs.read(layers="top")
     assert dstop1.shape == dstop2.shape
     assert dstop1.dims == dstop2.dims
-    assert isinstance(dstop1.geometry, GeometryFM)
+    assert isinstance(dstop1.geometry, GeometryFM2D)
     assert dstop1.geometry._type == dstop2.geometry._type
     assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
     assert dstop1.geometry.max_nodes_per_element <= 4
@@ -72,7 +72,7 @@ def test_read_bottom_layer():
     dsbot2 = dfs.read(layers="bottom")
     assert dsbot1.shape == dsbot2.shape
     assert dsbot1.dims == dsbot2.dims
-    assert isinstance(dsbot1.geometry, GeometryFM)
+    assert isinstance(dsbot1.geometry, GeometryFM2D)
     assert dsbot1.geometry._type == dsbot2.geometry._type
     assert np.all(dsbot1.to_numpy() == dsbot2.to_numpy())
     assert dsbot1.geometry.max_nodes_per_element <= 4

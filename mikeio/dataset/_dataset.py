@@ -21,7 +21,7 @@ from ._dataarray import DataArray
 from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
-    GeometryFM,
+    GeometryFM2D,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
@@ -928,7 +928,7 @@ class Dataset(MutableMapping):
             xy = [(x, y)]
 
             if isinstance(
-                self.geometry, GeometryFM
+                self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
 
                 interpolant = self.geometry.get_2d_interpolant(
@@ -1079,7 +1079,7 @@ class Dataset(MutableMapping):
 
     def interp_like(
         self,
-        other: Union["Dataset", DataArray, Grid2D, GeometryFM, pd.DatetimeIndex],
+        other: Union["Dataset", DataArray, Grid2D, GeometryFM2D, pd.DatetimeIndex],
         **kwargs,
     ) -> "Dataset":
         """Interpolate in space (and in time) to other geometry (and time axis)
@@ -1106,7 +1106,7 @@ class Dataset(MutableMapping):
         Dataset
             Interpolated Dataset
         """
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
@@ -1122,7 +1122,7 @@ class Dataset(MutableMapping):
         if isinstance(geom, Grid2D):
             xy = geom.xy
 
-        elif isinstance(geom, GeometryFM):
+        elif isinstance(geom, GeometryFM2D):
             xy = geom.element_coordinates[:, :2]
             if geom.is_layered:
                 raise NotImplementedError(
@@ -1821,7 +1821,7 @@ class Dataset(MutableMapping):
         elif isinstance(self.geometry, Grid1D):
             self._validate_extension(filename, ".dfs1")
             self._to_dfs1(filename)
-        elif isinstance(self.geometry, GeometryFM):
+        elif isinstance(self.geometry, GeometryFM2D):
             self._validate_extension(filename, ".dfsu")
             self._to_dfsu(filename)
         else:

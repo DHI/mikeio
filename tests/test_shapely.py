@@ -1,5 +1,5 @@
 import pytest
-from mikeio.spatial._FM_geometry import GeometryFM
+from mikeio.spatial._FM_geometry import GeometryFM2D
 
 
 ##################################################
@@ -18,7 +18,7 @@ def test_to_shapely():
 
     el = [(0, 1, 2)]
 
-    g = GeometryFM(nc, el)
+    g = GeometryFM2D(nc, el)
     shp = g.to_shapely()
     assert shp.geom_type == "MultiPolygon"
     assert shp.area == 0.5
