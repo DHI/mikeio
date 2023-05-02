@@ -265,9 +265,7 @@ class GeometryFM2D(_Geometry):
 
     def __str__(self) -> str:
 
-        gtxt = f"{self.type_name}"
-            gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
-        return gtxt
+        return f"{self.type_name} ({self.n_elements} elements, {self.n_nodes} nodes)"
 
     def __repr__(self):
         out = []
@@ -411,7 +409,7 @@ class GeometryFM2D(_Geometry):
 
     @property
     def ndim(self) -> int:
-            return 2
+        return 2
 
     @property
     def is_2d(self) -> bool:
@@ -484,9 +482,7 @@ class GeometryFM2D(_Geometry):
 
         return ec
 
-    def find_nearest_elements(
-        self, x, y=None, n_nearest=1, return_distances=False
-    ):
+    def find_nearest_elements(self, x, y=None, n_nearest=1, return_distances=False):
         """Find index of nearest elements (optionally for a list)
 
         Parameters
@@ -529,7 +525,6 @@ class GeometryFM2D(_Geometry):
             return idx, d2d
 
         return idx
-
 
     def get_2d_interpolant(
         self,
@@ -954,9 +949,7 @@ class GeometryFM2D(_Geometry):
         if self._type == DfsuFileType.DfsuSpectral1D:
             return self._nodes_to_geometry(nodes=idx)
         else:
-            return self.elements_to_geometry(
-                elements=idx, keepdims=keepdims
-            )
+            return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
     def find_index(self, x=None, y=None, coords=None, area=None) -> np.ndarray:
         """Find a *set* of element indicies for a number of points or within an area.
@@ -1110,27 +1103,21 @@ class GeometryFM2D(_Geometry):
             elements = list(elements)
         if len(elements) == 1 and not keepdims:
             x, y, z = self.element_coordinates[elements.pop(), :]
-            
+
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
         elements = np.sort(
             elements
-        )  # make sure elements are sorted! # TODO is this necessary?
-
-        # create new geometry
-        new_type = self._type
-        
+        )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
 
         # extract information for selected elements
-        
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elements, node_layers=node_layers
-        )
+
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
         elem_ids = self.element_ids[elements]
 
-        geom = GeometryFM2d(
+        geom = GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
@@ -1160,7 +1147,7 @@ class GeometryFM2D(_Geometry):
             element table with a list of nodes for each element
         """
         elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
-        
+
         for j, eid in enumerate(elements):
             elem_tbl[j] = np.asarray(self.element_table[eid])
 
@@ -1234,7 +1221,6 @@ class GeometryFM2D(_Geometry):
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
-
 
 
 class _GeometryFMSpectrum(GeometryFM2D):
