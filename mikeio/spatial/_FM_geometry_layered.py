@@ -180,6 +180,10 @@ class _GeometryFMLayered(_Geometry):
         return self._geometry.n_elements
 
     @property
+    def n_nodes(self):
+        return len(self.node_coordinates)
+
+    @property
     def element_ids(self):
         """Element ids"""
         return self._geometry.element_ids
