@@ -82,6 +82,17 @@ class _GeometryFMLayered(_Geometry):
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
 
+    # TODO should this be a public property?
+    @cached_property
+    def max_nodes_per_element(self):
+        """The maximum number of nodes for an element"""
+        maxnodes = 0
+        for local_nodes in self.element_table:
+            n = len(local_nodes)
+            if n > maxnodes:
+                maxnodes = n
+        return maxnodes
+
     @property
     def codes(self):
         return self._codes
@@ -95,6 +106,9 @@ class _GeometryFMLayered(_Geometry):
         return self.elements_to_geometry(
             elements=idx, node_layers=None, keepdims=keepdims
         )
+
+    def contains(self, points) -> Sequence[bool]:
+        return self.geometry2d.contains(points)
 
     def elements_to_geometry(
         self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
@@ -295,6 +309,9 @@ class _GeometryFMLayered(_Geometry):
     @property
     def boundary_polylines(self):
         return self.geometry2d.boundary_polylines
+
+    def to_mesh(self, outfilename):
+        return self.geometry2d.to_mesh(outfilename)
 
     def to_2d_geometry(self):
         """extract 2d geometry from 3d geometry

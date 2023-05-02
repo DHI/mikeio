@@ -405,8 +405,7 @@ class GeometryFM2D(_Geometry):
         """Element to node connectivity"""
         return self._element_table
 
-    # cache this?
-    @property
+    @cached_property
     def max_nodes_per_element(self):
         """The maximum number of nodes for an element"""
         maxnodes = 0
@@ -1075,7 +1074,6 @@ class GeometryFM2D(_Geometry):
             return self._elements_in_area(area)
         else:
             raise ValueError("Provide either coordinates or area")
-
 
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
