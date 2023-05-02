@@ -15,7 +15,6 @@ from .._interpolation import get_idw_interpolant, interp2d
 from ._FM_utils import (
     _get_node_centered_data,
     _plot_map,
-    _plot_vertical_profile,
     BoundaryPolylines,
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
@@ -23,7 +22,7 @@ from ._FM_utils import (
 from ._geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
 
 from ._grid_geometry import Grid2D
-from ._utils import _relative_cumulative_distance, xy_to_bbox
+from ._utils import xy_to_bbox
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -264,32 +263,22 @@ class GeometryFM2D(_Geometry):
 
         self.plot = _GeometryFMPlotter(self)
 
-    def _repr_txt(self, layer_txt=None):
+    def __str__(self) -> str:
+
+        gtxt = f"{self.type_name}"
+            gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
+        return gtxt
+
+    def __repr__(self):
         out = []
         out.append("Flexible Mesh Geometry: " + self.type_name)
         if self.n_nodes:
             out.append(f"number of nodes: {self.n_nodes}")
         if self.n_elements:
             out.append(f"number of elements: {self.n_elements}")
-            if layer_txt is not None:
-                out.append(layer_txt)
         if self._projstr:
             out.append(f"projection: {self.projection_string}")
         return str.join("\n", out)
-
-    def __str__(self) -> str:
-
-        # TODO refactor layered and non-layered
-        gtxt = f"{self.type_name}"
-        if self.is_layered:
-            n_z_layers = "no" if self.n_z_layers is None else self.n_z_layers
-            gtxt += f" ({self.n_elements} elements, {self.n_sigma_layers} sigma-layers, {n_z_layers} z-layers)"
-        else:
-            gtxt += f" ({self.n_elements} elements, {self.n_nodes} nodes)"
-        return gtxt
-
-    def __repr__(self):
-        return self._repr_txt()
 
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
@@ -422,9 +411,6 @@ class GeometryFM2D(_Geometry):
 
     @property
     def ndim(self) -> int:
-        if self.is_layered:
-            return 3
-        else:
             return 2
 
     @property
@@ -439,13 +425,7 @@ class GeometryFM2D(_Geometry):
     @property
     def is_layered(self) -> bool:
         """Type is layered dfsu (3d, vertical profile or vertical column)"""
-        return self._type in (
-            DfsuFileType.DfsuVerticalColumn,
-            DfsuFileType.DfsuVerticalProfileSigma,
-            DfsuFileType.DfsuVerticalProfileSigmaZ,
-            DfsuFileType.Dfsu3DSigma,
-            DfsuFileType.Dfsu3DSigmaZ,
-        )
+        return False
 
     @property
     def is_spectral(self) -> bool:
@@ -471,27 +451,16 @@ class GeometryFM2D(_Geometry):
         xy = self.element_coordinates[:, :2]
         return cKDTree(xy)
 
-    def _calc_element_coordinates(self, elements=None, zn=None):
-        # TODO remove 3d specific code
+    def _calc_element_coordinates(self):
         node_coordinates = self._nc
 
         element_table = self.element_table
-        if elements is not None:
-            element_table = element_table[elements]
-        if zn is not None:
-            node_coordinates = node_coordinates.copy()
-            if len(zn) == len(node_coordinates[:, 2]):
-                node_coordinates[:, 2] = zn
-            else:
-                # assume that user wants to find coords on a subset of points
-                idx = np.unique(np.hstack(element_table))
-                node_coordinates[idx, 2] = zn
 
         n_elements = len(element_table)
         ec = np.empty([n_elements, 3])
 
         # pre-allocate for speed
-        maxnodes = 4 if self.is_2d else 8
+        maxnodes = 4
         idx = np.zeros(maxnodes, dtype=int)
         xcoords = np.zeros([maxnodes, n_elements])
         ycoords = np.zeros([maxnodes, n_elements])
@@ -516,7 +485,7 @@ class GeometryFM2D(_Geometry):
         return ec
 
     def find_nearest_elements(
-        self, x, y=None, z=None, layer=None, n_nearest=1, return_distances=False
+        self, x, y=None, n_nearest=1, return_distances=False
     ):
         """Find index of nearest elements (optionally for a list)
 
@@ -526,12 +495,6 @@ class GeometryFM2D(_Geometry):
             X coordinate(s) (easting or longitude)
         y: float or array(float)
             Y coordinate(s) (northing or latitude)
-        z: float or array(float), optional
-            Z coordinate(s)  (vertical coordinate, positive upwards)
-            If not provided for a 3d file, the surface element is returned
-        layer: int, optional
-            Search in a specific layer only (3D files only)
-            Either z or layer (0-based) can be provided for a 3D file
         n_nearest : int, optional
             return this many (horizontally) nearest points for
             each coordinate set, default=1
@@ -555,10 +518,6 @@ class GeometryFM2D(_Geometry):
         >>> ids = g.find_nearest_elements(3, 4, n_nearest=4)
         >>> ids, d = g.find_nearest_elements(xy, return_distances=True)
 
-        >>> ids = g.find_nearest_elements(3, 4, z=-3)
-        >>> ids = g.find_nearest_elements(3, 4, layer=4)
-        >>> ids = g.find_nearest_elements(xyz)
-        >>> ids = g.find_nearest_elements(xyz, n_nearest=3)
 
         See Also
         --------
@@ -566,24 +525,11 @@ class GeometryFM2D(_Geometry):
         """
         idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
 
-        if self.is_layered:
-            if self._use_third_col_as_z(x, z, layer):
-                z = x[:, 2]
-            idx = self._find_3d_from_2d_points(idx, z=z, layer=layer)
-
         if return_distances:
             return idx, d2d
 
         return idx
 
-    def _use_third_col_as_z(self, x, z, layer):
-        return (
-            (z is None)
-            and (layer is None)
-            and (not np.isscalar(x))
-            and (np.ndim(x) == 2)
-            and (x.shape[1] >= 3)
-        )
 
     def get_2d_interpolant(
         self,
@@ -1009,7 +955,7 @@ class GeometryFM2D(_Geometry):
             return self._nodes_to_geometry(nodes=idx)
         else:
             return self.elements_to_geometry(
-                elements=idx, node_layers=None, keepdims=keepdims
+                elements=idx, keepdims=keepdims
             )
 
     def find_index(self, x=None, y=None, coords=None, area=None) -> np.ndarray:
@@ -1142,7 +1088,7 @@ class GeometryFM2D(_Geometry):
         return geom
 
     def elements_to_geometry(
-        self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
+        self, elements: Union[int, Collection[int]], keepdims=False
     ) -> Union["GeometryFM2D", GeometryPoint2D]:
         """export a selection of elements to new flexible file geometry
 
@@ -1150,9 +1096,6 @@ class GeometryFM2D(_Geometry):
         ----------
         elements : int or Collection[int]
             collection of element ids
-        node_layers : str, optional
-            for 3d files either 'top', 'bottom' layer nodes
-            or 'all' can be selected, by default 'all'
         keepdims: bool, optional
             keep original geometry type for single points
 
@@ -1167,10 +1110,8 @@ class GeometryFM2D(_Geometry):
             elements = list(elements)
         if len(elements) == 1 and not keepdims:
             x, y, z = self.element_coordinates[elements.pop(), :]
-            if self.is_layered:
-                return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
-            else:
-                return GeometryPoint2D(x=x, y=y, projection=self.projection)
+            
+            return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
         elements = np.sort(
             elements
@@ -1178,53 +1119,18 @@ class GeometryFM2D(_Geometry):
 
         # create new geometry
         new_type = self._type
-        if self.is_layered:
-            elements = list(elements)
-            layers_used = self.layer_ids[elements]
-            unique_layer_ids = np.unique(layers_used)
-            n_layers = len(unique_layer_ids)
-
-            if n_layers > 1:
-                elem_bot = self.get_layer_elements("bottom")
-                if np.all(np.in1d(elements, elem_bot)):
-                    n_layers = 1
-
-            if (
-                self._type == DfsuFileType.Dfsu3DSigma
-                or self._type == DfsuFileType.Dfsu3DSigmaZ
-            ) and n_layers == 1:
-                new_type = DfsuFileType.Dfsu2D
-
-            if n_layers == 1 and node_layers in ("all", None):
-                node_layers = "bottom"
+        
 
         # extract information for selected elements
-        if self.is_layered and n_layers == 1:
-            geom2d = self
-            elem2d = self.elem2d_ids[elements]
-            node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
-            node_coords = geom2d.node_coordinates[node_ids]
-            codes = geom2d.codes[node_ids]
-            elem_ids = self.element_ids[elem2d]
-        else:
-            node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-                elements, node_layers=node_layers
-            )
-            node_coords = self.node_coordinates[node_ids]
-            codes = self.codes[node_ids]
-            elem_ids = self.element_ids[elements]
+        
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+            elements, node_layers=node_layers
+        )
+        node_coords = self.node_coordinates[node_ids]
+        codes = self.codes[node_ids]
+        elem_ids = self.element_ids[elements]
 
-        if self.is_layered and (new_type != DfsuFileType.Dfsu2D):
-            if n_layers == len(elem_tbl):
-                from ._FM_geometry_layered import GeometryFMVerticalColumn
-
-                GeometryClass = GeometryFMVerticalColumn
-            else:
-                GeometryClass = self.__class__
-        else:
-            GeometryClass = GeometryFM2D
-
-        geom = GeometryClass(
+        geom = GeometryFM2d(
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
@@ -1233,49 +1139,18 @@ class GeometryFM2D(_Geometry):
             element_ids=elem_ids,
             dfsu_type=self._type,
         )
-        geom._reindex() # TODO this should be done in the initialiser
+        geom._reindex()  # TODO this should be done in the initialiser
 
-        geom._type = self._type  #
-        if self.is_layered:
-            if new_type == DfsuFileType.Dfsu2D:
-                # If source is 3d, but output only has 1 layer
-                # then change type to 2d
-                geom._type = DfsuFileType.Dfsu2D
-                geom._n_layers = None
-                if node_layers == "all":
-                    warnings.warn(
-                        "Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
-                    )
-            else:
-                geom._type = self._type
-                geom._n_layers = n_layers
-                lowest_sigma = self.n_layers - self.n_sigma_layers
-                geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
-
-                # If source is sigma-z but output only has sigma layers
-                # then change type accordingly
-                if (
-                    self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-                    or self._type == DfsuFileType.Dfsu3DSigmaZ
-                ) and n_layers == geom._n_sigma:
-                    # TODO fix this
-                    geom._type = DfsuFileType.Dfsu3DSigma
-
-                geom._top_elems = geom._findTopLayerElements(geom.element_table)
-
+        geom._type = self._type
         return geom
 
-    # TODO remove 3d specific code from here
-    def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
+    def _get_nodes_and_table_for_elements(self, elements):
         """list of nodes and element table for a list of elements
 
         Parameters
         ----------
         elements : np.array(int)
             array of element ids
-        node_layers : str, optional
-            for 3D files 'all', 'bottom' or 'top' nodes
-            of each element, by default 'all'
 
         Returns
         -------
@@ -1285,23 +1160,9 @@ class GeometryFM2D(_Geometry):
             element table with a list of nodes for each element
         """
         elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
-        if (node_layers is None) or (node_layers == "all") or self.is_2d:
-            for j, eid in enumerate(elements):
-                elem_tbl[j] = np.asarray(self.element_table[eid])
-
-        else:
-            # 3D => 2D
-            if (node_layers != "bottom") and (node_layers != "top"):
-                raise Exception("node_layers must be either all, bottom or top")
-            for j, eid in enumerate(elements):
-                elem_nodes = np.asarray(self.element_table[eid])
-                nn = len(elem_nodes)
-                halfn = int(nn / 2)
-                if node_layers == "bottom":
-                    elem_nodes = elem_nodes[:halfn]
-                if node_layers == "top":
-                    elem_nodes = elem_nodes[halfn:]
-                elem_tbl[j] = elem_nodes
+        
+        for j, eid in enumerate(elements):
+            elem_tbl[j] = np.asarray(self.element_table[eid])
 
         nodes = np.unique(np.hstack(elem_tbl))
         return nodes, elem_tbl
@@ -1326,15 +1187,6 @@ class GeometryFM2D(_Geometry):
         ec = geometry.element_coordinates
         elem_table = geometry.element_table
         return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
-
-    # TODO potential subject to change
-    # @cached_property
-    # def _geometry2d(self):
-    #    """The 2d geometry for a 3d object"""
-    #    if self._n_layers is None:
-    #        return self
-    #    else:
-    #        return self.to_2d_geometry()
 
     def to_shapely(self):
         """Export mesh as shapely MultiPolygon
@@ -1383,9 +1235,6 @@ class GeometryFM2D(_Geometry):
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
-
-# class GeometryFMHorizontal(GeometryFM):
-#     pass
 
 
 class _GeometryFMSpectrum(GeometryFM2D):
@@ -1479,7 +1328,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
             frequencies=self._frequencies,
             directions=self._directions,
         )
-        geom._reindex() # TODO this should be done in the initialiser
+        geom._reindex()  # TODO this should be done in the initialiser
         geom._type = self._type
         return geom
 
@@ -1534,6 +1383,6 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             frequencies=self._frequencies,
             directions=self._directions,
         )
-        geom._reindex() # TODO this should be done in the initialiser
+        geom._reindex()  # TODO this should be done in the initialiser
         geom._type = self._type
         return geom
