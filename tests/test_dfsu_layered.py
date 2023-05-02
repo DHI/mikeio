@@ -52,6 +52,7 @@ def test_read_top_layer():
 
     ds = dfs.read()  # all data in file
     dstop1 = ds.sel(layers="top")
+    assert dstop1.geometry.max_nodes_per_element <= 4
 
     dstop2 = dfs.read(layers="top")
     assert dstop1.shape == dstop2.shape
@@ -59,7 +60,6 @@ def test_read_top_layer():
     assert isinstance(dstop1.geometry, GeometryFM2D)
     assert dstop1.geometry._type == dstop2.geometry._type
     assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
-    assert dstop1.geometry.max_nodes_per_element <= 4
 
 
 def test_read_bottom_layer():

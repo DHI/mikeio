@@ -351,28 +351,6 @@ class Dfsu3D(DfsuLayered):
         """The 2d geometry for a 3d object"""
         return self._geometry2d
 
-    def find_nearest_profile_elements(self, x, y):
-        """Find 3d elements of profile nearest to (x,y) coordinates
-
-        Parameters
-        ----------
-        x : float
-            x-coordinate of point
-        y : float
-            y-coordinate of point
-
-        Returns
-        -------
-        np.array(int)
-            element ids of vertical profile
-        """
-        if self.is_2d:
-            raise InvalidGeometry("Object is 2d. Cannot get_nearest_profile")
-        else:
-            elem2d, _ = self.geometry._find_n_nearest_2d_elements(x, y)
-            elem3d = self.geometry.e2_e3_table[elem2d]
-            return elem3d
-
     def extract_surface_elevation_from_3d(self, filename=None, n_nearest=4):
         """
         Extract surface elevation from a 3d dfsu file (based on zn)

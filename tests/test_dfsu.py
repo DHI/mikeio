@@ -819,13 +819,14 @@ def test_elements_to_geometry():
     other_tiny_geom = dfs.geometry.isel(set([1, 0]))
     assert other_tiny_geom.n_elements == 2
 
-    prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
-    geom = dfs.geometry.elements_to_geometry(prof_ids)
+    # Removed, use sel on geometry instead
+    # prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
+    # geom = dfs.geometry.elements_to_geometry(prof_ids)
 
-    text = repr(geom)
+    # text = repr(geom)
 
-    assert geom.n_layers == 5
-    assert "nodes" in text
+    # assert geom.n_layers == 5
+    # assert "nodes" in text
 
     elements = dfs.get_layer_elements(layers=-1)
     geom = dfs.elements_to_geometry(elements, node_layers="top")

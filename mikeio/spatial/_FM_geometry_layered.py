@@ -139,6 +139,7 @@ class _GeometryFMLayered(_Geometry):
         if n_layers == 1:
             elem2d = self.elem2d_ids[elements]
             node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elem2d)
+            assert len(elem_tbl[0]) <= 4, "Not a 2D element"
             node_coords = self.node_coordinates[node_ids]
             codes = self._codes[node_ids]
             elem_ids = self._element_ids[elem2d]
