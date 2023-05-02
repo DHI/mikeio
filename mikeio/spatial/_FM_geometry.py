@@ -473,6 +473,7 @@ class GeometryFM2D(_Geometry):
         return cKDTree(xy)
 
     def _calc_element_coordinates(self, elements=None, zn=None):
+        # TODO remove 3d specific code
         node_coordinates = self._nc
 
         element_table = self.element_table
@@ -1089,10 +1090,7 @@ class GeometryFM2D(_Geometry):
 
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
-        idx = self._2d_elements_in_area(area)
-        if self.is_layered and len(idx) > 0:
-            idx = np.hstack(self.e2_e3_table[idx])
-        return idx
+        return self._2d_elements_in_area(area)
 
     def _2d_elements_in_area(self, area):
         """Find 2d element ids of elements inside area"""

@@ -152,6 +152,9 @@ class DataArray(DataUtilsMixin):
 
     @staticmethod
     def _guess_dims(ndim, shape, n_timesteps, geometry):
+
+        # TODO delete default dims to geometry
+
         # This is not very robust, but is probably a reasonable guess
         time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
         dims = ["time"] if time_is_first else []
@@ -163,6 +166,9 @@ class DataArray(DataUtilsMixin):
             if ndim_no_time == 2:
                 dims.append("direction")
                 dims.append("frequency")
+        elif isinstance(geometry, GeometryFM3D):
+            if ndim_no_time > 0:
+                dims.append("element")
         elif isinstance(geometry, GeometryFM2D):
             if geometry._type == DfsuFileType.DfsuSpectral1D:
                 if ndim_no_time > 0:

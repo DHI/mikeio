@@ -10,7 +10,7 @@ from mikecore.MeshBuilder import MeshBuilder  # type: ignore
 from scipy.spatial import cKDTree
 
 from ._FM_geometry import GeometryFM2D
-from ._geometry import _Geometry
+from ._geometry import _Geometry, GeometryPoint3D
 
 from ._FM_utils import _plot_vertical_profile
 
@@ -35,52 +35,211 @@ class _GeometryFMLayered(_Geometry):
 
         super().__init__(projection=projection)
 
-        # super().__init__(
-        #    node_coordinates=node_coordinates,
-        #    element_table=element_table,
-        #    codes=codes,
-        #    projection=projection,
-        #    dfsu_type=dfsu_type,
-        #    element_ids=element_ids,
-        #    node_ids=node_ids,
-        #    validate=validate,
-        # )
-
         self._type = dfsu_type
 
         self._n_layers_column = None  # lazy
         self._bot_elems = None  # lazy
         self._n_layers = n_layers
-        self._n_sigma = n_sigma
+        self._n_sigma: int = n_sigma if n_sigma is not None else n_layers
+
+        self._element_ids = (
+            np.arange(len(element_table))
+            if element_ids is None
+            else np.asarray(element_ids)
+        )
 
         self.node_coordinates = np.asarray(node_coordinates)
         n_nodes = len(node_coordinates)
         self.element_table = element_table  # 3d
-        self.codes = (
+        self._codes = (
             np.zeros((n_nodes,), dtype=int) if codes is None else np.asarray(codes)
         )
 
-        # TODO remove this
-        self._geometry = GeometryFM2D(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            validate=validate,
+        self._node_ids = (
+            np.arange(len(self._codes)) if node_ids is None else np.asarray(node_ids)
         )
 
         self._geometry2d = self.to_2d_geometry()
-
-        # TODO remove
-        self._geometry._geometry2d = self._geometry2d
 
         self._e2_e3_table = None  # lazy
         self._2d_ids = None  # lazy
         self._layer_ids = None  # lazy
         # self.__dz = None  # lazy
+
+    # TODO DRY
+    def _reindex(self):
+        new_node_ids = np.arange(self.n_nodes)
+        new_element_ids = np.arange(self.n_elements)
+        node_dict = dict(zip(self._node_ids, new_node_ids))
+        for eid in range(self.n_elements):
+            elem_nodes = self.element_table[eid]
+            new_elem_nodes = np.zeros_like(elem_nodes)
+            for jn, idx in enumerate(elem_nodes):
+                new_elem_nodes[jn] = node_dict[idx]
+            self.element_table[eid] = new_elem_nodes
+
+        self._node_ids = new_node_ids
+        self._element_ids = new_element_ids
+
+    def isel(self, idx: Collection[int], keepdims=False, **kwargs):
+
+        return self.elements_to_geometry(
+            elements=idx, node_layers=None, keepdims=keepdims
+        )
+
+    def elements_to_geometry(
+        self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
+    ):
+
+        if np.isscalar(elements):
+            elements = [elements]
+        else:
+            elements = list(elements)
+        if len(elements) == 1 and not keepdims:
+            x, y, z = self.element_coordinates[elements.pop(), :]
+
+            return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
+
+        elements = np.sort(
+            elements
+        )  # make sure elements are sorted! # TODO is this necessary?
+
+        # create new geometry
+        new_type = self._type
+
+        elements = list(elements)
+        layers_used = self.layer_ids[elements]
+        unique_layer_ids = np.unique(layers_used)
+        n_layers = len(unique_layer_ids)
+
+        if n_layers > 1:
+            elem_bot = self.get_layer_elements("bottom")
+            if np.all(np.in1d(elements, elem_bot)):
+                n_layers = 1
+
+        if (
+            self._type == DfsuFileType.Dfsu3DSigma
+            or self._type == DfsuFileType.Dfsu3DSigmaZ
+        ) and n_layers == 1:
+            new_type = DfsuFileType.Dfsu2D
+
+        if n_layers == 1 and node_layers in ("all", None):
+            node_layers = "bottom"
+
+        # extract information for selected elements
+        if n_layers == 1:
+            elem2d = self.elem2d_ids[elements]
+            node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elem2d)
+            node_coords = self.node_coordinates[node_ids]
+            codes = self._codes[node_ids]
+            elem_ids = self._element_ids[elem2d]
+        else:
+            node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+                elements, node_layers=node_layers
+            )
+            node_coords = self.node_coordinates[node_ids]
+            codes = self._codes[node_ids]
+            elem_ids = self._element_ids[elements]
+
+        if new_type != DfsuFileType.Dfsu2D:
+            if n_layers == len(elem_tbl):
+                from ._FM_geometry_layered import GeometryFMVerticalColumn
+
+                GeometryClass = GeometryFMVerticalColumn
+            else:
+                GeometryClass = self.__class__
+        else:
+            GeometryClass = GeometryFM2D
+
+        geom = GeometryClass(
+            node_coordinates=node_coords,
+            codes=codes,
+            node_ids=node_ids,
+            projection=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=elem_ids,
+            dfsu_type=self._type,
+        )
+        geom._reindex()
+
+        geom._type = self._type  #
+        if self.is_layered:
+            if new_type == DfsuFileType.Dfsu2D:
+                # If source is 3d, but output only has 1 layer
+                # then change type to 2d
+                geom._type = DfsuFileType.Dfsu2D
+                geom._n_layers = None
+                if node_layers == "all":
+                    warnings.warn(
+                        "Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
+                    )
+            else:
+                geom._type = self._type
+                geom._n_layers = n_layers
+                lowest_sigma = self.n_layers - self.n_sigma_layers
+                geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
+
+                # If source is sigma-z but output only has sigma layers
+                # then change type accordingly
+                if (
+                    self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
+                    or self._type == DfsuFileType.Dfsu3DSigmaZ
+                ) and n_layers == geom._n_sigma:
+                    # TODO fix this
+                    geom._type = DfsuFileType.Dfsu3DSigma
+
+                geom._top_elems = geom._findTopLayerElements(geom.element_table)
+
+        return geom
+
+    @cached_property
+    def element_coordinates(self):
+        """Center coordinates of each element"""
+        return self._calc_element_coordinates()
+
+    def _calc_element_coordinates(self, elements=None, zn=None):
+
+        node_coordinates = self.node_coordinates
+
+        element_table = self.element_table
+        if elements is not None:
+            element_table = element_table[elements]
+        if zn is not None:
+            node_coordinates = node_coordinates.copy()
+            if len(zn) == len(node_coordinates[:, 2]):
+                node_coordinates[:, 2] = zn
+            else:
+                # assume that user wants to find coords on a subset of points
+                idx = np.unique(np.hstack(element_table))
+                node_coordinates[idx, 2] = zn
+
+        n_elements = len(element_table)
+        ec = np.empty([n_elements, 3])
+
+        # pre-allocate for speed
+        maxnodes = 4 if self.is_2d else 8
+        idx = np.zeros(maxnodes, dtype=int)
+        xcoords = np.zeros([maxnodes, n_elements])
+        ycoords = np.zeros([maxnodes, n_elements])
+        zcoords = np.zeros([maxnodes, n_elements])
+        nnodes_per_elem = np.zeros(n_elements)
+
+        for j in range(n_elements):
+            nodes = element_table[j]
+            nnodes = len(nodes)
+            nnodes_per_elem[j] = nnodes
+            for i in range(nnodes):
+                idx[i] = nodes[i]  # - 1
+
+            xcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 0]
+            ycoords[:nnodes, j] = node_coordinates[idx[:nnodes], 1]
+            zcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 2]
+
+        ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
+        ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
+        ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
+
+        return ec
 
     @property
     def geometry2d(self):
@@ -127,6 +286,10 @@ class _GeometryFMLayered(_Geometry):
         nodes = np.unique(np.hstack(elem_tbl))
         return nodes, elem_tbl
 
+    @property
+    def boundary_polylines(self):
+        return self._geometry2d.boundary_polylines
+
     def to_2d_geometry(self):
         """extract 2d geometry from 3d geometry
 
@@ -145,7 +308,7 @@ class _GeometryFMLayered(_Geometry):
             elem_ids, node_layers="bottom"
         )
         node_coords = self.node_coordinates[node_ids]
-        codes = self.codes[node_ids]
+        codes = self._codes[node_ids]
 
         # create new geometry
         geom = GeometryFM2D(
@@ -154,7 +317,7 @@ class _GeometryFMLayered(_Geometry):
             node_ids=node_ids,
             projection=self.projection_string,
             element_table=elem_tbl,
-            element_ids=self.element_ids[elem_ids],
+            element_ids=elem_ids,
             validate=False,
             dfsu_type=DfsuFileType.Dfsu2D,
         )
@@ -174,19 +337,14 @@ class _GeometryFMLayered(_Geometry):
 
         return geom
 
-    @property
+    @cached_property
     def n_elements(self):
         """Number of 3d elements"""
-        return self._geometry.n_elements
+        return len(self.element_table)
 
     @property
     def n_nodes(self):
         return len(self.node_coordinates)
-
-    @property
-    def element_ids(self):
-        """Element ids"""
-        return self._geometry.element_ids
 
     @property
     def is_2d(self):
@@ -195,6 +353,10 @@ class _GeometryFMLayered(_Geometry):
     @property
     def ndim(self) -> int:
         return 3
+
+    @property
+    def is_layered(self) -> bool:
+        return True
 
     @cached_property
     def layer_ids(self):
@@ -235,14 +397,21 @@ class _GeometryFMLayered(_Geometry):
             )
         else:
             # slow path
-            return self._findTopLayerElements(self._geometry.element_table)
+            return self._findTopLayerElements(self.element_table)
+
+    def _elements_in_area(self, area):
+        """Find element ids of elements inside area"""
+        idx = self._geometry2d._elements_in_area(area)
+        if self.is_layered and len(idx) > 0:
+            idx = np.hstack(self.e2_e3_table[idx])
+        return idx
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
 
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
-            idx = self.element_ids
+            idx = self._element_ids
 
         if (
             (coords is not None)
@@ -268,7 +437,7 @@ class _GeometryFMLayered(_Geometry):
                 idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
             idx = np.intersect1d(idx, idx_3d).astype(int)
         elif area is not None:
-            idx_area = self._geometry._elements_in_area(area)
+            idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)
         elif layers is None:
             raise ValueError(
@@ -410,7 +579,7 @@ class _GeometryFMLayered(_Geometry):
         if layers < 0:
             layers = layers + n_lay
 
-        return self.element_ids[self.layer_ids == layers]
+        return self._element_ids[self.layer_ids == layers]
 
     @property
     def e2_e3_table(self):
@@ -694,7 +863,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
-            idx = self.element_ids
+            idx = self._element_ids
 
         # select in space
         if (

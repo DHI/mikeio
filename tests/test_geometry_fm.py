@@ -186,3 +186,7 @@ def test_layered():
     # find vertical column
     idx = g.find_index(x=0.9, y=0.1)
     assert len(idx) == 2
+
+    # subset
+    g2 = g.isel(idx)
+    assert g2.n_elements == 2
