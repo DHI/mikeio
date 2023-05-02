@@ -10,7 +10,7 @@ from mikecore.MeshBuilder import MeshBuilder  # type: ignore
 from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
-from ..exceptions import InvalidGeometry, OutsideModelDomainError
+from ..exceptions import OutsideModelDomainError
 from .._interpolation import get_idw_interpolant, interp2d
 from ._FM_utils import (
     _get_node_centered_data,
@@ -19,7 +19,7 @@ from ._FM_utils import (
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
-from ._geometry import GeometryPoint2D, GeometryPoint3D, _Geometry
+from ._geometry import GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
 from ._utils import xy_to_bbox
@@ -229,7 +229,7 @@ class _GeometryFMPlotter:
             return "equal"
 
 
-class GeometryFM2D(_Geometry):
+class _GeometryFM(_Geometry):
     def __init__(
         self,
         node_coordinates,
@@ -240,25 +240,112 @@ class GeometryFM2D(_Geometry):
         element_ids=None,
         node_ids=None,
         validate=True,
+        reindex=False,
     ) -> None:
         super().__init__(projection=projection)
-
-        self._nc = np.asarray(node_coordinates)
+        self.node_coordinates = np.asarray(node_coordinates)
 
         n_nodes = len(node_coordinates)
         self._codes = (
             np.zeros((n_nodes,), dtype=int) if codes is None else np.asarray(codes)
         )
+
         self._node_ids = (
             np.arange(len(self._codes)) if node_ids is None else np.asarray(node_ids)
         )
 
         self._type = dfsu_type
 
-        self._element_table, self._element_ids = self._set_elements(
+        self.element_table, self._element_ids = self._set_elements(
             element_table=element_table,
             element_ids=element_ids,
             validate=validate,
+        )
+
+        if reindex:
+            self._reindex()
+
+    def _set_elements(self, element_table, element_ids=None, validate=True):
+
+        if validate:
+            max_node_id = self._node_ids.max()
+            for i, e in enumerate(element_table):
+                # TODO: avoid looping through all elements (could be +1e6)!
+                if not isinstance(e, np.ndarray):
+                    e = np.asarray(e)
+                    element_table[i] = e
+
+                # NOTE: this check "e.max()" takes the most of the time when constructing a new FM_geometry
+                if e.max() > max_node_id:
+                    raise ValueError(
+                        f"Element table has node # {e.max()}. Max node id: {max_node_id}"
+                    )
+
+        if element_ids is None:
+            element_ids = np.arange(len(element_table))
+        element_ids = np.asarray(element_ids)
+
+        return element_table, element_ids
+
+    def _reindex(self):
+        new_node_ids = np.arange(self.n_nodes)
+        new_element_ids = np.arange(self.n_elements)
+        node_dict = dict(zip(self._node_ids, new_node_ids))
+        for eid in range(self.n_elements):
+            elem_nodes = self.element_table[eid]
+            new_elem_nodes = np.zeros_like(elem_nodes)
+            for jn, idx in enumerate(elem_nodes):
+                new_elem_nodes[jn] = node_dict[idx]
+            self.element_table[eid] = new_elem_nodes
+
+        self._node_ids = new_node_ids
+        self._element_ids = new_element_ids
+
+    @cached_property
+    def max_nodes_per_element(self):
+        """The maximum number of nodes for an element"""
+        maxnodes = 0
+        for local_nodes in self.element_table:
+            n = len(local_nodes)
+            if n > maxnodes:
+                maxnodes = n
+        return maxnodes
+
+    @property
+    def codes(self):
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
+        return self._codes
+
+    @codes.setter
+    def codes(self, v):
+        if len(v) != self.n_nodes:
+            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
+        self._codes = np.array(v, dtype=np.int32)
+
+
+class GeometryFM2D(_GeometryFM):
+    def __init__(
+        self,
+        node_coordinates,
+        element_table,
+        codes=None,
+        projection=None,
+        dfsu_type=None,
+        element_ids=None,
+        node_ids=None,
+        validate=True,
+        reindex=False,
+    ) -> None:
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            validate=validate,
+            reindex=reindex,
         )
 
         self.plot = _GeometryFMPlotter(self)
@@ -328,47 +415,6 @@ class GeometryFM2D(_Geometry):
 
         return True
 
-    def _set_elements(self, element_table, element_ids=None, validate=True):
-
-        if validate:
-            max_node_id = self.node_ids.max()
-            for i, e in enumerate(element_table):
-                # TODO: avoid looping through all elements (could be +1e6)!
-                if not isinstance(e, np.ndarray):
-                    e = np.asarray(e)
-                    element_table[i] = e
-
-                # NOTE: this check "e.max()" takes the most of the time when constructing a new FM_geometry
-                if e.max() > max_node_id:
-                    raise ValueError(
-                        f"Element table has node # {e.max()}. Max node id: {max_node_id}"
-                    )
-
-        if element_ids is None:
-            element_ids = np.arange(len(element_table))
-        element_ids = np.asarray(element_ids)
-
-        return element_table, element_ids
-
-    def _reindex(self):
-        new_node_ids = np.arange(self.n_nodes)
-        new_element_ids = np.arange(self.n_elements)
-        node_dict = dict(zip(self._node_ids, new_node_ids))
-        for eid in range(self.n_elements):
-            elem_nodes = self._element_table[eid]
-            new_elem_nodes = np.zeros_like(elem_nodes)
-            for jn, idx in enumerate(elem_nodes):
-                new_elem_nodes[jn] = node_dict[idx]
-            self._element_table[eid] = new_elem_nodes
-
-        self._node_ids = new_node_ids
-        self._element_ids = new_element_ids
-
-    @property
-    def node_coordinates(self):
-        """Coordinates (x,y,z) of all nodes"""
-        return self._nc
-
     @property
     def n_nodes(self) -> int:
         """Number of nodes"""
@@ -386,21 +432,6 @@ class GeometryFM2D(_Geometry):
     @property
     def element_ids(self):
         return self._element_ids
-
-    @property
-    def element_table(self):
-        """Element to node connectivity"""
-        return self._element_table
-
-    @cached_property
-    def max_nodes_per_element(self):
-        """The maximum number of nodes for an element"""
-        maxnodes = 0
-        for local_nodes in self.element_table:
-            n = len(local_nodes)
-            if n > maxnodes:
-                maxnodes = n
-        return maxnodes
 
     @property
     def type_name(self):
@@ -450,8 +481,6 @@ class GeometryFM2D(_Geometry):
         return cKDTree(xy)
 
     def _calc_element_coordinates(self):
-        node_coordinates = self._nc
-
         element_table = self.element_table
 
         n_elements = len(element_table)
@@ -472,9 +501,11 @@ class GeometryFM2D(_Geometry):
             for i in range(nnodes):
                 idx[i] = nodes[i]  # - 1
 
-            xcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 0]
-            ycoords[:nnodes, j] = node_coordinates[idx[:nnodes], 1]
-            zcoords[:nnodes, j] = node_coordinates[idx[:nnodes], 2]
+            x, y, z = self.node_coordinates[idx[:nnodes]].T
+
+            xcoords[:nnodes, j] = x
+            ycoords[:nnodes, j] = y
+            zcoords[:nnodes, j] = z
 
         ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
         ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
@@ -792,17 +823,6 @@ class GeometryFM2D(_Geometry):
 
         return np.abs(area)
 
-    @property
-    def codes(self):
-        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
-        return self._codes
-
-    @codes.setter
-    def codes(self, v):
-        if len(v) != self.n_nodes:
-            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
-        self._codes = np.array(v, dtype=np.int32)
-
     @cached_property
     def boundary_polylines(self) -> BoundaryPolylines:
         """Lists of closed polylines defining domain outline"""
@@ -1068,17 +1088,16 @@ class GeometryFM2D(_Geometry):
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
 
-        geom = GeometryFM2D(
+        return GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
+            dfsu_type=self._type,
             projection=self.projection_string,
             element_table=elem_tbl,
             element_ids=self.element_ids[elements],
+            reindex=True,
         )
-        geom._reindex()  # TODO this should be done in the initialiser
-        geom._type = self._type
-        return geom
 
     def elements_to_geometry(
         self, elements: Union[int, Collection[int]], keepdims=False
@@ -1102,7 +1121,7 @@ class GeometryFM2D(_Geometry):
         else:
             elements = list(elements)
         if len(elements) == 1 and not keepdims:
-            x, y, z = self.element_coordinates[elements.pop(), :]
+            x, y, _ = self.element_coordinates[elements.pop(), :]
 
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
@@ -1117,7 +1136,7 @@ class GeometryFM2D(_Geometry):
         codes = self.codes[node_ids]
         elem_ids = self.element_ids[elements]
 
-        geom = GeometryFM2D(
+        return GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
@@ -1125,11 +1144,8 @@ class GeometryFM2D(_Geometry):
             element_table=elem_tbl,
             element_ids=elem_ids,
             dfsu_type=self._type,
+            reindex=True,
         )
-        geom._reindex()  # TODO this should be done in the initialiser
-
-        geom._type = self._type
-        return geom
 
     def _get_nodes_and_table_for_elements(self, elements):
         """list of nodes and element table for a list of elements
@@ -1208,22 +1224,22 @@ class GeometryFM2D(_Geometry):
         """
         builder = MeshBuilder()
 
-        geom2d = self
-
-        nc = geom2d.node_coordinates
-        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geom2d.codes)
+        nc = self.node_coordinates
+        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
         # builder.SetNodeIds(geom2d.node_ids+1)
         # builder.SetElementIds(geom2d.elements+1)
-        element_table_MZ = [np.asarray(row) + 1 for row in geom2d.element_table]
+        element_table_MZ = [np.asarray(row) + 1 for row in self.element_table]
         builder.SetElements(element_table_MZ)
-        builder.SetProjection(geom2d.projection_string)
+        builder.SetProjection(self.projection_string)
         quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
 
 
-class _GeometryFMSpectrum(GeometryFM2D):
+class _GeometryFMSpectrum(
+    GeometryFM2D
+):  # TODO should this inherit from GeometryFM2D or _GeometryFM?
     def __init__(
         self,
         node_coordinates,
@@ -1236,6 +1252,7 @@ class _GeometryFMSpectrum(GeometryFM2D):
         validate=True,
         frequencies=None,
         directions=None,
+        reindex=False,
     ) -> None:
         super().__init__(
             node_coordinates=node_coordinates,
@@ -1246,6 +1263,7 @@ class _GeometryFMSpectrum(GeometryFM2D):
             element_ids=element_ids,
             node_ids=node_ids,
             validate=validate,
+            reindex=reindex,
         )
 
         self._frequencies = frequencies
@@ -1313,8 +1331,8 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
             element_ids=self.element_ids[elements],
             frequencies=self._frequencies,
             directions=self._directions,
+            reindex=True,
         )
-        geom._reindex()  # TODO this should be done in the initialiser
         geom._type = self._type
         return geom
 
@@ -1368,7 +1386,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             element_ids=self.element_ids[elements],
             frequencies=self._frequencies,
             directions=self._directions,
+            reindex=True,
         )
-        geom._reindex()  # TODO this should be done in the initialiser
-        geom._type = self._type
+        geom._type = self._type  # TODO
         return geom

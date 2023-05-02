@@ -7,11 +7,11 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
 from mikecore.eum import eumQuantity  # type: ignore
 from mikecore.MeshBuilder import MeshBuilder  # type: ignore
-from scipy.spatial import cKDTree
+from scipy.spatial import cKDTree  # type: ignore
 
 from mikeio.exceptions import InvalidGeometry
 
-from ._FM_geometry import GeometryFM2D
+from ._FM_geometry import GeometryFM2D, _GeometryFM
 from ._geometry import _Geometry, GeometryPoint3D
 
 from ._FM_utils import _plot_vertical_profile
@@ -19,7 +19,7 @@ from ._FM_utils import _plot_vertical_profile
 from ._utils import _relative_cumulative_distance
 
 
-class _GeometryFMLayered(_Geometry):
+class _GeometryFMLayered(_GeometryFM):
     def __init__(
         self,
         *,
@@ -33,33 +33,25 @@ class _GeometryFMLayered(_Geometry):
         n_layers: int = 1,  # at least 1 layer
         n_sigma=None,
         validate=True,
+        reindex=False,
     ) -> None:
 
-        super().__init__(projection=projection)
-
-        self._type = dfsu_type
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            validate=validate,
+            reindex=reindex,
+        )
 
         self._n_layers_column = None  # lazy
         self._bot_elems = None  # lazy
         self._n_layers = n_layers
         self._n_sigma: int = n_sigma if n_sigma is not None else n_layers
-
-        self._element_ids = (
-            np.arange(len(element_table))
-            if element_ids is None
-            else np.asarray(element_ids)
-        )
-
-        self.node_coordinates = np.asarray(node_coordinates)
-        n_nodes = len(node_coordinates)
-        self.element_table = element_table  # 3d
-        self._codes = (
-            np.zeros((n_nodes,), dtype=int) if codes is None else np.asarray(codes)
-        )
-
-        self._node_ids = (
-            np.arange(len(self._codes)) if node_ids is None else np.asarray(node_ids)
-        )
 
         # TODO not possible if we need to reindex
         # self.geometry2d = self.to_2d_geometry()
@@ -68,36 +60,6 @@ class _GeometryFMLayered(_Geometry):
         self._2d_ids = None  # lazy
         self._layer_ids = None  # lazy
         # self.__dz = None  # lazy
-
-    # TODO DRY
-    def _reindex(self):
-        new_node_ids = np.arange(self.n_nodes)
-        new_element_ids = np.arange(self.n_elements)
-        node_dict = dict(zip(self._node_ids, new_node_ids))
-        for eid in range(self.n_elements):
-            elem_nodes = self.element_table[eid]
-            new_elem_nodes = np.zeros_like(elem_nodes)
-            for jn, idx in enumerate(elem_nodes):
-                new_elem_nodes[jn] = node_dict[idx]
-            self.element_table[eid] = new_elem_nodes
-
-        self._node_ids = new_node_ids
-        self._element_ids = new_element_ids
-
-    # TODO should this be a public property?
-    @cached_property
-    def max_nodes_per_element(self):
-        """The maximum number of nodes for an element"""
-        maxnodes = 0
-        for local_nodes in self.element_table:
-            n = len(local_nodes)
-            if n > maxnodes:
-                maxnodes = n
-        return maxnodes
-
-    @property
-    def codes(self):
-        return self._codes
 
     @cached_property
     def geometry2d(self):
@@ -165,7 +127,7 @@ class _GeometryFMLayered(_Geometry):
                 elements, node_layers=node_layers
             )
             node_coords = self.node_coordinates[node_ids]
-            codes = self._codes[node_ids]
+            codes = self.codes[node_ids]
             elem_ids = self._element_ids[elements]
 
         if new_type != DfsuFileType.Dfsu2D:
@@ -186,8 +148,8 @@ class _GeometryFMLayered(_Geometry):
             element_table=elem_tbl,
             element_ids=elem_ids,
             dfsu_type=self._type,
+            reindex=True,
         )
-        geom._reindex()  # TODO this should be done in the initialiser
 
         geom._type = self._type  #
         if self.is_layered:
@@ -345,10 +307,10 @@ class _GeometryFMLayered(_Geometry):
             element_ids=elem_ids,
             validate=False,
             dfsu_type=DfsuFileType.Dfsu2D,
+            reindex=True,
         )
 
-        geom._type = None  # DfsuFileType.Mesh
-        geom._reindex()  # TODO this should be done in the initialiser
+        geom._type = None  # DfsuFileType.Mesh # TODO this seems fishy
 
         # Fix z-coordinate for sigma-z:
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
@@ -820,6 +782,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         n_layers: int = 1,
         n_sigma=None,
         validate=True,
+        reindex=False,
     ) -> None:
         super().__init__(
             node_coordinates=node_coordinates,
@@ -832,6 +795,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
             n_layers=n_layers,
             n_sigma=n_sigma,
             validate=validate,
+            reindex=reindex,
         )
         self.plot = _GeometryFMVerticalProfilePlotter(self)
         # self._rel_node_dist = None
