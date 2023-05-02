@@ -71,9 +71,6 @@ class _GeometryFMLayered(_GeometryFM):
             elements=idx, node_layers=None, keepdims=keepdims
         )
 
-    def contains(self, points) -> Sequence[bool]:
-        return self.geometry2d.contains(points)
-
     def elements_to_geometry(
         self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
     ):
@@ -132,7 +129,6 @@ class _GeometryFMLayered(_GeometryFM):
 
         if new_type != DfsuFileType.Dfsu2D:
             if n_layers == len(elem_tbl):
-                from ._FM_geometry_layered import GeometryFMVerticalColumn
 
                 GeometryClass = GeometryFMVerticalColumn
             else:
@@ -256,7 +252,7 @@ class _GeometryFMLayered(_GeometryFM):
         else:
             # 3D => 2D
             if (node_layers != "bottom") and (node_layers != "top"):
-                raise Exception("node_layers must be either all, bottom or top")
+                raise ValueError("node_layers must be either all, bottom or top")
             for j, eid in enumerate(elements):
                 elem_nodes = np.asarray(self.element_table[eid])
                 nn = len(elem_nodes)
@@ -269,13 +265,6 @@ class _GeometryFMLayered(_GeometryFM):
 
         nodes = np.unique(np.hstack(elem_tbl))
         return nodes, elem_tbl
-
-    @property
-    def boundary_polylines(self):
-        return self.geometry2d.boundary_polylines
-
-    def to_mesh(self, outfilename):
-        return self.geometry2d.to_mesh(outfilename)
 
     def to_2d_geometry(self):
         """extract 2d geometry from 3d geometry
@@ -766,7 +755,15 @@ class _GeometryFMLayered(_GeometryFM):
 
 
 class GeometryFM3D(_GeometryFMLayered):
-    pass
+    @property
+    def boundary_polylines(self):
+        return self.geometry2d.boundary_polylines
+
+    def contains(self, points) -> Sequence[bool]:
+        return self.geometry2d.contains(points)
+
+    def to_mesh(self, outfilename):
+        return self.geometry2d.to_mesh(outfilename)
 
 
 class GeometryFMVerticalProfile(_GeometryFMLayered):
