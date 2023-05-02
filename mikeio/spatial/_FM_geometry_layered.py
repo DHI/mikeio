@@ -60,7 +60,7 @@ class _GeometryFMLayered(_Geometry):
         )
 
         # TODO not possible if we need to reindex
-        # self._geometry2d = self.to_2d_geometry()
+        # self.geometry2d = self.to_2d_geometry()
 
         self._e2_e3_table = None  # lazy
         self._2d_ids = None  # lazy
@@ -81,6 +81,10 @@ class _GeometryFMLayered(_Geometry):
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
+
+    @property
+    def codes(self):
+        return self._codes
 
     @cached_property
     def geometry2d(self):
@@ -246,11 +250,6 @@ class _GeometryFMLayered(_Geometry):
 
         return ec
 
-    @property
-    def geometry2d(self):
-        """The 2d geometry for a 3d object"""
-        return self._geometry2d
-
     def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
         """list of nodes and element table for a list of elements
 
@@ -293,7 +292,7 @@ class _GeometryFMLayered(_Geometry):
 
     @property
     def boundary_polylines(self):
-        return self._geometry2d.boundary_polylines
+        return self.geometry2d.boundary_polylines
 
     def to_2d_geometry(self):
         """extract 2d geometry from 3d geometry
@@ -406,7 +405,7 @@ class _GeometryFMLayered(_Geometry):
 
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
-        idx = self._geometry2d._elements_in_area(area)
+        idx = self.geometry2d._elements_in_area(area)
         if self.is_layered and len(idx) > 0:
             idx = np.hstack(self.e2_e3_table[idx])
         return idx
@@ -434,7 +433,7 @@ class _GeometryFMLayered(_Geometry):
                 z = coords[:, 2] if coords.shape[1] == 3 else None
             else:
                 xy = np.vstack((x, y)).T
-            idx_2d = self._geometry2d._find_element_2d(coords=xy)
+            idx_2d = self.geometry2d._find_element_2d(coords=xy)
             assert len(idx_2d) == len(xy)
             if z is None:
                 idx_3d = np.hstack(self.e2_e3_table[idx_2d])
