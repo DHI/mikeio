@@ -59,7 +59,8 @@ class _GeometryFMLayered(_Geometry):
             np.arange(len(self._codes)) if node_ids is None else np.asarray(node_ids)
         )
 
-        self._geometry2d = self.to_2d_geometry()
+        # TODO not possible if we need to reindex
+        # self._geometry2d = self.to_2d_geometry()
 
         self._e2_e3_table = None  # lazy
         self._2d_ids = None  # lazy
@@ -80,6 +81,10 @@ class _GeometryFMLayered(_Geometry):
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
+
+    @cached_property
+    def geometry2d(self):
+        return self.to_2d_geometry()
 
     def isel(self, idx: Collection[int], keepdims=False, **kwargs):
 
