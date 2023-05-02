@@ -1137,7 +1137,7 @@ class GeometryFM2D(_Geometry):
             element_table=elem_tbl,
             element_ids=self.element_ids[elements],
         )
-        geom._reindex()
+        geom._reindex()  # TODO this should be done in the initialiser
         geom._type = self._type
         return geom
 
@@ -1233,7 +1233,7 @@ class GeometryFM2D(_Geometry):
             element_ids=elem_ids,
             dfsu_type=self._type,
         )
-        geom._reindex()
+        geom._reindex() # TODO this should be done in the initialiser
 
         geom._type = self._type  #
         if self.is_layered:
@@ -1479,7 +1479,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
             frequencies=self._frequencies,
             directions=self._directions,
         )
-        geom._reindex()
+        geom._reindex() # TODO this should be done in the initialiser
         geom._type = self._type
         return geom
 
@@ -1534,6 +1534,6 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             frequencies=self._frequencies,
             directions=self._directions,
         )
-        geom._reindex()
+        geom._reindex() # TODO this should be done in the initialiser
         geom._type = self._type
         return geom

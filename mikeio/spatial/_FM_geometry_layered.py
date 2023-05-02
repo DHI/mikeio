@@ -187,7 +187,7 @@ class _GeometryFMLayered(_Geometry):
             element_ids=elem_ids,
             dfsu_type=self._type,
         )
-        geom._reindex()
+        geom._reindex()  # TODO this should be done in the initialiser
 
         geom._type = self._type  #
         if self.is_layered:
@@ -348,7 +348,7 @@ class _GeometryFMLayered(_Geometry):
         )
 
         geom._type = None  # DfsuFileType.Mesh
-        geom._reindex()
+        geom._reindex()  # TODO this should be done in the initialiser
 
         # Fix z-coordinate for sigma-z:
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
