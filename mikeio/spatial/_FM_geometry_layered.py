@@ -162,8 +162,8 @@ class _GeometryFMLayered(_GeometryFM):
                 geom._type = DfsuFileType.Dfsu2D
                 geom._n_layers = None
                 if node_layers == "all":
-                    warnings.warn(
-                        "Warning: Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
+                    raise ValueError(
+                        "Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
                     )
             else:
                 geom._type = self._type
@@ -189,21 +189,11 @@ class _GeometryFMLayered(_GeometryFM):
         """Center coordinates of each element"""
         return self._calc_element_coordinates()
 
-    def _calc_element_coordinates(self, elements=None, zn=None):
+    def _calc_element_coordinates(self):
 
         node_coordinates = self.node_coordinates
 
         element_table = self.element_table
-        if elements is not None:
-            element_table = element_table[elements]
-        if zn is not None:
-            node_coordinates = node_coordinates.copy()
-            if len(zn) == len(node_coordinates[:, 2]):
-                node_coordinates[:, 2] = zn
-            else:
-                # assume that user wants to find coords on a subset of points
-                idx = np.unique(np.hstack(element_table))
-                node_coordinates[idx, 2] = zn
 
         n_elements = len(element_table)
         ec = np.empty([n_elements, 3])
@@ -526,13 +516,6 @@ class _GeometryFMLayered(_GeometryFM):
         np.array(int)
             element ids
         """
-        if layer is not None:
-            warnings.warn(
-                "layer argument is deprecated, use layers instead",
-                FutureWarning,
-            )
-            layers = layer
-
         if isinstance(layers, str):
             if layers in ("surface", "top"):
                 return self.top_elements

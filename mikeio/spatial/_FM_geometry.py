@@ -1036,10 +1036,6 @@ class GeometryFM2D(_GeometryFM):
             raise ValueError("Provide either coordinates or area")
 
     def _elements_in_area(self, area):
-        """Find element ids of elements inside area"""
-        return self._2d_elements_in_area(area)
-
-    def _2d_elements_in_area(self, area):
         """Find 2d element ids of elements inside area"""
         if self._area_is_bbox(area):
             x0, y0, x1, y1 = area
@@ -1070,8 +1066,6 @@ class GeometryFM2D(_GeometryFM):
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        assert not self.is_layered, "not supported for layered data"
-
         nodes = np.atleast_1d(nodes)
         if len(nodes) == 1:
             xy = self.node_coordinates[nodes[0], :2]

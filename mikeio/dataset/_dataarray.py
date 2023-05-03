@@ -28,7 +28,7 @@ from ..spatial import (
     GeometryFMVerticalProfile,
 )
 
-# TODO
+# We need this type to know if we should keep zn
 from ..spatial._FM_geometry_layered import _GeometryFMLayered
 
 from .._spectral import calc_m0_from_spectrum
