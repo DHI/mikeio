@@ -58,6 +58,16 @@ class _GeometryFMLayered(_GeometryFM):
         self._2d_ids = None
         self._layer_ids = None
 
+    def __repr__(self) -> str:
+        return (
+            f"Flexible Mesh Geometry: {self._type.name}\n"
+            f"number of nodes: {self.n_nodes}\n"
+            f"number of elements: {self.n_elements}\n"
+            f"number of layers: {self.n_layers}\n"
+            f"number of sigma layers: {self.n_sigma_layers}\n"
+            f"projection: {self.projection_string}"
+        )
+
     @cached_property
     def geometry2d(self):
         return self.to_2d_geometry()
@@ -822,16 +832,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
             reindex=reindex,
         )
         self.plot = _GeometryFMVerticalProfilePlotter(self)
-        # self._rel_node_dist = None
         self._rel_elem_dist = None
-
-        # remove inherited but unsupported methods
-        def __dir__(self):
-            natdir = set(self.__dict__.keys() + dir(self.__class__))
-            natdir.remove("interp2d")
-            return list(natdir)
-
-        # self.interp2d = None
 
     @property
     def boundary_polylines(self):
@@ -839,12 +840,6 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         raise AttributeError(
             "GeometryFMVerticalProfile has no boundary_polylines property"
         )
-
-    # remove unsupported methods from dir to avoid confusion
-    def __dir__(self):
-        unsupported = ("boundary_polylines", "interp2d")
-        keys = sorted(list(super().__dir__()) + list(self.__dict__.keys()))
-        return set([d for d in keys if d not in unsupported])
 
     @property
     def relative_element_distance(self):

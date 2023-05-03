@@ -236,7 +236,7 @@ class _GeometryFM(_Geometry):
         element_table,
         codes=None,
         projection=None,
-        dfsu_type=None,
+        dfsu_type=None,  # TODO should this be mandatory?
         element_ids=None,
         node_ids=None,
         validate=True,
@@ -352,7 +352,7 @@ class GeometryFM2D(_GeometryFM):
         element_table,
         codes=None,
         projection=None,
-        dfsu_type=None,
+        dfsu_type=DfsuFileType.Dfsu2D,  # Reasonable default?
         element_ids=None,
         node_ids=None,
         validate=True,
@@ -377,15 +377,12 @@ class GeometryFM2D(_GeometryFM):
         return f"{self.type_name} ({self.n_elements} elements, {self.n_nodes} nodes)"
 
     def __repr__(self):
-        out = []
-        out.append("Flexible Mesh Geometry: " + self.type_name)
-        if self.n_nodes:
-            out.append(f"number of nodes: {self.n_nodes}")
-        if self.n_elements:
-            out.append(f"number of elements: {self.n_elements}")
-        if self._projstr:
-            out.append(f"projection: {self.projection_string}")
-        return str.join("\n", out)
+        return (
+            f"Flexible Mesh Geometry: {self._type.name}\n"
+            f"number of nodes: {self.n_nodes}\n"
+            f"number of elements: {self.n_elements}\n"
+            f"projection: {self.projection_string}"
+        )
 
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:

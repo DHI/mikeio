@@ -55,6 +55,8 @@ def test_basic():
     with pytest.raises(ValueError):
         g.find_index(50.0, -50.0)
 
+    assert "nodes: 3" in repr(g)
+
 
 def test_too_many_elements():
     #     x     y    z
@@ -199,6 +201,9 @@ def test_layered(simple_3d_geom: GeometryFM3D):
     # subset
     g2 = g.isel(idx)
     assert g2.n_elements == 2
+
+    assert "elements: 2" in repr(g2)
+    assert "layers: 2" in repr(g2)
 
 
 def test_deprectated_geometryfm():
