@@ -11,8 +11,8 @@ from scipy.spatial import cKDTree  # type: ignore
 
 from mikeio.exceptions import InvalidGeometry
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM
-from ._geometry import _Geometry, GeometryPoint3D
+from ._FM_geometry import GeometryFM2D, _GeometryFM, _GeometryFMPlotter
+from ._geometry import GeometryPoint3D
 
 from ._FM_utils import _plot_vertical_profile
 
@@ -48,18 +48,17 @@ class _GeometryFMLayered(_GeometryFM):
             reindex=reindex,
         )
 
-        self._n_layers_column = None  # lazy
-        self._bot_elems = None  # lazy
         self._n_layers = n_layers
         self._n_sigma: int = n_sigma if n_sigma is not None else n_layers
 
-        # TODO not possible if we need to reindex
-        # self.geometry2d = self.to_2d_geometry()
+        # Lazy properties
+        self._n_layers_column = None
+        self._bot_elems = None
+        self._e2_e3_table = None
+        self._2d_ids = None
+        self._layer_ids = None
 
-        self._e2_e3_table = None  # lazy
-        self._2d_ids = None  # lazy
-        self._layer_ids = None  # lazy
-        # self.__dz = None  # lazy
+        self.plot = _GeometryFMPlotter(self)
 
     @cached_property
     def geometry2d(self):
@@ -173,7 +172,7 @@ class _GeometryFMLayered(_GeometryFM):
                     # TODO fix this
                     geom._type = DfsuFileType.Dfsu3DSigma
 
-                geom._top_elems = geom._findTopLayerElements(geom.element_table)
+                geom._top_elems = geom._find_top_layer_elements(geom.element_table)
 
         return geom
 
@@ -373,7 +372,7 @@ class _GeometryFMLayered(_GeometryFM):
             )
         else:
             # slow path
-            return self._findTopLayerElements(self.element_table)
+            return self._find_top_layer_elements(self.element_table)
 
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
@@ -422,7 +421,7 @@ class _GeometryFMLayered(_GeometryFM):
         return idx
 
     @staticmethod
-    def _findTopLayerElements(elementTable):
+    def _find_top_layer_elements(elementTable):
         """
         Find element indices (zero based) of the elements being the upper-most element
         in its column.
@@ -818,13 +817,6 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         unsupported = ("boundary_polylines", "interp2d")
         keys = sorted(list(super().__dir__()) + list(self.__dict__.keys()))
         return set([d for d in keys if d not in unsupported])
-
-    # @property
-    # def relative_node_distance(self):
-    #     if self._rel_node_dist is None:
-    #         nc = self.node_coordinates
-    #         self._rel_node_dist = _relative_cumulative_distance(nc, is_geo=self.is_geo)
-    #     return self._rel_node_dist
 
     @property
     def relative_element_distance(self):

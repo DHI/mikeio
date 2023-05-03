@@ -30,6 +30,8 @@ from ..spatial import (
     Grid3D,
 )
 
+from ..spatial._FM_geometry import _GeometryFM
+
 from ._data_plot import _DatasetPlotter
 
 
@@ -1821,9 +1823,7 @@ class Dataset(MutableMapping):
         elif isinstance(self.geometry, Grid1D):
             self._validate_extension(filename, ".dfs1")
             self._to_dfs1(filename)
-        elif (
-            "dfsu" in filename.lower()
-        ):  # Don't check geometry, assume the user knows what they are doing
+        elif isinstance(self.geometry, _GeometryFM):
             self._to_dfsu(filename)
         else:
             raise NotImplementedError(

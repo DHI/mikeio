@@ -256,7 +256,7 @@ class _GeometryFM(_Geometry):
 
         self._type = dfsu_type
 
-        self.element_table, self._element_ids = self._set_elements(
+        self.element_table, self._element_ids = self._check_elements(
             element_table=element_table,
             element_ids=element_ids,
             validate=validate,
@@ -265,7 +265,7 @@ class _GeometryFM(_Geometry):
         if reindex:
             self._reindex()
 
-    def _set_elements(self, element_table, element_ids=None, validate=True):
+    def _check_elements(self, element_table, element_ids=None, validate=True):
 
         if validate:
             max_node_id = self._node_ids.max()
@@ -300,6 +300,28 @@ class _GeometryFM(_Geometry):
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
+
+    @property
+    def n_nodes(self) -> int:
+        """Number of nodes"""
+        return len(self._node_ids)
+
+    @property
+    def node_ids(self):
+        return self._node_ids
+
+    @property
+    def n_elements(self) -> int:
+        """Number of elements"""
+        return len(self._element_ids)
+
+    @property
+    def element_ids(self):
+        return self._element_ids
+
+    @property
+    def _nc(self):
+        return self.node_coordinates
 
     @cached_property
     def max_nodes_per_element(self):
@@ -414,24 +436,6 @@ class GeometryFM2D(_GeometryFM):
                 return False
 
         return True
-
-    @property
-    def n_nodes(self) -> int:
-        """Number of nodes"""
-        return len(self._node_ids)
-
-    @property
-    def node_ids(self):
-        return self._node_ids
-
-    @property
-    def n_elements(self) -> int:
-        """Number of elements"""
-        return len(self._element_ids)
-
-    @property
-    def element_ids(self):
-        return self._element_ids
 
     @property
     def type_name(self):
