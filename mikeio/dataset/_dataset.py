@@ -1824,6 +1824,7 @@ class Dataset(MutableMapping):
             self._validate_extension(filename, ".dfs1")
             self._to_dfs1(filename)
         elif isinstance(self.geometry, _GeometryFM):
+            self._validate_extension(filename, ".dfsu")
             self._to_dfsu(filename)
         else:
             raise NotImplementedError(
