@@ -296,8 +296,6 @@ class _GeometryFMLayered(_GeometryFM):
             reindex=True,
         )
 
-        geom._type = None  # DfsuFileType.Mesh # TODO this seems fishy
-
         # Fix z-coordinate for sigma-z:
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
             zn = geom.node_coordinates[:, 2].copy()
@@ -637,29 +635,6 @@ class _GeometryFMLayered(_GeometryFM):
 
         return idx
 
-    def calc_element_coordinates(self, elements=None, zn=None):
-        """Calculates the coordinates of the center of each element.
-
-        Only necessary for dynamic vertical coordinates,
-        otherwise use the property *element_coordinates* instead
-
-        Parameters
-        ----------
-        elements : np.array(int), optional
-            element ids of selected elements
-        zn : np.array(float), optional
-            only the z-coodinates of the nodes
-
-        Examples
-        --------
-
-        Returns
-        -------
-        np.array
-            x,y,z of each element
-        """
-        return self._calc_element_coordinates(elements, zn)
-
     @cached_property
     def _dz(self):
         """Height of each 3d element (using static zn information)"""
@@ -702,8 +677,6 @@ class _GeometryFMLayered(_GeometryFM):
                 dz[j] = z_top - z_bot
 
         return dz
-
-    # TODO: add methods for extracting layers etc
 
 
 class GeometryFM3D(_GeometryFMLayered):

@@ -1262,9 +1262,7 @@ class GeometryFM(GeometryFM2D):
         warnings.warn("GeometryFM is deprecated, use GeometryFM2D instead")
 
 
-class _GeometryFMSpectrum(
-    GeometryFM2D
-):  # TODO should this inherit from GeometryFM2D or _GeometryFM?
+class _GeometryFMSpectrum(GeometryFM2D):
     def __init__(
         self,
         node_coordinates,
@@ -1362,6 +1360,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
         return geom
 
 
+# TODO this inherits indirectly from GeometryFM2D, which is not ideal
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     def isel(self, idx=None, axis="node"):
         return self._nodes_to_geometry(nodes=idx)

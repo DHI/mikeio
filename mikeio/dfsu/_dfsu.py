@@ -496,10 +496,6 @@ class _UnstructuredFile:
         """Center coordinates of each element"""
         return self.geometry.element_coordinates
 
-    @wraps(GeometryFM3D.calc_element_coordinates)
-    def calc_element_coordinates(self, elements=None, zn=None):
-        return self.geometry.calc_element_coordinates(elements, zn)
-
     @wraps(GeometryFM2D.contains)
     def contains(self, points):
         return self.geometry.contains(points)

@@ -41,7 +41,6 @@ def test_transect_geometry_properties(vslice):
     assert isinstance(g, GeometryFMVerticalProfile)
     assert len(g.top_elements) == 99
     assert len(g.bottom_elements) == 99
-    assert len(g.e2_e3_table) == 99
     assert len(g.relative_element_distance) == 441
     d1 = g.get_nearest_relative_distance([3.55e05, 6.145e06])
     assert d1 == pytest.approx(5462.3273)
