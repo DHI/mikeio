@@ -199,3 +199,19 @@ def test_layered(simple_3d_geom: GeometryFM3D):
     # subset
     g2 = g.isel(idx)
     assert g2.n_elements == 2
+
+
+def test_deprectated_geometryfm():
+
+    from mikeio.spatial import GeometryFM
+
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (0.5, 1.0, 0.0),  # 2
+    ]
+
+    el = [(0, 1, 2)]
+
+    with pytest.warns(match="GeometryFM2D"):
+        g = GeometryFM(nc, el)

@@ -1241,6 +1241,36 @@ class GeometryFM2D(_GeometryFM):
         newMesh.Write(outfilename)
 
 
+class GeometryFM(GeometryFM2D):
+    """Deprecated, use GeometryFM2D instead"""
+
+    def __init__(
+        self,
+        node_coordinates,
+        element_table,
+        codes=None,
+        projection=None,
+        dfsu_type=None,
+        element_ids=None,
+        node_ids=None,
+        validate=True,
+        reindex=False,
+    ) -> None:
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            validate=validate,
+            reindex=reindex,
+        )
+
+        warnings.warn("GeometryFM is deprecated, use GeometryFM2D instead")
+
+
 class _GeometryFMSpectrum(
     GeometryFM2D
 ):  # TODO should this inherit from GeometryFM2D or _GeometryFM?
