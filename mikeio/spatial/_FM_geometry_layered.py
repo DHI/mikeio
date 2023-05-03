@@ -155,32 +155,32 @@ class _GeometryFMLayered(_GeometryFM):
         )
 
         geom._type = self._type  #
-        if self.is_layered:
-            if new_type == DfsuFileType.Dfsu2D:
-                # If source is 3d, but output only has 1 layer
-                # then change type to 2d
-                geom._type = DfsuFileType.Dfsu2D
-                geom._n_layers = None
-                if node_layers == "all":
-                    raise ValueError(
-                        "Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
-                    )
-            else:
-                geom._type = self._type
-                geom._n_layers = n_layers
-                lowest_sigma = self.n_layers - self.n_sigma_layers
-                geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
 
-                # If source is sigma-z but output only has sigma layers
-                # then change type accordingly
-                if (
-                    self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-                    or self._type == DfsuFileType.Dfsu3DSigmaZ
-                ) and n_layers == geom._n_sigma:
-                    # TODO fix this
-                    geom._type = DfsuFileType.Dfsu3DSigma
+        if new_type == DfsuFileType.Dfsu2D:
+            # If source is 3d, but output only has 1 layer
+            # then change type to 2d
+            geom._type = DfsuFileType.Dfsu2D
+            geom._n_layers = None
+            if node_layers == "all":
+                raise ValueError(
+                    "Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
+                )
+        else:
+            geom._type = self._type
+            geom._n_layers = n_layers
+            lowest_sigma = self.n_layers - self.n_sigma_layers
+            geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
 
-                geom._top_elems = geom._find_top_layer_elements(geom.element_table)
+            # If source is sigma-z but output only has sigma layers
+            # then change type accordingly
+            if (
+                self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
+                or self._type == DfsuFileType.Dfsu3DSigmaZ
+            ) and n_layers == geom._n_sigma:
+                # TODO fix this
+                geom._type = DfsuFileType.Dfsu3DSigma
+
+            geom._top_elems = geom._find_top_layer_elements(geom.element_table)
 
         return geom
 
@@ -374,10 +374,11 @@ class _GeometryFMLayered(_GeometryFM):
 
     def _elements_in_area(self, area):
         """Find element ids of elements inside area"""
-        idx = self.geometry2d._elements_in_area(area)
-        if self.is_layered and len(idx) > 0:
-            idx = np.hstack(self.e2_e3_table[idx])
-        return idx
+        idx2d = self.geometry2d._elements_in_area(area)
+        if len(idx2d) > 0:
+            return np.hstack(self.e2_e3_table[idx2d])
+        else:
+            return np.array([], dtype=int)
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
 
