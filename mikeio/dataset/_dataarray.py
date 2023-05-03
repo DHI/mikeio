@@ -318,24 +318,21 @@ class DataArray(DataUtilsMixin):
         return len(problems) == 0
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFMVerticalProfile):
-            return _DataArrayPlotterFMVerticalProfile(self)
-        elif isinstance(self.geometry, GeometryFMVerticalColumn):
-            return _DataArrayPlotterFMVerticalColumn(self)
-        elif isinstance(self.geometry, GeometryFMPointSpectrum):
-            return _DataArrayPlotterPointSpectrum(self)
-        elif isinstance(self.geometry, GeometryFMLineSpectrum):
-            return _DataArrayPlotterLineSpectrum(self)
-        elif isinstance(self.geometry, GeometryFMAreaSpectrum):
-            return _DataArrayPlotterAreaSpectrum(self)
-        elif isinstance(self.geometry, GeometryFM2D):
-            return _DataArrayPlotterFM(self)
-        elif isinstance(self.geometry, Grid1D):
-            return _DataArrayPlotterGrid1D(self)
-        elif isinstance(self.geometry, Grid2D):
-            return _DataArrayPlotterGrid2D(self)
-        else:
-            return _DataArrayPlotter(self)
+        # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
+        PLOTTER_MAP = {
+            GeometryFMVerticalProfile: _DataArrayPlotterFMVerticalProfile,
+            GeometryFMVerticalColumn: _DataArrayPlotterFMVerticalColumn,
+            GeometryFMPointSpectrum: _DataArrayPlotterPointSpectrum,
+            GeometryFMLineSpectrum: _DataArrayPlotterLineSpectrum,
+            GeometryFMAreaSpectrum: _DataArrayPlotterAreaSpectrum,
+            GeometryFM2D: _DataArrayPlotterFM,
+            GeometryFM3D: _DataArrayPlotterFM,
+            Grid1D: _DataArrayPlotterGrid1D,
+            Grid2D: _DataArrayPlotterGrid2D,
+        }
+
+        plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
+        return plotter(self)
 
     def _set_spectral_attributes(self, geometry):
         if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
