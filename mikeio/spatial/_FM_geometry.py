@@ -90,7 +90,7 @@ class _GeometryFMPlotter:
     >>> g.plot.boundary_nodes()
     """
 
-    def __init__(self, geometry: "GeometryFM2D") -> None:
+    def __init__(self, geometry: Union["GeometryFM2D", "GeometryFM3D"]) -> None:
         self.g = geometry
 
     def __call__(self, ax=None, figsize=None, **kwargs):

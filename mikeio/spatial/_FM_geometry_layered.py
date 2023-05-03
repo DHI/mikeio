@@ -58,8 +58,6 @@ class _GeometryFMLayered(_GeometryFM):
         self._2d_ids = None
         self._layer_ids = None
 
-        self.plot = _GeometryFMPlotter(self)
-
     @cached_property
     def geometry2d(self):
         return self.to_2d_geometry()
@@ -754,6 +752,36 @@ class _GeometryFMLayered(_GeometryFM):
 
 
 class GeometryFM3D(_GeometryFMLayered):
+    def __init__(
+        self,
+        *,
+        node_coordinates,
+        element_table,
+        codes=None,
+        projection=None,
+        dfsu_type=DfsuFileType.Dfsu3DSigma,
+        element_ids=None,
+        node_ids=None,
+        n_layers: int = 1,  # at least 1 layer
+        n_sigma=None,
+        validate=True,
+        reindex=False,
+    ) -> None:
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            n_layers=n_layers,
+            n_sigma=n_sigma,
+            validate=validate,
+            reindex=reindex,
+        )
+        self.plot = _GeometryFMPlotter(self)
+
     @property
     def boundary_polylines(self):
         return self.geometry2d.boundary_polylines
