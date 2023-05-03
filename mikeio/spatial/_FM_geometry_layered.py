@@ -380,45 +380,6 @@ class _GeometryFMLayered(_GeometryFM):
         else:
             return np.array([], dtype=int)
 
-    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
-
-        if layers is not None:
-            idx = self.get_layer_elements(layers)
-        else:
-            idx = self._element_ids
-
-        if (
-            (coords is not None)
-            or (x is not None)
-            or (y is not None)
-            or (z is not None)
-        ):
-            if area is not None:
-                raise ValueError(
-                    "Coordinates and area cannot be provided at the same time!"
-                )
-            if coords is not None:
-                coords = np.atleast_2d(coords)
-                xy = coords[:, :2]
-                z = coords[:, 2] if coords.shape[1] == 3 else None
-            else:
-                xy = np.vstack((x, y)).T
-            idx_2d = self.geometry2d._find_element_2d(coords=xy)
-            assert len(idx_2d) == len(xy)
-            if z is None:
-                idx_3d = np.hstack(self.e2_e3_table[idx_2d])
-            else:
-                idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
-            idx = np.intersect1d(idx, idx_3d).astype(int)
-        elif area is not None:
-            idx_area = self._elements_in_area(area)
-            idx = np.intersect1d(idx, idx_area)
-        elif layers is None:
-            raise ValueError(
-                "At least one selection argument (x,y,z,coords,area,layers) needs to be provided!"
-            )
-        return idx
-
     @staticmethod
     def _find_top_layer_elements(elementTable):
         """
@@ -786,6 +747,45 @@ class GeometryFM3D(_GeometryFMLayered):
     def to_mesh(self, outfilename):
         return self.geometry2d.to_mesh(outfilename)
 
+    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
+
+        if layers is not None:
+            idx = self.get_layer_elements(layers)
+        else:
+            idx = self._element_ids
+
+        if (
+            (coords is not None)
+            or (x is not None)
+            or (y is not None)
+            or (z is not None)
+        ):
+            if area is not None:
+                raise ValueError(
+                    "Coordinates and area cannot be provided at the same time!"
+                )
+            if coords is not None:
+                coords = np.atleast_2d(coords)
+                xy = coords[:, :2]
+                z = coords[:, 2] if coords.shape[1] == 3 else None
+            else:
+                xy = np.vstack((x, y)).T
+            idx_2d = self.geometry2d._find_element_2d(coords=xy)
+            assert len(idx_2d) == len(xy)
+            if z is None:
+                idx_3d = np.hstack(self.e2_e3_table[idx_2d])
+            else:
+                idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
+            idx = np.intersect1d(idx, idx_3d).astype(int)
+        elif area is not None:
+            idx_area = self._elements_in_area(area)
+            idx = np.intersect1d(idx, idx_area)
+        elif layers is None:
+            raise ValueError(
+                "At least one selection argument (x,y,z,coords,area,layers) needs to be provided!"
+            )
+        return idx
+
 
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
@@ -817,13 +817,6 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         )
         self.plot = _GeometryFMVerticalProfilePlotter(self)
         self._rel_elem_dist = None
-
-    @property
-    def boundary_polylines(self):
-        # Overides base class
-        raise AttributeError(
-            "GeometryFMVerticalProfile has no boundary_polylines property"
-        )
 
     @property
     def relative_element_distance(self):
@@ -898,6 +891,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
 
 class GeometryFMVerticalColumn(GeometryFM3D):
+    # TODO class docstring
     def calc_ze(self, zn=None):
         if zn is None:
             zn = self.node_coordinates[:, 2]

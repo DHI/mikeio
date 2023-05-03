@@ -46,9 +46,6 @@ def test_transect_geometry_properties(vslice):
     d1 = g.get_nearest_relative_distance([3.55e05, 6.145e06])
     assert d1 == pytest.approx(5462.3273)
 
-    with pytest.raises(AttributeError, match="no boundary_polylines property"):
-        g.boundary_polylines
-
 
 def test_transect_geometry_properties_geo(vslice_geo):
     g = vslice_geo.geometry
