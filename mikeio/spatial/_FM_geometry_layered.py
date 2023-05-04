@@ -789,17 +789,12 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
             reindex=reindex,
         )
         self.plot = _GeometryFMVerticalProfilePlotter(self)
-        self._rel_elem_dist = None
 
-    @property
+    @cached_property
     def relative_element_distance(self):
-        if self._rel_elem_dist is None:
-            ec = self.element_coordinates
-            nc0 = self.node_coordinates[0, :2]
-            self._rel_elem_dist = _relative_cumulative_distance(
-                ec, nc0, is_geo=self.is_geo
-            )
-        return self._rel_elem_dist
+        ec = self.element_coordinates
+        nc0 = self.node_coordinates[0, :2]
+        return _relative_cumulative_distance(ec, nc0, is_geo=self.is_geo)
 
     def get_nearest_relative_distance(self, coords) -> float:
         """For a point near a transect, find the nearest relative distance
@@ -864,7 +859,10 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
 
 class GeometryFMVerticalColumn(GeometryFM3D):
-    # TODO class docstring
+    "A 3d geometry with consisting of a single vertical column"
+
+    # TODO: add plotter
+
     def calc_ze(self, zn=None):
         if zn is None:
             zn = self.node_coordinates[:, 2]
