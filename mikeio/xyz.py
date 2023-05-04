@@ -11,9 +11,9 @@ def read_xyz(filename: Union[str, Path]) -> pd.DataFrame:
         df = pd.read_csv(filename, sep=" ", header=None)
 
     ncol = df.shape[1]
-    names = ["x", "y", "z", "name"]
+    NAMES = ["x", "y", "z", "name"]
 
-    df.columns = names[0:ncol]
+    df.columns = NAMES[:ncol]  # type: ignore
 
     return df
 
@@ -24,4 +24,4 @@ def dataframe_to_xyz(self, filename: Union[str, Path]) -> None:
 
 
 # Monkey patch method on DataFrame for convenience
-pd.DataFrame.to_xyz = dataframe_to_xyz
+pd.DataFrame.to_xyz = dataframe_to_xyz  # type: ignore

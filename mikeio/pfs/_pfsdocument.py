@@ -3,7 +3,7 @@ import warnings
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, TextIO, Tuple, Union
+from typing import Callable, Dict, List, Mapping, TextIO, Tuple, Union
 
 import yaml
 
@@ -128,7 +128,7 @@ class PfsDocument(PfsSection):
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
     @staticmethod
-    def _unravel_items(items):
+    def _unravel_items(items: Callable) -> Tuple[List, List]:
         rkeys = []
         rvals = []
         for k, v in items():

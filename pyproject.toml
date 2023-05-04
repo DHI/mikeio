@@ -64,3 +64,12 @@ notebooks= [
 [project.urls]
 "Homepage" = "https://github.com/DHI/mikeio"
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
+
+# mypy global options:
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = false
+allow_redefinition = true
+warn_unreachable = true
+
