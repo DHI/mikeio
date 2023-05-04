@@ -8,10 +8,10 @@ from typing import Iterable, List, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.eum import eumQuantity
+from mikecore.DfsBuilder import DfsBuilder  # type: ignore
+from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile  # type: ignore
+from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
+from mikecore.eum import eumQuantity  # type: ignore
 from tqdm import tqdm, trange
 
 from . import __dfs_version__
@@ -50,7 +50,7 @@ class _ChunkInfo:
         Calculate chunk info based on # of elements in dfs file and selected buffer size
     """
 
-    def __init__(self, n_data: int, n_chunks: np.int32):
+    def __init__(self, n_data: int, n_chunks: int):
 
         self.n_data = n_data
         self.n_chunks = n_chunks

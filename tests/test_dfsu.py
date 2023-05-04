@@ -631,10 +631,12 @@ def test_write_big_file(tmp_path):
     with dfs.write(fp, data=ds, dt=3600, keep_open=True) as f:
         for _ in range(1, nt):
             data = []
-            for _ in range(n_items):
+            for i in range(n_items):
                 d = np.random.random((1, n_elements))
-                data.append(d)
-            f.append(data)
+                da = DataArray(data=d, geometry=msh.geometry, item=f"Item {i+1}")
+                data.append(da)
+            dst = Dataset(data)
+            f.append(dst)
 
     dfsu = mikeio.open(fp)
 

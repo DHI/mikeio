@@ -709,7 +709,7 @@ class DataArray(DataUtilsMixin):
         elif axis == 3:
             dat = self.values[:, :, :, idx]
         else:
-            dat = np.take(self.values, idx, axis=axis)
+            raise ValueError(f"Subsetting with {axis=} is not supported")
 
         return DataArray(
             data=dat,
@@ -853,12 +853,8 @@ class DataArray(DataUtilsMixin):
             if hasattr(time, "time"):
                 if isinstance(time.time, pd.DatetimeIndex):
                     time = time.time
-            if isinstance(time, int) or (
-                isinstance(time, Sequence) and isinstance(time[0], int)
-            ):
-                da = da.isel(time, axis="time")
-            else:
-                da = da[time]
+
+            da = da[time]  # __getitem__ is 🚀
 
         return da
 
