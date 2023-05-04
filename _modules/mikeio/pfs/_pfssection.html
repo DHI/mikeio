@@ -113,18 +113,17 @@
 
 
 <div class="viewcode-block" id="PfsSection"><a class="viewcode-back" href="../../../pfs.html#mikeio.PfsSection">[docs]</a><span class="k">class</span> <span class="nc">PfsSection</span><span class="p">(</span><span class="n">SimpleNamespace</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">):</span>
-
 <div class="viewcode-block" id="PfsSection.from_dataframe"><a class="viewcode-back" href="../../../pfs.html#mikeio.PfsSection.from_dataframe">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;PfsSection&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a PfsSection from a DataFrame</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        df: dataframe</span>
 <span class="sd">            data</span>
 <span class="sd">        prefix: str</span>
 <span class="sd">            section header prefix</span>
-<span class="sd">        </span>
+
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; df = pd.DataFrame(dict(station=[&quot;Foo&quot;, &quot;Bar&quot;],include=[0,1]), index=[1,2])</span>
@@ -143,11 +142,8 @@
 <span class="sd">            include = 1</span>
 <span class="sd">        EndSect  // STATION_2</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
-            <span class="n">key</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-            <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">idx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">()}</span>
+
         <span class="k">return</span> <span class="n">PfsSection</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dictionary</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>

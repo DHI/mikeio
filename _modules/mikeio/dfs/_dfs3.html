@@ -88,15 +88,17 @@
   <h1>Source code for mikeio.dfs._dfs3</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">mikecore.DfsBuilder</span> <span class="kn">import</span> <span class="n">DfsBuilder</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">DfsSimpleType</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>
-<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span><span class="p">,</span> <span class="n">eumUnit</span>
-<span class="kn">from</span> <span class="nn">mikecore.Projections</span> <span class="kn">import</span> <span class="n">Cartography</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsBuilder</span> <span class="kn">import</span> <span class="n">DfsBuilder</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">DfsSimpleType</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span><span class="p">,</span> <span class="n">eumUnit</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.Projections</span> <span class="kn">import</span> <span class="n">Cartography</span>  <span class="c1"># type: ignore</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
 <span class="kn">from</span> <span class="nn">..dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
@@ -302,9 +304,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
-                <span class="s2">&quot;area subsetting is not yet implemented for Dfs3&quot;</span>
-            <span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;area subsetting is not yet implemented for Dfs3&quot;</span><span class="p">)</span>
         <span class="c1"># NOTE:</span>
         <span class="c1"># if keepdims is not False:</span>
         <span class="c1">#    return NotImplementedError(&quot;keepdims is not yet implemented for Dfs3&quot;)</span>
@@ -330,6 +330,9 @@
             <span class="n">layers</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="n">layers</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
 
+        <span class="n">dims</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+
         <span class="n">nz</span> <span class="o">=</span> <span class="n">zNum</span> <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nz</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">keepdims</span><span class="p">):</span>
             <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_geometry_for_layers</span><span class="p">([</span><span class="mi">0</span><span class="p">])</span>
@@ -341,7 +344,7 @@
             <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">nt</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">yNum</span><span class="p">,</span> <span class="n">xNum</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
             <span class="n">data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">single_time_selected</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
