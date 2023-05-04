@@ -1,8 +1,8 @@
 import os
 
-from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.eum import eumUnit
+from mikecore.DfsBuilder import DfsBuilder  # type: ignore
+from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
+from mikecore.eum import eumUnit  # type: ignore
 
 from .. import __dfs_version__
 from ._dfs import _Dfs123
