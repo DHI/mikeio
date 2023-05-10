@@ -1035,6 +1035,14 @@ class GeometryFM2D(_GeometryFM):
         else:
             raise ValueError("Provide either coordinates or area")
 
+    @staticmethod
+    def _inside_polygon(polygon, xy) -> bool:
+        import matplotlib.path as mp
+
+        if polygon.ndim == 1:
+            polygon = np.column_stack((polygon[0::2], polygon[1::2]))
+        return mp.Path(polygon).contains_points(xy)
+
     def _elements_in_area(self, area):
         """Find 2d element ids of elements inside area"""
         if self._area_is_bbox(area):

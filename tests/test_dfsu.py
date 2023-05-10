@@ -231,6 +231,34 @@ def test_read_area():
     assert ds.geometry.n_elements == 18
 
 
+def test_read_area_polygon():
+
+    polygon = [
+        [7.78, 55.20],
+        [7.03, 55.46],
+        [6.91, 54.98],
+        [7.53, 54.73],
+        [7.78, 55.20],
+    ]
+
+    filename = "tests/testdata/wind_north_sea.dfsu"
+    dfs = mikeio.open(filename)
+
+    p1 = (4.0, 54.0)
+    assert p1 in dfs.geometry
+
+    ds = dfs.read(area=polygon)
+
+    assert p1 not in ds.geometry
+
+    assert ds.geometry.n_elements < dfs.geometry.n_elements
+
+    domain = dfs.geometry.to_shapely().buffer(0)
+    subdomain = ds.geometry.to_shapely().buffer(0)
+
+    assert subdomain.within(domain)
+
+
 def test_find_index_on_island():
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
