@@ -615,3 +615,14 @@ def test_read_dfs0_with_many_items():
     ds = mikeio.read("tests/testdata/many_items.dfs0")
 
     assert ds.n_items == 800
+
+def test_read_dfs0_with_non_unique_item_names():
+
+    ds = mikeio.read("tests/testdata/untitled_3_items.dfs0")
+
+    assert ds.n_items == 3
+
+    assert ds.Untitled.values[0] == pytest.approx(1.0)
+
+    assert ds.Untitled_3.values[0] == pytest.approx(0.0)
+    assert np.isnan(ds.Untitled_3.values[1])
