@@ -167,7 +167,7 @@ class Dataset(MutableMapping):
         return set([d for d in keys if d not in ("values", "keys")])
 
     @staticmethod
-    def _modify_list(lst):
+    def _modify_list(lst: Iterable[str]) -> List[str]:
         modified_list = []
         count_dict = {}
         
