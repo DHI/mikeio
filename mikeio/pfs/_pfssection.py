@@ -358,7 +358,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
             if v == "":
                 # add either '' or || as pre- and suffix to strings depending on path definition
                 v = "''"
-            elif v.count("|") == 2:
+            elif v.count("|") == 2 and "CLOB" not in v:
                 v = f"{v}"
             else:
                 v = f"'{v}'"

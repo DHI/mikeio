@@ -1208,5 +1208,28 @@ def test_clob_can_contain_pipe_characters():
     assert sct.TemplateFile == "||"
     assert (
         sct.Clob
-        == r'<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+        == '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+    )
+
+def test_write_read_clob(tmp_path):
+    clob_text = """
+    [WQRiverPfs_0]
+        Clob = '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+    EndSect  // WQRiverPfs_0
+   """
+    pfs = mikeio.PfsDocument(StringIO(clob_text))
+    sct = pfs.WQRiverPfs_0
+    assert (
+        sct.Clob
+        == '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+    )
+
+    fp = tmp_path / "clob.pfs"
+    pfs.write(fp)
+
+    pfs2 = mikeio.PfsDocument(fp)
+    sct = pfs2.WQRiverPfs_0
+    assert (
+        sct.Clob
+        == '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
     )
