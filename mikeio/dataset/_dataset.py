@@ -176,6 +176,7 @@ class Dataset(MutableMapping):
                 modified_list.append(item)
                 count_dict[item] = 2
             else:
+                warnings.warn(f"Duplicate item name: {item}. Renaming to {item}_{count_dict[item]}")
                 modified_item = f"{item}_{count_dict[item]}"
                 modified_list.append(modified_item)
                 count_dict[item] += 1

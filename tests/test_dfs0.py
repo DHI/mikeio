@@ -618,7 +618,8 @@ def test_read_dfs0_with_many_items():
 
 def test_read_dfs0_with_non_unique_item_names():
 
-    ds = mikeio.read("tests/testdata/untitled_3_items.dfs0")
+    with pytest.warns(match="item name"):
+        ds = mikeio.read("tests/testdata/untitled_3_items.dfs0")
 
     assert ds.n_items == 3
 
