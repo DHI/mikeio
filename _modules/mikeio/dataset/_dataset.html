@@ -111,7 +111,7 @@
 <span class="kn">from</span> <span class="nn">._data_utils</span> <span class="kn">import</span> <span class="n">_to_safe_name</span><span class="p">,</span> <span class="n">_get_time_idx_list</span><span class="p">,</span> <span class="n">_n_selected_timesteps</span>
 <span class="kn">from</span> <span class="nn">..eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">,</span> <span class="n">ItemInfo</span>
 <span class="kn">from</span> <span class="nn">..spatial</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">GeometryFM</span><span class="p">,</span>
+    <span class="n">GeometryFM2D</span><span class="p">,</span>
     <span class="n">GeometryPoint2D</span><span class="p">,</span>
     <span class="n">GeometryPoint3D</span><span class="p">,</span>
     <span class="n">GeometryUndefined</span><span class="p">,</span>
@@ -119,6 +119,8 @@
     <span class="n">Grid2D</span><span class="p">,</span>
     <span class="n">Grid3D</span><span class="p">,</span>
 <span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">..spatial._FM_geometry</span> <span class="kn">import</span> <span class="n">_GeometryFM</span>
 
 <span class="kn">from</span> <span class="nn">._data_plot</span> <span class="kn">import</span> <span class="n">_DatasetPlotter</span>
 
@@ -1018,7 +1020,7 @@
             <span class="n">xy</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)]</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM2D</span>
             <span class="p">):</span>  <span class="c1"># TODO remove this when all geometries implements the same method</span>
 
                 <span class="n">interpolant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span>
@@ -1169,7 +1171,7 @@
 
 <div class="viewcode-block" id="Dataset.interp_like"><a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.interp_like">[docs]</a>    <span class="k">def</span> <span class="nf">interp_like</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Dataset&quot;</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">GeometryFM</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">],</span>
+        <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Dataset&quot;</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">GeometryFM2D</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">],</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate in space (and in time) to other geometry (and time axis)</span>
@@ -1196,7 +1198,7 @@
 <span class="sd">        Dataset</span>
 <span class="sd">            Interpolated Dataset</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">is_2d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM2D</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">is_2d</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
                 <span class="s2">&quot;Currently only supports interpolating from 2d flexible mesh data!&quot;</span>
             <span class="p">)</span>
@@ -1212,7 +1214,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">):</span>
             <span class="n">xy</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">xy</span>
 
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">GeometryFM</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geom</span><span class="p">,</span> <span class="n">GeometryFM2D</span><span class="p">):</span>
             <span class="n">xy</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">geom</span><span class="o">.</span><span class="n">is_layered</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
@@ -1911,7 +1913,7 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">Grid1D</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_validate_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;.dfs1&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_to_dfs1</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">_GeometryFM</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_validate_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;.dfsu&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_to_dfsu</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>

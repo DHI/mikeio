@@ -63,7 +63,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.append"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.append()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.boundary_codes"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.boundary_codes</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.boundary_polylines</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.calc_element_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.calc_element_coordinates()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.close"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.close()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.contains"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.contains()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu.Dfsu2DH.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dfsu2DH.deletevalue</span></code></a></li>
@@ -224,31 +223,6 @@
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.calc_element_coordinates">
-<span class="sig-name descname"><span class="pre">calc_element_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.calc_element_coordinates" title="Permalink to this definition"></a></dt>
-<dd><p>Calculates the coordinates of the center of each element.</p>
-<p>Only necessary for dynamic vertical coordinates,
-otherwise use the property <em>element_coordinates</em> instead</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>elements</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>)</em><em>, </em><em>optional</em>) – element ids of selected elements</p></li>
-<li><p><strong>zn</strong> (<em>np.array</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><em>float</em></a><em>)</em><em>, </em><em>optional</em>) – only the z-coodinates of the nodes</p></li>
-</ul>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>x,y,z of each element</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.array</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.close">
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.close" title="Permalink to this definition"></a></dt>
 <dd><p>Finalize write for a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
@@ -291,14 +265,12 @@ otherwise use the property <em>element_coordinates</em> instead</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.dfsu.Dfsu2DH.elements_to_geometry">
-<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Collection" title="(in Python v3.11)"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'all'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial._FM_geometry.GeometryFM"><span class="pre">GeometryFM</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="dfsu-3d.html#mikeio.spatial.FM_geometry.GeometryFM3D" title="mikeio.spatial._FM_geometry.GeometryFM3D"><span class="pre">GeometryFM3D</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GeometryPoint3D</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GeometryPoint2D</span></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.elements_to_geometry" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Collection" title="(in Python v3.11)"><span class="pre">Collection</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">GeometryFM2D</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">GeometryPoint2D</span></span></span><a class="headerlink" href="#mikeio.dfsu.Dfsu2DH.elements_to_geometry" title="Permalink to this definition"></a></dt>
 <dd><p>export a selection of elements to new flexible file geometry</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>elements</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> or </em><em>Collection</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – collection of element ids</p></li>
-<li><p><strong>node_layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – for 3d files either ‘top’, ‘bottom’ layer nodes
-or ‘all’ can be selected, by default ‘all’</p></li>
 <li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – keep original geometry type for single points</p></li>
 </ul>
 </dd>
@@ -664,11 +636,11 @@ default np.nan</p></li>
 </section>
 <section id="flexible-mesh-geometry-api">
 <h2>Flexible Mesh Geometry API<a class="headerlink" href="#flexible-mesh-geometry-api" title="Permalink to this heading"></a></h2>
-<p>See <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="xref myst py py-class">Flexible Mesh Geometry API</span></a></p>
+<p>See <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="xref myst py py-attr">Flexible Mesh Geometry API</span></a></p>
 </section>
 <section id="fm-geometry-plotter-api">
 <h2>FM Geometry Plotter API<a class="headerlink" href="#fm-geometry-plotter-api" title="Permalink to this heading"></a></h2>
-<p>See <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry._GeometryFMPlotter" title="mikeio.spatial.FM_geometry._GeometryFMPlotter"><span class="xref myst py py-class">FM Geometry Plotter API</span></a></p>
+<p>See <a class="reference internal" href="#_GeometryFMPlotter"><span class="xref myst">FM Geometry Plotter API</span></a></p>
 </section>
 <section id="dataarray-plotter-fm-api">
 <h2>DataArray Plotter FM API<a class="headerlink" href="#dataarray-plotter-fm-api" title="Permalink to this heading"></a></h2>
