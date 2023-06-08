@@ -1276,7 +1276,7 @@ def test_layer_selection():
 
     das_layer = ds.Temperature.sel(layers=0)
     # should not be layered after selection
-    assert type(das_layer.geometry) == mikeio.spatial.GeometryFM
+    assert type(das_layer.geometry) == mikeio.spatial.GeometryFM2D
 
 
 def test_time_selection():

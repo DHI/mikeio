@@ -10,7 +10,7 @@ from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh, ItemInfo
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 
-from mikeio.spatial._FM_geometry import GeometryFM
+from mikeio.spatial._FM_geometry import GeometryFM2D
 from mikeio.spatial import GeometryPoint2D
 from mikeio.spatial import Grid2D
 
@@ -227,8 +227,36 @@ def test_read_area():
     dfs = mikeio.open(filename)
 
     ds = dfs.read(area=[0, 0, 0.1, 0.1])
-    assert isinstance(ds.geometry, GeometryFM)
+    assert isinstance(ds.geometry, GeometryFM2D)
     assert ds.geometry.n_elements == 18
+
+
+def test_read_area_polygon():
+
+    polygon = [
+        [7.78, 55.20],
+        [7.03, 55.46],
+        [6.91, 54.98],
+        [7.53, 54.73],
+        [7.78, 55.20],
+    ]
+
+    filename = "tests/testdata/wind_north_sea.dfsu"
+    dfs = mikeio.open(filename)
+
+    p1 = (4.0, 54.0)
+    assert p1 in dfs.geometry
+
+    ds = dfs.read(area=polygon)
+
+    assert p1 not in ds.geometry
+
+    assert ds.geometry.n_elements < dfs.geometry.n_elements
+
+    domain = dfs.geometry.to_shapely().buffer(0)
+    subdomain = ds.geometry.to_shapely().buffer(0)
+
+    assert subdomain.within(domain)
 
 
 def test_find_index_on_island():
@@ -821,13 +849,14 @@ def test_elements_to_geometry():
     other_tiny_geom = dfs.geometry.isel(set([1, 0]))
     assert other_tiny_geom.n_elements == 2
 
-    prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
-    geom = dfs.geometry.elements_to_geometry(prof_ids)
+    # Removed, use sel on geometry instead
+    # prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
+    # geom = dfs.geometry.elements_to_geometry(prof_ids)
 
-    text = repr(geom)
+    # text = repr(geom)
 
-    assert geom.n_layers == 5
-    assert "nodes" in text
+    # assert geom.n_layers == 5
+    # assert "nodes" in text
 
     elements = dfs.get_layer_elements(layers=-1)
     geom = dfs.elements_to_geometry(elements, node_layers="top")
@@ -1088,28 +1117,28 @@ def test_interp_like_dataset(tmp_path):
 def test_interp_like_fm():
     msh = Mesh("tests/testdata/north_sea_2.mesh")
     geometry = msh.geometry
-    assert isinstance(geometry, GeometryFM)
+    assert isinstance(geometry, GeometryFM2D)
 
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ws = ds[0]
     wsi = ws.interp_like(geometry)
     assert isinstance(wsi, DataArray)
-    assert isinstance(wsi.geometry, GeometryFM)
+    assert isinstance(wsi.geometry, GeometryFM2D)
 
     wsi2 = ws.interp_like(geometry, n_nearest=5, extrapolate=True)
     assert isinstance(wsi2, DataArray)
-    assert isinstance(wsi2.geometry, GeometryFM)
+    assert isinstance(wsi2.geometry, GeometryFM2D)
 
 
 def test_interp_like_fm_dataset():
     msh = Mesh("tests/testdata/north_sea_2.mesh")
     geometry = msh.geometry
-    assert isinstance(geometry, GeometryFM)
+    assert isinstance(geometry, GeometryFM2D)
 
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
-    assert isinstance(dsi.geometry, GeometryFM)
+    assert isinstance(dsi.geometry, GeometryFM2D)
 
 
 def test_write_header(tmp_path):

@@ -26,7 +26,7 @@ from ..dfs._dfs import (
 )
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
-    GeometryFM,
+    GeometryFM2D,
     GeometryFM3D,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
@@ -196,7 +196,7 @@ class _UnstructuredFile:
         nc, codes, node_ids = self._get_nodes_from_source(msh)
         el_table, el_ids = self._get_elements_from_source(msh)
 
-        self._geometry = GeometryFM(
+        self._geometry = GeometryFM2D(
             node_coordinates=nc,
             element_table=el_table,
             codes=codes,
@@ -276,7 +276,7 @@ class _UnstructuredFile:
                     directions=self.directions,
                 )
             else:
-                self._geometry = GeometryFM(
+                self._geometry = GeometryFM2D(
                     node_coordinates=nc,
                     element_table=el_table,
                     codes=codes,
@@ -487,7 +487,7 @@ class _UnstructuredFile:
             return nc[self.geometry.codes == code]
         return nc
 
-    @wraps(GeometryFM.elements_to_geometry)
+    @wraps(GeometryFM2D.elements_to_geometry)
     def elements_to_geometry(self, elements, node_layers="all"):
         return self.geometry.elements_to_geometry(elements, node_layers)
 
@@ -496,11 +496,7 @@ class _UnstructuredFile:
         """Center coordinates of each element"""
         return self.geometry.element_coordinates
 
-    @wraps(GeometryFM3D.calc_element_coordinates)
-    def calc_element_coordinates(self, elements=None, zn=None):
-        return self.geometry.calc_element_coordinates(elements, zn)
-
-    @wraps(GeometryFM.contains)
+    @wraps(GeometryFM2D.contains)
     def contains(self, points):
         return self.geometry.contains(points)
 
@@ -540,15 +536,15 @@ class _UnstructuredFile:
             projection=self.geometry.projection_string,
         )
 
-    @wraps(GeometryFM.get_element_area)
+    @wraps(GeometryFM2D.get_element_area)
     def get_element_area(self):
         return self.geometry.get_element_area()
 
-    @wraps(GeometryFM.to_shapely)
+    @wraps(GeometryFM2D.to_shapely)
     def to_shapely(self):
         return self.geometry.to_shapely()
 
-    @wraps(GeometryFM.get_node_centered_data)
+    @wraps(GeometryFM2D.get_node_centered_data)
     def get_node_centered_data(self, data, extrapolate=True):
         return self.geometry.get_node_centered_data(data, extrapolate)
 

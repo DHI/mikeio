@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 import mikeio
 from mikeio import Dfsu, Mesh
-from mikeio.spatial._FM_geometry import (
-    GeometryFM,
+from mikeio.spatial import (
+    GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalColumn,
 )
@@ -52,14 +52,14 @@ def test_read_top_layer():
 
     ds = dfs.read()  # all data in file
     dstop1 = ds.sel(layers="top")
+    assert dstop1.geometry.max_nodes_per_element <= 4
 
     dstop2 = dfs.read(layers="top")
     assert dstop1.shape == dstop2.shape
     assert dstop1.dims == dstop2.dims
-    assert isinstance(dstop1.geometry, GeometryFM)
+    assert isinstance(dstop1.geometry, GeometryFM2D)
     assert dstop1.geometry._type == dstop2.geometry._type
     assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
-    assert dstop1.geometry.max_nodes_per_element <= 4
 
 
 def test_read_bottom_layer():
@@ -72,7 +72,7 @@ def test_read_bottom_layer():
     dsbot2 = dfs.read(layers="bottom")
     assert dsbot1.shape == dsbot2.shape
     assert dsbot1.dims == dsbot2.dims
-    assert isinstance(dsbot1.geometry, GeometryFM)
+    assert isinstance(dsbot1.geometry, GeometryFM2D)
     assert dsbot1.geometry._type == dsbot2.geometry._type
     assert np.all(dsbot1.to_numpy() == dsbot2.to_numpy())
     assert dsbot1.geometry.max_nodes_per_element <= 4
@@ -304,34 +304,6 @@ def test_number_of_nodes_and_elements_sigma_z():
     assert dfs.n_nodes == 12042
 
 
-def test_calc_element_coordinates_3d():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-
-    # extract dynamic z values for profile
-    elem_ids = dfs.find_nearest_profile_elements(333934.1, 6158101.5)
-    ds = dfs.read(items=0, elements=elem_ids, time=0)
-    zn_dyn = ds[0]._zn  # TODO
-    ec = dfs.calc_element_coordinates(elements=elem_ids, zn=zn_dyn)
-
-    assert ec[0, 2] == pytest.approx(-6.981768845)
-
-
-def test_find_nearest_elements_3d():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-
-    elem_id = dfs.geometry.find_nearest_elements(333934, 6158101)
-    assert elem_id == 5323
-    assert elem_id in dfs.top_elements
-
-    elem_id = dfs.geometry.find_nearest_elements(333934, 6158101, layer=7)
-    assert elem_id == 5322
-
-    elem_id = dfs.geometry.find_nearest_elements(333934, 6158101, -7)
-    assert elem_id == 5320
-
-
 def test_read_and_select_single_element_dfsu_3d():
 
     filename = "tests/testdata/basin_3d.dfsu"
@@ -518,21 +490,6 @@ def test_get_layer_elements():
         elem_ids = dfs.get_layer_elements(11)
 
 
-def test_find_nearest_profile_elements():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-    elem_ids = dfs.find_nearest_profile_elements(358337, 6196090)
-    assert len(elem_ids) == 8
-    assert elem_ids[-1] == 3042
-
-
-def test_get_element_area_3D():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-    areas = dfs.get_element_area()
-    assert areas[0] == 350186.43530453625
-
-
 def test_write_from_dfsu3D(tmp_path):
 
     sourcefilename = "tests/testdata/basin_3d.dfsu"
@@ -605,29 +562,6 @@ def test_extract_surface_elevation_from_3d(tmp_path):
 
     dfs2 = mikeio.open(outputfile)
     assert dfs2.n_elements == n_top1
-
-
-def test_find_nearest_element_in_Zlayer():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-    el2dindx = dfs.elem2d_ids[12]
-    assert el2dindx == 2
-    ids = dfs.geometry.find_nearest_elements(357000, 6200000, layer=0)
-    el2dindx = dfs.elem2d_ids[ids]
-    table = dfs.e2_e3_table[el2dindx]
-    assert ids == 3216
-    assert el2dindx == 745
-    assert len(table) == 9
-    ids = dfs.geometry.find_nearest_elements(357000, 6200000, layer=8)
-    el2dindx = dfs.elem2d_ids[ids]
-    table = dfs.e2_e3_table[el2dindx]
-    assert ids == 3224
-    assert el2dindx == 745
-    assert len(table) == 9
-
-    with pytest.raises(Exception):
-        # z and layer cannot both be given
-        dfs.geometry.find_nearest_elements(357000, 6200000, z=-3, layer=8)
 
 
 def test_dataset_write_dfsu3d(tmp_path):

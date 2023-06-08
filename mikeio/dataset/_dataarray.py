@@ -19,7 +19,8 @@ from ..spatial import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
-    GeometryFM,
+    GeometryFM2D,
+    GeometryFM3D,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
@@ -27,7 +28,8 @@ from ..spatial import (
     GeometryFMVerticalProfile,
 )
 
-from ..spatial._FM_geometry import _GeometryFMLayered
+# We need this type to know if we should keep zn
+from ..spatial._FM_geometry_layered import _GeometryFMLayered
 
 from .._spectral import calc_m0_from_spectrum
 from ._data_plot import (
@@ -69,7 +71,7 @@ class _DataArraySpectrumToHm0:
                 axis_name="node",
             )
         elif isinstance(g, GeometryFMAreaSpectrum):
-            geometry = GeometryFM(
+            geometry = GeometryFM2D(
                 node_coordinates=g.node_coordinates,
                 codes=g.codes,
                 node_ids=g.node_ids,
@@ -150,6 +152,9 @@ class DataArray(DataUtilsMixin):
 
     @staticmethod
     def _guess_dims(ndim, shape, n_timesteps, geometry):
+
+        # TODO delete default dims to geometry
+
         # This is not very robust, but is probably a reasonable guess
         time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
         dims = ["time"] if time_is_first else []
@@ -161,7 +166,10 @@ class DataArray(DataUtilsMixin):
             if ndim_no_time == 2:
                 dims.append("direction")
                 dims.append("frequency")
-        elif isinstance(geometry, GeometryFM):
+        elif isinstance(geometry, GeometryFM3D):
+            if ndim_no_time > 0:
+                dims.append("element")
+        elif isinstance(geometry, GeometryFM2D):
             if geometry._type == DfsuFileType.DfsuSpectral1D:
                 if ndim_no_time > 0:
                     dims.append("node")
@@ -232,7 +240,7 @@ class DataArray(DataUtilsMixin):
 
         if isinstance(geometry, GeometryFMPointSpectrum):
             pass
-        elif isinstance(geometry, GeometryFM):
+        elif isinstance(geometry, GeometryFM2D):
             if geometry.is_spectral:
                 if geometry._type == DfsuFileType.DfsuSpectral1D:
                     assert (
@@ -310,24 +318,21 @@ class DataArray(DataUtilsMixin):
         return len(problems) == 0
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFMVerticalProfile):
-            return _DataArrayPlotterFMVerticalProfile(self)
-        elif isinstance(self.geometry, GeometryFMVerticalColumn):
-            return _DataArrayPlotterFMVerticalColumn(self)
-        elif isinstance(self.geometry, GeometryFMPointSpectrum):
-            return _DataArrayPlotterPointSpectrum(self)
-        elif isinstance(self.geometry, GeometryFMLineSpectrum):
-            return _DataArrayPlotterLineSpectrum(self)
-        elif isinstance(self.geometry, GeometryFMAreaSpectrum):
-            return _DataArrayPlotterAreaSpectrum(self)
-        elif isinstance(self.geometry, GeometryFM):
-            return _DataArrayPlotterFM(self)
-        elif isinstance(self.geometry, Grid1D):
-            return _DataArrayPlotterGrid1D(self)
-        elif isinstance(self.geometry, Grid2D):
-            return _DataArrayPlotterGrid2D(self)
-        else:
-            return _DataArrayPlotter(self)
+        # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
+        PLOTTER_MAP = {
+            GeometryFMVerticalProfile: _DataArrayPlotterFMVerticalProfile,
+            GeometryFMVerticalColumn: _DataArrayPlotterFMVerticalColumn,
+            GeometryFMPointSpectrum: _DataArrayPlotterPointSpectrum,
+            GeometryFMLineSpectrum: _DataArrayPlotterLineSpectrum,
+            GeometryFMAreaSpectrum: _DataArrayPlotterAreaSpectrum,
+            GeometryFM2D: _DataArrayPlotterFM,
+            GeometryFM3D: _DataArrayPlotterFM,
+            Grid1D: _DataArrayPlotterGrid1D,
+            Grid2D: _DataArrayPlotterGrid2D,
+        }
+
+        plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
+        return plotter(self)
 
     def _set_spectral_attributes(self, geometry):
         if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
@@ -937,13 +942,11 @@ class DataArray(DataUtilsMixin):
                     interpolant = self.geometry.get_spatial_interpolant(coords)
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
-            elif isinstance(self.geometry, GeometryFM):
+            elif isinstance(self.geometry, GeometryFM3D):
+                raise NotImplementedError("Interpolation in 3d is not yet implemented")
+            elif isinstance(self.geometry, GeometryFM2D):
                 if x is None or y is None:
                     raise ValueError("both x and y must be specified")
-                if self.geometry.is_layered:
-                    raise NotImplementedError(
-                        "Interpolation in 3d is not yet implemented"
-                    )
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
@@ -1101,7 +1104,7 @@ class DataArray(DataUtilsMixin):
 
     def interp_like(
         self,
-        other: Union["DataArray", Grid2D, GeometryFM, pd.DatetimeIndex],
+        other: Union["DataArray", Grid2D, GeometryFM2D, pd.DatetimeIndex],
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1128,7 +1131,7 @@ class DataArray(DataUtilsMixin):
         DataArray
             Interpolated DataArray
         """
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
@@ -1136,7 +1139,7 @@ class DataArray(DataUtilsMixin):
         if isinstance(other, pd.DatetimeIndex):
             return self.interp_time(other, **kwargs)
 
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError("Currently only supports 2d flexible mesh data!")
 
         if hasattr(other, "geometry"):
@@ -1146,7 +1149,7 @@ class DataArray(DataUtilsMixin):
 
         if isinstance(geom, Grid2D):
             xy = geom.xy
-        elif isinstance(geom, GeometryFM):
+        elif isinstance(geom, GeometryFM2D):
             xy = geom.element_coordinates[:, :2]
             if geom.is_layered:
                 raise NotImplementedError(
@@ -1160,7 +1163,7 @@ class DataArray(DataUtilsMixin):
         else:
             elem_ids, weights = interpolant
 
-        if isinstance(geom, (Grid2D, GeometryFM)):
+        if isinstance(geom, (Grid2D, GeometryFM2D)):
             shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
 
             dai = self.geometry.interp2d(
@@ -1757,7 +1760,7 @@ class DataArray(DataUtilsMixin):
             coords["z"] = xr.DataArray(data=self.geometry.z, dims="z")
             coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
             coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, GeometryFM):
+        elif isinstance(self.geometry, GeometryFM2D):
             coords["element"] = xr.DataArray(
                 data=self.geometry.element_ids, dims="element"
             )
