@@ -169,6 +169,23 @@ class Dataset(MutableMapping):
         return set([d for d in keys if d not in ("values", "keys")])
 
     @staticmethod
+    def _modify_list(lst: Iterable[str]) -> List[str]:
+        modified_list = []
+        count_dict = {}
+        
+        for item in lst:
+            if item not in count_dict:
+                modified_list.append(item)
+                count_dict[item] = 2
+            else:
+                warnings.warn(f"Duplicate item name: {item}. Renaming to {item}_{count_dict[item]}")
+                modified_item = f"{item}_{count_dict[item]}"
+                modified_list.append(modified_item)
+                count_dict[item] += 1
+        
+        return modified_list
+
+    @staticmethod
     def _parse_items(items, n_items_data):
         if items is None:
             # default Undefined items
@@ -189,9 +206,10 @@ class Dataset(MutableMapping):
                 item_infos.append(item)
 
             item_names = [it.name for it in item_infos]
-            if len(set(item_names)) != len(item_names):
-                raise ValueError(f"Item names must be unique ({item_names})!")
-
+            item_names = Dataset._modify_list(item_names)
+            for it, item_name in zip(item_infos, item_names):
+                it.name = item_name
+            
         return item_infos
 
     @staticmethod
