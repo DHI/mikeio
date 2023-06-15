@@ -49,7 +49,7 @@ dev = ["pytest",
        "matplotlib",
        "ruff",]
 
-test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely"]
+test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely","pyproj"]
 
 notebooks= [
             "nbformat",
