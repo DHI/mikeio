@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Callable, Optional, Sequence, Tuple, Union
+from typing import Callable, Sequence, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -125,7 +125,7 @@ def _extract_track(
 
         read_next = t_rel[t] > t2
 
-        while (read_next == True) and (not is_EOF(dfsu_step + 1)):
+        while read_next and not is_EOF(dfsu_step + 1):
             dfsu_step = dfsu_step + 1
 
             # swap new to old
@@ -140,7 +140,7 @@ def _extract_track(
 
             read_next = t_rel[t] > t2
 
-        if (read_next == True) and (is_EOF(dfsu_step)):
+        if read_next and is_EOF(dfsu_step):
             # cannot read next - no more timesteps
             continue
 

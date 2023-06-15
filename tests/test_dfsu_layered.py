@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pytest
 import mikeio
-from mikeio import Dfsu, Mesh
+from mikeio import Mesh
 from mikeio.spatial import (
     GeometryFM2D,
     GeometryFM3D,
@@ -83,7 +83,7 @@ def test_read_single_step_bottom_layer():
     dfs = mikeio.open(filename)
 
     ds = dfs.read(time=-1)  # Last timestep
-    dsbot1 = ds.sel(layers="bottom")
+    ds.sel(layers="bottom")
 
 
 def test_read_multiple_layers():
@@ -544,12 +544,12 @@ def test_to_mesh_3d(tmp_path):
     fp = tmp_path / "oresund_from_dfs.mesh"
     dfs.to_mesh(fp)
     assert os.path.exists(fp)
-    mesh = Mesh(fp)
+    Mesh(fp)
 
     fp = tmp_path / "oresund_from_geometry.mesh"
     dfs.geometry.to_mesh(fp)
     assert os.path.exists(fp)
-    mesh = Mesh(fp)
+    Mesh(fp)
 
 
 def test_extract_surface_elevation_from_3d(tmp_path):

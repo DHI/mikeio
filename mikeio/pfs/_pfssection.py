@@ -131,7 +131,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
             try:
                 float(s)
                 return True
-            except:
+            except ValueError:
                 return False
         else:
             return False

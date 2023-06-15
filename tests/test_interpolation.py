@@ -5,7 +5,6 @@ import numpy as np
 
 from mikeio.spatial import GeometryUndefined
 
-import pytest
 
 
 def test_get_idw_interpolant():

@@ -46,7 +46,8 @@ dev = ["pytest",
        "pyproj",
        "xarray",
        "netcdf4",
-       "matplotlib"]
+       "matplotlib",
+       "ruff",]
 
 test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely"]
 
@@ -73,3 +74,7 @@ warn_return_any = false
 allow_redefinition = true
 warn_unreachable = true
 
+[tool.ruff]
+
+# ignore long lines
+ignore = ["E501", "E741"]

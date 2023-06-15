@@ -517,7 +517,7 @@ class Dataset(MutableMapping):
             try:
                 value = DataArray(value)
                 # TODO: warn that this is not the preferred way!
-            except:
+            except TypeError:
                 raise ValueError("Input could not be interpreted as a DataArray")
 
         if len(self) > 0:
@@ -665,7 +665,7 @@ class Dataset(MutableMapping):
                 try:
                     s = self.time.slice_indexer(key.start, key.stop)
                     time_steps = list(range(s.start, s.stop))
-                except:
+                except ValueError:
                     time_steps = list(range(*key.indices(len(self.time))))
                 return self.isel(time_steps, axis=0)
 
@@ -738,7 +738,7 @@ class Dataset(MutableMapping):
         if len(set(key)) != len(key):
             return True
         warnings.warn(
-            f"A tuple of item numbers/names was provided as index to Dataset. This can lead to ambiguity and it is recommended to use a list instead."
+            "A tuple of item numbers/names was provided as index to Dataset. This can lead to ambiguity and it is recommended to use a list instead."
         )
         return False
 
@@ -1699,8 +1699,8 @@ class Dataset(MutableMapping):
                 self[x].to_numpy() + sign * other[y].to_numpy()
                 for x, y in zip(self.items, other.items)
             ]
-        except:
-            raise ValueError("Could not add data in Dataset")
+        except TypeError:
+            raise TypeError("Could not add data in Dataset")
         newds = self.copy()
         for j in range(len(self)):
             newds[j].values = data[j]  # type: ignore
@@ -1728,8 +1728,8 @@ class Dataset(MutableMapping):
     def _add_value(self, value) -> "Dataset":
         try:
             data = [value + self[x].to_numpy() for x in self.items]
-        except:
-            raise ValueError(f"{value} could not be added to Dataset")
+        except TypeError:
+            raise TypeError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(
@@ -1744,8 +1744,8 @@ class Dataset(MutableMapping):
     def _multiply_value(self, value) -> "Dataset":
         try:
             data = [value * self[x].to_numpy() for x in self.items]
-        except:
-            raise ValueError(f"{value} could not be multiplied to Dataset")
+        except TypeError:
+            raise TypeError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(

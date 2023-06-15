@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import Iterable, List, Sequence, Sized, Tuple, Union
+from typing import Iterable, Sequence, Sized, Tuple, Union
 
 import numpy as np
 import pandas as pd

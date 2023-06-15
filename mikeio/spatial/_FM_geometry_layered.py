@@ -1,13 +1,8 @@
-import warnings
-from collections import namedtuple
 from functools import cached_property
-from typing import Collection, Sequence, Union, Optional
+from typing import Collection, Sequence, Union
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
-from mikecore.eum import eumQuantity  # type: ignore
-from mikecore.MeshBuilder import MeshBuilder  # type: ignore
-from scipy.spatial import cKDTree  # type: ignore
 
 from mikeio.exceptions import InvalidGeometry
 
@@ -619,8 +614,8 @@ class _GeometryFMLayered(_GeometryFM):
                         layer_ids = self.layer_ids[row]
                         id = row[list(layer_ids).index(layer)]
                         idx[j] = id
-                    except:
-                        print(f"Layer {layer} not present for 2d element {elem2d[j]}")
+                    except IndexError:
+                        raise IndexError(f"Layer {layer} not present for 2d element {elem2d[j]}")
             else:
                 # sigma layer
                 idx = self.get_layer_elements(layer)[elem2d]

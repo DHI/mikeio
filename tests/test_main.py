@@ -52,4 +52,4 @@ def test_read_generic_read_unsupported_format():
     filename = "foo.txt"
 
     with pytest.raises(Exception):
-        res = mikeio.read(filename)
+        mikeio.read(filename)
