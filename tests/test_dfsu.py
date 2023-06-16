@@ -1059,7 +1059,7 @@ def test_dataset_to_xarray():
         nodes = c[idx : idx + nn]
         element_table.append(nodes)
         idx += nn
-    g2 = GeometryFM(node_coordinates=node_coordinates, element_table=element_table)
+    g2 = GeometryFM2D(node_coordinates=node_coordinates, element_table=element_table)
 
 
 def test_interp_like_grid():

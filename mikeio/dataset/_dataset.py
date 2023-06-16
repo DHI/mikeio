@@ -15,6 +15,7 @@ from typing import (
 
 import numpy as np
 import pandas as pd
+import xarray as xr
 from mikecore.DfsFile import DfsSimpleType  # type: ignore
 
 from ._dataarray import DataArray
@@ -1885,12 +1886,27 @@ class Dataset(MutableMapping):
 
         _write_dfsu(filename, self)
 
-    def to_xarray(self):
-        """Export to xarray.Dataset"""
-        import xarray as xr
+    def to_xarray(self, include_connectivity=False) ->  xr.Dataset:
+        """Export to xarray.Dataset
+        
+        Parameters
+        ----------
+        include_connectivity: bool, optional
+            Include flexible mesh connectivity, default False
 
+        Returns
+        -------
+        xr.Dataset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+        >>> ds.to_xarray()
+        >>> ds = mikio.read("tests/testdata/HD2D.dfsu")
+        >>> ds.to_xarray(include_connectivity=True)
+        """
         data = {da.name: da.to_xarray() for da in self}
-        if isinstance(self.geometry, GeometryFM):
+        if include_connectivity:
             # Not very pretty, but could be very useful
             nodes_per_element = []
             
