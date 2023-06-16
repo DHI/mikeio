@@ -1,30 +1,41 @@
-import collections.abc
 import os
 import warnings
 from copy import deepcopy
 from datetime import datetime
-from typing import Iterable, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import (
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    MutableMapping,
+)
 
 import numpy as np
 import pandas as pd
 from mikecore.DfsFile import DfsSimpleType  # type: ignore
 
-from .base import TimeSeries
-from .dataarray import DataArray
-from .data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
-from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.FM_geometry import GeometryFM
-from .spatial.geometry import (
+from ._dataarray import DataArray
+from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
+from ..eum import EUMType, EUMUnit, ItemInfo
+from ..spatial import (
+    GeometryFM2D,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
+    Grid1D,
+    Grid2D,
+    Grid3D,
 )
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
 
-from .data_plot import _DatasetPlotter
+from ..spatial._FM_geometry import _GeometryFM
+
+from ._data_plot import _DatasetPlotter
 
 
-class Dataset(TimeSeries, collections.abc.MutableMapping):
+class Dataset(MutableMapping):
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
@@ -158,6 +169,23 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         return set([d for d in keys if d not in ("values", "keys")])
 
     @staticmethod
+    def _modify_list(lst: Iterable[str]) -> List[str]:
+        modified_list = []
+        count_dict = {}
+        
+        for item in lst:
+            if item not in count_dict:
+                modified_list.append(item)
+                count_dict[item] = 2
+            else:
+                warnings.warn(f"Duplicate item name: {item}. Renaming to {item}_{count_dict[item]}")
+                modified_item = f"{item}_{count_dict[item]}"
+                modified_list.append(modified_item)
+                count_dict[item] += 1
+        
+        return modified_list
+
+    @staticmethod
     def _parse_items(items, n_items_data):
         if items is None:
             # default Undefined items
@@ -178,9 +206,10 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
                 item_infos.append(item)
 
             item_names = [it.name for it in item_infos]
-            if len(set(item_names)) != len(item_names):
-                raise ValueError(f"Item names must be unique ({item_names})!")
-
+            item_names = Dataset._modify_list(item_names)
+            for it, item_name in zip(item_infos, item_names):
+                it.name = item_name
+            
         return item_infos
 
     @staticmethod
@@ -919,7 +948,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             xy = [(x, y)]
 
             if isinstance(
-                self.geometry, GeometryFM
+                self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
 
                 interpolant = self.geometry.get_2d_interpolant(
@@ -969,7 +998,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             A dataset with data dimension t
             The first two items will be x- and y- coordinates of track
         """
-        from .track import _extract_track
+        from .._track import _extract_track
 
         item_numbers = list(range(self.n_items))
         time_steps = list(range(self.n_timesteps))
@@ -987,9 +1016,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             item_numbers=item_numbers,
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__dataset_read_item_time_func(
-                item, step
-            ),
+            data_read_func=self.__dataset_read_item_time_func,
         )
 
     def interp_time(
@@ -1072,7 +1099,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def interp_like(
         self,
-        other: Union["Dataset", DataArray, Grid2D, GeometryFM, pd.DatetimeIndex],
+        other: Union["Dataset", DataArray, Grid2D, GeometryFM2D, pd.DatetimeIndex],
         **kwargs,
     ) -> "Dataset":
         """Interpolate in space (and in time) to other geometry (and time axis)
@@ -1099,7 +1126,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         Dataset
             Interpolated Dataset
         """
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
@@ -1115,7 +1142,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         if isinstance(geom, Grid2D):
             xy = geom.xy
 
-        elif isinstance(geom, GeometryFM):
+        elif isinstance(geom, GeometryFM2D):
             xy = geom.element_coordinates[:, :2]
             if geom.is_layered:
                 raise NotImplementedError(
@@ -1732,6 +1759,14 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     # ===============================================
 
+    def to_pandas(self, **kwargs) -> Union[pd.Series, pd.DataFrame]:
+        """Convert Dataset to a Pandas DataFrame"""
+
+        if self.n_items != 1:
+            return self.to_dataframe(**kwargs)
+        else:
+            return self[0].to_pandas(**kwargs)
+
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
     ) -> pd.DataFrame:
@@ -1806,7 +1841,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
         elif isinstance(self.geometry, Grid1D):
             self._validate_extension(filename, ".dfs1")
             self._to_dfs1(filename)
-        elif isinstance(self.geometry, GeometryFM):
+        elif isinstance(self.geometry, _GeometryFM):
             self._validate_extension(filename, ".dfsu")
             self._to_dfsu(filename)
         else:
@@ -1821,7 +1856,7 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
             raise ValueError(f"File extension must be {valid_extension}")
 
     def _to_dfs0(self, filename, **kwargs):
-        from .dfs0 import _write_dfs0
+        from ..dfs._dfs0 import _write_dfs0
 
         dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
@@ -1829,24 +1864,24 @@ class Dataset(TimeSeries, collections.abc.MutableMapping):
 
     def _to_dfs2(self, filename):
         # assumes Grid2D geometry
-        from .dfs2 import write_dfs2
+        from ..dfs._dfs2 import write_dfs2
 
         write_dfs2(filename, self)
 
     def _to_dfs3(self, filename):
         # assumes Grid3D geometry
-        from .dfs3 import write_dfs3
+        from ..dfs._dfs3 import write_dfs3
 
         write_dfs3(filename, self)
 
     def _to_dfs1(self, filename):
-        from .dfs1 import Dfs1
+        from ..dfs._dfs1 import Dfs1
 
         dfs = Dfs1()
         dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry._x0)
 
     def _to_dfsu(self, filename):
-        from .dfsu import _write_dfsu
+        from ..dfsu._dfsu import _write_dfsu
 
         _write_dfsu(filename, self)
 

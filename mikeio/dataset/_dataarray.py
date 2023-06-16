@@ -8,26 +8,31 @@ import numpy as np
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
 
-from .base import TimeSeries
-from .data_utils import DataUtilsMixin
-from .eum import EUMType, EUMUnit, ItemInfo
-from .spatial.FM_geometry import (
-    GeometryFM,
+from ._data_utils import DataUtilsMixin
+from ..eum import EUMType, EUMUnit, ItemInfo
+
+
+from ..spatial import (
+    Grid1D,
+    Grid2D,
+    Grid3D,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+    GeometryFM2D,
+    GeometryFM3D,
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
-    _GeometryFMLayered,
 )
-from .spatial.geometry import (
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryUndefined,
-)
-from .spatial.grid_geometry import Grid1D, Grid2D, Grid3D
-from .spectral import calc_m0_from_spectrum
-from .data_plot import (
+
+# We need this type to know if we should keep zn
+from ..spatial._FM_geometry_layered import _GeometryFMLayered
+
+from .._spectral import calc_m0_from_spectrum
+from ._data_plot import (
     _DataArrayPlotter,
     _DataArrayPlotterFM,
     _DataArrayPlotterGrid1D,
@@ -66,7 +71,7 @@ class _DataArraySpectrumToHm0:
                 axis_name="node",
             )
         elif isinstance(g, GeometryFMAreaSpectrum):
-            geometry = GeometryFM(
+            geometry = GeometryFM2D(
                 node_coordinates=g.node_coordinates,
                 codes=g.codes,
                 node_ids=g.node_ids,
@@ -82,7 +87,7 @@ class _DataArraySpectrumToHm0:
         )
 
 
-class DataArray(DataUtilsMixin, TimeSeries):
+class DataArray(DataUtilsMixin):
     """DataArray with data and metadata for a single item in a dfs file
 
     The DataArray has these main properties:
@@ -147,6 +152,9 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     @staticmethod
     def _guess_dims(ndim, shape, n_timesteps, geometry):
+
+        # TODO delete default dims to geometry
+
         # This is not very robust, but is probably a reasonable guess
         time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
         dims = ["time"] if time_is_first else []
@@ -158,7 +166,10 @@ class DataArray(DataUtilsMixin, TimeSeries):
             if ndim_no_time == 2:
                 dims.append("direction")
                 dims.append("frequency")
-        elif isinstance(geometry, GeometryFM):
+        elif isinstance(geometry, GeometryFM3D):
+            if ndim_no_time > 0:
+                dims.append("element")
+        elif isinstance(geometry, GeometryFM2D):
             if geometry._type == DfsuFileType.DfsuSpectral1D:
                 if ndim_no_time > 0:
                     dims.append("node")
@@ -229,7 +240,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         if isinstance(geometry, GeometryFMPointSpectrum):
             pass
-        elif isinstance(geometry, GeometryFM):
+        elif isinstance(geometry, GeometryFM2D):
             if geometry.is_spectral:
                 if geometry._type == DfsuFileType.DfsuSpectral1D:
                     assert (
@@ -307,24 +318,21 @@ class DataArray(DataUtilsMixin, TimeSeries):
         return len(problems) == 0
 
     def _get_plotter_by_geometry(self):
-        if isinstance(self.geometry, GeometryFMVerticalProfile):
-            return _DataArrayPlotterFMVerticalProfile(self)
-        elif isinstance(self.geometry, GeometryFMVerticalColumn):
-            return _DataArrayPlotterFMVerticalColumn(self)
-        elif isinstance(self.geometry, GeometryFMPointSpectrum):
-            return _DataArrayPlotterPointSpectrum(self)
-        elif isinstance(self.geometry, GeometryFMLineSpectrum):
-            return _DataArrayPlotterLineSpectrum(self)
-        elif isinstance(self.geometry, GeometryFMAreaSpectrum):
-            return _DataArrayPlotterAreaSpectrum(self)
-        elif isinstance(self.geometry, GeometryFM):
-            return _DataArrayPlotterFM(self)
-        elif isinstance(self.geometry, Grid1D):
-            return _DataArrayPlotterGrid1D(self)
-        elif isinstance(self.geometry, Grid2D):
-            return _DataArrayPlotterGrid2D(self)
-        else:
-            return _DataArrayPlotter(self)
+        # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
+        PLOTTER_MAP = {
+            GeometryFMVerticalProfile: _DataArrayPlotterFMVerticalProfile,
+            GeometryFMVerticalColumn: _DataArrayPlotterFMVerticalColumn,
+            GeometryFMPointSpectrum: _DataArrayPlotterPointSpectrum,
+            GeometryFMLineSpectrum: _DataArrayPlotterLineSpectrum,
+            GeometryFMAreaSpectrum: _DataArrayPlotterAreaSpectrum,
+            GeometryFM2D: _DataArrayPlotterFM,
+            GeometryFM3D: _DataArrayPlotterFM,
+            Grid1D: _DataArrayPlotterGrid1D,
+            Grid2D: _DataArrayPlotterGrid2D,
+        }
+
+        plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
+        return plotter(self)
 
     def _set_spectral_attributes(self, geometry):
         if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
@@ -701,7 +709,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         elif axis == 3:
             dat = self.values[:, :, :, idx]
         else:
-            dat = np.take(self.values, idx, axis=axis)
+            raise ValueError(f"Subsetting with {axis=} is not supported")
 
         return DataArray(
             data=dat,
@@ -842,13 +850,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         # select in time
         if time is not None:
-            time = time.time if isinstance(time, TimeSeries) else time
-            if isinstance(time, int) or (
-                isinstance(time, Sequence) and isinstance(time[0], int)
-            ):
-                da = da.isel(time, axis="time")
-            else:
-                da = da[time]
+            if hasattr(time, "time"):
+                if isinstance(time.time, pd.DatetimeIndex):
+                    time = time.time
+
+            da = da[time]  # __getitem__ is 🚀
 
         return da
 
@@ -936,13 +942,11 @@ class DataArray(DataUtilsMixin, TimeSeries):
                     interpolant = self.geometry.get_spatial_interpolant(coords)
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
-            elif isinstance(self.geometry, GeometryFM):
+            elif isinstance(self.geometry, GeometryFM3D):
+                raise NotImplementedError("Interpolation in 3d is not yet implemented")
+            elif isinstance(self.geometry, GeometryFM2D):
                 if x is None or y is None:
                     raise ValueError("both x and y must be specified")
-                if self.geometry.is_layered:
-                    raise NotImplementedError(
-                        "Interpolation in 3d is not yet implemented"
-                    )
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
@@ -1001,7 +1005,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             A dataset with data dimension t
             The first two items will be x- and y- coordinates of track
         """
-        from .track import _extract_track
+        from .._track import _extract_track
 
         return _extract_track(
             deletevalue=self.deletevalue,
@@ -1016,9 +1020,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             item_numbers=[0],
             method=method,
             dtype=dtype,
-            data_read_func=lambda item, step: self.__dataarray_read_item_time_func(
-                item, step
-            ),
+            data_read_func=self.__dataarray_read_item_time_func,
         )
 
     def interp_time(
@@ -1102,7 +1104,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
     def interp_like(
         self,
-        other: Union["DataArray", Grid2D, GeometryFM, pd.DatetimeIndex],
+        other: Union["DataArray", Grid2D, GeometryFM2D, pd.DatetimeIndex],
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1129,7 +1131,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         DataArray
             Interpolated DataArray
         """
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
@@ -1137,7 +1139,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         if isinstance(other, pd.DatetimeIndex):
             return self.interp_time(other, **kwargs)
 
-        if not (isinstance(self.geometry, GeometryFM) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
             raise NotImplementedError("Currently only supports 2d flexible mesh data!")
 
         if hasattr(other, "geometry"):
@@ -1147,7 +1149,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
 
         if isinstance(geom, Grid2D):
             xy = geom.xy
-        elif isinstance(geom, GeometryFM):
+        elif isinstance(geom, GeometryFM2D):
             xy = geom.element_coordinates[:, :2]
             if geom.is_layered:
                 raise NotImplementedError(
@@ -1161,7 +1163,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
         else:
             elem_ids, weights = interpolant
 
-        if isinstance(geom, (Grid2D, GeometryFM)):
+        if isinstance(geom, (Grid2D, GeometryFM2D)):
             shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
 
             dai = self.geometry.interp2d(
@@ -1709,6 +1711,37 @@ class DataArray(DataUtilsMixin, TimeSeries):
         """
         self._to_dataset().to_dfs(filename, **kwargs)
 
+    def to_dataframe(
+        self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
+    ) -> pd.DataFrame:
+        """Convert to DataFrame
+
+        Parameters
+        ----------
+        unit_in_name: bool, optional
+            include unit in column name, default False,
+        round_time: str, bool, optional
+            round time to, by default "ms", use False to avoid rounding
+
+        Returns
+        -------
+        pd.DataFrame
+        """
+
+        return self._to_dataset().to_dataframe(
+            unit_in_name=unit_in_name, round_time=round_time
+        )
+
+    def to_pandas(self) -> pd.Series:
+        """Convert to Pandas Series
+
+        Returns
+        -------
+        pd.Series
+        """
+
+        return pd.Series(data=self.to_numpy(), index=self.time, name=self.name)
+
     def to_xarray(self):
         """Export to xarray.DataArray"""
 
@@ -1727,7 +1760,7 @@ class DataArray(DataUtilsMixin, TimeSeries):
             coords["z"] = xr.DataArray(data=self.geometry.z, dims="z")
             coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
             coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, GeometryFM):
+        elif isinstance(self.geometry, GeometryFM2D):
             coords["element"] = xr.DataArray(
                 data=self.geometry.element_ids, dims="element")
             

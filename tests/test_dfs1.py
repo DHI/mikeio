@@ -7,7 +7,7 @@ import pandas as pd
 import mikeio
 
 from mikeio import Dfs1
-from mikeio.eum import EUMType, EUMUnit
+from mikeio import EUMType, EUMUnit
 
 
 def test_filenotexist():
@@ -58,14 +58,14 @@ def test_properties():
     assert g.orientation == 180
 
 
-def test_read_write_properties(tmpdir):
+def test_read_write_properties(tmp_path):
     # test that properties are the same after read-write
     filename = r"tests/testdata/tide1.dfs1"
     ds1 = mikeio.read(filename)
 
-    outfilename = os.path.join(tmpdir.dirname, "tide1.dfs1")
-    ds1.to_dfs(outfilename)
-    ds2 = mikeio.read(outfilename)
+    fp = tmp_path / "tide1.dfs1"
+    ds1.to_dfs(fp)
+    ds2 = mikeio.read(fp)
 
     assert ds1.geometry == ds2.geometry
 
@@ -100,19 +100,18 @@ def test_read_time_steps():
     assert data.shape == (2, 3)  # time, x
 
 
-def test_write_some_time_steps_new_file(tmpdir):
+def test_write_some_time_steps_new_file(tmp_path):
 
-    outfilename = os.path.join(tmpdir.dirname, "subset.dfs1")
-    filename = r"tests/testdata/random.dfs1"
-    dfs = mikeio.open(filename)
+    fp = tmp_path / "random.dfs1"
+    dfs = mikeio.open("tests/testdata/random.dfs1")
 
     ds = dfs.read(time=[0, 1, 2, 3, 4, 5])
     data = ds[0].to_numpy()
     assert data.shape == (6, 3)  # time, x
 
-    dfs.write(outfilename, ds)
+    dfs.write(fp, ds)
 
-    dfsnew = mikeio.open(outfilename)
+    dfsnew = mikeio.open(fp)
 
     dsnew = dfsnew.read()
 
@@ -225,6 +224,7 @@ def test_select_point_dfs1_to_dfs0_double(tmp_path):
 
     assert dsnew.n_timesteps == ds.n_timesteps
 
+
 def test_interp_dfs1():
 
     ds = mikeio.read("tests/testdata/waterlevel_north.dfs1")
@@ -242,18 +242,17 @@ def test_interp_dfs1():
     dai = da.interp(x=8800)
     assert dai[-1].values == pytest.approx(-0.0814)
 
-    dai = da.interp(x=8900) # outside the domain
+    dai = da.interp(x=8900)  # outside the domain
     assert np.isnan(dai[-1].values)
 
-    dai = da.interp(x=-10) # outside the domain
+    dai = da.interp(x=-10)  # outside the domain
     assert np.isnan(dai[-1].values)
 
 
 def test_interp_onepoint_dfs1():
 
-    ds = mikeio.read("tests/testdata/nx1.dfs1")    
+    ds = mikeio.read("tests/testdata/nx1.dfs1")
     assert ds.geometry.nx == 1
 
     with pytest.raises(AssertionError, match="not possible for Grid1D with one point"):
         ds[0].interp(x=0)
-

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name="mikeio"
-version="1.5.dev0"
+version="1.6.1"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.15.0",  # first version with numpy.quantile
@@ -48,7 +48,7 @@ dev = ["pytest",
        "netcdf4",
        "matplotlib"]
 
-test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy"]
+test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely"]
 
 notebooks= [
             "nbformat",
@@ -64,3 +64,12 @@ notebooks= [
 [project.urls]
 "Homepage" = "https://github.com/DHI/mikeio"
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
+
+# mypy global options:
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = false
+allow_redefinition = true
+warn_unreachable = true
+

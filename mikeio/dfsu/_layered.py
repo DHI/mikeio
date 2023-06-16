@@ -9,7 +9,7 @@ from scipy.spatial import cKDTree
 from tqdm import trange
 
 from ..dataset import DataArray, Dataset
-from ..dfs import (
+from ..dfs._dfs import (
     _get_item_info,
     _read_item_time_step,
     _valid_item_numbers,
@@ -17,10 +17,10 @@ from ..dfs import (
 )
 from ..eum import EUMType, ItemInfo
 from ..exceptions import InvalidGeometry
-from ..interpolation import get_idw_interpolant, interp2d
-from ..spatial.FM_geometry import GeometryFM3D
-from ..spatial.FM_utils import _plot_vertical_profile
-from .dfsu import _Dfsu
+from .._interpolation import get_idw_interpolant, interp2d
+from ..spatial import GeometryFM3D
+from ..spatial._FM_utils import _plot_vertical_profile
+from ._dfsu import _Dfsu
 
 
 class DfsuLayered(_Dfsu):
@@ -240,7 +240,11 @@ class DfsuLayered(_Dfsu):
 
         dfs.Close()
 
-        dims = ("time", "element") if not single_time_selected else ("element",)
+        dims = (
+            ("time", "element")
+            if not (single_time_selected and not keepdims)  # TODO extract variable
+            else ("element",)
+        )
 
         if elements is not None and len(elements) == 1:
             # squeeze point data
@@ -346,28 +350,6 @@ class Dfsu3D(DfsuLayered):
     def geometry2d(self):
         """The 2d geometry for a 3d object"""
         return self._geometry2d
-
-    def find_nearest_profile_elements(self, x, y):
-        """Find 3d elements of profile nearest to (x,y) coordinates
-
-        Parameters
-        ----------
-        x : float
-            x-coordinate of point
-        y : float
-            y-coordinate of point
-
-        Returns
-        -------
-        np.array(int)
-            element ids of vertical profile
-        """
-        if self.is_2d:
-            raise InvalidGeometry("Object is 2d. Cannot get_nearest_profile")
-        else:
-            elem2d, _ = self.geometry._find_n_nearest_2d_elements(x, y)
-            elem3d = self.geometry.e2_e3_table[elem2d]
-            return elem3d
 
     def extract_surface_elevation_from_3d(self, filename=None, n_nearest=4):
         """

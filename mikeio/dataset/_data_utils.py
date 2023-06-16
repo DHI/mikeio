@@ -5,8 +5,6 @@ from typing import Iterable, List, Sequence, Sized, Tuple, Union
 import numpy as np
 import pandas as pd
 
-from .base import TimeSeries
-
 
 def _to_safe_name(name: str) -> str:
     tmp = re.sub("[^0-9a-zA-Z]", "_", name)
@@ -34,7 +32,7 @@ def _get_time_idx_list(time: pd.DatetimeIndex, steps):
         else:
             steps = slice(parts[0], parts[1])
 
-    if (isinstance(steps, (List, Tuple)) and not isinstance(steps, str)) and isinstance(
+    if isinstance(steps, (list, tuple)) and isinstance(
         steps[0], (str, datetime, np.datetime64, pd.Timestamp)
     ):
         steps = pd.DatetimeIndex(steps)
@@ -160,8 +158,8 @@ class DataUtilsMixin:
     def _parse_interp_time(old_time, new_time):
         if isinstance(new_time, pd.DatetimeIndex):
             t_out_index = new_time
-        elif isinstance(new_time, TimeSeries):
-            t_out_index = new_time.time
+        elif hasattr(new_time, "time"):
+            t_out_index = pd.DatetimeIndex(new_time.time)
         else:
             # offset = pd.tseries.offsets.DateOffset(seconds=new_time) # This seems identical, but doesn't work with slicing
             offset = pd.Timedelta(seconds=new_time)
@@ -175,12 +173,12 @@ class DataUtilsMixin:
     def _interpolate_time(
         intime,
         outtime,
-        data: np.array,
+        data: np.ndarray,
         method: Union[str, int],
         extrapolate: bool,
         fill_value: float,
     ):
-        from scipy.interpolate import interp1d
+        from scipy.interpolate import interp1d  # type: ignore
 
         interpolator = interp1d(
             intime,

@@ -67,7 +67,7 @@ def plot_2dspectrum(
     >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
     """
 
-    import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt  # type: ignore
 
     if (frequencies is None or len(frequencies) <= 1) and (
         directions is None or len(directions) <= 1

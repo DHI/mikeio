@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 
 from .dataset import Dataset
-from .dfs0 import Dfs0
+from .dfs import Dfs0
 from .eum import ItemInfo
-from .spatial.FM_geometry import GeometryFM
+from .spatial import GeometryFM2D
 
 
 def _extract_track(
@@ -17,7 +17,7 @@ def _extract_track(
     start_time: datetime,
     end_time: datetime,
     timestep: float,
-    geometry: GeometryFM,
+    geometry: GeometryFM2D,
     track: Union[str, Dataset, pd.DataFrame],
     items: Sequence[ItemInfo],
     item_numbers: Sequence[int],
@@ -28,7 +28,7 @@ def _extract_track(
     data_read_func: Callable[[int, int], Tuple[np.ndarray, float]],
 ) -> Dataset:
 
-    if not isinstance(geometry, GeometryFM):
+    if not isinstance(geometry, GeometryFM2D):
         raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
 
     n_items = len(item_numbers)
@@ -41,6 +41,7 @@ def _extract_track(
                 df = Dfs0(filename).to_dataframe()
             elif ext == ".csv":
                 df = pd.read_csv(filename, index_col=0, parse_dates=True)
+                df.index = pd.DatetimeIndex(df.index)
             else:
                 raise ValueError(f"{ext} files not supported (dfs0, csv)")
 

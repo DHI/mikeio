@@ -7,7 +7,7 @@ from mikecore.Projections import Cartography  # type: ignore
 
 from ..exceptions import OutsideModelDomainError
 
-from .geometry import (
+from ._geometry import (
     BoundingBox,
     GeometryPoint2D,
     GeometryPoint3D,
@@ -108,7 +108,7 @@ class Grid1D(_Geometry):
     ):
         """Create equidistant 1D spatial geometry"""
         super().__init__(projection)
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
@@ -183,7 +183,7 @@ class Grid1D(_Geometry):
 
     def isel(
         self, idx, axis=None
-    ) -> Union[GeometryPoint2D, GeometryPoint3D, GeometryUndefined]:
+    ) -> Union["Grid1D", GeometryPoint2D, GeometryPoint3D, GeometryUndefined]:
         """Get a subset geometry from this geometry
 
         Parameters
@@ -405,7 +405,7 @@ class Grid2D(_Geometry):
         """
         super().__init__(projection)
         self._shift_origin_on_write = origin is None  # user-constructed
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self.__xx = None
@@ -712,10 +712,12 @@ class Grid2D(_Geometry):
     ):
         """Find nearest index (i,j) of point(s)
 
-        -1 is returned if point is outside grid
-
         Parameters
         ----------
+        x : float
+            x-coordinate of point
+        y : float
+            y-coordinate of point
         coords : array(float)
             xy-coordinate of points given as n-by-2 array
         area : array(float)
@@ -725,12 +727,21 @@ class Grid2D(_Geometry):
         -------
         array(int), array(int)
             i- and j-index of nearest cell
+
+        Raises
+        ------
+        ValueError if x or y are not scalar values, use coords instead
+        OutsideModelDomainError if point is outside grid
         """
         if x is None and y is not None and not np.isscalar(y):
-            raise ValueError(f"{y} is not a scalar value")
+            raise ValueError(
+                f"{y=} is not a scalar value, use the coords argument instead"
+            )
 
         if y is None and x is not None and not np.isscalar(x):
-            raise ValueError(f"{x} is not a a scalar value")
+            raise ValueError(
+                f"{x=} is not a scalar value, use the coords argument instead"
+            )
 
         if x is not None and y is not None:
             if coords is not None:
@@ -756,12 +767,12 @@ class Grid2D(_Geometry):
         jj = (-999999999) * np.ones_like(y, dtype=int)
 
         inside = self.contains(xy)
-        for j, xyp in enumerate(xy):
-            if inside[j]:
-                ii[j] = (np.abs(self.x - xyp[0])).argmin()
-                jj[j] = (np.abs(self.y - xyp[1])).argmin()
-            else:
-                raise OutsideModelDomainError(x=x[j], y=y[j])
+        if np.any(~inside):
+            raise OutsideModelDomainError(x=x[~inside], y=y[~inside])
+
+        # get index in x, and y for points inside based on the grid spacing and origin
+        ii = np.floor((x - (self.x[0] - self.dx / 2)) / self.dx).astype(int)
+        jj = np.floor((y - (self.y[0] - self.dy / 2)) / self.dy).astype(int)
 
         return ii, jj
 
@@ -923,7 +934,7 @@ class Grid2D(_Geometry):
         south: int, optional
             code value for south boundary
         """
-        from mikeio.spatial.FM_geometry import GeometryFM
+        from mikeio.spatial._FM_geometry import GeometryFM2D
 
         # get node based grid
         xn = self._centers_to_nodes(self.x)
@@ -948,7 +959,7 @@ class Grid2D(_Geometry):
 
         nc = np.column_stack([x, y, zn])
         elem_table = gn._to_element_table(index_base=0)
-        return GeometryFM(
+        return GeometryFM2D(
             node_coordinates=nc,
             element_table=elem_table,
             codes=codes,
@@ -1019,7 +1030,7 @@ class Grid3D(_Geometry):
     ) -> None:
 
         super().__init__()
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
         self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)

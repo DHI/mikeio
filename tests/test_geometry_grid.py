@@ -4,11 +4,9 @@ import numpy as np
 import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D
-from mikeio.spatial.FM_geometry import GeometryFM
-from mikeio.spatial.geometry import GeometryUndefined
+from mikeio.spatial._FM_geometry import GeometryFM2D
+from mikeio.spatial import GeometryUndefined
 from mikeio.exceptions import OutsideModelDomainError
-
-
 
 
 def test_create_nx_ny():
@@ -280,12 +278,51 @@ def test_find_index():
         g.find_index(coords=[(-0.1, 0.1), (-0.1, 0.1)])
 
 
+def test_find_index_grid_with_negative_origin():
+    # create a grid with negative origin
+    bbox = [-1, -1, 1, 5]
+    g = Grid2D(bbox=bbox, dx=0.5)
+
+    xy1 = [0.52, 1.52]
+    ii, jj = g.find_index(x=xy1[0], y=xy1[1])
+    assert ii == 3
+    assert jj == 5
+
+    # to the left of the first element center, and above the last element center
+    xy2 = [-0.9, 4.95]
+    ii, jj = g.find_index(x=xy2[0], y=xy2[1])
+    assert ii == 0
+    assert jj == 11
+
+    # test three points, two inside and one outside
+    xy3 = [-1.5, 0.5]
+
+    xy = np.vstack([xy1, xy2, xy3])
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(coords=xy)
+
+
+def test_find_index_y_array_not_possible():
+    # create a simple grid
+    bbox = [0, 0, 1, 5]
+    g = Grid2D(bbox=bbox, dx=0.5)
+
+    xy1 = [0.52, 1.52]
+    xy2 = [0.4, 1.2]
+    xy = np.vstack([xy1, xy2])
+
+    # supply y as array
+    with pytest.raises(ValueError) as excinfo:
+        g.find_index(y=xy[:, 1])
+    assert "y=" in str(excinfo.value)
+
+
 def test_to_geometryFM():
     nx = 5
     ny = 3
     grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
     g = grd.to_geometryFM()
-    assert isinstance(g, GeometryFM)
+    assert isinstance(g, GeometryFM2D)
     assert g.n_elements == nx * ny
     assert g.n_nodes == (nx + 1) * (ny + 1)
     assert g.projection_string == "NON-UTM"
@@ -310,7 +347,7 @@ def test_to_geometryFM_custom_z_custom_code():
     ny = 3
     grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
     g = grd.to_geometryFM(z=-12.0, west=30)
-    assert isinstance(g, GeometryFM)
+    assert isinstance(g, GeometryFM2D)
     assert all(g.node_coordinates[:, 2] == -12.0)
 
     assert g.codes[0] == 30
@@ -389,3 +426,9 @@ def test_grid2d_equality():
     g6 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, y0=5)
 
     assert g5 != g6
+
+
+def test_bad_projection_raises_error():
+
+    with pytest.raises(ValueError, match="proj"):
+        Grid2D(nx=2, ny=2, dx=0.1, projection="Not a WKT projection string")

@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 import datetime
 import mikeio
-from mikeio.dfs0 import Dfs0
-from mikeio.eum import EUMType, EUMUnit, ItemInfo
+from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
+
 
 import pytest
 
@@ -29,25 +29,9 @@ def test_repr_equidistant():
     assert "NonEquidistant" not in text
 
 
-def test_write_float(tmpdir):
+def test_write_float(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
-
-    nt = 100
-
-    da = mikeio.DataArray(
-        data=np.random.random([nt]).astype(np.float32),
-        time=pd.date_range("2000", periods=nt, freq="H"),
-    )
-
-    da.to_dfs(filename)
-
-    assert os.path.exists(filename)
-
-
-def test_write_double(tmpdir):
-
-    filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
+    fp = tmp_path / "simple_float.dfs0"
 
     nt = 100
 
@@ -56,14 +40,30 @@ def test_write_double(tmpdir):
         time=pd.date_range("2000", periods=nt, freq="H"),
     )
 
-    da.to_dfs(filename, dtype=np.float64)
+    da.to_dfs(fp)
 
-    assert os.path.exists(filename)
+    assert fp.exists()
 
 
-def test_write_int_not_possible(tmpdir):
+def test_write_double(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "simple_float.dfs0")
+    fp = tmp_path / "simple_float.dfs0"
+
+    nt = 100
+
+    da = mikeio.DataArray(
+        data=np.random.random([nt]).astype(np.float32),
+        time=pd.date_range("2000", periods=nt, freq="H"),
+    )
+
+    da.to_dfs(fp, dtype=np.float64)
+
+    assert fp.exists()
+
+
+def test_write_int_not_possible(tmp_path):
+
+    fp = tmp_path / "simple_float.dfs0"
 
     nt = 100
 
@@ -73,23 +73,20 @@ def test_write_int_not_possible(tmpdir):
     )
 
     with pytest.raises(TypeError):
-        da.to_dfs(filename, dtype=np.int32)
+        da.to_dfs(fp, dtype=np.int32)
 
 
-def test_read_units_write_new(tmpdir):
+def test_read_units_write_new(tmp_path):
 
-    dfs0file = r"tests/testdata/random.dfs0"
-    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+    fp = tmp_path / "random.dfs0"
 
-    dfs = Dfs0(dfs0file)
-    ds = dfs.read()
+    ds = mikeio.read("tests/testdata/random.dfs0")
 
     # write new file
-    dfs.write(tmpfile, ds)
+    ds.to_dfs(fp)
 
     # Verify that new file has same variables/units as original
-    newdfs = Dfs0(tmpfile)
-    ds2 = newdfs.read()
+    ds2 = mikeio.read(fp)
 
     assert ds2.items[0] == ds.items[0]
 
@@ -112,57 +109,26 @@ def test_read_all_time_steps_without_reading_items():
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 1000
 
+
 def test_items_dataframe():
     dfs = mikeio.open("tests/testdata/random.dfs0")
     df = dfs.items.to_dataframe()
     assert "name" in df.columns
-    assert "type" in df.columns # or EUMType ?
-    assert df.type.iloc[1] == "Water_Level" # Is this the correct way to show it?
+    assert "type" in df.columns  # or EUMType ?
+    assert df.type.iloc[1] == "Water_Level"  # Is this the correct way to show it?
 
 
 def test_read_all_time_steps_without_reading_items_neq():
-    dfs0file = r"tests/testdata/da_diagnostic.dfs0"
+    dfs0file = "tests/testdata/da_diagnostic.dfs0"
     dfs = mikeio.open(dfs0file)
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 744
 
 
-def test_write_equidistant_calendar(tmpdir):
+def test_write_non_equidistant_calendar(tmp_path):
+    dfs0file = tmp_path / "neq.dfs0"
+    data = [np.zeros(1000), np.ones(1000)]
 
-    dfs0file = os.path.join(tmpdir.dirname, "random.dfs0")
-    d1 = np.random.random([1000])
-    d2 = np.random.random([1000])
-    data = []
-    data.append(d1)
-    data.append(d2)
-    start_time = datetime.datetime(2017, 1, 1)
-    # timeseries_unit = 1402
-    title = "Hello Test"
-    items = [
-        ItemInfo("VarFun01", 100000, 1000, data_value_type=0),
-        ItemInfo("NotFun", 100000, 1000, data_value_type=1),
-    ]
-
-    dt = 5
-    dfs = Dfs0()
-    dfs.write(
-        filename=dfs0file,
-        data=data,
-        start_time=start_time,
-        # timeseries_unit=timeseries_unit,
-        dt=dt,
-        items=items,
-        title=title,
-    )
-
-
-def test_write_non_equidistant_calendar(tmpdir):
-    dfs0file = os.path.join(tmpdir.dirname, "neq.dfs0")
-    d1 = np.zeros(1000)
-    d2 = np.ones([1000])
-    data = []
-    data.append(d1)
-    data.append(d2)
     start_time = datetime.datetime(2017, 1, 1)
     time_vector = []
     for i in range(1000):
@@ -179,12 +145,12 @@ def test_write_non_equidistant_calendar(tmpdir):
         title=title,
     )
 
-    assert os.path.exists(dfs0file)
+    assert dfs0file.exists()
 
 
 def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
 
-    dfs0file = r"tests/testdata/random.dfs0"
+    dfs0file = "tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
     df = dfs.to_dataframe()
@@ -196,7 +162,7 @@ def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
 
 def test_read_equidistant_dfs0_to_dataframe_unit_in_name():
 
-    dfs0file = r"tests/testdata/random.dfs0"
+    dfs0file = "tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
     df = dfs.to_dataframe(unit_in_name=True)
@@ -206,7 +172,7 @@ def test_read_equidistant_dfs0_to_dataframe_unit_in_name():
 
 def test_read_nonequidistant_dfs0_to_dataframe_no_freq():
 
-    dfs0file = r"tests/testdata/da_diagnostic.dfs0"
+    dfs0file = "tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
     df = dfs.to_dataframe()
@@ -216,14 +182,14 @@ def test_read_nonequidistant_dfs0_to_dataframe_no_freq():
 
 def test_read_dfs0_delete_value_conversion():
 
-    dfs0file = r"tests/testdata/da_diagnostic.dfs0"
+    dfs0file = "tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
     ds = dfs.read()
 
     assert np.isnan(ds[3].values[1])
 
-    dfs0file = r"tests/testdata/random.dfs0"
+    dfs0file = "tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
     ds = dfs.read()
@@ -231,9 +197,9 @@ def test_read_dfs0_delete_value_conversion():
     assert np.isnan(ds[0].values[2])
 
 
-def test_read_dfs0_small_value_not_delete_value(tmpdir):
+def test_read_dfs0_small_value_not_delete_value(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "small.dfs0")
+    filename = tmp_path / "small.dfs0"
     d = np.array([0.0, 0.0000001, -0.0001])
     assert np.isclose(d, -1e-35, atol=1e-33).any()
 
@@ -249,7 +215,7 @@ def test_read_dfs0_small_value_not_delete_value(tmpdir):
     assert not np.isnan(ds[0].to_numpy()).any()
 
 
-def test_write_from_data_frame(tmpdir):
+def test_write_from_data_frame(tmp_path):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -258,12 +224,10 @@ def test_write_from_data_frame(tmpdir):
         na_values=-99.99,
     )
 
-    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+    filename = tmp_path / "dataframe.dfs0"
     Dfs0.from_dataframe(
         df, filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
     )  # Could not find better type
-
-    assert os.path.exists(filename)
 
     ds = mikeio.read(filename)
 
@@ -273,7 +237,7 @@ def test_write_from_data_frame(tmpdir):
     assert ds.items[0].data_value_type == 0
 
 
-def test_write_from_data_frame_monkey_patched(tmpdir):
+def test_write_from_data_frame_monkey_patched(tmp_path):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -282,13 +246,11 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
         na_values=-99.99,
     )
 
-    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+    fp = tmp_path / "dataframe.dfs0"
 
-    df.to_dfs0(
-        filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
-    )
+    df.to_dfs0(fp, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3)
 
-    ds = mikeio.read(filename)
+    ds = mikeio.read(fp)
 
     assert len(ds.items) == 5
     assert ds[0].type == EUMType.Concentration
@@ -297,7 +259,7 @@ def test_write_from_data_frame_monkey_patched(tmpdir):
     assert ds.time[0].year == 1958
 
 
-def test_write_dataframe_different_eum_types_to_dfs0(tmpdir):
+def test_write_dataframe_different_eum_types_to_dfs0(tmp_path):
 
     time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
 
@@ -308,17 +270,17 @@ def test_write_dataframe_different_eum_types_to_dfs0(tmpdir):
 
     dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
 
-    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+    fp = tmp_path / "dataframe.dfs0"
 
     dfr.to_dfs0(
-        filename,
+        fp,
         items=[
             mikeio.ItemInfo("Flow", itemtype=mikeio.EUMType.Discharge),
             mikeio.ItemInfo("Level", itemtype=mikeio.EUMType.Water_Level),
         ],
     )
 
-    ds = mikeio.read(filename)
+    ds = mikeio.read(fp)
     assert ds.n_timesteps == 15
     assert ds[0].type == mikeio.EUMType.Discharge
     assert ds[1].type == mikeio.EUMType.Water_Level
@@ -327,7 +289,7 @@ def test_write_dataframe_different_eum_types_to_dfs0(tmpdir):
     assert ds.is_equidistant
 
 
-def test_write_from_pandas_series_monkey_patched(tmpdir):
+def test_write_from_pandas_series_monkey_patched(tmp_path):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -336,7 +298,7 @@ def test_write_from_pandas_series_monkey_patched(tmpdir):
         na_values=-99.99,
     )
 
-    filename = os.path.join(tmpdir.dirname, "series.dfs0")
+    filename = tmp_path / "series.dfs0"
 
     series = df["Average"]
 
@@ -353,7 +315,7 @@ def test_write_from_pandas_series_monkey_patched(tmpdir):
     assert ds.time[0].year == 1958
 
 
-def test_write_from_data_frame_different_types(tmpdir):
+def test_write_from_data_frame_different_types(tmp_path):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -364,7 +326,7 @@ def test_write_from_data_frame_different_types(tmpdir):
 
     df = df[["Average", "Trend"]]
 
-    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+    filename = tmp_path / "dataframe.dfs0"
 
     items = [
         ItemInfo("Average", EUMType.Concentration, EUMUnit.gram_per_meter_pow_3),
@@ -460,9 +422,9 @@ def test_read_dfs0_to_matrix():
     assert len(ds.to_numpy()) == 2
 
 
-def test_write_data_with_missing_values(tmpdir):
+def test_write_data_with_missing_values(tmp_path):
     dfs0file = r"tests/testdata/random.dfs0"
-    tmpfile = os.path.join(tmpdir.dirname, "random.dfs0")
+    tmpfile = tmp_path / "random.dfs0"
 
     dfs = Dfs0(dfs0file)
     ds = dfs.read()
@@ -495,8 +457,8 @@ def test_read_relative_time_axis():
     assert len(ds) == 5
 
 
-def test_write_accumulated_datatype(tmpdir):
-    filename = os.path.join(tmpdir.dirname, "simple.dfs0")
+def test_write_accumulated_datatype(tmp_path):
+    filename = tmp_path / "simple.dfs0"
 
     data = []
     d = np.random.random(100)
@@ -523,8 +485,8 @@ def test_write_accumulated_datatype(tmpdir):
     assert newdfs.items[0].data_value_type == 3
 
 
-def test_write_default_datatype(tmpdir):
-    filename = os.path.join(tmpdir.dirname, "simple.dfs0")
+def test_write_default_datatype(tmp_path):
+    filename = tmp_path / "simple.dfs0"
 
     data = []
     d = np.random.random(100)
@@ -545,7 +507,7 @@ def test_write_default_datatype(tmpdir):
     assert newdfs.items[0].data_value_type == 0
 
 
-def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
+def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmp_path):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -554,7 +516,7 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
         na_values=-99.99,
     )
 
-    filename = os.path.join(tmpdir.dirname, "series.dfs0")
+    filename = tmp_path / "series.dfs0"
 
     series = df["Average"]
 
@@ -580,7 +542,7 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmpdir):
     assert ds.items[0].data_value_type == 3
 
 
-def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
+def test_write_from_data_frame_monkey_patched_data_value_not_default(tmp_path):
 
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
@@ -589,7 +551,7 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmpdir):
         na_values=-99.99,
     )
 
-    filename = os.path.join(tmpdir.dirname, "dataframe.dfs0")
+    filename = tmp_path / "dataframe.dfs0"
 
     items = []
     for col in df.columns:
@@ -653,3 +615,15 @@ def test_read_dfs0_with_many_items():
     ds = mikeio.read("tests/testdata/many_items.dfs0")
 
     assert ds.n_items == 800
+
+def test_read_dfs0_with_non_unique_item_names():
+
+    with pytest.warns(match="item name"):
+        ds = mikeio.read("tests/testdata/untitled_3_items.dfs0")
+
+    assert ds.n_items == 3
+
+    assert ds.Untitled.values[0] == pytest.approx(1.0)
+
+    assert ds.Untitled_3.values[0] == pytest.approx(0.0)
+    assert np.isnan(ds.Untitled_3.values[1])
