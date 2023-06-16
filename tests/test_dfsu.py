@@ -1044,7 +1044,7 @@ def test_dataset_interp_to_xarray():
 
 def test_dataset_to_xarray():
     ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
-    xr_ds = ds.to_xarray()
+    xr_ds = ds.to_xarray(include_connectivity=True)
     assert len(xr_ds["nodes_per_element"]) == ds.n_elements
     assert len(xr_ds["connectivity"]) == (xr_ds["nodes_per_element"]).sum()
 
