@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 import datetime
 from matplotlib import pyplot as plt
@@ -9,7 +8,7 @@ import xarray
 
 import mikeio
 
-from mikeio import Dataset, Dfs2
+from mikeio import Dfs2
 from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import ItemsError
 from mikeio.spatial import GeometryPoint2D, Grid2D
@@ -556,8 +555,6 @@ def test_find_by_x_y():
     assert isinstance(da_point.geometry, GeometryPoint2D)
     assert da_point.geometry.x == ds_point.geometry.x
 
-    xx = [12.74, 12.39]
-    yy = [55.78, 54.98]
     # # with pytest.raises(NotImplementedError):
     # da.sel(x=xx, y=yy)
 
@@ -622,7 +619,7 @@ def test_write_NonEqCalendarAxis(tmp_path):
     da.to_dfs(fp)
 
     newds = mikeio.read(fp)
-    assert newds.is_equidistant == False
+    assert newds.is_equidistant is False
     assert newds.start_time.year == 2012
     assert newds.end_time.day == 28
 

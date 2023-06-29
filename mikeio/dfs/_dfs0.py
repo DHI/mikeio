@@ -75,7 +75,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
         data_to_write = np.concatenate(
             [np.atleast_2d(t_seconds), np.atleast_2d(data)], axis=1
         )
-    rc = dfs.WriteDfs0DataDouble(data_to_write)
+    dfs.WriteDfs0DataDouble(data_to_write)
 
     dfs.Close()
 

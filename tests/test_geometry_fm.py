@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 from mikeio.spatial import GeometryFM2D, GeometryFM3D
 from mikeio.exceptions import OutsideModelDomainError
@@ -204,19 +203,3 @@ def test_layered(simple_3d_geom: GeometryFM3D):
 
     assert "elements: 2" in repr(g2)
     assert "layers: 2" in repr(g2)
-
-
-def test_deprectated_geometryfm():
-
-    from mikeio.spatial import GeometryFM
-
-    nc = [
-        (0.0, 0.0, 0.0),  # 0
-        (1.0, 0.0, 0.0),  # 1
-        (0.5, 1.0, 0.0),  # 2
-    ]
-
-    el = [(0, 1, 2)]
-
-    with pytest.warns(match="GeometryFM2D"):
-        g = GeometryFM(nc, el)

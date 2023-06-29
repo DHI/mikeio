@@ -1,4 +1,3 @@
-import warnings
 
 import numpy as np
 from collections import namedtuple

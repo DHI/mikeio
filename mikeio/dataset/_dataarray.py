@@ -204,17 +204,13 @@ class DataArray(DataUtilsMixin):
             )
 
     @staticmethod
-    def _parse_item(item):
+    def _parse_item(item) -> ItemInfo:
         if item is None:
             return ItemInfo("NoName")
 
         if not isinstance(item, ItemInfo):
-            try:
-                item = ItemInfo(item)
-            except:
-                raise ValueError(
-                    "Item must be None, ItemInfo or valid input to ItemInfo"
-                )
+            return ItemInfo(item)
+        
         return item
 
     @staticmethod
@@ -1601,9 +1597,9 @@ class DataArray(DataUtilsMixin):
     def _apply_unary_math_operation(self, func) -> "DataArray":
         try:
             data = func(self.values)
-        except:
-            # TODO: better except... TypeError etc
-            raise ValueError(f"Math operation could not be applied to DataArray")
+        
+        except TypeError:
+            raise TypeError("Math operation could not be applied to DataArray")
 
         new_da = self.copy()
         new_da.values = data
@@ -1614,9 +1610,8 @@ class DataArray(DataUtilsMixin):
         try:
             other_values = other.values if hasattr(other, "values") else other
             data = func(self.values, other_values)
-        except:
-            # TODO: better except... TypeError etc
-            raise ValueError(f"Math operation could not be applied to DataArray")
+        except TypeError:
+            raise TypeError("Math operation could not be applied to DataArray")
 
         # TODO: check if geometry etc match if other is DataArray?
 

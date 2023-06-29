@@ -703,7 +703,7 @@ def test_extrapolate_not_allowed():
     ds2 = mikeio.Dataset(data, time, items)
 
     with pytest.raises(ValueError):
-        dsi = ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
+        ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
 
 
 def test_get_data_2():
@@ -714,7 +714,7 @@ def test_get_data_2():
     data.append(d)
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    mikeio.Dataset(data, time, items)
 
     assert data[0].shape == (100, 100, 30)
 
@@ -1055,7 +1055,7 @@ def test_iteminfo_string_type_should_fail_with_helpful_message():
 
     with pytest.raises(ValueError):
 
-        item = ItemInfo("Water level", "Water level")
+        ItemInfo("Water level", "Water level")
 
 
 def test_item_search():
@@ -1074,7 +1074,7 @@ def test_dfsu3d_dataset():
 
     ds = dfsu.read()
 
-    text = repr(ds)
+    repr(ds)
 
     assert len(ds) == 2  # Salinity, Temperature
 
@@ -1207,13 +1207,13 @@ def test_add_inconsistent_dataset(ds1):
 
 def test_add_bad_value(ds1):
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ds1 + ["one"]
 
 
 def test_multiple_bad_value(ds1):
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ds1 * ["pi"]
 
 
@@ -1419,17 +1419,17 @@ def test_to_numpy(ds2):
 
 def test_concat():
     filename = "tests/testdata/HD2D.dfsu"
-    ds1 = mikeio.read(filename, time=[0, 1])
-    ds2 = mikeio.read(filename, time=[2, 3])
-    ds3 = mikeio.Dataset.concat([ds1, ds2])
-    ds3.n_timesteps
+    dss1 = mikeio.read(filename, time=[0, 1])
+    dss2 = mikeio.read(filename, time=[2, 3])
+    dss3 = mikeio.Dataset.concat([dss1, dss2])
 
-    assert ds1.n_items == ds2.n_items == ds3.n_items
-    assert ds3.n_timesteps == (ds1.n_timesteps + ds2.n_timesteps)
-    assert ds3.start_time == ds1.start_time
-    assert ds3.end_time == ds2.end_time
-    assert type(ds3.geometry) == type(ds1.geometry)
-    assert ds3.geometry.n_elements == ds1.geometry.n_elements
+    assert dss1.n_items == dss2.n_items == dss3.n_items
+    assert dss3.n_timesteps == (dss1.n_timesteps + dss2.n_timesteps)
+    assert dss3.start_time == dss1.start_time
+    assert dss3.end_time == dss2.end_time
+    assert isinstance(dss1.geometry, mikeio.spatial.GeometryFM2D)
+    assert isinstance(dss3.geometry, mikeio.spatial.GeometryFM2D)
+    assert dss3.geometry.n_elements == dss1.geometry.n_elements
 
 
 def test_concat_dfsu3d():
@@ -1442,7 +1442,8 @@ def test_concat_dfsu3d():
     assert ds1.n_items == ds2.n_items == ds3.n_items
     assert ds3.start_time == ds.start_time
     assert ds3.end_time == ds.end_time
-    assert type(ds3.geometry) == type(ds.geometry)
+    assert isinstance(ds1.geometry, mikeio.spatial.GeometryFM3D)
+    assert isinstance(ds3.geometry, mikeio.spatial.GeometryFM3D)
     assert ds3.geometry.n_elements == ds1.geometry.n_elements
     assert ds3._zn.shape == ds._zn.shape
     assert np.all(ds3._zn == ds._zn)
@@ -1450,7 +1451,7 @@ def test_concat_dfsu3d():
 
 def test_concat_dfsu3d_single_timesteps():
     filename = "tests/testdata/basin_3d.dfsu"
-    ds = mikeio.read(filename)
+    mikeio.read(filename)
     ds1 = mikeio.read(filename, time=0)
     ds2 = mikeio.read(filename, time=2)
     ds3 = mikeio.Dataset.concat([ds1, ds2])
@@ -1462,7 +1463,7 @@ def test_concat_dfsu3d_single_timesteps():
 
 def test_concat_dfs2_single_timesteps():
     filename = "tests/testdata/single_row.dfs2"
-    ds = mikeio.read(filename)
+    mikeio.read(filename)
     ds1 = mikeio.read(filename, time=0)
     ds2 = mikeio.read(filename, time=2)
     ds3 = mikeio.Dataset.concat([ds1, ds2])

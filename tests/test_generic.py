@@ -1,9 +1,6 @@
-import os
-from shutil import copyfile
 import numpy as np
 import pandas as pd
 import mikeio
-from mikeio import Dfsu
 from mikeio import generic
 from mikeio.generic import scale, diff, sum, extract, avg_time, fill_corrupt
 import pytest
@@ -110,7 +107,7 @@ def test_sum_itself(tmp_path):
 
     sum(infilename_1, infilename_2, fp)
 
-    org = mikeio.read(infilename_1)
+    mikeio.read(infilename_1)
 
     summed = mikeio.read(fp)
 
@@ -218,7 +215,7 @@ def test_diff_dfsu(tmp_path):
     fp = tmp_path / "diff.dfsu"
     mikeio.generic.diff(infilename_a, infilename_b, fp)
 
-    org = mikeio.read(infilename_a)
+    mikeio.read(infilename_a)
 
     diffed = mikeio.read(fp)
 

@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from datetime import datetime
 
@@ -6,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import mikeio
-from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh, ItemInfo
+from mikeio import Dataset, DataArray, Dfsu, Mesh, ItemInfo
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 
@@ -36,8 +35,8 @@ def test_read_all_items_returns_all_items_and_names():
 
     assert dfs.n_items == 4
 
-    ds_text = repr(ds)
-    dfs_text = repr(dfs)
+    repr(ds)
+    repr(dfs)
 
     assert len(ds) == 4
 
@@ -83,7 +82,7 @@ def test_read_precision_single_and_double():
 def test_read_int_not_accepted():
     filename = "tests/testdata/HD2D.dfsu"
     with pytest.raises(Exception):
-        dfs = mikeio.open(filename, dtype=np.int32)
+        mikeio.open(filename, dtype=np.int32)
 
 
 def test_read_timestep_1():
@@ -346,8 +345,8 @@ def test_contains():
 
     pts = [[4, 54], [0, 50]]
     inside = dfs.contains(pts)
-    assert inside[0] == True
-    assert inside[1] == False
+    assert inside[0]
+    assert not inside[1]
 
 
 def test_point_in_domain():
@@ -362,8 +361,8 @@ def test_point_in_domain():
 
     pts = [pt, pt2]
     inside = [pt in dfs.geometry for pt in pts]
-    assert inside[0] == True
-    assert inside[1] == False
+    assert inside[0] is True
+    assert inside[1] is False
 
 
 def test_get_overset_grid():
@@ -1074,7 +1073,7 @@ def test_interp_like_grid_time_invariant():
 
 def test_interp_like_dataarray(tmp_path):
 
-    fp = tmp_path / "interp.dfs2"
+    tmp_path / "interp.dfs2"
 
     da = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")[0]
     da2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])[0]
