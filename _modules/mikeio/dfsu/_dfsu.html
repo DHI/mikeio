@@ -955,7 +955,7 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot select both </span><span class="si">{</span><span class="n">kw</span><span class="si">}</span><span class="s2"> and elements!&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s2">&quot;area&quot;</span> <span class="ow">in</span> <span class="n">used_kwargs</span> <span class="ow">and</span> <span class="p">(</span><span class="s2">&quot;x&quot;</span> <span class="ow">in</span> <span class="n">used_kwargs</span> <span class="ow">or</span> <span class="s2">&quot;y&quot;</span> <span class="ow">in</span> <span class="n">used_kwargs</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot select both x,y and area!&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot select both x,y and area!&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_parse_geometry_sel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse geometry selection</span>
@@ -1357,14 +1357,14 @@
         <span class="n">geometry</span><span class="o">.</span><span class="n">to_mesh</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Dfsu2DH"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.Dfsu2DH">[docs]</a><span class="k">class</span> <span class="nc">Dfsu2DH</span><span class="p">(</span><span class="n">_Dfsu</span><span class="p">):</span>
+<div class="viewcode-block" id="Dfsu2DH"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH">[docs]</a><span class="k">class</span> <span class="nc">Dfsu2DH</span><span class="p">(</span><span class="n">_Dfsu</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">_dfs_read_item_time_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsuFile</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
         <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span><span class="p">,</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
 
-<div class="viewcode-block" id="Dfsu2DH.extract_track"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.Dfsu2DH.extract_track">[docs]</a>    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<div class="viewcode-block" id="Dfsu2DH.extract_track"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH.extract_track">[docs]</a>    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract track data from a dfsu file</span>
 
@@ -1431,7 +1431,7 @@
         <span class="k">return</span> <span class="n">res</span></div></div>
 
 
-<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">(</span><span class="n">_UnstructuredFile</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">(</span><span class="n">_UnstructuredFile</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Mesh class is initialized with a mesh or a dfsu file.</span>
 
@@ -1472,7 +1472,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="o">.</span><span class="n">_nc</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="o">.</span><span class="n">_ec</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="Mesh.write"><a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu.Mesh.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.write"><a class="viewcode-back" href="../../../mesh.html#mikeio.Mesh.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;write mesh to file (will overwrite if file exists)</span>
 
 <span class="sd">        Parameters</span>

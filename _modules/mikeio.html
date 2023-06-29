@@ -88,7 +88,6 @@
              
   <h1>Source code for mikeio</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">platform</span> <span class="kn">import</span> <span class="n">architecture</span>
 
 <span class="c1"># PEP0440 compatible formatted version, see:</span>
@@ -131,6 +130,7 @@
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.xyz</span> <span class="kn">import</span> <span class="n">read_xyz</span>
+
 
 
 <div class="viewcode-block" id="read"><a class="viewcode-back" href="../dfs-overview.html#mikeio.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
@@ -265,6 +265,30 @@
     <span class="n">reader_klass</span> <span class="o">=</span> <span class="n">READERS</span><span class="p">[</span><span class="n">file_format</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">reader_klass</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;DataArray&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Dataset&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Dfs0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Dfs1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Dfs2&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Dfs3&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Dfsu&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Mesh&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EUMType&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;EUMUnit&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;ItemInfo&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Pfs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PfsDocument&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;PfsSection&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;read_pfs&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Grid1D&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Grid2D&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;Grid3D&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;read_xyz&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;read&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;open&quot;</span><span class="p">,</span>
+<span class="p">]</span>
 </pre></div>
 
            </div>

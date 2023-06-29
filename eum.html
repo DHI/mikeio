@@ -62,7 +62,21 @@
 <li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">EUM</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#eum-type-search">EUM type search</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-mikeio.eum">EUM API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-mikeio.eum">EUM API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.eum.EUMType"><code class="docutils literal notranslate"><span class="pre">EUMType</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.eum.EUMType.display_name"><code class="docutils literal notranslate"><span class="pre">EUMType.display_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.eum.EUMType.units"><code class="docutils literal notranslate"><span class="pre">EUMType.units</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.eum.EUMUnit"><code class="docutils literal notranslate"><span class="pre">EUMUnit</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.eum.EUMUnit.display_name"><code class="docutils literal notranslate"><span class="pre">EUMUnit.display_name</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.eum.ItemInfo"><code class="docutils literal notranslate"><span class="pre">ItemInfo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.eum.ItemInfoList"><code class="docutils literal notranslate"><span class="pre">ItemInfoList</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.eum.TimeStepUnit"><code class="docutils literal notranslate"><span class="pre">TimeStepUnit</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="pfs.html">Pfs</a></li>
@@ -140,6 +154,84 @@ An ItemInfo consists of:</p>
 </section>
 <section id="module-mikeio.eum">
 <span id="eum-api"></span><h2>EUM API<a class="headerlink" href="#module-mikeio.eum" title="Permalink to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.eum.EUMType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.eum.</span></span><span class="sig-name descname"><span class="pre">EUMType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/eum/_eum.html#EUMType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.eum.EUMType" title="Permalink to this definition"></a></dt>
+<dd><p>EUM type</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mikeio</span><span class="o">.</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Temperature</span>
+<span class="go">Temperature</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">EUMType</span><span class="o">.</span><span class="n">Temperature</span><span class="o">.</span><span class="n">units</span>
+<span class="go">[degree Celsius, degree Fahrenheit, degree Kelvin]</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.eum.EUMType.display_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">display_name</span></span><a class="headerlink" href="#mikeio.eum.EUMType.display_name" title="Permalink to this definition"></a></dt>
+<dd><p>Display friendly name</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.eum.EUMType.units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">units</span></span><a class="headerlink" href="#mikeio.eum.EUMType.units" title="Permalink to this definition"></a></dt>
+<dd><p>List valid units for this EUM type</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.eum.EUMUnit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.eum.</span></span><span class="sig-name descname"><span class="pre">EUMUnit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/eum/_eum.html#EUMUnit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.eum.EUMUnit" title="Permalink to this definition"></a></dt>
+<dd><p>EUM unit</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio.eum</span> <span class="kn">import</span> <span class="n">EUMUnit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">EUMUnit</span><span class="o">.</span><span class="n">degree_Kelvin</span>
+<span class="go">degree Kelvin</span>
+</pre></div>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.eum.EUMUnit.display_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">display_name</span></span><a class="headerlink" href="#mikeio.eum.EUMUnit.display_name" title="Permalink to this definition"></a></dt>
+<dd><p>Display friendly name</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.eum.ItemInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.eum.</span></span><span class="sig-name descname"><span class="pre">ItemInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itemtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_value_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Instantaneous'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/eum/_eum.html#ItemInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.eum.ItemInfo" title="Permalink to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> or </em><a class="reference internal" href="#mikeio.eum.EUMType" title="mikeio.eum.EUMType"><em>EUMType</em></a><em>, </em><em>optional</em>) – </p></li>
+<li><p><strong>type</strong> (<a class="reference internal" href="#mikeio.eum.EUMType" title="mikeio.eum.EUMType"><em>EUMType</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – Default EUMType.Undefined</p></li>
+<li><p><strong>unit</strong> (<a class="reference internal" href="#mikeio.eum.EUMUnit" title="mikeio.eum.EUMUnit"><em>EUMUnit</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>, </em><em>optional</em>) – Default unit matching EUMType</p></li>
+<li><p><strong>data_value_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>optional</em>) – One of the following strings: ‘Instantaneous’, ‘Accumulated’, ‘StepAccumulated’, ‘MeanStepBackward’,
+‘MeanStepForward’. Default: ‘Instantaneous’</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Viken&quot;</span><span class="p">,</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Water_Level</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">item</span>
+<span class="go">Viken &lt;Water Level&gt; (meter)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ItemInfo</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Wind_speed</span><span class="p">)</span>
+<span class="go">Wind speed &lt;Wind speed&gt; (meter per sec)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.eum.ItemInfoList">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.eum.</span></span><span class="sig-name descname"><span class="pre">ItemInfoList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Sequence" title="(in Python v3.11)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mikeio.eum.ItemInfo" title="mikeio.eum._eum.ItemInfo"><span class="pre">ItemInfo</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/eum/_eum.html#ItemInfoList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.eum.ItemInfoList" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.eum.TimeStepUnit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.eum.</span></span><span class="sig-name descname"><span class="pre">TimeStepUnit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/eum/_eum.html#TimeStepUnit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.eum.TimeStepUnit" title="Permalink to this definition"></a></dt>
+<dd><p>An enumeration.</p>
+</dd></dl>
+
 </section>
 </section>
 
