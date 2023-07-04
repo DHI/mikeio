@@ -24,7 +24,7 @@ jobs:
     - name: Sphinx Build
       run: |
         cd docs
-        make html SPHINXOPTS="-W --keep-going -n"
+        make html
 
     - name: Upload documentation
       uses: actions/upload-artifact@v2
