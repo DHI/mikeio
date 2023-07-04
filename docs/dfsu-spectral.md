@@ -14,7 +14,7 @@ MIKE 21 SW can output spectral information in *points*, along *lines* or in an *
 ## Dfsu Spectral API
 
 ```{eval-rst}
-.. autoclass:: mikeio.dfsu_spectral.DfsuSpectral
+.. autoclass:: mikeio.dfsu._spectral.DfsuSpectral
 	:members:
 	:inherited-members:
 ```
@@ -23,7 +23,7 @@ MIKE 21 SW can output spectral information in *points*, along *lines* or in an *
 ## FM Geometry Point Spectrum API
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMPointSpectrum
+.. autoclass:: mikeio.spatial._FM_geometry.GeometryFMPointSpectrum
 	:members:
 	:inherited-members:
 ```
@@ -31,7 +31,7 @@ MIKE 21 SW can output spectral information in *points*, along *lines* or in an *
 ## FM Geometry Line Spectrum API
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMLineSpectrum
+.. autoclass:: mikeio.spatial._FM_geometry.GeometryFMLineSpectrum
 	:members:
 	:inherited-members:
 ```
@@ -39,7 +39,7 @@ MIKE 21 SW can output spectral information in *points*, along *lines* or in an *
 ## FM Geometry Area Spectrum API
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMAreaSpectrum
+.. autoclass:: mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum
 	:members:
 	:inherited-members:
 ```

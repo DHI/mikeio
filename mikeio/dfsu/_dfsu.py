@@ -927,7 +927,7 @@ class _Dfsu(_UnstructuredFile):
             start datetime, default is datetime.now()
         dt: float, optional
             The time step (in seconds)
-        items: list[ItemInfo], optional
+        items: list[mikeio.ItemInfo], optional
         elements: list[int], optional
             write only these element ids to file
         title: str

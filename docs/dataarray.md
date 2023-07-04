@@ -1,6 +1,6 @@
 # DataArray
 
-The [DataArray](DataArray) is the common MIKE IO data structure 
+The [DataArray](mikeio.DataArray) is the common MIKE IO data structure 
 for *item* data from dfs files. 
 The {py:meth}`mikeio.read` methods returns a Dataset as a container of DataArrays (Dfs items)
 
@@ -98,7 +98,7 @@ The plotting of a DataArray is context-aware meaning that plotting behaviour dep
 >>> da.plot.mesh()
 ```
 
-See details in the [API specification](_DatasetPlotter) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](_DataArrayPlotterGrid2D) on the dfs2 page.
+See details in the [API specification](mikeio.dataset._data_plot._DataArrayPlotter) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](mikeio.dataset._data_plot._DataArrayPlotter._DataArrayPlotterGrid2D) on the dfs2 page.
 
 
 
@@ -175,7 +175,7 @@ Other methods that also return a DataArray:
 A DataArray `da` can be plotted using `da.plot`. 
 
 ```{eval-rst}
-.. autoclass:: mikeio.dataarray._DataArrayPlotter
+.. autoclass:: mikeio.dataset._data_plot._DataArrayPlotter
 	:members:
 ```
 
