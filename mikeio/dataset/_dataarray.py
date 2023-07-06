@@ -453,7 +453,18 @@ class DataArray(DataUtilsMixin):
         return self
 
     def describe(self, **kwargs) -> pd.DataFrame:
-        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`"""
+        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`
+        
+        Parameters
+        ----------
+        **kwargs
+            Keyword arguments passed to :py:meth:`pandas.DataFrame.describe`
+        
+        Returns
+        -------
+        pd.DataFrame
+        """
+
         data = {}
         data[self.name] = self.to_numpy().ravel()
         df = pd.DataFrame(data).describe(**kwargs)
