@@ -32,7 +32,7 @@ An ItemInfo consists of:
 * unit - an [EUMUnit](eum.EUMUnit)
 
 ```python
->>> from mikeio.eum import ItemInfo, EUMType
+>>> from mikeio import ItemInfo, EUMType
 >>> item = ItemInfo("Viken", EUMType.Water_Level)
 >>> item
 Viken <Water Level> (meter)
@@ -44,20 +44,29 @@ More info on the [EUM page](eum).
 ## Dfs0
 A dfs0 file is also called a time series file. 
 
-Working with data from dfs0 files are conveniently done in one of two ways:
-
-* mikeio.Dataset - keeps EUM information (convenient if you save data to new dfs0 file)
-* pandas.DataFrame - utilize all the powerful methods of pandas
-
-
 Read Dfs0 to Dataset:
 
 ```python
 >>> ds = mikeio.read("testdata/da_diagnostic.dfs0")
+>>> ds
+<mikeio.Dataset>
+dims: (time:744)
+time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)
+geometry: GeometryUndefined()
+items:
+  0:  State 1Sign. Wave Height <Significant wave height> (meter)
+  1:  State 2Sign. Wave Height <Significant wave height> (meter)
+  2:  Mean StateSign. Wave Height <Significant wave height> (meter)
+  3:  MeasurementSign. Wave Height <Significant wave height> (meter)
 ```
 
 Read more on the [Dfs0 page](dfs0).
 
+Convert the timeseries dataset to a pandas DataFrame:
+
+```python
+>>> df = ds.to_dataframe()
+```
 
 
 ## Dfs2
