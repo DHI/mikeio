@@ -1,7 +1,7 @@
 import warnings
 from abc import abstractmethod
 from datetime import datetime, timedelta
-from typing import Iterable, List, Optional, Tuple, Union
+from typing import Iterable, List, Optional, Tuple, Union, Sequence
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
@@ -87,7 +87,7 @@ def _valid_item_numbers(
             )
         else:
             items = [items]
-
+    assert isinstance(items, Sequence)
     for idx, item in enumerate(items):
         if isinstance(item, str):
             items[idx] = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
@@ -100,7 +100,7 @@ def _valid_item_numbers(
     if len(np.unique(items)) != len(items):
         raise ValueError("'items' must be unique")
 
-    assert isinstance(items, Iterable)
+    
     assert isinstance(items[0], int)
 
     return items
@@ -149,7 +149,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         else:
             s = time.slice_indexer(time_steps.start, time_steps.stop)
             time_steps = list(range(s.start, s.stop))
-    elif isinstance(time_steps, Iterable) and isinstance(time_steps[0], int):
+    elif isinstance(time_steps, Sequence) and isinstance(time_steps[0], int):
         time_steps = np.array(time_steps)
         time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
         time_steps = list(time_steps)
@@ -169,8 +169,8 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
     elif isinstance(time_steps, (pd.Timestamp, datetime)):
         s = time.slice_indexer(time_steps, time_steps)
         time_steps = list(range(s.start, s.stop))
-    elif isinstance(time_steps, pd.DatetimeIndex):
-        time_steps = list(time.get_indexer(time_steps))
+    #elif isinstance(time_steps, pd.DatetimeIndex):
+    #    time_steps = list(time.get_indexer(time_steps))
 
     else:
         raise TypeError(f"Indexing is not possible with {type(time_steps)}")
@@ -213,7 +213,7 @@ def _item_numbers_by_name(dfsItemInfo, item_names, ignore_first=False):
 
 def _get_item_info(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    item_numbers: List[int] = None,
+    item_numbers: Optional[List[int]] = None,
     ignore_first: bool = False,
 ) -> ItemInfoList:
     """Read DFS ItemInfo for specific item numbers
@@ -234,14 +234,10 @@ def _get_item_info(
     items = []
     for item in item_numbers:
         item = item + first_idx
-        name = dfsItemInfo[item].Name
-        eumItem = dfsItemInfo[item].Quantity.Item
-        eumUnit = dfsItemInfo[item].Quantity.Unit
-        itemtype = EUMType(eumItem)
-        unit = EUMUnit(eumUnit)
-        data_value_type = dfsItemInfo[item].ValueType
-        item = ItemInfo(name, itemtype, unit, data_value_type)
-        items.append(item)
+
+        item_info = ItemInfo.from_mikecore_dynamic_item_info(dfsItemInfo[item])
+
+        items.append(item_info)
     return ItemInfoList(items)
 
 

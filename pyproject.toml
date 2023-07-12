@@ -77,6 +77,16 @@ warn_return_any = false
 allow_redefinition = true
 warn_unreachable = true
 
+[[tool.mypy.overrides]]
+module = "mikecore.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pandas"
+
+ignore_missing_imports = true
+
+
 [tool.ruff]
 
 # ignore long lines

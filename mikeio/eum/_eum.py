@@ -21,7 +21,7 @@ from enum import IntEnum
 from typing import Dict, List, Sequence, Union
 
 import pandas as pd
-from mikecore.DfsFile import DataValueType
+from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
 from mikecore.eum import eumUnit, eumWrapper
 
 from ..exceptions import InvalidDataValueType
@@ -1495,6 +1495,18 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
+    
+    @staticmethod
+    def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
+        """Create ItemInfo from a mikecore.DfsDynamicItemInfo object"""
+        name = dfsItemInfo.Name
+        item = dfsItemInfo.Quantity.Item
+        unit = dfsItemInfo.Quantity.Unit
+        itemtype = EUMType(item)
+        unit = EUMUnit(unit)
+        data_value_type = dfsItemInfo.ValueType
+
+        return ItemInfo(name, itemtype, unit, data_value_type)
 
 
 class ItemInfoList(list):
