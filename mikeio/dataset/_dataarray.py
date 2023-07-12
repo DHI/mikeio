@@ -136,7 +136,7 @@ class DataArray(DataUtilsMixin):
             )
         return data
 
-    def _parse_dims(self, dims, geometry):
+    def _parse_dims(self, dims, geometry) -> Tuple[str, ...]:
         if dims is None:
             return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
@@ -953,10 +953,11 @@ class DataArray(DataUtilsMixin):
                     geometry = GeometryPoint2D(
                         x=x, y=y, projection=self.geometry.projection
                     )
-                else:
-                    geometry = GeometryPoint3D(
-                        x=x, y=y, z=z, projection=self.geometry.projection
-                    )
+                # this is not supported yet (see above)
+                #else:
+                #    geometry = GeometryPoint3D(
+                #        x=x, y=y, z=z, projection=self.geometry.projection
+                #    )
 
             da = DataArray(
                 data=dai, time=self.time, geometry=geometry, item=deepcopy(self.item)
@@ -1436,10 +1437,14 @@ class DataArray(DataUtilsMixin):
         axis = self._parse_axis(self.shape, self.dims, axis)
         time = self._time_by_agg_axis(self.time, axis)
 
-        if isinstance(axis, Iterable):
-            dims = tuple([d for i, d in enumerate(self.dims) if i not in axis])
+        
+        if isinstance(axis, int):
+            axes = (axis,)
         else:
-            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
+            axes = axis
+
+        dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
+        
 
         item = deepcopy(self.item)
         if "name" in kwargs:
