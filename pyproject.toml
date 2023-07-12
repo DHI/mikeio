@@ -82,8 +82,15 @@ module = "mikecore.*"
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = "pandas"
+module = "pandas" # TODO is it possible to list multiple modules to avoid repeating this?
+ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "matplotlib.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "shapely.*"
 ignore_missing_imports = true
 
 

@@ -1547,7 +1547,7 @@ def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
 
         return string_datatype_mapping[datatype]
 
-    if not isinstance(DataValueType):
+    if not isinstance(datatype, DataValueType):
         raise ValueError("Data value type not supported")
 
     return datatype
