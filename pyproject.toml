@@ -78,19 +78,15 @@ allow_redefinition = true
 warn_unreachable = true
 
 [[tool.mypy.overrides]]
-module = "mikecore.*"
-ignore_missing_imports = true
+module = [
+    "mikecore.*",
+    "pandas",
+    "matplotlib.*",
+    "shapely.*",
+    "mpl_toolkits.*",
+    "scipy.*"
+]
 
-[[tool.mypy.overrides]]
-module = "pandas" # TODO is it possible to list multiple modules to avoid repeating this?
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "matplotlib.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "shapely.*"
 ignore_missing_imports = true
 
 
