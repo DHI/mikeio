@@ -222,22 +222,20 @@ def _get_item_info(
     ----------
     dfsItemInfo : List[DfsDynamicItemInfo]
     item_numbers : list[int], optional
+        Item numbers to read, by default all items are read
+    ignore_first : bool, optional
+        Ignore first item, by default False, used for Dfsu3D
 
     Returns
     -------
-    list[ItemInfo]
+    ItemInfoList
     """
     first_idx = 1 if ignore_first else 0
     if item_numbers is None:
         item_numbers = list(range(len(dfsItemInfo) - first_idx))
 
-    items = []
-    for item in item_numbers:
-        item = item + first_idx
-
-        item_info = ItemInfo.from_mikecore_dynamic_item_info(dfsItemInfo[item])
-
-        items.append(item_info)
+    item_numbers = [i + first_idx for i in item_numbers]
+    items = [ItemInfo.from_mikecore_dynamic_item_info(dfsItemInfo[i]) for i in item_numbers]
     return ItemInfoList(items)
 
 
