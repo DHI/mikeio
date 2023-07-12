@@ -744,7 +744,7 @@ class Dataset(MutableMapping):
         return False
 
     # TODO change this to return a single type
-    def _key_to_str(self, key: Union[str, int, slice, Iterable[str], Iterable[int]]) -> Any:
+    def _key_to_str(self, key: Any) -> Any:
         """Translate item selection key to str (or List[str])"""
         if isinstance(key, str):
             return key
@@ -758,6 +758,8 @@ class Dataset(MutableMapping):
             for k in key:
                 keys.append(self._key_to_str(k))
             return keys
+        if hasattr(key, "name"):
+            return key.name
         raise TypeError(f"indexing with type {type(key)} is not supported")
 
     def __delitem__(self, key):
