@@ -376,7 +376,7 @@ class Dfs2(_Dfs123):
         return self._dy
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, ...]:
         """Tuple with number of values in the t-, y-, x-direction"""
         return (self._n_timesteps, self._ny, self._nx)
 

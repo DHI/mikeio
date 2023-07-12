@@ -77,33 +77,41 @@ def _valid_item_numbers(
     n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
         return list(range(n_items_file))
+    
+    # Handling scalar and sequences is a bit tricky
+    
+    item_numbers : List[int] = []
 
-    items = deepcopy(items)
-
-    if np.isscalar(items):
+    # check if items is a scalar (int or str)
+    if isinstance(items, (int, str)):
         if isinstance(items, str) and "*" in items:
             return _fuzzy_item_search(
                 dfsItemInfo=dfsItemInfo, search=items, start_idx=start_idx
             )
-        else:
-            items = [items]
+        elif isinstance(items, str):
+            item_number  = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
+            return [item_number]
+        elif isinstance(items, int):
+            if (items < 0) or (items >= n_items_file):
+                raise ItemsError(n_items_file)
+            return [items]
+    
     assert isinstance(items, Sequence)
-    for idx, item in enumerate(items):
+    for item in items:
         if isinstance(item, str):
-            items[idx] = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
+            item_number = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
         elif isinstance(item, int):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
+            item_number = item
         else:
             raise ItemsError(n_items_file)
+        item_numbers.append(item_number)
 
-    if len(np.unique(items)) != len(items):
+    if len(set(item_numbers)) != len(item_numbers):
         raise ValueError("'items' must be unique")
 
-    
-    assert isinstance(items[0], int)
-
-    return items
+    return item_numbers
 
 
 def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
@@ -179,7 +187,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
     return single_time_selected, time_steps
 
 
-def _item_numbers_by_name(dfsItemInfo, item_names, ignore_first=False):
+def _item_numbers_by_name(dfsItemInfo, item_names: List[str], ignore_first: bool=False) -> List[int]:
     """Utility function to find item numbers
 
     Parameters
@@ -493,6 +501,9 @@ class _Dfs123:
                     d = d.reshape(self.shape[1:])
                     darray = d.reshape(d.size, 1)[:, 0]
 
+                if self._ndim == 3:
+                    raise NotImplementedError("Append is not yet available for 3D files")
+
                 if self._is_equidistant:
                     self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
                 else:
@@ -695,30 +706,18 @@ class _Dfs123:
         return self._n_timesteps
 
     @property
-    def timestep(self) -> Optional[float]:
+    def timestep(self) -> float:
         """Time step size in seconds"""
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.TimeEquidistant,
-        }:
-            return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
+        # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
+        return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
 
     @property
-    def time(self) -> Optional[pd.DatetimeIndex]:
+    def time(self) -> pd.DatetimeIndex:
         """File all datetimes"""
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.TimeEquidistant,
-        }:
-            return pd.to_datetime(
-                [
-                    self.start_time + timedelta(seconds=i * self.timestep)
-                    for i in range(self.n_timesteps)
-                ]
-            )
-
-        else:
-            return None
+        # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
+        if not self._is_equidistant:
+            raise NotImplementedError("Not implemented for non-equidistant files")
+        return pd.date_range(start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S")
 
     @property
     def projection_string(self):
@@ -743,6 +742,12 @@ class _Dfs123:
     def orientation(self):
         """Orientation (in own CRS)"""
         return self.geometry.orientation
+
+    @property
+    @abstractmethod
+    def shape(self) -> Tuple[int, ...]:
+        """Shape of the data array"""
+        pass
 
     @property
     @abstractmethod
