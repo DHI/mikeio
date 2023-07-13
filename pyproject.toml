@@ -50,7 +50,9 @@ dev = ["pytest",
        "xarray",
        "netcdf4",
        "matplotlib",
-       "ruff",]
+       "ruff",
+       "types-PyYAML",
+       "types-tqdm"]
 
 test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely","pyproj"]
 

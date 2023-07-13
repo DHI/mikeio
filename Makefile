@@ -14,7 +14,7 @@ perftest:
 	pytest tests/performance/ --durations=0
 
 typecheck:
-	mypy mikeio/dataset/*.py
+	mypy mikeio/
 
 coverage: 
 	pytest --cov-report html --cov=mikeio tests/
