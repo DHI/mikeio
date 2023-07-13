@@ -50,7 +50,7 @@ dev = ["pytest",
        "xarray",
        "netcdf4",
        "matplotlib",
-       "ruff",]
+       "ruff"]
 
 test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely","pyproj"]
 
@@ -76,6 +76,21 @@ python_version = "3.9"
 warn_return_any = false
 allow_redefinition = true
 warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+    "mikecore.*",
+    "pandas",
+    "matplotlib.*",
+    "shapely.*",
+    "mpl_toolkits.*",
+    "scipy.*",
+    "tqdm.*",
+    "yaml.*"
+]
+
+ignore_missing_imports = true
+
 
 [tool.ruff]
 

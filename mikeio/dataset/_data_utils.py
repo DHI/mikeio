@@ -124,6 +124,7 @@ class DataUtilsMixin:
 
     @staticmethod
     def _parse_axis(data_shape, dims, axis) -> Union[int, Tuple[int]]:
+        # TODO change to return tuple always
         # axis = 0 if axis == "time" else axis
         if (axis == "spatial") or (axis == "space"):
             if len(data_shape) == 1:
