@@ -775,7 +775,7 @@
             <span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">_read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -789,38 +789,7 @@
         <span class="n">error_bad_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">fill_bad_data_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Read data from a dfsu file</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ---------</span>
-<span class="sd">        items: list[int] or list[str], optional</span>
-<span class="sd">            Read only selected items, by number (0-based), or by name</span>
-<span class="sd">        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional</span>
-<span class="sd">            Read only selected time steps, by default None (=all)</span>
-<span class="sd">        keepdims: bool, optional</span>
-<span class="sd">            When reading a single time step only, should the time-dimension be kept</span>
-<span class="sd">            in the returned Dataset? by default: False</span>
-<span class="sd">        area: list[float], optional</span>
-<span class="sd">            Read only data inside (horizontal) area given as a</span>
-<span class="sd">            bounding box (tuple with left, lower, right, upper)</span>
-<span class="sd">            or as list of coordinates for a polygon, by default None</span>
-<span class="sd">        x, y: float, optional</span>
-<span class="sd">            Read only data for elements containing the (x,y) points(s),</span>
-<span class="sd">            by default None</span>
-<span class="sd">        elements: list[int], optional</span>
-<span class="sd">            Read only selected element ids, by default None</span>
-<span class="sd">        error_bad_data: bool, optional</span>
-<span class="sd">            raise error if data is corrupt, by default True,</span>
-<span class="sd">        fill_bad_data_value:</span>
-<span class="sd">            fill value for to impute corrupt data, used in conjunction with error_bad_data=False</span>
-<span class="sd">            default np.nan</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        Dataset</span>
-<span class="sd">            A Dataset with data dimensions [t,elements]</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">if</span> <span class="n">dtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid data type. Choose np.float32 or np.float64&quot;</span><span class="p">)</span>
 
@@ -1358,6 +1327,65 @@
 
 
 <div class="viewcode-block" id="Dfsu2DH"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH">[docs]</a><span class="k">class</span> <span class="nc">Dfsu2DH</span><span class="p">(</span><span class="n">_Dfsu</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Dfsu2DH.read"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">elements</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+        <span class="n">error_bad_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">fill_bad_data_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dataset</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read data from a dfsu file</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        items: list[int] or list[str], optional</span>
+<span class="sd">            Read only selected items, by number (0-based), or by name</span>
+<span class="sd">        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional</span>
+<span class="sd">            Read only selected time steps, by default None (=all)</span>
+<span class="sd">        keepdims: bool, optional</span>
+<span class="sd">            When reading a single time step only, should the time-dimension be kept</span>
+<span class="sd">            in the returned Dataset? by default: False</span>
+<span class="sd">        area: list[float], optional</span>
+<span class="sd">            Read only data inside (horizontal) area given as a</span>
+<span class="sd">            bounding box (tuple with left, lower, right, upper)</span>
+<span class="sd">            or as list of coordinates for a polygon, by default None</span>
+<span class="sd">        x, y: float, optional</span>
+<span class="sd">            Read only data for elements containing the (x,y) points(s),</span>
+<span class="sd">            by default None</span>
+<span class="sd">        elements: list[int], optional</span>
+<span class="sd">            Read only selected element ids, by default None</span>
+<span class="sd">        error_bad_data: bool, optional</span>
+<span class="sd">            raise error if data is corrupt, by default True,</span>
+<span class="sd">        fill_bad_data_value:</span>
+<span class="sd">            fill value for to impute corrupt data, used in conjunction with error_bad_data=False</span>
+<span class="sd">            default np.nan</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dataset</span>
+<span class="sd">            A Dataset with data dimensions [t,elements]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span>
+                          <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+                          <span class="n">elements</span><span class="o">=</span><span class="n">elements</span><span class="p">,</span>
+                          <span class="n">area</span><span class="o">=</span><span class="n">area</span><span class="p">,</span>
+                          <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span>
+                          <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>
+                          <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">,</span>
+                          <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
+                          <span class="n">error_bad_data</span><span class="o">=</span><span class="n">error_bad_data</span><span class="p">,</span>
+                          <span class="n">fill_bad_data_value</span><span class="o">=</span><span class="n">fill_bad_data_value</span><span class="p">)</span></div>
+
     <span class="k">def</span> <span class="nf">_dfs_read_item_time_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsuFile</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
         <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>

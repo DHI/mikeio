@@ -91,7 +91,7 @@
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFileType</span>  <span class="c1"># type: ignore</span>
@@ -684,16 +684,16 @@
         <span class="k">if</span> <span class="n">n_nearest</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">dists</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">extrapolate</span><span class="p">:</span>
-                <span class="n">weights</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">xy</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">weights</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">xy</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># type: ignore</span>
         <span class="k">elif</span> <span class="n">n_nearest</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">weights</span> <span class="o">=</span> <span class="n">get_idw_interpolant</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">extrapolate</span><span class="p">:</span>
-                <span class="n">weights</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">xy</span><span class="p">),</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">weights</span><span class="p">[</span><span class="o">~</span><span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">xy</span><span class="p">),</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_nearest must be at least 1&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">weights</span><span class="p">[</span><span class="n">dists</span> <span class="o">&gt;</span> <span class="n">radius</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">weights</span><span class="p">[</span><span class="n">dists</span> <span class="o">&gt;</span> <span class="n">radius</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># type: ignore</span>
 
         <span class="k">return</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span>
 
@@ -1209,25 +1209,25 @@
 <span class="sd">        UnstructuredGeometry</span>
 <span class="sd">            which can be used for further extraction or saved to file</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
-            <span class="n">elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">elements</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="n">sel_elements</span> <span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">elements</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
-            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">elements</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="p">:]</span>
+            <span class="n">sel_elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sel_elements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">sel_elements</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="p">:]</span>
 
             <span class="k">return</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
 
-        <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
-            <span class="n">elements</span>
+        <span class="n">sorted_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+            <span class="n">sel_elements</span>
         <span class="p">)</span>  <span class="c1"># make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser</span>
 
         <span class="c1"># extract information for selected elements</span>
 
-        <span class="n">node_ids</span><span class="p">,</span> <span class="n">elem_tbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_nodes_and_table_for_elements</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+        <span class="n">node_ids</span><span class="p">,</span> <span class="n">elem_tbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_nodes_and_table_for_elements</span><span class="p">(</span><span class="n">sorted_elements</span><span class="p">)</span>
         <span class="n">node_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
         <span class="n">codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codes</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
-        <span class="n">elem_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_ids</span><span class="p">[</span><span class="n">elements</span><span class="p">]</span>
+        <span class="n">elem_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_ids</span><span class="p">[</span><span class="n">sorted_elements</span><span class="p">]</span>
 
         <span class="k">return</span> <span class="n">GeometryFM2D</span><span class="p">(</span>
             <span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coords</span><span class="p">,</span>
@@ -1411,18 +1411,21 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_directions</span>
 
 
+<span class="c1"># TODO reconsider inheritance to avoid overriding method signature</span>
 <span class="k">class</span> <span class="nc">GeometryFMAreaSpectrum</span><span class="p">(</span><span class="n">_GeometryFMSpectrum</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;elements&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">elements_to_geometry</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeometryFMAreaSpectrum&quot;</span><span class="p">,</span> <span class="n">GeometryFMPointSpectrum</span><span class="p">]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of elements to new flexible file geometry</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        elements : list(int)</span>
 <span class="sd">            list of element ids</span>
+<span class="sd">        keepdims: bool</span>
+<span class="sd">            Not used</span>
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        GeometryFMAreaSpectrum or GeometryFMPointSpectrum</span>
@@ -1465,7 +1468,7 @@
 
     <span class="k">def</span> <span class="nf">_nodes_to_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;GeometryFM2D&quot;</span><span class="p">,</span> <span class="n">GeometryFMPointSpectrum</span><span class="p">,</span> <span class="s2">&quot;GeometryFMLineSpectrum&quot;</span><span class="p">]:</span>
+    <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of nodes to new flexible file geometry</span>
 <span class="sd">        Note: takes only the elements for which all nodes are selected</span>
 <span class="sd">        Parameters</span>
