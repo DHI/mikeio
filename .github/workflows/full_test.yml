@@ -41,7 +41,7 @@ jobs:
         flake8 tests/ --select=F811
     - name: Install mikeio
       run: |
-        pip install .[test]
+        pip install .[dev,test]
     - name: Test with pytest
       run: |
         pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings

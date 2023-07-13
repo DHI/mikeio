@@ -50,9 +50,7 @@ dev = ["pytest",
        "xarray",
        "netcdf4",
        "matplotlib",
-       "ruff",
-       "types-PyYAML",
-       "types-tqdm"]
+       "ruff"]
 
 test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely","pyproj"]
 
@@ -86,7 +84,9 @@ module = [
     "matplotlib.*",
     "shapely.*",
     "mpl_toolkits.*",
-    "scipy.*"
+    "scipy.*",
+    "tqdm.*",
+    "yaml.*"
 ]
 
 ignore_missing_imports = true
