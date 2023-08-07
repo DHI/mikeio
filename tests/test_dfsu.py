@@ -1166,3 +1166,16 @@ def test_write_header(tmp_path):
                 d = np.random.random((n_elements))  # 1d
                 data.append(d)
                 f.append(data)
+
+def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    dss = ds.isel(time=[0,2,3])
+    assert not dss.is_equidistant
+
+    # TODO which exception should be raised, when trying to write non-equidistant dfsu? This operation is not supported
+    with pytest.raises(ValueError, match="equidistant"):
+        fp = tmp_path / "not_gonna_work.dfsu"
+        dss.to_dfs(fp)
+
+    

@@ -45,6 +45,9 @@ def _write_dfsu(filename: str, data: Dataset):
     if len(data.time) == 1:
         dt = 1  # TODO is there any sensible default?
     else:
+        if not data.is_equidistant:
+            raise ValueError("Non-equidistant time axis is not supported.")
+
         dt = (data.time[1] - data.time[0]).total_seconds()  # type: ignore
     n_time_steps = len(data.time)
 
