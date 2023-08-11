@@ -1,4 +1,5 @@
-from typing import Union, Tuple
+from __future__ import annotations
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -321,7 +322,7 @@ class DfsuSpectral(_Dfsu):
         )
 
     def calc_Hm0_from_spectrum(
-        self, spectrum: Union[np.ndarray, DataArray], tail=True
+        self, spectrum: np.ndarray | DataArray, tail=True
     ) -> np.ndarray:
         """Calculate significant wave height (Hm0) from spectrum
 

@@ -1,12 +1,11 @@
 import warnings
 from abc import abstractmethod
-from datetime import datetime, timedelta
-from typing import Iterable, List, Optional, Tuple, Union, Sequence
+from datetime import datetime
+from typing import Iterable, List, Optional, Tuple, Sequence
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
 
-from copy import deepcopy
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -70,7 +69,7 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    items: Optional[Union[str, int, List[int], List[str]]] = None,
+    items: Optional[str | int | List[int] | List[str]] = None,
     ignore_first: bool = False,
 ) -> List[int]:
     start_idx = 1 if ignore_first else 0

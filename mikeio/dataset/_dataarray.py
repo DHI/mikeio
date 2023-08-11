@@ -740,7 +740,7 @@ class DataArray(DataUtilsMixin):
 
         Parameters
         ----------
-        time : Union[str, pd.DatetimeIndex, DataArray], optional
+        time : str, pd.DatetimeIndex, DataArray, optional
             time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
             by default None
         x : float, optional
@@ -883,7 +883,7 @@ class DataArray(DataUtilsMixin):
 
         Parameters
         ----------
-        time : Union[float, pd.DatetimeIndex, DataArray], optional
+        time : float, pd.DatetimeIndex or DataArray, optional
             timestep in seconds or discrete time instances given by
             pd.DatetimeIndex (typically from another DataArray
             da2.time), by default None (=don't interp in time)

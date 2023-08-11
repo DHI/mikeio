@@ -10,7 +10,6 @@ from typing import (
     Optional,
     Sequence,
     Tuple,
-    Union,
     MutableMapping,
     Any,
 )
@@ -839,7 +838,7 @@ class Dataset(MutableMapping):
 
         Parameters
         ----------
-        time : Union[str, pd.DatetimeIndex, Dataset], optional
+        time : str, pd.DatetimeIndex or Dataset, optional
             time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
             by default None
         x : float, optional
@@ -910,7 +909,7 @@ class Dataset(MutableMapping):
 
         Parameters
         ----------
-        time : Union[float, pd.DatetimeIndex, Dataset], optional
+        time : float, pd.DatetimeIndex or Dataset, optional
             timestep in seconds or discrete time instances given by
             pd.DatetimeIndex (typically from another Dataset
             da2.time), by default None (=don't interp in time)

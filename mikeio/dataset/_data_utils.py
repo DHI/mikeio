@@ -1,6 +1,7 @@
+from __future__ import annotations
 import re
 from datetime import datetime
-from typing import Iterable, Sequence, Sized, Tuple, Union
+from typing import Iterable, Sequence, Sized, Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,7 +12,7 @@ def _to_safe_name(name: str) -> str:
     return re.sub("_+", "_", tmp)  # Collapse multiple underscores
 
 
-def _n_selected_timesteps(x: Sized, k: Union[slice, Sized]) -> int:
+def _n_selected_timesteps(x: Sized, k: slice | Sized) -> int:
     if isinstance(k, slice):
         k = list(range(*k.indices(len(x))))
     return len(k)
@@ -65,7 +66,7 @@ class DataUtilsMixin:
 
     @staticmethod
     def _time_by_agg_axis(
-        time: pd.DatetimeIndex, axis: Union[int, Sequence[int]]
+        time: pd.DatetimeIndex, axis: int | Sequence[int]
     ) -> pd.DatetimeIndex:
         """New DatetimeIndex after aggregating over time axis"""
         if axis == 0 or (isinstance(axis, Sequence) and 0 in axis):
@@ -123,7 +124,7 @@ class DataUtilsMixin:
         return index
 
     @staticmethod
-    def _parse_axis(data_shape, dims, axis) -> Union[int, Tuple[int]]:
+    def _parse_axis(data_shape, dims, axis) -> int | Tuple[int]:
         # TODO change to return tuple always
         # axis = 0 if axis == "time" else axis
         if (axis == "spatial") or (axis == "space"):
@@ -175,7 +176,7 @@ class DataUtilsMixin:
         intime,
         outtime,
         data: np.ndarray,
-        method: Union[str, int],
+        method: str | int,
         extrapolate: bool,
         fill_value: float,
     ):
