@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import warnings
 from copy import deepcopy
@@ -79,7 +80,7 @@ class Dataset(MutableMapping):
 
     def __init__(
         self,
-        data: Union[Mapping[str, DataArray], Iterable[DataArray], Sequence[np.ndarray]],
+        data: Mapping[str, DataArray] | Iterable[DataArray] | Sequence[np.ndarray],
         time=None,
         items=None,
         geometry=None,
@@ -579,7 +580,7 @@ class Dataset(MutableMapping):
             time_steps = list(range(s.start, s.stop))
             return self.isel(time_steps, axis=0)
 
-    def remove(self, key: Union[int, str]):
+    def remove(self, key: int | str):
         """Remove DataArray from Dataset
 
         Parameters
@@ -649,7 +650,7 @@ class Dataset(MutableMapping):
             self.__itemattr.remove(name)
             delattr(self, name)
 
-    def __getitem__(self, key) -> Union[DataArray, "Dataset"]:
+    def __getitem__(self, key) -> DataArray | "Dataset":
 
         # select time steps
         if (
@@ -887,7 +888,7 @@ class Dataset(MutableMapping):
     def interp(
         self,
         *,
-        time: Optional[Union[pd.DatetimeIndex, "DataArray"]] = None,
+        time: Optional[pd.DatetimeIndex | "DataArray"] = None,
         x: Optional[float] = None,
         y: Optional[float] = None,
         z: Optional[float] = None,
@@ -1022,7 +1023,7 @@ class Dataset(MutableMapping):
 
     def interp_time(
         self,
-        dt: Optional[Union[float, pd.DatetimeIndex, "Dataset", DataArray]] = None,
+        dt: Optional[float | pd.DatetimeIndex | "Dataset" | DataArray] = None,
         *,
         freq: Optional[str] = None,
         method="linear",
@@ -1100,7 +1101,7 @@ class Dataset(MutableMapping):
 
     def interp_like(
         self,
-        other: Union["Dataset", DataArray, Grid2D, GeometryFM2D, pd.DatetimeIndex],
+        other: "Dataset" | DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
         **kwargs,
     ) -> "Dataset":
         """Interpolate in space (and in time) to other geometry (and time axis)
@@ -1305,7 +1306,7 @@ class Dataset(MutableMapping):
 
     def aggregate(
         self, axis=0, func=np.nanmean, **kwargs
-    ) -> Union["Dataset", "DataArray"]:
+    ) -> "Dataset":
         """Aggregate along an axis
 
         Parameters
@@ -1324,15 +1325,8 @@ class Dataset(MutableMapping):
             if self.n_items <= 1:
                 return self
 
-            if "keepdims" in kwargs:
-                warnings.warn(
-                    "The keepdims arguments is deprecated. The result will always be a Dataset.",
-                    FutureWarning,
-                )
-
-            keepdims = kwargs.pop("keepdims", False)
             name = kwargs.pop("name", func.__name__)
-            data = func(self.to_numpy(), axis=0, keepdims=False, **kwargs)
+            data = func(self.to_numpy(), axis=0, **kwargs)
             item = self._agg_item_from_items(self.items, name)
             da = DataArray(
                 data=data,
@@ -1342,12 +1336,8 @@ class Dataset(MutableMapping):
                 dims=self.dims,
                 zn=self._zn,
             )
-            if not keepdims:
-                warnings.warn(
-                    "The keepdims arguments is deprecated. The result will always be a Dataset.",
-                    FutureWarning,
-                )
-            return Dataset([da], validate=False) if keepdims else da
+            
+            return Dataset([da], validate=False)
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
@@ -1369,7 +1359,7 @@ class Dataset(MutableMapping):
         )
         return ItemInfo(name, it_type, it_unit)
 
-    def quantile(self, q, *, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def quantile(self, q, *, axis=0, **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1399,7 +1389,7 @@ class Dataset(MutableMapping):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def nanquantile(self, q, *, axis=0, **kwargs) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1427,14 +1417,13 @@ class Dataset(MutableMapping):
 
     def _quantile(
         self, q, *, axis=0, func=np.quantile, **kwargs
-    ) -> Union["Dataset", "DataArray"]:
+    ) -> "Dataset":
 
         if axis == "items":
-            keepdims = kwargs.pop("keepdims", False)
             if self.n_items <= 1:
                 return self  # or raise ValueError?
             if np.isscalar(q):
-                data = func(self.to_numpy(), q=q, axis=0, keepdims=False, **kwargs)
+                data = func(self.to_numpy(), q=q, axis=0, **kwargs)
                 item = self._agg_item_from_items(self.items, f"Quantile {str(q)}")
                 da = DataArray(
                     data=data,
@@ -1444,10 +1433,8 @@ class Dataset(MutableMapping):
                     dims=self.dims,
                     zn=self._zn,
                 )
-                return Dataset([da], validate=False) if keepdims else da
+                return Dataset([da], validate=False)
             else:
-                if keepdims:
-                    raise ValueError("Cannot keepdims for multiple quantiles")
                 res = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)
@@ -1470,7 +1457,7 @@ class Dataset(MutableMapping):
 
             return Dataset(data=res, validate=False)
 
-    def max(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def max(self, axis=0, **kwargs) -> "Dataset":
         """Max value along an axis
 
         Parameters
@@ -1489,7 +1476,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def min(self, axis=0, **kwargs) -> "Dataset":
         """Min value along an axis
 
         Parameters
@@ -1508,7 +1495,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def mean(self, axis=0, **kwargs) -> "Dataset":
         """Mean value along an axis
 
         Parameters
@@ -1528,7 +1515,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def std(self, axis=0, **kwargs) -> "Dataset":
         """Standard deviation along an axis
 
         Parameters
@@ -1547,7 +1534,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def ptp(self, axis=0, **kwargs) -> "Dataset":
         """Range (max - min) a.k.a Peak to Peak along an axis
         Parameters
         ----------
@@ -1561,7 +1548,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def average(self, weights, axis=0, **kwargs) -> "Dataset":
         """Compute the weighted average along the specified axis.
 
         Parameters
@@ -1595,7 +1582,7 @@ class Dataset(MutableMapping):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def nanmax(self, axis=0, **kwargs) -> "Dataset":
         """Max value along an axis (NaN removed)
 
         Parameters
@@ -1614,7 +1601,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def nanmin(self, axis=0, **kwargs) -> "Dataset":
         """Min value along an axis (NaN removed)
 
         Parameters
@@ -1629,7 +1616,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def nanmean(self, axis=0, **kwargs) -> "Dataset":
         """Mean value along an axis (NaN removed)
 
         Parameters
@@ -1644,7 +1631,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis=0, **kwargs) -> Union["Dataset", "DataArray"]:
+    def nanstd(self, axis=0, **kwargs) -> "Dataset":
         """Standard deviation along an axis (NaN removed)
 
         Parameters
@@ -1760,7 +1747,7 @@ class Dataset(MutableMapping):
 
     # ===============================================
 
-    def to_pandas(self, **kwargs) -> Union[pd.Series, pd.DataFrame]:
+    def to_pandas(self, **kwargs) -> pd.Series | pd.DataFrame:
         """Convert Dataset to a Pandas DataFrame"""
 
         if self.n_items != 1:
@@ -1769,7 +1756,7 @@ class Dataset(MutableMapping):
             return self[0].to_pandas(**kwargs)
 
     def to_dataframe(
-        self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
+        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
     ) -> pd.DataFrame:
         """Convert Dataset to a Pandas DataFrame
 
