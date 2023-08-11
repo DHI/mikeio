@@ -1435,9 +1435,9 @@ class Dataset(MutableMapping):
                 )
                 return Dataset([da], validate=False)
             else:
-                res = []
+                res: List[DataArray] = []
                 for quantile in q:
-                    qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)
+                    qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
                     res.append(qd)
                 return Dataset(data=res, validate=False)

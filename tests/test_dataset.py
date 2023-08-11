@@ -920,6 +920,14 @@ def test_aggregate_across_items():
     assert dsm.geometry == ds.geometry
     assert dsm.dims == ds.dims
 
+    dsq = ds.quantile(q=[0.1,0.5,0.9], axis="items")
+    assert isinstance(dsq, mikeio.Dataset)
+    assert dsq[0].name == "Quantile 0.1"
+    assert dsq[1].name == "Quantile 0.5"
+    assert dsq[2].name == "Quantile 0.9"
+
+    # TODO allow name to be specified similar to below
+
 
 def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
 
