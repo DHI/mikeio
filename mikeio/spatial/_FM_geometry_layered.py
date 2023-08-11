@@ -1,3 +1,4 @@
+from __future__ import annotations
 from functools import cached_property
 from typing import Collection, Sequence, List
 
