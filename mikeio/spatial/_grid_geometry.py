@@ -778,7 +778,7 @@ class Grid2D(_Geometry):
 
     def _bbox_to_index(
         self, bbox: Tuple[float,float,float,float] | BoundingBox
-    ) -> Tuple[range, range:
+    ) -> Tuple[range, range]:
         """Find subarea within this geometry"""
         if not (len(bbox) == 4):
             raise ValueError(
