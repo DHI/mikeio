@@ -175,10 +175,14 @@ def test_read_dfsu3d_column():
 def test_read_dfsu3d_column_save(tmp_path):
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
+    assert dfs.geometry.n_sigma_layers == 4
+    assert dfs.geometry.n_z_layers == 5
+
 
     (x, y) = (333934.1, 6158101.5)
 
     ds = dfs.read(x=x, y=y)  # all data in file
+    assert isinstance(ds.geometry, GeometryFMVerticalColumn)
     assert ds.geometry.n_sigma_layers == 4
     assert ds.geometry.n_z_layers == 0
     fp = tmp_path / "new_column.dfsu"
@@ -187,6 +191,8 @@ def test_read_dfsu3d_column_save(tmp_path):
     (x, y) = (347698.5188405, 6221233.34815)
 
     ds = dfs.read(x=x, y=y)  # all data in file
+    assert isinstance(ds.geometry, GeometryFMVerticalColumn)
+    assert ds.geometry.n_layers == 8
     assert ds.geometry.n_sigma_layers == 4
     assert ds.geometry.n_z_layers == 4
     fp = tmp_path / "new_column_2.dfsu"

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Tuple
 
 import numpy as np
 import pandas as pd
@@ -36,11 +36,11 @@ class DfsuSpectral(_Dfsu):
         dims = [] if n_steps == 1 else ["time"]
         n_freq = self.n_frequencies
         n_dir = self.n_directions
-        shape = (n_dir, n_freq)
+        shape: Tuple[int,...] = (n_dir, n_freq)
         if n_dir == 0:
-            shape = [n_freq]
+            shape = (n_freq,)
         elif n_freq == 0:
-            shape = [n_dir]
+            shape = (n_dir,)
         if self._type == DfsuFileType.DfsuSpectral0D:
             read_shape = (n_steps, *shape)
         elif self._type == DfsuFileType.DfsuSpectral1D:
@@ -165,7 +165,7 @@ class DfsuSpectral(_Dfsu):
         read_shape, shape, dims = self._get_spectral_data_shape(n_steps, pts)
         for item in range(n_items):
             # Initialize an empty data block
-            data = np.ndarray(shape=read_shape, dtype=dtype)
+            data: np.ndarray = np.ndarray(shape=read_shape, dtype=dtype)
             data_list.append(data)
 
         t_seconds = np.zeros(n_steps, dtype=float)

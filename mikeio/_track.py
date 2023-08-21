@@ -103,8 +103,8 @@ def _extract_track(
     )
 
     # initialize arrays
-    d1 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
-    d2 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
+    d1: np.ndarray = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
+    d2: np.ndarray = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
     t1 = 0.0
     t2 = 0.0
 

@@ -11,6 +11,7 @@ from typing import (
     Tuple,
     Union,
     MutableMapping,
+    Any,
 )
 
 import numpy as np
@@ -743,7 +744,7 @@ class Dataset(MutableMapping):
         return False
 
     # TODO change this to return a single type
-    def _key_to_str(self, key: Union[str, int, slice, Iterable[str], Iterable[int]]):
+    def _key_to_str(self, key: Any) -> Any:
         """Translate item selection key to str (or List[str])"""
         if isinstance(key, str):
             return key
