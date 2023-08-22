@@ -23,6 +23,7 @@ from ..dataset import Dataset
 from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
 from ..exceptions import DataDimensionMismatch, ItemsError
 from ..spatial import GeometryUndefined
+from .._time import DateTimeSelector
 
 
 def _read_item_time_step(
@@ -116,75 +117,82 @@ def _valid_item_numbers(
 
 def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
 
+    time_axis = dfsFileInfo.TimeAxis
+
     single_time_selected = False
-    if isinstance(time_steps, int) and np.isscalar(time_steps):
+    if isinstance(time_steps, (int,str, datetime)): # and np.isscalar(time_steps):
         single_time_selected = True
 
-    n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
-    if time_steps is None:
-        return single_time_selected, list(range(n_steps_file))
+    n_steps_file = time_axis.NumberOfTimeSteps
+    # if time_steps is None:
+    #     return single_time_selected, list(range(n_steps_file))
 
-    if isinstance(time_steps, int):
-        time_steps = [time_steps]
+    # if isinstance(time_steps, int):
+    #     time_steps = [time_steps]
 
-    if isinstance(time_steps, str):
-        parts = time_steps.split(",")
-        if len(parts) == 1:
-            parts.append(parts[0])  # end=start
+    # if isinstance(time_steps, str):
+    #     parts = time_steps.split(",")
+    #     if len(parts) == 1:
+    #         parts.append(parts[0])  # end=start
 
-        if parts[0] == "":
-            time_steps = slice(parts[1])  # stop only
-        elif parts[1] == "":
-            time_steps = slice(parts[0], None)  # start only
-        else:
-            time_steps = slice(parts[0], parts[1])
+    #     if parts[0] == "":
+    #         time_steps = slice(parts[1])  # stop only
+    #     elif parts[1] == "":
+    #         time_steps = slice(parts[0], None)  # start only
+    #     else:
+    #         time_steps = slice(parts[0], parts[1])
 
-    if isinstance(time_steps, (slice, pd.Timestamp, datetime, pd.DatetimeIndex)):
-        if dfsFileInfo.TimeAxis.TimeAxisType != TimeAxisType.CalendarEquidistant:
-            # TODO: handle non-equidistant calendar
-            raise ValueError(
-                "Only equidistant calendar files are supported for this type of time_step argument"
-            )
+    # if isinstance(time_steps, (slice, pd.Timestamp, datetime, pd.DatetimeIndex)):
+    #     if dfsFileInfo.TimeAxis.TimeAxisType != TimeAxisType.CalendarEquidistant:
+    #         # TODO: handle non-equidistant calendar
+    #         raise ValueError(
+    #             "Only equidistant calendar files are supported for this type of time_step argument"
+    #         )
 
-        start_time_file = dfsFileInfo.TimeAxis.StartDateTime
-        time_step_file = dfsFileInfo.TimeAxis.TimeStep
-        freq = pd.Timedelta(seconds=time_step_file)
-        time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
+    start_time_file = time_axis.StartDateTime
+    time_step_file = time_axis.TimeStep
+    freq = pd.Timedelta(seconds=time_step_file)
+    time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
 
-    if isinstance(time_steps, slice):
-        if isinstance(time_steps.start, int) or isinstance(time_steps.stop, int):
-            time_steps = list(range(*time_steps.indices(n_steps_file)))
-        else:
-            s = time.slice_indexer(time_steps.start, time_steps.stop)
-            time_steps = list(range(s.start, s.stop))
-    elif isinstance(time_steps, Sequence) and isinstance(time_steps[0], int):
-        time_steps = np.array(time_steps)
-        time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
-        time_steps = list(time_steps)
+    
 
-        if max(time_steps) > (n_steps_file - 1):
-            raise IndexError(f"Timestep cannot be larger than {n_steps_file}")
-        if min(time_steps) < 0:
-            raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
-    elif isinstance(time_steps, Iterable):
-        steps = []
-        for t in time_steps:
-            _, step = _valid_timesteps(dfsFileInfo, t)
-            steps.append(step[0])
-        single_time_selected = len(steps) == 1
-        time_steps = steps
+    dts = DateTimeSelector(time)
+    return single_time_selected, dts.isel(time_steps)
 
-    elif isinstance(time_steps, (pd.Timestamp, datetime)):
-        s = time.slice_indexer(time_steps, time_steps)
-        time_steps = list(range(s.start, s.stop))
-    #elif isinstance(time_steps, pd.DatetimeIndex):
-    #    time_steps = list(time.get_indexer(time_steps))
+    # if isinstance(time_steps, slice):
+    #     if isinstance(time_steps.start, int) or isinstance(time_steps.stop, int):
+    #         time_steps = list(range(*time_steps.indices(n_steps_file)))
+    #     else:
+    #         s = time.slice_indexer(time_steps.start, time_steps.stop)
+    #         time_steps = list(range(s.start, s.stop))
+    # elif isinstance(time_steps, Sequence) and isinstance(time_steps[0], int):
+    #     time_steps = np.array(time_steps)
+    #     time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
+    #     time_steps = list(time_steps)
 
-    else:
-        raise TypeError(f"Indexing is not possible with {type(time_steps)}")
-    if len(time_steps) == 1:
-        single_time_selected = True
-    return single_time_selected, time_steps
+    #     if max(time_steps) > (n_steps_file - 1):
+    #         raise IndexError(f"Timestep cannot be larger than {n_steps_file}")
+    #     if min(time_steps) < 0:
+    #         raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
+    # elif isinstance(time_steps, Iterable):
+    #     steps = []
+    #     for t in time_steps:
+    #         _, step = _valid_timesteps(dfsFileInfo, t)
+    #         steps.append(step[0])
+    #     single_time_selected = len(steps) == 1
+    #     time_steps = steps
+
+    # elif isinstance(time_steps, (pd.Timestamp, datetime)):
+    #     s = time.slice_indexer(time_steps, time_steps)
+    #     time_steps = list(range(s.start, s.stop))
+    # #elif isinstance(time_steps, pd.DatetimeIndex):
+    # #    time_steps = list(time.get_indexer(time_steps))
+
+    # else:
+    #     raise TypeError(f"Indexing is not possible with {type(time_steps)}")
+    # if len(time_steps) == 1:
+    #     single_time_selected = True
+    # return single_time_selected, time_steps
 
 
 def _item_numbers_by_name(dfsItemInfo, item_names: List[str], ignore_first: bool=False) -> List[int]:
