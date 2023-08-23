@@ -1,12 +1,11 @@
 import warnings
 from abc import abstractmethod
-from datetime import datetime, timedelta
-from typing import Iterable, List, Optional, Tuple, Union, Sequence
+from datetime import datetime
+from typing import List, Optional, Tuple, Union, Sequence
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
 
-from copy import deepcopy
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -120,7 +119,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
     time_axis = dfsFileInfo.TimeAxis
 
     single_time_selected = False
-    if isinstance(time_steps, (int,str, datetime)): # and np.isscalar(time_steps):
+    if isinstance(time_steps, (int, datetime)):
         single_time_selected = True
 
     n_steps_file = time_axis.NumberOfTimeSteps
@@ -149,15 +148,31 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
     #             "Only equidistant calendar files are supported for this type of time_step argument"
     #         )
 
-    start_time_file = time_axis.StartDateTime
-    time_step_file = time_axis.TimeStep
-    freq = pd.Timedelta(seconds=time_step_file)
-    time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
+    if time_axis.TimeAxisType != TimeAxisType.CalendarEquidistant:
+        start_time_file = datetime(1970, 1, 1) # TODO is this the proper epoch, should this magic number be somewhere else?
+    else:
+        start_time_file = time_axis.StartDateTime
 
-    
+    if time_axis.TimeAxisType == TimeAxisType.CalendarEquidistant:
+        time_step_file = time_axis.TimeStep
+        freq = pd.Timedelta(seconds=time_step_file)
+        time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
+    elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:        
+        idx = list(range(n_steps_file))
+
+        if isinstance(time_steps, int):
+            return True, [idx[time_steps]]
+        return single_time_selected, idx
 
     dts = DateTimeSelector(time)
-    return single_time_selected, dts.isel(time_steps)
+
+    idx = dts.isel(time_steps)
+
+    if isinstance(time_steps, str):
+        if len(idx) == 1:
+            single_time_selected = True
+
+    return single_time_selected, idx
 
     # if isinstance(time_steps, slice):
     #     if isinstance(time_steps.start, int) or isinstance(time_steps.stop, int):
@@ -395,7 +410,7 @@ class _Dfs123:
         }:
             self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
-            self._start_time = datetime(1970, 1, 1)
+            self._start_time = datetime(1970, 1, 1) # TODO is this the proper epoch, should this magic number be somewhere else?
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep

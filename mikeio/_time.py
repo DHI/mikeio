@@ -1,4 +1,4 @@
-
+from __future__ import annotations
 from datetime import datetime
 from dataclasses import dataclass
 from typing import List, Iterable, Optional
@@ -26,8 +26,12 @@ class  DateTimeSelector:
             return [indices[time]]
         
         if isinstance(time, (datetime, str)):
-            return [self.index.get_loc(time)]
-        
+            loc = self.index.get_loc(time)
+            if isinstance(loc, int):
+                return [loc]
+            elif isinstance(loc, slice):
+                return list(range(loc.start, loc.stop))
+
         if isinstance(time, slice):
             if isinstance(time.start, int) or isinstance(time.stop, int):
                 return indices[time]
@@ -39,6 +43,8 @@ class  DateTimeSelector:
             
             # recursive call
             return [self.isel(t)[0] for t in time]
+        
+        return indices
 
     
 
