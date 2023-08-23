@@ -7,7 +7,7 @@ import pandas as pd
 
 
 @dataclass
-class  DateTimeSelector:
+class DateTimeSelector:
     """Helper class for selecting time steps from a pandas DatetimeIndex"""
 
     index: pd.DatetimeIndex
@@ -15,7 +15,12 @@ class  DateTimeSelector:
     def __len__(self):
         return len(self.index)
 
-    def isel(self, x: Optional[int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice]) -> List[int]:
+    def isel(
+        self,
+        x: Optional[
+            int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice
+        ] = None,
+    ) -> List[int]:
         """Select time steps from a pandas DatetimeIndex
 
         Parameters
@@ -38,15 +43,15 @@ class  DateTimeSelector:
         >>> dts.isel(-1)
         [3]
         """
-        
+
         indices = list(range(len(self.index)))
 
         if x is None:
             return indices
-        
+
         if isinstance(x, int):
             return [indices[x]]
-        
+
         if isinstance(x, (datetime, str)):
             loc = self.index.get_loc(x)
             if isinstance(loc, int):
@@ -60,28 +65,26 @@ class  DateTimeSelector:
             else:
                 s = self.index.slice_indexer(x.start, x.stop)
                 return list(range(s.start, s.stop))
-        
+
         if isinstance(x, Iterable):
             return [self.isel(t)[0] for t in x]
-        
+
         return indices
 
 
 if __name__ == "__main__":
-        
+
     idx = pd.date_range("2000-01-01", periods=4, freq="D")
     assert len(idx) == 4
-    
+
     dts = DateTimeSelector(idx)
 
-    assert dts.isel(None) == [0,1,2,3]
+    assert dts.isel(None) == [0, 1, 2, 3]
     assert dts.isel(0) == [0]
     assert dts.isel(-1) == [3]
-    assert dts.isel([0,1]) == [0,1]
+    assert dts.isel([0, 1]) == [0, 1]
     assert dts.isel("2000-01-02") == [1]
-    assert dts.isel(["2000-01-02", "2000-01-03"]) == [1,2]
-    assert dts.isel(idx) == [0,1,2,3]
-    assert dts.isel(slice(1,4)) == [1,2,3]
-    assert dts.isel(slice("2000-01-02", "2000-01-04")) == [1,2,3]
-
-        
+    assert dts.isel(["2000-01-02", "2000-01-03"]) == [1, 2]
+    assert dts.isel(idx) == [0, 1, 2, 3]
+    assert dts.isel(slice(1, 4)) == [1, 2, 3]
+    assert dts.isel(slice("2000-01-02", "2000-01-04")) == [1, 2, 3]
