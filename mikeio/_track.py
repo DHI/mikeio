@@ -1,6 +1,7 @@
+from __future__ import annotations
 import os
 from datetime import datetime
-from typing import Callable, Sequence, Tuple, Union
+from typing import Callable, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -18,7 +19,7 @@ def _extract_track(
     end_time: datetime,
     timestep: float,
     geometry: GeometryFM2D,
-    track: Union[str, Dataset, pd.DataFrame],
+    track: str | Dataset | pd.DataFrame,
     items: Sequence[ItemInfo],
     item_numbers: Sequence[int],
     time_steps: Sequence[int],

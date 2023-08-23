@@ -914,19 +914,19 @@ def test_aggregate_across_items():
 
     ds = mikeio.read("tests/testdata/State_wlbc_north_err.dfs1")
 
-    with pytest.warns(FutureWarning):  # TODO: remove in 1.5.0
-        dam = ds.max(axis="items")
-
-    assert isinstance(dam, mikeio.DataArray)
-    assert dam.geometry == ds.geometry
-    assert dam.dims == ds.dims
-    assert dam.type == ds[-1].type
-
-    dsm = ds.mean(axis="items", keepdims=True)
+    dsm = ds.mean(axis="items")
 
     assert isinstance(dsm, mikeio.Dataset)
     assert dsm.geometry == ds.geometry
     assert dsm.dims == ds.dims
+
+    dsq = ds.quantile(q=[0.1,0.5,0.9], axis="items")
+    assert isinstance(dsq, mikeio.Dataset)
+    assert dsq[0].name == "Quantile 0.1"
+    assert dsq[1].name == "Quantile 0.5"
+    assert dsq[2].name == "Quantile 0.9"
+
+    # TODO allow name to be specified similar to below
 
 
 def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
@@ -935,10 +935,8 @@ def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
 
     assert ds.n_items == 5
 
-    with pytest.warns(FutureWarning):  # TODO: remove keepdims in 1.5.0
-        dsm = ds.max(
-            axis="items", keepdims=True, name="Max Water Level"
-        )  # add a nice name
+    
+    dsm = ds.max(axis="items", name="Max Water Level")  # add a nice name
     assert len(dsm) == 1
     assert dsm[0].name == "Max Water Level"
     assert dsm.geometry == ds.geometry

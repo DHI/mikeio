@@ -1,9 +1,10 @@
+from __future__ import annotations
 import re
 import warnings
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Mapping, TextIO, Tuple, Union
+from typing import Callable, Dict, List, Mapping, TextIO, Tuple
 
 import yaml
 
@@ -81,7 +82,7 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: Union[TextIO, PfsSection, Dict],
+        data: TextIO | PfsSection | Dict,
         *,
         encoding="cp1252",
         names=None,
@@ -140,15 +141,6 @@ class PfsDocument(PfsSection):
                 rkeys.append(k)
                 rvals.append(v)
         return rkeys, rvals
-
-    @property
-    def data(self) -> Union[PfsSection, List[PfsSection]]:
-        warnings.warn(
-            FutureWarning(
-                "The data attribute has been deprecated, please access the targets by their names instead."
-            )
-        )
-        return self.targets[0] if self.n_targets == 1 else self.targets
 
     @property
     def targets(self) -> List[PfsSection]:

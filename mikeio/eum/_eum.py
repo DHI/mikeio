@@ -16,9 +16,10 @@ degree Celsius
 >>>
 
 """
+from __future__ import annotations
 import warnings
 from enum import IntEnum
-from typing import Dict, List, Sequence, Union
+from typing import Dict, List, Sequence
 
 import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
@@ -1521,7 +1522,7 @@ class ItemInfoList(list):
         return pd.DataFrame(data)
 
 
-def to_datatype(datatype: Union[str, int, DataValueType]) -> DataValueType:
+def to_datatype(datatype: str | int | DataValueType) -> DataValueType:
     string_datatype_mapping = {
         "Instantaneous": DataValueType.Instantaneous,
         "Accumulated": DataValueType.Accumulated,
