@@ -1,8 +1,10 @@
+from __future__ import annotations
 import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Iterable, Optional, Sequence, Tuple, Union
+from typing import Iterable, Optional, Sequence, Tuple
+
 
 import numpy as np
 import pandas as pd
@@ -104,7 +106,7 @@ class DataArray(DataUtilsMixin):
         self,
         data,
         *,
-        time: Optional[Union[pd.DatetimeIndex, str]] = None,
+        time: Optional[pd.DatetimeIndex | str] = None,
         item: Optional[ItemInfo] = None,
         geometry=GeometryUndefined(),
         zn=None,
@@ -719,7 +721,7 @@ class DataArray(DataUtilsMixin):
     def sel(
         self,
         *,
-        time: Optional[Union[str, pd.DatetimeIndex, "DataArray"]] = None,
+        time: Optional[str | pd.DatetimeIndex | "DataArray"] = None,
         **kwargs,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
@@ -738,7 +740,7 @@ class DataArray(DataUtilsMixin):
 
         Parameters
         ----------
-        time : Union[str, pd.DatetimeIndex, DataArray], optional
+        time : str, pd.DatetimeIndex, DataArray, optional
             time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
             by default None
         x : float, optional
@@ -858,7 +860,7 @@ class DataArray(DataUtilsMixin):
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         # *, # TODO: make this a keyword-only argument in the future
-        time: Optional[Union[pd.DatetimeIndex, "DataArray"]] = None,
+        time: Optional[pd.DatetimeIndex | "DataArray"] = None,
         x: Optional[float] = None,
         y: Optional[float] = None,
         z: Optional[float] = None,
@@ -881,7 +883,7 @@ class DataArray(DataUtilsMixin):
 
         Parameters
         ----------
-        time : Union[float, pd.DatetimeIndex, DataArray], optional
+        time : float, pd.DatetimeIndex or DataArray, optional
             timestep in seconds or discrete time instances given by
             pd.DatetimeIndex (typically from another DataArray
             da2.time), by default None (=don't interp in time)
@@ -916,9 +918,7 @@ class DataArray(DataUtilsMixin):
         if z is not None:
             raise NotImplementedError()
 
-        geometry: Union[
-            GeometryPoint2D, GeometryPoint3D, GeometryUndefined
-        ] = GeometryUndefined()
+        geometry: GeometryPoint2D | GeometryPoint3D | GeometryUndefined = GeometryUndefined()
 
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
@@ -1022,7 +1022,7 @@ class DataArray(DataUtilsMixin):
 
     def interp_time(
         self,
-        dt: Union[float, pd.DatetimeIndex, "DataArray"],
+        dt: float | pd.DatetimeIndex | "DataArray",
         *,
         method="linear",
         extrapolate=True,
@@ -1101,7 +1101,7 @@ class DataArray(DataUtilsMixin):
 
     def interp_like(
         self,
-        other: Union["DataArray", Grid2D, GeometryFM2D, pd.DatetimeIndex],
+        other: "DataArray" | Grid2D | GeometryFM2D | pd.DatetimeIndex,
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1712,7 +1712,7 @@ class DataArray(DataUtilsMixin):
         self._to_dataset().to_dfs(filename, **kwargs)
 
     def to_dataframe(
-        self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
+        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
     ) -> pd.DataFrame:
         """Convert to DataFrame
 

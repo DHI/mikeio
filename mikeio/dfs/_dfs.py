@@ -1,7 +1,8 @@
+from __future__ import annotations
 import warnings
 from abc import abstractmethod
 from datetime import datetime
-from typing import List, Optional, Tuple, Union, Sequence
+from typing import List, Optional, Tuple, Sequence
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
@@ -70,7 +71,7 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    items: Optional[Union[str, int, List[int], List[str]]] = None,
+    items: Optional[str | int | List[int] | List[str]] = None,
     ignore_first: bool = False,
 ) -> List[int]:
     start_idx = 1 if ignore_first else 0
