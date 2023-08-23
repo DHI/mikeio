@@ -11,11 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -98,9 +98,9 @@
            <div itemprop="articleBody">
              
   <section id="getting-started">
-<h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h1>
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
 <section id="resources">
-<h2>Resources<a class="headerlink" href="#resources" title="Permalink to this heading"></a></h2>
+<h2>Resources<a class="headerlink" href="#resources" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Online book: <a class="reference external" href="https://dhi.github.io/getting-started-with-mikeio">Getting started with Dfs files in Python using MIKE IO</a></p></li>
 <li><p>Online book: <a class="reference external" href="https://dhi.github.io/book-learn-mikeio-fmskill">Python for marine modelers using MIKE IO and FMskill</a></p></li>
@@ -110,7 +110,7 @@
 </ul>
 </section>
 <section id="dataset">
-<h2>Dataset<a class="headerlink" href="#dataset" title="Permalink to this heading"></a></h2>
+<h2>Dataset<a class="headerlink" href="#dataset" title="Link to this heading"></a></h2>
 <p>The <a class="reference internal" href="dfs-overview.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class">Dataset</span></a> is the common MIKE IO data structure for data read from dfs files.
 The  <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code> method returns a Dataset with a <a class="reference internal" href="dataarray.html"><span class="doc std std-doc">DataArray</span></a> for each item.</p>
 <p>The DataArray have all the relevant information, e.g:</p>
@@ -122,7 +122,7 @@ The  <code class="docutils literal notranslate"><span class="pre">mikeio.read()<
 <p>Read more on the <a class="reference internal" href="dataset.html"><span class="doc std std-doc">Dataset page</span></a>.</p>
 </section>
 <section id="items-iteminfo-and-eum">
-<h2>Items, ItemInfo and EUM<a class="headerlink" href="#items-iteminfo-and-eum" title="Permalink to this heading"></a></h2>
+<h2>Items, ItemInfo and EUM<a class="headerlink" href="#items-iteminfo-and-eum" title="Link to this heading"></a></h2>
 <p>The dfs items in MIKE IO are represented by the <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="xref myst py py-class">ItemInfo class</span></a>.
 An ItemInfo consists of:</p>
 <ul class="simple">
@@ -141,7 +141,7 @@ An ItemInfo consists of:</p>
 <p>More info on the <a class="reference internal" href="eum.html"><span class="doc std std-doc">EUM page</span></a>.</p>
 </section>
 <section id="dfs0">
-<h2>Dfs0<a class="headerlink" href="#dfs0" title="Permalink to this heading"></a></h2>
+<h2>Dfs0<a class="headerlink" href="#dfs0" title="Link to this heading"></a></h2>
 <p>A dfs0 file is also called a time series file.</p>
 <p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
 <ul class="simple">
@@ -155,7 +155,7 @@ An ItemInfo consists of:</p>
 <p>Read more on the <a class="reference internal" href="dfs0.html"><span class="doc std std-doc">Dfs0 page</span></a>.</p>
 </section>
 <section id="dfs2">
-<h2>Dfs2<a class="headerlink" href="#dfs2" title="Permalink to this heading"></a></h2>
+<h2>Dfs2<a class="headerlink" href="#dfs2" title="Link to this heading"></a></h2>
 <p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;gebco_sound.dfs2&quot;</span><span class="p">)</span> 
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
@@ -169,7 +169,7 @@ An ItemInfo consists of:</p>
 <p>Read more on the <a class="reference internal" href="dfs2.html"><span class="doc std std-doc">Dfs2 page</span></a>.</p>
 </section>
 <section id="generic-dfs">
-<h2>Generic dfs<a class="headerlink" href="#generic-dfs" title="Permalink to this heading"></a></h2>
+<h2>Generic dfs<a class="headerlink" href="#generic-dfs" title="Link to this heading"></a></h2>
 <p>MIKE IO has <a class="reference internal" href="generic.html"><span class="std std-doc"><code class="docutils literal notranslate"><span class="pre">generic</span></code></span></a> functionality that works for all dfs files:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="generic.html#mikeio.generic.concat" title="mikeio.generic.concat"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">concat()</span></code></span></a> - Concatenates files along the time axis</p></li>

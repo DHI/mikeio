@@ -11,11 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -113,7 +113,7 @@
            <div itemprop="articleBody">
              
   <section id="dfs0">
-<h1>Dfs0<a class="headerlink" href="#dfs0" title="Permalink to this heading"></a></h1>
+<h1>Dfs0<a class="headerlink" href="#dfs0" title="Link to this heading"></a></h1>
 <p>A dfs0 file is also called a time series file.</p>
 <p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
 <ul class="simple">
@@ -121,7 +121,7 @@
 <li><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html"><code class="docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> - utilize all the powerful methods of pandas</p></li>
 </ul>
 <section id="read-dfs0-to-dataset">
-<h2>Read Dfs0 to Dataset<a class="headerlink" href="#read-dfs0-to-dataset" title="Permalink to this heading"></a></h2>
+<h2>Read Dfs0 to Dataset<a class="headerlink" href="#read-dfs0-to-dataset" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;da_diagnostic.dfs0&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
@@ -137,7 +137,7 @@
 </div>
 </section>
 <section id="from-dfs0-to-pandas-dataframe">
-<h2>From Dfs0 to pandas DataFrame<a class="headerlink" href="#from-dfs0-to-pandas-dataframe" title="Permalink to this heading"></a></h2>
+<h2>From Dfs0 to pandas DataFrame<a class="headerlink" href="#from-dfs0-to-pandas-dataframe" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 <span class="go">                     State 1Sign. Wave Height  State 2Sign. Wave Height  Mean StateSign. Wave Height  MeasurementSign. Wave Height</span>
@@ -151,7 +151,7 @@
 </div>
 </section>
 <section id="from-pandas-dataframe-to-dfs0">
-<h2>From pandas DataFrame to Dfs0<a class="headerlink" href="#from-pandas-dataframe-to-dfs0" title="Permalink to this heading"></a></h2>
+<h2>From pandas DataFrame to Dfs0<a class="headerlink" href="#from-pandas-dataframe-to-dfs0" title="Link to this heading"></a></h2>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;co2-mm-mlo.csv&quot;</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=-</span><span class="mf">99.99</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">to_dfs0</span><span class="p">(</span><span class="s2">&quot;mauna_loa_co2.dfs0&quot;</span><span class="p">)</span>
@@ -159,7 +159,7 @@
 </div>
 </section>
 <section id="dfs0-example-notebooks">
-<h2>Dfs0 example notebooks<a class="headerlink" href="#dfs0-example-notebooks" title="Permalink to this heading"></a></h2>
+<h2>Dfs0 example notebooks<a class="headerlink" href="#dfs0-example-notebooks" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb">Dfs0</a> - read, write, to_dataframe, non-equidistant, accumulated timestep, extrapolation</p></li>
 <li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Relative%20time.ipynb">Dfs0 Relative-time</a> - read file with relative time axis</p></li>
@@ -167,19 +167,19 @@
 </ul>
 </section>
 <section id="dfs0-api">
-<h2>Dfs0 API<a class="headerlink" href="#dfs0-api" title="Permalink to this heading"></a></h2>
+<h2>Dfs0 API<a class="headerlink" href="#dfs0-api" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="mikeio.Dfs0">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0" title="Link to this definition"></a></dt>
 <dd><dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs0.deletevalue">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs0.deletevalue" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs0.deletevalue" title="Link to this definition"></a></dt>
 <dd><p>File delete value</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dfs0.from_dataframe">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itemtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.from_dataframe" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itemtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.from_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.from_dataframe" title="Link to this definition"></a></dt>
 <dd><p>Create a dfs0 from a pandas Dataframe</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -196,25 +196,25 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs0.items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs0.items" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs0.items" title="Link to this definition"></a></dt>
 <dd><p>List of items</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs0.n_items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfs0.n_items" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfs0.n_items" title="Link to this definition"></a></dt>
 <dd><p>Number of items</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs0.n_timesteps">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfs0.n_timesteps" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfs0.n_timesteps" title="Link to this definition"></a></dt>
 <dd><p>Number of time steps</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dfs0.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="dfs-overview.html#mikeio.Dataset" title="mikeio.dataset._dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.read" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="dfs-overview.html#mikeio.Dataset" title="mikeio.dataset._dataset.Dataset"><span class="pre">Dataset</span></a></span></span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.read" title="Link to this definition"></a></dt>
 <dd><p>Read data from a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -234,25 +234,25 @@
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs0.start_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfs0.start_time" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfs0.start_time" title="Link to this definition"></a></dt>
 <dd><p>File start time</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs0.time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#mikeio.Dfs0.time" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#mikeio.Dfs0.time" title="Link to this definition"></a></dt>
 <dd><p>File all datetimes</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="mikeio.Dfs0.timestep">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfs0.timestep" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfs0.timestep" title="Link to this definition"></a></dt>
 <dd><p>Time step size in seconds</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dfs0.to_dataframe">
-<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.to_dataframe" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit_in_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ms'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.to_dataframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.to_dataframe" title="Link to this definition"></a></dt>
 <dd><p>Read data from the dfs0 file and return a Pandas DataFrame.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -269,7 +269,7 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dfs0.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.write" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetimes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs0.html#Dfs0.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs0.write" title="Link to this definition"></a></dt>
 <dd><p>Create a dfs0 file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>

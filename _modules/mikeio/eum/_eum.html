@@ -10,11 +10,11 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -106,9 +106,10 @@
 <span class="sd">&gt;&gt;&gt;</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DataValueType</span><span class="p">,</span> <span class="n">DfsDynamicItemInfo</span>
@@ -202,7 +203,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
 
-<div class="viewcode-block" id="TimeStepUnit"><a class="viewcode-back" href="../../../eum.html#mikeio.TimeStepUnit">[docs]</a><span class="k">class</span> <span class="nc">TimeStepUnit</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<div class="viewcode-block" id="TimeStepUnit">
+<a class="viewcode-back" href="../../../eum.html#mikeio.TimeStepUnit">[docs]</a>
+<span class="k">class</span> <span class="nc">TimeStepUnit</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 
     <span class="n">SECOND</span> <span class="o">=</span> <span class="mi">1400</span>
     <span class="n">MINUTE</span> <span class="o">=</span> <span class="mi">1401</span>
@@ -212,7 +215,10 @@
     <span class="n">YEAR</span> <span class="o">=</span> <span class="mi">1404</span></div>
 
 
-<div class="viewcode-block" id="EUMType"><a class="viewcode-back" href="../../../eum.html#mikeio.EUMType">[docs]</a><span class="k">class</span> <span class="nc">EUMType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EUMType">
+<a class="viewcode-back" href="../../../eum.html#mikeio.EUMType">[docs]</a>
+<span class="k">class</span> <span class="nc">EUMType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;EUM type</span>
 
 <span class="sd">    Examples</span>
@@ -838,7 +844,10 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">EUMType</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">temp</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="EUMUnit"><a class="viewcode-back" href="../../../eum.html#mikeio.EUMUnit">[docs]</a><span class="k">class</span> <span class="nc">EUMUnit</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+
+<div class="viewcode-block" id="EUMUnit">
+<a class="viewcode-back" href="../../../eum.html#mikeio.EUMUnit">[docs]</a>
+<span class="k">class</span> <span class="nc">EUMUnit</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;EUM unit</span>
 
 <span class="sd">    Examples</span>
@@ -1494,7 +1503,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_name</span></div>
 
 
-<div class="viewcode-block" id="ItemInfo"><a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfo">[docs]</a><span class="k">class</span> <span class="nc">ItemInfo</span><span class="p">:</span>
+
+<div class="viewcode-block" id="ItemInfo">
+<a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfo">[docs]</a>
+<span class="k">class</span> <span class="nc">ItemInfo</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ItemInfo</span>
 
 <span class="sd">    Parameters</span>
@@ -1586,7 +1598,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">&gt; (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_value_type</span><span class="si">}</span><span class="s2">&quot;</span>
     
-<div class="viewcode-block" id="ItemInfo.from_mikecore_dynamic_item_info"><a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfo.from_mikecore_dynamic_item_info">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ItemInfo.from_mikecore_dynamic_item_info">
+<a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfo.from_mikecore_dynamic_item_info">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_mikecore_dynamic_item_info</span><span class="p">(</span><span class="n">dfsItemInfo</span><span class="p">:</span> <span class="n">DfsDynamicItemInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ItemInfo&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ItemInfo from a mikecore.DfsDynamicItemInfo object&quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">dfsItemInfo</span><span class="o">.</span><span class="n">Name</span>
@@ -1596,10 +1610,14 @@
         <span class="n">unit</span> <span class="o">=</span> <span class="n">EUMUnit</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
         <span class="n">data_value_type</span> <span class="o">=</span> <span class="n">dfsItemInfo</span><span class="o">.</span><span class="n">ValueType</span>
 
-        <span class="k">return</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">data_value_type</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">itemtype</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">data_value_type</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="ItemInfoList"><a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfoList">[docs]</a><span class="k">class</span> <span class="nc">ItemInfoList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ItemInfoList">
+<a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfoList">[docs]</a>
+<span class="k">class</span> <span class="nc">ItemInfoList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
@@ -1611,7 +1629,8 @@
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">to_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">DataValueType</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DataValueType</span><span class="p">:</span>
+
+<span class="k">def</span> <span class="nf">to_datatype</span><span class="p">(</span><span class="n">datatype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">DataValueType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataValueType</span><span class="p">:</span>
     <span class="n">string_datatype_mapping</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;Instantaneous&quot;</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">Instantaneous</span><span class="p">,</span>
         <span class="s2">&quot;Accumulated&quot;</span><span class="p">:</span> <span class="n">DataValueType</span><span class="o">.</span><span class="n">Accumulated</span><span class="p">,</span>

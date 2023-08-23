@@ -10,11 +10,11 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -88,20 +88,21 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio.dfsu._dfsu</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsuBuilder</span> <span class="kn">import</span> <span class="n">DfsuBuilder</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFile</span><span class="p">,</span> <span class="n">DfsuFileType</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span><span class="p">,</span> <span class="n">eumUnit</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.MeshBuilder</span> <span class="kn">import</span> <span class="n">MeshBuilder</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.MeshFile</span> <span class="kn">import</span> <span class="n">MeshFile</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFactory</span> <span class="kn">import</span> <span class="n">DfsFactory</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsuBuilder</span> <span class="kn">import</span> <span class="n">DfsuBuilder</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFile</span><span class="p">,</span> <span class="n">DfsuFileType</span>
+<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span><span class="p">,</span> <span class="n">eumUnit</span>
+<span class="kn">from</span> <span class="nn">mikecore.MeshBuilder</span> <span class="kn">import</span> <span class="n">MeshBuilder</span>
+<span class="kn">from</span> <span class="nn">mikecore.MeshFile</span> <span class="kn">import</span> <span class="n">MeshFile</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">trange</span>
 
 <span class="kn">from</span> <span class="nn">mikeio.spatial._utils</span> <span class="kn">import</span> <span class="n">xy_to_bbox</span>
@@ -1273,7 +1274,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">Dataset</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">|</span> <span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Append to a dfsu file opened with `write(...,keep_open=True)`</span>
 
 <span class="sd">        Parameters</span>
@@ -1291,7 +1292,7 @@
                 <span class="n">zn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span><span class="o">.</span><span class="n">WriteItemTimeStepNext</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">zn</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-                <span class="n">dai</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+                <span class="n">dai</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="n">Dataset</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dai</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">):</span>
                     <span class="n">di</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">dai</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dai</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>  <span class="c1"># TODO is this too restrictive?</span>
@@ -1329,9 +1330,13 @@
         <span class="n">geometry</span><span class="o">.</span><span class="n">to_mesh</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Dfsu2DH"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH">[docs]</a><span class="k">class</span> <span class="nc">Dfsu2DH</span><span class="p">(</span><span class="n">_Dfsu</span><span class="p">):</span>
+<div class="viewcode-block" id="Dfsu2DH">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH">[docs]</a>
+<span class="k">class</span> <span class="nc">Dfsu2DH</span><span class="p">(</span><span class="n">_Dfsu</span><span class="p">):</span>
 
-<div class="viewcode-block" id="Dfsu2DH.read"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
+<div class="viewcode-block" id="Dfsu2DH.read">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -1389,13 +1394,16 @@
                           <span class="n">error_bad_data</span><span class="o">=</span><span class="n">error_bad_data</span><span class="p">,</span>
                           <span class="n">fill_bad_data_value</span><span class="o">=</span><span class="n">fill_bad_data_value</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">_dfs_read_item_time_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">dfs</span> <span class="o">=</span> <span class="n">DfsuFile</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
         <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span><span class="p">,</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
 
-<div class="viewcode-block" id="Dfsu2DH.extract_track"><a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH.extract_track">[docs]</a>    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<div class="viewcode-block" id="Dfsu2DH.extract_track">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.Dfsu2DH.extract_track">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract track data from a dfsu file</span>
 
@@ -1459,10 +1467,14 @@
             <span class="n">data_read_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dfs_read_item_time_func</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">dfs</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">res</span></div></div>
+        <span class="k">return</span> <span class="n">res</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Mesh"><a class="viewcode-back" href="../../../mesh.html#mikeio.Mesh">[docs]</a><span class="k">class</span> <span class="nc">Mesh</span><span class="p">(</span><span class="n">_UnstructuredFile</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Mesh">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.Mesh">[docs]</a>
+<span class="k">class</span> <span class="nc">Mesh</span><span class="p">(</span><span class="n">_UnstructuredFile</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Mesh class is initialized with a mesh or a dfsu file.</span>
 
@@ -1503,7 +1515,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="o">.</span><span class="n">_nc</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span><span class="o">.</span><span class="n">_ec</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="Mesh.write"><a class="viewcode-back" href="../../../mesh.html#mikeio.Mesh.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Mesh.write">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.Mesh.write">[docs]</a>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;write mesh to file (will overwrite if file exists)</span>
 
 <span class="sd">        Parameters</span>
@@ -1539,9 +1553,11 @@
         <span class="n">newMesh</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">CreateMesh</span><span class="p">()</span>
         <span class="n">newMesh</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span></div>
 
+
     <span class="c1"># @wraps(GeometryFM.plot.boundary_nodes)</span>
     <span class="k">def</span> <span class="nf">plot_boundary_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boundary_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">boundary_nodes</span><span class="p">(</span><span class="n">boundary_names</span><span class="p">,</span> <span class="n">figsize</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span></div>
+
 
     <span class="c1"># @staticmethod</span>
     <span class="c1"># def _geometry_to_mesh(outfilename, geometry):</span>

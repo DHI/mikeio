@@ -11,11 +11,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="_static/jquery.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -96,14 +96,14 @@
            <div itemprop="articleBody">
              
   <section id="dfsu-and-mesh-overview">
-<h1>Dfsu and Mesh Overview<a class="headerlink" href="#dfsu-and-mesh-overview" title="Permalink to this heading"></a></h1>
+<h1>Dfsu and Mesh Overview<a class="headerlink" href="#dfsu-and-mesh-overview" title="Link to this heading"></a></h1>
 <p>Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines.
 The .mesh file is an ASCII file for storing the flexible mesh geometry.
 The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is
 available in a .dfsu file as static items.</p>
 <p>For a detailed description of the .mesh and .dfsu file specification see the <a class="reference external" href="https://manuals.mikepoweredbydhi.help/2021/General/FM_FileSpecification.pdf">flexible file format documentation</a>.</p>
 <section id="the-flexible-mesh">
-<h2>The flexible mesh<a class="headerlink" href="#the-flexible-mesh" title="Permalink to this heading"></a></h2>
+<h2>The flexible mesh<a class="headerlink" href="#the-flexible-mesh" title="Link to this heading"></a></h2>
 <p>The mesh geometry in a .mesh or a .dfsu file consists of a list of nodes and a list of elements.</p>
 <p>Each node has:</p>
 <ul class="simple">
@@ -123,7 +123,7 @@ available in a .dfsu file as static items.</p>
 </div>
 </section>
 <section id="mike-io-flexible-mesh-geometry">
-<h2>MIKE IO Flexible Mesh Geometry<a class="headerlink" href="#mike-io-flexible-mesh-geometry" title="Permalink to this heading"></a></h2>
+<h2>MIKE IO Flexible Mesh Geometry<a class="headerlink" href="#mike-io-flexible-mesh-geometry" title="Link to this heading"></a></h2>
 <p>MIKE IO has a Flexible Mesh Geometry class, <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="xref myst py py-attr"><code class="docutils literal notranslate"><span class="pre">GeometryFM</span></code></span></a>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh.</p>
 <table class="docutils align-default">
 <thead>
@@ -226,13 +226,13 @@ available in a .dfsu file as static items.</p>
 </div>
 </section>
 <section id="common-dfsu-and-mesh-properties">
-<h2>Common Dfsu and Mesh properties<a class="headerlink" href="#common-dfsu-and-mesh-properties" title="Permalink to this heading"></a></h2>
+<h2>Common Dfsu and Mesh properties<a class="headerlink" href="#common-dfsu-and-mesh-properties" title="Link to this heading"></a></h2>
 <p>MIKE IO has Dfsu classes for .dfsu files
 and a <a class="reference internal" href="mesh.html#mikeio.Mesh" title="mikeio.Mesh"><span class="xref myst py py-class">Mesh class</span></a> for .mesh files which both
 have a <a class="reference internal" href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM" title="mikeio.spatial.FM_geometry.GeometryFM"><span class="xref myst py py-attr">Flexible Mesh Geometry</span></a> accessible through the ´geometry´ accessor.</p>
 </section>
 <section id="dfsu-types">
-<h2>Dfsu types<a class="headerlink" href="#dfsu-types" title="Permalink to this heading"></a></h2>
+<h2>Dfsu types<a class="headerlink" href="#dfsu-types" title="Link to this heading"></a></h2>
 <p>The following dfsu file types are supported by MIKE IO.</p>
 <ul class="simple">
 <li><p>2D horizontal.</p></li>

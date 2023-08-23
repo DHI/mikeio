@@ -10,11 +10,11 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -193,7 +193,9 @@
     <span class="p">)</span>
 
 
-<div class="viewcode-block" id="Dfs2"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Dfs2">[docs]</a><span class="k">class</span> <span class="nc">Dfs2</span><span class="p">(</span><span class="n">_Dfs123</span><span class="p">):</span>
+<div class="viewcode-block" id="Dfs2">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Dfs2">[docs]</a>
+<span class="k">class</span> <span class="nc">Dfs2</span><span class="p">(</span><span class="n">_Dfs123</span><span class="p">):</span>
 
     <span class="n">_ndim</span> <span class="o">=</span> <span class="mi">2</span>
 
@@ -268,7 +270,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_header</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Dfs2.read"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Dfs2.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
+<div class="viewcode-block" id="Dfs2.read">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Dfs2.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -368,11 +372,14 @@
             <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">_open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">Dfs2FileOpen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span>
 
-<div class="viewcode-block" id="Dfs2.write"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Dfs2.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
+<div class="viewcode-block" id="Dfs2.write">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Dfs2.write">[docs]</a>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
@@ -432,6 +439,7 @@
         <span class="k">if</span> <span class="n">keep_open</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span></div>
 
+
     <span class="k">def</span> <span class="nf">_set_spatial_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_builder</span><span class="o">.</span><span class="n">SetSpatialAxis</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_factory</span><span class="o">.</span><span class="n">CreateAxisEqD2</span><span class="p">(</span>
@@ -484,6 +492,7 @@
     <span class="k">def</span> <span class="nf">is_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Are coordinates geographical (LONG/LAT)?&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_projstr</span> <span class="o">==</span> <span class="s2">&quot;LONG/LAT&quot;</span></div>
+
 </pre></div>
 
            </div>

@@ -10,11 +10,11 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -89,12 +89,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio.pfs._pfsdocument</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">import</span> <span class="nn">yaml</span>
 
@@ -152,7 +153,9 @@
     <span class="k">return</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">PreserveDuplicatesLoader</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="PfsDocument"><a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument">[docs]</a><span class="k">class</span> <span class="nc">PfsDocument</span><span class="p">(</span><span class="n">PfsSection</span><span class="p">):</span>
+<div class="viewcode-block" id="PfsDocument">
+<a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument">[docs]</a>
+<span class="k">class</span> <span class="nc">PfsDocument</span><span class="p">(</span><span class="n">PfsSection</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a PfsDocument object for reading, writing and manipulating pfs files</span>
 
 <span class="sd">    Parameters</span>
@@ -172,7 +175,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TextIO</span><span class="p">,</span> <span class="n">PfsSection</span><span class="p">,</span> <span class="n">Dict</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">TextIO</span> <span class="o">|</span> <span class="n">PfsSection</span> <span class="o">|</span> <span class="n">Dict</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;cp1252&quot;</span><span class="p">,</span>
         <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -206,17 +209,26 @@
                 <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
         <span class="k">return</span> <span class="n">data</span>
 
-<div class="viewcode-block" id="PfsDocument.keys"><a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PfsDocument.keys">
+<a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.keys">[docs]</a>
+    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of the PfsDocument&#39;s keys (target names)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span></div>
 
-<div class="viewcode-block" id="PfsDocument.values"><a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.values">[docs]</a>    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PfsDocument.values">
+<a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.values">[docs]</a>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a list of the PfsDocument&#39;s values (targets).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span></div>
 
-<div class="viewcode-block" id="PfsDocument.items"><a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="PfsDocument.items">
+<a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.items">[docs]</a>
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new view of the PfsDocument&#39;s items ((key, value) pairs)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ALIAS_LIST</span><span class="p">]</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_unravel_items</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">List</span><span class="p">]:</span>
@@ -231,15 +243,6 @@
                 <span class="n">rkeys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
                 <span class="n">rvals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">rkeys</span><span class="p">,</span> <span class="n">rvals</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">PfsSection</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">PfsSection</span><span class="p">]]:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="ne">FutureWarning</span><span class="p">(</span>
-                <span class="s2">&quot;The data attribute has been deprecated, please access the targets by their names instead.&quot;</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_targets</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">targets</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">PfsSection</span><span class="p">]:</span>
@@ -459,7 +462,9 @@
 
         <span class="k">return</span> <span class="n">s</span>
 
-<div class="viewcode-block" id="PfsDocument.write"><a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="PfsDocument.write">
+<a class="viewcode-back" href="../../../pfs.html#mikeio.PfsDocument.write">[docs]</a>
+    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write object to a pfs file</span>
 
 <span class="sd">        Parameters</span>
@@ -482,7 +487,9 @@
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">rf</span><span class="s2">&quot;// Version     : </span><span class="si">{</span><span class="n">mikeio_version</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">_write_with_func</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_write_with_func</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="c1"># TODO remove this alias</span>

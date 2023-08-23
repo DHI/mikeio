@@ -10,11 +10,11 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -88,11 +88,13 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio.dataset._dataarray</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
+
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -177,7 +179,9 @@
         <span class="p">)</span>
 
 
-<div class="viewcode-block" id="DataArray"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray">[docs]</a><span class="k">class</span> <span class="nc">DataArray</span><span class="p">(</span><span class="n">DataUtilsMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="DataArray">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray">[docs]</a>
+<span class="k">class</span> <span class="nc">DataArray</span><span class="p">(</span><span class="n">DataUtilsMixin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;DataArray with data and metadata for a single item in a dfs file</span>
 
 <span class="sd">    The DataArray has these main properties:</span>
@@ -194,7 +198,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">item</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">geometry</span><span class="o">=</span><span class="n">GeometryUndefined</span><span class="p">(),</span>
         <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -515,15 +519,20 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="DataArray.to_numpy"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_numpy">[docs]</a>    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<div class="viewcode-block" id="DataArray.to_numpy">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_numpy">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Values as a np.ndarray (equivalent to values)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">_has_time_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span>
 
-<div class="viewcode-block" id="DataArray.dropna"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.dropna">[docs]</a>    <span class="k">def</span> <span class="nf">dropna</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="DataArray.dropna">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.dropna">[docs]</a>
+    <span class="k">def</span> <span class="nf">dropna</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove time steps where values are NaN&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_time_axis</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not available if no time axis!&quot;</span><span class="p">)</span>
@@ -535,14 +544,20 @@
         <span class="n">idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axes</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.flipud"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.flipud">[docs]</a>    <span class="k">def</span> <span class="nf">flipud</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.flipud">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.flipud">[docs]</a>
+    <span class="k">def</span> <span class="nf">flipud</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flip upside down (on first non-time axis)&quot;&quot;&quot;</span>
 
         <span class="n">first_non_t_axis</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_time_axis</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">first_non_t_axis</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="DataArray.describe"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.describe">[docs]</a>    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.describe">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.describe">[docs]</a>
+    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`&quot;&quot;&quot;</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
@@ -550,11 +565,17 @@
 
         <span class="k">return</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="DataArray.copy"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.copy">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.copy">[docs]</a>
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make copy of DataArray&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.squeeze"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.squeeze">[docs]</a>    <span class="k">def</span> <span class="nf">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.squeeze">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.squeeze">[docs]</a>
+    <span class="k">def</span> <span class="nf">squeeze</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove axes of length 1</span>
 
 <span class="sd">        Returns</span>
@@ -575,6 +596,7 @@
             <span class="n">zn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">,</span>
             <span class="n">dims</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">dims</span><span class="p">),</span>
         <span class="p">)</span></div>
+
 
     <span class="c1"># ============= Select/interp ===========</span>
 
@@ -634,7 +656,9 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_by_boolean_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-<div class="viewcode-block" id="DataArray.isel"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.isel">[docs]</a>    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="DataArray.isel">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.isel">[docs]</a>
+    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new DataArray whose data is given by</span>
 <span class="sd">        integer indexing along the specified dimension(s).</span>
 
@@ -806,10 +830,13 @@
             <span class="n">dims</span><span class="o">=</span><span class="n">dims</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.sel"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.sel">[docs]</a>    <span class="k">def</span> <span class="nf">sel</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DataArray.sel">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.sel">[docs]</a>
+    <span class="k">def</span> <span class="nf">sel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new DataArray whose data is given by</span>
@@ -828,7 +855,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        time : Union[str, pd.DatetimeIndex, DataArray], optional</span>
+<span class="sd">        time : str, pd.DatetimeIndex, DataArray, optional</span>
 <span class="sd">            time labels e.g. &quot;2018-01&quot; or slice(&quot;2018-1-1&quot;,&quot;2019-1-1&quot;),</span>
 <span class="sd">            by default None</span>
 <span class="sd">        x : float, optional</span>
@@ -944,11 +971,14 @@
 
         <span class="k">return</span> <span class="n">da</span></div>
 
-<div class="viewcode-block" id="DataArray.interp"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp">[docs]</a>    <span class="k">def</span> <span class="nf">interp</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DataArray.interp">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp">[docs]</a>
+    <span class="k">def</span> <span class="nf">interp</span><span class="p">(</span>
         <span class="c1"># TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="c1"># *, # TODO: make this a keyword-only argument in the future</span>
-        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -971,7 +1001,7 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        time : Union[float, pd.DatetimeIndex, DataArray], optional</span>
+<span class="sd">        time : float, pd.DatetimeIndex or DataArray, optional</span>
 <span class="sd">            timestep in seconds or discrete time instances given by</span>
 <span class="sd">            pd.DatetimeIndex (typically from another DataArray</span>
 <span class="sd">            da2.time), by default None (=don&#39;t interp in time)</span>
@@ -1006,9 +1036,7 @@
         <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
-        <span class="n">geometry</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-            <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">GeometryUndefined</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">()</span>
+        <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryPoint2D</span> <span class="o">|</span> <span class="n">GeometryPoint3D</span> <span class="o">|</span> <span class="n">GeometryUndefined</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">()</span>
 
         <span class="c1"># interp in space</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
@@ -1061,6 +1089,7 @@
 
         <span class="k">return</span> <span class="n">da</span></div>
 
+
     <span class="k">def</span> <span class="nf">__dataarray_read_item_time_func</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -1071,7 +1100,9 @@
 
         <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">time</span>
 
-<div class="viewcode-block" id="DataArray.extract_track"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.extract_track">[docs]</a>    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+<div class="viewcode-block" id="DataArray.extract_track">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.extract_track">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract data along a moving track</span>
 
@@ -1110,9 +1141,12 @@
             <span class="n">data_read_func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__dataarray_read_item_time_func</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.interp_time"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp_time">[docs]</a>    <span class="k">def</span> <span class="nf">interp_time</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DataArray.interp_time">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp_time">[docs]</a>
+    <span class="k">def</span> <span class="nf">interp_time</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">],</span>
+        <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
         <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
         <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -1161,7 +1195,10 @@
             <span class="n">zn</span><span class="o">=</span><span class="n">zn</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.interp_na"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp_na">[docs]</a>    <span class="k">def</span> <span class="nf">interp_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.interp_na">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp_na">[docs]</a>
+    <span class="k">def</span> <span class="nf">interp_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fill in NaNs by interpolating according to different methods.</span>
 
 <span class="sd">        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`</span>
@@ -1189,9 +1226,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">xr_da</span><span class="o">.</span><span class="n">values</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="DataArray.interp_like"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp_like">[docs]</a>    <span class="k">def</span> <span class="nf">interp_like</span><span class="p">(</span>
+
+<div class="viewcode-block" id="DataArray.interp_like">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.interp_like">[docs]</a>
+    <span class="k">def</span> <span class="nf">interp_like</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;DataArray&quot;</span><span class="p">,</span> <span class="n">Grid2D</span><span class="p">,</span> <span class="n">GeometryFM2D</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">],</span>
+        <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;DataArray&quot;</span> <span class="o">|</span> <span class="n">Grid2D</span> <span class="o">|</span> <span class="n">GeometryFM2D</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span>
         <span class="n">interpolant</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
@@ -1266,7 +1306,10 @@
 
         <span class="k">return</span> <span class="n">dai</span></div>
 
-<div class="viewcode-block" id="DataArray.concat"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.concat">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="DataArray.concat">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.concat">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">concat</span><span class="p">(</span><span class="n">dataarrays</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;DataArray&quot;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate DataArrays along the time axis</span>
 
@@ -1301,9 +1344,12 @@
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">da</span></div>
 
+
     <span class="c1"># ============= Aggregation methods ===========</span>
 
-<div class="viewcode-block" id="DataArray.max"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.max">[docs]</a>    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+<div class="viewcode-block" id="DataArray.max">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.max">[docs]</a>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Max value along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1322,7 +1368,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.min"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.min">[docs]</a>    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.min">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.min">[docs]</a>
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Min value along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1341,7 +1390,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.mean"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.mean">[docs]</a>    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.mean">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.mean">[docs]</a>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mean value along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1360,7 +1412,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.std"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.std">[docs]</a>    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.std">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.std">[docs]</a>
+    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Standard deviation values along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1379,7 +1434,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.ptp"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.ptp">[docs]</a>    <span class="k">def</span> <span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.ptp">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.ptp">[docs]</a>
+    <span class="k">def</span> <span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Range (max - min) a.k.a Peak to Peak along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1394,7 +1452,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ptp</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.average"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.average">[docs]</a>    <span class="k">def</span> <span class="nf">average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.average">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.average">[docs]</a>
+    <span class="k">def</span> <span class="nf">average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the weighted average along the specified axis.</span>
 
 <span class="sd">        Parameters</span>
@@ -1427,7 +1488,10 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.nanmax"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanmax">[docs]</a>    <span class="k">def</span> <span class="nf">nanmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.nanmax">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanmax">[docs]</a>
+    <span class="k">def</span> <span class="nf">nanmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Max value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1446,7 +1510,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.nanmin"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanmin">[docs]</a>    <span class="k">def</span> <span class="nf">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.nanmin">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanmin">[docs]</a>
+    <span class="k">def</span> <span class="nf">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Min value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1465,7 +1532,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.nanmean"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanmean">[docs]</a>    <span class="k">def</span> <span class="nf">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.nanmean">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanmean">[docs]</a>
+    <span class="k">def</span> <span class="nf">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mean value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1484,7 +1554,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.nanstd"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanstd">[docs]</a>    <span class="k">def</span> <span class="nf">nanstd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.nanstd">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanstd">[docs]</a>
+    <span class="k">def</span> <span class="nf">nanstd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Standard deviation value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1503,7 +1576,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">aggregate</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanstd</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.aggregate"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.aggregate">[docs]</a>    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.aggregate">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.aggregate">[docs]</a>
+    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Aggregate along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1561,7 +1637,10 @@
             <span class="n">zn</span><span class="o">=</span><span class="n">zn</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.quantile"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.quantile">[docs]</a>    <span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DataArray.quantile">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.quantile">[docs]</a>
+    <span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the q-th quantile of the data along the specified axis.</span>
 
 <span class="sd">        Wrapping np.quantile</span>
@@ -1591,7 +1670,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantile</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.nanquantile"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanquantile">[docs]</a>    <span class="k">def</span> <span class="nf">nanquantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DataArray.nanquantile">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.nanquantile">[docs]</a>
+    <span class="k">def</span> <span class="nf">nanquantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the q-th quantile of the data along the specified axis, while ignoring nan values.</span>
 
 <span class="sd">        Wrapping np.nanquantile</span>
@@ -1620,6 +1702,7 @@
 <span class="sd">        quantile : Quantile with NaN values</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantile</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
@@ -1788,7 +1871,9 @@
             <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="p">}</span>
         <span class="p">)</span>  <span class="c1"># Single-item Dataset (All info is contained in the DataArray, no need for additional info)</span>
 
-<div class="viewcode-block" id="DataArray.to_dfs"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_dfs">[docs]</a>    <span class="k">def</span> <span class="nf">to_dfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="DataArray.to_dfs">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_dfs">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_dfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write data to a new dfs file</span>
 
 <span class="sd">        Parameters</span>
@@ -1801,8 +1886,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_to_dataset</span><span class="p">()</span><span class="o">.</span><span class="n">to_dfs</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.to_dataframe"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_dataframe">[docs]</a>    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">unit_in_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">round_time</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;ms&quot;</span>
+
+<div class="viewcode-block" id="DataArray.to_dataframe">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_dataframe">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">unit_in_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">round_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">bool</span> <span class="o">=</span> <span class="s2">&quot;ms&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to DataFrame</span>
 
@@ -1822,7 +1910,10 @@
             <span class="n">unit_in_name</span><span class="o">=</span><span class="n">unit_in_name</span><span class="p">,</span> <span class="n">round_time</span><span class="o">=</span><span class="n">round_time</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.to_pandas"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_pandas">[docs]</a>    <span class="k">def</span> <span class="nf">to_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+
+<div class="viewcode-block" id="DataArray.to_pandas">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_pandas">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_pandas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to Pandas Series</span>
 
 <span class="sd">        Returns</span>
@@ -1832,7 +1923,10 @@
 
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="DataArray.to_xarray"><a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_xarray">[docs]</a>    <span class="k">def</span> <span class="nf">to_xarray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="DataArray.to_xarray">
+<a class="viewcode-back" href="../../../dfs-overview.html#mikeio.DataArray.to_xarray">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_xarray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Export to xarray.DataArray&quot;&quot;&quot;</span>
 
         <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
@@ -1875,6 +1969,7 @@
             <span class="p">},</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">xr_da</span></div>
+
 
     <span class="c1"># ===============================================</span>
 
@@ -1922,6 +2017,7 @@
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;values: [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4g</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4g</span><span class="si">}</span><span class="s2">, ..., </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4g</span><span class="si">}</span><span class="s2">]&quot;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># raise NotImplementedError()</span></div>
+
 </pre></div>
 
            </div>

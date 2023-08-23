@@ -10,11 +10,11 @@
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-        <script src="../../../_static/sphinx_highlight.js"></script>
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -88,8 +88,9 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio.spatial._grid_geometry</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
@@ -144,7 +145,9 @@
     <span class="k">return</span> <span class="n">txt</span>
 
 
-<div class="viewcode-block" id="Grid1D"><a class="viewcode-back" href="../../../dfs1.html#mikeio.Grid1D">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="Grid1D">
+<a class="viewcode-back" href="../../../dfs1.html#mikeio.Grid1D">[docs]</a>
+<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Grid1D</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;1D grid (node-based)</span>
 <span class="sd">    axis is increasing and equidistant</span>
@@ -220,12 +223,15 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Grid1D (n=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="si">}</span><span class="s2">, dx=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dx</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">)&quot;</span>
 
-<div class="viewcode-block" id="Grid1D.find_index"><a class="viewcode-back" href="../../../dfs1.html#mikeio.Grid1D.find_index">[docs]</a>    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<div class="viewcode-block" id="Grid1D.find_index">
+<a class="viewcode-back" href="../../../dfs1.html#mikeio.Grid1D.find_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find nearest point&quot;&quot;&quot;</span>
 
         <span class="n">d</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
 
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">d</span><span class="p">))</span></div>
+
 
     <span class="k">def</span> <span class="nf">get_spatial_interpolant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
@@ -271,9 +277,11 @@
     <span class="k">def</span> <span class="nf">orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span>
 
-<div class="viewcode-block" id="Grid1D.isel"><a class="viewcode-back" href="../../../dfs1.html#mikeio.Grid1D.isel">[docs]</a>    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span>
+<div class="viewcode-block" id="Grid1D.isel">
+<a class="viewcode-back" href="../../../dfs1.html#mikeio.Grid1D.isel">[docs]</a>
+    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Grid1D&quot;</span><span class="p">,</span> <span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">GeometryUndefined</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Grid1D&quot;</span> <span class="o">|</span> <span class="n">GeometryPoint2D</span> <span class="o">|</span> <span class="n">GeometryPoint3D</span> <span class="o">|</span> <span class="n">GeometryUndefined</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset geometry from this geometry</span>
 
 <span class="sd">        Parameters</span>
@@ -318,7 +326,9 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">GeometryPoint3D</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">)</span></div></div>
+                <span class="k">return</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="o">*</span><span class="n">coords</span><span class="p">)</span></div>
+</div>
+
 
 
 <span class="k">class</span> <span class="nc">_Grid2DPlotter</span><span class="p">:</span>
@@ -416,7 +426,9 @@
             <span class="n">ax</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s2">&quot;equal&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Grid2D"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D">[docs]</a><span class="nd">@dataclass</span>
+<div class="viewcode-block" id="Grid2D">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D">[docs]</a>
+<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Grid2D</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;2D grid</span>
 <span class="sd">    Origin in the center of cell in lower-left corner</span>
@@ -769,7 +781,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_origin</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y0</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Grid2D.contains"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.contains">[docs]</a>    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+<div class="viewcode-block" id="Grid2D.contains">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.contains">[docs]</a>
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;test if a list of points are inside grid</span>
 
 <span class="sd">        Parameters</span>
@@ -790,10 +804,13 @@
         <span class="n">yinside</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">bottom</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">y</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="o">.</span><span class="n">top</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">xinside</span> <span class="o">&amp;</span> <span class="n">yinside</span></div>
 
+
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Grid2D.find_index"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.find_index">[docs]</a>    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span>
+<div class="viewcode-block" id="Grid2D.find_index">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.find_index">[docs]</a>
+    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -847,6 +864,7 @@
         <span class="k">elif</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bbox_to_index</span><span class="p">(</span><span class="n">area</span><span class="p">)</span></div>
 
+
     <span class="k">def</span> <span class="nf">_xy_to_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xy</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find specific points in this geometry&quot;&quot;&quot;</span>
         <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
@@ -867,8 +885,8 @@
         <span class="k">return</span> <span class="n">ii</span><span class="p">,</span> <span class="n">jj</span>
 
     <span class="k">def</span> <span class="nf">_bbox_to_index</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">BoundingBox</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">range</span><span class="p">,</span> <span class="nb">range</span><span class="p">]]:</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]</span> <span class="o">|</span> <span class="n">BoundingBox</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">range</span><span class="p">,</span> <span class="nb">range</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find subarea within this geometry&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bbox</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -877,8 +895,7 @@
 
         <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span> <span class="o">=</span> <span class="n">bbox</span>
         <span class="k">if</span> <span class="n">x0</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">y0</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">x1</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">y1</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;No elements in bbox&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;area is outside grid&quot;</span><span class="p">)</span>
 
         <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">x0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;=</span> <span class="n">x1</span><span class="p">)</span>
         <span class="n">ii</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -890,9 +907,11 @@
 
         <span class="k">return</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span>
 
-<div class="viewcode-block" id="Grid2D.isel"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.isel">[docs]</a>    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="s2">&quot;Grid2D&quot;</span><span class="p">,</span> <span class="s2">&quot;Grid1D&quot;</span><span class="p">,</span> <span class="s2">&quot;GeometryUndefined&quot;</span><span class="p">]:</span>
+<div class="viewcode-block" id="Grid2D.isel">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.isel">[docs]</a>
+    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Grid2D&quot;</span> <span class="o">|</span> <span class="s2">&quot;Grid1D&quot;</span> <span class="o">|</span> <span class="s2">&quot;GeometryUndefined&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new geometry as a subset of Grid2D along the given axis.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
@@ -925,6 +944,7 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;axis must be 0 or 1 (or &#39;x&#39; or &#39;y&#39;), not </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_index_to_Grid2D</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">jj</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">ii</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">)</span> <span class="k">if</span> <span class="n">ii</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ii</span>
@@ -995,7 +1015,9 @@
     <span class="k">def</span> <span class="nf">_nodes_to_centers</span><span class="p">(</span><span class="n">xn</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">xn</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">xn</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
 
-<div class="viewcode-block" id="Grid2D.get_node_coordinates"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.get_node_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_node_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Grid2D.get_node_coordinates">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.get_node_coordinates">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_node_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;node coordinates for this grid</span>
 
 <span class="sd">        Returns</span>
@@ -1008,7 +1030,10 @@
         <span class="n">gn</span> <span class="o">=</span> <span class="n">Grid2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">xn</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">gn</span><span class="o">.</span><span class="n">xy</span></div>
 
-<div class="viewcode-block" id="Grid2D.to_geometryFM"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.to_geometryFM">[docs]</a>    <span class="k">def</span> <span class="nf">to_geometryFM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">west</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">east</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">north</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">south</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Grid2D.to_geometryFM">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.to_geometryFM">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_geometryFM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">west</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">east</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">north</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">south</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;convert Grid2D to GeometryFM</span>
 
 <span class="sd">        Parameters</span>
@@ -1056,7 +1081,10 @@
             <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Grid2D.to_mesh"><a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.to_mesh">[docs]</a>    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Grid2D.to_mesh">
+<a class="viewcode-back" href="../../../dfs2.html#mikeio.Grid2D.to_mesh">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;export grid to mesh file</span>
 
 <span class="sd">        Parameters</span>
@@ -1076,10 +1104,14 @@
                         <span class="s2">&quot;z must either be scalar or have length of nodes ((nx+1)*(ny+1))&quot;</span>
                     <span class="p">)</span>
             <span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">z</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">to_mesh</span><span class="p">(</span><span class="n">outfilename</span><span class="o">=</span><span class="n">outfilename</span><span class="p">)</span></div></div>
+        <span class="n">g</span><span class="o">.</span><span class="n">to_mesh</span><span class="p">(</span><span class="n">outfilename</span><span class="o">=</span><span class="n">outfilename</span><span class="p">)</span></div>
+</div>
 
 
-<div class="viewcode-block" id="Grid3D"><a class="viewcode-back" href="../../../dfs3.html#mikeio.Grid3D">[docs]</a><span class="nd">@dataclass</span>
+
+<div class="viewcode-block" id="Grid3D">
+<a class="viewcode-back" href="../../../dfs3.html#mikeio.Grid3D">[docs]</a>
+<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Grid3D</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;3D  grid</span>
 <span class="sd">    Origin in the center of cell in lower-left corner</span>
@@ -1207,7 +1239,9 @@
             <span class="s2">&quot;Not yet implemented for Grid3D. Please use mikeio.read(&#39;file.dfs3&#39;) and its arguments instead.&quot;</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Grid3D.isel"><a class="viewcode-back" href="../../../dfs3.html#mikeio.Grid3D.isel">[docs]</a>    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+<div class="viewcode-block" id="Grid3D.isel">
+<a class="viewcode-back" href="../../../dfs3.html#mikeio.Grid3D.isel">[docs]</a>
+    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a subset geometry from this geometry&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;z&quot;</span><span class="p">:</span>
@@ -1263,6 +1297,7 @@
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;axis must be 0, 1 or 2 (or &#39;x&#39;, &#39;y&#39; or &#39;z&#39;), not </span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_index_to_Grid3D</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ii</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">jj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kk</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">ii</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nx</span><span class="p">)</span> <span class="k">if</span> <span class="n">ii</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ii</span>
@@ -1334,7 +1369,7 @@
 
     <span class="k">def</span> <span class="nf">_geometry_for_layers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Grid2D</span><span class="p">,</span> <span class="s2">&quot;Grid3D&quot;</span><span class="p">,</span> <span class="s2">&quot;GeometryUndefined&quot;</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grid2D</span> <span class="o">|</span> <span class="s2">&quot;Grid3D&quot;</span> <span class="o">|</span> <span class="s2">&quot;GeometryUndefined&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span>
 
@@ -1368,6 +1403,7 @@
             <span class="n">orientation</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">orientation</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">geometry</span></div>
+
 </pre></div>
 
            </div>
