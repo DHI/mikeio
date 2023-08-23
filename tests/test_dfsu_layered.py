@@ -297,7 +297,7 @@ def test_read_column_interp_time_and_select_time():
     salinity_st = da.sel(time="1997-09-15 23:00")  # single time-step
     assert salinity_st.n_timesteps == 1
 
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         # not in time
         da.sel(time="1997-09-15 00:00")
 
