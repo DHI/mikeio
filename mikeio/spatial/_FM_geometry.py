@@ -1,7 +1,8 @@
+from __future__ import annotations
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import Collection, Sequence, Union, Optional, List
+from typing import Collection, Sequence, Optional, List
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -942,7 +943,7 @@ class GeometryFM2D(_GeometryFM):
 
     def isel(
         self, idx: Collection[int], keepdims=False, **kwargs
-    ) -> Union["GeometryFM2D", GeometryPoint2D]:
+    ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of elements to a new geometry
 
         Typically not called directly, but by Dataset/DataArray's
@@ -1059,7 +1060,7 @@ class GeometryFM2D(_GeometryFM):
 
         return np.where(mask)[0]
 
-    def _nodes_to_geometry(self, nodes) -> Union["GeometryFM2D", GeometryPoint2D]:
+    def _nodes_to_geometry(self, nodes) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of nodes to new flexible file geometry
 
         Note: takes only the elements for which all nodes are selected
@@ -1103,8 +1104,8 @@ class GeometryFM2D(_GeometryFM):
         )
 
     def elements_to_geometry(
-        self, elements: Union[int, Collection[int]], keepdims=False
-    ) -> Union["GeometryFM2D", GeometryPoint2D]:
+        self, elements: int | Collection[int], keepdims=False
+    ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of elements to new flexible file geometry
 
         Parameters

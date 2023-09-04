@@ -1,5 +1,6 @@
+from __future__ import annotations
 from functools import cached_property
-from typing import Collection, Sequence, Union, List
+from typing import Collection, Sequence, List
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -74,7 +75,7 @@ class _GeometryFMLayered(_GeometryFM):
         )
 
     def elements_to_geometry(
-        self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
+        self, elements: int | Collection[int], node_layers="all", keepdims=False
     ):
         sel_elements: List[int]
 

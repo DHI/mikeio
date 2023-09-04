@@ -72,7 +72,7 @@ notebooks= [
 # mypy global options:
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = false
 allow_redefinition = true
 warn_unreachable = true
@@ -80,7 +80,7 @@ warn_unreachable = true
 [[tool.mypy.overrides]]
 module = [
     "mikecore.*",
-    "pandas",
+    "pandas.*",
     "matplotlib.*",
     "shapely.*",
     "mpl_toolkits.*",

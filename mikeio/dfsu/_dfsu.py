@@ -1,17 +1,18 @@
+from __future__ import annotations
 import os
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Collection, List, Union, Optional, Tuple
+from typing import Collection, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsFactory import DfsFactory  # type: ignore
-from mikecore.DfsuBuilder import DfsuBuilder  # type: ignore
-from mikecore.DfsuFile import DfsuFile, DfsuFileType  # type: ignore
-from mikecore.eum import eumQuantity, eumUnit  # type: ignore
-from mikecore.MeshBuilder import MeshBuilder  # type: ignore
-from mikecore.MeshFile import MeshFile  # type: ignore
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsuBuilder import DfsuBuilder
+from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.eum import eumQuantity, eumUnit
+from mikecore.MeshBuilder import MeshBuilder
+from mikecore.MeshFile import MeshFile
 from tqdm import trange
 
 from mikeio.spatial._utils import xy_to_bbox
@@ -1183,7 +1184,7 @@ class _Dfsu(_UnstructuredFile):
             self._dfs.Close()
             os.remove(filename)
 
-    def append(self, data: Union[List[np.ndarray], Dataset]) -> None:
+    def append(self, data: List[np.ndarray] | Dataset) -> None:
         """Append to a dfsu file opened with `write(...,keep_open=True)`
 
         Parameters
@@ -1201,7 +1202,7 @@ class _Dfsu(_UnstructuredFile):
                 zn = self.geometry.node_coordinates[:, 2]
                 self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
             for item in range(n_items):
-                dai: Union[np.ndarray, DataArray, Dataset] = data[item]
+                dai: np.ndarray | DataArray | Dataset = data[item]
                 if isinstance(dai, DataArray):
                     di: np.ndarray = dai.to_numpy()
                 elif isinstance(dai, np.ndarray):  # TODO is this too restrictive?
