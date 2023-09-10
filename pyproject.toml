@@ -63,6 +63,9 @@ notebooks= [
             "rasterio",
             "geopandas",
             "scikit-learn",
+            "matplotlib",
+            "folium",
+            "mapclassify",
         ]
 
 [project.urls]
