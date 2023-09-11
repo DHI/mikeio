@@ -1182,7 +1182,7 @@ class _Dfsu(_UnstructuredFile):
         except Exception as e:
 
             print(e)
-            dfs.Close()
+            self._dfs.Close()
             os.remove(filename)
 
     def append(self, data: List[np.ndarray] | Dataset) -> None:
